@@ -18,7 +18,7 @@ from widgets import get_predictor_widget, get_predictor_config
 from SelectPredictorsLayers import SelectPredictorsLayers
 from utils import map_ports, path_value, create_file_module, createrootdir 
 from utils import create_dir_module, mktempfile, mktempdir, cleantemps
-from utils import dir_path_value, collapse_dictionary
+from utils import dir_path_value, collapse_dictionary, tif_to_color_jpeg
 
 #import our python SAHM Processing files
 import packages.sahm.pySAHM.FieldDataQuery as FDQ
@@ -137,7 +137,7 @@ class Model2(Module):
         
         r_path = r_path + ""
         program = r_path + r"\i386\Rterm.exe" #-q prevents program from running
-        Script = r"I:\VisTrails\Central_VisTrailsInstall_debug\VisTrails\vistrails\packages\sahm\pySAHM\Resources\ModelBuilder\FIT_BRT_pluggable.r"
+        Script = r"I:\VisTrails\Central_VisTrailsInstall_debug\vistrails\packages\sahm\pySAHM\Resources\R_Modules\FIT_BRT_pluggable.r"
         output_dname = mktempdir(prefix='output_')
         
         args = "c=" + mdsFile + " o=" + output_dname + " rc=ResponseBinary"
@@ -155,6 +155,12 @@ class Model2(Module):
             print ret[1]
         del(ret)
         
+        
+        input_fname = os.path.join(output_dname,"brt_1_prob_map.tif")
+        output_fname = mktempfile(prefix='brt_1_prob_map_', suffix='.jpeg')
+        tif_to_color_jpeg(input_fname, output_fname)
+        
+        
         outFileName = os.path.join(output_dname,"brt_1_bin_map.tif")
         output_file1 = create_file_module(outFileName)
         self.setResult('BinaryMap', output_file1)
@@ -168,7 +174,7 @@ class Model2(Module):
         output_file3 = create_file_module(outFileName)
         self.setResult('AUC_plot', output_file3)
         
-        outFileName = os.path.join(output_dname,"brt_1_prob_map.tif")
+        outFileName = output_fname
         print "brt_1_prob_map.tif: ", outFileName
         output_file4 = create_file_module(outFileName)
         self.setResult('ProbabilityMap', output_file4)
@@ -180,7 +186,9 @@ class Model2(Module):
         
         print "\nfinished BRT builder\n"
         
-        
+
+
+
 
 class Model(File):
     _input_ports = [('value', '(edu.utah.sci.vistrails.basic:File)', True)]
