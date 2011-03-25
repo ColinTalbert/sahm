@@ -648,10 +648,46 @@ class SelectPredictorsLayers(Module):
 
 
 def initialize():
-    global models_path, r_path, color_breaks_csv
-    models_path = configuration.models_path
+    global r_path, color_breaks_csv, models_path
+    path, scriptName = os.path.split(__file__)
+    color_breaks_csv = os.path.join(path, "ColorBreaks.csv")
+    print "color_breaks_csv: ", color_breaks_csv
+    
+    
+    proj_path = os.path.join(configuration.gdal_path, "proj", "bin")
+    
+#    print ("*"*60 + "\n")*2 + ("*"*60 )
+#    print os.environ['Path']
+#    print ("*"*60 + "\n")*3
+    
+    currentPath = os.environ['Path']
+    appendedPath = currentPath + ";" + proj_path
+    os.environ['Path'] = appendedPath
+
+#    print ("*"*60 + "\n")*2 + ("*"*60 )
+#    print os.environ['Path']
+#    print ("*"*60 + "\n")*3
+
+
+    print "proj_path: ", proj_path
+    
+    
+    
+    gdal_data = os.path.join(configuration.gdal_path, "gdal-data")
+    os.putenv("GDAL_DATA", gdal_data)
+    print "gdal_data: ", gdal_data
+    
+    gdal_folder = os.path.join(configuration.gdal_path, "GDAL")
+    currentPath = os.environ['Path']
+    appendedPath = currentPath + ";" + gdal_folder
+    os.environ['Path'] = appendedPath
+    
+    models_path = os.path.join(path, "pySAHM", "Resources", "R_Modules")  
+    
     r_path = configuration.r_path
-    color_breaks_csv = configuration.color_breaks_csv
+    print "r_path:", r_path
+    
+    
     createrootdir(configuration.output_dir)
     
     #RunParc.configuration = configuration
