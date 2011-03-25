@@ -27,23 +27,23 @@ import packages.sahm.pySAHM.PARC as parc
 
 identifier = 'gov.usgs.sahm'
 
-def run_cmd_line_jar(jar_name, args):
-    arg_items = list(itertools.chain(*args.items()))
-    output = []
-    jar_name = os.path.join(sahm_path, jar_name)
-    cmdline = ['java', '-jar', jar_name] + arg_items
-    print 'running', cmdline
-    res = execute_cmdline(['java', '-jar', jar_name] + arg_items, output)
-    return res, output
+#def run_cmd_line_jar(jar_name, args):
+#    arg_items = list(itertools.chain(*args.items()))
+#    output = []
+#    jar_name = os.path.join(sahm_path, jar_name)
+#    cmdline = ['java', '-jar', jar_name] + arg_items
+#    print 'running', cmdline
+#    res = execute_cmdline(['java', '-jar', jar_name] + arg_items, output)
+#    return res, output
 
-def run_cmd_line_py(jar_name, args):
-    arg_items = list(itertools.chain(*args.items()))
-    output = []
-    jar_name = os.path.join(sahm_path, jar_name)
-    cmdline = ['java', '-jar', jar_name] + arg_items
-    print 'running', cmdline
-    res = execute_cmdline(['java', '-jar', jar_name] + arg_items, output)
-    return res, output
+#def run_cmd_line_py(jar_name, args):
+#    arg_items = list(itertools.chain(*args.items()))
+#    output = []
+#    jar_name = os.path.join(sahm_path, jar_name)
+#    cmdline = ['java', '-jar', jar_name] + arg_items
+#    print 'running', cmdline
+#    res = execute_cmdline(['java', '-jar', jar_name] + arg_items, output)
+#    return res, output
 
 def expand_ports(port_list):
     new_port_list = []
@@ -88,7 +88,7 @@ def expand_ports(port_list):
     return new_port_list
 
 class FieldData(File):
-    # _input_ports = [('csvFile', '(edu.utah.sci.vistrails.basic:File)')]
+    _input_ports = [('csvFile', '(edu.utah.sci.vistrails.basic:File)')]
     _output_ports = [('value', '(gov.usgs.sahm:FieldData:DataInput)'),
                      ('value_as_string', 
                       '(edu.utah.sci.vistrails.basic:String)', True)]
@@ -100,10 +100,12 @@ class Predictor(File):
                       '(edu.utah.sci.vistrails.basic:String)', True)]
 
 class TemplateLayer(File):
-    # _input_ports = [('csvFile', '(edu.utah.sci.vistrails.basic:File)')]
+    _input_ports = [('FilePath', '(edu.utah.sci.vistrails.basic:File)')]
     _output_ports = [('value', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                      ('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
-    pass
+#    def compute(self):
+#        output_file = create_file_module(self.forceGetInputFromPort('FilePath', []))
+#        self.setResult('value', output_file)
 
 class SingleInputPredictor(Predictor):
     pass
@@ -116,9 +118,8 @@ class MergedDataSet(File):
     _output_ports = expand_ports([('value', '(gov.usgs.sahm:MergedDataSet:DataInput)')])
     
     True
-    
 
-class Model2(Module):
+class Model(Module):
     _input_ports = [('mdsFile', '(gov.usgs.sahm:MergedDataSet:DataInput)')]
     _output_ports = [('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
                      ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)'),
@@ -133,17 +134,31 @@ class Model2(Module):
         print "sys.argv[0]", sys.argv[0]
         
         global r_path
-        print r_path
+        global models_path
+        global color_breaks_csv
         
-        r_path = r_path + ""
-        program = r_path + r"\i386\Rterm.exe" #-q prevents program from running
-        Script = r"I:\VisTrails\Central_VisTrailsInstall_debug\vistrails\packages\sahm\pySAHM\Resources\R_Modules\FIT_BRT_pluggable.r"
+        program = os.path.join(r_path, "i386", "Rterm.exe") #-q prevents program from running
+        Script = os.path.join(models_path, self.name)
+        print Script
+        print program
+        #r"I:\VisTrails\Central_VisTrailsInstall_debug\vistrails\packages\sahm\pySAHM\Resources\R_Modules\FIT_BRT_pluggable.r"
+        
+        
+        ModelOutput = {"FIT_BRT_pluggable.r":"brt",
+                       "FIT_GLM_pluggable.r":"glm",
+                       "FIT_RF_pluggable.r":"rf",
+                       "FIT_MARS_pluggable.r":"mars"}
+        ModelAbbrev = ModelOutput[self.name]
+        
         output_dname = mktempdir(prefix='output_')
         
         args = "c=" + mdsFile + " o=" + output_dname + " rc=ResponseBinary"
         
         command = program + " --vanilla -f " + Script + " --args " + args
         print command
+        
+        print subprocess.PIPE
+        
         p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 
         # Second, use communicate to run the command; communicate() returns a
@@ -156,79 +171,78 @@ class Model2(Module):
         del(ret)
         
         
-        input_fname = os.path.join(output_dname,"brt_1_prob_map.tif")
-        output_fname = mktempfile(prefix='brt_1_prob_map_', suffix='.jpeg')
-        tif_to_color_jpeg(input_fname, output_fname)
+        input_fname = os.path.join(output_dname, ModelAbbrev + "_prob_map.tif")
+        output_fname = mktempfile(prefix=ModelAbbrev + '_prob_map_', suffix='.jpeg')
+        tif_to_color_jpeg(input_fname, output_fname, color_breaks_csv)
         
-        
-        outFileName = os.path.join(output_dname,"brt_1_bin_map.tif")
+        outFileName = os.path.join(output_dname, ModelAbbrev + "_bin_map.tif")
         output_file1 = create_file_module(outFileName)
         self.setResult('BinaryMap', output_file1)
         
-        outFileName = os.path.join(output_dname,"brt_1_output.txt")
+        outFileName = os.path.join(output_dname, ModelAbbrev + "_output.txt")
         output_file2 = create_file_module(outFileName)
         self.setResult('Text_Output', output_file2)
         
-        outFileName = os.path.join(output_dname,"brt_1_auc_plot.jpg")
+        outFileName = os.path.join(output_dname, ModelAbbrev + "_auc_plot.jpg")
         print "out auc: ", outFileName
         output_file3 = create_file_module(outFileName)
         self.setResult('AUC_plot', output_file3)
         
         outFileName = output_fname
-        print "brt_1_prob_map.tif: ", outFileName
+        print ModelAbbrev + "_prob_map.tif: ", outFileName
         output_file4 = create_file_module(outFileName)
         self.setResult('ProbabilityMap', output_file4)
         
-        outFileName = os.path.join(output_dname,"brt_1_response_curves.pdf")
+        outFileName = os.path.join(output_dname, ModelAbbrev + "_response_curves.pdf")
         output_file5 = create_file_module(outFileName)
         self.setResult('ResponseCurves', output_file5)
         
         
-        print "\nfinished BRT builder\n"
+        print "\nfinished " + ModelAbbrev   +  " builder\n"
         
 
 
 
 
-class Model(File):
-    _input_ports = [('value', '(edu.utah.sci.vistrails.basic:File)', True)]
-    _output_ports = [('value', '(gov.usgs.sahm:Model:Models)'),
-                     ('value_as_string', 
-                      '(edu.utah.sci.vistrails.basic:String)', True)]
-    
-    def compute(self):
-        self.upToDate = True
-        self.setResult('value', self)
+#class Model(File):
+#    _input_ports = [('value', '(edu.utah.sci.vistrails.basic:File)', True)]
+#    _output_ports = [('value', '(gov.usgs.sahm:Model:Models)'),
+#                     ('value_as_string', 
+#                      '(edu.utah.sci.vistrails.basic:String)', True)]
+#    
+#    def compute(self):
+#        self.upToDate = True
+#        self.setResult('value', self)
         
 class GLM(Model):
     def __init__(self):
         global models_path
         Model.__init__(self)
-        self.name = os.path.join(models_path, 'FIT_GLM_pluggable.r')
+        self.name = 'FIT_GLM_pluggable.r'
 
 class RandomForest(Model):
     def __init__(self):
         global models_path
         Model.__init__(self)
-        self.name = os.path.join(models_path, 'FIT_RF_pluggable.r')
+        self.name = 'FIT_RF_pluggable.r'
 
 class MARS(Model):
     def __init__(self):
         global models_path
         Model.__init__(self)
-        self.name = os.path.join(models_path, 'FIT_MARS_pluggable.r')
+        self.name = 'FIT_MARS_pluggable.r'
 
 class MAXENT(Model):
     def __init__(self):
         global models_path
         Model.__init__(self)
-        self.name = os.path.join(models_path, 'RunMaxEnt.jar')
+        self.name = 'RunMaxEnt.jar'
 
 class BoostedRegressionTree(Model):
     def __init__(self):
         global models_path
         Model.__init__(self)
-        self.name = os.path.join(models_path, 'FIT_BRT_pluggable.r')
+        self.name = 'FIT_BRT_pluggable.r'
 
 class MDSBuilder(Module):
 
@@ -333,9 +347,10 @@ class PARC(Module):
         for predictor in predictor_list:
             predictors.append(os.path.join(predictor.name))
 
-        args = (arg_items + [self.getInputFromPort('templateLayer').name]
+        args = (arg_items + [self.forceGetInputListFromPort('templateLayer').name]
                + predictors)
         
+        print args
         ourPARCer = parc.PARC()
         ourPARCer.main(args)
         print output_dname
@@ -678,7 +693,7 @@ def build_available_trees():
         available_dict['Daymet'].append((row[0], row[1], row[3]))            
         # if row[1] not in available_dict:
         #     available_dict[row[1]] = []
-        # available_dict[row[1]].append((row[3], row[2]))    
+        # available_dict[row[1]].append((row[3], row[2]))     
     return trees
 
 def build_predictor_modules():
@@ -711,13 +726,10 @@ _modules = generate_namespaces({'DataInput': [Predictor,
                                               MergedDataSet] + \
                                     build_predictor_modules(),
                                 'Tools': [FieldDataQuery,
-                                          ModelBuilder,
-                                          MapBuilder,
                                           MDSBuilder,
                                           PARC,
                                           SelectPredictorsLayers],
                                 'Models': [Model,
-                                           Model2,
                                            GLM,
                                            RandomForest,
                                            MARS,
