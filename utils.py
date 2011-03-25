@@ -4,6 +4,7 @@ Created on Nov 18, 2010
 @author: talbertc
 '''
 import os, sys, shutil
+import csv
 import time
 import tempfile
 
@@ -93,12 +94,28 @@ def collapse_dictionary(dict):
         list.append(v)
     return list
 
-def tif_to_color_jpeg(input, output):
+def tif_to_color_jpeg(input, output, colorBreaksCSV):
     out_bands = 3
     output_tmp = mktempfile(prefix='intermediateJpegPic', suffix='.tif')
     # Print some info
     print "Creating %s" % (output)
     
+    #populate the color breaks dictionary 
+    #  from the colorBreaks CSV
+
+    csvfile = open(colorBreaksCSV, "r")
+    #dialect = csv.Sniffer().sniff(csvfile.read(1024))
+    reader = csv.reader(csvfile)
+    usedPixels = {}
+    header = reader.next() #skip the header
+    
+    color_dict = {}
+    maxVal = -9999
+    for row in reader:
+        color_dict[float(row[1])] = [row[3], row[4], row[5]]
+        if row[2] > maxVal: maxVal = row[2]
+        
+    print color_dict
     # Open source file
     src_ds = gdal.Open( input )
     src_band = src_ds.GetRasterBand(1)
@@ -124,8 +141,8 @@ def tif_to_color_jpeg(input, output):
         col_values = src_data[0] # array of z_values, one per row in source data
         for iX in range(src_ds.RasterXSize):
             z_value = col_values[iX]
-            #print z_value # uncomment to see what value breaks color ramp
-            [R,G,B] = MakeColor(z_value)
+            print z_value # uncomment to see what value breaks color ramp
+            [R,G,B] = MakeColor(z_value, color_dict, maxVal)
             band1[iY][iX] = R
             band2[iY][iX] = G
             band3[iY][iX] = B
@@ -150,33 +167,25 @@ def tif_to_color_jpeg(input, output):
 
     return True
 
-def MakeColor(z_value):
-    '''LUT for color ramp. Keys are pixel values, hash values are RGB
-    triplets.'''
-    color_dict = {
-    0:[0,245,0],
-    0:[0,245,0],
-    0.1:[91,247,0],
-    0.2:[140,247,0],
-    0.3:[186,247,0],
-    0.4:[224,245,0],
-    0.5:[245,194,0],
-    0.6:[247,223,0],
-    0.7:[252,177,0],
-    0.8:[252,130,0],
-    0.9:[250,79,0],
-    1:[245,0,0]}
+def MakeColor(z_value, color_dict, maxVal):
+
     
     key_list = color_dict.keys()
     key_list.sort()
     while len(key_list) > 0:
         last_val = key_list[-1]
-        if z_value >= last_val:
+        #print "lastVal =   ",last_val
+        #print "ZVal =   ",z_value
+        if z_value >= last_val and z_value <= maxVal:
+            "print color for ", z_value, " is ", last_val, " = ", color_dict[last_val]
             return color_dict[last_val]
+            break
         else:
             key_list.remove(last_val)
 
-
+    #if we get here something is wrong return black
+    print "Value not found defaulting to black"
+    return [255, 255, 255]
 
 if __name__ == '__main__':
     pass
