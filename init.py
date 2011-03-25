@@ -652,8 +652,8 @@ def initialize():
     models_path = configuration.models_path
     r_path = configuration.r_path
     color_breaks_csv = configuration.color_breaks_csv
+    createrootdir(configuration.output_dir)
     
-    createrootdir()
     #RunParc.configuration = configuration
     load_max_ent_params()
     

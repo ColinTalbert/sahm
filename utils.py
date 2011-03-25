@@ -16,6 +16,8 @@ from osgeo import gdal
 from osgeo import osr
 import numpy
 
+import getpass
+
 _roottempdir = ""
 _temp_files = []
 _temp_dirs = []
@@ -37,10 +39,11 @@ def mktempdir(*args, **kwargs):
     _temp_dirs.append(dname)
     return dname
 
-def createrootdir():
+def createrootdir(rootWorkspace):
     global _roottempdir
-    _roottempdir = tempfile.mkdtemp(prefix='sahmrun_' + 
-                    time.strftime("%Y%m%dT%H%M%S") +"_")
+    _roottempdir = os.path.join(rootWorkspace, getpass.getuser() + '_' + time.strftime("%Y%m%dT%H%M%S"))
+    if not os.path.exists(_roottempdir):
+        os.makedirs(_roottempdir) 
     
     print ("*"*60 + "\n")*2 + ("*"*60 )
     print "temp directory location is " + _roottempdir
