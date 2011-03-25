@@ -305,7 +305,7 @@ class SelectListDialog(QtGui.QDialog):
         outHeader2 = []
         for item in headerList:
             if item[2] == '': #append our empty columns to header line 2
-                outHeader2.append('0')
+                outHeader2.append('')
                 
         treeviewIter = QtGui.QTreeWidgetItemIterator(self.treeview)
         while treeviewIter.value():
@@ -338,31 +338,14 @@ class SelectListDialog(QtGui.QDialog):
         program = os.path.join(self.rPath, "i386", "Rterm.exe") #-q prevents program from running
         script = os.path.join(self.modelsPath, "PairsExplore.r")
 
-        #output_dname =  #mktempdir(prefix='output_PE_')
-        
-#        threshold = unicode(self.lineEdit.text().toPlainText().toUtf)
-        
-        
-#        arg_items = ["i=" + MDSfile, "o=" + output_dname, "m=" +  str(self.lineEdit.text())]
-#        cmdline = [program, "--vanilla", "-f", script, "--args"] + arg_items
-#        print 'running', cmdline
-#        output = []
-#        res = execute_cmdline(cmdline, output)
-#        
-#        print "res:", res
-#        print "output:", output
-        #    arg_items = list(itertools.chain(*args.items()))
-#    output = []
-#    jar_name = os.path.join(sahm_path, jar_name)
-#    cmdline = ['java', '-jar', jar_name] + arg_items
-#    print 'running', cmdline
-#    res = execute_cmdline(['java', '-jar', jar_name] + arg_items, output)
-#    return res, output
-
-
         args = "i=" + MDSfile + " o=" + self.outputDir + " m=" + str(self.lineEdit.text())
 
         command = program + " --vanilla -f " + script + " --args " + args
+        print command
+        if os.path.exists(os.path.join(self.outputDir, "Predictor_Correlation.jpg")):
+            os.remove(os.path.join(self.outputDir, "Predictor_Correlation.jpg"))
+            
+        
         p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 
         # Second, use communicate to run the command; communicate() returns a
