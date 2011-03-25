@@ -15,7 +15,7 @@ from core.system import list2cmdline, execute_cmdline
 
 from widgets import get_predictor_widget, get_predictor_config
 #from RunPARC import PARC
-from SelectPredictorsLayers import SelectPredictorsLayers
+from SelectPredictorsLayers import SelectListDialog
 from utils import map_ports, path_value, create_file_module, createrootdir 
 from utils import create_dir_module, mktempfile, mktempdir, cleantemps
 from utils import dir_path_value, collapse_dictionary, tif_to_color_jpeg
@@ -598,11 +598,46 @@ def load_max_ent_params():
     MAXENT.provide_input_port_documentation = \
         classmethod(provide_input_port_documentation)
 
+class SelectPredictorsLayers(Module):
+    '''
+    select from a list of processessed predictor layers for inclusion in the module
+    '''
+
+    _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:DataInput)")]
+    _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:DataInput)")]
+
+    def compute(self):
+        print "Starting compute"
+        inputMDS = dir_path_value(self.forceGetInputFromPort('inputMDS', []))
+        outputMDS = mktempfile(prefix='sahm', suffix='.mds')
+        
+        print "inputMDS = ", inputMDS, "outputMDS = ", outputMDS
+        
+        self.callDisplayMDS(inputMDS, outputMDS)
+
+        output_file = create_file_module(outputMDS)
+        
+        self.setResult("outputMDS", output_file)
+        print "Finished compute"
+
+    def callDisplayMDS(self, inputMDS, outputMDS):
+        global r_path
+        global models_path
+        dialog = SelectListDialog(inputMDS, outputMDS, r_path, models_path)
+        #dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
+        print "finished with dialog" 
+        retVal = dialog.exec_()
+        #outputPredictorList = dialog.outputList
+        print "finished with callDisplayMDS"
+        return inputMDS
+
+
 def initialize():
-    global sahm_path, models_path, r_path
-    sahm_path = configuration.sahm_path
+    global models_path, r_path, color_breaks_csv
     models_path = configuration.models_path
     r_path = configuration.r_path
+    color_breaks_csv = configuration.color_breaks_csv
+    
     createrootdir()
     #RunParc.configuration = configuration
     load_max_ent_params()
