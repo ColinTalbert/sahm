@@ -23,7 +23,7 @@ class PredictorListWidget(QtGui.QTreeWidget):
         self.set_values(p_value)
 
     def set_values(self, str_value):
-        print 'set_values:', str_value
+#        print 'set_values:', str_value
         values = []
         if str_value:
             values = eval(str_value)
@@ -37,6 +37,17 @@ class PredictorListWidget(QtGui.QTreeWidget):
             if item.checkState(0) == QtCore.Qt.Checked:
                 values.append(value)
         return str(values)
+    
+    def select_all(self):
+        for value, item in self.tree_items.iteritems():
+            self.tree_items[value].setCheckState(0, QtCore.Qt.Checked)
+    
+    def switch_selection(self):
+        for value, item in self.tree_items.iteritems():
+            if item.checkState(0) == QtCore.Qt.Checked:
+                self.tree_items[value].setCheckState(0, QtCore.Qt.Unchecked)
+            else:
+                self.tree_items[value].setCheckState(0, QtCore.Qt.Checked)
 
 class PredictorListConfigurationWidget(PredictorListWidget, 
                                        ConstantWidgetMixin):
@@ -188,20 +199,39 @@ class PredictorListConfiguration(StandardModuleConfigurationWidget):
         self.cancelButton.setShortcut('Esc')
         self.cancelButton.setFixedWidth(100)
         self.buttonLayout.addWidget(self.cancelButton)
+        
+        self.selectAllButton = QtGui.QPushButton('&Select All', self)
+        self.selectAllButton.setFixedWidth(120)
+        self.buttonLayout.addWidget(self.selectAllButton)
+        
+        self.switchSelectionButton = QtGui.QPushButton('&Switch Selection', self)
+        self.switchSelectionButton.setFixedWidth(120)
+        self.buttonLayout.addWidget(self.switchSelectionButton)
+        
         layout.addLayout(self.buttonLayout)
         self.connect(self.okButton, QtCore.SIGNAL('clicked(bool)'), 
                      self.okTriggered)
         self.connect(self.cancelButton, QtCore.SIGNAL('clicked(bool)'), 
                      self.close)
+        self.connect(self.selectAllButton, QtCore.SIGNAL('clicked(bool)'), 
+                     self.selectAllTriggered)
+        self.connect(self.switchSelectionButton, QtCore.SIGNAL('clicked(bool)'), 
+                     self.switchSelectionTriggered)
         self.setLayout(layout)
 
     def okTriggered(self):
         str_value = self.list_config.get_values()
         if str_value != self.p_value:
-            print 'okTriggered:', str_value
+#            print 'okTriggered:', str_value
             functions = [('value', [str_value])]
             self.controller.update_functions(self.module, functions)
         self.close()
+
+    def selectAllTriggered(self):
+        self.list_config.select_all()
+    
+    def switchSelectionTriggered(self):
+        self.list_config.switch_selection()
 
     def sizeHint(self):
         return QtCore.QSize(512, 512)
