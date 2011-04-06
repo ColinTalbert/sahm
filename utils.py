@@ -50,12 +50,13 @@ def createrootdir(rootWorkspace):
     print ("*"*60 + "\n")*3
 
 def cleantemps():
-    global _temp_files, _temp_dirs, _roottempdir
-    for file in _temp_files:
-        os.remove(file)
-    for dir in _temp_dirs:
-        shutil.rmtree(dir)
-    shutil.rmtree(_roottempdir)
+    pass
+#    global _temp_files, _temp_dirs, _roottempdir
+#    for file in _temp_files:
+#        os.remove(file)
+#    for dir in _temp_dirs:
+#        shutil.rmtree(dir)
+#    shutil.rmtree(_roottempdir)
 
 def map_ports(module, port_map):
     args = {}
