@@ -14,7 +14,6 @@ from core.system import list2cmdline, execute_cmdline
 
 
 from widgets import get_predictor_widget, get_predictor_config
-#from RunPARC import PARC
 from SelectPredictorsLayers import SelectListDialog
 from utils import map_ports, path_value, create_file_module, createrootdir 
 from utils import create_dir_module, mktempfile, mktempdir, cleantemps
@@ -58,7 +57,7 @@ def expand_ports(port_list):
             for spec in port_spec.split(','):
                 spec = spec.strip()
                 parts = spec.split(':', 1)
-                print 'parts:', parts
+#                print 'parts:', parts
                 namespace = None
                 if len(parts) > 1:
                     mod_parts = parts[1].rsplit('|', 1)
@@ -84,7 +83,7 @@ def expand_ports(port_list):
                     new_spec_list.append(id_str + ':' + module_name)
             port_spec = '(' + ','.join(new_spec_list) + ')'
         new_port_list.append((port[0], port_spec) + port[2:])
-    print new_port_list
+#    print new_port_list
     return new_port_list
 
 class FieldData(File):
@@ -107,8 +106,8 @@ class TemplateLayer(File):
 #        output_file = create_file_module(self.forceGetInputFromPort('FilePath', []))
 #        self.setResult('value', output_file)
 
-class SingleInputPredictor(Predictor):
-    pass
+#class SingleInputPredictor(Predictor):
+#    pass
 
 class SpatialDef(Module):
     _output_ports = [('spatialDef', '(gov.usgs.sahm:SpatialDef:DataInput)')]
@@ -129,20 +128,13 @@ class Model(Module):
 
     def compute(self):
         mdsFile = dir_path_value(self.forceGetInputFromPort('mdsFile', []))
-        print "mdsFile: ", mdsFile
-        print "sys.path[0]", sys.path[0]
-        print "sys.argv[0]", sys.argv[0]
-        
-        global r_path
+
         global models_path
         global color_breaks_csv
         
+        r_path = configuration.r_path
         program = os.path.join(r_path, "i386", "Rterm.exe") #-q prevents program from running
         Script = os.path.join(models_path, self.name)
-        print Script
-        print program
-        #r"I:\VisTrails\Central_VisTrailsInstall_debug\vistrails\packages\sahm\pySAHM\Resources\R_Modules\FIT_BRT_pluggable.r"
-        
         
         ModelOutput = {"FIT_BRT_pluggable.r":"brt",
                        "FIT_GLM_pluggable.r":"glm",
@@ -155,15 +147,16 @@ class Model(Module):
         args = "c=" + mdsFile + " o=" + output_dname + " rc=ResponseBinary"
         
         command = program + " --vanilla -f " + Script + " --args " + args
-        print command
-        
-        print subprocess.PIPE
+#        print command
+#        
+#        print subprocess.PIPE
         
         p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 
         # Second, use communicate to run the command; communicate() returns a
         #   tuple (stdoutdata, stderrdata)
-        print "starting R Processing"
+        if configuration.verbose:
+            print "starting R Processing of " + ModelAbbrev,
 
         ret = p.communicate()
         if ret[1]:
@@ -184,12 +177,12 @@ class Model(Module):
         self.setResult('Text_Output', output_file2)
         
         outFileName = os.path.join(output_dname, ModelAbbrev + "_auc_plot.jpg")
-        print "out auc: ", outFileName
+#        print "out auc: ", outFileName
         output_file3 = create_file_module(outFileName)
         self.setResult('AUC_plot', output_file3)
         
         outFileName = output_fname
-        print ModelAbbrev + "_prob_map.tif: ", outFileName
+#        print ModelAbbrev + "_prob_map.tif: ", outFileName
         output_file4 = create_file_module(outFileName)
         self.setResult('ProbabilityMap', output_file4)
         
@@ -197,8 +190,8 @@ class Model(Module):
         output_file5 = create_file_module(outFileName)
         self.setResult('ResponseCurves', output_file5)
         
-        
-        print "\nfinished " + ModelAbbrev   +  " builder\n"
+        if configuration.verbose:
+            print "Finished " + ModelAbbrev   +  " builder\n"
         
 
 
@@ -253,6 +246,8 @@ class MDSBuilder(Module):
     _output_ports = expand_ports([('mdsFile', '(gov.usgs.sahm:MergedDataSet:DataInput)')])
 
     def compute(self):
+        if configuration.verbose:
+            print "Running MDSBuilder  ",
         port_map = {'fieldData': ('-f', dir_path_value, True),
                     'PredictorsDir': ('-d', path_value, True),
                     'minValue': ('-m', None, False)}
@@ -262,16 +257,17 @@ class MDSBuilder(Module):
         output_fname = mktempfile(prefix='sahm', suffix='.mds')
         args['-o'] = output_fname
 
-        print args
+#        print args
         
         cmd_args = collapse_dictionary(args)
-        print cmd_args
+#        print cmd_args
 
         MDSB.run(cmd_args)
 
         output_file = create_file_module(output_fname)
         
-        print "\nfinished running MDS builder\n"
+        if configuration.verbose:
+            print "Finished running MDS builder\n"
         
         self.setResult('mdsFile', output_file)
 
@@ -283,36 +279,25 @@ class FieldDataQuery(Module):
     _output_ports = expand_ports([('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')])
     
     def compute(self):
-        port_map = {'fieldData': ('-f', dir_path_value, True),
-            'templateLayer': ('-t', dir_path_value, True),
-            'aggregateRows': ('-p', None, False),
-            'aggregateRowsByYear': ('-y', None, False),
-            }
-        args = map_ports(self, port_map)
 
         output_fname = mktempfile(prefix='FDQ_', suffix='.csv')
-        print output_fname
-        args['-o'] = output_fname
         
-        try:
-            if args['-p'] == True:
-                args['-p'] = ''
-            if args['-p'] == False:
-                del args['-p']
-            if args['-y'] == True:
-                args['-y'] = ''
-            if args['-y'] == False:
-                del args['-y']
-        except:
-            pass
+        ourFDQ = FDQ.FieldDataQuery()
         
-        cmd_args = collapse_dictionary(args)
-      
+        if configuration.verbose:
+            ourFDQ.verbose = True
+            
+        ourFDQ.template = self.forceGetInputFromPort('templateLayer').name
+        ourFDQ.csv = self.forceGetInputFromPort('fieldData').name
+        ourFDQ.output = output_fname
+        if self.hasInputFromPort('aggregateRows'):
+            ourFDQ.AggByPixel = self.getInputFromPort('aggregateRows')
+        #not implemented yet
+        #ourFDQ.AggByYear = options.bAggYears
+        ourFDQ.processCSV()
+        
 
-        FDQ.run(cmd_args)
-#        
-        output_file = create_file_module(args['-o'])
-        print "\nfinished running Field Data Query\n"
+        output_file = create_file_module(output_fname)
         self.setResult('fieldData', output_file)
 
 class PARC(Module):
@@ -321,6 +306,7 @@ class PARC(Module):
     provides functionality to sync raster layer properties
     with a template dataset
     '''
+
     configuration = []
     _input_ports = [('predictor', "(gov.usgs.sahm:Predictor:DataInput)"),
                                 ('PredictorList', '(gov.usgs.sahm:PredictorList:DataInput)'),
@@ -331,14 +317,22 @@ class PARC(Module):
     _output_ports = [('PredictorLayersDir', '(edu.utah.sci.vistrails.basic:Directory)')]
 
     def compute(self):
-        port_map = {'aggregationMethod': ('-m',  None, False),
-                    'resampleMethod': ('-r', None, False)}
-        args = map_ports(self, port_map)
-
+        if configuration.verbose:
+            print "Running PARC"
+        
+        ourPARC = parc.PARC()
         output_dname = mktempdir(prefix='parc')
-        args['-o'] = output_dname
-
-        arg_items = collapse_dictionary(args)
+        
+        if configuration.verbose:
+            ourPARC.verbose = True
+        
+        
+        ourPARC.template = self.forceGetInputFromPort('templateLayer').name
+        if self.hasInputFromPort('resampleMethod'):
+            ourPARC.AggByPixel = self.getInputFromPort('resampleMethod')
+        if self.hasInputFromPort('aggregationMethod'):
+            ourPARC.AggByPixel = self.getInputFromPort('aggregationMethod')
+        ourPARC.outDir = output_dname
 
         predictor_list = self.forceGetInputFromPort('PredictorList', [])
         predictor_list.extend(self.forceGetInputListFromPort('predictor'))
@@ -347,200 +341,16 @@ class PARC(Module):
         for predictor in predictor_list:
             predictors.append(os.path.join(predictor.name))
 
-        args = (arg_items + [self.forceGetInputListFromPort('templateLayer').name]
-               + predictors)
+        ourPARC.inputs = predictors
         
-        print args
-        ourPARCer = parc.PARC()
-        ourPARCer.main(args)
-        print output_dname
+        ourPARC.parcFiles()
+
+#        ourPARCer.main(args)
         predictorsDir = create_dir_module(output_dname)
-        print "\nfinished running PARC\n"
+        if configuration.verbose:
+            print "Finished running PARC\n"
         self.setResult('PredictorLayersDir', predictorsDir)
 
-#class FieldDataQuery(Module):
-#    _input_ports = expand_ports([('siteConfig', 'basic:File'),
-#                                 ('fieldData', 'basic:File'),
-#                                 ('siteName', 'basic:String'),
-#                                 ('sessionDir', 'basic:Directory'),
-#                                 ('aggregateRows', 'basic:Boolean'),
-#                                 ('aggregateRowsByYear', 'basic:Boolean')])
-#    _output_ports = expand_ports([('outputDir', 'basic:Directory')])
-#
-#    def compute(self):
-#        port_map = {'siteConfig': ('-c', path_value, True),
-#                    'fieldData': ('-f', path_value, False),
-#                    'siteName': ('-n', None, True),
-#                    'sessionDir': ('-s', path_value, False),
-#                    'aggregateRows': ('-p', None, False),
-#                    'aggregateRowsByYear': ('-y', None, False),
-#                    }
-#        
-#        args = map_ports(self, port_map)
-#        
-#        try:
-#            if args['-p'] == True:
-#                args['-p'] = ''
-#            if args['-p'] == False:
-#                del args['-p']
-#        except:
-#            pass
-#        
-#        output_dname = mktempdir(prefix='sahm')
-#        args['-o'] = output_dname
-#
-#        for k,v in args:
-#            print "%s=%s" % (k, v)
-#        print args
-#        
-#        res, output = run_cmd_line_jar('FieldDataQuery.jar', args)
-#        if res != 0:
-#            raise ModuleError(self, ''.join(output))
-#        
-#        output_dir = create_dir_module(output_dname)
-#        self.setResult('outputDir', output_dir)
-
-class ModelBuilder(Module):
-    _input_ports = expand_ports([('mdsFile', 'basic:File'),
-                                 ('addModel', 'Models|Model'),
-                                 ('PredictorLayersDir', 'basic:Directory'),
-                                 ('sessionDir', 'basic:Directory')])
-    _output_ports = expand_ports([('outputFile', 'basic:File'),
-                                  ('ancillaryDir', 'basic:Directory')])
-
-    def compute(self):
-        port_map = {'mdsFile': ('-f', path_value, True),
-                    'sessionDir': ('-s', path_value, False),
-                    'PredictorLayersDir': ('-i', path_value, False)
-                    }
-        args = map_ports(self, port_map)
-        
-        models = self.getInputListFromPort('addModel')
-        predictor_list = self.forceGetInputFromPort('predictorList', [])
-        predictor_list.extend(self.forceGetInputListFromPort('addPredictor'))
-
-        ancillary_dname = mktempdir(prefix='sahm_ancillary')
-
-        models_dir = mktempdir(prefix='sahm_models')
-        for model in models:
-            print model
-            shutil.copy(model.name, models_dir)
-            print "%%% NAME %%%", model.__class__.__name__
-            if model.__class__.__name__ == 'MAXENT':
-                # create file named RunMaxEnt.args and copy parameters there
-                args_fname = os.path.join(models_dir, "RunMaxEnt.args")
-                args_f = None
-                for port in model._input_ports:
-                    print 'checking port:', port[0], port
-                    if model.hasInputFromPort(port[0]):
-                        port_val = model.getInputFromPort(port[0])
-                        if port[1] == "(edu.utah.sci.vistrails.basic:Boolean)":
-                            port_val = str(port_val)
-                            port_val = port_val[0].lower() + port_val[1:]
-                        if args_f is None:
-                            args_f = open(args_fname, 'w')
-                        print "%s=%s" % (port[0], port_val)
-                        print >>args_f, "%s=%s" % (port[0], port_val),
-                if args_f is not None:
-                    args_f.close()
-                    
-                # FIXME, use parameters from MAXENT
-                # for port in model.input_ports:
-                #    port + model.getInputFromPort(port)
-                pass
-            
-#        predictors_dir = mktempdir(prefix='sahm_layers')
-#        for predictor in predictor_list:
-#            shutil.copy(predictor.name, predictors_dir)
-
-        
-
-        output_fname = mktempfile(prefix='sahm', suffix='.xml')
-        args['-a'] = ancillary_dname
-        args['-o'] = output_fname
-        args['-m'] = models_dir
-        #args['-i'] = predictors_dir
-
-        res, output = run_cmd_line_jar('ModelBuilder.jar', args)
-        if res != 0:
-            raise ModuleError(self, ''.join(output))
-
-        output_file = create_file_module(output_fname)
-        self.setResult('outputFile', output_file)
-
-        ancillary_dir = create_dir_module(ancillary_dname)
-        self.setResult('ancillaryDir', ancillary_dir)
-
-class MapBuilder(Module):
-    _input_ports = expand_ports([('ancillaryDir', 'basic:Directory'),
-                                 ('xmlFile', 'basic:File'),
-                                 ('sessionDir', 'basic:Directory')])
-    _output_ports = expand_ports([('tiffImage', 'basic:File'),
-                                  ('jpgImage', 'basic:File'),
-                                  ('ancillaryDir', 'basic:Directory')])
-    
-    def compute(self):
-        port_map = {'xmlFile': ('-f', path_value, True),
-                    'ancillaryDir': ('-a', path_value, True),
-                    'sessionDir': ('-s', path_value, False),
-                    }
-        self.setResult('ancillaryDir', self.getInputFromPort('ancillaryDir'))
-
-        args = map_ports(self, port_map)
-        
-        tif_fname = mktempfile(prefix='sahm', suffix='.tif')
-        args['-t'] = tif_fname
-        jpg_fname = mktempfile(prefix='sahm', suffix='.jpg')
-        args['-j'] = jpg_fname
-
-        res, output = run_cmd_line_jar('MapBuilder.jar', args)
-        if res != 0:
-            raise ModuleError(self, ''.join(output))
-
-        tif_file = create_file_module(tif_fname)
-        self.setResult('tiffImage', tif_file)
-
-        jpg_file = create_file_module(jpg_fname)
-        self.setResult('jpgImage', jpg_file)
-
-class ReportBuilder(Module):
-    _input_ports = expand_ports([('fieldData', 'basic:File'),
-                                 ('jpgFile', 'basic:File'),
-                                 ('mdsFile', 'basic:File'),
-                                 ('tifFile', 'basic:File'),
-                                 ('xmlFile', 'basic:File'),
-                                 ('sessionDir', 'basic:Directory')])
-    _output_ports = expand_ports([('htmlFile', 'basic:File')])
-
-    def compute(self):
-        port_map = {'fieldData': ('-f', path_value, True),
-                    'jpgFile': ('-j', path_value, True),
-                    'mdsFile': ('-m', path_value, True),
-                    'tifFile': ('-t', path_value, True),
-                    'xmlFile': ('-x', path_value, True),
-                    'sessionDir': ('-s', path_value, False)}
-        args = map_ports(self, port_map)
-        
-        output_fname = mktempfile(prefix='sahm', suffix='.html')
-        args['-o'] = output_fname
-
-        res, output = run_cmd_line_jar('RptBuilder.jar', args)
-        if res != 0:
-            raise ModuleError(self, ''.join(output))
-
-        output_file = create_file_module(output_fname)
-        self.setResult('htmlFile', output_file)
-
-
-
-
-# FIXME: OK on trunk, changed for current release
-#
-# PredictorList = new_constant("PredictorList",
-#                              List.translate_to_python,
-#                              [], staticmethod(lambda x: type(x) == list), 
-#                              ClimatePredictorListConfig,
-#                              base_class=List)
 
 class PredictorList(Constant):
     _input_ports = expand_ports([('value', 'DataInput|PredictorList'),
@@ -601,10 +411,10 @@ def load_max_ent_params():
             kwargs['optional'] = True
         input_ports.append((name, '(' + basic_pkg + ':' + p_type + ')', kwargs))
         # FIXME set documentation
-        print 'port:', (name, '(' + basic_pkg + ':' + p_type + ')', kwargs)
+        #print 'port:', (name, '(' + basic_pkg + ':' + p_type + ')', kwargs)
         docs[name] = doc
 
-    print 'MAXENT:', input_ports
+    #print 'MAXENT:', input_ports
     MAXENT._input_ports = input_ports
     MAXENT._port_docs = docs
 
@@ -622,7 +432,7 @@ class SelectPredictorsLayers(Module):
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:DataInput)")]
 
     def compute(self):
-        print "Starting compute"
+        print "Starting compute ",
         inputMDS = dir_path_value(self.forceGetInputFromPort('inputMDS', []))
         outputMDS = mktempfile(prefix='sahm', suffix='.mds')
         
@@ -633,65 +443,65 @@ class SelectPredictorsLayers(Module):
         output_file = create_file_module(outputMDS)
         
         self.setResult("outputMDS", output_file)
-        print "Finished compute"
+        print " ... Finished compute",
 
     def callDisplayMDS(self, inputMDS, outputMDS):
         global r_path
         global models_path
         dialog = SelectListDialog(inputMDS, outputMDS, r_path, models_path)
         #dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
-        print "finished with dialog" 
+        print " ... finished with dialog ",  
         retVal = dialog.exec_()
         #outputPredictorList = dialog.outputList
-        print "finished with callDisplayMDS"
+        print " ... finished with callDisplayMDS"
         return inputMDS
 
-
 def initialize():
-    global r_path, color_breaks_csv, models_path
-    path, scriptName = os.path.split(__file__)
-    color_breaks_csv = os.path.join(path, "ColorBreaks.csv")
-    print "color_breaks_csv: ", color_breaks_csv
+    global models_path, r_path, color_breaks_csv
     
+    r_path = configuration.r_path
     
+    #append to our path variable the location of the GDAL dependencies
+    #Proj, GDAL, and GDAL data
     proj_path = os.path.join(configuration.gdal_path, "proj", "bin")
-    
-#    print ("*"*60 + "\n")*2 + ("*"*60 )
-#    print os.environ['Path']
-#    print ("*"*60 + "\n")*3
-    
     currentPath = os.environ['Path']
     appendedPath = currentPath + ";" + proj_path
     os.environ['Path'] = appendedPath
 
-#    print ("*"*60 + "\n")*2 + ("*"*60 )
-#    print os.environ['Path']
-#    print ("*"*60 + "\n")*3
-
-
-    print "proj_path: ", proj_path
-    
-    
-    
     gdal_data = os.path.join(configuration.gdal_path, "gdal-data")
     os.putenv("GDAL_DATA", gdal_data)
-    print "gdal_data: ", gdal_data
-    
+
     gdal_folder = os.path.join(configuration.gdal_path, "GDAL")
     currentPath = os.environ['Path']
     appendedPath = currentPath + ";" + gdal_folder
     os.environ['Path'] = appendedPath
     
-    models_path = os.path.join(path, "pySAHM", "Resources", "R_Modules")  
+    #store the path to the directory containing our R code in a g
+    models_path = os.path.join(os.path.dirname(__file__), "pySAHM", "Resources", "R_Modules")  
+
+    rootdir = createrootdir(configuration.output_dir)
     
-    r_path = configuration.r_path
-    print "r_path:", r_path
+    color_breaks_csv = os.path.join(os.path.dirname(__file__),  "ColorBreaks.csv")
     
-    
-    createrootdir(configuration.output_dir)
-    
-    #RunParc.configuration = configuration
     load_max_ent_params()
+    
+    if configuration.verbose:
+        print "*" * 79
+        print "Initialize:"
+        print "  Locations of dependencies"
+        print "   layers csv = " + os.path.join(os.path.dirname(__file__), "layers.csv")
+        print "   ColorBreaks csv = " + color_breaks_csv
+        print "   R path = " + configuration.r_path
+        print "   R models directory = " + models_path
+        print "   GDAL folder = " + configuration.gdal_path
+        print "        Must contain subfolders proj, gdal-data, GDAL"
+        print "    "
+        print "*" * 79
+    
+    print "*" * 79
+    print " output directory:   " + rootdir
+    print "*" * 79
+    print "*" * 79
     
 def finalize():
     cleantemps()
@@ -708,7 +518,7 @@ def generate_namespaces(modules):
             if type(module) == tuple:
                 m_dict.update(module[1])
                 module_list.append((module[0], m_dict))
-                print 'm_dict:', m_dict
+                #print 'm_dict:', m_dict
             else:
                 module_list.append((module, m_dict))
     return module_list
@@ -724,12 +534,13 @@ def build_available_trees():
         if row[2] not in trees:
             trees[row[2]] = {}
         available_dict = trees[row[2]]
-        if 'Daymet' not in available_dict:
-            available_dict['Daymet'] = []
-        available_dict['Daymet'].append((row[0], row[1], row[3]))            
-        # if row[1] not in available_dict:
-        #     available_dict[row[1]] = []
-        # available_dict[row[1]].append((row[3], row[2]))     
+#        if 'Daymet' not in available_dict:
+#            available_dict['Daymet'] = []
+#        available_dict['Daymet'].append((row[0], row[1], row[3]))            
+        if row[3] not in available_dict:
+            available_dict[row[3]] = []
+        available_dict[row[3]].append((row[0], row[1], row[4]))
+       
     return trees
 
 def build_predictor_modules():
@@ -754,13 +565,13 @@ def build_predictor_modules():
         modules.append((module, {'configureWidgetType': config_class}))
     return modules
 
-_modules = generate_namespaces({'DataInput': [Predictor, 
+_modules = generate_namespaces({'DataInput': [
+                                              Predictor,
                                               PredictorList,
                                               FieldData,
                                               TemplateLayer,
-                                              SingleInputPredictor,
                                               MergedDataSet] + \
-                                    build_predictor_modules(),
+                                              build_predictor_modules(),
                                 'Tools': [FieldDataQuery,
                                           MDSBuilder,
                                           PARC,
@@ -771,5 +582,4 @@ _modules = generate_namespaces({'DataInput': [Predictor,
                                            MARS,
                                            MAXENT,
                                            BoostedRegressionTree],
-                                'Reporting': [ReportBuilder],
                                 })

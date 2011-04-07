@@ -8,22 +8,53 @@ class PredictorListWidget(QtGui.QTreeWidget):
     def __init__(self, p_value, available_tree, parent=None):
         QtGui.QTreeWidget.__init__(self, parent)
         self.available_tree = available_tree
-        self.setColumnCount(2)
+        self.setColumnCount(4)
+        self.headerItem().setText(0, "File")
+        self.headerItem().setText(1, "Layer")
+        self.headerItem().setText(2, "Resampling")
+        self.headerItem().setText(3, "Aggregation")
+        
         self.tree_items = {}
         for source, file_list in self.available_tree.iteritems():
+            #print source, file_list
             source_item = QtGui.QTreeWidgetItem([source])
             self.addTopLevelItem(source_item)
             for (file, desc, categorical) in file_list:
-                child_item = QtGui.QTreeWidgetItem([file, desc])
+                #print file, desc, categorical
+                resamplingCB = QtGui.QComboBox(self)
+                resamplings = ["NearestNeighbor", 
+                                "Bilinear",
+                                "Cubic", 
+                                "CubicSpline",
+                                "Lanczos"]
+                resamplingCB.addItems(resamplings)
+                aggCB = QtGui.QComboBox(self)
+                aggs = ["Min", 
+                        "Mean",
+                        "Max",
+                        "Majority", 
+                        "None"]
+                aggCB.addItems(aggs)
+                
+                if categorical == "N":
+                    resamplingCB.setCurrentIndex(1)
+                    aggCB.setCurrentIndex(1)
+                else:
+                    resamplingCB.setCurrentIndex(0)
+                    aggCB.setCurrentIndex(3)
+                
+                child_item = QtGui.QTreeWidgetItem([file, desc, categorical])
                 child_item.setFlags(QtCore.Qt.ItemIsUserCheckable |
                                     QtCore.Qt.ItemIsEnabled)
                 child_item.setCheckState(0, QtCore.Qt.Unchecked)
                 source_item.addChild(child_item)
+                self.setItemWidget(child_item, 2, resamplingCB)
+                self.setItemWidget(child_item, 3, aggCB)
                 self.tree_items[(source, file)] = child_item
         self.set_values(p_value)
 
     def set_values(self, str_value):
-#        print 'set_values:', str_value
+        #print 'set_values:', str_value
         values = []
         if str_value:
             values = eval(str_value)
@@ -32,8 +63,10 @@ class PredictorListWidget(QtGui.QTreeWidget):
                 self.tree_items[value].setCheckState(0, QtCore.Qt.Checked)
     
     def get_values(self):
+        #print 'get_values:'
         values = []
         for value, item in self.tree_items.iteritems():
+            #print value, item
             if item.checkState(0) == QtCore.Qt.Checked:
                 values.append(value)
         return str(values)
@@ -131,7 +164,7 @@ class PredictorListConfigurationWidget(PredictorListWidget,
 #                 self.setText(base)
 
     def sizeHint(self):
-        return QtCore.QSize(512, 512)
+        return QtCore.QSize(1512, 812)
 
 #     def sizeHint(self):
 #         metrics = QtGui.QFontMetrics(self.font())
