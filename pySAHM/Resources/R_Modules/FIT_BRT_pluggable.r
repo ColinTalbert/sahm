@@ -2881,6 +2881,6 @@ function (data,                        # the input dataframe
 		output.dir=output,
 		response.col=responseCol,
 		test.resp.col="response",make.p.tif=T,make.binary.tif=T,
-		simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",tc=NULL,n.folds=3,ma.test=NULL,alpha=1,script.name="brt.r",
+		simp.method="cross-validation",debug.mode=F,responseCurveForm="pdf",tc=NULL,n.folds=3,ma.test=NULL,alpha=1,script.name="brt.r",
 		learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, model.family = "bernoulli", max.trees = NULL)
 
