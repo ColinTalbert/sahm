@@ -45,9 +45,7 @@ def createrootdir(rootWorkspace):
     if not os.path.exists(_roottempdir):
         os.makedirs(_roottempdir) 
     
-    print ("*"*60 + "\n")*2 + ("*"*60 )
-    print "temp directory location is " + _roottempdir
-    print ("*"*60 + "\n")*3
+    return _roottempdir
 
 def cleantemps():
     pass
@@ -102,7 +100,7 @@ def tif_to_color_jpeg(input, output, colorBreaksCSV):
     out_bands = 3
     output_tmp = mktempfile(prefix='intermediateJpegPic', suffix='.tif')
     # Print some info
-    print "Creating %s" % (output)
+    #print "Creating %s" % (output)
     
     #populate the color breaks dictionary 
     #  from the colorBreaks CSV
@@ -119,7 +117,7 @@ def tif_to_color_jpeg(input, output, colorBreaksCSV):
         color_dict[float(row[1])] = [row[3], row[4], row[5]]
         if row[2] > maxVal: maxVal = row[2]
         
-    print color_dict
+    #print color_dict
     # Open source file
     src_ds = gdal.Open( input )
     src_band = src_ds.GetRasterBand(1)
@@ -145,7 +143,7 @@ def tif_to_color_jpeg(input, output, colorBreaksCSV):
         col_values = src_data[0] # array of z_values, one per row in source data
         for iX in range(src_ds.RasterXSize):
             z_value = col_values[iX]
-            print z_value # uncomment to see what value breaks color ramp
+            #print z_value # uncomment to see what value breaks color ramp
             [R,G,B] = MakeColor(z_value, color_dict, maxVal)
             band1[iY][iX] = R
             band2[iY][iX] = G
@@ -181,14 +179,14 @@ def MakeColor(z_value, color_dict, maxVal):
         #print "lastVal =   ",last_val
         #print "ZVal =   ",z_value
         if z_value >= last_val and z_value <= maxVal:
-            "print color for ", z_value, " is ", last_val, " = ", color_dict[last_val]
+            #"print color for ", z_value, " is ", last_val, " = ", color_dict[last_val]
             return color_dict[last_val]
             break
         else:
             key_list.remove(last_val)
 
     #if we get here something is wrong return black
-    print "Value not found defaulting to black"
+    #print "Value not found defaulting to black"
     return [255, 255, 255]
 
 if __name__ == '__main__':
