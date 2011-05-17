@@ -1,0 +1,122 @@
+#!/usr/bin/python
+'''Takes an MDS file and converts all of the tiff files into 
+ascii format in a supplied directory
+The optional parameter format can be used to specify other 
+conversion types.
+'''
+import sys
+import csv
+import os
+import time
+import random
+import shutil
+
+from osgeo import gdalconst
+from osgeo import gdal
+
+from optparse import OptionParser
+
+import utilities
+from utilities import isMDSFile
+
+class FormatConverter(object):
+    def __init__(self):
+        #instance level variables
+        self.verbose = False
+        self.MDSFile = ''
+        self.outputDir = ''
+        self.format = 'asc'
+        self.logger = None
+        
+    def run(self):
+        self.validateArgs()
+        usedTifs = self.extractFileNames()
+        #self.writetolog('    Converting: ' + ','.join(usedTifs))
+        self.convertEnvironmentalLayers(usedTifs, self.outputDir, self.format)
+        
+    def validateArgs(self):
+        argProblem = False
+        if not isMDSFile(self.MDSFile):
+            self.writetolog("The supplied MDS file, " + self.MDSFile + ", does not appear to be in the appropriate format.")
+            argProblem = True
+        if not os.path.isdir(self.outputDir):
+            try:
+                os.mkdir(self.outputDir)
+            except:
+                self.writetolog('The supplied output directory, ' + self.outputDir + ", does not exist and could not be created.")
+                argProblem = True
+        if not self.format.lower() in ['asc', 'bil']:
+            self.writetolog("The supplied format must be one of 'asc' or 'bil'" )
+            argProblem = True
+        if argProblem:
+            raise RuntimeError
+        
+        if self.logger is None:
+            self.logger = utilities.logger(outDir, self.verbose)
+        self.writetolog = self.logger.writetolog
+        
+    def extractFileNames(self):
+        #Read through the MDS and pull the headers
+        MDSreader = csv.reader(open(self.MDSFile, 'r'))
+        header1 = MDSreader.next()
+        header2 = MDSreader.next()
+        header3 = MDSreader.next()
+        
+        usedTifs = []
+        for i in range(3, len(header1)):
+            if header2[i] == '1' and  header1[i] <> 'Split':
+                usedTifs.append(header3[i])
+        return usedTifs
+        
+    
+    def convertEnvironmentalLayers(self, files, outputFolder, type):
+        driverExt = {'asc':'AAIGrid', 'bil':'EHdr'}
+        i = 1
+        for f in files:
+            f_name = os.path.splitext(os.path.split(f)[1])[0]
+            self.writetolog('    Starting on ' + f_name)
+            outputfile = os.path.join(outputFolder, f_name + '.' + type)
+            self.convertFormat(f, outputfile, driverExt[type]) 
+            if self.verbose:
+                self.writetolog('   Finished converting ' + f_name + '    ' + str(i) + ' out of ' + str(len(files)) + ' finished.')
+            i += 1
+    def convertFormat(self, file, outfile, driver):
+        inds = gdal.Open(file, gdalconst.GA_ReadOnly)
+       
+        #ascii = "AAIGrid"
+        #bil = "EHdr"
+        Driver = gdal.GetDriverByName(driver)
+        Driver.CreateCopy(outfile, inds, 0)
+
+def main(argv):
+    usageStmt = "usage:  options: -m --MDSFile -o --outputDir -f --format -v --verbose"
+    desc = "Converts all of the tif files specified in an MDS to ASCII format (or optionally other formats)"
+    parser = OptionParser(usage=usageStmt, description=desc)
+    
+    parser.add_option("-v", 
+                      dest="verbose", 
+                      default=False, 
+                      action="store_true", 
+                      help="the verbose flag causes diagnostic output to print.")
+    parser.add_option("-m", "--MDSFile", 
+                      dest="MDSFile", 
+                      help="The input MDS used to determine tif inputs.")           
+    parser.add_option("-o", "--outputDir", 
+                      dest="outputDir", 
+                      help="Output directory to save files in.")
+    parser.add_option("-f", "--format", 
+                      dest="format",
+                      default='asc', 
+                      help="The format to convert into.  Currently only 'bil' is supported.")
+    
+    (options, args) = parser.parse_args(argv)
+    
+    ourFC = FormatConverter()
+    ourFC.verbose = options.verbose
+    ourFC.MDSFile = options.MDSFile
+    ourFC.outputDir = options.outputDir
+    ourFC.format = options.format
+    ourFC.run()
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
