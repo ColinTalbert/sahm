@@ -188,6 +188,92 @@ def MakeColor(z_value, color_dict, maxVal):
     #if we get here something is wrong return black
     #print "Value not found defaulting to black"
     return [255, 255, 255]
+    
+def MDSresponseCol(MDSFile):
+    csvfile = open(MDSFile, "r")
+    reader = csv.reader(csvfile)
+    header = reader.next() #store the header
+    responseCol = header[2]
+    return responseCol 
+   
+def print_exc_plus( ):
+    """ Print the usual traceback information, followed by a listing of
+        all the local variables in each frame.
+        lifted from the Python Cookbook
+    """
+    msg = ""
+    tb = sys.exc_info( )[2]
+    while tb.tb_next:
+        tb = tb.tb_next
+    stack = [  ]
+    f = tb.tb_frame
+    while f:
+        if r'\sahm\\' in f.f_code.co_filename:
+            stack.append(f)
+        f = f.f_back
+    stack.reverse( )
+    traceback.print_exc( )
+    msg += "\n" + "Locals by frame, innermost last"
+    for frame in stack:
+        msg += "\n"
+        msg += "\n" + "Frame %s in %s at line %s" % (frame.f_code.co_name,
+                                             frame.f_code.co_filename,
+                                             frame.f_lineno)
+        msg += "\n"
+        for key, value in frame.f_locals.items( ):
+            msg += "\t%20s = " % key
+            # we must _absolutely_ avoid propagating exceptions, and str(value)
+            # COULD cause any exception, so we MUST catch any...:
+            try:
+                msg += str(value)
+            except:
+                msg += "<ERROR WHILE PRINTING VALUE>"
+                
+    msg += "\n\n" + ' '.join([str(i) for i in sys.exc_info()[:2]])
+    
+    return msg
 
+def informative_untrapped_error(instance, name):
+    errorMsg = "An error occurred running " + name + ", error message below:  "
+    errorMsg += "\n    " + ' '.join([str(i) for i in sys.exc_info()[:2]])
+    try:
+        errorMsg += traceback.format_tb(sys.exc_info()[2], 10)[-2]
+    except IndexError:
+        pass
+    writetolog(print_exc_plus(), False, False)
+    raise ModuleError(instance, errorMsg)
+
+def breakpoint():
+    ''' open up the python debugger here and poke around
+    Very helpful, I should have figured this out ages ago!
+    '''
+    QtCore.pyqtRemoveInputHook()
+    import pdb; pdb.set_trace()
+
+def writetolog(*args, **kwargs):
+    '''Uses the SAHM log file writting function
+    but appends our known logfile to the kwargs.
+    '''
+    global _logger
+    _logger.writetolog(*args, **kwargs)
+
+def createLogger(outputdir, verbose):
+    global _logger
+    _logger = utilities.logger(outputdir, verbose)
+    
+def getLogger():
+    global _logger
+    return _logger
+
+def getShortName(fullPathName):
+    if fullPathName.endswith('hdr.adf'):
+        shortname = os.path.split(fullPathName)[0]
+        shortname = os.path.split(shortname)[1]
+    else:
+        shortname = os.path.split(fullPathName)[1]
+        shortname = os.path.splitext(shortname)[0]
+    return shortname
 if __name__ == '__main__':
     pass
+    
+    
