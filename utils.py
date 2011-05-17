@@ -1,26 +1,35 @@
 '''
-Created on Nov 18, 2010
+These are utilites used by the VisTrails 
+wrappers of the SAHM command line applications
 
 @author: talbertc
 '''
 import os, sys, shutil
+import traceback
 import csv
 import time
 import tempfile
 
+from PyQt4 import QtCore
 
 from core.modules.basic_modules import File, Directory, new_constant, Constant
+from core.modules.vistrails_module import ModuleError
 
 from osgeo import gdalconst
 from osgeo import gdal
 from osgeo import osr
 import numpy
 
+import packages.sahm.pySAHM.utilities as utilities
+
 import getpass
 
 _roottempdir = ""
+#_logfile = ""
+_verbose = False
 _temp_files = []
 _temp_dirs = []
+_logger = None
 
 def mktempfile(*args, **kwargs):
     global _temp_files
@@ -39,13 +48,54 @@ def mktempdir(*args, **kwargs):
     _temp_dirs.append(dname)
     return dname
 
+def mknextfile(prefix, suffix="", directory=""):
+    global _roottempdir
+    if directory == "":
+        directory = _roottempdir
+    files = os.listdir(directory)
+    seq = 0
+    for f in files:
+        if f.startswith(prefix):
+            old_seq = f.replace(prefix, '')
+            old_seq = old_seq.replace(suffix, '')
+            old_seq = old_seq.replace("_", '')
+            if old_seq.isdigit():
+                if int(old_seq) > seq:
+                    seq = int(old_seq)
+    seq += 1
+    filename = prefix + str(seq) + suffix
+    return os.path.join(directory, filename)
+
+def mknextdir(prefix, directory=""):
+    global _roottempdir
+    if directory == "":
+        directory = _roottempdir
+    files = os.listdir(directory)
+    seq = 0
+    for f in files:
+        if (f.startswith(prefix) and
+            not os.path.isfile(f)):
+            f_seq = int(f.replace(prefix, ''))
+            if f_seq > seq:
+                seq = f_seq
+    seq += 1
+    dirname = prefix + str(seq)
+    os.mkdir(os.path.join(directory, dirname))
+    return os.path.join(directory, dirname)
+
 def createrootdir(rootWorkspace):
     global _roottempdir
+#    global _logfile
     _roottempdir = os.path.join(rootWorkspace, getpass.getuser() + '_' + time.strftime("%Y%m%dT%H%M%S"))
     if not os.path.exists(_roottempdir):
         os.makedirs(_roottempdir) 
+#    _logfile = os.path.join(_roottempdir, "sessionLog.txt")
     
     return _roottempdir
+#
+#def setverbose(verbose):
+#    global _verbose
+#    _verbose = verbose
 
 def cleantemps():
     pass
@@ -74,7 +124,6 @@ def dir_path_value(value):
     sep = os.path.sep
     return val.replace("/", sep)
     
-
 def create_file_module(fname, f=None):
     if f is None:
         f = File()
@@ -97,8 +146,13 @@ def collapse_dictionary(dict):
     return list
 
 def tif_to_color_jpeg(input, output, colorBreaksCSV):
+    writetolog("    running  tif_to_color_jpeg()", True, False)
+    writetolog("        input=" + input, False, False)
+    writetolog("        output=" + output, False, False)
+    writetolog("        colorBreaksCSV=" + colorBreaksCSV, False, False)
     out_bands = 3
-    output_tmp = mktempfile(prefix='intermediateJpegPic', suffix='.tif')
+    #output_tmp = mktempfile(prefix='intermediateJpegPic', suffix='.tif')
+    output_tmp = mknextfile(prefix='intermediateJpegPic_', suffix='.tif')
     # Print some info
     #print "Creating %s" % (output)
     
@@ -143,7 +197,6 @@ def tif_to_color_jpeg(input, output, colorBreaksCSV):
         col_values = src_data[0] # array of z_values, one per row in source data
         for iX in range(src_ds.RasterXSize):
             z_value = col_values[iX]
-            #print z_value # uncomment to see what value breaks color ramp
             [R,G,B] = MakeColor(z_value, color_dict, maxVal)
             band1[iY][iX] = R
             band2[iY][iX] = G
@@ -161,12 +214,17 @@ def tif_to_color_jpeg(input, output, colorBreaksCSV):
     jpg_driver.CreateCopy(output, dst_ds, 0 ) 
     
     try:
+        os.remove(output_tmp)
+    except:
+        pass
+    try:
         GDALClose(output_tmp)
         os.remove(output_tmp)
     except:
         pass
+    
     dst_ds = None
-
+    writetolog("    finished running  tif_to_color_jpeg()", True, False)
     return True
 
 def MakeColor(z_value, color_dict, maxVal):
