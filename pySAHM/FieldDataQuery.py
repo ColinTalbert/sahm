@@ -17,6 +17,8 @@ from math import floor
 
 from optparse import OptionParser
 
+import utilities
+
 def main(argv):
     usageStmt = "usage:  options: -t --template   -f --fieldData -a --aggPixel -y --aggYears -o --output"
     desc = "Aggregates sample points by pixel and/or year."
@@ -58,7 +60,7 @@ def main(argv):
     ourFDQ.verbose = options.verbose
     ourFDQ.processCSV()
     
-class FieldDataQuery:
+class FieldDataQuery(object):
 
     def __init__(self):
         #instance level variables
@@ -69,6 +71,8 @@ class FieldDataQuery:
         self.AggByYear = False
         self.AggByPixel = True
         self.verbose = False
+        self.countdata = False
+        self.logger = None
 
     def validateArgs(self):
         """
@@ -102,6 +106,15 @@ class FieldDataQuery:
     
         if not os.path.exists(self.csv):
             raise Exception, "CSV file, " + self.csv + ", does not exist on file system"
+        
+        #make sure the directory the mds file is going into exists:
+        outDir = os.path.split(self.output)[0]
+        if not os.path.exists(outDir):
+            raise RuntimeError, "The directory of the supplied MDS output file path, " + self.output +", does not appear to exist on the filesystem"
+        
+        if self.logger is None:
+            self.logger = utilities.logger(outDir, self.verbose)
+        self.writetolog = self.logger.writetolog
         
     def getRasterParams(self, rasterFile):
         """
@@ -152,17 +165,22 @@ class FieldDataQuery:
     
     def processCSV(self):
         if self.verbose:
-            print "Starting on Field Data Query for " + os.path.split(self.csv)[1]
-            print "  using template " + os.path.split(self.template)[1]
+            self.validateArgs() 
+            self.writetolog("Starting on Field Data Query for " + os.path.split(self.csv)[1])
+            templatename = os.path.split(self.template)[1]
+            if templatename == 'hdr.adf':
+                templatename = os.path.split(os.path.split(self.template)[0])[1]
+            self.writetolog("  using template " + os.path.split(self.template)[1])
          
-        self.validateArgs()  
+         
             
         csvfile = open(self.csv, "r")
         #dialect = csv.Sniffer().sniff(csvfile.read(1024))
         reader = csv.reader(csvfile)
         usedPixels = {}
-        reader.next()
-        header = ["x", "y", "ResponseBinary"]
+        header = reader.next()
+        if header[2].lower() == 'responsecount':
+            self.countdata = True
         
         #Commented this out because it is causing an error
         #to be thrown by the java, uncomment out when the 
@@ -223,21 +241,37 @@ class FieldDataQuery:
                                     self.templateParams["yScale"]/2)
             frequency = len(v)
     
-            numPresence = 0
+            #loop though the 'points' in each pixel
+            #for count data the value is the sum of the 'points'
+            #    if there were any 'hits' not equal to 0
+            #    otherwise if there were any absences the value is 0
+            #    what's left is background points
+            #for presense/absense data
+            #    The value is 1 if there were any 1s in our points
+            #    Or 0 if there were any zeros (absenses)
+            #    Otherwise it's a background pixel.
+            total = 0
+            numAbsense = 0
             for i in range (frequency):
-                if int(float(v[i][2])) == 1:
-                    numPresence += 1
+                if int(float(v[i][2])) > 0:
+                    total += int(float(v[i][2]))
+                if int(float(v[i][2])) == 0:
+                    numAbsense += 1
             
             outputLine[0] = outPixelX
             outputLine[1] = outPixelY
             
-            if numPresence == 0:
+            if self.countdata and total > 0:
+                outputLine[2] = total
+            elif total > 0:
+                outputLine[2] = 1
+            elif numAbsense > 0:
                 outputLine[2] = 0
             else:
-                outputLine[2] = 1
+                outputLine[2] = -9999
                 
             outputLine.append(frequency)
-            outputLine.append(numPresence)
+            outputLine.append(total)
             outputLine.append(pixelColumn)
             outputLine.append(pixelRow)
             
@@ -245,9 +279,9 @@ class FieldDataQuery:
             fOut.writerow(outputLine)
         oFile.close
         if self.verbose:
-            print "Done\nFinished creating field data query output.\n"
+            self.writetolog("Done\nFinished creating field data query output.\n")
             if len(extraPoints) > 0:
-                print ("  WARNING: " + str(len(extraPoints)) + " points" +
+                self.writetolog ("  WARNING: " + str(len(extraPoints)) + " points" +
                     " out of " + str(pointCount) + " total points in the " +
                     "original CSV were outside the template extent and WERE NOT " +
                     "INCLUDED IN THE FDQ OUTPUT.")
