@@ -297,104 +297,454 @@ class FieldDataQuery(Module):
         ourFDQ.processCSV()
         
 
-        output_file = create_file_module(output_fname)
+        output_file = utils.create_file_module(output_fname)
+        writetolog("Finished running FieldDataQuery", True)
         self.setResult('fieldData', output_file)
 
 class PARC(Module):
     '''
-    This class provides a widget to run the PARC module which
+    A widget to run the PARC module which
     provides functionality to sync raster layer properties
-    with a template dataset
+    with a template dataset's properties.
     '''
 
     configuration = []
     _input_ports = [('predictor', "(gov.usgs.sahm:Predictor:DataInput)"),
-                                ('PredictorList', '(gov.usgs.sahm:PredictorList:DataInput)'),
-                                ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
-                                ('resampleMethod', '(edu.utah.sci.vistrails.basic:String)'),
-                                ('aggregationMethod', '(edu.utah.sci.vistrails.basic:String)')]
+                                ('PredictorList', '(gov.usgs.sahm:PredictorList:Other)'),
+                                ('FileListCSV', '(edu.utah.sci.vistrails.basic:File)'),
+                                ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)')]
 
-    _output_ports = [('PredictorLayersDir', '(edu.utah.sci.vistrails.basic:Directory)')]
+    _output_ports = [('PredictorListCSV', '(edu.utah.sci.vistrails.basic:File)')]
 
     def compute(self):
-        if configuration.verbose:
-            print "Running PARC"
+        writetolog("\nRunning PARC", True)
         
         ourPARC = parc.PARC()
-        output_dname = mktempdir(prefix='parc')
+        output_dname = utils.mknextdir(prefix='PARC_')
         
         if configuration.verbose:
             ourPARC.verbose = True
-        
-        
-        ourPARC.template = self.forceGetInputFromPort('templateLayer').name
-        if self.hasInputFromPort('resampleMethod'):
-            ourPARC.AggByPixel = self.getInputFromPort('resampleMethod')
-        if self.hasInputFromPort('aggregationMethod'):
-            ourPARC.AggByPixel = self.getInputFromPort('aggregationMethod')
+        ourPARC.loggert = utils.getLogger()
+        writetolog("    output_dname=" + output_dname, False, False)
         ourPARC.outDir = output_dname
 
-        predictor_list = self.forceGetInputFromPort('PredictorList', [])
-        predictor_list.extend(self.forceGetInputListFromPort('predictor'))
-
-        predictors = []
-        for predictor in predictor_list:
-            predictors.append(os.path.join(predictor.name))
-
-        ourPARC.inputs = predictors
+        workingCSV = utils.mknextfile(prefix='tmpFilesToPARC_', suffix='.csv')
+        outputCSV = utils.mknextfile(prefix='PARCOutput_', suffix='.csv')
+        writetolog("    workingCSV=" + workingCSV, False, False)
+        #append additional inputs to the existing CSV if one was supplied
+        #otherwise start a new CSV
+        if self.hasInputFromPort("csvFileList"):
+            inputCSV = self.getInputFromPort("csvFileList").name
+            shutil.copy(inputCSV, workingCSV)
+            f = open(workingCSV, "ab")
+            csvWriter = csv.writer(f)
+        else:
+            f = open(workingCSV, "wb")
+            csvWriter = csv.writer(f)
+            csvWriter.writerow(["FilePath", "Categorical", "Resampling", "Aggregation"])
         
-        ourPARC.parcFiles()
+        if self.hasInputFromPort("PredictorList"):
+            predictor_lists = self.forceGetInputListFromPort('PredictorList')
+            for predictor_list in predictor_lists:
+                for predictor in predictor_list:
+                    csvWriter.writerow(list(predictor))
+        
+        if self.hasInputFromPort("predictor"):
+            predictor_list = self.forceGetInputListFromPort('predictor')
+            for predictor in predictor_list:
+                csvWriter.writerow(list(predictor))
+        f.close()
+        del csvWriter
+        ourPARC.inputsCSV = workingCSV
+        ourPARC.template = self.forceGetInputFromPort('templateLayer').name
 
-#        ourPARCer.main(args)
-        predictorsDir = create_dir_module(output_dname)
-        if configuration.verbose:
-            print "Finished running PARC\n"
-        self.setResult('PredictorLayersDir', predictorsDir)
+        try:
+            ourPARC.parcFiles()
+        except:
+            utils.informative_untrapped_error(self, "PARC")
+        
+        #read through our tmp csv of files to parc. 
+        #append the output file location to a new (fourth) column for each input.
+        working = csv.reader(open(workingCSV, "r"))
+        working.next()
+        output = csv.writer(open(outputCSV, "wb"))
+        output.writerow(["PARCOutputFile", "Categorical", "Resampling", "Aggregation", "OriginalFile"])
+        for row in working:
+            fileName = os.path.split(row[0])[1]
+            fileName = os.path.join(output_dname, fileName + ".tif")
+            outputrow = [fileName] + row[1:4] + [row[0]]
+            output.writerow(outputrow)
+        del working
+        del output
+        #delete our temp working file
+        os.remove(workingCSV)
+        
+        
+        predictorsDir = utils.create_dir_module(output_dname)
+        output_file = utils.create_file_module(outputCSV)
+         
+        writetolog("Finished running PARC", True)
+        self.setResult('PredictorListCSV', output_file)
 
+class TiffConverter(Module):
+    '''
+    A widget to run the TiffConverter module which
+    provides functionality to convert the tiffs specified 
+    in an MDS header into ASCII format for Maxent.
+    '''
 
-class PredictorList(Constant):
-    _input_ports = expand_ports([('value', 'DataInput|PredictorList'),
-                                 ('addPredictor', 'DataInput|Predictor')])
-    _output_ports = expand_ports([('value', 'DataInput|PredictorList')])
-    
-    @staticmethod
-    def translate_to_string(v):
-        return str(v)
+    configuration = []
+    _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:DataInput)"),
+                                ('format', '(edu.utah.sci.vistrails.basic:String)'),]
 
-    @staticmethod
-    def translate_to_python(v):
-        v_list = eval(v)
-        return v_list
-
-    @staticmethod
-    def validate(x):
-        return type(x) == list
+    _output_ports = [('outputDir', '(edu.utah.sci.vistrails.basic:Directory)')]
 
     def compute(self):
-        p_list = self.forceGetInputListFromPort("addPredictor")
-        v = self.forceGetInputFromPort("value", [])
-        b = self.validate(v)
-        if not b:
-            raise ModuleError(self, "Internal Error: Constant failed validation")
-        if len(v) > 0 and type(v[0]) == tuple:
-            f_list = [create_file_module(v_elt[1]) for v_elt in v]
-        else:
-            f_list = v
-        p_list += f_list
-        self.setResult("value", p_list)
+        writetolog("\nRunning TiffConverter", True)
+        #utils.breakpoint()
+        ourTC = TC.FormatConverter()
+        ourTC.MDSFile = self.forceGetInputFromPort('inputMDS').name   
+        ourTC.outputDir = utils.mknextdir(prefix='ConvertedTifs_')
+        if configuration.verbose:
+            ourTC.verbose = True
+        ourTC.logger = utils.getLogger()
+        writetolog("    output directory = " + ourTC.outputDir, False, False)
+        ourTC.run()
+        writetolog("\nFinished running TiffConverter", True)
+        
+class TestTrainingSplit(Module):
+    _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:DataInput)"),
+                    ('trainingProportion', '(edu.utah.sci.vistrails.basic:String)'),
+                    ('RatioPresAbs', '(edu.utah.sci.vistrails.basic:String)')]
+    _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:DataInput)")]
+    
+    def compute(self):
+        writetolog("\nGenerating Test Training split ", True)
+        inputMDS = utils.dir_path_value(self.forceGetInputFromPort('inputMDS', []))
+        outputMDS = utils.mknextfile(prefix='TestTrainingSplit_', suffix='.csv')
 
+        global models_path
+        
+        args = "i=" + inputMDS + " o=" + outputMDS 
+        args += " rc=" + utils.MDSresponseCol(inputMDS)
+        if (self.hasInputFromPort("trainingProportion")):
+            try:
+                trainingProportion = float(self.getInputFromPort("resampleMethod"))
+                if trainingProportion <= 0 or trainingProportion > 1:
+                    raise runtimeError
+                args += " p=" + str(trainingProportion)
+            except:
+                raise ModuleError(self, "Train Proportion (trainProp) must be a number between 0 and 1 excluding 0")
+        if (self.hasInputFromPort("RatioPresAbs")):
+            try:
+                RatioPresAbs = float(self.getInputFromPort("RatioPresAbs"))
+                if RatioPresAbs <= 0 or RatioPresAbs >= 1:
+                    raise runtimeError
+                args += " m=" + str(trainingProportion)
+            except:
+                raise ModuleError(self, "The ratio of presence to absence (RatioPresAbs) must be a \nnumber between 0 and 1 excluding both 0 and 1") 
+        
+        
+        r_path = configuration.r_path
+        program = os.path.join(r_path, "i386", "Rterm.exe") #-q prevents program from running
+        Script = os.path.join(models_path, "TestTrainSplit.r")
+
+        command = program + " --vanilla -f " + Script + " --args " + args
+        writetolog("    " + command, False, False)
+#        print command
+#        
+#        print subprocess.PIPE
+        
+        p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+
+        ret = p.communicate()
+        if ret[1]:
+            msg = "An error was encountered in the R script for this module.  The R error message is below - \n"
+            msg += ret[1]
+            writetolog(msg)
+            raise ModuleError(self, msg)
+        del(ret)
+
+        output = os.path.join(outputMDS)
+        if os.path.exists(output):
+            output_file = utils.create_file_module(output)
+            writetolog("Finished Test Training split ", True)
+        else:
+            msg = "Problem encountered generating Test Training split.  Expected output file not found."
+            writetolog(msg, False)
+            raise ModuleError(self, msg)
+        self.setResult("outputMDS", output_file)
+        
+
+class CovariateCoorelationAndSelection(Module):
+    '''
+    select from a list of processessed predictor layers for inclusion in the module
+    '''
+    kwargs = {}
+    kwargs['defaults'] = str(['initial'])
+    _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:DataInput)"),
+                    ('selectionName', '(edu.utah.sci.vistrails.basic:String)', kwargs)]
+    _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:DataInput)")]
+
+    def compute(self):
+        writetolog("\nOpening Select Predictors Layers widget", True)
+        inputMDS = utils.dir_path_value(self.forceGetInputFromPort('inputMDS'))
+        selectionName = self.forceGetInputFromPort('selectionName', 'initial')
+        outputMDS = utils.mknextfile(prefix='SelectPredictorsLayers_' + selectionName + "_", suffix='.csv')
+        displayJPEG = utils.mknextfile(prefix='PredictorCorrelation_' + selectionName + "_", suffix='.jpg')
+        writetolog("    inputMDS = " + inputMDS, False, False)
+        writetolog("    displayJPEG = " + displayJPEG, False, False)
+        writetolog("    outputMDS = " + outputMDS, False, False)
+        
+        self.callDisplayMDS(inputMDS, outputMDS, displayJPEG)
+
+        output_file = utils.create_file_module(outputMDS)
+        writetolog("Finished Select Predictors Layers widget", True)
+        self.setResult("outputMDS", output_file)
+
+    def callDisplayMDS(self, inputMDS, outputMDS, displayJPEG):
+        global r_path
+        global models_path
+        dialog = SelectListDialog(inputMDS, outputMDS, displayJPEG, r_path, models_path)
+        #dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
+#        print " ... finished with dialog "  
+        retVal = dialog.exec_()
+        #outputPredictorList = dialog.outputList
+
+        return inputMDS
+
+
+class ProjectionLayers(Module):
+    _input_ports = [('fileListCSV', '(edu.utah.sci.vistrails.basic:File)'),
+                    ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
+                    ('model', '(edu.utah.sci.vistrails.basic:String)'),
+                    ('scenario', '(edu.utah.sci.vistrails.basic:String)'),
+                    ('year', '(edu.utah.sci.vistrails.basic:String)'),
+                    ('directoryCrosswalkCSV', '(edu.utah.sci.vistrails.basic:File)')
+                    ]
+    _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:DataInput)")]
+
+    def compute(self):
+        models = ['CCCMA', 'CSIRO', 'hadcm3']
+        scenarioss = ['A2a', 'B2b']
+        years = ['2020', '2050', '2080']
+        
+        writetolog("\nRunning make Projection Layers", True)
+        
+        
+        
+        
+        inputCSV = self.forceGetInputFromPort('fileListCSV').name
+    
+        if self.hasInputFromPort('templateLayer'):
+            template = self.forceGetInputFromPort('templateLayer').name
+        else:
+            template = '' #we'll get a template below
+            
+        fromto = []
+        climargs = {}
+        
+        for input in ['model', 'scenario', 'year']:
+            if self.hasInputFromPort(input):
+                climargs[input] = self.forceGetInputFromPort(input)
+        if climargs <> {} and climargs.keys() <> ['model', 'scenario', 'year']:
+            #they did not add in one of each, Not going to fly
+            raise ModuleError(self, "All of model, scenario, and year must be supplied if any are used.")
+        elif climargs <> {} and climargs.keys <> ['model', 'scenario', 'year']:
+            #they specified a alt climate scenario add this to our list to search for
+            fromto.append([r'K:\GIS_LIBRARY\Climate\WorldClim\BioclimaticVariables\bio_30s_esri\bio',
+                           os.path.join('I:\WorldClim_Future_Climate\RenamedBILs', 
+                                        climargs['model'], climargs['scenario'], climargs['year'])])
+        
+        if self.hasInputFromPort('directoryCrosswalkCSV'):
+            crosswalkCSV = csv.reader(open(self.forceGetInputFromPort('directoryCrosswalkCSV'), 'r'))
+            header = crosswalkCSV
+            for row in crosswalkCSV:
+                fromto.append(row[0], row[1])
+            del crosswalkCSV    
+            
+        #write out the outputs to an empty MDS file (just the header is needed to PARC the outputs)
+            
+        
+        inCSV = csv.reader(open(inputCSV, 'r'))
+        inCSV.next() #skip header
+        workingCSV = utils.mknextfile(prefix='tmpFilesToPARC_', suffix='.csv')
+        tmpCSV = csv.writer(open(workingCSV, 'wb'))
+        tmpCSV.writerow(["FilePath", "Categorical", "Resampling", "Aggregation"])
+        outHeader1 = ['x', 'y', 'response']
+        outHeader2 = ['', '', '']
+        outHeader3 = ['', '', '']
+        
+        output_dname = utils.mknextdir(prefix='ProjectionLayers_')
+        
+        for row in inCSV:
+            if template == '':
+                template = row[0]
+            fileShortName = utils.getShortName(row[0])
+            if row[1] == 1:
+                outHeader1.append(fileShortName + '_categorical')
+            else:
+                outHeader1.append(fileShortName)
+            outHeader2.append('1')
+            outHeader3.append(os.path.join(output_dname, fileShortName + '.tif'))
+
+            origFile = row[4]
+            newOrigFile = origFile
+            for lookup in fromto:
+               if lookup[0] in origFile:
+                   newOrigFile = origFile.replace(lookup[0], lookup[1])
+            tmpCSV.writerow([newOrigFile,] + row[1:4])
+        
+        #PARC the files here
+        ourPARC = parc.PARC()
+        
+        
+        if configuration.verbose:
+            ourPARC.verbose = True
+        writetolog("    output_dname=" + output_dname, False, False)
+        ourPARC.outDir = output_dname
+        
+        ourPARC.inputsCSV = workingCSV
+        ourPARC.template = template
+
+        try:
+            ourPARC.parcFiles()
+        except:
+            utils.informative_untrapped_error(self, "PARC")
+        
+        #loop through our workingCSV and format it into an MDS header
+        
+        output_MDSname = utils.mknextfile(prefix='ProjectionLayersMDS', suffix = '.csv')
+        outCSV = csv.writer(open(output_MDSname), 'wb')
+        outCSV.writerow(outHeader1)
+        outCSV.writerow(outHeader2)
+        outCSV.writerow(outHeader3)
+        
+        
+        
+        
+        #at a minimum we need input MDS, template layer
+        # additionally we need a specified , year and model and scenario, 
+        #    and/or a csvFile that has a find replace of path names.
+
+#class ClimateModel(String):
+#    _input_ports = [('value', '(gov.usgs.sahm:ClimateModel:Other)')]
+#    _output_ports = [('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
+#    _widget_class = build_enum_widget('ClimateModel', 
+#                                      ['CCCMA', 'CSIRO', 'hadcm3'])
+#
+#    @staticmethod
+#    def get_widget_class():
+#        return ClimateModel._widget_class
+#
+#class ClimateScenario(String):
+#    _input_ports = [('value', '(gov.usgs.sahm:ClimateScenario:Other)')]
+#    _output_ports = [('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
+#    _widget_class = build_enum_widget('ClimateScenario', 
+#                                      ['A2a', 'B2b'])
+#
+#    @staticmethod
+#    def get_widget_class():
+#        return ClimateScenario._widget_class
+#
+#class ClimateYear(String):
+#    _input_ports = [('value', '(gov.usgs.sahm:ClimateYear:Other)')]
+#    _output_ports = [('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
+#    _widget_class = build_enum_widget('ClimateYear', 
+#                                      ['2020', '2050', '2080'])
+#
+#    @staticmethod
+#    def get_widget_class():
+#        return ClimateYear._widget_class
+
+class MAXENT(Module):
+
+    _output_ports = [("lambdas", "(edu.utah.sci.vistrails.basic:File)"),
+                     ("report", "(edu.utah.sci.vistrails.basic:File)"),
+                     ("roc", "(edu.utah.sci.vistrails.basic:File)")]
+
+    def compute(self):
+        global maxent_path
+        #get input MDS
+        
+        
+        ourMaxent = MaxentRunner.MAXENTRunner()
+        ourMaxent.outputDir = utils.mknextdir(prefix='maxentFiles_')
+        
+        if self.hasInputFromPort('inputMDS'):
+            ourMaxent.inputMDS = self.forceGetInputFromPort('inputMDS').name
+
+        ourMaxent.maxentpath = maxent_path
+        
+        MaxentArgsCSV = utils.mknextfile(prefix='MaxentArgs', suffix='.csv')
+        argWriter = csv.writer(open(MaxentArgsCSV, 'wb'))
+        for port in self._input_ports:
+            #print port
+            if port[0] <> 'inputMDS':
+                if self.hasInputFromPort(port[0]):
+                    port_val = self.getInputFromPort(port[0])
+                    #print "   has input " + str(port_val)
+                    if port[1] == "(edu.utah.sci.vistrails.basic:Boolean)":
+                        port_val = str(port_val).lower()
+                        #port_val = port_val[0].lower() + port_val[1:]
+                    elif port[1] == "(edu.utah.sci.vistrails.basic:Path)" or \
+                        port[1] == "(edu.utah.sci.vistrails.basic:File)":
+                        port_val = port_val.name
+                    argWriter.writerow([port[0],port_val])
+                else:
+                    #print "   has no input "
+                    kwargs = port[2]
+                    #print kwargs
+                    try:
+                        if port[1] == "(edu.utah.sci.vistrails.basic:Boolean)":
+                            default = kwargs['defaults'][2:-2].lower()
+                        else:
+                            default = kwargs['defaults'][2:-2]
+                        #args[port[0]] = default
+                        argWriter.writerow([port[0], default])
+                    except KeyError:
+                        pass
+        del argWriter
+        ourMaxent.argsCSV = MaxentArgsCSV
+        ourMaxent.logger = utils.getLogger()
+        try:
+            ourMaxent.run()
+        except:
+            utils.informative_untrapped_error(self, "Maxent")
+#        
+        #set outputs
+        lambdasfile = os.path.join(outputDir, args["species_name"] + ".lambdas")
+        print lambdasfile
+        output_file = utils.create_file_module(lambdasfile)
+        self.setResult("lambdas", output_file)
+        
+        rocfile = os.path.join(outputDir, 'plots', args["species_name"] + "_roc.png")
+        print rocfile
+        output_file = utils.create_file_module(rocfile)
+        self.setResult("roc", output_file)
+
+        htmlfile = os.path.join(outputDir, args["species_name"] + ".html")
+        print htmlfile
+        output_file = utils.create_file_module(htmlfile)
+        self.setResult("report", output_file)
+
+        writetolog("Finished Maxent widget", True)
+        
 def load_max_ent_params():    
     maxent_fname = os.path.join(os.path.dirname(__file__), 'maxent.csv')
     csv_reader = csv.reader(open(maxent_fname, 'rU'))
     # pass on header
     csv_reader.next()
     input_ports = []
+    
+    input_ports.append(('inputMDS', '(gov.usgs.sahm:MergedDataSet:DataInput)'))
+    
     docs = {}
     basic_pkg = 'edu.utah.sci.vistrails.basic'
     p_type_map = {'file/directory': 'Path',
                   'double': 'Float'}
     for row in csv_reader:
-        [name, flag, p_type, default, doc] = row
+        [name, flag, p_type, default, doc, notes] = row
         name = name.strip()
         p_type = p_type.strip()
         if p_type in p_type_map:
