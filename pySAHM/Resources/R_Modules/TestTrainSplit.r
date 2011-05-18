@@ -15,7 +15,7 @@
    #Modifications
       # 5/10/2011 Modified to report an error message if count data is supplied with a ratio of presence to absence
 
-      if(response.col=="responseCount" && RatioPresAbs!=NULL) stop("Ratio of Presence to Absence cannot be set with count data")
+      if(response.col=="responseCount" && !is.null(RatioPresAbs)) stop("Ratio of Presence to Absence cannot be set with count data")
      if(trainProp<=0 | trainProp>1) stop("Train Proportion (trainProp) must be a number between 0 and 1 excluding 0")
     if(!is.null(RatioPresAbs)) {
     if(RatioPresAbs<=0 | RatioPresAbs>=1)stop("The ratio of presence to absence (RatioPresAbs) must be a \nnumber between 0 and 1 excluding both 0 and 1")}
