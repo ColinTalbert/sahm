@@ -44,6 +44,10 @@ Pairs.Explore<-function(num.plots=10,min.cor=.7,input.file,output.file,response.
        dat<-dat[order(response),]
        response<-response[order(response)]
 
+       #for the purpose of the pairs plot, taking all counts greater than 1 and setting them equal to presence
+       #this is never exported
+      if(response.col=="responseCount") dat$responseCount[dat$responseCount>1]<-1
+      
     #remove any of pres absn or bgd that aren't desired
      temp<-c(0,1,-9999)
      temp<-temp[c(absn,pres,bgd)]

@@ -16,61 +16,15 @@
 #   RandomForest - duh
 #   sp - used by rdgal library
 
-Debug=F    # set to F for command line pluggability
-if(Debug==T){
-     output.dir <- "F:/code for Jeff and Roger/jeffs paper/filtered_rs/"  # a set of ouput files will be created in this directory.
-    ma.dir <- "F:/code for Jeff and Roger/jeffs paper/filtered_rs/train/"
-    test.dir <- "F:/code for Jeff and Roger/jeffs paper/filtered_rs/test/"
-    ma.names <- paste(ma.dir,sort(list.files(path=ma.dir)),sep="")
-    test.names <- paste(test.dir,sort(list.files(path=test.dir)),sep="")
-    
-    tif.dir <- "F:/yerc/RRSC/YELL/" # directory containing geotiff files
-     test.name <- NULL  # if this is supplied, it will be read for use as test data. 
-    
-    #setwd('F:/code for Jeff and Roger/jeffs paper/data')
-    library(tools)
-    debug.mode=T  # if true, prints output and status updates to the console. Otherwise all of this goes to a log file and only the XML output is printed to console.
-    batch.mode=F
-     output.dir <- "c:/temp/"  # a set of ouput files will be created in this directory.
-    fnames <- list.files(pattern=".csv")
-    ma.names <- fnames[-grep("_test.csv",fnames)]
-    test.names <- rep(fnames[grep("_test.csv",fnames)],rep(7,7))
-    test.resp.col <- "pres_abs"
-    response.col <- "^response.binary"
-    tif.dir <- "j:/SAHM/YELL/" # directory containing geotiff files
-    ma.name <- "j:/SAHM/07_YELL_Dalmatiantoadflax_train_clean_filt_mod.csv" # model array to use.
-    #ma.name <- "GSENM_cheat_pres_abs_2001_factor.mds" # model array to use.
-    test.name <- NULL
-    debug.mode=F  # if true, prints output and status updates to the console. Otherwise all of this goes to a log file and only the XML output is printed to console.
-    batch.mode=F
-    make.p.tif=F # make a geotiff of probability surface?
-    make.binary.tif=F  # make a binary response surface geotiff?
-    output.dir <- "c:/temp"  # a set of ouput files will be created in this directory.
-    ma.names <- c("a","b","c")
-    test.resp.col <- "pres_abs"
-    response.col <- "^response.binary"
-    simp.method="BIC"
-    library(tools) 
-    script.name="glm.r"                        
-    out.table <- as.data.frame(matrix(NA,nrow=21,ncol=length(ma.names),dimnames=list(c("ncov.final","nrow_train","ncol_train",
-              "dev_exp_train","auc_train","auc.sd_train","thresh_train","pcc_train","sens_train","spec_train","kappa_train",
-              "nrow_test","ncol_test","dev_exp_test","auc_test","auc.sd_test","thresh_test","pcc_test","sens_test","spec_test",
-              "kappa_test"),file_path_sans_ext(basename(ma.names)))))
-    #out.table <- as.data.frame(matrix(NA,nrow=21,ncol=length(ma.names),dimnames=list(c("ncov.final","nrow_train","ncol_train",
-#              "dev_exp_train","auc_train","auc.sd_train","thresh_train","pcc_train","sens_train","spec_train","kappa_train",
-#              "nrow_test","ncol_test","dev_exp_test","auc_test","auc.sd_test","thresh_test","pcc_test","sens_test","spec_test",
-#              "kappa_test"),file_path_sans_ext(basename(ma.names)))))
-}
-    
-# source("F:/code for Jeff and Roger/FIT_RF_pluggable_040609.r")    
-    
-fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^response.binary",test.resp.col="response",make.p.tif=T,make.binary.tif=T,
+
+fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^response.binary",make.p.tif=T,make.binary.tif=T,
       debug.mode=F,responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL, samp.replace=FALSE, sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
-      localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=proximity,norm.votes=TRUE,do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE, ma.test=NULL,make.r.curves=T,script.name="rf.r"){
+      localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=proximity,norm.votes=TRUE,do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE, make.r.curves=T,
+      seed=NULL,script.name="rf.r",opt.methods=2,save.model=FALSE){
     # This function fits a boosted regression tree model to presence-absence data.
     # written by Alan Swanson, Jan-March 2009
     # uses code modified from that published in Elith et al 2008
-    #
+    # # Maintained and edited by Marian Talbert September 2010-
     # Arguements.
     # ma.name: is the name of a .csv file with a model array.  full path must be included unless it is in the current
     #  R working directory #
@@ -105,6 +59,10 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
     # brt_response_curves.pdf:  an pdf file with response curves for
     #   each covariate in the final model and perspective plots showing the effect of interactions deemed significant.
     #   only produced when debug.mode=T
+    #  seed=NULL                                 # sets a seed for the algorithm, any inegeger is acceptable
+    #  opt.methods=2                             # sets the method used for threshold optimization used in the
+    #                                            # the evaluation statistics module
+    #  save.model=FALSE                          # whether the model will be used to later produce tifs
     #
     # when debug.mode is true, these filenames will include a number in them so that they will not overwrite preexisting files. eg brt_1_output.txt.
     #
@@ -115,11 +73,10 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
     #simp.method <- match.arg(simp.method)
     out <- list(
       input=list(ma.name=ma.name,
-                 ma.test=ma.test,
                  tif.dir=tif.dir,
                  output.dir=output.dir,
                  response.col=response.col,
-                 test.resp.col=test.resp.col,
+                 save.model=save.model,
                  xtest=xtest,
                  ytest=ytest,
                  n.trees=n.trees,
@@ -177,7 +134,7 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
       ec=0
       )
     
-       
+   if(!is.null(seed)) set.seed(seed)
     #if(simplify.brt==T) out$input$simp.method<-"cross-validation" else out$input$simp.method<-">1% rel. influence"
     # load libaries #
     out <- check.libs(list("randomForest","PresenceAbsence","rgdal","XML","sp","raster"),out)
@@ -313,7 +270,8 @@ y=factor(out$dat$ma$ma[,1])
     ##############################################################################################################
            
     # ROC plot #                            
-    auc.output <- try(make.auc.plot.jpg(out$dat$ma$ma,pred=tweak.p(as.vector(predict(out$mods$final.mod,type="prob")[,2])),plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="RF"),
+    auc.output <- try(make.auc.plot.jpg(out$dat$ma$ma,pred=tweak.p(as.vector(predict(out$mods$final.mod,type="prob")[,2])),
+            plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="RF",opt.methods=opt.methods),
             silent=T)
    
     if(class(auc.output)=="try-error"){
@@ -406,6 +364,7 @@ y=factor(out$dat$ma$ma[,1])
     if(debug.mode) flush.console()
     
     # Make .tif of predictions #
+     save.image(paste(output.dir,"modelWorkspace",sep="\\"))
     if(out$input$make.p.tif==T | out$input$make.binary.tif==T){
         cat("\nproducing prediction maps...","\n","\n");flush.console()
         mssg <- try(proc.tiff(model=out$mods$final.mod,vnames=as.character(row.names(out$mods$summary)),
@@ -427,10 +386,13 @@ y=factor(out$dat$ma$ma[,1])
           }
         }
     if(!debug.mode) {sink();cat("Progress:90%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("90%\n")}  ### print time
+
+  # Evaluation Statistics on Test Data#
+    if(!is.null(out$dat$ma$ma.test)) Eval.Stat<-EvaluationStats(out,thresh=auc.output$thresh,train=out$dat$ma$ma,train.pred=tweak.p(as.vector(predict(out$mods$final.mod,type="prob")[,2])),
+            out$mods$final.mod$target.trees,type="response"),opt.methods)
+
     
-    
-    # read in test data #
-    if(!is.null(out$input$ma.test)) out <- read.maRF(out,T)
+
     
     # Write summaries to xml #
     assign("out",out,envir=.GlobalEnv)
@@ -573,10 +535,10 @@ get.cov.names <- function(model){
     }
 
 
-read.maRF <- function(out,test.dat=F){
-      if(test.dat==F){
+read.maRF <- function(out){
+
           ma.name <- out$input$ma.name
-          } else ma.name <- out$input$ma.test
+
       tif.dir <- out$dat$tif.dir$dname
       out.list <- out$dat$ma
       out.list$status[1] <- file.access(ma.name,mode=0)==0
@@ -606,9 +568,9 @@ read.maRF <- function(out,test.dat=F){
           } else {
           out.list$status[2]<-T
           }
-      if(test.dat==F){
+
           r.name <- out$input$response.col
-          } else r.name <- out$input$test.resp.col 
+
       
       # remove x and y columns #
       xy.cols <- c(match("x",tolower(names(ma))),match("y",tolower(names(ma))))
@@ -654,10 +616,10 @@ read.maRF <- function(out,test.dat=F){
           } else {
           names(ma) <- ma.names <-  sub("categorical.","",ma.names)
           factor.names <- ma.names[factor.cols]
-          if(test.dat==F) factor.levels <- list() 
+          factor.levels <- list()
           for (i in 1:length(factor.cols)){
               f.col <- factor.cols[i]
-              if(test.dat==F){
+
                   x <- table(ma[,f.col],ma[,1])
                   if(nrow(x)<2){
                         out$dat$bad.factor.cols <- c(out$dat$bad.factor.cols,factor.names[i])
@@ -665,16 +627,14 @@ read.maRF <- function(out,test.dat=F){
                   lc.levs <-  as.numeric(row.names(x))[x[,2]>0] # make sure there is at least one "available" observation at each level
                   lc.levs <- data.frame(number=lc.levs,class=lc.levs)
                   factor.levels[[i]] <- lc.levs
-                  } else {
-                      f.index <- match(factor.names[i],names(out$dat$ma$factor.levels))
-                      lc.levs <- out$dat$ma$factor.levels[[f.index]]
-                  }
+
+
               ma[,f.col] <- factor(ma[,f.col],levels=lc.levs$number,labels=lc.levs$class)
               }
-          if(test.dat==F) {
+
               names(factor.levels)<-factor.names
               out.list$factor.levels <- factor.levels
-              }
+
           }
       
       #out.list$ma <- ma[,c(r.col,c(1:ncol(ma))[-r.col])]
@@ -723,12 +683,8 @@ read.maRF <- function(out,test.dat=F){
             }} else out$dat$tif.names <- ma.names[-1]
 
       out.list$ma <- ma[complete.cases(ma),c(r.col,c(1:ncol(ma))[-r.col])]
-      if(!test.dat & !is.null(out$dat$bad.factor.cols)) out.list$ma <- out.list$ma[,-match(out$dat$bad.factor.cols,names(out.list$ma))]
-      if(test.dat & any(ss<-is.na(match(names(ma),names(out$dat$ma$ma))))) {
-           out$ec <- out$ec+1
-           out$error.mssg[[out$ec]] <- paste("ERROR: missing columns in test model array:  ",paste(names(ma)[ss],collapse=" ,"),sep="")
-           return(out)
-           }  
+      if(!is.null(out$dat$bad.factor.cols)) out.list$ma <- out.list$ma[,-match(out$dat$bad.factor.cols,names(out.list$ma))]
+
             
       
       out.list$dims <- dim(out.list$ma)
@@ -780,167 +736,6 @@ check.dir <- function(dname){
     return(list(dname=dname,exist=exist,readable=readable,writable=writable))
     }
 
-proc.tiff <- function(model,vnames,tif.dir=NULL,filenames=NULL,pred.fct,factor.levels=NA,make.binary.tif=F,make.p.tif=T,binary.thresh=NA,
-    thresh=0.5,outfile.p="brt.prob.map.tif",outfile.bin="brt.bin.map.tif",tsize=2.0,NAval=-3000,fnames=NULL,logname=NULL){
-    # vnames,fpath,myfun,make.binary.tif=F,outfile=NA,outfile.bin=NA,output.dir=NA,tsize=10.0,NAval=NA,fnames=NA
-    # Written by Alan Swanson, YERC, 6-11-08
-    # Description:
-    # This function is used to make predictions using a number of .tiff image inputs
-    # in cases where memory limitations don't allow the full images to be read in.
-    #
-    # Arguments:
-    # vname: names of variables used for prediction.  must be same as filenames and variables
-    #   in model used for prediction. do not include a .tif extension as this is added in code.
-    # fpath: path to .tif files for predictors. use forward slashes and end with a forward slash ('/').
-    # myfun: prediction function.  must generate a vector of predictions using only a
-    #   dataframe as input.
-    # outfile:  name of output file.  placed in same directory as input .tif files.  should
-    #   have .tif extension in name.
-    # tsize: size of dataframe used for prediction in MB.  this controls the size of tiles
-    #   extracted from the input files, and the memory usage of this function.
-    # NAval: this is the NAvalue used in the input files.
-    # fnames: if the filenames of input files are different from the variable names used in the
-    #   prediction model.
-    #
-    # Modification history:
-    # NA
-    #
-    # Description:
-    # This function reads in a limited number of lines of each image (specified in terms of the
-    # size of the temporary predictor dataframe), applies a user-specified
-    # prediction function, and stores the results as matrix.  Alternatively, if an
-    # output file is specified, a file is written directly to that file in .tif format to
-    # the same directory as the input files.  Geographic information from the input images
-    # is retained.
-    #
-    # Example:
-    # tdata <- read.csv("D:/yerc/LISN biodiversity/resource selection/split/05_GYA_Leafyspurge_reduced_250m_train.csv")
-    # tdata$gya_250m_evi_16landcovermap_4ag05<-factor(tdata$gya_250m_evi_16landcovermap_4ag05)
-    # f.levels <- levels(tdata$gya_250m_evi_16landcovermap_4ag05)
-    # m0 <- glm(pres_abs~gya_250m_evi_01greenup_4ag05+gya_250m_evi_02browndown_4ag05+gya_250m_evi_03seasonlength_4ag05+
-    #          gya_250m_evi_04baselevel_4ag05+gya_250m_evi_05peakdate_4ag05+gya_250m_evi_16landcovermap_4ag05,data=tdata,family=binomial())#
-    # glm.predict <- function(x) {
-    #   x$gya_250m_evi_16landcovermap_4ag05<-factor(x$gya_250m_evi_16landcovermap_4ag05,levels=f.levels)
-    #   y <- as.vector(predict(m0,x,type="response"))
-    #   y[is.na(y)]<- -1
-    #   return(y)
-    # }
-    # x<-glm.predict(temp)
-    # fnames <- names(tdata)[c(10:14,25)]
-    # vnames <- fnames
-    # fpath <- 'D:/yerc/LISN biodiversity/GYA data/gya_250m_tif_feb08_2/'
-    # x <- proc.tiff(vnames,fpath,glm.predict)
-    # proc.tiff(vnames,fpath,glm.predict,"test11.tif")
-
-    # Start of function #
-    require(rgdal)
-
-    if(is.na(NAval)) NAval<- -3000
-    if(is.null(fnames)) fnames <- paste(vnames,"tif",sep=".")
-    nvars<-length(vnames)
-
-    # check availability of image files #
-   if(!is.null(tif.dir)){
-      fnames <- fnames[match(vnames,basename(sub(".tif","",fnames)))]
-      fullnames <- paste(tif.dir,fnames,sep="/")
-      goodfiles <- file.access(fullnames)==0
-      if(!all(goodfiles)){
-          cat('\n',paste("ERROR: the following image files are missing:",paste(fullnames[!goodfiles],collapse=", ")),'\n','\n')
-         flush.console()
-          return(paste("ERROR: the following image files are missing:",paste(fullnames[!goodfiles],collapse=", ")))
-          }}
-# settup up output raster to match input raster
-       if(!is.null(filenames)){
-          fullnames <- as.character(filenames[match(vnames,basename(sub(".tif","",filenames)))])
-          goodfiles <- file.access(fullnames)==0
-        if(!all(goodfiles)){
-          cat('\n',paste("ERROR: the following image files are missing:",paste(fullnames[!goodfiles],collapse=", ")),'\n','\n')
-         flush.console()
-          return(paste("ERROR: the following image files are missing:",paste(fullnames[!goodfiles],collapse=", ")))
-          }}
-
-
-RasterInfo=raster(fullnames[1])
-
-
-    # get spatial reference info from existing image file
-    gi <- GDALinfo(fullnames[1])
-    dims <- as.vector(gi)[1:2]
-    ps <- as.vector(gi)[6:7]
-    ll <- as.vector(gi)[4:5]
-    pref<-attr(gi,"projection")
-
-RasterInfo=raster(fullnames[1])
-
-if(!is.na(match("AREA_OR_POINT=Point",attr(gi,"mdata")))){
-   xx<-RasterInfo  #this shifts by a half pixel
-nrow(xx) <- nrow(xx) - 1
-ncol(xx) <- ncol(xx) - 1
-rs <- res(xx)
-xmin(RasterInfo) <- xmin(RasterInfo) - 0.5 * rs[1]
-xmax(RasterInfo) <- xmax(RasterInfo) - 0.5 * rs[1]
-ymin(RasterInfo) <- ymin(RasterInfo) + 0.5 * rs[2]
-ymax(RasterInfo) <- ymax(RasterInfo) + 0.5 * rs[2]
- }
-    # calculate position of upper left corner and get geotransform ala http://www.gdal.org/gdal_datamodel.html
-    #ul <- c(ll[1]-ps[1]/2,ll[2]+(dims[1]+.5)*ps[2])
-    ul <- c(ll[1],ll[2]+(dims[1])*ps[2])
-    gt<-c(ul[1],ps[1],0,ul[2],0,ps[2])
-
-    # setting tile size
-    MB.per.row<-dims[2]*nvars*32/8/1000/1024
-
-    nrows<-min(round(tsize/MB.per.row),dims[1])
-    bs<-c(nrows,dims[2])
-    nbs <- ceiling(dims[1]/nrows)
-    inc<-round(10/nbs,1)
-
-    chunksize<-bs[1]*bs[2]
-    tr<-blockSize(RasterInfo,chunksize=chunksize)
-
-  continuousRaster<-raster(RasterInfo)
-  NAvalue(continuousRaster)<-NAval
-  continuousRaster <- writeStart(continuousRaster, filename=outfile.p, overwrite=TRUE)
-    if(make.binary.tif) {
-     binaryRaster<-raster(RasterInfo)
-      NAvalue(binaryRaster)<-NAval
-      binaryRaster <- writeStart(binaryRaster, filename=outfile.bin, overwrite=TRUE)
-      }
-temp <- data.frame(matrix(ncol=nvars,nrow=tr$size*ncol(RasterInfo))) # temp data.frame.
-names(temp) <- vnames
-
-  for (i in 1:tr$n) {
-    strt <- c((i-1)*nrows,0)
-     region.dims <- c(min(dims[1]-strt[1],nrows),dims[2])
-        if (i==tr$n) temp <- temp[1:(tr$nrows[i]*dims[2]),] # for the last tile...
-      for(k in 1:nvars) { # fill temp data frame
-            temp[,k]<- getValuesBlock(raster(fullnames[k]), row=tr$row[i], nrows=tr$size)
-            }
-    temp[temp==NAval] <- NA # replace missing values #
-    temp[is.na(temp)]<-NA #this seemingly worthless line switches NaNs to NA so they aren't predicted
-        if(!is.na(factor.levels)){
-            factor.cols <- match(names(factor.levels),names(temp))
-            for(j in 1:length(factor.cols)){
-                if(!is.na(factor.cols[j])){
-                    temp[,factor.cols[j]] <- factor(temp[,factor.cols[j]],levels=factor.levels[[j]]$number,labels=factor.levels[[j]]$class)
-                }
-            }
-        }
-    ifelse(sum(!is.na(temp))==0,  # does not calculate predictions if all predictors in the region are na
-        preds<-matrix(data=NaN,nrow=region.dims[1],ncol=region.dims[2]),
-        preds <- t(matrix(pred.fct(model,temp),ncol=dims[2],byrow=T)))
-print(i)
-    ## Writing to the rasters u
-      if(make.binary.tif) binaryRaster<-writeValues(binaryRaster,(preds>thresh),tr$row[i])
-   continuousRaster <- writeValues(continuousRaster,preds, tr$row[i])
-
-  #NAvalue(continuousRaster) <-NAval
-        rm(preds);gc() #why is gc not working on the last call
-}
-  continuousRaster <- writeStop(continuousRaster)
-  if(make.binary.tif) writeStop(binaryRaster)
-   return(0)
-   }
 
 get.image.info <- function(image.names){
     # this function creates a data.frame with summary image info for a set of images #
@@ -981,13 +776,43 @@ tweak.p <- function(p){
 	}
 
 
-# Interpret command line argurments #
-# Make Function Call #
+#
 
  # Interpret command line argurments #
 # Make Function Call #
- Args     <- commandArgs(T)
-    print(Args)
+#Set defaults for optional commands
+make.p.tif=T
+make.binary.tif=T
+responseCurveForm="pdf"
+xtest=NULL
+ytest=NULL
+n.trees=1000
+mtry=NULL
+sample.replace=FALSE
+sampsize=NULL
+nodesize=NULL
+maxnodes=NULL
+importance=FALSE
+localImp=FALSE
+nPerm=1
+proximity=NULL
+oob.prox=proximity
+norm.votes=TRUE
+do.trace=FALSE
+keep.forest=NULL
+keep.inbag=FALSE
+make.r.curves=T
+seed=NULL
+opt.methods=2
+save.model=TRUE
+seed=NULL
+
+Args <- commandArgs(trailingOnly=FALSE)
+
+    for (i in 1:length(Args)){
+     if(Args[i]=="-f") ScriptPath<-Args[i+1]
+     }
+
     for (arg in Args) {
     	argSplit <- strsplit(arg, "=")
     	argSplit[[1]][1]
@@ -995,17 +820,56 @@ tweak.p <- function(p){
     	if(argSplit[[1]][1]=="c") csv <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="o") output <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="mpt") make.p.tif <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- argSplit[[1]][2]
+      if(argSplit[[1]][1]=="xtst")  xtest <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="ytst")  ytest <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="ntree")  n.trees <- argSplit[[1]][2]
+      if(argSplit[[1]][1]=="mtry")  mtry <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="sampR")  samp.replace <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="sampS")  sampsize <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="nodeS")  nodesize <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="maxN")  maxnodes <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="impt")  importance <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="locImp")  localImp <- argSplit[[1]][2]
+ 		  if(argSplit[[1]][1]=="nPerm")  nPerm <- argSplit[[1]][2]
+ 		  if(argSplit[[1]][1]=="prox")  proximity <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="oopp")  oop.prox <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="NVot")  norm.votes <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="Trce")  do.trace <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="kf")  keep.forest <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="Kbag")  keep.inbag <- argSplit[[1]][2]
+ 		  if(argSplit[[1]][1]=="curves")  make.r.curves <- argSplit[[1]][2]
+ 		  if(argSplit[[1]][1]=="om")  opt.methods <- argSplit[[1]][2]
+      if(argSplit[[1]][1]=="savm")  save.model <- argSplit[[1]][2]
+ 		  
     }
 	print(csv)
 	print(output)
 	print(responseCol)
+	
+make.p.tif<-as.logical(make.p.tif)
+make.binary.tif<-as.logical(make.binary.tif)
+sample.replace<-as.logical(sample.replace)
+importance<-as.logical(importance)
+localImp<-as.logical(localImp)
+norm.votes<-as.logical(norm.votes)
+do.trace<-as.logical(do.trace)
+keep.inbag<-as.logical(keep.inbag)
+make.r.curves<-as.logical(make.r.curves)
+save.model<-as.logical(save.model)
 
+ScriptPath<-dirname(ScriptPath)
+source(paste(ScriptPath,"EvaluationStats.r",sep="\\"))
+source(paste(ScriptPath,"TestTrainRocPlot.r",sep="\\"))
+source(paste(ScriptPath,"read.ma.r",sep="\\"))
+source(paste(ScriptPath,"proc.tiff.r",sep="\\"))
 
-fit.rf.fct(ma.name=csv,
-  tif.dir=NULL,
-  output.dir=output,
-  response.col=responseCol,
-  test.resp.col="response",make.p.tif=T,make.binary.tif=T,
-      debug.mode=F,n.trees=1000,ma.test=NULL,make.r.curves=T,script.name="glm.r")
-    
+fit.rf.fct <- function(ma.name=csv,tif.dir=NULL,output.dir=output,response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
+      debug.mode=F,responseCurveForm="pdf",xtest=xtest,ytest=ytest,n.trees=n.trees,mtry=mtry,samp.replace=samp.replace, sampsize=sampsize,
+      nodesize=nodesize,maxnodes=maxnodes,importance=importance,
+      localImp=localImp,nPerm=nPerm,proximity=proximity,oob.prox=oob.prox,norm.votes=norm.votes,do.trace=do.trace,keep.forest=keep.forest,
+      keep.inbag=keep.inbag,make.r.curves=make.r.curves,
+      seed=seed,script.name="rf.r",opt.methods=opt.methods,save.model=save.model){
+
  

@@ -18,40 +18,12 @@
 #   sp - used by rdgal library
 #   raster for geotiff o
 
-Debug=F   # set to F for command line pluggability
-if(Debug==T){
-    tif.dir <- "F:/yerc/RRSC/YELL/" # directory containing geotiff files
-    simp.method="AIC" # use cross-validation model simplification methods of Elith '08.
-    ma.dir <- "F:/code for Jeff and Roger/jeffs paper/filtered_rs/train/"
-    test.dir <- "F:/code for Jeff and Roger/jeffs paper/filtered_rs/test/"
-    tif.dir <- "j:/SAHM/YELL/" # directory containing geotiff files
-    ma.name <- "j:/SAHM/07_YELL_Dalmatiantoadflax_train_clean_filt_mod2.csv" # model array to use.
-    ma.name <- "GSENM_cheat_pres_abs_2001_factor.mds" # model array to use.
-    test.name <- NULL  # if this is supplied, it will be read for use as test data. 
-    mars.degree=1
-    mars.penalty=2
-    ma.test=NULL
-    #setwd('F:/code for Jeff and Roger/jeffs paper/data')
-    library(tools)
-    debug.mode=F  # if true, prints output and status updates to the console. Otherwise all of this goes to a log file and only the XML output is printed to console.
-    batch.mode=F
-    make.p.tif=F # make a geotiff of probability surface?
-    make.binary.tif=F  # make a binary response surface geotiff?
-    output.dir <- "c:/temp/"  # a set of ouput files will be created in this directory.
-    ma.names <- c("a","b","c")
-    test.resp.col <- "pres_abs"
-    response.col <- "^response.binary"
-    out.table <- as.data.frame(matrix(NA,nrow=21,ncol=length(ma.names),dimnames=list(c("ncov.final","nrow_train","ncol_train",
-              "dev_exp_train","auc_train","auc.sd_train","thresh_train","pcc_train","sens_train","spec_train","kappa_train",
-              "nrow_test","ncol_test","dev_exp_test","auc_test","auc.sd_test","thresh_test","pcc_test","sens_test","spec_test",
-              "kappa_test"),file_path_sans_ext(basename(ma.names)))))
-    }
-    
-fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^response.binary",test.resp.col="response",make.p.tif=T,make.binary.tif=T,
-      mars.degree=1,mars.penalty=2,responseCurveForm=NULL,debug.mode=T,ma.test=NULL,model.family="binomial",script.name="mars.r"){
+
+fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^response.binary",make.p.tif=T,make.binary.tif=T,
+      mars.degree=1,mars.penalty=2,responseCurveForm=NULL,debug.mode=T,model.family="binomial",script.name="mars.r",opt.methods=2,save.model=FALSE){
     # This function fits a stepwise GLM model to presence-absence data.
     # written by Alan Swanson, 2008-2009
-    #
+    # # Maintained and edited by Marian Talbert September 2010-
     # Arguements.
     # ma.name: is the name of a .csv file with a model array.  full path must be included unless it is in the current
     #  R working directory # THIS FILE CAN NOW INCLUDE AN OPTIONAL COLUMN OF SITE WEIGHTS WHICH MUST BE LABELED "site.weights"
@@ -82,7 +54,10 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     # glm_response_curves.pdf:  an pdf file with response curves for
     #   each covariate in the final model and perspective plots showing the effect of interactions deemed significant.
     #   only produced when debug.mode=T
-    #
+    # #  seed=NULL                                 # sets a seed for the algorithm, any inegeger is acceptable
+    #  opt.methods=2                             # sets the method used for threshold optimization used in the
+    #                                            # the evaluation statistics module
+    #  save.model=FALSE                          # whether the model will be used to later produce tifs
     # when debug.mode is true, these filenames will include a number in them so that they will not overwrite preexisting files. eg brt_1_output.txt.
     #
     times <- as.data.frame(matrix(NA,nrow=7,ncol=1,dimnames=list(c("start","read data","model fit",
@@ -92,14 +67,13 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     #simp.method <- match.arg(simp.method)
     out <- list(
       input=list(ma.name=ma.name,
-                 ma.test=ma.test,
                  tif.dir=tif.dir,
                  output.dir=output.dir,
                  response.col=response.col,
-                 test.resp.col=test.resp.col,
                  make.p.tif=make.p.tif,
                  make.binary.tif=make.binary.tif,
                  site.weights=NULL,
+                 save.model=save.model,
                  mars.degree=mars.degree,
                  mars.penalty=mars.penalty,
                  model.type="stepwise with pruning",
@@ -121,6 +95,8 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
                           n.abs=c(all=NA,complete=NA,subset=NA),
                           ratio=NA,
                           resp.name=NULL,
+                          train.weights=NULL,
+                          test.weights=NULL,
                           factor.levels=NA,
                           used.covs=NULL,
                           ma=NULL,
@@ -207,7 +183,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     flush.console()
 
     fit <- try(mars.glm(data=out$dat$ma$ma, mars.x=c(2:ncol(out$dat$ma$ma)), mars.y=1, mars.degree=out$input$mars.degree, family=out$input$model.family,
-          site.weights=out$input$site.weights, penalty=out$input$mars.penalty),silent=T)
+          site.weights=oout$dat$ma$train.weights, penalty=out$input$mars.penalty),silent=T)
       
     if(class(fit)=="try-error"){
           if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
@@ -267,7 +243,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
           return()
           } 
                           
-    auc.output <- try(make.auc.plot.jpg(out$dat$ma$ma,pred=pred,plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="MARS"),
+    auc.output <- try(make.auc.plot.jpg(out$dat$ma$ma,pred=pred,plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="MARS",opt.methods=opt.methods),
             silent=T)
    
     if(class(auc.output)=="try-error"){
@@ -296,7 +272,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
             out$error.mssg[[out$ec]] <- paste("ERROR: problem fitting response curves",r.curves)
             }
         
-    
+ save.image(paste(output.dir,"modelWorkspace",sep="\\"))
     t4 <- unclass(Sys.time())
     cat("\nfinished with final model summarization, t=",round(t4-t3,2),"sec\n");flush.console()
     if(!debug.mode) {sink();cat("Progress:80%\n");flush.console();sink(logname,append=T)} else cat("70%\n")   
@@ -328,8 +304,12 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
           }
         }
     if(!debug.mode) {sink();cat("Progress:90%\n");flush.console();sink(logname,append=T)} else cat("90%\n")
-    # read in test data #
-    if(!is.null(out$input$ma.test)) out <- read.ma(out,T)
+
+     # Evaluation Statistics on Test Data#
+
+    if(!is.null(out$dat$ma$ma.test)) Eval.Stat<-EvaluationStats(out,thresh=auc.output$thresh,train=out$dat$ma$ma,train.pred=pred,opt.methods)
+
+
     
     # Write summaries to xml #
     if(debug.mode) assign("out",out,envir=.GlobalEnv)
@@ -487,222 +467,6 @@ get.cov.names <- function(model){
     return(attr(terms(formula(model)),"term.labels"))
     }
 
- read.ma <- function(out,test.dat=F){
-
-      if(test.dat==F){
-          ma.name <- out$input$ma.name
-          } else ma.name <- out$input$ma.test
-      tif.dir <- out$dat$tif.dir$dname
-      out.list <- out$dat$ma
-      out.list$status[1] <- file.access(ma.name,mode=0)==0
-      if(!is.null(out$input$tif.dir)){
-          ma <- try(read.csv(ma.name, header=TRUE),silent=T)}
-
-      if(is.null(out$input$tif.dir)){
-          try(ma<-read.csv(ma.name,skip=3),silent=T)
-          hl<-readLines(ma.name,1)
-          hl=strsplit(hl,',')
-          colnames(ma) = hl[[1]]
-
-          tif.info<-readLines(ma.name,3)
-          tif.info<-strsplit(tif.info,',')
-          include<-(as.numeric(tif.info[[2]]))
-          paths<-as.character(tif.info[[3]])
-          #paths<-paths[!is.na(include)]
-          #include[is.na(include)]<-0
-
-            }
-      if(class(ma)=="try-error"){
-          out$ec <- out$ec+1
-          out$error.mssg[[out$ec]] <- paste("ERROR: model array",ma.name,"is not readable")
-          return(out)
-          } else {
-          out.list$status[2]<-T
-          }
-
-      if(test.dat==F){
-          r.name <- out$input$response.col
-          } else r.name <- out$input$test.resp.col
-
-      # remove x and y columns #
-      xy.cols <- c(match("x",tolower(names(ma))),match("y",tolower(names(ma))))
-      xy.cols <- xy.cols[!is.na(xy.cols)]
-      if(length(xy.cols)>0){ ma <- ma[,-xy.cols]
-          if(is.null(out$input$tif.dir)){
-           include<-include[-xy.cols]
-           paths<-paths[-xy.cols]
-      }}
-       # remove weights column
-       site.weights<-match("site.weights",tolower(names(ma)))
-       ifelse(!is.na(site.weights),{
-          out$input$site.weights<-ma[,site.weights]
-          ma <- ma[,-site.weights]
-           if(is.null(out$input$tif.dir)){
-           include<-include[-site.weights]
-           paths<-paths[-site.weights]
-            }
-          },
-          out$input$site.weights<-rep(1,times=dim(ma)[1]))
-
-      # check to make sure that response column exists in the model array #
-
-      r.col <- grep(r.name,names(ma))
-      if(length(r.col)==0){
-          out$ec <- out$ec+1
-          out$error.mssg[[out$ec]] <- paste("ERROR: response column (",r.name,") not found in ",ma.name,sep="")
-          return(out)
-          }
-      if(length(r.col)>1){
-          out$ec <- out$ec+1
-          out$error.mssg[[out$ec]] <- paste("ERROR: multiple columns in ",ma.name," match:",r.name,sep="")
-          return(out)
-          }
-      # check that response column contains only 1's and 0's, but not all 1's or all 0's if GLMFamily==binomial
-
-      if(tolower(out$input$model.family)=="binomial"){
-      if(any(ma[,r.col]!=1 & ma[,r.col]!=0) | sum(ma[,r.col]==1)==nrow(ma) | sum(ma[,r.col]==0)==nrow(ma)){
-          out$ec <- out$ec+1
-          out$error.mssg[[out$ec]] <- paste("ERROR: response column (#",r.col,") in ",ma.name," is not binary 0/1",sep="")
-          return(out)
-          }
-           out$dat$ma$resp.name <- names(ma)[r.col]<-"response"
-          out.list$n.pres[1] <- sum(ma[,r.col])
-          out.list$n.abs[1] <- nrow(ma)-sum(ma[,r.col])
-          out.list$resp.name <- names(ma)[r.col]
-          ma.names <- names(ma)
-          }
-     #check that response column contains at least two unique values for counts
-
-      if(tolower(out$input$model.family)=="poisson"){
-      if(length(table(unique(ma[,r.col])))==1){
-          out$ec <- out$ec+1
-          out$error.mssg[[out$ec]] <- paste("ERROR: response column (#",r.col,") in ",ma.name," does not have at least two unique values",sep="")
-          return(out)
-          }
-          out$dat$ma$resp.name <- names(ma)[r.col]<-"response"
-          out.list$n.pres[1] <- sum(ma[,r.col])
-          out.list$n.abs[1] <- nrow(ma)-sum(ma[,r.col])
-          out.list$resp.name <- names(ma)[r.col]
-          ma.names <- names(ma)
-          }
-
-      # identify factors (this will eventually be derived from image metadata) #
-
-      factor.cols <- grep("categorical",names(ma))
-      factor.cols <- factor.cols[!is.na(factor.cols)]
-      if(length(factor.cols)==0){
-          out.list$factor.levels <- NA
-          } else {
-          names(ma) <- ma.names <-  sub("categorical.","",ma.names)
-          factor.names <- ma.names[factor.cols]
-          if(test.dat==F) factor.levels <- list()
-          for (i in 1:length(factor.cols)){
-
-
-              f.col <- factor.cols[i]
-              if(test.dat==F){
-                  x <- table(ma[,f.col])
-                  if(nrow(x)<2){
-                        out$dat$bad.factor.cols <- c(out$dat$bad.factor.cols,factor.names[i])
-                        }
-                  lc.levs <-  as.numeric(row.names(x))[x>0] # make sure there is at least one "available" observation at each level
-                  lc.levs <- data.frame(number=lc.levs,class=lc.levs)
-                  factor.levels[[i]] <- lc.levs
-                  } else {
-                      f.index <- match(factor.names[i],names(out$dat$ma$factor.levels))
-                      lc.levs <- out$dat$ma$factor.levels[[f.index]]
-                  }
-              ma[,f.col] <- factor(ma[,f.col],levels=lc.levs$number,labels=lc.levs$class)
-
-
-              }
-          if(test.dat==F) {
-              names(factor.levels)<-factor.names
-              out.list$factor.levels <- factor.levels
-              }
-          }
-
-      #out.list$ma <- ma[,c(r.col,c(1:ncol(ma))[-r.col])]
-
-      # if producing geotiff output, check to make sure geotiffs are available for each column of the model array #
-        if(out$input$make.binary.tif==T | out$input$make.p.tif==T){
-               # test that geotiffs match ma.columns
-          if(is.null(out$input$tif.dir)){
-              ma.cols <- match(ma.names[-r.col],sub(".tif","",basename(paths[-r.col])))
-                if(any(is.na(ma.cols))){
-                  out$ec <- out$ec+1
-                  out$error.mssg[[out$ec]] <- paste("ERROR: the following geotiff(s) are missing in ",
-                        tif.dir,":  ",paste(ma.names[-r.col][is.na(ma.cols)],collapse=" ,"),sep="")
-                  return(out)
-                }
-                 #remove columns that shouldn't be used from tiff based on the indicator
-                include<-include[-r.col]
-                paths<-paths[-r.col]
-                paths<-paths[include==1]
-                 #creates a list of predictors from tif.ind and response column
-               ma.use <- c(r.col,match(sub(".tif","",basename(paths)),ma.names))
-                ma<-ma[,ma.use]
-                ma.names<-names(ma)
-                #Now check that tiffs to be used exist
-              #out$dat$tif.names <- tif.names[ma.cols]
-
-              if(sum(file.access(paths),mode=0)!=0){
-                  out$ec <- out$ec+1
-                  out$error.mssg[[out$ec]] <- paste("ERROR: the following geotiff(s) are missing : ",
-                        paths[(file.access(paths)!=0),][1],sep="")
-                return(out)
-                }
-                out$dat$tif.ind<-paths
-                }
-          if(!is.null(out$input$tif.dir)){
-              tif.names <- out$dat$tif.names
-              ma.cols <- match(ma.names[-r.col],sub(".tif","",basename(tif.names)))
-              if(any(is.na(ma.cols))){
-                  out$ec <- out$ec+1
-                  out$error.mssg[[out$ec]] <- paste("ERROR: the following geotiff(s) are missing in ",
-                        tif.dir,":  ",paste(ma.names[-r.col][is.na(ma.cols)],collapse=" ,"),sep="")
-                return(out)
-                }
-            out$dat$tif.names <- tif.names[ma.cols]
-            }} else out$dat$tif.names <- ma.names[-1]
-
-      out.list$ma <- ma[complete.cases(ma),c(r.col,c(1:ncol(ma))[-r.col])]
-      out.list$site.weights <- out$input$site.weights[complete.cases(ma)]
-      if(!test.dat & !is.null(out$dat$bad.factor.cols)) out.list$ma <- out.list$ma[,-match(out$dat$bad.factor.cols,names(out.list$ma))]
-      if(test.dat & any(ss<-is.na(match(names(ma),names(out$dat$ma$ma))))) {
-           out$ec <- out$ec+1
-           out$error.mssg[[out$ec]] <- paste("ERROR: missing columns in test model array:  ",paste(names(ma)[ss],collapse=" ,"),sep="")
-           return(out)
-           }
-
-        out.list$dims <- dim(out.list$ma)
-        out.list$ratio <- min(sum(out$input$model.fitting.subset)/out.list$dims[1],1)
-        out.list$n.pres[2] <- sum(out.list$ma[,1])
-        out.list$n.abs[2] <- nrow(out.list$ma)-sum(out.list$ma[,1])
-        out.list$used.covs <- names(out.list$ma)[-1]
-      if(!is.null(out$input$model.fitting.subset)){
-            pres.sample <- sample(c(1:nrow(out.list$ma))[out.list$ma[,1]==1],min(out.list$n.pres[2],out$input$model.fitting.subset[1]))
-            abs.sample <- sample(c(1:nrow(out.list$ma))[out.list$ma[,1]==0],min(out.list$n.abs[2],out$input$model.fitting.subset[2]))
-            out.list$ma.subset <- out.list$ma[c(pres.sample,abs.sample),]
-            out.list$weight.subset<-out.list$site.weights[c(pres.sample,abs.sample)]
-            out.list$n.pres[3] <- length(pres.sample)
-            out.list$n.abs[3] <- length(abs.sample)
-            } else {
-            out.list$ma.subset <- NULL
-            out.list$weight.subset<-NULL
-            out.list$n.pres[3] <- NA
-            out.list$n.abs[3] <- NA }
-
-if(tolower(out$input$model.family)=="poisson"){
-out.list$ma.subset<-out.list$ma
-}
-
-      if(test.dat==F){
-          out$dat$ma <- out.list
-          } else out$dat$ma.test <- out.list
-      return(out)
-      }
-
 check.libs <- function(libs,out){
       lib.mssg <- unlist(suppressMessages(suppressWarnings(lapply(libs,require,quietly = T, warn.conflicts=F,character.only=T))))
       if(any(!lib.mssg)){
@@ -724,176 +488,6 @@ check.dir <- function(dname){
     writable <- suppressWarnings(as.numeric(file.access(dname,mode=2))==0) # -1 if bad, 0 if ok #
     return(list(dname=dname,exist=exist,readable=readable,writable=writable))
     }
-
-#model=out$mods$final.mod;vnames=names(out$dat$ma$ma)[-1] #out$mods$summary[,1];
-#fnames=NULL;tif.dir=out$dat$tif.dir$dname;pred.fct=mars.predict;factor.levels=out$dat$ma$factor.levels;make.binary.tif=make.binary.tif;
-#thresh=out$mods$auc.output$thresh;make.p.tif=make.p.tif;outfile.p=paste(out$dat$bname,"_prob_map.tif",sep="");
-#outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep="");tsize=50/nrow(out$mods$summary);NAval=-3000
-#
-
-#model<-fit;vnames<-names(ma.reduced)[out$good.cols]
-proc.tiff <- function(model,vnames,tif.dir=NULL,filenames=NULL,pred.fct,factor.levels=NA,make.binary.tif=F,make.p.tif=T,binary.thresh=NA,
-    thresh=0.5,outfile.p="brt.prob.map.tif",outfile.bin="brt.bin.map.tif",tsize=2.0,NAval=-3000,fnames=NULL,logname=NULL){
-    # vnames,fpath,myfun,make.binary.tif=F,outfile=NA,outfile.bin=NA,output.dir=NA,tsize=10.0,NAval=NA,fnames=NA
-    # Written by Alan Swanson, YERC, 6-11-08
-    # Description:
-    # This function is used to make predictions using a number of .tiff image inputs
-    # in cases where memory limitations don't allow the full images to be read in.
-    #
-    # Arguments:
-    # vname: names of variables used for prediction.  must be same as filenames and variables
-    #   in model used for prediction. do not include a .tif extension as this is added in code.
-    # fpath: path to .tif files for predictors. use forward slashes and end with a forward slash ('/').
-    # myfun: prediction function.  must generate a vector of predictions using only a
-    #   dataframe as input.
-    # outfile:  name of output file.  placed in same directory as input .tif files.  should
-    #   have .tif extension in name.
-    # tsize: size of dataframe used for prediction in MB.  this controls the size of tiles
-    #   extracted from the input files, and the memory usage of this function.
-    # NAval: this is the NAvalue used in the input files.
-    # fnames: if the filenames of input files are different from the variable names used in the
-    #   prediction model.
-    #
-    # Modification history:
-    # NA
-    #
-    # Description:
-    # This function reads in a limited number of lines of each image (specified in terms of the
-    # size of the temporary predictor dataframe), applies a user-specified
-    # prediction function, and stores the results as matrix.  Alternatively, if an
-    # output file is specified, a file is written directly to that file in .tif format to
-    # the same directory as the input files.  Geographic information from the input images
-    # is retained.
-    #
-    # Example:
-    # tdata <- read.csv("D:/yerc/LISN biodiversity/resource selection/split/05_GYA_Leafyspurge_reduced_250m_train.csv")
-    # tdata$gya_250m_evi_16landcovermap_4ag05<-factor(tdata$gya_250m_evi_16landcovermap_4ag05)
-    # f.levels <- levels(tdata$gya_250m_evi_16landcovermap_4ag05)
-    # m0 <- glm(pres_abs~gya_250m_evi_01greenup_4ag05+gya_250m_evi_02browndown_4ag05+gya_250m_evi_03seasonlength_4ag05+
-    #          gya_250m_evi_04baselevel_4ag05+gya_250m_evi_05peakdate_4ag05+gya_250m_evi_16landcovermap_4ag05,data=tdata,family=binomial())#
-    # glm.predict <- function(x) {
-    #   x$gya_250m_evi_16landcovermap_4ag05<-factor(x$gya_250m_evi_16landcovermap_4ag05,levels=f.levels)
-    #   y <- as.vector(predict(m0,x,type="response"))
-    #   y[is.na(y)]<- -1
-    #   return(y)
-    # }
-    # x<-glm.predict(temp)
-    # fnames <- names(tdata)[c(10:14,25)]
-    # vnames <- fnames
-    # fpath <- 'D:/yerc/LISN biodiversity/GYA data/gya_250m_tif_feb08_2/'
-    # x <- proc.tiff(vnames,fpath,glm.predict)
-    # proc.tiff(vnames,fpath,glm.predict,"test11.tif")
-
-    # Start of function #
-    require(rgdal)
-
-    if(is.na(NAval)) NAval<- -3000
-    if(is.null(fnames)) fnames <- paste(vnames,"tif",sep=".")
-    nvars<-length(vnames)
-
-    # check availability of image files #
-   if(!is.null(tif.dir)){
-      fnames <- fnames[match(vnames,basename(sub(".tif","",fnames)))]
-      fullnames <- paste(tif.dir,fnames,sep="/")
-      goodfiles <- file.access(fullnames)==0
-      if(!all(goodfiles)){
-          cat('\n',paste("ERROR: the following image files are missing:",paste(fullnames[!goodfiles],collapse=", ")),'\n','\n')
-         flush.console()
-          return(paste("ERROR: the following image files are missing:",paste(fullnames[!goodfiles],collapse=", ")))
-          }}
-# settup up output raster to match input raster
-       if(!is.null(filenames)){
-          fullnames <- as.character(filenames[match(vnames,basename(sub(".tif","",filenames)))])
-          goodfiles <- file.access(fullnames)==0
-        if(!all(goodfiles)){
-          cat('\n',paste("ERROR: the following image files are missing:",paste(fullnames[!goodfiles],collapse=", ")),'\n','\n')
-         flush.console()
-          return(paste("ERROR: the following image files are missing:",paste(fullnames[!goodfiles],collapse=", ")))
-          }}
-
-
-RasterInfo=raster(fullnames[1])
-
-
-    # get spatial reference info from existing image file
-    gi <- GDALinfo(fullnames[1])
-    dims <- as.vector(gi)[1:2]
-    ps <- as.vector(gi)[6:7]
-    ll <- as.vector(gi)[4:5]
-    pref<-attr(gi,"projection")
-
-RasterInfo=raster(fullnames[1])
-
-if(!is.na(match("AREA_OR_POINT=Point",attr(gi,"mdata")))){
-   xx<-RasterInfo  #this shifts by a half pixel
-nrow(xx) <- nrow(xx) - 1
-ncol(xx) <- ncol(xx) - 1
-rs <- res(xx)
-xmin(RasterInfo) <- xmin(RasterInfo) - 0.5 * rs[1]
-xmax(RasterInfo) <- xmax(RasterInfo) - 0.5 * rs[1]
-ymin(RasterInfo) <- ymin(RasterInfo) + 0.5 * rs[2]
-ymax(RasterInfo) <- ymax(RasterInfo) + 0.5 * rs[2]
- }
-    # calculate position of upper left corner and get geotransform ala http://www.gdal.org/gdal_datamodel.html
-    #ul <- c(ll[1]-ps[1]/2,ll[2]+(dims[1]+.5)*ps[2])
-    ul <- c(ll[1],ll[2]+(dims[1])*ps[2])
-    gt<-c(ul[1],ps[1],0,ul[2],0,ps[2])
-
-    # setting tile size
-    MB.per.row<-dims[2]*nvars*32/8/1000/1024
-
-    nrows<-min(round(tsize/MB.per.row),dims[1])
-    bs<-c(nrows,dims[2])
-    nbs <- ceiling(dims[1]/nrows)
-    inc<-round(10/nbs,1)
-
-    chunksize<-bs[1]*bs[2]
-    tr<-blockSize(RasterInfo,chunksize=chunksize)
-
-  continuousRaster<-raster(RasterInfo)
-  NAvalue(continuousRaster)<-NAval
-  continuousRaster <- writeStart(continuousRaster, filename=outfile.p, overwrite=TRUE)
-    if(make.binary.tif) {
-     binaryRaster<-raster(RasterInfo)
-      NAvalue(binaryRaster)<-NAval
-      binaryRaster <- writeStart(binaryRaster, filename=outfile.bin, overwrite=TRUE)
-      }
-temp <- data.frame(matrix(ncol=nvars,nrow=tr$size*ncol(RasterInfo))) # temp data.frame.
-names(temp) <- vnames
-
-  for (i in 1:tr$n) {
-    strt <- c((i-1)*nrows,0)
-     region.dims <- c(min(dims[1]-strt[1],nrows),dims[2])
-        if (i==tr$n) temp <- temp[1:(tr$nrows[i]*dims[2]),] # for the last tile...
-      for(k in 1:nvars) { # fill temp data frame
-            temp[,k]<- getValuesBlock(raster(fullnames[k]), row=tr$row[i], nrows=tr$size)
-            }
-    temp[temp==NAval] <- NA # replace missing values #
-    temp[is.na(temp)]<-NA #this seemingly worthless line switches NaNs to NA so they aren't predicted
-        if(!is.na(factor.levels)){
-            factor.cols <- match(names(factor.levels),names(temp))
-            for(j in 1:length(factor.cols)){
-                if(!is.na(factor.cols[j])){
-                    temp[,factor.cols[j]] <- factor(temp[,factor.cols[j]],levels=factor.levels[[j]]$number,labels=factor.levels[[j]]$class)
-                }
-            }
-        }
-    ifelse(sum(!is.na(temp))==0,  # does not calculate predictions if all predictors in the region are na
-        preds<-matrix(data=NaN,nrow=region.dims[1],ncol=region.dims[2]),
-        preds <- t(matrix(pred.fct(model,temp),ncol=dims[2],byrow=T)))
-print(i)
-    ## Writing to the rasters u
-      if(make.binary.tif) binaryRaster<-writeValues(binaryRaster,(preds>thresh),tr$row[i])
-   continuousRaster <- writeValues(continuousRaster,preds, tr$row[i])
-
-  #NAvalue(continuousRaster) <-NAval
-        rm(preds);gc() #why is gc not working on the last call
-}
-  continuousRaster <- writeStop(continuousRaster)
-  if(make.binary.tif) writeStop(binaryRaster)
-   return(0)
-   }
-
 
 
 get.image.info <- function(image.names){
@@ -2069,12 +1663,24 @@ function (obsdat, preddat)
 
 
 
-# Interpret command line argurments #
-# Make Function Call #
+#set defaults
+make.p.tif=T
+make.binary.tif=T
+mars.degree=1
+mars.penalty=2
+model.family="binomial"
+script.name="mars.r"
+opt.methods=2
+save.model=TRUE
 
 # Interpret command line argurments #
 # Make Function Call #
- Args     <- commandArgs(T)
+Args <- commandArgs(trailingOnly=FALSE)
+
+    for (i in 1:length(Args)){
+     if(Args[i]=="-f") ScriptPath<-Args[i+1]
+     }
+
     print(Args)
     for (arg in Args) {
     	argSplit <- strsplit(arg, "=")
@@ -2083,14 +1689,30 @@ function (obsdat, preddat)
     	if(argSplit[[1]][1]=="c") csv <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="o") output <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="mpt") make.p.tif <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="deg") mars.degree <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="pen") mars.penalty <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="mf") model.family <- argSplit[[1]][2]
+   		if(argSplit[[1]][1]=="mf") model.family <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="om")  opt.methods <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="savm")  save.model <- argSplit[[1]][2]
     }
 	print(csv)
 	print(output)
 	print(responseCol)
 
+ScriptPath<-dirname(ScriptPath)
+source(paste(ScriptPath,"EvaluationStats.r",sep="\\"))
+source(paste(ScriptPath,"TestTrainRocPlot.r",sep="\\"))
+source(paste(ScriptPath,"read.ma.r",sep="\\"))
+source(paste(ScriptPath,"proc.tiff.r",sep="\\"))
+
+make.p.tif<-as.logical(make.p.tif)
+make.binary.tif<-as.logical(make.binary.tif)
+save.model<-as.logical(save.model)
 
 fit.mars.fct(ma.name=csv,
         tif.dir=NULL,output.dir=output,
-        response.col=responseCol,test.resp.col="response",make.p.tif=T,make.binary.tif=T,
-            mars.degree=1,mars.penalty=2,debug.mode=F,responseCurveForm="pdf",ma.test=NULL,model.family="binomial",script.name="mars.r")
-
+        response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
+            mars.degree=mars.degree,mars.penalty=mars.penalty,debug.mode=F,responseCurveForm="pdf",model.family=model.family,script.name="mars.r")

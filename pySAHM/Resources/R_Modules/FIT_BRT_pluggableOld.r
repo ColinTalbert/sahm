@@ -94,10 +94,10 @@ if(Debug==T){
 
 
 fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^response.binary",test.resp.col="response",make.p.tif=T,make.binary.tif=T,
-      simp.method="cross-validation",debug.mode=F,responseCurveForm="jpg",tc=NULL,n.folds=3,ma.test=NULL,alpha=1,script.name="brt.r",
+      simp.method="cross-validation",debug.mode=F,responseCurveForm="jpg",tc=NULL,n.folds=3,alpha=1,script.name="brt.r",
      learning.rate = NULL, bag.fraction = 0.5,
  prev.stratify = TRUE, model.family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
-  tolerance = 0.001){
+  tolerance = 0.001,seed=NULL,opt.methods=2,save.model=FALSE){
 
 # Possibly to add later
 # offset = NULL, fold.vector = NULL, var.monotone = rep(0,length(gbm.x))
@@ -107,7 +107,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
 #  tree.complexity = 1,                      # sets the complexity of individual trees
 #  learning.rate = 0.01,                     # sets the weight applied to inidivudal trees
 #  bag.fraction = 0.75,                      # sets the proportion of observations used in selecting variables
-#  site.weights = rep(1, nrow(dat)),        # allows varying weighting for sites
+#  site.weights = rep(1, nrow(dat)),         # allows varying weighting for sites
 #  var.monotone = rep(0, length(gbm.x)),     # restricts responses to individual predictors to monotone
 #  n.folds = 10,                             # number of folds
 #  prev.stratify = TRUE,                     # prevalence stratify the folds - only for p/a data
@@ -117,9 +117,14 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
 #  max.trees = 10000,                        # max number of trees to fit before stopping
 #  tolerance.method = "auto",                # method to use in deciding to stop - "fixed" or "auto"
 #  tolerance = 0.001,                        # tolerance value to use - if method == fixed is absolute,
+#  seed=NULL                                 # sets a seed for the algorithm, any inegeger is acceptable
+#  opt.methods=2                             # sets the method used for threshold optimization used in the
+                                             # the evaluation statistics module
+
     # This function fits a boosted regression tree model to presence-absence data.
     # written by Alan Swanson, Jan-March 2009
     # uses code modified from that published in Elith et al 2008
+    # Maintained and edited by Marian Talbert September 2010-
     #
     # Arguements.
     # ma.name: is the name of a .csv file with a model array.  full path must be included unless it is in the current
@@ -166,7 +171,6 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     #simp.method <- match.arg(simp.method)
     out <- list(
       input=list(ma.name=ma.name,
-                 ma.test=ma.test,
                  tif.dir=tif.dir,
                  output.dir=output.dir,
                  response.col=response.col,
@@ -198,17 +202,18 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
                  bad.factor.covs=NULL, # factorchange
                  ma=list( status=c(exists=F,readable=F),
                           dims=c(NA,NA),
-                          n.pres=c(all=NA,complete=NA,subset=NA),
-                          n.abs=c(all=NA,complete=NA,subset=NA),
+                          n.pres=c(all=NA,complete=NA,subset=NA,test=NA),
+                          n.abs=c(all=NA,complete=NA,subset=NA,test=NA),
                           ratio=NA,
                           resp.name=NULL,
                           factor.levels=NA,
                           used.covs=NULL,
                           ma=NULL,
-                          site.weights=NULL,
+                          train.weights=NULL,
+                          test.weights=NULL,
                           ma.subset=NULL,
                           weight.subset=NULL),
-                 ma.test=NULL),
+                          ma.test=NULL),
       mods=list(parms=list(n.target.trees=1000,tc.full=tc,tc.sub=tc),
                 lr.mod=NULL,
                 simp.mod=NULL,
@@ -222,6 +227,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
       error.mssg=list(NULL),
       ec=0
       )
+      if(!is.null(seed)) set.seed(seed)
     # load libaries #
     out <- check.libs(list("PresenceAbsence","rgdal","XML","sp","survival","lattice","raster"),out)
 
@@ -358,7 +364,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
 
   out$mods$final.mod <- try(gbm.step.fast(dat=out$dat$ma$ma,gbm.x=out$mods$simp.mod$good.cols,gbm.y = 1,family=out$input$model.family,
                   n.trees = c(300,600,700,800,900,1000,1200,1500,1800,2200,2600,3000,3500,4000,4500,5000),n.folds=out$input$n.folds,
-                  tree.complexity=out$mods$parms$tc.full,learning.rate=out$mods$lr.mod$lr,bag.fraction=out$input$bag.fraction,site.weights=out$dat$ma$site.weights,
+                  tree.complexity=out$mods$parms$tc.full,learning.rate=out$mods$lr.mod$lr,bag.fraction=out$input$bag.fraction,site.weights=out$dat$ma$train.weights,
                   autostop=T,debug.mode=F,silent=T,plot.main=F,superfast=F))
 
 
@@ -380,8 +386,9 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     ##############################################################################################################
 
     # Store .jpg ROC plot #
+
     auc.output <- try(make.auc.plot.jpg(out$dat$ma$ma,pred=predict.gbm(out$mods$final.mod,out$dat$ma$ma,
-            out$mods$final.mod$target.trees,type="response"),plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT"),
+            out$mods$final.mod$target.trees,type="response"),plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",opt.methods=opt.methods),
             silent=T)
 
     if(class(auc.output)=="try-error"){
@@ -417,6 +424,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
         out$mods$summary <- model.summary
         }
     if(debug.mode) assign("out",out,envir=.GlobalEnv)
+
     txt0 <- paste("Boosted Regression Tree Modeling Results\n",out$input$run.time,"\n\n","Data:\n",ma.name,"\n","n(pres)=",
         out$dat$ma$n.pres[2],", n(abs)=",out$dat$ma$n.abs[2],", n covariates considered=",length(out$dat$ma$used.covs),
         "\n\n","Settings:\n","tree complexity=",out$mods$parms$tc.full,", learning rate=",round(out$mods$lr.mod$lr,4),
@@ -474,6 +482,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     if(!debug.mode) {sink();cat("Progress:80%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("80%\n")}
 
     # Make .tif of predictions #
+    browser()
     if(out$input$make.p.tif==T | out$input$make.binary.tif==T){
         cat("\nproducing prediction maps...","\n","\n");flush.console()
         mssg <- proc.tiff(model=out$mods$final.mod,vnames=as.character(out$mods$final.mod$contributions$var),
@@ -496,9 +505,13 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
         }
     if(!debug.mode) {sink();cat("Progress:90%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("90%\n")}  ### print time
 
-    # read in test data #
-    if(!is.null(out$input$ma.test)) out <- read.ma(out,T)
+    # Evaluation Statistics on Test Data#
 
+    if(!is.null(out$dat$ma$ma.test)) Eval.Stat<-EvaluationStats(out,thresh=auc.output$thresh,train=out$dat$ma$ma,train.pred=predict.gbm(out$mods$final.mod,out$dat$ma$ma,
+            out$mods$final.mod$target.trees,type="response"),opt.methods)
+
+
+    
     # Write summaries to xml #
     if(debug.mode) assign("out",out,envir=.GlobalEnv)
     doc <- brt.to.xml(out)
@@ -533,26 +546,6 @@ brt.predict <- function(model,x) {
 
 
 
-make.auc.plot.jpg<-function(ma.reduced,pred,plotname,modelname){
-    auc.data <- data.frame(ID=1:nrow(ma.reduced),pres_abs=ma.reduced[,1],pred=pred)
-    p_bar <- mean(auc.data$pres_abs); n_pres <- sum(auc.data$pres_abs); n_abs <- nrow(auc.data)-n_pres
-    null_dev <- -2*(n_pres*log(p_bar)+n_abs*log(1-p_bar))
-    dev_fit <- -2*(sum(log(auc.data$pred[auc.data$pres_abs==1]))+sum(log(1-auc.data$pred[auc.data$pres_abs==0])))
-    dev_exp <- null_dev - dev_fit
-    pct_dev_exp <- dev_exp/null_dev*100
-    thresh <- as.numeric(optimal.thresholds(auc.data,opt.methods=2))[2]
-    auc.fit <- auc(auc.data,st.dev=T)
-    jpeg(file=plotname)
-    auc.roc.plot(auc.data,model.names=modelname,opt.thresholds=thresh)
-    graphics.off()
-    cmx <- cmx(auc.data,threshold=thresh)
-    PCC <- pcc(cmx,st.dev=F)
-    SENS <- sensitivity(cmx,st.dev=F)
-    SPEC <- specificity(cmx,st.dev=F)
-    KAPPA <- Kappa(cmx,st.dev=F)
-    return(list(thresh=thresh,null_dev=null_dev,dev_fit=dev_fit,dev_exp=dev_exp,pct_dev_exp=pct_dev_exp,auc=auc.fit[1,1],auc.sd=auc.fit[1,2],
-        plotname=plotname,pcc=PCC,sens=SENS,spec=SPEC,kappa=KAPPA))
-}
 
 logit <- function(x) 1/(1+exp(-x))
 
@@ -676,7 +669,6 @@ est.lr <- function(out){
     # written by AKS early 2009
     suppressMessages(require(gbm))
 
-
     t0 <- unclass(Sys.time())
 
     # set tree complexity for full-data run #
@@ -684,7 +676,7 @@ est.lr <- function(out){
     if(is.null(out$mods$parms$tc.full)) out$mods$parms$tc.full<-min(round(a+b*out$dat$ma$dims[1]),15) # this gives 3 for n=250
     if(is.null(out$mods$parms$tc.sub)){
         n <- out$dat$ma$n.abs[3]+out$dat$ma$n.pres[3]  # this gives 3 for n=250
-       if(is.na(n)) (n=length(out$input$site.weights))
+       if(is.na(n)) (n=length(out$dat$ma$weight.subset))
         out$mods$parms$tc.sub <- round(a+b*n)
     }
 
@@ -746,15 +738,13 @@ est.lr <- function(out){
     out$mods$simp.mod <- list(good.cols=good.cols,good.vars=good.vars)
     out$mods$lr.mod <- list(tc=out$mods$parms$tc.sub,lr=lr.full,lr0=lr0,lr.out=lr.out,ab=ab,gbm.fit=gbm.fit,good.cols=good.cols,t.elapsed=c(unclass(Sys.time())-t0))
     if(!is.null(out$input$learning.rate)) out$mods$lr.mod$lr0=out$input$learning.rate
-
     return(out)
     }
 
- read.ma <- function(out,test.dat=F){
+ read.ma <- function(out){
 
-      if(test.dat==F){
           ma.name <- out$input$ma.name
-          } else ma.name <- out$input$ma.test
+
       tif.dir <- out$dat$tif.dir$dname
       out.list <- out$dat$ma
       out.list$status[1] <- file.access(ma.name,mode=0)==0
@@ -783,31 +773,9 @@ est.lr <- function(out){
           out.list$status[2]<-T
           }
 
-      if(test.dat==F){
+
           r.name <- out$input$response.col
-          } else r.name <- out$input$test.resp.col
-
-      # remove x and y columns #
-      xy.cols <- c(match("x",tolower(names(ma))),match("y",tolower(names(ma))))
-      xy.cols <- xy.cols[!is.na(xy.cols)]
-      if(length(xy.cols)>0){ ma <- ma[,-xy.cols]
-          if(is.null(out$input$tif.dir)){
-           include<-include[-xy.cols]
-           paths<-paths[-xy.cols]
-      }}
-       # remove weights column
-       site.weights<-match("site.weights",tolower(names(ma)))
-       ifelse(!is.na(site.weights),{
-          out$input$site.weights<-ma[,site.weights]
-          ma <- ma[,-site.weights]
-           if(is.null(out$input$tif.dir)){
-           include<-include[-site.weights]
-           paths<-paths[-site.weights]
-            }
-          },
-          out$input$site.weights<-rep(1,times=dim(ma)[1]))
-
-      # check to make sure that response column exists in the model array #
+        # check to make sure that response column exists in the model array #
 
       r.col <- grep(r.name,names(ma))
       if(length(r.col)==0){
@@ -820,6 +788,46 @@ est.lr <- function(out){
           out$error.mssg[[out$ec]] <- paste("ERROR: multiple columns in ",ma.name," match:",r.name,sep="")
           return(out)
           }
+
+        # remove background points which aren't used here
+         if(length(which(ma[,r.col]==-9999,arr.ind=TRUE))>0) ma<-ma[-c(which(ma[,r.col]==-9999,arr.ind=TRUE)),]
+         
+      # remove x and y columns #
+      xy.cols <- c(match("x",tolower(names(ma))),match("y",tolower(names(ma))))
+      xy.cols <- xy.cols[!is.na(xy.cols)]
+      if(length(xy.cols)>0){ ma <- ma[,-xy.cols]
+          if(is.null(out$input$tif.dir)){
+           include<-include[-xy.cols]
+           paths<-paths[-xy.cols]
+      }}
+      
+
+       # remove weights column
+       site.weights<-match("site.weights",tolower(names(ma)))
+       ifelse(!is.na(site.weights),{
+          out.list$train.weights<-ma[,site.weights]
+          ma <- ma[,-site.weights]
+           if(is.null(out$input$tif.dir)){
+           include<-include[-site.weights]
+           paths<-paths[-site.weights]
+            }
+          },
+          out.list$train.weights<-rep(1,times=dim(ma)[1]))
+
+       #remove test training split column if present
+          split.indx<-match("split",tolower(names(ma)))
+          if(length(na.omit(split.indx))>0){
+            include<-include[-c(split.indx)]
+            split.col<-ma[,split.indx]
+            ma <- ma[,-split.indx]
+            out.list$ma.test<-ma[split.col=="test",]
+            ma<-ma[split.col=="train",]
+            out.list$test.weights<-out.list$train.weights[split.col=="test"]
+            out.list$train.weights<-out.list$train.weights[split.col=="train"]
+            }
+
+           r.col <- grep(r.name,names(ma))
+
       # check that response column contains only 1's and 0's, but not all 1's or all 0's if GLMFamily==binomial
 
       if(tolower(out$input$model.family)=="bernoulli"){
@@ -834,6 +842,9 @@ est.lr <- function(out){
           out.list$resp.name <- names(ma)[r.col]
           ma.names <- names(ma)
           }
+          
+
+            
      #check that response column contains at least two unique values for counts
 
       if(tolower(out$input$model.family)=="poisson"){
@@ -844,7 +855,7 @@ est.lr <- function(out){
           }
           out$dat$ma$resp.name <- names(ma)[r.col]<-"response"
           out.list$n.pres[1] <- sum(ma[,r.col])
-          out.list$n.abs[1] <- nrow(ma)-sum(ma[,r.col])
+          out.list$n.abs[1] <- sum(ma[,r.col]==0)
           out.list$resp.name <- names(ma)[r.col]
           ma.names <- names(ma)
           }
@@ -856,9 +867,9 @@ est.lr <- function(out){
       if(length(factor.cols)==0){
           out.list$factor.levels <- NA
           } else {
-          names(ma) <- ma.names <-  sub("categorical.","",ma.names)
+          names(ma) <- ma.names <-  sub("_categorical","",ma.names)
           factor.names <- ma.names[factor.cols]
-          if(test.dat==F) factor.levels <- list()
+          factor.levels <- list()
           for (i in 1:length(factor.cols)){
 
 
@@ -879,10 +890,10 @@ est.lr <- function(out){
 
 
               }
-          if(test.dat==F) {
+
               names(factor.levels)<-factor.names
               out.list$factor.levels <- factor.levels
-              }
+
           }
 
       #out.list$ma <- ma[,c(r.col,c(1:ncol(ma))[-r.col])]
@@ -930,24 +941,28 @@ est.lr <- function(out){
             }} else out$dat$tif.names <- ma.names[-1]
 
       out.list$ma <- ma[complete.cases(ma),c(r.col,c(1:ncol(ma))[-r.col])]
-      out.list$site.weights <- out$input$site.weights[complete.cases(ma)]
-      if(!test.dat & !is.null(out$dat$bad.factor.cols)) out.list$ma <- out.list$ma[,-match(out$dat$bad.factor.cols,names(out.list$ma))]
-      if(test.dat & any(ss<-is.na(match(names(ma),names(out$dat$ma$ma))))) {
-           out$ec <- out$ec+1
-           out$error.mssg[[out$ec]] <- paste("ERROR: missing columns in test model array:  ",paste(names(ma)[ss],collapse=" ,"),sep="")
-           return(out)
-           }
+
+      if(!is.null(out.list$ma.test)){
+        out.list$ma.test<-out.list$ma.test[complete.cases(out.list$ma.test),c(r.col,c(1:ncol(out.list$ma.test))[-r.col])]
+        out.list$test.weights<- out.list$test.weights[complete.cases(out.list$ma.test)]
+        out.list$n.pres[4] <- sum(out.list$ma.test[,r.col])
+        out.list$n.abs[4] <- nrow(out.list$ma.test)-sum(out.list$ma.test[,r.col])
+        }
+      out.list$train.weights <- out.list$train.weights[complete.cases(ma)]
+      if(!is.null(out$dat$bad.factor.cols)) out.list$ma <- out.list$ma[,-match(out$dat$bad.factor.cols,names(out.list$ma))]
+
 
         out.list$dims <- dim(out.list$ma)
         out.list$ratio <- min(sum(out$input$model.fitting.subset)/out.list$dims[1],1)
         out.list$n.pres[2] <- sum(out.list$ma[,1])
         out.list$n.abs[2] <- nrow(out.list$ma)-sum(out.list$ma[,1])
         out.list$used.covs <- names(out.list$ma)[-1]
+
       if(!is.null(out$input$model.fitting.subset)){
             pres.sample <- sample(c(1:nrow(out.list$ma))[out.list$ma[,1]==1],min(out.list$n.pres[2],out$input$model.fitting.subset[1]))
             abs.sample <- sample(c(1:nrow(out.list$ma))[out.list$ma[,1]==0],min(out.list$n.abs[2],out$input$model.fitting.subset[2]))
             out.list$ma.subset <- out.list$ma[c(pres.sample,abs.sample),]
-            out.list$weight.subset<-out.list$site.weights[c(pres.sample,abs.sample)]
+            out.list$weight.subset<-out.list$train.weights[c(pres.sample,abs.sample)]
             out.list$n.pres[3] <- length(pres.sample)
             out.list$n.abs[3] <- length(abs.sample)
             } else {
@@ -960,9 +975,9 @@ if(tolower(out$input$model.family)=="poisson"){
 out.list$ma.subset<-out.list$ma
 }
 
-      if(test.dat==F){
+
           out$dat$ma <- out.list
-          } else out$dat$ma.test <- out.list
+
       return(out)
       }
 
@@ -2860,10 +2875,31 @@ function (data,                        # the input dataframe
 }
 
 
+make.p.tif=T
+make.binary.tif=T
+
+tc=NULL
+n.folds=3
+alpha=1
+
+learning.rate = NULL
+bag.fraction = 0.5
+prev.stratify = TRUE
+model.family = "bernoulli"
+max.trees = 10000
+tolerance.method = "auto"
+tolerance = 0.001
+seed=NULL
+opt.methods=2
+
 # Interpret command line argurments #
 # Make Function Call #
- Args     <- commandArgs(T)
-    print(Args)
+Args <- commandArgs(trailingOnly=FALSE)
+
+    for (i in 1:length(Args)){
+     if(Args[i]=="-f") ScriptPath<-Args[i+1]
+     }
+
     for (arg in Args) {
     	argSplit <- strsplit(arg, "=")
     	argSplit[[1]][1]
@@ -2871,16 +2907,39 @@ function (data,                        # the input dataframe
     	if(argSplit[[1]][1]=="c") csv <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="o") output <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
+   		if(argSplit[[1]][1]=="mpt") make.p.tif <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- argSplit[[1]][2]
+      if(argSplit[[1]][1]=="tc")  tc <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="nf")  n.folds <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="alp")  alpha <- argSplit[[1]][2]
+      if(argSplit[[1]][1]=="lr")  learning.rate <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="bf")  bag.fraction <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="mf")  model.family <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="ps")  prev.stratify <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="mt")  max.trees <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="om")  opt.methods <- argSplit[[1]][2]
+ 			
     }
 	print(csv)
 	print(output)
 	print(responseCol)
-	
+
+ScriptPath<-dirname(ScriptPath)
+source(paste(ScriptPath,"EvaluationStats.r",sep="\\"))
+source(paste(ScriptPath,"TestTrainRocPlot.r",sep="\\"))
+
+make.p.tif<-as.logical(make.p.tif)
+make.binary.tif<-as.logical(makebinary.tif)
+prev.stratify<-as.logical(prev.stratify)
+save.model<-as.logical(save.model)
+
     fit.brt.fct(ma.name=csv,
 		tif.dir=NULL,
 		output.dir=output,
 		response.col=responseCol,
-		test.resp.col="response",make.p.tif=T,make.binary.tif=T,
-		simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",tc=NULL,n.folds=3,ma.test=NULL,alpha=1,script.name="brt.r",
-		learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, model.family = "bernoulli", max.trees = NULL)
+		test.resp.col="response",make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
+		simp.method="cross-validation",debug.mode=F,responseCurveForm="pdf",tc=tc,n.folds=n.folds,alpha=alpha,script.name="brt.r",
+		learning.rate =learning.rate, bag.fraction = bag.fraction,prev.stratify = prev.stratify, model.family = model.family, max.trees = max.trees,seed=seed)
+
+
 
