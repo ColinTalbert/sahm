@@ -45,10 +45,10 @@ class MAXENTRunner(object):
         self.loadArgs()
         self.args['outputdirectory'] = self.outputDir
     
-        if self.projectionDataFile <> '':
-            #A command line input overrides an input in the args csv
-            self.args['projectionlayers'] = self.projectionDataFile
-    
+#        if self.projectionlayers <> '':
+#            #A command line input overrides an input in the args csv
+#            self.args['projectionlayers'] = self.projectionlayers
+#    
         self.validateInputs()
     
         if self.inputMDS <> '':
@@ -266,16 +266,16 @@ class MAXENTRunner(object):
 def main(argv):
     '''Process our command line args and initiate a Maxent run
     '''
-    usageStmt = "usage:  -m --MDSFile -p --projectionData -a --argsCSV -o --outputDir"
+    usageStmt = "usage:  -m --MDSFile -a --argsCSV -o --outputDir"
     desc = "Formats and prepares input for running the Maxent Jar in a SAHM workflow"
 
     parser = OptionParser(usage=usageStmt, description=desc)
     parser.add_option("-m", "--MDSFile", 
                       dest="MDSFile", 
                       help="The MDS file with our sample data.")
-    parser.add_option("-p", "--projectionData", 
-                      dest="projectionData", 
-                      help="An optional CSV with a projection file for each of our environemnetal layers.")
+#    parser.add_option("-p", "--projectionData", 
+#                      dest="projectionData", 
+#                      help="An optional CSV with a projection file for each of our environemnetal layers.")
     parser.add_option("-a", "--argsCSV", 
                       dest="argsCSV", 
                       help="A CSV with each Maxent argument name and it's value on separate lines.")

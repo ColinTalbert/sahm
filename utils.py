@@ -9,6 +9,7 @@ import traceback
 import csv
 import time
 import tempfile
+import subprocess
 
 from PyQt4 import QtCore
 
@@ -21,15 +22,11 @@ from osgeo import osr
 import numpy
 
 import packages.sahm.pySAHM.utilities as utilities
-
 import getpass
 
 _roottempdir = ""
-#_logfile = ""
-_verbose = False
-_temp_files = []
-_temp_dirs = []
 _logger = None
+config = None
 
 def mktempfile(*args, **kwargs):
     global _temp_files
@@ -92,10 +89,7 @@ def createrootdir(rootWorkspace):
 #    _logfile = os.path.join(_roottempdir, "sessionLog.txt")
     
     return _roottempdir
-#
-#def setverbose(verbose):
-#    global _verbose
-#    _verbose = verbose
+
 
 def cleantemps():
     pass
@@ -152,7 +146,7 @@ def tif_to_color_jpeg(input, output, colorBreaksCSV):
     writetolog("        colorBreaksCSV=" + colorBreaksCSV, False, False)
     out_bands = 3
     #output_tmp = mktempfile(prefix='intermediateJpegPic', suffix='.tif')
-    output_tmp = mknextfile(prefix='intermediateJpegPic_', suffix='.tif')
+    output_tmp = output + ".tmp.tif"
     # Print some info
     #print "Creating %s" % (output)
     
@@ -209,7 +203,6 @@ def tif_to_color_jpeg(input, output, colorBreaksCSV):
     dst_ds.GetRasterBand(3).WriteArray(band3)
 
     # Create jpeg or rename tmp file
-    
     jpg_driver = gdal.GetDriverByName("JPEG") 
     jpg_driver.CreateCopy(output, dst_ds, 0 ) 
     
@@ -217,8 +210,13 @@ def tif_to_color_jpeg(input, output, colorBreaksCSV):
         os.remove(output_tmp)
     except:
         pass
+    
     try:
         GDALClose(output_tmp)
+    except:
+        pass
+    
+    try:
         os.remove(output_tmp)
     except:
         pass
@@ -331,7 +329,30 @@ def getShortName(fullPathName):
         shortname = os.path.split(fullPathName)[1]
         shortname = os.path.splitext(shortname)[0]
     return shortname
-if __name__ == '__main__':
-    pass
+
+
+def getModelsPath():
+    return os.path.join(os.path.dirname(__file__), "pySAHM", "Resources", "R_Modules")
+
+def runRScript(script, args, module=None):
+    global config
+    r_path = config.r_path
+    program = os.path.join(r_path, "i386", "Rterm.exe") #-q prevents program from running
+    scriptFile = os.path.join(getModelsPath(), script)
     
+    command = program + " --vanilla -f " + scriptFile + " --args " + args
     
+    p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    writetolog("\nStarting R Processing of " + script, True)
+    writetolog("    args: " + args, False, False)
+    writetolog("    command: " + command, False, False)
+    ret = p.communicate()
+    
+    if 'Error' in ret[1]:
+        msg = "An error was encountered in the R script for this module.  The R error message is below - \n"
+        msg += ret[1]
+        writetolog(msg)
+        raise RuntimeError , msg
+
+    del(ret)
+    writetolog("\nFinished R Processing of " + script, True)

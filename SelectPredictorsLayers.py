@@ -20,10 +20,9 @@ except AttributeError:
 
 class SelectListDialog(QtGui.QDialog):
 
-    def __init__(self, inputMDS, outputMDS, displayJPEG, rPath, modelsPath, parent=None):
+    def __init__(self, inputMDS, outputMDS, displayJPEG, rPath, parent=None):
         #print inputMDS, outputMDS, rPath, modelsPath
         self.rPath = rPath
-        self.modelsPath = modelsPath
         self.displayJPEG = displayJPEG
         
         QtGui.QDialog.__init__(self, parent)
@@ -293,9 +292,9 @@ class SelectListDialog(QtGui.QDialog):
         self.load_picture(outputPic)
         
     def runR(self, MDSfile):
-        
-        program = os.path.join(self.rPath, "i386", "Rterm.exe") 
-        script = os.path.join(self.modelsPath, "PairsExplore.r")
+#        
+#        program = os.path.join(self.rPath, "i386", "Rterm.exe") 
+#        script = os.path.join(utils.getModelsPath(), "PairsExplore.r")
 
         args = "i=" + MDSfile + " o=" + self.displayJPEG + " m=" + str(self.lineEdit.text())
         args += " rc=" + self.responseCol
@@ -313,24 +312,26 @@ class SelectListDialog(QtGui.QDialog):
         else:
             args += " bgd=FALSE"
 
-        command = program + " --vanilla -f " + script + " --args " + args
-        writetolog("    " + command, False, False)
+#        command = program + " --vanilla -f " + script + " --args " + args
+#        writetolog("    " + command, False, False)
         if os.path.exists(os.path.join(self.outputDir, "Predictor_Correlation.jpg")):
             os.remove(os.path.join(self.outputDir, "Predictor_Correlation.jpg"))
             
-        p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        utils.runRScript('PairsExplore.r', args)
 
-        writetolog("   Calculating covariate correlation in r R ")
+#        p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+#
+#        writetolog("   Calculating covariate correlation in r R ")
 
-        ret = p.communicate()
-        if ret[1]:
-            msg = "An error was encountered in the R script for this module.  The R error message is below - \n"
-            msg += ret[1]
-            writetolog(msg)
-            raise Exception, msg
-        else:
-            writetolog("   Finished in R. ")
-        del(ret)
+#        ret = p.communicate()
+#        if ret[1]:
+#            msg = "An error was encountered in the R script for this module.  The R error message is below - \n"
+#            msg += ret[1]
+#            writetolog(msg)
+#            raise Exception, msg
+#        else:
+#            writetolog("   Finished in R. ")
+#        del(ret)
         
         if os.path.exists(os.path.join(self.displayJPEG)):
             return os.path.join(self.displayJPEG)

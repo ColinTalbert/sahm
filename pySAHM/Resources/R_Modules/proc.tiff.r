@@ -1,7 +1,9 @@
-proc.tiff <- function(model,vnames,tif.dir=NULL,filenames=NULL,pred.fct,factor.levels=NA,make.binary.tif=F,make.p.tif=T,binary.thresh=NA,
+proc.tiff <- function(model,vnames,tif.dir=NULL,filenames=NULL,pred.fct,factor.levels=NA,make.binary.tif=F,make.p.tif=T,
     thresh=0.5,outfile.p="brt.prob.map.tif",outfile.bin="brt.bin.map.tif",tsize=2.0,NAval=-3000,fnames=NULL,logname=NULL){
+
     # vnames,fpath,myfun,make.binary.tif=F,outfile=NA,outfile.bin=NA,output.dir=NA,tsize=10.0,NAval=NA,fnames=NA
     # Written by Alan Swanson, YERC, 6-11-08
+    # Revised and Edited by Marian Talbert 2010-2011
     # Description:
     # This function is used to make predictions using a number of .tiff image inputs
     # in cases where memory limitations don't allow the full images to be read in.
@@ -51,8 +53,10 @@ proc.tiff <- function(model,vnames,tif.dir=NULL,filenames=NULL,pred.fct,factor.l
     # proc.tiff(vnames,fpath,glm.predict,"test11.tif")
 
     # Start of function #
-    require(rgdal)
+    library(rgdal)
+    library(raster)
 
+    if(is.null(thresh)) thresh<-.5
     if(is.na(NAval)) NAval<- -3000
     if(is.null(fnames)) fnames <- paste(vnames,"tif",sep=".")
     nvars<-length(vnames)
@@ -144,6 +148,7 @@ names(temp) <- vnames
                 }
             }
         }
+
     ifelse(sum(!is.na(temp))==0,  # does not calculate predictions if all predictors in the region are na
         preds<-matrix(data=NaN,nrow=region.dims[1],ncol=region.dims[2]),
         preds <- t(matrix(pred.fct(model,temp),ncol=dims[2],byrow=T)))

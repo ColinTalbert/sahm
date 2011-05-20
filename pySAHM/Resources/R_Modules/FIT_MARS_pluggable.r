@@ -20,7 +20,7 @@
 
 
 fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^response.binary",make.p.tif=T,make.binary.tif=T,
-      mars.degree=1,mars.penalty=2,responseCurveForm=NULL,debug.mode=T,model.family="binomial",script.name="mars.r",opt.methods=2,save.model=FALSE){
+      mars.degree=1,mars.penalty=2,responseCurveForm=NULL,debug.mode=T,model.family="binomial",script.name="mars.r",opt.methods=2,save.model=TRUE){
     # This function fits a stepwise GLM model to presence-absence data.
     # written by Alan Swanson, 2008-2009
     # # Maintained and edited by Marian Talbert September 2010-
@@ -172,7 +172,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
         
     cat("\nbegin processing of model array:",out$input$ma.name,"\n")
     cat("\nfile basename set to:",out$dat$bname,"\n")
-    if(debug.mode) assign("out",out,envir=.GlobalEnv)
+    assign("out",out,envir=.GlobalEnv)
     if(!debug.mode) {sink();cat("Progress:20%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("20%\n")}  ### print time
     ##############################################################################################################
     #  Begin model fitting #
@@ -183,7 +183,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     flush.console()
 
     fit <- try(mars.glm(data=out$dat$ma$ma, mars.x=c(2:ncol(out$dat$ma$ma)), mars.y=1, mars.degree=out$input$mars.degree, family=out$input$model.family,
-          site.weights=oout$dat$ma$train.weights, penalty=out$input$mars.penalty),silent=T)
+          site.weights=out$dat$ma$train.weights, penalty=out$input$mars.penalty),silent=T)
       
     if(class(fit)=="try-error"){
           if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
@@ -192,6 +192,8 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
           cat(saveXML(mars.to.xml(out),indent=T),'\n')
           return()
           } else out$mods$final.mod <- fit  
+
+  out$mods$final.mod$contributions$var<-names(out$dat$ma$ma)[-1]
 
     assign("out",out,envir=.GlobalEnv)
     t3 <- unclass(Sys.time())
@@ -218,7 +220,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
             "because they had only one level:",paste(out$dat$bad.factor.cols,collapse=","),"\n\n")
         }
     cat("\n","Storing output...","\n","\n")
-    flush.console()
+    #flush.console()
     capture.output(print(out$mods$summary),file=paste(bname,"_output.txt",sep=""))
     if(!is.null(out$dat$bad.factor.cols)){
         capture.output(cat("\nWarning: the following categorical response variables were removed from consideration\n",
@@ -245,7 +247,8 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
                           
     auc.output <- try(make.auc.plot.jpg(out$dat$ma$ma,pred=pred,plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="MARS",opt.methods=opt.methods),
             silent=T)
-   
+
+    
     if(class(auc.output)=="try-error"){
           out$ec<-out$ec+1
           out$error.mssg[[out$ec]] <- paste("Error making ROC plot:",auc.output)
@@ -271,7 +274,11 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
             out$ec<-out$ec+1
             out$error.mssg[[out$ec]] <- paste("ERROR: problem fitting response curves",r.curves)
             }
-        
+
+        pred.fct<-pred.mars
+
+     assign("out",out,envir=.GlobalEnv)
+
  save.image(paste(output.dir,"modelWorkspace",sep="\\"))
     t4 <- unclass(Sys.time())
     cat("\nfinished with final model summarization, t=",round(t4-t3,2),"sec\n");flush.console()
@@ -351,31 +358,6 @@ pred.mars <- function(model,x) {
     }
 
 logit <- function(x) 1/(1+exp(-x))
-
-
-make.auc.plot.jpg<-function(ma.reduced,pred,plotname,modelname){
-    auc.data <- data.frame(ID=1:nrow(ma.reduced),pres_abs=ma.reduced[,1],pred=pred)
-    auc.data <- auc.data[complete.cases(auc.data),]
-    p_bar <- mean(auc.data$pres_abs); n_pres <- sum(auc.data$pres_abs); n_abs <- nrow(auc.data)-n_pres
-    null_dev <- -2*(n_pres*log(p_bar)+n_abs*log(1-p_bar))
-    dev_fit <- -2*(sum(log(auc.data$pred[auc.data$pres_abs==1]))+sum(log(1-auc.data$pred[auc.data$pres_abs==0])))
-    dev_exp <- null_dev - dev_fit
-    pct_dev_exp <- dev_exp/null_dev*100
-    thresh <- as.numeric(optimal.thresholds(auc.data,opt.methods=2))[2] 
-    auc.fit <- auc(auc.data,st.dev=T)
-    jpeg(file=plotname)
-    auc.roc.plot(auc.data,model.names=modelname,opt.thresholds=thresh)
-    graphics.off()
-    cmx <- cmx(auc.data,threshold=thresh)
-    PCC <- pcc(cmx,st.dev=F)
-    SENS <- sensitivity(cmx,st.dev=F)
-    SPEC <- specificity(cmx,st.dev=F)
-    KAPPA <- Kappa(cmx,st.dev=F)
-    return(list(thresh=thresh,null_dev=null_dev,dev_fit=dev_fit,dev_exp=dev_exp,pct_dev_exp=pct_dev_exp,auc=auc.fit[1,1],auc.sd=auc.fit[1,2],
-        plotname=plotname,pcc=PCC,sens=SENS,spec=SPEC,kappa=KAPPA))
-}
-   
-
 
 file_path_as_absolute <- function (x){
     if (!file.exists(epath <- path.expand(x))) 

@@ -10,24 +10,10 @@ source("PredictModel.r")
 source("read.ma.r")
 source("proc.tiff.r")
 
-
+# Curr
 #trace(proc.tiff,browser)
 #options(error=expression(if(interactive()) recover() else dump.calls()))
 #options(error=NULL)
-
-#BRT with a test/training split specified in the MDS file
-ma.name<-"H:\\Desktop\\SAHM\\Rcode\\ExposingModelParameters\\ModelOutputCheck\\TestTrainOut.csv"
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\talbertc_20110510T100421\\TestTrainingSplit_1.csv"
-output.dir="C:\\VisTrails\\mtalbert_20110504T132851"
-rc="responseCount"
-
-    #input.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSet_1.csv"
-      fit.brt.fct(ma.name=input.file,
-      tif.dir=NULL,output.dir=output.dir,
-      response.col=rc,test.resp.col="response",make.p.tif=F,make.binary.tif=F,
-            simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",tc=NULL,n.folds=3,alpha=1,script.name="brt.r",
-           learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, model.family = "bernoulli", max.trees = NULL,opt.methods=1,seed=1,save.model=FALSE)
-
 
 output.dir="C:\\VisTrails\\mtalbert_20110504T132851"
     rc="ResponseBinary"
@@ -38,7 +24,7 @@ output.dir="C:\\VisTrails\\mtalbert_20110504T132851"
             simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",tc=NULL,n.folds=3,alpha=1,script.name="brt.r",
            learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, model.family = "bernoulli", max.trees = NULL,opt.methods=1,seed=1,save.model=TRUE)
 
-PredictModel(workspace=paste("C:\\VisTrails\\mtalbert_20110504T132851","modelWorkspace",sep="\\"))
+PredictModel(workspace=paste("C:\\VisTrails\\mtalbert_20110504T132851","modelWorkspace",sep="\\"),out.dir="C:\\VisTrails")
            
 
 #Now testing to make sure this code works with no test training split

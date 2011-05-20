@@ -77,23 +77,33 @@
 
           } else {  #now considering if there is a desired ratio of presence to absence points
                 if(sum(response>=1)/sum(response==0)>=RatioPresAbs){
-                     browser()
-                      TrainSplit<-numeric()
-                        for(i in sort(as.numeric(unique(response)))){
-                        TrainSplit<-c(TrainSplit,sample(which(response==i,arr.ind=TRUE),size=round((RatioPresAbs)*sum(response==i)*trainProp)))
-                        }
 
-                      TrainSplit<-c(sample(which(response>=1,arr.ind=TRUE),size=round((RatioPresAbs)*sum(response==0)*trainProp)),
-                      sample(which(response==0,arr.ind=TRUE),size=round(sum(response==0)*trainProp)))
+                   #first determine how many presence points to remove
+                     TotToRmv<-(sum(response>=1)-RatioPresAbs*sum(response==0))
 
-                      #Take everything not in the training set for the test set
-                      TestSplit=which(!(seq(1:length(response)))%in%TrainSplit,arr.ind=TRUE)
+                  #determine the number of each count to remove weighted by the reponse and then remove these
+                     EachToRmv<-round(TotToRmv*table(response[response!=0])/sum(response!=0))
+                     ByCount<-split(cbind(which(response!=0,arr.ind=TRUE)),f=response[response!=0])
 
-                      #now sample some points to remove so we have the correct proportion
-                      for(i in sort(as.numeric(unique(response[response!=0]))))
-                      temp<-sample(which(TestSplit%in%which(response==i,arr.ind=TRUE),arr.ind=TRUE),
-                        size=round(sum(TestSplit%in%which(response==i,arr.ind=TRUE))-(1-trainProp)*sum(response==0)*(RatioPresAbs)))
-                      TestSplit<-TestSplit[-c(temp)]
+                     #sampling one from a vector of size 1 actually samples a sequence from 1 to the value in the vector
+                     #so correcting this here
+                     sam<-function(x,size){if(length(x)==1 & size==1) return(x)
+                                            else sample(x=x,size=size)}
+
+                     RmvIndx<-as.vector(unlist(mapply(sam,x=ByCount,size=EachToRmv)))
+                     KeepIndx<-seq(1:length(response))[-c(RmvIndx)]
+                     Response<-response[KeepIndx]
+                     names(Response)<-KeepIndx
+
+                     #now break these into a train an test split while
+                    TrainSplit<-numeric()
+
+                      for(i in sort(as.numeric(unique(Response)))){
+                        TrainSplit<-c(TrainSplit,sample(names(Response[Response==i]),size=round(sum(Response==i)*trainProp)))
+                      }
+                       TrainSplit<-as.numeric(TrainSplit)
+                      #Take everything not in the training set or in the remove list for the test set
+                      TestSplit<-seq(from=1,to=length(response))[-c(c(TrainSplit,RmvIndx))]
 
                      dat$TrainSplit[seq(1:length(response))%in%TrainSplit]<-"train"
                      dat$TrainSplit[seq(1:length(response))%in%TestSplit]<-"test"
@@ -102,7 +112,7 @@
                }
 
                if(sum(response>=1)/sum(response==0)<RatioPresAbs){
-                  browser()
+
                #first ballance all responses greater than 1
                TrainSplit<-numeric()
                 for(i in sort(as.numeric(unique(response[response!=0])))){

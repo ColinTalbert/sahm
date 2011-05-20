@@ -325,7 +325,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
 
 
 
-    if(debug.mode) assign("out",out,envir=.GlobalEnv)
+    assign("out",out,envir=.GlobalEnv)
     if(class(out$mods$final.mod)=="try-error"){
           if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
           out$ec<-out$ec+1
@@ -342,7 +342,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     ##############################################################################################################
 
     # Store .jpg ROC plot #
-    browser()
+
     auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=predict.gbm(out$mods$final.mod,out$dat$ma$ma,
             out$mods$final.mod$target.trees,type="response"),plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",opt.methods=opt.methods)
 
@@ -436,8 +436,9 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     cat("\nfinished with final model summarization, t=",round(t4-t3,2),"sec\n");flush.console()
     if(!debug.mode) {sink();cat("Progress:80%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("80%\n")}
 
+    assign("out",out,envir=.GlobalEnv)
     # Make .tif of predictions #
-
+    
     save.image(paste(output.dir,"modelWorkspace",sep="\\"))
     if(out$input$make.p.tif==T | out$input$make.binary.tif==T){
         cat("\nproducing prediction maps...","\n","\n");flush.console()
@@ -462,7 +463,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     if(!debug.mode) {sink();cat("Progress:90%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("90%\n")}  ### print time
 
     # Evaluation Statistics on Test Data#
-     browser()
+
     if(!is.null(out$dat$ma$ma.test)) Eval.Stat<-EvaluationStats(out,thresh=auc.output$thresh,train=out$dat$ma$ma,train.pred=predict.gbm(out$mods$final.mod,out$dat$ma$ma,
             out$mods$final.mod$target.trees,type="response"),opt.methods)
 

@@ -20,7 +20,7 @@
 
 
 fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^response.binary",make.p.tif=T,make.binary.tif=T,
-      simp.method="AIC",responseCurveForm=NULL,debug.mode=F,model.family="binomial",script.name="glm.r",opt.methods=2,save.model=FALSE){
+      simp.method="AIC",responseCurveForm=NULL,debug.mode=F,model.family="binomial",script.name="glm.r",opt.methods=2,save.model=TRUE){
     # This function fits a stepwise GLM model to presence-absence data.
     # written by Alan Swanson, 2008-2009
     ## Maintained and edited by Marian Talbert September 2010-
@@ -116,10 +116,10 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
           cat(saveXML(glm.to.xml(out),indent=T),'\n')
           return()
           }
-      mssg<-"No Errors Yet"
-      on.exit(print(mssg))
+
+
       
-      mssg<- "ERROR: arguement simp.method must be either AIC or BIC"
+
     if(is.na(match(simp.method,c("AIC","BIC")))){
         return()
         }
@@ -191,7 +191,7 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     scope.glm <- list(lower=as.formula(paste(out$dat$ma$resp.name,"~1")),
         upper=as.formula(paste(out$dat$ma$resp.name,"~",paste(out$dat$ma$used.covs,collapse='+'))))
 
-       on.exit(print("Error fitting stepwise regression model"))
+
     mymodel.glm.step <- step(glm(as.formula(paste(out$dat$ma$resp.name,"~1")),family=out$input$model.family,data=out$dat$ma$ma,weights=out$dat$ma$train.weights,na.action="na.exclude"),
           direction='both',scope=scope.glm,trace=0,k=penalty)
     
@@ -271,6 +271,9 @@ if(debug.mode | responseCurveForm=="pdf"){
     ##############################################################################################################
     # Make .tif of predictions #
     ##############################################################################################################
+        out$mods$final.mod$contributions$var<-attr(terms(formula(out$mods$final.mod)),"term.labels")
+         assign("out",out,envir=.GlobalEnv)
+         
  save.image(paste(output.dir,"modelWorkspace",sep="\\"))
     if(out$input$make.p.tif==T | out$input$make.binary.tif==T){
         if((n.var <- length(coef(out$mods$final.mod)))<2){
@@ -305,8 +308,8 @@ if(debug.mode | responseCurveForm=="pdf"){
     
      # Evaluation Statistics on Test Data#
 
-    if(!is.null(out$dat$ma$ma.test)) Eval.Stat<-EvaluationStats(out,thresh=auc.output$thresh,train=out$dat$ma$ma,train.pred=predict(mymodel.glm.step,type='response'),
-            out$mods$final.mod$target.trees,type="response"),opt.methods)
+    if(!is.null(out$dat$ma$ma.test)) Eval.Stat<-EvaluationStats(out,thresh=auc.output$thresh,train=out$dat$ma$ma,
+    train.pred=predict(mymodel.glm.step,type="response"),opt.methods)
 
     
     # Write summaries to xml #
@@ -346,30 +349,6 @@ glm.predict <- function(model,x) {
     }
 
 logit <- function(x) 1/(1+exp(-x))
-
-
-make.auc.plot.jpg<-function(ma.reduced,pred,plotname,modelname){
-    auc.data <- data.frame(ID=1:nrow(ma.reduced),pres_abs=ma.reduced[,1],pred=pred)
-    auc.data <- auc.data[complete.cases(auc.data),]
-    p_bar <- mean(auc.data$pres_abs); n_pres <- sum(auc.data$pres_abs); n_abs <- nrow(auc.data)-n_pres
-    null_dev <- -2*(n_pres*log(p_bar)+n_abs*log(1-p_bar))
-    dev_fit <- -2*(sum(log(auc.data$pred[auc.data$pres_abs==1]))+sum(log(1-auc.data$pred[auc.data$pres_abs==0])))
-    dev_exp <- null_dev - dev_fit
-    pct_dev_exp <- dev_exp/null_dev*100
-    thresh <- as.numeric(optimal.thresholds(auc.data,opt.methods=2))[2] 
-    auc.fit <- auc(auc.data,st.dev=T)
-    jpeg(file=plotname)
-    auc.roc.plot(auc.data,model.names=modelname,opt.thresholds=thresh)
-    graphics.off()
-    cmx <- cmx(auc.data,threshold=thresh)
-    PCC <- pcc(cmx,st.dev=F)
-    SENS <- sensitivity(cmx,st.dev=F)
-    SPEC <- specificity(cmx,st.dev=F)
-    KAPPA <- Kappa(cmx,st.dev=F)
-    return(list(thresh=thresh,null_dev=null_dev,dev_fit=dev_fit,dev_exp=dev_exp,pct_dev_exp=pct_dev_exp,auc=auc.fit[1,1],auc.sd=auc.fit[1,2],
-        plotname=plotname,pcc=PCC,sens=SENS,spec=SPEC,kappa=KAPPA))
-}
-   
 
 
 file_path_as_absolute <- function (x){

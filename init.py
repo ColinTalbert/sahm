@@ -6,43 +6,35 @@ import os
 import shutil
 import sys
 import subprocess
+import traceback
 
 from core.modules.vistrails_module import Module, ModuleError, ModuleConnector
-from core.modules.basic_modules import File, Directory, new_constant, Constant
+from core.modules.basic_modules import File, Directory, Path, new_constant, Constant
 from core.modules.basic_modules import List
-from core.system import list2cmdline, execute_cmdline
+from core.modules.basic_modules import String
 
+#from enum_modules import myEnum
 
 from widgets import get_predictor_widget, get_predictor_config
+from enum_widget import build_enum_widget
+
 from SelectPredictorsLayers import SelectListDialog
-from utils import map_ports, path_value, create_file_module, createrootdir 
-from utils import create_dir_module, mktempfile, mktempdir, cleantemps
-from utils import dir_path_value, collapse_dictionary, tif_to_color_jpeg
+#from maxent_module import MAXENTRunner
+import utils
+#import packages.sahm.pySAHM.Utilites
+
 
 #import our python SAHM Processing files
 import packages.sahm.pySAHM.FieldDataQuery as FDQ
 import packages.sahm.pySAHM.MDSBuilder as MDSB
 import packages.sahm.pySAHM.PARC as parc
+import packages.sahm.pySAHM.TiffConverter as TC
+import packages.sahm.pySAHM.MaxentRunner as MaxentRunner
 
-identifier = 'gov.usgs.sahm'
+from utils import writetolog
 
-#def run_cmd_line_jar(jar_name, args):
-#    arg_items = list(itertools.chain(*args.items()))
-#    output = []
-#    jar_name = os.path.join(sahm_path, jar_name)
-#    cmdline = ['java', '-jar', jar_name] + arg_items
-#    print 'running', cmdline
-#    res = execute_cmdline(['java', '-jar', jar_name] + arg_items, output)
-#    return res, output
+identifier = 'gov.usgs.sahm' 
 
-#def run_cmd_line_py(jar_name, args):
-#    arg_items = list(itertools.chain(*args.items()))
-#    output = []
-#    jar_name = os.path.join(sahm_path, jar_name)
-#    cmdline = ['java', '-jar', jar_name] + arg_items
-#    print 'running', cmdline
-#    res = execute_cmdline(['java', '-jar', jar_name] + arg_items, output)
-#    return res, output
 
 def expand_ports(port_list):
     new_port_list = []
@@ -87,19 +79,164 @@ def expand_ports(port_list):
     return new_port_list
 
 class FieldData(File):
-    _input_ports = [('csvFile', '(edu.utah.sci.vistrails.basic:File)')]
+#    _input_ports = [('csvFile', '(edu.utah.sci.vistrails.basic:File)')]
     _output_ports = [('value', '(gov.usgs.sahm:FieldData:DataInput)'),
-                     ('value_as_string', 
-                      '(edu.utah.sci.vistrails.basic:String)', True)]
+                     ('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
     
-class Predictor(File):
-    _input_ports = [('categorical', '(edu.utah.sci.vistrails.basic:Boolean)')]
-    _output_ports = [('value', '(gov.usgs.sahm:Predictor:DataInput)'),
-                     ('value_as_string', 
-                      '(edu.utah.sci.vistrails.basic:String)', True)]
+class AggregationMethod(String):
+    _input_ports = [('value', '(gov.usgs.sahm:AggregationMethod:Other)')]
+    _output_ports = [('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
+    _widget_class = build_enum_widget('AggregationMethod', 
+                                      ['Mean', 'Max', 'Min', 'Majority', 'None'])
 
-class TemplateLayer(File):
-    _input_ports = [('FilePath', '(edu.utah.sci.vistrails.basic:File)')]
+    @staticmethod
+    def get_widget_class():
+        return AggregationMethod._widget_class
+
+class ResampleMethod(String):
+    _input_ports = [('value', '(gov.usgs.sahm:ResampleMethod:Other)')]
+    _output_ports = [('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
+    _widget_class = build_enum_widget('ResampleMethod', 
+                                      ['NearestNeighbor', 'Bilinear', 'Cubic', 'CubicSpline', 'Lanczos'])
+
+    @staticmethod
+    def get_widget_class():
+        return ResampleMethod._widget_class
+
+class Predictor(Constant):
+    _input_ports = [('categorical', '(edu.utah.sci.vistrails.basic:Boolean)'),
+                    ('ResampleMethod', '(gov.usgs.sahm:ResampleMethod:Other)'),
+                    ('AggregationMethod', '(gov.usgs.sahm:AggregationMethod:Other)'),
+                    ('file', '(edu.utah.sci.vistrails.basic:Path)')]
+    _output_ports = [('value', '(gov.usgs.sahm:Predictor:DataInput)'),
+                     ('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
+
+    def compute(self):
+        if (self.hasInputFromPort("ResampleMethod")):
+            resampleMethod = self.getInputFromPort("ResampleMethod")
+        else:
+            raise ModuleError(self, "No Resample Method specified")
+        
+        if (self.hasInputFromPort("AggregationMethod")):
+            aggregationMethod = self.getInputFromPort("AggregationMethod")
+        else:
+            raise ModuleError(self, "No Aggregation Method specified")
+        
+        if (self.hasInputFromPort("categorical")):
+            if self.getInputFromPort("categorical") == True:
+                categorical = '1'
+            else:
+                categorical = '0'
+        else:
+            categorical = '0'
+        
+        if (self.hasInputFromPort("file")):
+            inFile = self.getInputFromPort("file").name
+        else:
+            raise ModuleError(self, "No input file specified")
+        self.setResult('value', (inFile, categorical, resampleMethod, aggregationMethod))
+   
+class PredictorList(Constant):
+    _input_ports = expand_ports([('value', 'Other|PredictorList'),
+                                 ('addPredictor', 'DataInput|Predictor')])
+    _output_ports = expand_ports([('value', 'Other|PredictorList')])
+    
+    @staticmethod
+    def translate_to_string(v):
+        return str(v)
+
+    @staticmethod
+    def translate_to_python(v):
+        v_list = eval(v)
+        return v_list
+
+    @staticmethod
+    def validate(x):
+        return type(x) == list
+
+    def compute(self):
+        p_list = self.forceGetInputListFromPort("addPredictor")
+        v = self.forceGetInputFromPort("value", [])
+        
+        b = self.validate(v)
+        if not b:
+            raise ModuleError(self, "Internal Error: Constant failed validation")
+        if len(v) > 0 and type(v[0]) == tuple:
+            f_list = [utils.create_file_module(v_elt[1]) for v_elt in v]
+        else:
+            f_list = v
+        p_list += f_list
+        #self.setResult("value", p_list)
+        self.setResult("value", v)     
+
+class PredictorListFile(Module):
+    _input_ports = expand_ports([('csvFileList', '(edu.utah.sci.vistrails.basic:File)'),
+                                 ('addPredictor', 'DataInput|Predictor')])
+    _output_ports = expand_ports([('csvFileList', '(edu.utah.sci.vistrails.basic:File)')])
+    '''
+    copies the input predictor list csv to our working directory
+    and appends any additionally added predictors
+    '''
+    @staticmethod
+    def translate_to_string(v):
+        return str(v)
+
+    @staticmethod
+    def translate_to_python(v):
+        v_list = eval(v)
+        return v_list
+
+    @staticmethod
+    def validate(x):
+        return type(x) == list
+
+    def compute(self):
+        if not (self.hasInputFromPort("csvFileList") or
+                self.hasInputFromPort("addPredictor")):
+            raise ModuleError(self, "No inputs or CSV file provided")
+
+        output_fname = utils.mknextfile(prefix='PredictorList_', suffix='.csv')
+        if (self.hasInputFromPort("csvFileList") and 
+            os.path.exists(self.getInputFromPort("csvFileList").name)):
+            shutil.copy(self.getInputFromPort("csvFileList").name, 
+                output_fname)
+            csv_writer = csv.writer(open(output_fname, 'ab'))
+        else:
+            #create an empty file to start with.
+            csv_writer = csv.writer(open(output_fname, 'wb'))
+            csv_writer.writerow(["file", "Resampling", "Aggregation"])
+        
+        if self.hasInputFromPort("addPredictor"):
+            p_list = self.forceGetInputListFromPort("addPredictor")
+            for p in p_list:
+                if p.hasInputFromPort('resampleMethod'):
+                    resMethod = p.getInputFromPort('resampleMethod')
+                else:
+                    resMethod = "NearestNeighbor"
+                if p.hasInputFromPort('aggregationMethod'):
+                    aggMethod = p.getInputFromPort('aggregationMethod')
+                else:
+                    aggMethod = "Mean"  
+                csv_writer.writerow([os.path.normpath(p.name), resMethod, aggMethod])
+
+        del csv_writer
+        
+        output_file = utils.create_file_module(output_fname)
+        self.setResult('csvFileList', output_file)
+        
+#        v = self.forceGetInputFromPort("value", [])
+#        b = self.validate(v)
+#        if not b:
+#            raise ModuleError(self, "Internal Error: Constant failed validation")
+#        if len(v) > 0 and type(v[0]) == tuple:
+#            f_list = [create_file_module(v_elt[1]) for v_elt in v]
+#        else:
+#            f_list = v
+#        p_list += f_list
+#        self.setResult("value", p_list)
+
+class TemplateLayer(Path):
+#    _input_ports = [('FilePath', '(edu.utah.sci.vistrails.basic:File)')]
     _output_ports = [('value', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                      ('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
 #    def compute(self):
@@ -108,33 +245,88 @@ class TemplateLayer(File):
 
 #class SingleInputPredictor(Predictor):
 #    pass
-
-class SpatialDef(Module):
-    _output_ports = [('spatialDef', '(gov.usgs.sahm:SpatialDef:DataInput)')]
+#
+#class SpatialDef(Module):
+#    _output_ports = [('spatialDef', '(gov.usgs.sahm:SpatialDef:DataInput)')]
 
 class MergedDataSet(File):
     _input_ports = expand_ports([('mdsFile', '(edu.utah.sci.vistrails.basic:File)')])
     _output_ports = expand_ports([('value', '(gov.usgs.sahm:MergedDataSet:DataInput)')])
     
-    True
+    pass
+
+class ApplyModel(Module):
+    _input_ports = [('mdsFile', '(gov.usgs.sahm:MergedDataSet:DataInput)'),
+                    ('modelWorkspace', '(edu.utah.sci.vistrails.basic:File)'),
+                    ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)'),
+                    ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)'),]
+    _output_ports = [('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
+                     ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)')]
+    
+    
+    
+    def compute(self):
+        
+        workspace = self.forceGetInputFromPort('modelWorkspace').name
+        output_dname = utils.mknextdir(prefix='AppliedModel_')
+        if self.hasInputFromPort('mdsFile'):
+            mdsFile = self.forceGetInputFromPort('mdsFile').name
+            args = "ws=" + workspace + " c=" + mdsFile + " o=" + output_dname
+        else:
+            args = "ws=" + workspace + " o=" + output_dname 
+        
+        if self.hasInputFromPort('makeBinMap'):
+            makeBinMap = self.forceGetInputFromPort('makeBinMap')
+            args += ' mbt=' + str(makeBinMap).upper()
+        else:
+            args += ' mbt=TRUE'
+            
+        if self.hasInputFromPort('makeProbabilityMap'):
+            makeProbabilityMap = self.forceGetInputFromPort('makeProbabilityMap')
+            args += ' mpt=' + str(makeProbabilityMap).upper()
+        else:
+             args += ' mpt=TRUE'
+                
+        
+        utils.runRScript('PredictModel.r', args, self)
+        
+        input_fname = os.path.join(output_dname, "prob_map.tif")
+        output_fname = os.path.join(output_dname, 'prob_map.jpeg')
+        if os.path.exists(input_fname):
+            utils.tif_to_color_jpeg(input_fname, output_fname, color_breaks_csv)
+            output_file1 = utils.create_file_module(output_fname)
+            self.setResult('ProbabilityMap', output_file1)
+        else:
+            msg = "Expected output from ApplyModel was not found."
+            msg += "\nThis likely indicates problems with the inputs to the R module."
+            writetolog(msg, False, True)
+            raise ModuleError(self, msg)
+        
+        if  os.path.exists(os.path.join(output_dname, "bin_map.tif")):
+            outFileName = os.path.join(output_dname, "bin_map.tif")
+            output_file2 = utils.create_file_module(outFileName)
+            self.setResult('BinaryMap', output_file2)
+        
+        
+        
 
 class Model(Module):
-    _input_ports = [('mdsFile', '(gov.usgs.sahm:MergedDataSet:DataInput)')]
-    _output_ports = [('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
+    _input_ports = [('mdsFile', '(gov.usgs.sahm:MergedDataSet:DataInput)'),
+                    ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)'),
+                    ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)'),
+                    ('seed', '(edu.utah.sci.vistrails.basic:Integer)') 
+                    ]
+    _output_ports = [('modelWorkspace', '(edu.utah.sci.vistrails.basic:File)'), 
+                     ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
                      ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('AUC_plot', '(edu.utah.sci.vistrails.basic:File)'),
                      ('ResponseCurves', '(edu.utah.sci.vistrails.basic:File)'),
                      ('Text_Output', '(edu.utah.sci.vistrails.basic:File)')]
 
     def compute(self):
-        mdsFile = dir_path_value(self.forceGetInputFromPort('mdsFile', []))
-
-        global models_path
         global color_breaks_csv
         
-        r_path = configuration.r_path
-        program = os.path.join(r_path, "i386", "Rterm.exe") #-q prevents program from running
-        Script = os.path.join(models_path, self.name)
+        mdsFile = utils.dir_path_value(self.forceGetInputFromPort('mdsFile', []))
         
         ModelOutput = {"FIT_BRT_pluggable.r":"brt",
                        "FIT_GLM_pluggable.r":"glm",
@@ -142,70 +334,69 @@ class Model(Module):
                        "FIT_MARS_pluggable.r":"mars"}
         ModelAbbrev = ModelOutput[self.name]
         
-        output_dname = mktempdir(prefix='output_')
+        output_dname = utils.mknextdir(prefix=ModelAbbrev + 'output_')
+        args = "c=" + mdsFile + " o=" + output_dname 
+        args += " rc=" + utils.MDSresponseCol(mdsFile)
+        if self.hasInputFromPort('makeBinMap'):
+            makeBinMap = self.forceGetInputFromPort('makeBinMap')
+            args += ' mbt=' + str(makeBinMap).upper()
+        else:
+            makeBinMap = True
+            args += ' mbt=TRUE'
+            
+        if self.hasInputFromPort('makeProbabilityMap'):
+            makeProbabilityMap = self.forceGetInputFromPort('makeProbabilityMap')
+            args += ' mpt=' + str(makeProbabilityMap).upper()
+        else:
+            makeProbabilityMap = True
+            args += ' mpt=TRUE'  
         
-        args = "c=" + mdsFile + " o=" + output_dname + " rc=ResponseBinary"
+        if self.hasInputFromPort('seed'):
+            args += ' seed=' + str(self.forceGetInputFromPort('seed'))
         
-        command = program + " --vanilla -f " + Script + " --args " + args
-#        print command
-#        
-#        print subprocess.PIPE
-        
-        p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-
-        # Second, use communicate to run the command; communicate() returns a
-        #   tuple (stdoutdata, stderrdata)
-        if configuration.verbose:
-            print "starting R Processing of " + ModelAbbrev,
-
-        ret = p.communicate()
-        if ret[1]:
-            print ret[1]
-        del(ret)
-        
+        utils.runRScript(self.name, args)
+#        utils.breakpoint()
+#        utils.runRScript('FIT_BRT_pluggableErrorMessage.r', args, self)
         
         input_fname = os.path.join(output_dname, ModelAbbrev + "_prob_map.tif")
-        output_fname = mktempfile(prefix=ModelAbbrev + '_prob_map_', suffix='.jpeg')
-        tif_to_color_jpeg(input_fname, output_fname, color_breaks_csv)
+        output_fname = os.path.join(output_dname, ModelAbbrev + "_prob_map.jpeg")
+        if os.path.exists(input_fname):
+            utils.tif_to_color_jpeg(input_fname, output_fname, color_breaks_csv)
+        elif makeProbabilityMap == True:
+            msg = "Expected output from " + ModelAbbrev + " was not found."
+            msg += "\nThis likely indicates problems with the inputs to the R module."
+            writetolog(msg, False, True)
+            raise ModuleError(self, msg)
         
-        outFileName = os.path.join(output_dname, ModelAbbrev + "_bin_map.tif")
-        output_file1 = create_file_module(outFileName)
-        self.setResult('BinaryMap', output_file1)
+        if makeBinMap == True:
+            outFileName = os.path.join(output_dname, ModelAbbrev + "_bin_map.tif")
+            output_file1 = utils.create_file_module(outFileName)
+            self.setResult('BinaryMap', output_file1)
         
         outFileName = os.path.join(output_dname, ModelAbbrev + "_output.txt")
-        output_file2 = create_file_module(outFileName)
+        output_file2 = utils.create_file_module(outFileName)
         self.setResult('Text_Output', output_file2)
         
         outFileName = os.path.join(output_dname, ModelAbbrev + "_auc_plot.jpg")
 #        print "out auc: ", outFileName
-        output_file3 = create_file_module(outFileName)
+        output_file3 = utils.create_file_module(outFileName)
         self.setResult('AUC_plot', output_file3)
         
         outFileName = output_fname
 #        print ModelAbbrev + "_prob_map.tif: ", outFileName
-        output_file4 = create_file_module(outFileName)
+        output_file4 = utils.create_file_module(outFileName)
         self.setResult('ProbabilityMap', output_file4)
         
         outFileName = os.path.join(output_dname, ModelAbbrev + "_response_curves.pdf")
-        output_file5 = create_file_module(outFileName)
+        output_file5 = utils.create_file_module(outFileName)
         self.setResult('ResponseCurves', output_file5)
         
-        if configuration.verbose:
-            print "Finished " + ModelAbbrev   +  " builder\n"
+        outFileName = os.path.join(output_dname, "modelWorkspace")
+#        print "out auc: ", outFileName
+        output_file6 = utils.create_file_module(outFileName)
+        self.setResult('modelWorkspace', output_file6)
         
-
-
-
-
-#class Model(File):
-#    _input_ports = [('value', '(edu.utah.sci.vistrails.basic:File)', True)]
-#    _output_ports = [('value', '(gov.usgs.sahm:Model:Models)'),
-#                     ('value_as_string', 
-#                      '(edu.utah.sci.vistrails.basic:String)', True)]
-#    
-#    def compute(self):
-#        self.upToDate = True
-#        self.setResult('value', self)
+        writetolog("Finished " + ModelAbbrev   +  " builder\n", True, True) 
         
 class GLM(Model):
     def __init__(self):
@@ -225,11 +416,11 @@ class MARS(Model):
         Model.__init__(self)
         self.name = 'FIT_MARS_pluggable.r'
 
-class MAXENT(Model):
-    def __init__(self):
-        global models_path
-        Model.__init__(self)
-        self.name = 'RunMaxEnt.jar'
+#class MAXENT(Model):
+#    def __init__(self):
+#        global models_path
+#        Model.__init__(self)
+#        self.name = 'RunMaxEnt.jar'
 
 class BoostedRegressionTree(Model):
     def __init__(self):
@@ -237,41 +428,55 @@ class BoostedRegressionTree(Model):
         Model.__init__(self)
         self.name = 'FIT_BRT_pluggable.r'
 
+
+    
 class MDSBuilder(Module):
 
-    _input_ports = expand_ports([('PredictorsDir', 'basic:Directory'),
+    _input_ports = expand_ports([('PredictorListCSV', '(edu.utah.sci.vistrails.basic:File)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
-                                 ('minValue', 'basic:Float')]
+                                 ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
+                                 ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)')]
                                  )
     _output_ports = expand_ports([('mdsFile', '(gov.usgs.sahm:MergedDataSet:DataInput)')])
 
     def compute(self):
+
+        if self.hasInputFromPort('PredictorListCSV'):
+            inputsCSV = self.forceGetInputFromPort('PredictorListCSV').name
+        else:
+            raise ModuleError(self, "Missing required input from PredictorListCSV")
+        #check to see if this is a simple list (default) format 
+        #or if this has come from PARC and needs to be rearanged
+        ourMDSBuilder = MDSB.MDSBuilder()
+        ourMDSBuilder.logger = utils.getLogger()
+        ourMDSBuilder.inputsCSV = inputsCSV
+        ourMDSBuilder.fieldData = self.forceGetInputFromPort('fieldData').name
+        ourMDSBuilder.outputMDS = utils.mknextfile(prefix='MergedDataset_', suffix='.csv')
+
+        if self.hasInputFromPort('backgroundPointCount'):
+            ourMDSBuilder.pointcount = self.forceGetInputFromPort('backgroundPointCount')
+
+        if self.hasInputFromPort('backgroundProbSurf'):
+            ourMDSBuilder.probsurf = self.forceGetInputFromPort('backgroundProbSurf').name
+
         if configuration.verbose:
-            print "Running MDSBuilder  ",
-        port_map = {'fieldData': ('-f', dir_path_value, True),
-                    'PredictorsDir': ('-d', path_value, True),
-                    'minValue': ('-m', None, False)}
-         
-        args = map_ports(self, port_map)
+            ourMDSBuilder.verbose = True
 
-        output_fname = mktempfile(prefix='sahm', suffix='.mds')
-        args['-o'] = output_fname
-
-#        print args
+        writetolog("    inputsCSV=" + ourMDSBuilder.inputsCSV, False, False)
+        writetolog("    fieldData=" + ourMDSBuilder.fieldData, False, False)
+        writetolog("    outputMDS=" + ourMDSBuilder.outputMDS, False, False)
         
-        cmd_args = collapse_dictionary(args)
-#        print cmd_args
+        try:
+            ourMDSBuilder.run()
+        except:
+            utils.informative_untrapped_error(self, "MDSBuilder")
 
-        MDSB.run(cmd_args)
-
-        output_file = create_file_module(output_fname)
-        
-        if configuration.verbose:
-            print "Finished running MDS builder\n"
+        output_file = utils.create_file_module(ourMDSBuilder.outputMDS)
         
         self.setResult('mdsFile', output_file)
 
 class FieldDataQuery(Module):
+    """ A widget implementation of the SAHM FieldDataQuery"""
     _input_ports = expand_ports([('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
                                  ('aggregateRows', 'basic:Boolean'),
@@ -279,13 +484,14 @@ class FieldDataQuery(Module):
     _output_ports = expand_ports([('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')])
     
     def compute(self):
-
-        output_fname = mktempfile(prefix='FDQ_', suffix='.csv')
-        
+        writetolog("\nRunning FieldDataQuery", True)
+        output_fname = utils.mknextfile(prefix='FDQ_', suffix='.csv')
+        writetolog("    output_fname=" + output_fname, True, False)
         ourFDQ = FDQ.FieldDataQuery()
         
         if configuration.verbose:
             ourFDQ.verbose = True
+        ourFDQ.loggger = utils.getLogger()
             
         ourFDQ.template = self.forceGetInputFromPort('templateLayer').name
         ourFDQ.csv = self.forceGetInputFromPort('fieldData').name
@@ -324,7 +530,7 @@ class PARC(Module):
         
         if configuration.verbose:
             ourPARC.verbose = True
-        ourPARC.loggert = utils.getLogger()
+        ourPARC.logger = utils.getLogger()
         writetolog("    output_dname=" + output_dname, False, False)
         ourPARC.outDir = output_dname
 
@@ -401,7 +607,6 @@ class TiffConverter(Module):
 
     def compute(self):
         writetolog("\nRunning TiffConverter", True)
-        #utils.breakpoint()
         ourTC = TC.FormatConverter()
         ourTC.MDSFile = self.forceGetInputFromPort('inputMDS').name   
         ourTC.outputDir = utils.mknextdir(prefix='ConvertedTifs_')
@@ -444,26 +649,7 @@ class TestTrainingSplit(Module):
             except:
                 raise ModuleError(self, "The ratio of presence to absence (RatioPresAbs) must be a \nnumber between 0 and 1 excluding both 0 and 1") 
         
-        
-        r_path = configuration.r_path
-        program = os.path.join(r_path, "i386", "Rterm.exe") #-q prevents program from running
-        Script = os.path.join(models_path, "TestTrainSplit.r")
-
-        command = program + " --vanilla -f " + Script + " --args " + args
-        writetolog("    " + command, False, False)
-#        print command
-#        
-#        print subprocess.PIPE
-        
-        p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-
-        ret = p.communicate()
-        if ret[1]:
-            msg = "An error was encountered in the R script for this module.  The R error message is below - \n"
-            msg += ret[1]
-            writetolog(msg)
-            raise ModuleError(self, msg)
-        del(ret)
+        utils.runRScript("TestTrainSplit.r", args, self)
 
         output = os.path.join(outputMDS)
         if os.path.exists(output):
@@ -503,9 +689,7 @@ class CovariateCoorelationAndSelection(Module):
         self.setResult("outputMDS", output_file)
 
     def callDisplayMDS(self, inputMDS, outputMDS, displayJPEG):
-        global r_path
-        global models_path
-        dialog = SelectListDialog(inputMDS, outputMDS, displayJPEG, r_path, models_path)
+        dialog = SelectListDialog(inputMDS, outputMDS, displayJPEG, configuration.r_path)
         #dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
 #        print " ... finished with dialog "  
         retVal = dialog.exec_()
@@ -594,6 +778,7 @@ class ProjectionLayers(Module):
                if lookup[0] in origFile:
                    newOrigFile = origFile.replace(lookup[0], lookup[1])
             tmpCSV.writerow([newOrigFile,] + row[1:4])
+        del tmpCSV
         
         #PARC the files here
         ourPARC = parc.PARC()
@@ -603,7 +788,6 @@ class ProjectionLayers(Module):
             ourPARC.verbose = True
         writetolog("    output_dname=" + output_dname, False, False)
         ourPARC.outDir = output_dname
-        
         ourPARC.inputsCSV = workingCSV
         ourPARC.template = template
 
@@ -614,13 +798,15 @@ class ProjectionLayers(Module):
         
         #loop through our workingCSV and format it into an MDS header
         
-        output_MDSname = utils.mknextfile(prefix='ProjectionLayersMDS', suffix = '.csv')
-        outCSV = csv.writer(open(output_MDSname), 'wb')
+        outputMDS = utils.mknextfile(prefix='ProjectionLayersMDS', suffix = '.csv')
+        outCSV = csv.writer(open(outputMDS, 'wb'))
         outCSV.writerow(outHeader1)
         outCSV.writerow(outHeader2)
         outCSV.writerow(outHeader3)
         
-        
+        output_file = utils.create_file_module(outputMDS)
+        writetolog("Finished Select Projection Layers widget", True)
+        self.setResult("outputMDS", output_file)
         
         
         #at a minimum we need input MDS, template layer
@@ -671,9 +857,9 @@ class MAXENT(Module):
         ourMaxent = MaxentRunner.MAXENTRunner()
         ourMaxent.outputDir = utils.mknextdir(prefix='maxentFiles_')
         
-        if self.hasInputFromPort('inputMDS'):
-            ourMaxent.inputMDS = self.forceGetInputFromPort('inputMDS').name
-
+        
+        ourMaxent.inputMDS = self.forceGetInputFromPort('inputMDS').name
+        
         ourMaxent.maxentpath = maxent_path
         
         MaxentArgsCSV = utils.mknextfile(prefix='MaxentArgs', suffix='.csv')
@@ -764,6 +950,7 @@ def load_max_ent_params():
         #print 'port:', (name, '(' + basic_pkg + ':' + p_type + ')', kwargs)
         docs[name] = doc
 
+
     #print 'MAXENT:', input_ports
     MAXENT._input_ports = input_ports
     MAXENT._port_docs = docs
@@ -773,43 +960,14 @@ def load_max_ent_params():
     MAXENT.provide_input_port_documentation = \
         classmethod(provide_input_port_documentation)
 
-class SelectPredictorsLayers(Module):
-    '''
-    select from a list of processessed predictor layers for inclusion in the module
-    '''
-
-    _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:DataInput)")]
-    _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:DataInput)")]
-
-    def compute(self):
-        print "Starting compute ",
-        inputMDS = dir_path_value(self.forceGetInputFromPort('inputMDS', []))
-        outputMDS = mktempfile(prefix='sahm', suffix='.mds')
-        
-        print "inputMDS = ", inputMDS, "outputMDS = ", outputMDS
-        
-        self.callDisplayMDS(inputMDS, outputMDS)
-
-        output_file = create_file_module(outputMDS)
-        
-        self.setResult("outputMDS", output_file)
-        print " ... Finished compute",
-
-    def callDisplayMDS(self, inputMDS, outputMDS):
-        global r_path
-        global models_path
-        dialog = SelectListDialog(inputMDS, outputMDS, r_path, models_path)
-        #dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
-        print " ... finished with dialog ",  
-        retVal = dialog.exec_()
-        #outputPredictorList = dialog.outputList
-        print " ... finished with callDisplayMDS"
-        return inputMDS
 
 def initialize():
-    global models_path, r_path, color_breaks_csv
+    global maxent_path, color_breaks_csv
+    global session_dir
+    utils.config = configuration
     
     r_path = configuration.r_path
+    maxent_path = configuration.maxent_path
     
     #append to our path variable the location of the GDAL dependencies
     #Proj, GDAL, and GDAL data
@@ -824,41 +982,35 @@ def initialize():
     gdal_folder = os.path.join(configuration.gdal_path, "GDAL")
     currentPath = os.environ['Path']
     appendedPath = currentPath + ";" + gdal_folder
-    os.environ['Path'] = appendedPath
-    
-    #store the path to the directory containing our R code in a g
-    models_path = os.path.join(os.path.dirname(__file__), "pySAHM", "Resources", "R_Modules")  
+    os.environ['Path'] = appendedPath     
 
-    rootdir = createrootdir(configuration.output_dir)
+    session_dir = utils.createrootdir(configuration.output_dir)
+    utils.createLogger(session_dir, configuration.output_dir)
+    #log_file = Utilities.createsessionlog(session_dir, configuration.verbose)
     
     color_breaks_csv = os.path.join(os.path.dirname(__file__),  "ColorBreaks.csv")
     
     load_max_ent_params()
     
-    if configuration.verbose:
-        print "*" * 79
-        print "Initialize:"
-        print "  Locations of dependencies"
-        print "   layers csv = " + os.path.join(os.path.dirname(__file__), "layers.csv")
-        print "   ColorBreaks csv = " + color_breaks_csv
-        print "   R path = " + configuration.r_path
-        print "   R models directory = " + models_path
-        print "   GDAL folder = " + configuration.gdal_path
-        print "        Must contain subfolders proj, gdal-data, GDAL"
-        print "    "
-        print "*" * 79
+    writetolog("*" * 79)
+    writetolog("Initializing:", True, True)
+    writetolog("  Locations of dependencies")
+    writetolog("   layers csv = " + os.path.join(os.path.dirname(__file__), "layers.csv"))
+    writetolog("   ColorBreaks csv = " + color_breaks_csv)
+    writetolog("   R path = " + configuration.r_path)
+    writetolog("   GDAL folder = " + configuration.gdal_path)
+    writetolog("        Must contain subfolders proj, gdal-data, GDAL")
+    writetolog("    ")
+    writetolog("*" * 79)
     
     print "*" * 79
-    print " output directory:   " + rootdir
+    print " output directory:   " + session_dir
     print "*" * 79
     print "*" * 79
     
 def finalize():
-    cleantemps()
+    utils.cleantemps()#No longer used
     
-
-# FIXME: no need for generate_namespaces on trunk, this is built in to the
-#        registry
 
 def generate_namespaces(modules):
     module_list = []
@@ -907,17 +1059,23 @@ def build_predictor_modules():
             def get_widget_class():
                 return w_class
             return get_widget_class
+#        print class_name
+#        print PredictorList
+#        print dir(PredictorList)
+#        print widget_class
+#        print config_class
+#        print get_widget_method(widget_class)
         module = type(class_name, (PredictorList,),
                       {'get_widget_class': get_widget_method(widget_class),
                        '_input_ports': \
                            [('value',
-                             '(gov.usgs.sahm:%s:DataInput)' % class_name)]})
+                             '(gov.usgs.sahm:%s:DataInput)' % class_name, True)]})
         modules.append((module, {'configureWidgetType': config_class}))
     return modules
 
 _modules = generate_namespaces({'DataInput': [
                                               Predictor,
-                                              PredictorList,
+                                              PredictorListFile,
                                               FieldData,
                                               TemplateLayer,
                                               MergedDataSet] + \
@@ -925,11 +1083,22 @@ _modules = generate_namespaces({'DataInput': [
                                 'Tools': [FieldDataQuery,
                                           MDSBuilder,
                                           PARC,
-                                          SelectPredictorsLayers],
-                                'Models': [Model,
-                                           GLM,
+                                          TiffConverter,
+                                          ProjectionLayers,
+                                          TestTrainingSplit,
+                                          CovariateCoorelationAndSelection,
+                                          ApplyModel],
+                                'Models': [GLM,
                                            RandomForest,
                                            MARS,
                                            MAXENT,
                                            BoostedRegressionTree],
+                                'Other':  [Model,
+                                           ResampleMethod,
+                                           AggregationMethod,
+                                           PredictorList,
+#                                           ClimateModel,
+#                                           ClimateScenario,
+#                                           ClimateYear
+],
                                 })
