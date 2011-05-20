@@ -15,6 +15,8 @@ from core.modules.basic_modules import String
 
 #from enum_modules import myEnum
 
+#testGIT
+
 from widgets import get_predictor_widget, get_predictor_config
 from enum_widget import build_enum_widget
 
