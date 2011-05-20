@@ -232,7 +232,7 @@ class SelectListDialog(QtGui.QDialog):
         for i in range(0, len(header)):
             headerList.append([header[i], header2[i], header3[i]])
         
-        headerList.sort()
+        #headerList.sort()
         for item in headerList:
             if item[2] <> '':
                 child_item = QtGui.QTreeWidgetItem([item[0],])

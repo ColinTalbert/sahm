@@ -362,6 +362,8 @@ class Model(Module):
         output_fname = os.path.join(output_dname, ModelAbbrev + "_prob_map.jpeg")
         if os.path.exists(input_fname):
             utils.tif_to_color_jpeg(input_fname, output_fname, color_breaks_csv)
+            output_file4 = utils.create_file_module(output_fname)
+            self.setResult('ProbabilityMap', output_file4)
         elif makeProbabilityMap == True:
             msg = "Expected output from " + ModelAbbrev + " was not found."
             msg += "\nThis likely indicates problems with the inputs to the R module."
@@ -381,11 +383,6 @@ class Model(Module):
 #        print "out auc: ", outFileName
         output_file3 = utils.create_file_module(outFileName)
         self.setResult('AUC_plot', output_file3)
-        
-        outFileName = output_fname
-#        print ModelAbbrev + "_prob_map.tif: ", outFileName
-        output_file4 = utils.create_file_module(outFileName)
-        self.setResult('ProbabilityMap', output_file4)
         
         outFileName = os.path.join(output_dname, ModelAbbrev + "_response_curves.pdf")
         output_file5 = utils.create_file_module(outFileName)
@@ -514,7 +511,7 @@ class PARC(Module):
     with a template dataset's properties.
     '''
 
-    configuration = []
+    #configuration = []
     _input_ports = [('predictor', "(gov.usgs.sahm:Predictor:DataInput)"),
                                 ('PredictorList', '(gov.usgs.sahm:PredictorList:Other)'),
                                 ('FileListCSV', '(edu.utah.sci.vistrails.basic:File)'),
@@ -599,7 +596,7 @@ class TiffConverter(Module):
     in an MDS header into ASCII format for Maxent.
     '''
 
-    configuration = []
+    #configuration = []
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:DataInput)"),
                                 ('format', '(edu.utah.sci.vistrails.basic:String)'),]
 
