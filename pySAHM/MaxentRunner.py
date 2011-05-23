@@ -119,9 +119,6 @@ class MAXENTRunner(object):
         if not os.path.exists(self.inputMDS):
             raise RuntimeError(self, 'Input MDS, ' + self.inputMDS + ', could not be found on file system')
         
-        if not self.args.has_key('projectionlayers'):
-            self.args['projectionlayers'] = ''
-        
         if self.args['projectionlayers'] <> '' and os.path.isdir(self.args['projectionlayers']):
             raise RuntimeError(self, "Input 'projectionlayers' must be a directory")
         

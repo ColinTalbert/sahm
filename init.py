@@ -15,13 +15,14 @@ from core.modules.basic_modules import String
 
 #from enum_modules import myEnum
 
-
 from widgets import get_predictor_widget, get_predictor_config
 from enum_widget import build_enum_widget
 
 from SelectPredictorsLayers import SelectListDialog
 #from maxent_module import MAXENTRunner
 import utils
+#import packages.sahm.pySAHM.Utilites
+
 
 #import our python SAHM Processing files
 import packages.sahm.pySAHM.FieldDataQuery as FDQ
