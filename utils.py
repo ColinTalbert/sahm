@@ -330,6 +330,12 @@ def getShortName(fullPathName):
         shortname = os.path.splitext(shortname)[0]
     return shortname
 
+def getRasterName(fullPathName):
+    if fullPathName.endswith('hdr.adf'):
+        rastername = os.path.split(fullPathName)[0]
+    else:
+        rastername = fullPathName
+    return rastername
 
 def getModelsPath():
     return os.path.join(os.path.dirname(__file__), "pySAHM", "Resources", "R_Modules")
