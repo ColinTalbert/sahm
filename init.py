@@ -111,15 +111,20 @@ class Predictor(Constant):
                      ('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
 
     def compute(self):
+        #utils.breakpoint()
         if (self.hasInputFromPort("ResampleMethod")):
             resampleMethod = self.getInputFromPort("ResampleMethod")
+            if resampleMethod.lower() not in ['nearestneighbor', 'bilinear', 'cubic', 'cubicspline', 'lanczos']:
+                raise ModuleError(self, "Resample Method not one of 'nearestneighbor', 'bilinear', 'cubic', 'cubicspline', or 'lanczos'")
         else:
-            raise ModuleError(self, "No Resample Method specified")
+            resampleMethod = 'Bilinear'
         
         if (self.hasInputFromPort("AggregationMethod")):
             aggregationMethod = self.getInputFromPort("AggregationMethod")
+            if self.getInputFromPort("AggregationMethod").lower() not in ['mean', 'max', 'min', 'majority', 'none']:
+                raise ModuleError(self, "No Aggregation Method specified")
         else:
-            raise ModuleError(self, "No Aggregation Method specified")
+            aggregationMethod = "Mean"
         
         if (self.hasInputFromPort("categorical")):
             if self.getInputFromPort("categorical") == True:
@@ -130,7 +135,7 @@ class Predictor(Constant):
             categorical = '0'
         
         if (self.hasInputFromPort("file")):
-            inFile = self.getInputFromPort("file").name
+            inFile = utils.getRasterName(self.getInputFromPort("file").name)
         else:
             raise ModuleError(self, "No input file specified")
         self.setResult('value', (inFile, categorical, resampleMethod, aggregationMethod))
@@ -472,7 +477,7 @@ class MDSBuilder(Module):
         self.setResult('mdsFile', output_file)
 
 class FieldDataQuery(Module):
-    """ A widget implementation of the SAHM FieldDataQuery"""
+    '''A widget implementation of the SAHM FieldDataQuery'''
     _input_ports = expand_ports([('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
                                  ('aggregateRows', 'basic:Boolean'),
@@ -507,13 +512,13 @@ class PARC(Module):
     '''
     A widget to run the PARC module which
     provides functionality to sync raster layer properties
-    with a template dataset's properties.
+    with a template dataset's properties. DI Test....
     '''
 
     #configuration = []
     _input_ports = [('predictor', "(gov.usgs.sahm:Predictor:DataInput)"),
                                 ('PredictorList', '(gov.usgs.sahm:PredictorList:Other)'),
-                                ('FileListCSV', '(edu.utah.sci.vistrails.basic:File)'),
+                                ('csvFileList', '(edu.utah.sci.vistrails.basic:File)'),
                                 ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)')]
 
     _output_ports = [('PredictorListCSV', '(edu.utah.sci.vistrails.basic:File)')]
@@ -559,6 +564,7 @@ class PARC(Module):
         del csvWriter
         ourPARC.inputsCSV = workingCSV
         ourPARC.template = self.forceGetInputFromPort('templateLayer').name
+        writetolog('    template layer = ' & self.forceGetInputFromPort('templateLayer').name)
 
         try:
             ourPARC.parcFiles()
