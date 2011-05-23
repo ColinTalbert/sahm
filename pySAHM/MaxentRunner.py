@@ -56,6 +56,9 @@ class MAXENTRunner(object):
         else:
             raise Exception, "No MDS supplied."
 
+        if not self.args.has_key('projectionlayers'):
+            self.args['projectionlayers'] = ''
+
         if self.trainingCSV <> '':
             self.args['samplesfile'] = self.trainingCSV
         else:
@@ -84,6 +87,7 @@ class MAXENTRunner(object):
             jar = os.path.join(self.maxentpath, 'maxent.jar')
         else:
             jar = self.maxentpath
+            
         res, output = self.run_cmd_line_jar(jar, strargs)
            
     def run_cmd_line_jar(self, jar_name, args):
@@ -99,7 +103,7 @@ class MAXENTRunner(object):
         
         self.writetolog('    strErr:  ' + str(p.communicate()[0]))
         self.writetolog('    strOut:  ' + str(''))
-        return res, output
+        return str(p.communicate()[0]), str(p.communicate()[1])
         
     def loadArgs(self):
         argsReader = csv.reader(open(self.argsCSV, 'r'))
