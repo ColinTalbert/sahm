@@ -113,7 +113,7 @@ class PARC:
         sourceParams = self.getRasterParams(source[0])
                 
         gdalType = None
-        if source[2].lower() == "nearestneighbour":
+        if source[2].lower() == "nearestneighbor":
             gdalType = gdalconst.GRA_NearestNeighbour
         if source[2].lower() == "bilinear":
             gdalType = gdalconst.GRA_Bilinear
@@ -124,7 +124,7 @@ class PARC:
         if source[2].lower() == "lanczos":
             gdalType = gdalconst.GRA_Lanczos
         if gdalType == None:
-            self.logger.writetolog("   Specified resampling method (" + source[2] + ") not one of 'NearestNeighbour', 'Bilinear', 'Cubic', 'CubicSpline', or 'Lanczos'.  Defaulting to 'NearestNeighbor'")
+            self.logger.writetolog("   Specified resampling method (" + source[2] + ") not one of 'NearestNeighbor', 'Bilinear', 'Cubic', 'CubicSpline', or 'Lanczos'.  Defaulting to 'NearestNeighbor'")
             gdalType = gdalconst.GRA_NearestNeighbour
         
         #Open dgal dataset of the source to pull some values from
