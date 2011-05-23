@@ -115,7 +115,8 @@ class Predictor(Constant):
         if (self.hasInputFromPort("ResampleMethod")):
             resampleMethod = self.getInputFromPort("ResampleMethod")
             if resampleMethod.lower() not in ['nearestneighbor', 'bilinear', 'cubic', 'cubicspline', 'lanczos']:
-                raise ModuleError(self, "Resample Method not one of 'nearestneighbor', 'bilinear', 'cubic', 'cubicspline', or 'lanczos'")
+                raise ModuleError(self, 
+                                  "Resample Method not one of 'nearestneighbor', 'bilinear', 'cubic', 'cubicspline', or 'lanczos'")
         else:
             resampleMethod = 'Bilinear'
         
