@@ -160,7 +160,7 @@ class PARC:
             tmpOutput2 = os.path.splitext(tmpOutput)[0] + ".tif"
             self.Aggregate(tmpOutput2, dest, 
                         sourceParams, self.templateParams,
-                        self.aggMethod, numSourcePerTarget)
+                        source[3], numSourcePerTarget)
             
             os.remove(tmpOutput2)
             
