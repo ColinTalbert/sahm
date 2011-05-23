@@ -243,8 +243,8 @@ class PredictorListFile(Module):
 
 class TemplateLayer(Path):
 #    _input_ports = [('FilePath', '(edu.utah.sci.vistrails.basic:File)')]
-    _output_ports = [('value', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
-                     ('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
+    _output_ports = [('value', '(gov.usgs.sahm:TemplateLayer:DataInput)')]
+                     #('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
 #    def compute(self):
 #        output_file = create_file_module(self.forceGetInputFromPort('FilePath', []))
 #        self.setResult('value', output_file)
@@ -564,9 +564,10 @@ class PARC(Module):
                 csvWriter.writerow(list(predictor))
         f.close()
         del csvWriter
+        #utils.breakpoint()
         ourPARC.inputsCSV = workingCSV
         ourPARC.template = self.forceGetInputFromPort('templateLayer').name
-        writetolog('    template layer = ' & self.forceGetInputFromPort('templateLayer').name)
+        writetolog('    template layer = ' + self.forceGetInputFromPort('templateLayer').name)
 
         try:
             ourPARC.parcFiles()
