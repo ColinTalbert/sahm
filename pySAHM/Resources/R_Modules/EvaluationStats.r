@@ -36,13 +36,24 @@ make.auc.plot.jpg<-function(ma.reduced,pred,plotname,modelname,train.split=FALSE
 
 ##############################################################################
 EvaluationStats<-function(out,thresh,train,train.pred,opt.methods=opt.methods){
+    response<-out$dat$ma$ma.test[,1]
+
+     if(out$input$model.source.file=="rf.r") pred<-tweak.p(as.vector(predict(out$mods$final.mod,out$dat$ma$ma.test,type="prob")[,2]))
+
+    if(out$input$model.source.file=="mars.r") pred<-mars.predict(fit,out$dat$ma$ma.test)$prediction[,1]
+
+    if(out$input$model.source.file=="glm.r")  pred=glm.predict(mymodel.glm.step,out$dat$ma.ma.test)
+
+    if(out$input$model.source.file=="brt.r") pred=predict.gbm(out$mods$final.mod,out$dat$ma$ma.test,out$mods$final.mod$target.trees,type="response")
+
+
+
   auc.output <- try(make.auc.plot.jpg(out$dat$ma$ma.test,pred=predict.gbm(out$mods$final.mod,out$dat$ma$ma.test,
             out$mods$final.mod$target.trees,type="response"),plotname=paste(out$dat$bname,"_auc_plot.jpg",sep=""),
             modelname="BRT",train.split=TRUE,thresh=thresh,train=train,train.pred,opt.methods=opt.methods),silent=T)
 
-     response<-out$dat$ma$ma.test[,1]
-     pred=predict.gbm(out$mods$final.mod,out$dat$ma$ma.test,
-                 out$mods$final.mod$target.trees,type="response")
+
+
 
                  if(class(auc.output)=="try-error"){
               out$ec<-out$ec+1

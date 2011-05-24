@@ -78,7 +78,7 @@ fit.rf.fct(ma.name=input.file,
   tif.dir=NULL,
   output.dir=output.dir,
   response.col=rc,make.p.tif=F,make.binary.tif=F,
-      debug.mode=F,n.trees=1000)
+      debug.mode=T,n.trees=1000)
 
 PredictModel(workspace=paste("C:\\VisTrails\\mtalbert_20110504T132851","modelWorkspace",sep="\\"),out.dir="C:\\VisTrails")
       

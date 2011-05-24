@@ -20,7 +20,7 @@
 fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^response.binary",make.p.tif=T,make.binary.tif=T,
       debug.mode=F,responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL, samp.replace=FALSE, sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
       localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=proximity,norm.votes=TRUE,do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE, make.r.curves=T,
-      seed=NULL,script.name="rf.r",opt.methods=2,save.model=FALSE){
+      seed=NULL,script.name="rf.r",opt.methods=2,save.model=TRUE){
     # This function fits a boosted regression tree model to presence-absence data.
     # written by Alan Swanson, Jan-March 2009
     # uses code modified from that published in Elith et al 2008
