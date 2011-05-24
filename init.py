@@ -78,7 +78,31 @@ def expand_ports(port_list):
 #    print new_port_list
     return new_port_list
 
-class FieldData(File):
+class FieldData(File): 
+    '''
+    FieldData
+
+    The FieldData module allows a user to add presence/absence points recorded across a landscape
+    for the phenomenon being modeled (e.g. plant sightings, evidence of animal presence, etc.).
+    The input data for this module must be in the form of a .csv file that follows one of two formats: 
+
+    Format 1
+    A .csv file with the following column headings, in order: "X," "Y," and "responseBinary".
+    In this case, the "X" field should be populated with the horizontal (longitudinal) positional
+    data for a sample point. The "Y" field should be populated with the vertical (latitudinal) data
+    for a sample point. These values must be in the same coordinate system/units as the template
+    layer used in the workflow. The column "responseBinary" should be populated with either a '0'
+    (indicating absence at the point) or a '1' (indicating presence at the point).
+
+    Format 2
+    A .csv file with the following column headings, in order: "X," "Y," and "responseCount".
+    In this case, the "X" field should be populated with the horizontal (longitudinal) positional
+    data for a sample point. The "Y" field should be populated with the vertical (latitudinal) data
+    for a sample point. These values must be in the same coordinate system/units as the template
+    layer used in the workflow. The column "responseCount" should be populated with either a '-999'
+    (indicating that the point is a background point) or a numerical value (either '0' or a positive integer)
+    indicating the number of a incidences of the phenomenon recorded at that point.
+    '''   
 #    _input_ports = [('csvFile', '(edu.utah.sci.vistrails.basic:File)')]
     _output_ports = [('value', '(gov.usgs.sahm:FieldData:DataInput)'),
                      ('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
