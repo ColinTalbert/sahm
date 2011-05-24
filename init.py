@@ -83,7 +83,7 @@ class FieldData(File):
     FieldData
 
     The FieldData module allows a user to add presence/absence points recorded across a landscape
-    for the phenomenon being modeled (e.g. plant sightings, evidence of animal presence, etc.).
+    for the phenomenon being modeled (e.g., plant sightings, evidence of animal presence, etc.).
     The input data for this module must be in the form of a .csv file that follows one of two formats: 
 
     Format 1
@@ -128,6 +128,27 @@ class ResampleMethod(String):
         return ResampleMethod._widget_class
 
 class Predictor(Constant):
+    '''
+    Predictor
+    The Predictor module allows a user to select a single raster layer for consideration in the
+    modeled analysis. Four parameters must be specified by the user:
+    
+    1. Aggregation Method: The aggregation method to be used in the event that the raster layer
+    must be up-scaled to match the template layer (i.e., generalizing a 10 m input layer to a
+    100 m output layer). Care should be taken to ensure that the aggregation method that best
+    preserves the integrity of the data is used.
+    
+    2. Resample Method: The resample method to be used when re-aligning the predictor data set
+    to match up with the template layer. 
+    
+    3. Categorical (Boolean): Checking this box indicates that the data contained in the raster
+    layer is categorical (e.g. landcover categories). Leaving this box unchecked indicates that
+    the data contained in the raster is continuous (e.g., a DEM layer). This distinction is important
+    in determining the appropriate resampling method.
+    
+    4. File Path: The location of the raster file. A user can navigate to the location on their file system.
+
+    '''
     _input_ports = [('categorical', '(edu.utah.sci.vistrails.basic:Boolean)'),
                     ('ResampleMethod', '(gov.usgs.sahm:ResampleMethod:Other)'),
                     ('AggregationMethod', '(gov.usgs.sahm:AggregationMethod:Other)'),
