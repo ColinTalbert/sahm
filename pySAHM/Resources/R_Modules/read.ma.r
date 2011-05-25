@@ -6,10 +6,10 @@
       out.list <- out$dat$ma
       out.list$status[1] <- file.access(ma.name,mode=0)==0
       if(!is.null(out$input$tif.dir)){
-          ma <- try(read.csv(ma.name, header=TRUE),silent=T)}
+          ma <- try(read.csv(ma.name, header=TRUE))}
 
       if(is.null(out$input$tif.dir)){
-          try(ma<-read.csv(ma.name,skip=3),silent=T)
+          try(ma<-read.csv(ma.name,skip=3))
           hl<-readLines(ma.name,1)
           hl=strsplit(hl,',')
           colnames(ma) = hl[[1]]

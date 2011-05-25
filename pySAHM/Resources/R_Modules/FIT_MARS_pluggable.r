@@ -183,7 +183,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     flush.console()
 
     fit <- try(mars.glm(data=out$dat$ma$ma, mars.x=c(2:ncol(out$dat$ma$ma)), mars.y=1, mars.degree=out$input$mars.degree, family=out$input$model.family,
-          site.weights=out$dat$ma$train.weights, penalty=out$input$mars.penalty),silent=T)
+          site.weights=out$dat$ma$train.weights, penalty=out$input$mars.penalty))
       
     if(class(fit)=="try-error"){
           if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
@@ -197,7 +197,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
 
     assign("out",out,envir=.GlobalEnv)
     t3 <- unclass(Sys.time())
-    fit_contribs <- try(mars.contribs(fit),silent=T)
+    fit_contribs <- try(mars.contribs(fit))
     if(class(fit_contribs)=="try-error"){
           if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
           out$ec<-out$ec+1
@@ -236,7 +236,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     ##############################################################################################################
            
     # Store .jpg ROC plot #    
-    pred<-try(mars.predict(fit,out$dat$ma$ma)$prediction[,1],silent=T)
+    pred<-try(mars.predict(fit,out$dat$ma$ma)$prediction[,1])
     if(class(pred)=="try-error"){
           if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
           out$ec<-out$ec+1
@@ -245,8 +245,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
           return()
           } 
                           
-    auc.output <- try(make.auc.plot.jpg(out$dat$ma$ma,pred=pred,plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="MARS",opt.methods=opt.methods),
-            silent=T)
+    auc.output <- try(make.auc.plot.jpg(out$dat$ma$ma,pred=pred,plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="MARS",opt.methods=opt.methods))
 
     
     if(class(auc.output)=="try-error"){
@@ -264,9 +263,9 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
         nvar <- nrow(out$mods$summary)
         pcol <- min(ceiling(sqrt(nvar)),4)
         prow <- min(ceiling(nvar/pcol),3)
-        r.curves <- try(mars.plot(fit,plot.layout=c(prow,pcol),file.name=paste(bname,"_response_curves.pdf",sep="")),silent=T)
+        r.curves <- try(mars.plot(fit,plot.layout=c(prow,pcol),file.name=paste(bname,"_response_curves.pdf",sep="")))
         
-        } else r.curves<-try(mars.plot(fit,plot.it=F),silent=T)
+        } else r.curves<-try(mars.plot(fit,plot.it=F))
         
         if(class(r.curves)!="try-error") {
             out$mods$r.curves <- r.curves
@@ -294,7 +293,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
                 tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=pred.mars,factor.levels=out$dat$ma$factor.levels,make.binary.tif=make.binary.tif,
                 thresh=out$mods$auc.output$thresh,make.p.tif=make.p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
                 outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50.0,NAval=-3000,
-                fnames=out$dat$tif.names,logname=logname),silent=T)     #"brt.prob.map.tif"
+                fnames=out$dat$tif.names,logname=logname))     #"brt.prob.map.tif"
             }
 
         if(class(mssg)=="try-error"){
@@ -484,8 +483,8 @@ get.image.info <- function(image.names){
     out$type[grep(".asc",image.names)]<-"asc"
     for(i in 1:n.images){
         if(out$type[i]=="tif"){
-            x <-try(GDAL.open(full.names[1],read.only=T),silent=T)
-            suppressMessages(try(GDAL.close(x),silent=T))
+            x <-try(GDAL.open(full.names[1],read.only=T))
+            suppressMessages(try(GDAL.close(x)))
             if(class(x)!="try-error") out$available[i]<-T
             x<-try(file.info(full.names[i]))
         } else {
@@ -665,7 +664,10 @@ function (mars.glm.object,sp.no = 1, verbose = TRUE)
 	             quote=FALSE)
       }
       x.data.new<-as.data.frame(x.data.new)
-      new.model <- glm(y.data[,sp.no] ~ ., data=x.data.new, family = family)
+      if(dim(x.data.new)[2]==0){
+           new.model <- glm(y.data[,sp.no] ~ 1, family = family)
+           }else new.model <- glm(y.data[,sp.no] ~ ., data=x.data.new, family = family)
+           
       comparison <- anova(glm.model,new.model,test="Chisq")
 
       df[i] <- comparison[2,3]

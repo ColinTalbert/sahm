@@ -276,7 +276,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
           cat(saveXML(brt.to.xml(out),indent=T),'\n')
           return()}
 
-    cat("\nfinished with learning rate estimation, lr=",out$mods$lr.mod$lr0,", t=",try(round(out$mods$lr.mod$t.elapsed,2),silent=T),"sec\n")
+    cat("\nfinished with learning rate estimation, lr=",out$mods$lr.mod$lr0,", t=",try(round(out$mods$lr.mod$t.elapsed,2)),"sec\n")
     cat("\nfor final fit, lr=",out$mods$lr.mod$lr,"and tc=",out$mods$parms$tc.full,"\n");flush.console()
     if(!debug.mode) {sink();cat("Progress:30%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("30%\n")}
 
@@ -301,7 +301,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
         if(!debug.mode) {sink();cat("Progress:40%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("40%\n")}
         cat("\nfinished with trimmed model fitting, n.trees=",m0$target.trees,", t=",round(t1b-t1,2),"sec\n");flush.console()
         cat("\nbeginning model simplification - very slow...\n");flush.console()
-        out$mods$simp.mod <- try(gbm.simplify(m0,n.folds=out$input$n.folds,plot=F,verbose=F,alpha=out$input$alpha),silent=T) # this step is very slow #
+        out$mods$simp.mod <- try(gbm.simplify(m0,n.folds=out$input$n.folds,plot=F,verbose=F,alpha=out$input$alpha)) # this step is very slow #
         if(debug.mode) assign("out",out,envir=.GlobalEnv)
         if(class(out$mods$simp.mod)=="try-error"){
             if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
@@ -353,7 +353,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
 
     # Generate and store text summary #
     #source('F:/code for Jeff and Roger/boosted regression trees/brt.functions.aks.021709.r')
-    y <- try(gbm.interactions(out$mods$final.mod),silent=T)
+    y <- try(gbm.interactions(out$mods$final.mod))
     if(debug.mode) assign("out",out,envir=.GlobalEnv)
     if(class(y)!="try-error"){
         int <- y$rank.list;
@@ -368,7 +368,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
         out$error.mssg[[out$ec]] <- paste("ERROR: problem assessing interactions:",y)
         }
 
-    model.summary <- try(summary(out$mods$final.mod,plotit=F),silent=T)
+    model.summary <- try(summary(out$mods$final.mod,plotit=F))
     if(class(model.summary)=="try-error"){
         if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
         out$ec<-out$ec+1
@@ -414,7 +414,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
 
         pdf(paste(bname,"_response_curves.pdf",sep=""),width=11,height=8.5,onefile=T)
             par(oma=c(2,2,4,2))
-            r.curves <- try(gbm.plot(out$mods$final.mod,plotit=T,plot.layout=c(prow,pcol)),silent=T)
+            r.curves <- try(gbm.plot(out$mods$final.mod,plotit=T,plot.layout=c(prow,pcol)))
             if(class(r.curves)!="try-error") {out$mods$r.curves <- r.curves
             mtext(paste("BRT response curves for",basename(ma.name)),outer=T,side=3,cex=1.3)}
             par(mfrow=c(1,1))
@@ -425,7 +425,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
                 }
         graphics.off()
         } else {
-            r.curves <- try(gbm.plot(out$mods$final.mod,plotit=F),silent=T)
+            r.curves <- try(gbm.plot(out$mods$final.mod,plotit=F))
             if(class(r.curves)!="try-error") {out$mods$r.curves <- r.curves
               } else {
               out$ec<-out$ec+1
@@ -736,8 +736,8 @@ get.image.info <- function(image.names){
     out$type[grep(".asc",image.names)]<-"asc"
     for(i in 1:n.images){
         if(out$type[i]=="tif"){
-            x <-try(GDAL.open(full.names[1],read.only=T),silent=T)
-            suppressMessages(try(GDAL.close(x),silent=T))
+            x <-try(GDAL.open(full.names[1],read.only=T))
+            suppressMessages(try(GDAL.close(x)))
             if(class(x)!="try-error") out$available[i]<-T
             x<-try(file.info(full.names[i]))
         } else {
