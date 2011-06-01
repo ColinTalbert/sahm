@@ -32,6 +32,10 @@ output.dir="C:\\VisTrails\\mtalbert_20110504T132851"
     rc="ResponseBinary"
     input.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSet_1.csv"
 
+#this file does have a test training split
+    input.file<-"I:\\VisTrails\\WorkingFiles\\workspace\\talbertc_20110519T121044\\TestTrainingSplit_1.csv"
+    rc="responseBinary"
+    
 fit.brt.fct(ma.name=input.file,
       tif.dir=NULL,output.dir=output.dir,
       response.col=rc,test.resp.col="response",make.p.tif=F,make.binary.tif=F,
@@ -44,12 +48,18 @@ PredictModel(workspace=paste("C:\\VisTrails\\mtalbert_20110504T132851","modelWor
 #########################################################
 ## MARS TESTING
 output.dir="C:\\VisTrails\\mtalbert_20110504T132851"
-    rc="ResponseBinary"
-    input.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSet_1.csv"
 
+    #this input file does not have a test training split
+    input.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSet_1.csv"
+    rc="ResponseBinary"
+    
+    #this file does have a test training split
+    input.file<-"I:\\VisTrails\\WorkingFiles\\workspace\\talbertc_20110519T121044\\TestTrainingSplit_1.csv"
+    rc="responseBinary"
+    
 fit.mars.fct(ma.name=input.file,
         tif.dir=NULL,output.dir=output.dir,
-        response.col="ResponseBinary",make.p.tif=F,make.binary.tif=F,
+        response.col=rc,make.p.tif=F,make.binary.tif=F,
         mars.degree=1,mars.penalty=2,debug.mode=F,responseCurveForm="pdf",model.family="binomial",script.name="mars.r")
 
 PredictModel(workspace=paste("C:\\VisTrails\\mtalbert_20110504T132851","modelWorkspace",sep="\\"),out.dir="C:\\VisTrails")
@@ -60,6 +70,10 @@ output.dir="C:\\VisTrails\\mtalbert_20110504T132851"
     rc="ResponseBinary"
     input.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSet_1.csv"
 
+#this file does have a test training split
+    input.file<-"I:\\VisTrails\\WorkingFiles\\workspace\\talbertc_20110519T121044\\TestTrainingSplit_1.csv"
+    rc="responseBinary"
+    
 fit.glm.fct(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,
@@ -73,6 +87,10 @@ PredictModel(workspace=paste("C:\\VisTrails\\mtalbert_20110504T132851","modelWor
 output.dir="C:\\VisTrails\\mtalbert_20110504T132851"
     rc="ResponseBinary"
     input.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSet_1.csv"
+
+#this file does have a test training split
+    input.file<-"I:\\VisTrails\\WorkingFiles\\workspace\\talbertc_20110519T121044\\TestTrainingSplit_1.csv"
+    rc="responseBinary"
     
 fit.rf.fct(ma.name=input.file,
   tif.dir=NULL,

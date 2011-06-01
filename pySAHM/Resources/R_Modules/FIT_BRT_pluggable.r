@@ -219,7 +219,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
 
     # sink console output to log file #
     if(!debug.mode) {sink(logname <- paste(bname,"_log.txt",sep=""));on.exit(sink)} else logname<-NULL
-    options(warn=-1)
+    options(warn=1)
     out <- check.libs(list("gbm"),out)
 
     # check that only one of tif.dir and tif.file is supplied #

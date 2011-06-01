@@ -180,6 +180,9 @@
     	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
     }
 
+    RatioResAbs<-as.numeric(RatioPresAbs)
+    trainProp<-as.numeric(trainProp)
+    
 	#Run the Test training split with these parameters
 	TestTrainSplit(input.file=infil,output.file=output.file,response.col=responseCol,
   trainProp=trainProp,RatioPresAbs=RatioPresAbs)

@@ -139,7 +139,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     
     # sink console output to log file #
     if(!debug.mode) {sink(logname <- paste(bname,"_log.txt",sep=""));on.exit(sink)} else logname<-NULL
-    options(warn=-1)
+    options(warn=1)
     
     # check tif dir #
         # check tif dir #
@@ -1678,7 +1678,6 @@ Args <- commandArgs(trailingOnly=FALSE)
     	if(argSplit[[1]][1]=="deg") mars.degree <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="pen") mars.penalty <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="mf") model.family <- argSplit[[1]][2]
-   		if(argSplit[[1]][1]=="mf") model.family <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="om")  opt.methods <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="savm")  save.model <- argSplit[[1]][2]
     }
