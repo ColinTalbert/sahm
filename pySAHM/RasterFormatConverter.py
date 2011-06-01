@@ -24,29 +24,42 @@ class FormatConverter(object):
         #instance level variables
         self.verbose = False
         self.MDSFile = ''
+        self.inputDir = ''
         self.outputDir = ''
         self.format = 'asc'
         self.logger = None
+        self.driverExt = {'asc':'AAIGrid', 'bil':'EHdr', 'img':'HFA', 'jpg':'JPEG'}
         
     def run(self):
         self.validateArgs()
-        usedTifs = self.extractFileNames()
+        if self.MDSFile <> '':
+            usedTifs = self.extractFileNames()
+        else:
+            usedTifs = self.fileNamesFromFolder()
         #self.writetolog('    Converting: ' + ','.join(usedTifs))
         self.convertEnvironmentalLayers(usedTifs, self.outputDir, self.format)
         
     def validateArgs(self):
         argProblem = False
-        if not isMDSFile(self.MDSFile):
-            self.writetolog("The supplied MDS file, " + self.MDSFile + ", does not appear to be in the appropriate format.")
+        if os.path.isdir(self.inputDir):
+            pass
+        elif os.path.exists(self.MDSFile):
+            if not isMDSFile(self.MDSFile):
+                self.writetolog("The supplied MDS file, " + self.MDSFile + ", does not appear to be in the appropriate format.")
+                argProblem = True
+        else:
+            self.writetolog("Neither an input Directory or MDS File was supplied.")
             argProblem = True
+        
+        
         if not os.path.isdir(self.outputDir):
             try:
                 os.mkdir(self.outputDir)
             except:
                 self.writetolog('The supplied output directory, ' + self.outputDir + ", does not exist and could not be created.")
                 argProblem = True
-        if not self.format.lower() in ['asc', 'bil']:
-            self.writetolog("The supplied format must be one of 'asc' or 'bil'" )
+        if not self.format.lower() in self.driverExt.keys():
+            self.writetolog("The supplied format must be one of " + ", ".join(self.driverExt.keys()) )
             argProblem = True
         if argProblem:
             raise RuntimeError
@@ -67,19 +80,38 @@ class FormatConverter(object):
             if header2[i] == '1' and  header1[i] <> 'Split':
                 usedTifs.append(header3[i])
         return usedTifs
-        
+    
+    def fileNamesFromFolder(self):
+        usedRasters = []
+        items = os.listdir(self.inputDir)
+        for item in items:
+            print item
+            fullPath = os.path.join(self.inputDir, item)
+            try:
+                if os.path.isdir(fullPath) or \
+                    os.path.splitext(item)[1].lower() in \
+                    ['.bil', '.img', '.tif', '.jpg', '.bmp', '.asc']:
+                    inds = None
+                    inds = gdal.Open(fullPath, gdalconst.GA_ReadOnly)
+                    if inds is not None:
+                        usedRasters.append(fullPath)
+            except:
+                pass
+        return usedRasters
+
     
     def convertEnvironmentalLayers(self, files, outputFolder, type):
-        driverExt = {'asc':'AAIGrid', 'bil':'EHdr'}
+        
         i = 1
         for f in files:
             f_name = os.path.splitext(os.path.split(f)[1])[0]
             self.writetolog('    Starting on ' + f_name)
             outputfile = os.path.join(outputFolder, f_name + '.' + type)
-            self.convertFormat(f, outputfile, driverExt[type]) 
+            self.convertFormat(f, outputfile, self.driverExt[type]) 
             if self.verbose:
                 self.writetolog('   Finished converting ' + f_name + '    ' + str(i) + ' out of ' + str(len(files)) + ' finished.')
             i += 1
+            
     def convertFormat(self, file, outfile, driver):
         inds = gdal.Open(file, gdalconst.GA_ReadOnly)
        

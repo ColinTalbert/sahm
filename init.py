@@ -28,7 +28,7 @@ import utils
 import packages.sahm.pySAHM.FieldDataQuery as FDQ
 import packages.sahm.pySAHM.MDSBuilder as MDSB
 import packages.sahm.pySAHM.PARC as parc
-import packages.sahm.pySAHM.TiffConverter as TC
+import packages.sahm.pySAHM.RasterFormatConverter as RFC
 import packages.sahm.pySAHM.MaxentRunner as MaxentRunner
 
 from utils import writetolog
@@ -523,7 +523,7 @@ class MDSBuilder(Module):
         
         self.setResult('mdsFile', output_file)
 
-class FieldDataQuery(Module):
+class FieldDataAggregateAndWeight(Module):
     '''A widget implementation of the SAHM FieldDataQuery'''
     _input_ports = expand_ports([('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
@@ -642,7 +642,7 @@ class PARC(Module):
         writetolog("Finished running PARC", True)
         self.setResult('PredictorListCSV', output_file)
 
-class TiffConverter(Module):
+class RasterFormatConverter(Module):
     '''
     A widget to run the TiffConverter module which
     provides functionality to convert the tiffs specified 
@@ -712,7 +712,7 @@ class TestTrainingSplit(Module):
         self.setResult("outputMDS", output_file)
         
 
-class CovariateCoorelationAndSelection(Module):
+class CovariateCorrelationAndSelection(Module):
     '''
     select from a list of processessed predictor layers for inclusion in the module
     '''
@@ -1130,13 +1130,13 @@ _modules = generate_namespaces({'DataInput': [
                                               TemplateLayer,
                                               MergedDataSet] + \
                                               build_predictor_modules(),
-                                'Tools': [FieldDataQuery,
+                                'Tools': [FieldDataAggregateAndWeight,
                                           MDSBuilder,
                                           PARC,
-                                          TiffConverter,
+                                          RasterFormatConverter,
                                           ProjectionLayers,
                                           TestTrainingSplit,
-                                          CovariateCoorelationAndSelection,
+                                          CovariateCorrelationAndSelection,
                                           ApplyModel],
                                 'Models': [GLM,
                                            RandomForest,
@@ -1147,6 +1147,8 @@ _modules = generate_namespaces({'DataInput': [
                                            ResampleMethod,
                                            AggregationMethod,
                                            PredictorList,
+                                           MergedDataSet,
+                                           RastersWithPARCInfoCSV],
 #                                           ClimateModel,
 #                                           ClimateScenario,
 #                                           ClimateYear
