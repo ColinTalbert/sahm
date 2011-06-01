@@ -79,6 +79,8 @@ class PARC:
             2: Make sure all of our instance variables are good and proper
             3: Loop through the list of sourceImages and PARC each one.
             4: The outputs will be stored in the output directory
+            5: Additionally an output CSV will be produced that lists the 
+            inputs, parameters used, and outputs
         '''
         
         self.validateArgs()
@@ -441,6 +443,16 @@ class PARC:
         Make sure the user sent us some stuff we can work with
         """
 
+        if not os.path.exists(self.outDir):
+            raise Exception, "Specified Output directory " + self.outDir + " not found on file system"
+        
+        if not os.path.isdir(self.outDir):
+            raise Exception, "Specified Output directory " + self.outDir + " is not a directory"
+     
+        if self.logger is None:
+            self.logger = utilities.logger(self.outDir, self.verbose)
+        self.writetolog = self.logger.writetolog
+
         # Validate template image.
         if self.template is None:
             raise Exception, "template raster not provided (-t command line argument missing)"
@@ -467,6 +479,11 @@ class PARC:
         inputsCSV = csv.reader(open(self.inputsCSV, 'r'))
         header = inputsCSV.next()
         strInputFileErrors = ""
+
+        outputCSV = os.path.join(self.outDir, "PARC_Files.csv")
+        output = csv.writer(open(outputCSV, "wb"))
+        output.writerow(["PARCOutputFile", "Categorical", "Resampling", "Aggregation", "OriginalFile"])
+        
         for row in inputsCSV:
             inputFile = row[0]
             sourceParams = self.getRasterParams(inputFile)
@@ -487,30 +504,50 @@ class PARC:
                     strInputFileErrors += "\n        image    lower right = (" + str(sourceParams["tEast"]) + ", " + str(sourceParams["tSouth"]) + ")"
                     strInputFileErrors += "\n        Note: points are given in the template coordinates." + "\n"
             
-            if not row[1] in ['0', '1']:
-                 strInputFileErrors += ("  " + os.path.split(inputFile)[1] + " categorical not 0 or 1:\n")
-            if not row[3].lower() in [item.lower() for item in self.aggMethods]:
-                 strInputFileErrors += ("  " + os.path.split(inputFile)[1] + " aggregation method not one of " + 
-                                        ", ".join(self.aggMethods + "\n"))
-            if not row[2].lower() in [item.lower() for item in self.resampleMethods]:
-                 strInputFileErrors += ("  " + os.path.split(inputFile)[1] + " resample method not one of " + 
-                                        ", ".join(self.resampleMethods + "\n"))                  
-            
+            if len(row) < 2 or not row[1] in ['0', '1']:
+                self.writetolog("  " + os.path.split(inputFile)[1] + " categorical either missing or not 0 or 1:\n   Defaulting to 0 (continuous)")
+                if len(row) < 2:
+                    row.append('0')
+                else:
+                    row[1] = '0'
+                 
+            if len(row) < 3 or not row[2].lower() in [item.lower() for item in self.resampleMethods]:
+                 self.writetolog("  " + os.path.split(inputFile)[1] + " resample method either missing or not one of " + 
+                                        ", ".join(self.resampleMethods) + "\n  Defaulting to 'Bilinear'")                  
+                 
+                 if row[1] == '0':
+                     default = 'Bilinear'
+                 else:
+                     default = 'NearestNeighbor'
+                 if len(row) < 3:
+                     row.append(default)
+                 else:
+                     row[2] = default
+
+            if len(row) < 4 or not row[3].lower() in [item.lower() for item in self.aggMethods]:
+                 self.writetolog("  " + os.path.split(inputFile)[1] + " aggregation method either missing or not one of " + 
+                                        ", ".join(self.aggMethods) + "\n  Defaulting to 'Mean'")
+                 if row[1] == '0':
+                     default = 'Mean'
+                 else:
+                     default = 'Majority'
+                 if len(row) < 4:
+                     row.append(default)
+                 else:
+                     row[3] = default
+                 
             self.inputs.append(row)
-            
+            #also write the output row, reconfigured to our output file
+            fileName = self.getShortName(row[0])
+            fileName = os.path.join(self.outDir, fileName + ".tif")
+            outputrow = [fileName] + row[1:4] + [row[0]]
+            output.writerow(outputrow)
+        del output
         
         if strInputFileErrors <> "":
             raise Exception, "There was one or more problems with your input raters: \n" + strInputFileErrors
         
-        if not os.path.exists(self.outDir):
-            raise Exception, "Specified Output directory " + self.outDir + " not found on file system"
-        
-        if not os.path.isdir(self.outDir):
-            raise Exception, "Specified Output directory " + self.outDir + " is not a directory"
-     
-        if self.logger is None:
-            self.logger = utilities.logger(self.outDir, self.verbose)
-        self.writetolog = self.logger.writetolog
+
      
 
 #    def getInputFiles(self):
@@ -626,6 +663,15 @@ class PARC:
             print "Pixel type = ", gdal.GetDataTypeName(tmpOutDataset.GetRasterBand(1).DataType)
         return tmpOutDataset
 
+    def getShortName(self, fullPathName):
+        if fullPathName.endswith('hdr.adf'):
+            shortname = os.path.split(fullPathName)[0]
+            shortname = os.path.split(shortname)[1]
+        else:
+            shortname = os.path.split(fullPathName)[1]
+            shortname = os.path.splitext(shortname)[0]
+        return shortname
+    
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
 #    try:

@@ -88,7 +88,8 @@ class MAXENTRunner(object):
         else:
             jar = self.maxentpath
             
-        res, output = self.run_cmd_line_jar(jar, strargs)
+        self.run_cmd_line_jar(jar, strargs)
+        
            
     def run_cmd_line_jar(self, jar_name, args):
         #arg_items = list(itertools.chain(*args.items()))
@@ -101,10 +102,16 @@ class MAXENTRunner(object):
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         self.writetolog('    Finished running:  ', True, False)
         
-        self.writetolog('    strErr:  ' + str(p.communicate()[0]))
-        self.writetolog('    strOut:  ' + str(''))
-        return str(p.communicate()[0]), str(p.communicate()[1])
         
+        ret = p.communicate()
+        self.writetolog('    Maxent strOut:  ' + str(ret[0]))
+        if ret[1] is not None:
+            msg = "An error was encountered running the Maxent jar file.  The error message is below - \n"
+            msg += ret[1]
+            writetolog(msg)
+            raise RuntimeError , msg
+        del ret
+
     def loadArgs(self):
         argsReader = csv.reader(open(self.argsCSV, 'r'))
         header = argsReader.next()
@@ -119,7 +126,11 @@ class MAXENTRunner(object):
         if not os.path.exists(self.inputMDS):
             raise RuntimeError(self, 'Input MDS, ' + self.inputMDS + ', could not be found on file system')
         
-        if self.args['projectionlayers'] <> '' and os.path.isdir(self.args['projectionlayers']):
+        if not self.args.has_key('projectionlayers'):
+             self.args['projectionlayers'] = ''
+             
+        if self.args['projectionlayers'] <> '' and \
+             not os.path.isdir(self.args['projectionlayers']):
             raise RuntimeError(self, "Input 'projectionlayers' must be a directory")
         
         if not utilities.isMDSFile(self.inputMDS):
