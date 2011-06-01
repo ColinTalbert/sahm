@@ -36,7 +36,7 @@ Pairs.Explore<-function(num.plots=10,min.cor=.7,input.file,output.file,response.
 
      #remove testing split
     if(!is.na(match("Split",names(dat)))) dat<-dat[-c(which(dat$Split=="test"),arr.ind=TRUE),]
-      browser()
+
     include[is.na(include)]<-0
     rm.cols<-unique(c(rm.cols,which(include==0,arr.ind=TRUE)))
     response<-dat[,match(tolower(response.col),tolower(names(dat)))]
@@ -170,11 +170,11 @@ Pairs.Explore<-function(num.plots=10,min.cor=.7,input.file,output.file,response.
   #Find a new unique file name (one in the desired directory that hasn't yet been used)
 
  options(warn=-1)
- jpeg(output.file,width=1000,height=1000,pointsize=13)
+ #jpeg(output.file,width=1000,height=1000,pointsize=13)
 
-    MyPairs(HighToPlot,cor.range=cor.range,my.labels=(as.vector(High.cor)[1:num.plots]),
+    MyPairs(cbind(response,HighToPlot),cor.range=cor.range,my.labels=(as.vector(High.cor)[1:num.plots]),
     lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,bg = c("green","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red")
- graphics.off()
+# graphics.off()
  options(warn=0)
  
   }
@@ -184,6 +184,9 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
     label.pos = 0.5 + has.diag/3, cex.labels = NULL, font.labels = 1,
     row1attop = TRUE, gap = 1,Toplabs=NULL)
 {
+    response<-x[,1]
+    response[response==-9999]<-0
+    x<-x[,2:dim(x)[2]]
 
     textPanel <- function(x = 0.5, y = 0.5, txt, cex, font) text(x,
         y, txt, cex = cex, font = font)
@@ -246,17 +249,34 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
         if (!is.null(main))
             oma[3L] <- 6
     }
-    opar <- par(mfrow = c(nc, nc), mar = rep.int(gap/2, 4), oma = oma)
+    opar <- par(mfrow = c(nc, nc+1), mar = rep.int(gap/2, 4), oma = oma)
     on.exit(par(opar))
     for (i in if (row1attop)
-        1L:nc
-    else nc:1L) for (j in 1L:nc) {
+        1L:(nc)
+    else nc:1L) for (j in 0:(nc)) {
+
 
         if(i==1){ par(mar = c(gap/2,gap/2,gap,gap/2))
-        localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
-           type="n",...)}else { par(mar = rep.int(gap/2, 4))
-        localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
-            type = "n", ...)}
+          if(j==0){ localPlot(x[, i],response, xlab = "", ylab = "", axes = FALSE,
+                type="n",...)
+                }else localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
+           type="n",...)
+           }else { par(mar = rep.int(gap/2, 4))
+               if(j==0){ localPlot(x[, i],response, xlab = "", ylab = "", axes = FALSE,
+                type="n",...)
+                }else localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
+           type="n",...)
+        }
+         if(j==0) {
+             if(i==1) par(mar=c(gap/2,gap/2,gap,gap*2))
+                else par(mar = c(gap/2,gap/2,gap/2,gap*2))
+
+                  if(i==1) title(main="Response",line=.04,cex.main=1.5)
+                  box()
+                  my.panel.smooth(as.vector(x[, (i)]), as.vector(response),weights=
+                          c(rep(table(response)[2]/table(response)[1],times=table(response)[1]),rep(1,times=table(response)[2])),...)
+
+                 } else{
         if (i == j || (i < j && has.lower) || (i > j && has.upper)) {
             box()
             if(i==1) title(main=paste("Total Cor=",my.labels[j],sep=""),line=.04,cex.main=1.5)
@@ -266,10 +286,10 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
             if (i == nc)
                 localAxis(3 - 2 * row1attop, x[, j], x[, i],
                   ...)
-            if (j == 1 && (!(i%%2) || !has.upper || !has.lower))
+            if (j == 1 && (i!=1 || !has.upper || !has.lower))
                 localAxis(2, x[, j], x[, i], ...)
-            if (j == nc && (i%%2 || !has.upper || !has.lower))
-                localAxis(4, x[, j], x[, i], ...)
+            #if (j == nc && (i%%2 || !has.upper || !has.lower))
+            #    localAxis(4, x[, j], x[, i], ...)
             mfg <- par("mfg")
             if (i == j) {
                 if (has.diag)
@@ -284,6 +304,7 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
                     font = font.labels)
                 }
             }
+
             else if (i < j)
                 localLowerPanel(as.vector(x[, j]), as.vector(x[,
                   i]), ...)
@@ -293,7 +314,7 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
                 stop("the 'panel' function made a new plot")
         }
         else par(new = FALSE)
-    }
+    }}
     if (!is.null(main)) {
         font.main <- if ("font.main" %in% nmdots)
             dots$font.main
@@ -304,6 +325,17 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
         mtext(main, 3, 3, TRUE, 0.5, cex = cex.main, font = font.main)
     }
     invisible(NULL)
+}
+
+
+my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),
+    cex = 1, col.smooth = "red", span = 2/3, iter = 3, weights=rep(1,times=length(y)), ...)
+{
+    points(x, y, pch = pch, col = col, bg = bg, cex = cex)
+    ok <- is.finite(x) & is.finite(y)
+    if (any(ok))
+        lines(stats::loess(y[ok]~x[ok],weights=weights[ok],
+            col = "red", ...))
 }
 
 
