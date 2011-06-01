@@ -13,7 +13,7 @@ import subprocess
 
 from PyQt4 import QtCore
 
-from core.modules.basic_modules import File, Directory, new_constant, Constant
+from core.modules.basic_modules import File, Path, Directory, new_constant, Constant
 from core.modules.vistrails_module import ModuleError
 
 from osgeo import gdalconst
@@ -28,22 +28,23 @@ _roottempdir = ""
 _logger = None
 config = None
 
-def mktempfile(*args, **kwargs):
-    global _temp_files
-    global _roottempdir
-    kwargs["dir"] = _roottempdir
-    (fd, fname) = tempfile.mkstemp(*args, **kwargs)
-    os.close(fd)
-    _temp_files.append(fname)
-    return fname
-
-def mktempdir(*args, **kwargs):
-    global _temp_dirs
-    global _roottempdir
-    kwargs["dir"] = _roottempdir
-    dname = tempfile.mkdtemp(*args, **kwargs)
-    _temp_dirs.append(dname)
-    return dname
+#No longer used replaced with mknextfile and mknextdir
+#def mktempfile(*args, **kwargs):
+#    global _temp_files
+#    global _roottempdir
+#    kwargs["dir"] = _roottempdir
+#    (fd, fname) = tempfile.mkstemp(*args, **kwargs)
+#    os.close(fd)
+#    _temp_files.append(fname)
+#    return fname
+#
+#def mktempdir(*args, **kwargs):
+#    global _temp_dirs
+#    global _roottempdir
+#    kwargs["dir"] = _roottempdir
+#    dname = tempfile.mkdtemp(*args, **kwargs)
+#    _temp_dirs.append(dname)
+#    return dname
 
 def mknextfile(prefix, suffix="", directory=""):
     global _roottempdir
@@ -81,6 +82,10 @@ def mknextdir(prefix, directory=""):
     return os.path.join(directory, dirname)
 
 def createrootdir(rootWorkspace):
+    '''Creates a session Directory which will
+    contain all of the output produced in a single
+    VisTrails/Sahm session.
+    '''
     global _roottempdir
 #    global _logfile
     _roottempdir = os.path.join(rootWorkspace, getpass.getuser() + '_' + time.strftime("%Y%m%dT%H%M%S"))
@@ -90,9 +95,9 @@ def createrootdir(rootWorkspace):
     
     return _roottempdir
 
-
-def cleantemps():
-    pass
+#No longer used
+#def cleantemps():
+#    pass
 #    global _temp_files, _temp_dirs, _roottempdir
 #    for file in _temp_files:
 #        os.remove(file)
@@ -104,14 +109,66 @@ def map_ports(module, port_map):
     args = {}
     for port, (flag, access, required) in port_map.iteritems():
         if required or module.hasInputFromPort(port):
-            value = module.getInputFromPort(port)
+            #breakpoint()
+            value = module.forceGetInputListFromPort(port)
+            if len(value) > 1:
+                raise ModuleError(module, 'Multiple items found from Port ' + 
+                    port + '.  Only single entry handled.  Please remove extraneous items.')
+            elif len(value)  == 0:
+                raise ModuleError(module, 'Multiple items found from Port ' + 
+                    port + '.  Only single entry handled.  Please remove extraneous items.')
+            value = module.forceGetInputFromPort(port)
             if access is not None:
                 value = access(value)
+            if isinstance(value, File) or \
+                        isinstance(value, Directory) or \
+                        isinstance(value, Path):
+                value = path_port(module, port)
             args[flag] = value
     return args
 
-def path_value(value):
-    return value.name
+def path_port(module, portName):
+    value = module.forceGetInputListFromPort(portName)
+    if len(value) > 1:
+        raise ModuleError(module, 'Multiple items found from Port ' + 
+                          portName + '.  Only single entry handled.  Please remove extraneous items.')
+    value = value[0]
+    path = value.name 
+    path.replace("/", os.path.sep)
+    if os.path.exists(path):
+        return path
+    else:
+        raise RuntimeError, 'The indicated file or directory, ' + \
+            path + ', does not exist on the file system.  Cannot continue!'
+    
+def PySAHM_instance_params(instance, mappedPorts):
+    global _logger
+    instance.__dict__['logger'] = _logger
+    instance.__dict__['verbose'] = _logger.verbose
+    for k, v in mappedPorts.iteritems():
+            instance.__dict__[k] = v
+    
+
+#def path_value(value):
+#    return value.name
+#
+#def path_exists(value):
+#    '''checks to see if a file or dir passed
+#    exists and returns the string to the path is so.
+#    otherwise raises an error'''
+#    path = value.name
+#    if os.path.exists(path):
+#        return path
+#    else:
+#        raise RuntimeError, 'The indicated file or directory, ' + \
+#            path + ', does not exist on the file system.  Cannot continue!'
+    
+def R_boolean(value):
+    if value:
+        return 'TRUE'
+    else:
+        return 'FALSE'
+
 
 def dir_path_value(value):
     val = value.name
@@ -132,12 +189,13 @@ def create_dir_module(dname, d=None):
     d.upToDate = True
     return d
 
-def collapse_dictionary(dict):
-    list = []
-    for k,v in dict.items():
-        list.append(k)
-        list.append(v)
-    return list
+#No longer used
+#def collapse_dictionary(dict):
+#    list = []
+#    for k,v in dict.items():
+#        list.append(k)
+#        list.append(v)
+#    return list
 
 def tif_to_color_jpeg(input, output, colorBreaksCSV):
     writetolog("    running  tif_to_color_jpeg()", True, False)
@@ -359,6 +417,11 @@ def runRScript(script, args, module=None):
         msg += ret[1]
         writetolog(msg)
         raise RuntimeError , msg
+
+    if 'Warning' in ret[1]:
+        msg = "The R scipt returned the following warning(s).  The R warning message is below - \n"
+        msg += ret[1]
+        writetolog(msg)
 
     del(ret)
     writetolog("\nFinished R Processing of " + script, True)
