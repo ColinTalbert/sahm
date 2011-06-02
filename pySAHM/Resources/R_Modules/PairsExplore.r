@@ -170,11 +170,11 @@ Pairs.Explore<-function(num.plots=10,min.cor=.7,input.file,output.file,response.
   #Find a new unique file name (one in the desired directory that hasn't yet been used)
 
  options(warn=-1)
- #jpeg(output.file,width=1000,height=1000,pointsize=13)
+jpeg(output.file,width=1000,height=1000,pointsize=13)
 
     MyPairs(cbind(response,HighToPlot),cor.range=cor.range,my.labels=(as.vector(High.cor)[1:num.plots]),
     lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,bg = c("green","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red")
-# graphics.off()
+ graphics.off()
  options(warn=0)
  
   }
@@ -249,27 +249,39 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
         if (!is.null(main))
             oma[3L] <- 6
     }
-    opar <- par(mfrow = c(nc, nc+1), mar = rep.int(gap/2, 4), oma = oma)
+
+    nCol<-ifelse(length(unique(response))>1,nc+1,nc)
+    j.start<-ifelse(length(unique(response))>1,0,1)
+    opar <- par(mfrow = c(nc, nCol), mar = rep.int(gap/2, 4), oma = oma)
     on.exit(par(opar))
     for (i in if (row1attop)
         1L:(nc)
-    else nc:1L) for (j in 0:(nc)) {
+    else nc:1L) for (j in j.start:(nc)) {
 
 
-        if(i==1){ par(mar = c(gap/2,gap/2,gap,gap/2))
-          if(j==0){ localPlot(x[, i],response, xlab = "", ylab = "", axes = FALSE,
+        if(i==1){ par(mar = c(gap/2,gap/2,gap,gap/2)) #top row add extra room at top
+          if(j==0){
+                par(mar = c(gap/2,gap/2,gap,gap)) #top left corner room at top and on right
+          localPlot(x[, i],response, xlab = "", ylab = "", axes = FALSE,
                 type="n",...)
-                }else localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
+                }else if(j==1) {par(mar = c(gap/2,gap,gap,gap/2)) #extra room on left and topfor second plot top row
+                    localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
+           type="n",...)} else  {
+           par(mar = c(gap/2,gap/2,gap,gap/2)) #all other top row plots need extra room at top only
+           localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
            type="n",...)
-           }else { par(mar = rep.int(gap/2, 4))
-               if(j==0){ localPlot(x[, i],response, xlab = "", ylab = "", axes = FALSE,
+           }}else { par(mar = rep.int(gap/2, 4))
+               if(j==0){ par(mar = c(gap/2,gap/2,gap/2,gap))  #left column needs extra room on right only
+               localPlot(x[, i],response, xlab = "", ylab = "", axes = FALSE,
                 type="n",...)
-                }else localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
+                }else if(j==1){ par(mar = c(gap/2,gap,gap/2,gap/2)) #second column needs extra room on left so labels fit
+                localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
            type="n",...)
-        }
+        }else localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
+           type="n",...)}
          if(j==0) {
-             if(i==1) par(mar=c(gap/2,gap/2,gap,gap*2))
-                else par(mar = c(gap/2,gap/2,gap/2,gap*2))
+             if(i==1) par(mar=c(gap/2,gap/2,gap,gap))
+                else par(mar = c(gap/2,gap/2,gap/2,gap))
 
                   if(i==1) title(main="Response",line=.04,cex.main=1.5)
                   box()
