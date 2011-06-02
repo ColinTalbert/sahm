@@ -33,13 +33,13 @@ output.dir="C:\\VisTrails\\mtalbert_20110504T132851"
     input.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSet_1.csv"
 
 #this file does have a test training split
-    input.file<-"I:\\VisTrails\\WorkingFiles\\workspace\\talbertc_20110519T121044\\TestTrainingSplit_1.csv"
+
     rc="responseBinary"
     
 fit.brt.fct(ma.name=input.file,
       tif.dir=NULL,output.dir=output.dir,
       response.col=rc,test.resp.col="response",make.p.tif=F,make.binary.tif=F,
-      simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",tc=NULL,n.folds=3,alpha=1,script.name="brt.r",
+      simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",tc=NULL,n.folds=3,alpha=.3,script.name="brt.r",
       learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, model.family = "bernoulli", max.trees = NULL,opt.methods=1,seed=1,save.model=TRUE)
 
 source("FIT_MARS_pluggable.r")

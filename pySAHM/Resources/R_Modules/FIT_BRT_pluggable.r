@@ -2187,7 +2187,7 @@ require(gbm)
     dev.results[n.steps,i] <- round(deviance - original.deviances[i] ,4)
 
     }
-
+browser()
   if (auto.stop){ # check to see if delta mean is less than original deviance error estimate
 
     delta.mean <- mean(dev.results[n.steps,])
@@ -2480,6 +2480,8 @@ Args <- commandArgs(trailingOnly=FALSE)
  			if(argSplit[[1]][1]=="om")  opt.methods <- argSplit[[1]][2]
  			if(argSplit[[1]][1]=="seed")  seed <- argSplit[[1]][2]
  		  if(argSplit[[1]][1]=="savm")  save.model <- argSplit[[1]][2]
+ 		  if(argSplit[[1]][1]=="tolm")  tolerance.method <- argSplit[[1]][2]
+ 		  if(argSplit[[1]][1]=="tol")  tolerance <- argSplit[[1]][2]
  			
     }
 	print(csv)
