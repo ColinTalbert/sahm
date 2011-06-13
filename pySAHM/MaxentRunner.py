@@ -129,9 +129,11 @@ class MAXENTRunner(object):
         if not self.args.has_key('projectionlayers'):
              self.args['projectionlayers'] = ''
              
-        if self.args['projectionlayers'] <> '' and \
-             not os.path.isdir(self.args['projectionlayers']):
-            raise RuntimeError(self, "Input 'projectionlayers' must be a directory")
+        if self.args['projectionlayers'] <> '':
+             dirs = self.args['projectionlayers'].split(',')
+             for dir in dirs:
+                 if not os.path.isdir(dir):
+                     raise RuntimeError(self, "Input 'projectionlayers' must be a directory")
         
         if not utilities.isMDSFile(self.inputMDS):
             raise RuntimeError(self, 'Input MDS, ' + self.inputMDS + ', does not appear to be formated as an MDS file.')
@@ -207,7 +209,7 @@ class MAXENTRunner(object):
         if not hasBackground:
             msg = "    No background points were detected in the input file."
             msg += "\n    This implementation of Maxent does not have access to prepared ASCII environmental layers"
-            msg += " from which to extract values.  Background points must be supplied either in the MDS file."
+            msg += " from which to extract values.  Background points must be supplied in the MDS file."
             self.writetolog(msg)
             raise RuntimeError(msg)
         
@@ -228,21 +230,9 @@ class MAXENTRunner(object):
         
         #First we have to figure out what they passed us
         #either a directory, a SWD file, or a csv with a list of files
-        if os.path.isdir(self.args['projectionlayers']):
+        
+        if self.args['projectionlayers'] <> '':
             pass
-        elif self.isSWD(self.args['projectionlayers']):
-            pass
-        elif self.args['projectionlayers'] <> '':
-            #assume they passed us a MDS header file
-            type = 'bil'
-            self.writetolog("  Converting environmental layers to '*." + type + "' format", True)
-            outputFolder = os.path.join(self.outputDir, 'ConvertedGrids')
-            if not os.path.exists(outputFolder):
-                os.mkdir(outputFolder)
-            self.convertEnvironmentalLayers(usedCovariateFiles, outputFolder, type)
-            self.writetolog("  Finished converting environmental layers to '*." + type + "' format", True, True)
-            self.args['projectionlayers'] = outputFolder
-            self.args['outputgrids'] = 'true'
         else:
             self.args['outputgrids'] = 'false'
 

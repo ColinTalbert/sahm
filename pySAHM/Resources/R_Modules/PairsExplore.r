@@ -1,4 +1,4 @@
-Pairs.Explore<-function(num.plots=10,min.cor=.7,input.file,output.file,response.col="ResponseBinary",cors.w.highest=FALSE,pres=TRUE,absn=TRUE,bgd=TRUE){
+Pairs.Explore<-function(num.plots=10,min.cor=.7,input.file,output.file,response.col="ResponseBinary",cors.w.highest=FALSE,pres=TRUE,absn=TRUE,bgd=TRUE,Debug=FALSE){
 
 
       #num.plots=plots per page of display
@@ -170,11 +170,12 @@ Pairs.Explore<-function(num.plots=10,min.cor=.7,input.file,output.file,response.
   #Find a new unique file name (one in the desired directory that hasn't yet been used)
 
  options(warn=-1)
-jpeg(output.file,width=1000,height=1000,pointsize=13)
+ if(Debug==FALSE) jpeg(output.file,width=1000,height=1000,pointsize=13)
 
     MyPairs(cbind(response,HighToPlot),cor.range=cor.range,my.labels=(as.vector(High.cor)[1:num.plots]),
     lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,bg = c("green","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red")
- graphics.off()
+
+ if(Debug==FALSE) graphics.off()
  options(warn=0)
  
   }
@@ -261,7 +262,7 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
 
         if(i==1){ par(mar = c(gap/2,gap/2,gap,gap/2)) #top row add extra room at top
           if(j==0){
-                par(mar = c(gap/2,gap/2,gap,gap)) #top left corner room at top and on right
+                par(mar = c(gap/2,gap,gap,gap)) #top left corner room at top and on right
           localPlot(x[, i],response, xlab = "", ylab = "", axes = FALSE,
                 type="n",...)
                 }else if(j==1) {par(mar = c(gap/2,gap,gap,gap/2)) #extra room on left and topfor second plot top row
@@ -271,7 +272,7 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
            localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
            type="n",...)
            }}else { par(mar = rep.int(gap/2, 4))
-               if(j==0){ par(mar = c(gap/2,gap/2,gap/2,gap))  #left column needs extra room on right only
+               if(j==0){ par(mar = c(gap/2,gap,gap/2,gap))  #left column needs extra room on right only
                localPlot(x[, i],response, xlab = "", ylab = "", axes = FALSE,
                 type="n",...)
                 }else if(j==1){ par(mar = c(gap/2,gap,gap/2,gap/2)) #second column needs extra room on left so labels fit
@@ -280,13 +281,20 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
         }else localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
            type="n",...)}
          if(j==0) {
-             if(i==1) par(mar=c(gap/2,gap/2,gap,gap))
-                else par(mar = c(gap/2,gap/2,gap/2,gap))
+             if(i==1) par(mar=c(gap/2,gap,gap,gap))
+                else par(mar = c(gap/2,gap,gap/2,gap))
 
                   if(i==1) title(main="Response",line=.04,cex.main=1.5)
+
                   box()
+                     my.lab<-paste("cor=",round(max(abs(cor(x[,(i)],response)),abs(cor(x[,(i)],response,method="spearman")),abs(cor(x[,(i)],response,method="kendall"))),digits=2),sep="")
+
                   my.panel.smooth(as.vector(x[, (i)]), as.vector(response),weights=
                           c(rep(table(response)[2]/table(response)[1],times=table(response)[1]),rep(1,times=table(response)[2])),...)
+
+                          title(ylab=paste("cor=",round(max(abs(cor(x[,(i)],response)),abs(cor(x[,(i)],response,method="spearman")),abs(cor(x[,(i)],response,method="kendall"))),digits=2),
+                          sep=""),line=.02,cex.lab=1.5)
+                          #,y=.85,x=max(x[,(i)])-.2*diff(range(x[,(i)])),cex=1.5)
 
                  } else{
         if (i == j || (i < j && has.lower) || (i > j && has.upper)) {
@@ -345,9 +353,9 @@ my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),
 {
     points(x, y, pch = pch, col = col, bg = bg, cex = cex)
     ok <- is.finite(x) & is.finite(y)
-    if (any(ok))
-        lines(stats::loess(y[ok]~x[ok],weights=weights[ok],
-            col = "red", ...))
+    if (any(ok) && length(unique(x))>3)
+        lines(smooth.spline(x,jitter(y)))
+
 }
 
 

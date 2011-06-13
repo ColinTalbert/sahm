@@ -99,7 +99,7 @@ class FieldData(File):
     In this case, the "X" field should be populated with the horizontal (longitudinal) positional
     data for a sample point. The "Y" field should be populated with the vertical (latitudinal) data
     for a sample point. These values must be in the same coordinate system/units as the template
-    layer used in the workflow. The column "responseCount" should be populated with either a '-999'
+    layer used in the workflow. The column "responseCount" should be populated with either a '-9999'
     (indicating that the point is a background point) or a numerical value (either '0' or a positive integer)
     indicating the number of incidences of the phenomenon recorded at that point.
     '''   
@@ -158,7 +158,9 @@ class Predictor(Constant):
     the data contained in the raster is continuous (e.g., a DEM layer). This distinction is important
     in determining an appropriate resampling method.
     
-    4. File Path: The location of the raster file. A user can navigate to the location on their file system.
+    4. File Path: The location of the raster predictor file, which a user can specify by navigating to the
+    file's location on their file system. When a user is selecting an ESRI grid raster, the user should navigate
+    to the 'hdr.adf' file contained within the grid folder.
 
     '''
     _input_ports = [('categorical', '(edu.utah.sci.vistrails.basic:Boolean)'),
@@ -271,7 +273,7 @@ class PredictorListFile(Module):
     '''
     _input_ports = expand_ports([('csvFileList', '(edu.utah.sci.vistrails.basic:File)'),
                                  ('addPredictor', 'DataInput|Predictor')])
-    _output_ports = expand_ports([('csvFileList', '(edu.utah.sci.vistrails.basic:File)')])
+    _output_ports = expand_ports([('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')])
 
     #copies the input predictor list csv to our working directory
     #and appends any additionally added predictors
@@ -513,13 +515,12 @@ class Model(Module):
         ModelAbbrev = ModelOutput[self.name]
         
         output_dname = utils.mknextdir(prefix=ModelAbbrev + 'output_')
-        
         argsDict = utils.map_ports(self, self.port_map)
-        mdsFile = argsDict['mdsFile']
+        mdsFile = self.forceGetInputFromPort('mdsFile').name
         
         args = ''
         for k, v in argsDict.iteritems():
-            args += ' ' + '='.join(k,v)
+            args += ' ' + '='.join([k,v])
         args += " o=" + output_dname 
         args += " rc=" + utils.MDSresponseCol(mdsFile)
 #        if self.hasInputFromPort('makeBinMap'):
@@ -556,13 +557,15 @@ class Model(Module):
             utils.tif_to_color_jpeg(input_fname, output_fname, color_breaks_csv)
             output_file4 = utils.create_file_module(output_fname)
             self.setResult('ProbabilityMap', output_file4)
-        elif makeProbabilityMap == True:
+        elif (argsDict.has_key('mpt') and argsDict('mpt') == True) or \
+            not argsDict.has_key('mpt'):
             msg = "Expected output from " + ModelAbbrev + " was not found."
             msg += "\nThis likely indicates problems with the inputs to the R module."
             writetolog(msg, False, True)
             raise ModuleError(self, msg)
         
-        if makeBinMap == True:
+        if (argsDict.has_key('mbt') and argsDict('mbt') == True) or \
+            not argsDict.has_key('mbt'):
             outFileName = os.path.join(output_dname, ModelAbbrev + "_bin_map.tif")
             output_file1 = utils.create_file_module(outFileName)
             self.setResult('BinaryMap', output_file1)
@@ -1223,9 +1226,6 @@ class ProjectionLayers(Module):
         
         writetolog("\nRunning make Projection Layers", True)
         
-        
-        
-        
         inputCSV = self.forceGetInputFromPort('RastersWithPARCInfoCSV').name
     
         if self.hasInputFromPort('templateLayer'):
@@ -1359,7 +1359,6 @@ class MAXENT(Module):
         ourMaxent = MaxentRunner.MAXENTRunner()
         ourMaxent.outputDir = utils.mknextdir(prefix='maxentFiles_')
         
-        
         ourMaxent.inputMDS = self.forceGetInputFromPort('inputMDS').name
         
         ourMaxent.maxentpath = maxent_path
@@ -1369,7 +1368,7 @@ class MAXENT(Module):
         argWriter.writerow(['parameter','value'])
         for port in self._input_ports:
             #print port
-            if port[0] <> 'inputMDS':
+            if port[0] <> 'inputMDS' and port[0] <> 'projectionlayers':
                 if self.hasInputFromPort(port[0]):
                     port_val = self.getInputFromPort(port[0])
                     if port[1] == "(edu.utah.sci.vistrails.basic:Boolean)":
@@ -1391,7 +1390,11 @@ class MAXENT(Module):
                         argWriter.writerow([port[0], default])
                     except KeyError:
                         pass
-                    
+        if self.hasInputFromPort('projectionlayers'):
+            value = self.forceGetInputListFromPort('projectionlayers')
+            projlayers = ','.join([path.name for path in value])
+            argWriter.writerow(['projectionlayers', projlayers])
+            
         del argWriter
         ourMaxent.argsCSV = MaxentArgsCSV
         ourMaxent.logger = utils.getLogger()

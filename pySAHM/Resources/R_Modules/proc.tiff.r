@@ -148,7 +148,6 @@ names(temp) <- vnames
                 }
             }
         }
-
     ifelse(sum(!is.na(temp))==0,  # does not calculate predictions if all predictors in the region are na
         preds<-matrix(data=NaN,nrow=region.dims[1],ncol=region.dims[2]),
         preds <- t(matrix(pred.fct(model,temp),ncol=dims[2],byrow=T)))

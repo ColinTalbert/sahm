@@ -222,15 +222,6 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     options(warn=1)
     out <- check.libs(list("gbm"),out)
 
-    # check that only one of tif.dir and tif.file is supplied #
-#     if(sum(is.null(tif.file),is.null(tif.dir))!=1){
-#              out$ec<-out$ec+1
-#             out$error.mssg[[out$ec]] <- paste("ERROR: Exactly one of tif.dir and tif.file must be supplied at the function call")
-#              if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
-#            cat(saveXML(brt.to.xml(out),indent=T),'\n')
-#            return()
-#            }
-     
     # check tif dir #
     if(!is.null(tif.dir)){
       out$dat$tif.dir <- check.dir(tif.dir)
@@ -266,7 +257,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     #  Begin model fitting #
     ##############################################################################################################
 
-    # estimate optimal learning rate and tc #
+    # estimate optimal learning rate and tc #         o
     out <-est.lr(out)
     if(debug.mode) assign("out",out,envir=.GlobalEnv)
 
@@ -281,13 +272,14 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     if(!debug.mode) {sink();cat("Progress:30%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("30%\n")}
 
     if(out$input$simp.method=="cross-validation"){
-        # remove variables with <1% relative influence and re-fit model #
-
+        # remove variables with <1% relative influence and re-fit model
+        print(debug.mode)
         t1 <- unclass(Sys.time())
+
         m0 <- try(gbm.step.fast(dat=out$dat$ma$ma.subset,gbm.x=out$mods$lr.mod$good.cols,gbm.y=1,family=out$input$model.family,
               n.trees = c(300,600,800,1000,1200,1500,1800),step.size=out$input$step.size,max.trees=out$input$max.trees,
               tolerance.method=out$input$tolerance.method,tolerance=out$input$tolerance, n.folds=out$input$n.folds,tree.complexity=out$mods$parms$tc.sub,
-              learning.rate=out$mods$lr.mod$lr0,bag.fraction=out$input$bag.fraction,site.weights=out$dat$ma$weight.subset,autostop=T,debug.mode=F,silent=T,
+              learning.rate=out$mods$lr.mod$lr0,bag.fraction=out$input$bag.fraction,site.weights=out$dat$ma$weight.subset,autostop=T,debug.mode=F,silent=!debug.mode,
               plot.main=F,superfast=F))
         if(debug.mode) assign("m0",m0,envir=.GlobalEnv)
         if(class(m0)=="try-error"){
@@ -321,7 +313,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
   out$mods$final.mod <- gbm.step.fast(dat=out$dat$ma$ma,gbm.x=out$mods$simp.mod$good.cols,gbm.y = 1,family=out$input$model.family,
                   n.trees = c(300,600,700,800,900,1000,1200,1500,1800,2200,2600,3000,3500,4000,4500,5000),n.folds=out$input$n.folds,
                   tree.complexity=out$mods$parms$tc.full,learning.rate=out$mods$lr.mod$lr,bag.fraction=out$input$bag.fraction,site.weights=out$dat$ma$train.weights,
-                  autostop=T,debug.mode=F,silent=T,plot.main=F,superfast=F)
+                  autostop=T,debug.mode=F,silent=!debug.mode,plot.main=F,superfast=F)
 
 
 
@@ -343,14 +335,20 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
 
     # Store .jpg ROC plot #
 
-    auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=predict.gbm(out$mods$final.mod,out$dat$ma$ma,
-            out$mods$final.mod$target.trees,type="response"),plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",opt.methods=opt.methods)
+  if(out$input$model.family=="bernoulli"){
+      auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=predict.gbm(out$mods$final.mod,out$dat$ma$ma,
+            out$mods$final.mod$target.trees,type="response"),plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",opt.methods=opt.methods,
+            weight=out$dat$ma$train.weights)
 
-    if(class(auc.output)=="try-error"){
-          out$ec<-out$ec+1
-          out$error.mssg[[out$ec]] <- paste("Error making ROC plot:",auc.output)
-    } else { out$mods$auc.output<-auc.output}
+      out$mods$auc.output<-auc.output
+      }
+  if(out$input$model.family=="poisson"){
+      auc.output <- make.poisson.jpg(out$dat$ma$ma,pred=predict.gbm(out$mods$final.mod,out$dat$ma$ma,
+            out$mods$final.mod$target.trees,type="response"),plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",
+            weight=out$dat$ma$train.weights)
 
+      out$mods$auc.output<-auc.output
+      }
     # Generate and store text summary #
     #source('F:/code for Jeff and Roger/boosted regression trees/brt.functions.aks.021709.r')
     y <- try(gbm.interactions(out$mods$final.mod))
@@ -379,7 +377,8 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
         out$mods$summary <- model.summary
         }
     if(debug.mode) assign("out",out,envir=.GlobalEnv)
-
+    
+   if(out$input$model.family=="bernoulli"){
     txt0 <- paste("Boosted Regression Tree Modeling Results\n",out$input$run.time,"\n\n","Data:\n",ma.name,"\n","n(pres)=",
         out$dat$ma$n.pres[2],", n(abs)=",out$dat$ma$n.abs[2],", n covariates considered=",length(out$dat$ma$used.covs),
         "\n\n","Settings:\n","tree complexity=",out$mods$parms$tc.full,", learning rate=",round(out$mods$lr.mod$lr,4),
@@ -391,6 +390,22 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     txt2 <- "\nImportant interactions in final model:\n\n"
     capture.output(cat(txt0),cat(txt1),print(out$mods$final.mod$contributions),cat(txt2),print(out$mods$interactions,row.names=F),file=paste(bname,"_output.txt",sep=""))
     cat(txt0);cat(txt1);print(out$mods$final.mod$contributions);cat(txt2);print(out$mods$interactions,row.names=F)
+    }
+ browser()
+  if(out$input$model.family=="poisson"){
+    txt0 <- paste("Boosted Regression Tree Modeling Results\n",out$input$run.time,"\n\n","Data:\n",ma.name,"\n","n(pres)=",
+        out$dat$ma$n.pres[2],", n(abs)=",out$dat$ma$n.abs[2],", n covariates considered=",length(out$dat$ma$used.covs),
+        "\n\n","Settings:\n","tree complexity=",out$mods$parms$tc.full,", learning rate=",round(out$mods$lr.mod$lr,4),
+        ", n(trees)=",out$mods$final.mod$target.trees,",\n","model simplification=",out$input$simp.method,", n folds=",out$input$n.folds,
+        "\n\n","Results:\n",", n covariates in final model=",nrow(out$mods$final.mod$contributions),
+        ", pct deviance explained=",round(out$mods$auc.output$pct_dev_exp,1),"%\n",
+        "total time for model fitting=",round((unclass(Sys.time())-t0)/60,2),"min\n",sep="")
+    txt1 <- "\nRelative influence of predictors in final model:\n\n"
+    txt2 <- "\nImportant interactions in final model:\n\n"
+    capture.output(cat(txt0),cat(txt1),print(out$mods$final.mod$contributions),cat(txt2),print(out$mods$interactions,row.names=F),file=paste(bname,"_output.txt",sep=""))
+    cat(txt0);cat(txt1);print(out$mods$final.mod$contributions);cat(txt2);print(out$mods$interactions,row.names=F)
+    }
+    
     if(!is.null(out$dat$bad.factor.cols)){
         capture.output(cat("\nWarning: the following categorical response variables were removed from consideration\n",
             "because they had only one level:",paste(out$dat$bad.factor.cols,collapse=","),"\n"),
@@ -640,7 +655,7 @@ est.lr <- function(out){
     cat("\n");cat("tree complexity set to",out$mods$parms$tc.sub,"\n")
 
     n.trees <- c(100,200,400,800,900,1000,1100,1200,1500,1800,2400)
-    lrs <- c(.1,.06,.05,.04,.03,.02,.01,.005,.0025,.001)
+    lrs <- c(.1,.06,.05,.04,.03,.02,.01,.005,.0025,.001,.0005,.0001)
     lr.out <- data.frame(lrs=lrs,max.trees=0)
     dat <- out$dat$ma$ma.subset
     gbm.y <- 1
@@ -676,6 +691,7 @@ est.lr <- function(out){
        i<-i+1 #ifelse(max.trees<=200,i+2,i+1)
        }
     # pick lr that gives closest to 1000 trees #
+
     lr.out$i <- 1:nrow(lr.out)
     lr.out <- lr.out[lr.out$max.trees!=0,]
     ab<-coef(lm(max.trees~log(lrs),data=lr.out))
@@ -694,7 +710,9 @@ est.lr <- function(out){
     good.cols <- c(1:ncol(dat))[names(dat)  %in%  good.vars]
     out$mods$simp.mod <- list(good.cols=good.cols,good.vars=good.vars)
     out$mods$lr.mod <- list(tc=out$mods$parms$tc.sub,lr=lr.full,lr0=lr0,lr.out=lr.out,ab=ab,gbm.fit=gbm.fit,good.cols=good.cols,t.elapsed=c(unclass(Sys.time())-t0))
-    if(!is.null(out$input$learning.rate)) out$mods$lr.mod$lr0=out$input$learning.rate
+    if(!is.null(out$input$learning.rate)) {out$mods$lr.mod$lr0=out$input$learning.rate
+       out$mods$lr.mod$lr=out$input$learning.rate
+    }
     return(out)
     }
 
@@ -2187,7 +2205,7 @@ require(gbm)
     dev.results[n.steps,i] <- round(deviance - original.deviances[i] ,4)
 
     }
-browser()
+
   if (auto.stop){ # check to see if delta mean is less than original deviance error estimate
 
     delta.mean <- mean(dev.results[n.steps,])

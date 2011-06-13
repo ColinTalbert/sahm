@@ -113,7 +113,7 @@
           return(out)
           }
           out$dat$ma$resp.name <- names(ma)[r.col]<-"response"
-          out.list$n.pres[1] <- sum(ma[,r.col])
+          out.list$n.pres[1] <- sum(ma[,r.col]!=0)
           out.list$n.abs[1] <- sum(ma[,r.col]==0)
           out.list$resp.name <- names(ma)[r.col]
           ma.names <- names(ma)
@@ -201,8 +201,8 @@
       if(!is.null(out.list$ma.test)){
         out.list$ma.test<-out.list$ma.test[complete.cases(out.list$ma.test),c(r.col,c(1:ncol(out.list$ma.test))[-r.col])]
         if(out$input$model.source.file!="rf.r") out.list$test.weights<- out.list$test.weights[complete.cases(out.list$ma.test)]
-        out.list$n.pres[4] <- sum(out.list$ma.test[,r.col])
-        out.list$n.abs[4] <- nrow(out.list$ma.test)-sum(out.list$ma.test[,r.col])
+        out.list$n.pres[4] <- sum(out.list$ma.test[,r.col]!=0)
+        out.list$n.abs[4] <- nrow(out.list$ma.test)-sum(out.list$ma.test[,r.col]!=0)
         }
       if(out$input$model.source.file!="rf.r") out.list$train.weights <- out.list$train.weights[complete.cases(ma)]
       if(!is.null(out$dat$bad.factor.cols)) out.list$ma <- out.list$ma[,-match(out$dat$bad.factor.cols,names(out.list$ma))]
@@ -210,12 +210,12 @@
 
         out.list$dims <- dim(out.list$ma)
         out.list$ratio <- min(sum(out$input$model.fitting.subset)/out.list$dims[1],1)
-        out.list$n.pres[2] <- sum(out.list$ma[,1])
-        out.list$n.abs[2] <- nrow(out.list$ma)-sum(out.list$ma[,1])
+        out.list$n.pres[2] <- sum(out.list$ma[,1]!=0)
+        out.list$n.abs[2] <- nrow(out.list$ma)-sum(out.list$ma[,1]!=0)
         out.list$used.covs <- names(out.list$ma)[-1]
 
       if(!is.null(out$input$model.fitting.subset)){
-            pres.sample <- sample(c(1:nrow(out.list$ma))[out.list$ma[,1]==1],min(out.list$n.pres[2],out$input$model.fitting.subset[1]))
+            pres.sample <- sample(c(1:nrow(out.list$ma))[out.list$ma[,1]>=1],min(out.list$n.pres[2],out$input$model.fitting.subset[1]))
             abs.sample <- sample(c(1:nrow(out.list$ma))[out.list$ma[,1]==0],min(out.list$n.abs[2],out$input$model.fitting.subset[2]))
             out.list$ma.subset <- out.list$ma[c(pres.sample,abs.sample),]
             if(out$input$model.source.file!="rf.r") out.list$weight.subset<-out.list$train.weights[c(pres.sample,abs.sample)]

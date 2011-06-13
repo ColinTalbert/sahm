@@ -33,14 +33,14 @@ output.dir="C:\\VisTrails\\mtalbert_20110504T132851"
     input.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSet_1.csv"
 
 #this file does have a test training split
-
-    rc="responseBinary"
+input.file="N:\\Active\\FORT_RAM\\VisTrails\\workspace\\mtalbert_20110602T155823\\MergedDataset_1.csv"
+    rc="responseCount"
     
 fit.brt.fct(ma.name=input.file,
       tif.dir=NULL,output.dir=output.dir,
       response.col=rc,test.resp.col="response",make.p.tif=F,make.binary.tif=F,
       simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",tc=NULL,n.folds=3,alpha=.3,script.name="brt.r",
-      learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, model.family = "bernoulli", max.trees = NULL,opt.methods=1,seed=1,save.model=TRUE)
+      learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, model.family = "poisson", max.trees = NULL,opt.methods=1,seed=1,save.model=TRUE)
 
 source("FIT_MARS_pluggable.r")
 PredictModel(workspace=paste("C:\\VisTrails\\mtalbert_20110504T132851","modelWorkspace",sep="\\"),out.dir="C:\\VisTrails")

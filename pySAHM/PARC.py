@@ -8,11 +8,14 @@ import struct
 import sys
 import csv
 
+import subprocess
+
 from optparse import OptionParser
 
 from osgeo import gdalconst
 from osgeo import gdal
 from osgeo import osr
+
 
 from numpy import *
 import numpy as np
@@ -35,7 +38,7 @@ def main(args_in):
     parser.add_option("-v", dest="verbose", default=False, action="store_true", help="the verbose flag causes diagnostic output to print")
     parser.add_option("-t", dest="templateRaster", help="The template raster used for projection, origin, cell size and extent")
     parser.add_option("-i", dest="inputsCSV", help="The CSV containing the list of files to process.  Format is 'FilePath, Categorical, Resampling, Aggreagtion")
-    
+    parser.add_option("-m", dest="multicore", default=True, help="'True', 'False' indicating whether to use multiple cores or not") 
     (options, args) = parser.parse_args(args_in)
     
     ourPARC = PARC()
@@ -43,6 +46,7 @@ def main(args_in):
     ourPARC.template = options.templateRaster
     ourPARC.outDir = options.outDir
     ourPARC.inputsCSV = options.inputsCSV
+    ourPARC.multicores = options.multicore
     
     ourPARC.parcFiles()
 
@@ -65,13 +69,14 @@ class PARC:
         #instance level variables
         self.verbose = False
         self.template = ""
-        self.templateParams ={}
+        self.templateParams = {}
         self.outDir = ""
         self.inputsCSV = ''
         self.inputs = []
         self.aggMethods = ['Min', 'Mean', 'Max', 'Majority']
         self.resampleMethods = ['NearestNeighbor', 'Bilinear', 'Cubic', 'CubicSpline', 'Lanczos']
         self.logger = None
+        self.multicores = 'False'
 
     def parcFiles(self):
         '''
@@ -85,6 +90,14 @@ class PARC:
         
         self.validateArgs()
         self.logger.writetolog("Starting PARC", True, True)
+        if self.multicores.lower() in ['true', 'yes', 't', 'y', '1']:
+            self.processFilesMC()
+        else:
+            self.processFiles()
+        
+        self.logger.writetolog("Finished PARC", True, True)
+        
+    def processFiles(self):
         # Clip and reproject each source image.
         for image in self.inputs:
             # Ensure source is different from template.
@@ -104,7 +117,46 @@ class PARC:
                 self.parcFile(image, outFile)
             elif os.path.abspath(self.template) == os.path.abspath(image[0]): 
                 shutil.copyfile(self.template, outFile)
-		self.logger.writetolog("Finished PARC", True, True)
+                
+		
+        
+    def processFilesMC(self):
+        '''This function has the same functionality as parcFiles
+        with the addition of utilizing multiple cores to do the processing.
+        '''
+        processes = []
+        for image in self.inputs:
+            # Ensure source is different from template.
+            #if not os.path.samefile(template, image):
+            inPath, inFileName = os.path.split(image[0])
+            outFile, ext = os.path.splitext(inFileName) 
+            outFile = os.path.join(self.outDir, outFile + ".tif")
+            
+            # os.path.samefile(image, outFile):
+            if os.path.exists(outFile) and \
+               os.path.abspath(image[0]) == os.path.abspath(outFile):
+
+                baseName, extension = os.path.splitext(outFile)
+                outFile = baseName + "-PARC.tif"
+            
+            if os.path.abspath(self.template) != os.path.abspath(image[0]):
+                args = '-s ' + image[0]
+                args += ' -d ' + outFile
+                args += ' -t ' + self.template
+                args += ' -r ' + image[2]
+                args += ' -a ' + image[3]
+                
+                execDir = os.path.split(sys.argv[0])[0]
+                executable = os.path.join(execDir, 'singlePARC.py')
+                
+                pyEx = sys.executable
+                command = ' '.join([pyEx, executable, args])
+                processes.append(subprocess.Popen(command))
+            
+                
+        
+        
+        self.logger.writetolog("Finished PARC", True, True)
 
     def parcFile(self, source, dest):
         """
@@ -166,6 +218,7 @@ class PARC:
             
             os.remove(tmpOutput2)
             
+    
     def getTemplateSRSCellSize(self, sourceParams):
         """
         Calculate what size our source image pixels would be in the template SRS
@@ -374,19 +427,19 @@ class PARC:
                 if dataset.GetRasterBand(1).DataType == 1:
                     print "Warning:  Could not extract NoData value.  Using assumed nodata value of 255"
                     params["NoData"] = 255
-                if dataset.GetRasterBand(1).DataType == 2:
+                elif dataset.GetRasterBand(1).DataType == 2:
                     print "Warning:  Could not extract NoData value.  Using assumed nodata value of 65536"
                     params["NoData"] = 65536
-                if dataset.GetRasterBand(1).DataType == 3:
+                elif dataset.GetRasterBand(1).DataType == 3:
                     print "Warning:  Could not extract NoData value.  Using assumed nodata value of 32767"
                     params["NoData"] = 32767
-                if dataset.GetRasterBand(1).DataType == 4:
+                elif dataset.GetRasterBand(1).DataType == 4:
                     print "Warning:  Could not extract NoData value.  Using assumed nodata value of 2147483647"
                     params["NoData"] = 2147483647
-                if dataset.GetRasterBand(1).DataType == 5:
+                elif dataset.GetRasterBand(1).DataType == 5:
                     print "Warning:  Could not extract NoData value.  Using assumed nodata value of 2147483647"
                     params["NoData"] = 2147483647
-                if dataset.GetRasterBand(1).DataType == 6:
+                elif dataset.GetRasterBand(1).DataType == 6:
                     print "Warning:  Could not extract NoData value.  Using assumed nodata value of -3.40282346639e+038"
                     params["NoData"] = -3.40282346639e+038
                 else:
@@ -545,7 +598,7 @@ class PARC:
         del output
         
         if strInputFileErrors <> "":
-            raise Exception, "There was one or more problems with your input raters: \n" + strInputFileErrors
+            raise Exception, "There was one or more problems with your input rasters: \n" + strInputFileErrors
         
 
      
