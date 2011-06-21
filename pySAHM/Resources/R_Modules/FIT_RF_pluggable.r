@@ -118,6 +118,8 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
                           used.covs=NULL,
                           ma=NULL,
                           ma.subset=NULL,
+                          train.xy=NULL,
+                          test.xy=NULL,
                           site.weights=NULL),
                  ma.test=NULL),
       mods=list(parms=list(n.trees=n.trees,mtry=NULL),
@@ -204,15 +206,17 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
     #  Begin model fitting #
     ##############################################################################################################
 
-    
+
     # tune the mtry parameter - this controls the number of covariates randomly subset for each split #
     cat("\ntuning mtry parameter\n")
-     rf.full <- try(randomForest(x=out$dat$ma$ma[,-1],y=factor(out$dat$ma$ma[,1]),xtest=xtest,ytest=ytest,importance=TRUE, ntree=n.trees,
-        mtry=mtry,replace=samp.replace,sampsize=ifelse(is.null(sampsize),(ifelse(samp.replace,nrow(x),ceiling(.632*nrow(x)))),sampsize),
-        nodesize=ifelse(is.null(nodesize),(if (!is.null(y) && !is.factor(y)) 5 else 1),nodesize),maxnodes=maxnodes,
-        localImp=localImp, nPerm=nPerm, keep.forest=ifelse(is.null(keep.forest),!is.null(y) && is.null(xtest),keep.forest),
-        corr.bias=corr.bias, keep.inbag=keep.inbag),silent=TRUE)
-        
+    
+   # rf.full <- randomForest(x=out$dat$ma$ma[,-1],y=factor(out$dat$ma$ma[,1]),xtest=xtest,ytest=ytest,importance=TRUE, ntree=n.trees,
+    #    mtry=mtry,replace=samp.replace,sampsize=ifelse(is.null(sampsize),(ifelse(samp.replace,nrow(x),ceiling(.632*nrow(x)))),sampsize),
+     #   nodesize=ifelse(is.null(nodesize),(if (!is.null(y) && !is.factor(y)) 5 else 1),nodesize),maxnodes=maxnodes,
+    #    localImp=localImp, nPerm=nPerm, keep.forest=ifelse(is.null(keep.forest),!is.null(y) && is.null(xtest),keep.forest),
+    #    corr.bias=corr.bias, keep.inbag=keep.inbag)
+
+
   x=out$dat$ma$ma[,-1]
   y=factor(out$dat$ma$ma[,1])
       if(is.null(mtry)){
@@ -239,15 +243,15 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
     cat("\nnow fitting full random forest model using mtry=",mtry,"\n")  
     if(debug.mode) flush.console() 
 
-x=out$dat$ma$ma[,-1]
-y=factor(out$dat$ma$ma[,1])
+
      rf.full <- try(randomForest(x=out$dat$ma$ma[,-1],y=factor(out$dat$ma$ma[,1]),xtest=xtest,ytest=ytest,importance=TRUE, ntree=n.trees,
         mtry=mtry,replace=samp.replace,sampsize=ifelse(is.null(sampsize),(ifelse(samp.replace,nrow(x),ceiling(.632*nrow(x)))),sampsize),
         nodesize=ifelse(is.null(nodesize),(if (!is.null(y) && !is.factor(y)) 5 else 1),nodesize),maxnodes=maxnodes,
         localImp=localImp, nPerm=nPerm, keep.forest=ifelse(is.null(keep.forest),!is.null(y) && is.null(xtest),keep.forest),
         corr.bias=corr.bias, keep.inbag=keep.inbag),silent=TRUE)
 
-
+     rf.full <- randomForest(x=out$dat$ma$ma[,-1],y=factor(out$dat$ma$ma[,1]),importance=TRUE,
+        ntree=out$mods$parms$n.tree, replace=FALSE, mtry=mtry)
         
     if(class(rf.full)=="try-error"){
               if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
@@ -269,9 +273,10 @@ y=factor(out$dat$ma$ma[,1])
     #  Begin model output #
     ##############################################################################################################
            
-    # ROC plot #                            
-    auc.output <- try(make.auc.plot.jpg(out$dat$ma$ma,pred=tweak.p(as.vector(predict(out$mods$final.mod,type="prob")[,2])),
-            plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="RF",opt.methods=opt.methods),
+    # ROC plot #
+
+    auc.output <- try(make.auc.plot.jpg(out$dat$ma$ma,pred=tweak.p(as.vector(predict(out$mods$final.mod,,newdata=out$dat$ma$ma[,-1],type="prob")[,2])),
+            plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="RF",opt.methods=opt.methods,weight=rep(1,times=dim(out$dat$ma$ma)[1])),
             silent=T)
    
     if(class(auc.output)=="try-error"){
@@ -297,7 +302,7 @@ y=factor(out$dat$ma$ma[,1])
         out$dat$ma$n.pres[2],", n(abs)=",out$dat$ma$n.abs[2],", n covariates considered=",length(out$dat$ma$used.covs),
         "\n\n","Settings:\n","n covariates considered at each split =",out$mods$parms$mtry,", n trees=",out$mods$parms$n.tree,
         "\n\n","Results:\n","AUC=",round(out$mods$auc.output$auc,4),
-        ", pct deviance explained=",round(out$mods$auc.output$pct_dev_exp,1),"%\n",
+        ", pct deviance explained=",round(out$mods$auc.output$pct.dev.exp,1),"%\n",
         "total time for model fitting=",round((unclass(Sys.time())-t0)/60,2),"min\n",sep="")
     txt1 <- "\nRelative performance of predictors in final model:\n\n"
     txt2 <- "\nDefault summary of random forest fit:\n"
@@ -391,8 +396,9 @@ y=factor(out$dat$ma$ma[,1])
     if(!debug.mode) {sink();cat("Progress:90%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("90%\n")}  ### print time
 
   # Evaluation Statistics on Test Data#
+
     if(!is.null(out$dat$ma$ma.test)) Eval.Stat<-EvaluationStats(out,thresh=auc.output$thresh,train=out$dat$ma$ma,
-        train.pred=tweak.p(as.vector(predict(out$mods$final.mod,type="prob")[,2])),opt.methods)
+        train.pred=tweak.p(as.vector(predict(out$mods$final.mod,newdata=out$dat$ma$ma[,-1],type="prob")[,2])),opt.methods)
 
     
 
@@ -588,7 +594,7 @@ xtest=NULL
 ytest=NULL
 n.trees=1000
 mtry=NULL
-sample.replace=FALSE
+samp.replace=FALSE
 sampsize=NULL
 nodesize=NULL
 maxnodes=NULL
@@ -650,14 +656,15 @@ Args <- commandArgs(trailingOnly=FALSE)
 	
 make.p.tif<-as.logical(make.p.tif)
 make.binary.tif<-as.logical(make.binary.tif)
-sample.replace<-as.logical(sample.replace)
+samp.replace<-as.logical(samp.replace)
 importance<-as.logical(importance)
 localImp<-as.logical(localImp)
 norm.votes<-as.logical(norm.votes)
 do.trace<-as.logical(do.trace)
 keep.inbag<-as.logical(keep.inbag)
 make.r.curves<-as.logical(make.r.curves)
-save.model<-as.logical(save.model)
+save.model<-make.p.tif | make.binary.tif
+#save.model<-as.logical(save.model)
 
 ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"EvaluationStats.r",sep="\\"))

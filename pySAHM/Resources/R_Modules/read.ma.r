@@ -32,6 +32,7 @@
 
 
           r.name <- out$input$response.col
+          if(r.name=="responseCount") out$input$model.family="poisson"
         # check to make sure that response column exists in the model array #
 
       r.col <- grep(r.name,names(ma))
@@ -52,7 +53,9 @@
       # remove x and y columns #
       xy.cols <- c(match("x",tolower(names(ma))),match("y",tolower(names(ma))))
       xy.cols <- xy.cols[!is.na(xy.cols)]
-      if(length(xy.cols)>0){ ma <- ma[,-xy.cols]
+      if(length(xy.cols)>0){
+      out.list$train.xy<-ma[,xy.cols]
+      ma <- ma[,-xy.cols]
           if(is.null(out$input$tif.dir)){
            include<-include[-xy.cols]
            paths<-paths[-xy.cols]
@@ -73,7 +76,9 @@
           out.list$train.weights<-rep(1,times=dim(ma)[1]))
             }
             
-       #remove test training split column if present
+           ma[ma==-9999]<-NA
+
+     #remove test training split column if present
           split.indx<-match("split",tolower(names(ma)))
           if(length(na.omit(split.indx))>0){
             include<-include[-c(split.indx)]
@@ -83,6 +88,8 @@
             ma<-ma[split.col=="train",]
             out.list$test.weights<-out.list$train.weights[split.col=="test"]
             out.list$train.weights<-out.list$train.weights[split.col=="train"]
+            out.list$test.xy<-out.list$train.xy[split.col=="test",]
+            out.list$train.xy<-out.list$train.xy[split.col=="train",]
             }
 
            r.col <- grep(r.name,names(ma))
@@ -126,6 +133,7 @@
       if(length(factor.cols)==0){
           out.list$factor.levels <- NA
           } else {
+          if(length(na.omit(split.indx))>0) names(out.list$ma.test)<-sub("_categorical","",names(out.list$ma.test))
           names(ma) <- ma.names <-  sub("_categorical","",ma.names)
           factor.names <- ma.names[factor.cols]
           factor.levels <- list()
@@ -151,6 +159,7 @@
               out.list$factor.levels <- factor.levels
 
           }
+          
 
       #out.list$ma <- ma[,c(r.col,c(1:ncol(ma))[-r.col])]
 
@@ -195,12 +204,15 @@
                 }
             out$dat$tif.names <- tif.names[ma.cols]
             }} else out$dat$tif.names <- ma.names[-1]
-
-      out.list$ma <- ma[complete.cases(ma),c(r.col,c(1:ncol(ma))[-r.col])]
-
+       #trying leaving the na's in
+      #out.list$ma <- ma[complete.cases(ma),c(r.col,c(1:ncol(ma))[-r.col])]
+       out.list$ma <- ma[,c(r.col,c(1:ncol(ma))[-r.col])]
+       
       if(!is.null(out.list$ma.test)){
-        out.list$ma.test<-out.list$ma.test[complete.cases(out.list$ma.test),c(r.col,c(1:ncol(out.list$ma.test))[-r.col])]
-        if(out$input$model.source.file!="rf.r") out.list$test.weights<- out.list$test.weights[complete.cases(out.list$ma.test)]
+        #out.list$ma.test<-out.list$ma.test[complete.cases(out.list$ma.test),c(r.col,c(1:ncol(out.list$ma.test))[-r.col])]
+        #if(out$input$model.source.file!="rf.r") out.list$test.weights<- out.list$test.weights[complete.cases(out.list$ma.test)]
+         out.list$ma.test<-out.list$ma.test[,c(r.col,c(1:ncol(out.list$ma.test))[-r.col])]
+        if(out$input$model.source.file!="rf.r") out.list$test.weights<- out.list$test.weights
         out.list$n.pres[4] <- sum(out.list$ma.test[,r.col]!=0)
         out.list$n.abs[4] <- nrow(out.list$ma.test)-sum(out.list$ma.test[,r.col]!=0)
         }
@@ -229,6 +241,7 @@
 
 if(tolower(out$input$model.family)=="poisson"){
 out.list$ma.subset<-out.list$ma
+out.list$weight.subset<-out.list$train.weights
 }
 
 

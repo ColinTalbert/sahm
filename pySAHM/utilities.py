@@ -9,6 +9,9 @@ import os
 import time
 import csv
 
+from osgeo import gdal
+from osgeo import osr
+
 _logfile = ''
 _verbose = False
 
@@ -49,7 +52,15 @@ class logger(object):
         f.write(msg)
         del f  
 
-         
+class TrappedError(Exception):
+    """Exception class indicating that an anticipated problem
+    was encountered in a specific module
+    """
+    def __init__(self, msg=None):
+        Exception.__init__(self)
+        self.message = msg
+
+            
 
 #def createsessionlog(roottempdir, verbose):
 #    '''Creates a new log file if one doesn't already exist.
@@ -123,6 +134,7 @@ def isMDSFile(MDSFile):
     del MDSreader
 
 
+
 #class SAHMLogger(object):
 #    def __init__(self, sessiondir):
 #        self.sessiondir = sessiondir
@@ -146,3 +158,5 @@ def isMDSFile(MDSFile):
 #            self.logfile.write(msg)
 #        self.logfile.write("\n")
 #        self.logfile.flush()
+
+

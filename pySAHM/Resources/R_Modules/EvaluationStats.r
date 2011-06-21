@@ -1,15 +1,15 @@
-make.auc.plot.jpg<-function(ma.reduced,pred,plotname,modelname,train.split=FALSE,thresh=NULL,train=NULL,train.pred=NULL,opt.methods=2,site.weights){
+make.auc.plot.jpg<-function(ma.reduced,pred,plotname,modelname,train.split=FALSE,thresh=NULL,train=NULL,train.pred=NULL,opt.methods=2,weight){
+      if(is.null(weight)) weight=rep(1,times=dim(ma.reduced)[1])
+    auc.data <- data.frame(ID=1:nrow(ma.reduced),pres.abs=ma.reduced[,1],pred=pred)
+    p.bar <- sum(auc.data$pres.abs * weight) / sum(weight)
+    n.pres <- sum(auc.data$pres.abs)
+    n.abs <- nrow(auc.data)-n.pres
 
-    auc.data <- data.frame(ID=1:nrow(ma.reduced),pres_abs=ma.reduced[,1],pred=pred)
-    p_bar <- mean(auc.data$pres_abs); n_pres <- sum(auc.data$pres_abs); n_abs <- nrow(auc.data)-n_pres
-    null_dev <- -2*(n_pres*log(p_bar)+n_abs*log(1-p_bar))
-    #function (y, mu, wt)
-    #2 * wt * (y * log(ifelse(y == 0, 1, y/mu)) - (y - mu))
-     browser()
-
-    dev_fit <- -2*(sum(log(auc.data$pred[auc.data$pres_abs==1]))+sum(log(1-auc.data$pred[auc.data$pres_abs==0])))
-    dev_exp <- null_dev - dev_fit
-    pct_dev_exp <- dev_exp/null_dev*100
+    null.dev<-calc.deviance(auc.data$pres.abs, rep(p.bar,times=length(auc.data$pres.abs)), weight, family="binomial")*nrow(ma.reduced)
+    dev.fit<-calc.deviance(auc.data$pres.abs, pred, weight, family="binomial")*nrow(ma.reduced)
+    dev.exp <- null.dev - dev.fit
+    pct.dev.exp <- dev.exp/null.dev*100
+   correlation<-cor(auc.data$pres.abs,pred)
 
     if(is.null(thresh)){
     thresh <- as.numeric(optimal.thresholds(auc.data,opt.methods=opt.methods))[2]}
@@ -17,7 +17,7 @@ make.auc.plot.jpg<-function(ma.reduced,pred,plotname,modelname,train.split=FALSE
     if(train.split==TRUE){
 
       jpeg(file=plotname)
-      d<-data.frame(ID=1:nrow(train),pres_abs=train[,1],pred=train.pred)
+      d<-data.frame(ID=1:nrow(train),pres.abs=train[,1],pred=train.pred)
       thresh<- as.numeric(optimal.thresholds(d,opt.methods=opt.methods))[2]
       TestTrainRocPlot(DATA=d,opt.thresholds=thresh,add.legend=FALSE,lwd=2)
       TestTrainRocPlot(auc.data,model.names=modelname,opt.thresholds=thresh,add.roc=TRUE,line.type=2,color="red",add.legend=FALSE)
@@ -35,56 +35,70 @@ make.auc.plot.jpg<-function(ma.reduced,pred,plotname,modelname,train.split=FALSE
     SPEC <- specificity(cmx,st.dev=F)
     KAPPA <- Kappa(cmx,st.dev=F)
     TSS <- SENS+SPEC-1
-    return(list(thresh=thresh,cmx=cmx,null_dev=null_dev,dev_fit=dev_fit,dev_exp=dev_exp,pct_dev_exp=pct_dev_exp,auc=auc.fit[1,1],auc.sd=auc.fit[1,2],
-        plotname=plotname,pcc=PCC,sens=SENS,spec=SPEC,kappa=KAPPA,tss=TSS))
+    return(list(thresh=thresh,cmx=cmx,null.dev=null.dev,dev.fit=dev.fit,dev.exp=dev.exp,pct.dev.exp=pct.dev.exp,auc=auc.fit[1,1],auc.sd=auc.fit[1,2],
+        plotname=plotname,pcc=PCC,sens=SENS,spec=SPEC,kappa=KAPPA,tss=TSS,correlation=correlation))
 }
 
 
-make.poisson.jpg<-function(ma.reduced,pred,plotname,modelname,train.split=FALSE,thresh=NULL,train=NULL,train.pred=NULL,weight){
-    browser()
-    pois.data <- data.frame(ID=1:nrow(ma.reduced),pres_abs=ma.reduced[,1],pred=pred)
-    p_bar <- mean(pois.data$pres_abs); n_pres <- sum(pois.data$pres_abs>1); n_abs <- nrow(pois.data)-n_pres
+make.poisson.jpg<-function(ma.reduced,pred,plotname,modelname,train.split=FALSE,thresh=NULL,train=NULL,train.pred=NULL,weight,train.weight=NULL){
+
+    pois.data <- data.frame(ID=1:nrow(ma.reduced),pres.abs=ma.reduced[,1],pred=pred)
+    p.bar <- sum(pois.data$pres.abs * weight) / sum(weight)
+    n.pres <- sum(pois.data$pres.abs>=1)
+    n.abs <- nrow(pois.data)-n.pres
 
     #takes into account potential weights but not offset
 
-    null_dev<-calc.deviance(pois.data$pres_abs, rep(p_bar,times=length(pois.data$pres_abs)), weight, family="poisson")*nrow(ma.reduced)
-    dev_fit<-calc.deviance(pois.data$pres_abs, pred, weight, family="poisson")*nrow(ma.reduced)
-    dev_exp <- null_dev - dev_fit
-    pct_dev_exp <- dev_exp/null_dev*100
-    corelation<-cor(pois.data$pres_abs,pred)
+    null.dev<-calc.deviance(pois.data$pres.abs, rep(p.bar,times=length(pois.data$pres.abs)), weight, family="poisson")*nrow(ma.reduced)
+    dev.fit<-calc.deviance(pois.data$pres.abs, pred, weight, family="poisson")*nrow(ma.reduced)
+    dev.exp <- null.dev - dev.fit
+    pct.dev.exp <- dev.exp/null.dev*100 #this is the pseudo R^2 using definition in the course notes
+    correlation<-cor(pois.data$pres.abs,pred)
+    #calibration(pois.data$pres.abs,pred,family="poisson") gbm hasn't implimented this for poisson though elith and leathwich use it, I can't find much
+    prediction.error<-sum((pois.data$pres.abs-pred)^2)
+
     ## ADD Weights and offset?
     #function (y, mu, wt)
     #2 * wt * (y * log(ifelse(y == 0, 1, y/mu)) - (y - mu))
 
    if(train.split==TRUE){
+      if(is.null(train.weight)) train.weight=rep(1,times=nrow(train))
+        null.dev.train<-calc.deviance(train$response, rep(mean(train$response),times=nrow(train)), train.weight, family="poisson")*nrow(train)
+        dev.fit.train<-calc.deviance(train$response, train.pred, train.weight, family="poisson")*nrow(train)
+        dev.exp.train <- null.dev.train - dev.fit.train
+        pct.dev.exp.train <- dev.exp.train/null.dev.train*100
+        correlation.train<-cor(train$response,train.pred)
+    
+              jpeg(file=plotname)
+    par(mfrow=c(2,1))
+        plot(train.pred,(train$response-train.pred),xlab="Predicted Values",ylab="Residuals",pch=19,col="lightgrey",main="Residual plot for train split")
+          panel.smooth(train.pred,(train$response-train.pred),lwd=2,col.smooth="grey")
+          abline(0,0)
 
-        jpeg(file=plotname)
-        par(mfrow=c(1,1))
-        plot(pois.data$pred,(pois.data$pres_abs-pois.data$pred),xlab="Fitted Values",ylab="Residuals")
-        panel.smooth(pois.data$pred,(pois.data$pres_abs-pois.data$pred),lwd=2)
-        abline(0,0)
+        plot(pois.data$pred,(pois.data$pres.abs-pois.data$pred),xlab="Predicted Values",ylab="Residuals",col="red",pch=19,main="Residual plot for test split")
+          panel.smooth(pois.data$pred,(pois.data$pres.abs-pois.data$pred),lwd=2)
+          abline(0,0)
+
         graphics.off()
+        return(list(null.dev=null.dev,dev.fit=dev.fit,dev.exp=dev.exp,pct.dev.exp=pct.dev.exp,correlation=correlation,
+          null.dev.train=null.dev.train,dev.fit.train=dev.fit.train,dev.exp.train=dev.exp.train,pct.dev.exp.train=pct.dev.exp.train,correlation.train=correlation.train))
+
      }else{
-           jpeg(file=plotname)
-        par(mfrow=c(2,1))
-            plot(pois.data$pred,(pois.data$pres_abs-pois.data$pred),xlab="Fitted Values",ylab="Residuals")
-        panel.smooth(pois.data$pred,(pois.data$pres_abs-pois.data$pred),lwd=2)
-        abline(0,0)
-
-        plot(pois.data$pred,(pois.data$pres_abs-pois.data$pred),xlab="Predicted Values",ylab="Residuals")
-        panel.smooth(pois.data$pred,(pois.data$pres_abs-pois.data$pred),lwd=2)
+     jpeg(file=plotname)
+        par(mfrow=c(1,1))
+        plot(pois.data$pred,(pois.data$pres.abs-pois.data$pred),xlab="Predicted Values",ylab="Residuals")
+        panel.smooth(pois.data$pred,(pois.data$pres.abs-pois.data$pred),lwd=2)
         abline(0,0)
         graphics.off()
+        return(list(null.dev=null.dev,dev.fit=dev.fit,dev.exp=dev.exp,pct.dev.exp=pct.dev.exp,correlation=correlation))
         }
-
-    return(list(null_dev=null_dev,dev_fit=dev_fit,dev_exp=dev_exp,pct_dev_exp=pct_dev_exp))
 }
 
 ##############################################################################
 EvaluationStats<-function(out,thresh,train,train.pred,opt.methods=opt.methods){
     response<-out$dat$ma$ma.test[,1]
 
-     if(out$input$model.source.file=="rf.r") {pred<-tweak.p(as.vector(predict(out$mods$final.mod,out$dat$ma$ma.test,type="prob")[,2]))
+     if(out$input$model.source.file=="rf.r") {pred<-tweak.p(as.vector(predict(out$mods$final.mod,newdata=out$dat$ma$ma.test[,-1],type="prob")[,2]))
       modelname="Random Forest"
      }
 
@@ -100,10 +114,11 @@ EvaluationStats<-function(out,thresh,train,train.pred,opt.methods=opt.methods){
        modelname="BRT"
       }
 
-  auc.output <- ifelse(out$input$model.family!="poisson",make.auc.plot.jpg(out$dat$ma$ma.test,pred=pred,plotname=paste(out$dat$bname,"_auc_plot.jpg",sep=""),
-            modelname=modelname,train.split=TRUE,thresh=thresh,train=train,train.pred,opt.methods=opt.methods),
-            make.poisson.jpg(out$dat$ma$ma.test,pred=pred,plotname=paste(out$dat$bname,"_auc_plot.jpg",sep=""),
-            modelname=modelname,train.split=TRUE,thresh=thresh,train=train,train.pred,weight=out$dat$ma$test.weights))
+  ifelse(out$input$model.family!="poisson",
+                  auc.output<-make.auc.plot.jpg(out$dat$ma$ma.test,pred=pred,plotname=paste(out$dat$bname,"_auc_plot.jpg",sep=""),
+                      modelname=modelname,train.split=TRUE,thresh=thresh,train=train,train.pred,opt.methods=opt.methods,weight=out$dat$ma$test.weights),
+                  auc.output<-make.poisson.jpg(out$dat$ma$ma.test,pred=pred,plotname=paste(out$dat$bname,"_auc_plot.jpg",sep=""),
+                      modelname=modelname,train.split=TRUE,thresh=thresh,train=train,train.pred,weight=out$dat$ma$test.weights))
 
 
 
@@ -116,14 +131,12 @@ EvaluationStats<-function(out,thresh,train,train.pred,opt.methods=opt.methods){
 
     #deviance calcuation from Elith Leathwich code
 
-    cor.test(pred,response)$estimate
-
-    capture.output(cat("\n\nEvaluation Statistics applied to test split\n",
+    capture.output(cat("\n\nEvaluation Statistics applied to test split:\n",
                        "\n\t Correlation Coefficient      : ",cor.test(pred,response)$estimate,
-                       "\n\t NULL Deviance                : ",auc.output$null_dev,
-                       "\n\t Fit Deviance                 : ",auc.output$dev_fit,
-                       "\n\t Explained Deviance           : ",auc.output$dev_exp,
-                       "\n\t Percent Deviance Explained   : ",auc.output$pct_dev_exp,
+                       "\n\t NULL Deviance                : ",auc.output$null.dev,
+                       "\n\t Fit Deviance                 : ",auc.output$dev.fit,
+                       "\n\t Explained Deviance           : ",auc.output$dev.exp,
+                       "\n\t Percent Deviance Explained   : ",auc.output$pct.dev.exp,
                        file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE))
                        
                       if(out$input$model.family!="poisson"){

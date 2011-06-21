@@ -167,6 +167,8 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
                           ma=NULL,
                           train.weights=NULL,
                           test.weights=NULL,
+                          train.xy=NULL,
+                          test.xy=NULL,
                           ma.subset=NULL,
                           weight.subset=NULL),
                           ma.test=NULL),
@@ -258,6 +260,8 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     ##############################################################################################################
 
     # estimate optimal learning rate and tc #         o
+
+     if(out$input$model.family=="binomial")  out$input$model.family="bernoulli"
     out <-est.lr(out)
     if(debug.mode) assign("out",out,envir=.GlobalEnv)
 
@@ -310,6 +314,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     # fit final model #
     t2 <- unclass(Sys.time())
 
+   if(out$mods$lr.mod$lr==0) out$mods$lr.mod$lr<-out$mods$lr.mod$lr0
   out$mods$final.mod <- gbm.step.fast(dat=out$dat$ma$ma,gbm.x=out$mods$simp.mod$good.cols,gbm.y = 1,family=out$input$model.family,
                   n.trees = c(300,600,700,800,900,1000,1200,1500,1800,2200,2600,3000,3500,4000,4500,5000),n.folds=out$input$n.folds,
                   tree.complexity=out$mods$parms$tc.full,learning.rate=out$mods$lr.mod$lr,bag.fraction=out$input$bag.fraction,site.weights=out$dat$ma$train.weights,
@@ -384,22 +389,22 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
         "\n\n","Settings:\n","tree complexity=",out$mods$parms$tc.full,", learning rate=",round(out$mods$lr.mod$lr,4),
         ", n(trees)=",out$mods$final.mod$target.trees,",\n","model simplification=",out$input$simp.method,", n folds=",out$input$n.folds,
         "\n\n","Results:\n","AUC=",round(out$mods$auc.output$auc,4),", n covariates in final model=",nrow(out$mods$final.mod$contributions),
-        ", pct deviance explained=",round(out$mods$auc.output$pct_dev_exp,1),"%\n",
+        ", pct deviance explained=",round(out$mods$auc.output$pct.dev.exp,1),"%\n",
         "total time for model fitting=",round((unclass(Sys.time())-t0)/60,2),"min\n",sep="")
     txt1 <- "\nRelative influence of predictors in final model:\n\n"
     txt2 <- "\nImportant interactions in final model:\n\n"
     capture.output(cat(txt0),cat(txt1),print(out$mods$final.mod$contributions),cat(txt2),print(out$mods$interactions,row.names=F),file=paste(bname,"_output.txt",sep=""))
     cat(txt0);cat(txt1);print(out$mods$final.mod$contributions);cat(txt2);print(out$mods$interactions,row.names=F)
     }
- browser()
+
   if(out$input$model.family=="poisson"){
-    txt0 <- paste("Boosted Regression Tree Modeling Results\n",out$input$run.time,"\n\n","Data:\n",ma.name,"\n","n(pres)=",
-        out$dat$ma$n.pres[2],", n(abs)=",out$dat$ma$n.abs[2],", n covariates considered=",length(out$dat$ma$used.covs),
-        "\n\n","Settings:\n","tree complexity=",out$mods$parms$tc.full,", learning rate=",round(out$mods$lr.mod$lr,4),
-        ", n(trees)=",out$mods$final.mod$target.trees,",\n","model simplification=",out$input$simp.method,", n folds=",out$input$n.folds,
-        "\n\n","Results:\n",", n covariates in final model=",nrow(out$mods$final.mod$contributions),
-        ", pct deviance explained=",round(out$mods$auc.output$pct_dev_exp,1),"%\n",
-        "total time for model fitting=",round((unclass(Sys.time())-t0)/60,2),"min\n",sep="")
+    txt0 <- paste("Boosted Regression Tree Modeling Results\n",out$input$run.time,"\n\n","Data:\n\t ",ma.name,"\n\t ","n(pres)=",
+        out$dat$ma$n.pres[2],"\n\t n(abs)=",out$dat$ma$n.abs[2],"\n\t number of covariates considered=",length(out$dat$ma$used.covs),
+        "\n\n","Settings:\n","\t tree complexity=",out$mods$parms$tc.full,"\n\t learning rate=",round(out$mods$lr.mod$lr,4),
+        "\n\t n(trees)=",out$mods$final.mod$target.trees,"\n","\t model simplification=",out$input$simp.method,"\n\t n folds=",out$input$n.folds,
+        "\n\n","Results:\n\t ","number covariates in final model=",nrow(out$mods$final.mod$contributions),
+        "\n\t pct deviance explained on train data =",round(out$mods$auc.output$pct.dev.exp,1),"%\n",
+        "\n\t total time for model fitting=",round((unclass(Sys.time())-t0)/60,2),"min\n",sep="")
     txt1 <- "\nRelative influence of predictors in final model:\n\n"
     txt2 <- "\nImportant interactions in final model:\n\n"
     capture.output(cat(txt0),cat(txt1),print(out$mods$final.mod$contributions),cat(txt2),print(out$mods$interactions,row.names=F),file=paste(bname,"_output.txt",sep=""))
@@ -697,7 +702,7 @@ est.lr <- function(out){
     ab<-coef(lm(max.trees~log(lrs),data=lr.out))
     tt <- out$dat$ma$ratio*800
     lr.full <- round(as.numeric(exp((tt-ab[1])/ab[2])),4)
-    lr <- round(as.numeric(exp((1000-ab[1])/ab[2])),4)
+    lr <- round(as.numeric(exp((1000-ab[1])/ab[2])),6)
     lr.out$abs <- abs(lr.out$max.trees-1000)
     lr.out$d.lr <- abs(lr.out$lrs-lr)
     lr.out <- lr.out[order(lr.out$abs,lr.out$d.lr),]
@@ -2512,10 +2517,11 @@ source(paste(ScriptPath,"TestTrainRocPlot.r",sep="\\"))
 source(paste(ScriptPath,"read.ma.r",sep="\\"))
 source(paste(ScriptPath,"proc.tiff.r",sep="\\"))
 
+alpha<-as.numeric(alpha)
 make.p.tif<-as.logical(make.p.tif)
 make.binary.tif<-as.logical(make.binary.tif)
 prev.stratify<-as.logical(prev.stratify)
-save.model<-as.logical(save.model)
+save.model<-make.p.tif | make.binary.tif
 
     fit.brt.fct(ma.name=csv,
 		tif.dir=NULL,

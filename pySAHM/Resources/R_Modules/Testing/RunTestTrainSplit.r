@@ -1,10 +1,29 @@
 ### This file runs the TestTrainSplit and checks that all ratios end up being what they should if RatioPresAbs is set at an extreme value
 ### an excessive number of values are deleted and ratios and be drastically off might want to include future error checking
-input.file="C:\\VisTrails\\mtalbert_20110505T105647\\MergedDataSet_1.csv"
-output.file="I:\\VisTrails\\WorkingFiles\\workspace\\talbertc_20110518T084930\\TestTrainingSplit_2.csv"
-response.col="DICK"
+setwd("I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
+source("TestTrainSplit.r")
 
-TestTrainSplit(input.file,output.file,response.col=response.col,trainProp=.7,RatioPresAbs=.1)  #tried also with .8, and no RatioPresAbs
+input.file="I:\\NPS_NPMP_data\\ModelingSession_June\\GRSP_MDS.csv"
+output.file="C:\\VisTrails\\GRSP_TestTrain.csv"
+response.col="responseCount"
+TestTrainSplit(input.file,output.file,response.col=response.col,trainProp=.7)  #tried also with .8, and no RatioPresAb
+
+
+input.file="I:\\NPS_NPMP_data\\ModelingSession_June\\HESP_MDS.csv"
+output.file="C:\\VisTrails\\HESP_TestTrain.csv"
+response.col="responseCount"
+TestTrainSplit(input.file,output.file,response.col=response.col,trainProp=.7)  #tried also with .8, and no RatioPresAb
+
+
+input.file="I:\\NPS_NPMP_data\\ModelingSession_June\\EAME_MDS.csv"
+output.file="C:\\VisTrails\\EAME_TestTrain.csv"
+response.col="responseCount"
+TestTrainSplit(input.file,output.file,response.col=response.col,trainProp=.7)  #tried also with .8, and no RatioPresAb
+
+input.file="I:\\NPS_NPMP_data\\ModelingSession_June\\DICK_MDS.csv"
+output.file="C:\\VisTrails\\EAME_TestTrain.csv"
+response.col="responseCount"
+TestTrainSplit(input.file,output.file,response.col=response.col,trainProp=.7)  #tried also with .8, and no RatioPresAb
 
 input.file<-output.file
 dat<-read.csv(input.file,skip=3,header=FALSE)
@@ -18,7 +37,7 @@ dat<-read.csv(input.file,skip=3,header=FALSE)
           include<-(as.numeric(tif.info[[2]]))
           
 # checking that trainProp is correct
-ta<-table(dat$Split,dat$DICK)
+ta<-table(dat$Split,dat$responseCount)
 ta
 #if there are background points, remove them here
 ta<-ta[-1,]

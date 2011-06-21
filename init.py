@@ -21,8 +21,8 @@ from enum_widget import build_enum_widget
 from SelectPredictorsLayers import SelectListDialog
 #from maxent_module import MAXENTRunner
 import utils
-#import packages.sahm.pySAHM.Utilites
 
+#import packages.sahm.pySAHM.Utilites
 
 #import our python SAHM Processing files
 import packages.sahm.pySAHM.FieldDataQuery as FDQ
@@ -32,6 +32,7 @@ import packages.sahm.pySAHM.RasterFormatConverter as RFC
 import packages.sahm.pySAHM.MaxentRunner as MaxentRunner
 
 from utils import writetolog
+from pySAHM.utilities import TrappedError
 
 identifier = 'gov.usgs.sahm' 
 
@@ -106,6 +107,8 @@ class FieldData(File):
 #    _input_ports = [('csvFile', '(edu.utah.sci.vistrails.basic:File)')]
     _output_ports = [('value', '(gov.usgs.sahm:FieldData:DataInput)'),
                      ('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
+    
+    
     
 class AggregationMethod(String):
     '''
@@ -520,7 +523,7 @@ class Model(Module):
         
         args = ''
         for k, v in argsDict.iteritems():
-            args += ' ' + '='.join([k,v])
+            args += ' ' + '='.join([str(k),str(v)])
         args += " o=" + output_dname 
         args += " rc=" + utils.MDSresponseCol(mdsFile)
 #        if self.hasInputFromPort('makeBinMap'):
@@ -548,7 +551,7 @@ class Model(Module):
 #                writetolog(msg, False, True)
 #            args += " abr=" + x
                 
-        utils.runRScript(self.name, args)
+        utils.runRScript(self.name, args, self)
 #        utils.runRScript('FIT_BRT_pluggableErrorMessage.r', args, self)
         
         input_fname = os.path.join(output_dname, ModelAbbrev + "_prob_map.tif")
@@ -557,14 +560,15 @@ class Model(Module):
             utils.tif_to_color_jpeg(input_fname, output_fname, color_breaks_csv)
             output_file4 = utils.create_file_module(output_fname)
             self.setResult('ProbabilityMap', output_file4)
-        elif (argsDict.has_key('mpt') and argsDict('mpt') == True) or \
+        elif (argsDict.has_key('mpt') and argsDict['mpt'] == True) or \
             not argsDict.has_key('mpt'):
             msg = "Expected output from " + ModelAbbrev + " was not found."
-            msg += "\nThis likely indicates problems with the inputs to the R module."
+            msg += "\nThis might indicate problems with the inputs to the R module."
+            msg += "\nCheck the console output for additional R warnings "
             writetolog(msg, False, True)
             raise ModuleError(self, msg)
         
-        if (argsDict.has_key('mbt') and argsDict('mbt') == True) or \
+        if (argsDict.has_key('mbt') and argsDict['mbt'] == True) or \
             not argsDict.has_key('mbt'):
             outFileName = os.path.join(output_dname, ModelAbbrev + "_bin_map.tif")
             output_file1 = utils.create_file_module(outFileName)
@@ -756,6 +760,8 @@ class MDSBuilder(Module):
         
         try:
             ourMDSBuilder.run()
+        except TrappedError as e:
+            raise ModuleError(self, e.message)
         except:
             utils.informative_untrapped_error(self, "MDSBuilder")
 
@@ -902,6 +908,9 @@ class PARC(Module):
 
         try:
             ourPARC.parcFiles()
+        except TrappedError as e:
+            writetolog(e.message)
+            raise ModuleError(self, e.message)
         except:
             utils.informative_untrapped_error(self, "PARC")        
         
@@ -981,7 +990,14 @@ class RasterFormatConverter(Module):
             ourRFC.verbose = True
         ourRFC.logger = utils.getLogger()
         writetolog("    output directory = " + ourRFC.outputDir, False, False)
-        ourRFC.run()
+        
+        try:
+            ourRFC.run()
+        except TrappedError as e:
+            raise ModuleError(self, e.message)
+        except:
+            utils.informative_untrapped_error(self, "RasterFormatConverter") 
+        
         
         outputDir = utils.create_dir_module(ourRFC.outputDir)
         self.setResult('outputDir', outputDir)
@@ -1051,7 +1067,7 @@ class TestTrainingSplit(Module):
             try:
                 trainingProportion = float(self.getInputFromPort("trainingProportion"))
                 if trainingProportion <= 0 or trainingProportion > 1:
-                    raise runtimeError
+                    raise ModuleError(self, "Train Proportion (trainProp) must be a number between 0 and 1 excluding 0")
                 args += " p=" + str(trainingProportion)
             except:
                 raise ModuleError(self, "Train Proportion (trainProp) must be a number between 0 and 1 excluding 0")
@@ -1059,7 +1075,7 @@ class TestTrainingSplit(Module):
             try:
                 RatioPresAbs = float(self.getInputFromPort("RatioPresAbs"))
                 if RatioPresAbs <= 0:
-                    raise runtimeError
+                    raise ModuleError(self, "The ratio of presence to absence (RatioPresAbs) must be a number greater than 0") 
                 args += " m=" + str(trainingProportion)
             except:
                 raise ModuleError(self, "The ratio of presence to absence (RatioPresAbs) must be a number greater than 0") 
@@ -1301,7 +1317,9 @@ class ProjectionLayers(Module):
 
         try:
             ourPARC.parcFiles()
-        except:
+        except TrappedError as e:
+            raise ModuleError(self, e.message)
+        except :
             utils.informative_untrapped_error(self, "PARC")
         
         #loop through our workingCSV and format it into an MDS header
@@ -1400,6 +1418,8 @@ class MAXENT(Module):
         ourMaxent.logger = utils.getLogger()
         try:
             ourMaxent.run()
+        except TrappedError as e:
+            raise ModuleError(self, e.message)  
         except:
             utils.informative_untrapped_error(self, "Maxent")
         

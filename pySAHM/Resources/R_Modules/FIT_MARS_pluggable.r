@@ -97,6 +97,8 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
                           resp.name=NULL,
                           train.weights=NULL,
                           test.weights=NULL,
+                          train.xy=NULL,
+                          test.xy=NULL,
                           factor.levels=NA,
                           used.covs=NULL,
                           ma=NULL,
@@ -182,16 +184,10 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     cat("\n","Fitting MARS model","\n")
     flush.console()
 
-    fit <- try(mars.glm(data=out$dat$ma$ma, mars.x=c(2:ncol(out$dat$ma$ma)), mars.y=1, mars.degree=out$input$mars.degree, family=out$input$model.family,
-          site.weights=out$dat$ma$train.weights, penalty=out$input$mars.penalty))
+    fit <- mars.glm(data=out$dat$ma$ma, mars.x=c(2:ncol(out$dat$ma$ma)), mars.y=1, mars.degree=out$input$mars.degree, family=out$input$model.family,
+          site.weights=out$dat$ma$train.weights, penalty=out$input$mars.penalty)
       
-    if(class(fit)=="try-error"){
-          if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
-          out$ec<-out$ec+1
-          out$error.mssg[[out$ec]]<- paste("Error fitting MARS model:",fit)
-          cat(saveXML(mars.to.xml(out),indent=T),'\n')
-          return()
-          } else out$mods$final.mod <- fit  
+    out$mods$final.mod <- fit
 
   out$mods$final.mod$contributions$var<-names(out$dat$ma$ma)[-1]
 
@@ -221,7 +217,8 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
         }
     cat("\n","Storing output...","\n","\n")
     #flush.console()
-    capture.output(print(out$mods$summary),file=paste(bname,"_output.txt",sep=""))
+    capture.output(cat("Summary of MARS Model:\n"),file=paste(bname,"_output.txt",sep=""))
+    capture.output(print(out$mods$summary),file=paste(bname,"_output.txt",sep=""),append=TRUE)
     if(!is.null(out$dat$bad.factor.cols)){
         capture.output(cat("\nWarning: the following categorical response variables were removed from consideration\n",
             "because they had only one level:",paste(out$dat$bad.factor.cols,collapse=","),"\n"),
@@ -235,23 +232,32 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     #  Begin model output #
     ##############################################################################################################
            
-    # Store .jpg ROC plot #    
-    pred<-try(mars.predict(fit,out$dat$ma$ma)$prediction[,1])
-    if(class(pred)=="try-error"){
-          if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
-          out$ec<-out$ec+1
-          out$error.mssg[[out$ec]]<- paste("Error producing ROC predictions:",pred)
-          cat(saveXML(mars.to.xml(out),indent=T),'\n')
-          return()
-          } 
-                          
-    auc.output <- try(make.auc.plot.jpg(out$dat$ma$ma,pred=pred,plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="MARS",opt.methods=opt.methods))
+    # Store .jpg ROC plot #
 
-    
-    if(class(auc.output)=="try-error"){
-          out$ec<-out$ec+1
-          out$error.mssg[[out$ec]] <- paste("Error making ROC plot:",auc.output)
-    } else { out$mods$auc.output<-auc.output}
+    if(out$input$model.family=="bernoulli" |out$input$model.family=="binomial"){
+      auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=mars.predict(fit,out$dat$ma$ma)$prediction[,1],
+      plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",opt.methods=opt.methods,
+            weight=out$dat$ma$train.weights)
+
+      out$mods$auc.output<-auc.output
+      }
+  if(out$input$model.family=="poisson"){
+      auc.output <- make.poisson.jpg(out$dat$ma$ma,pred=mars.predict(fit,out$dat$ma$ma)$prediction[,1],
+      plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",
+            weight=out$dat$ma$train.weights)
+
+      out$mods$auc.output<-auc.output
+      }
+
+    txt0 <- paste("\n\n","Data:\n",ma.name,"\n","\n\t n(pres)=",
+        out$dat$ma$n.pres[2],"\n\t n(abs)=",out$dat$ma$n.abs[2],"\n\t n covariates considered=",length(out$dat$ma$used.covs),
+        "\n\n","Results on training data:\n", "\t correlation between predicted values and true response=",round(out$mods$auc.output$correlation,3),
+        "\n\t pct deviance explained=",round(out$mods$auc.output$pct.dev.exp,1),"%\n",
+        "\n total time for model fitting=",round((unclass(Sys.time())-t0)/60,2),"min\n",sep="")
+
+    capture.output(cat(txt0),file=paste(bname,"_output.txt",sep=""),append=T)
+
+
     if(!debug.mode) {sink();cat("Progress:70%\n");flush.console();sink(logname,append=T)} else cat("70%\n")
     
     # Response curves #
@@ -313,7 +319,8 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
 
      # Evaluation Statistics on Test Data#
 
-    if(!is.null(out$dat$ma$ma.test)) Eval.Stat<-EvaluationStats(out,thresh=auc.output$thresh,train=out$dat$ma$ma,train.pred=pred,opt.methods)
+    if(!is.null(out$dat$ma$ma.test)) Eval.Stat<-EvaluationStats(out,thresh=auc.output$thresh,train=out$dat$ma$ma,
+          train.pred=mars.predict(fit,out$dat$ma$ma)$prediction[,1],opt.methods)
 
 
     
@@ -1066,7 +1073,7 @@ function (data,                         # the input data frame
 
   mars.object <- mars(x = xdat, y = ydat, degree = mars.degree, w = site.weights, 
        wp = spp.weights, penalty = penalty)
-
+  if(length(mars.object$coefficients==1)) stop("MARS has fit the null model (intercept only) \n new predictors are required")
   bf.data <- as.data.frame(eval(mars.object$x))
   n.bfs <- ncol(bf.data)
   bf.names <- paste("bf", 1:n.bfs, sep = "")
@@ -1083,7 +1090,7 @@ function (data,                         # the input data frame
 # now cycle through the species fitting glm models 
 
   cat("fitting glms for individual responses","\n")
-
+      browser()
   for (i in 1:n.spp) {
 
     cat(names(ydat)[i],"\n")
@@ -1267,7 +1274,11 @@ function (mars.glm.object,  #the input mars object
   xrange <- matrix(0,nrow = 2,ncol = ncol(xdat))
   factor.filter <- rep(FALSE,ncol(xdat))
   for (i in 1:ncol(xdat)) factor.filter[i] <- is.vector(xdat[,i])
+
+  if(sum(factor.filter>1)) {
   xrange[,factor.filter] <- sapply(xdat[,factor.filter], range)
+  } else  xrange[,factor.filter]<-range(xdat[,factor.filter])
+  
   for (i in wanted.species) {
     n.pages <- 1
     plotit <- rep(TRUE, n.bfs)
@@ -1693,9 +1704,9 @@ source(paste(ScriptPath,"proc.tiff.r",sep="\\"))
 
 make.p.tif<-as.logical(make.p.tif)
 make.binary.tif<-as.logical(make.binary.tif)
-save.model<-as.logical(save.model)
+save.model<-make.p.tif | make.binary.tif
 
 fit.mars.fct(ma.name=csv,
         tif.dir=NULL,output.dir=output,
         response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
-            mars.degree=mars.degree,mars.penalty=mars.penalty,debug.mode=F,responseCurveForm="pdf",model.family=model.family,script.name="mars.r")
+            mars.degree=mars.degree,mars.penalty=mars.penalty,debug.mode=F,responseCurveForm="pdf",model.family=model.family,script.name="mars.r",save.model=save.model)

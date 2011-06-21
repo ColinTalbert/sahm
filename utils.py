@@ -11,7 +11,7 @@ import time
 import tempfile
 import subprocess
 
-from PyQt4 import QtCore
+from PyQt4 import QtCore, QtGui
 
 from core.modules.basic_modules import File, Path, Directory, new_constant, Constant
 from core.modules.vistrails_module import ModuleError
@@ -413,10 +413,15 @@ def runRScript(script, args, module=None):
     ret = p.communicate()
     
     if 'Error' in ret[1]:
-        msg = "An error was encountered in the R script for this module.  The R error message is below - \n"
+        msg = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        msg +="\n  An error was encountered in the R script for this module."
+        msg += "\n     The R error message is below: \n"
         msg += ret[1]
         writetolog(msg)
-        raise RuntimeError , msg
+        if module:
+            raise ModuleError(module, msg)
+        else:
+            raise RuntimeError , msg
 
     if 'Warning' in ret[1]:
         msg = "The R scipt returned the following warning(s).  The R warning message is below - \n"
@@ -425,3 +430,11 @@ def runRScript(script, args, module=None):
 
     del(ret)
     writetolog("\nFinished R Processing of " + script, True)
+    
+
+
+
+        
+
+    
+    

@@ -95,6 +95,8 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
                           ma=NULL,
                           train.weights=NULL,
                           test.weights=NULL,
+                          train.xy=NULL,
+                          test.xy=NULL,
                           ma.subset=NULL
                           ),
                  ma.test=NULL),
@@ -191,7 +193,6 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     scope.glm <- list(lower=as.formula(paste(out$dat$ma$resp.name,"~1")),
         upper=as.formula(paste(out$dat$ma$resp.name,"~",paste(out$dat$ma$used.covs,collapse='+'))))
 
-
     mymodel.glm.step <- step(glm(as.formula(paste(out$dat$ma$resp.name,"~1")),family=out$input$model.family,data=out$dat$ma$ma,weights=out$dat$ma$train.weights,na.action="na.exclude"),
           direction='both',scope=scope.glm,trace=0,k=penalty)
     
@@ -217,21 +218,32 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     flush.console()
     times[3,1] <- unclass(Sys.time())
     if(!debug.mode) {sink();cat("Progress:40%\n");flush.console();sink(logname,append=T)} else cat("40%\n")
-   
-    
-    
+    # browser()
+     #r<-residuals(out$mods$final.mod, "deviance")
+
+    if(length(coef(out$mods$final.mod))==1) stop("Null model was selected.  \nEvaluation metrics and plots will not be produced")
+
     ##############################################################################################################
     #  Begin model output #
     ##############################################################################################################
            
     # Store .jpg ROC plot #                            
-    auc.output <- try(make.auc.plot.jpg(out$dat$ma$ma,pred=predict(mymodel.glm.step,type='response'),plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="GLM",opt.methods=opt.methods),
-            silent=T)
-   
-    if(class(auc.output)=="try-error"){
-          out$ec<-out$ec+1
-          out$error.mssg[[out$ec]] <- paste("Error making ROC plot:",auc.output)
-    } else { out$mods$auc.output<-auc.output}
+    if(out$input$model.family=="bernoulli" || out$input$model.family=="binomial"){
+      auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=predict(mymodel.glm.step,type='response'),plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",opt.methods=opt.methods,
+            weight=out$dat$ma$train.weights)
+
+      out$mods$auc.output<-auc.output
+      }
+  if(out$input$model.family=="poisson"){
+      auc.output <- make.poisson.jpg(out$dat$ma$ma,pred=predict(mymodel.glm.step,type='response'),
+      plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",
+            weight=out$dat$ma$train.weights)
+
+      out$mods$auc.output<-auc.output
+      }
+
+    out$mods$auc.output<-auc.output
+
     times[4,1] <- unclass(Sys.time())
     if(!debug.mode) {sink();cat("Progress:70%\n");flush.console();sink(logname,append=T)} else cat("70%\n")
     
@@ -247,11 +259,11 @@ if(debug.mode | responseCurveForm=="pdf"){
         
         pdf(paste(bname,"_response_curves.pdf",sep=""),width=11,height=8.5,onefile=T)
             par(oma=c(2,2,4,2),mfrow=c(prow,pcol))
-            r.curves <- try(my.termplot(out$mods$final.mod,plot.it=T),silent=T)
+            r.curves <-my.termplot(out$mods$final.mod,plot.it=T)
             mtext(paste("GLM response curves for",basename(ma.name)),outer=T,side=3,cex=1.3)
             par(mfrow=c(1,1))
             graphics.off()
-        } else r.curves<-try(my.termplot(out$mods$final.mod,plot.it=F),silent=T)
+        } else r.curves<-try(my.termplot(out$mods$final.mod,plot.it=F))
             
     
         if(class(r.curves)!="try-error") {
@@ -284,7 +296,7 @@ if(debug.mode | responseCurveForm=="pdf"){
             mssg <- try(proc.tiff(model=out$mods$final.mod,vnames=attr(terms(formula(out$mods$final.mod)),"term.labels"),
                 tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=glm.predict,factor.levels=out$dat$ma$factor.levels,make.binary.tif=make.binary.tif,
                 thresh=out$mods$auc.output$thresh,make.p.tif=make.p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
-                outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50,NAval=-3000,fnames=out$dat$tif.names,logname=logname),silent=T)     #"brt.prob.map.tif"
+                outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50,NAval=-3000,fnames=out$dat$tif.names,logname=logname))     #"brt.prob.map.tif"
             }
       #  model=out$mods$final.mod;vnames=attr(terms(formula(out$mods$final.mod)),"term.labels");
 #                tif.dir=out$dat$tif.dir$dname;pred.fct=glm.predict;factor.levels=out$dat$ma$factor.levels;make.binary.tif=make.binary.tif;
@@ -479,8 +491,8 @@ get.image.info <- function(image.names){
     out$type[grep(".asc",image.names)]<-"asc"
     for(i in 1:n.images){
         if(out$type[i]=="tif"){
-            x <-try(GDAL.open(full.names[1],read.only=T),silent=T)
-            suppressMessages(try(GDAL.close(x),silent=T))
+            x <-try(GDAL.open(full.names[1],read.only=T))
+            suppressMessages(try(GDAL.close(x)))
             if(class(x)!="try-error") out$available[i]<-T
             x<-try(file.info(full.names[i]))
         } else {
@@ -748,9 +760,9 @@ source(paste(ScriptPath,"proc.tiff.r",sep="\\"))
 
 make.p.tif<-as.logical(make.p.tif)
 make.binary.tif<-as.logical(make.binary.tif)
-save.model<-as.logical(save.model)
+save.model<-make.p.tif | make.binary.tif
 
  fit.glm.fct(ma.name=csv,
       tif.dir=NULL,output.dir=output,
       response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
-      simp.method=simp.method,debug.mode=F,responseCurveForm="pdf",script.name="glm.r")
+      simp.method=simp.method,debug.mode=F,responseCurveForm="pdf",script.name="glm.r",save.model=save.model)

@@ -46,6 +46,7 @@ class MDSBuilder(object):
         self.outputMDS  = ''
         self.probsurf = ''
         self.pointcount = 0
+        self.NDFlag = -9999
         self.deleteTmp = False
         self.logger = None
     
@@ -109,7 +110,7 @@ class MDSBuilder(object):
         #loop though each of the supplied rasters and add the 
         #extracted values to
         for input in self.inputs:
-            
+            inputND = self.getND(input)
             rasterDS = gdal.Open(input, gdalconst.GA_ReadOnly)
             # get image size
             rows = rasterDS.RasterYSize
@@ -137,7 +138,10 @@ class MDSBuilder(object):
                 data = band.ReadAsArray(xOffset, yOffset, 1, 1)
                 # xOffset, yOffset
                 value = data[0,0]
-                row.append(value)
+                if value <> inputND:
+                    row.append(value)
+                else:
+                    row.append(str(self.NDFlag))
                 #print value
                 if self.verbose:
                     if i/float(len(outputRows)) > float(pcntDone)/100:
@@ -148,7 +152,7 @@ class MDSBuilder(object):
                 self.writetolog("    Done")
             
         outputMDS = csv.writer(open(self.outputMDS, 'ab'))
-        for row in outputRows:   
+        for row in outputRows:
             outputMDS.writerow(row)
         del outputMDS
         
@@ -324,6 +328,33 @@ class MDSBuilder(object):
                 del dataset
         except:
             return False
+        
+    def getND(self, raster):
+        dataset = gdal.Open(raster, gdalconst.GA_ReadOnly)
+        ND = dataset.GetRasterBand(1).GetNoDataValue()
+        if ND is None:
+            if dataset.GetRasterBand(1).DataType == 1:
+                print "Warning:  Could not extract NoData value.  Using assumed nodata value of 255"
+                return 255
+            elif dataset.GetRasterBand(1).DataType == 2:
+                print "Warning:  Could not extract NoData value.  Using assumed nodata value of 65536"
+                return 65536
+            elif dataset.GetRasterBand(1).DataType == 3:
+                print "Warning:  Could not extract NoData value.  Using assumed nodata value of 32767"
+                return 32767
+            elif dataset.GetRasterBand(1).DataType == 4:
+                print "Warning:  Could not extract NoData value.  Using assumed nodata value of 2147483647"
+                return 2147483647
+            elif dataset.GetRasterBand(1).DataType == 5:
+                print "Warning:  Could not extract NoData value.  Using assumed nodata value of 2147483647"
+                return 2147483647
+            elif dataset.GetRasterBand(1).DataType == 6:
+                print "Warning:  Could not extract NoData value.  Using assumed nodata value of -3.40282346639e+038"
+                return -3.40282346639e+038
+            else:
+                return None
+        else:
+            return ND
 
 def main(argv):
     

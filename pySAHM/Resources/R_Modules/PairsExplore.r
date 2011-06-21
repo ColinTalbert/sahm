@@ -46,23 +46,29 @@ Pairs.Explore<-function(num.plots=10,min.cor=.7,input.file,output.file,response.
 
        #for the purpose of the pairs plot, taking all counts greater than 1 and setting them equal to presence
        #this is never exported
-      if(response.col=="responseCount") dat$responseCount[dat$responseCount>1]<-1
+      if(response.col=="responseCount") {response[response>=1]<-1
+      }
       
     #remove any of pres absn or bgd that aren't desired
      temp<-c(0,1,-9999)
      temp<-temp[c(absn,pres,bgd)]
      dat<-dat[response%in%temp,]
      response<-response[response%in%temp]
-     
+
 
      if(sum(response==-9999)>1000){
       s<-sample(which(response==-9999,arr.ind=TRUE),size=(sum(response==-9999)-1000))
       dat<-dat[-c(s),]
       response<-response[-c(s)]
     }
+
+   if (response.col=="responseCount") {
+    TrueResponse<-dat[,match(tolower(response.col),tolower(names(dat)))]
+    } else TrueResponse<-response
+
     #now remove all columns except predictors
     dat<-dat[-rm.cols]
-
+     dat[dat==-9999]<-NA
     #dat<-dat[1:2000,]
   #Remove columns with only one unique value
       varr <- function(x) var(x,na.rm=TRUE)
@@ -70,16 +76,17 @@ Pairs.Explore<-function(num.plots=10,min.cor=.7,input.file,output.file,response.
     dat<-try(dat[,as.vector(apply(dat,2,varr)==0)!=1],silent=TRUE)
     if(class(dat)=="try-error") stop("mds file contains nonnumeric columns please remove and continue")
   #record correlations for later plots
-
-    cmat<-cor(dat)
-    smat<-cor(dat,method="spearman")
+    browser()
+    cmat<-cor(dat,use="pairwise.complete.obs")
+    smat<-cor(dat,method="spearman",use="pairwise.complete.obs")
     if(dim(dat)[1]<2000){
-    kmat<-cor(dat,method="kendall")}
+    kmat<-cor(dat,method="kendall",use="pairwise.complete.obs")}
     else {s<-sample(seq(1:dim(dat)[1]),size=2000,replace=FALSE)
-     kmat<-cor(dat[s,],method="kendall")
+     kmat<-cor(dat[s,],method="kendall",use="pairwise.complete.obs")
     }
     
     cmat=pmax(abs(cmat),abs(smat),abs(kmat),na.rm=TRUE)
+    
     High.cor<-sort(apply(abs(cmat)>min.cor,2,sum)-1,decreasing=TRUE)
 
   #take the top num.plots to put in the pairs plot or if the looking at a single
@@ -171,8 +178,7 @@ Pairs.Explore<-function(num.plots=10,min.cor=.7,input.file,output.file,response.
 
  options(warn=-1)
  if(Debug==FALSE) jpeg(output.file,width=1000,height=1000,pointsize=13)
-
-    MyPairs(cbind(response,HighToPlot),cor.range=cor.range,my.labels=(as.vector(High.cor)[1:num.plots]),
+    MyPairs(cbind(TrueResponse,HighToPlot),cor.range=cor.range,my.labels=(as.vector(High.cor)[1:num.plots]),
     lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,bg = c("green","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red")
 
  if(Debug==FALSE) graphics.off()
@@ -289,9 +295,16 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
                   box()
                      my.lab<-paste("cor=",round(max(abs(cor(x[,(i)],response)),abs(cor(x[,(i)],response,method="spearman")),abs(cor(x[,(i)],response,method="kendall"))),digits=2),sep="")
 
-                  my.panel.smooth(as.vector(x[, (i)]), as.vector(response),weights=
-                          c(rep(table(response)[2]/table(response)[1],times=table(response)[1]),rep(1,times=table(response)[2])),...)
+                  #panel smooth doesn't work for two reasons: one, the response is binary and it requires more than two unique values
+                  #second I don't think it can use weights which is necessary with an overwhelming amount of background points so that presnce points
+                  #can't be viewed
+                  #panel.smooth(as.vector(x[, (i)]), as.vector(jitter(response,factor=.1)),weights=
+                  #        c(rep(table(response)[2]/table(response)[1],times=table(response)[1]),rep(1,times=table(response)[2])),...)
 
+                   if(length(unique(response))>2) panel.smooth(as.vector(x[, (i)]), as.vector(response),...)
+                   else my.panel.smooth(as.vector(x[, (i)]), as.vector(response),weights=
+                          c(rep(table(response)[2]/table(response)[1],times=table(response)[1]),rep(1,times=table(response)[2])),...)
+                          
                           title(ylab=paste("cor=",round(max(abs(cor(x[,(i)],response)),abs(cor(x[,(i)],response,method="spearman")),abs(cor(x[,(i)],response,method="kendall"))),digits=2),
                           sep=""),line=.02,cex.lab=1.5)
                           #,y=.85,x=max(x[,(i)])-.2*diff(range(x[,(i)])),cex=1.5)
@@ -326,8 +339,12 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
             }
 
             else if (i < j)
-                localLowerPanel(as.vector(x[, j]), as.vector(x[,
-                  i]), ...)
+                  if(length(unique(x[,i])>2)){
+                  localLowerPanel(as.vector(x[, j]), as.vector(x[,
+                    i]), ...) } else {
+                      my.panel.smooth(as.vector(x[, j]),as.vector(x[,i]))
+                    }
+                  
             else localUpperPanel(as.vector(x[, j]), as.vector(x[,
                 i]), ...)
             if (any(par("mfg") != mfg))
@@ -354,7 +371,7 @@ my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),
     points(x, y, pch = pch, col = col, bg = bg, cex = cex)
     ok <- is.finite(x) & is.finite(y)
     if (any(ok) && length(unique(x))>3)
-        lines(smooth.spline(x,jitter(y)))
+        lines(smooth.spline(x,w=weights,jitter(y,amount=(max(y)-min(y))/100),nknots=min(length(unique(x)),4)),col="red")
 
 }
 

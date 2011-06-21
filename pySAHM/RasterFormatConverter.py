@@ -40,33 +40,32 @@ class FormatConverter(object):
         self.convertEnvironmentalLayers(usedTifs, self.outputDir, self.format)
         
     def validateArgs(self):
-        argProblem = False
+        argProblem = ""
+        
+        if self.logger is None:
+            self.logger = utilities.logger(outDir, self.verbose)
+        self.writetolog = self.logger.writetolog
+        
         if os.path.isdir(self.inputDir):
             pass
         elif os.path.exists(self.MDSFile):
             if not isMDSFile(self.MDSFile):
-                self.writetolog("The supplied MDS file, " + self.MDSFile + ", does not appear to be in the appropriate format.")
-                argProblem = True
+                argProblem += "The supplied MDS file, " + self.MDSFile + ", does not appear to be in the appropriate format."
         else:
-            self.writetolog("Neither an input Directory or MDS File was supplied.")
-            argProblem = True
-        
+            argProblem += "Neither an input Directory or MDS File was supplied."       
         
         if not os.path.isdir(self.outputDir):
             try:
                 os.mkdir(self.outputDir)
             except:
-                self.writetolog('The supplied output directory, ' + self.outputDir + ", does not exist and could not be created.")
-                argProblem = True
+                argProblem += 'The supplied output directory, ' + self.outputDir + ", does not exist and could not be created."
         if not self.format.lower() in self.driverExt.keys():
-            self.writetolog("The supplied format must be one of " + ", ".join(self.driverExt.keys()) )
-            argProblem = True
+            argProblem += "The supplied format must be one of " + ", ".join(self.driverExt.keys()) 
+
         if argProblem:
-            raise RuntimeError
+            raise utilities.TrappedError("There was a problem with one or more of the inputs to RasterFormatConverter")
         
-        if self.logger is None:
-            self.logger = utilities.logger(outDir, self.verbose)
-        self.writetolog = self.logger.writetolog
+
         
     def extractFileNames(self):
         #Read through the MDS and pull the headers

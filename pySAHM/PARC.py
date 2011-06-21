@@ -47,7 +47,6 @@ def main(args_in):
     ourPARC.outDir = options.outDir
     ourPARC.inputsCSV = options.inputsCSV
     ourPARC.multicores = options.multicore
-    
     ourPARC.parcFiles()
 
 class PARC:
@@ -77,6 +76,7 @@ class PARC:
         self.resampleMethods = ['NearestNeighbor', 'Bilinear', 'Cubic', 'CubicSpline', 'Lanczos']
         self.logger = None
         self.multicores = 'False'
+        self.module = None
 
     def parcFiles(self):
         '''
@@ -423,7 +423,6 @@ class PARC:
             
             params["NoData"] = dataset.GetRasterBand(1).GetNoDataValue()
             if params["NoData"] == None:
-                driver = dataset.GetDriver()
                 if dataset.GetRasterBand(1).DataType == 1:
                     print "Warning:  Could not extract NoData value.  Using assumed nodata value of 255"
                     params["NoData"] = 255
@@ -475,21 +474,16 @@ class PARC:
         Checks to see if the templatate images 
         falls completely inside the source raster
         """
-        inside = False
-        if (sourceParams["tWest"] <= self.templateParams["tWest"] and 
-            sourceParams["tNorth"] >= self.templateParams["tNorth"] and                                     
-               sourceParams["tEast"] >=  self.templateParams["tEast"] and 
-               sourceParams["tSouth"] <=  self.templateParams["tSouth"]):
-            inside = True
-
-        if (sourceParams["gWest"] <= self.templateParams["gWest"] and 
-            sourceParams["gNorth"] >= self.templateParams["gNorth"] and                                     
-               sourceParams["gEast"] >=  self.templateParams["gEast"] and 
-               sourceParams["gSouth"] <=  self.templateParams["gSouth"]):
-            inside = True
-
-
-        return inside
+        if not sourceParams["tWest"] <= self.templateParams["tWest"]:
+            return False
+        elif not sourceParams["tEast"] >= self.templateParams["tEast"]:
+            return False
+        elif not sourceParams["tNorth"] >= self.templateParams["tNorth"]:
+            return False
+        elif not sourceParams["tSouth"] <= self.templateParams["tSouth"]:
+            return False
+        else:
+            return True
 
     def validateArgs(self):
         """
@@ -497,10 +491,10 @@ class PARC:
         """
 
         if not os.path.exists(self.outDir):
-            raise Exception, "Specified Output directory " + self.outDir + " not found on file system"
+            raise utilities.TrappedError("Specified Output directory " + self.outDir + " not found on file system")
         
         if not os.path.isdir(self.outDir):
-            raise Exception, "Specified Output directory " + self.outDir + " is not a directory"
+            raise utilities.TrappedError("Specified Output directory " + self.outDir + " is not a directory")
      
         if self.logger is None:
             self.logger = utilities.logger(self.outDir, self.verbose)
@@ -508,26 +502,26 @@ class PARC:
 
         # Validate template image.
         if self.template is None:
-            raise Exception, "template raster not provided (-t command line argument missing)"
+            raise utilities.TrappedError("template raster not provided.")
         
         if not os.path.exists(self.template):
-            raise Exception, "Template file, " + self.template + ", does not exist on file system"
+            raise utilities.TrappedError("Template file, " + self.template + ", does not exist on file system")
 
         self.templateParams = self.getRasterParams(self.template)
         if len(self.templateParams["Error"]) <> 0:
-            raise Exception, ("There was a problem with the provided template: \n    " + 
+            raise utilities.TrappedError("There was a problem with the provided template: \n    " + 
                                     "    " + "\n    ".join(self.templateParams["Error"]))
         
         # Ensure the template has square pixels.
         if abs(abs(self.templateParams["xScale"]) - abs(self.templateParams["yScale"])) > 1e-6:
-            raise Exception, ("template image must have square pixels." + 
+            raise utilities.TrappedError("template image must have square pixels." + 
                             "/n    x pixel scale = " + str(xScale) +
                             "/n    y pixel scale = " + str(yScale))
 
         
         #Validate input rasters
         if not os.path.exists(self.inputsCSV):
-            raise Exception, "Inputs CSV, " + self.inputsCSV + ", does not exist on file system."
+            raise utilities.TrappedError("Inputs CSV, " + self.inputsCSV + ", does not exist on file system.")
         
         inputsCSV = csv.reader(open(self.inputsCSV, 'r'))
         header = inputsCSV.next()
@@ -544,19 +538,20 @@ class PARC:
                 strInputFileErrors += ("  " + os.path.split(inputFile)[1] + " had the following errors:\n" + 
                                     "    " + "\n    ".join(sourceParams["Error"])) + "\n"
             else:
-                if not self.TemplateCoversImage(sourceParams):
-                    strInputFileErrors += ("\n  Some part of the template image falls outside of " + os.path.split(inputFile)[1])
-                    strInputFileErrors += "\n        template upper left  = (" + str(self.templateParams["west"]) + ", " + str(self.templateParams["north"]) + ")"
-                    strInputFileErrors += "\n        template lower right = (" + str(self.templateParams["east"]) + ", " + str(self.templateParams["south"]) + ")"
-                    strInputFileErrors += "\n        image    upper left  = (" + str(sourceParams["west"]) + ", " + str(sourceParams["north"]) + ")"
-                    strInputFileErrors += "\n        image    lower right = (" + str(sourceParams["east"]) + ", " + str(sourceParams["south"]) + ")"
-                    strInputFileErrors += "\n        points are given in projected coordinates."
-                    strInputFileErrors += "\n        template upper left  = (" + str(self.templateParams["tWest"]) + ", " + str(self.templateParams["tNorth"]) + ")"
-                    strInputFileErrors += "\n        template lower right = (" + str(self.templateParams["tEast"]) + ", " + str(self.templateParams["tSouth"]) + ")"
-                    strInputFileErrors += "\n        image    upper left  = (" + str(sourceParams["tWest"]) + ", " + str(sourceParams["tNorth"]) + ")"
-                    strInputFileErrors += "\n        image    lower right = (" + str(sourceParams["tEast"]) + ", " + str(sourceParams["tSouth"]) + ")"
-                    strInputFileErrors += "\n        Note: points are given in the template coordinates." + "\n"
-            
+                pass
+#                if not self.TemplateCoversImage(sourceParams):
+#                    strInputFileErrors += ("\n  Some part of the template image falls outside of " + os.path.split(inputFile)[1])
+#                    strInputFileErrors += "\n        template upper left  = (" + str(self.templateParams["west"]) + ", " + str(self.templateParams["north"]) + ")"
+#                    strInputFileErrors += "\n        template lower right = (" + str(self.templateParams["east"]) + ", " + str(self.templateParams["south"]) + ")"
+#                    strInputFileErrors += "\n        image    upper left  = (" + str(sourceParams["west"]) + ", " + str(sourceParams["north"]) + ")"
+#                    strInputFileErrors += "\n        image    lower right = (" + str(sourceParams["east"]) + ", " + str(sourceParams["south"]) + ")"
+#                    strInputFileErrors += "\n        points are given in projected coordinates."
+#                    strInputFileErrors += "\n        template upper left  = (" + str(self.templateParams["tWest"]) + ", " + str(self.templateParams["tNorth"]) + ")"
+#                    strInputFileErrors += "\n        template lower right = (" + str(self.templateParams["tEast"]) + ", " + str(self.templateParams["tSouth"]) + ")"
+#                    strInputFileErrors += "\n        image    upper left  = (" + str(sourceParams["tWest"]) + ", " + str(sourceParams["tNorth"]) + ")"
+#                    strInputFileErrors += "\n        image    lower right = (" + str(sourceParams["tEast"]) + ", " + str(sourceParams["tSouth"]) + ")"
+#                    strInputFileErrors += "\n        Note: points are given in the template coordinates." + "\n"
+#            
             if len(row) < 2 or not row[1] in ['0', '1']:
                 self.writetolog("  " + os.path.split(inputFile)[1] + " categorical either missing or not 0 or 1:\n   Defaulting to 0 (continuous)")
                 if len(row) < 2:
@@ -598,43 +593,8 @@ class PARC:
         del output
         
         if strInputFileErrors <> "":
-            raise Exception, "There was one or more problems with your input rasters: \n" + strInputFileErrors
-        
-
-     
-
-#    def getInputFiles(self):
-#        """ Parses the arguments to generate a list
-#        of covariate files that we will be processing 
-#        against the template
-#        """
-        
-#        sourceImages = None
-#
-#        # Validate input directory or files.
-#        if (os.path.isdir(self.inputs[0]) and
-#            not os.path.exists(os.path.join(self.inputs[0], "hdr.adf"))):
-#            if self.verbose == True:  print "Input directory found..."
-#
-#            if not os.path.exists(self.inputs[0]):
-#                raise Exception, "Input directory, " + self.inputs[0] + ", does not exist."
-#
-#            sourceImages = glob.glob(self.inputs[0] + "/*.tif")
-#            sourceImages += glob.glob(self.inputs[0] + "/*.img")
-#            sourceImages += glob.glob(self.inputs[0] + "/*.asc")
-#            hdrs = glob.glob(self.inputs[0] + "/*/hdr.adf")
-#            for hdr in hdrs:
-#                folder,hdr = os.path.split(hdr)
-#                sourceImages.append(folder)
-#
-#            if len(sourceImages) == 0:
-#                raise Exception, "Input directory (" + self.inputs[0] + ") did not contain any rasters in one of the recognized formats (tif, img, asc, grid)"
-#
-#        else:
-#            sourceImages = self.inputs
-#            #if self.verbose == True:  print "source images: " + str(sourceImages)
-#
-#        return sourceImages
+            self.writetolog(strInputFileErrors)
+            raise utilities.TrappedError("There was one or more problems with your input rasters: \n" + strInputFileErrors)
 
     def reprojectRaster(self, srcDs, sourceParams, templateParams, 
                     destFile, resamplingType, shortName='', outputCellSize = None):
