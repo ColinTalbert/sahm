@@ -30,7 +30,7 @@
           out.list$status[2]<-T
           }
 
-
+        browser()
           r.name <- out$input$response.col
           if(r.name=="responseCount") out$input$model.family="poisson"
         # check to make sure that response column exists in the model array #
@@ -169,10 +169,9 @@
           if(is.null(out$input$tif.dir)){
               ma.cols <- match(ma.names[-r.col],sub(".tif","",basename(paths[-r.col])))
                 if(any(is.na(ma.cols))){
-                  out$ec <- out$ec+1
-                  out$error.mssg[[out$ec]] <- paste("ERROR: the following geotiff(s) are missing in ",
-                        tif.dir,":  ",paste(ma.names[-r.col][is.na(ma.cols)],collapse=" ,"),sep="")
-                  return(out)
+                  stop("the following geotiff(s) are missing in ",
+                        tif.dir,":  ",paste(ma.names[-r.col][is.na(ma.cols)],collapse=" ,"),
+                        "\nif these are intentionally left blank, uncheck makeBinMap and makeProbabilityMap options",sep="")
                 }
                  #remove columns that shouldn't be used from tiff based on the indicator
                 include<-include[-r.col]
@@ -188,7 +187,7 @@
               if(sum(file.access(paths),mode=0)!=0){
                   out$ec <- out$ec+1
                   out$error.mssg[[out$ec]] <- paste("ERROR: the following geotiff(s) are missing : ",
-                        paths[(file.access(paths)!=0),][1],sep="")
+                        paths[(file.access(paths)!=0),][1],"\nif these are intentionally left blank, uncheck makeBinMap and makeProbabilityMap options", sep="")
                 return(out)
                 }
                 out$dat$tif.ind<-paths
@@ -205,20 +204,22 @@
             out$dat$tif.names <- tif.names[ma.cols]
             }} else out$dat$tif.names <- ma.names[-1]
        #trying leaving the na's in
-      #out.list$ma <- ma[complete.cases(ma),c(r.col,c(1:ncol(ma))[-r.col])]
-       out.list$ma <- ma[,c(r.col,c(1:ncol(ma))[-r.col])]
-       
+      out.list$ma <- ma[complete.cases(ma),c(r.col,c(1:ncol(ma))[-r.col])]
+      # out.list$ma <- ma[,c(r.col,c(1:ncol(ma))[-r.col])]
+         if(length(na.omit(split.indx))>0) out.list$test.xy<-out.list$test.xy[complete.cases(out.list$ma.test),]
+            out.list$train.xy<-out.list$train.xy[complete.cases(ma),]
+
       if(!is.null(out.list$ma.test)){
-        #out.list$ma.test<-out.list$ma.test[complete.cases(out.list$ma.test),c(r.col,c(1:ncol(out.list$ma.test))[-r.col])]
-        #if(out$input$model.source.file!="rf.r") out.list$test.weights<- out.list$test.weights[complete.cases(out.list$ma.test)]
-         out.list$ma.test<-out.list$ma.test[,c(r.col,c(1:ncol(out.list$ma.test))[-r.col])]
-        if(out$input$model.source.file!="rf.r") out.list$test.weights<- out.list$test.weights
+      if(out$input$model.source.file!="rf.r") out.list$test.weights<- out.list$test.weights[complete.cases(out.list$ma.test)]
+        out.list$ma.test<-out.list$ma.test[complete.cases(out.list$ma.test),c(r.col,c(1:ncol(out.list$ma.test))[-r.col])]
+        if(out$input$model.source.file!="rf.r") out.list$test.weights<- out.list$test.weights[complete.cases(out.list$ma.test)]
+        # out.list$ma.test<-out.list$ma.test[,c(r.col,c(1:ncol(out.list$ma.test))[-r.col])]
+        #if(out$input$model.source.file!="rf.r") out.list$test.weights<- out.list$test.weights
         out.list$n.pres[4] <- sum(out.list$ma.test[,r.col]!=0)
         out.list$n.abs[4] <- nrow(out.list$ma.test)-sum(out.list$ma.test[,r.col]!=0)
         }
       if(out$input$model.source.file!="rf.r") out.list$train.weights <- out.list$train.weights[complete.cases(ma)]
       if(!is.null(out$dat$bad.factor.cols)) out.list$ma <- out.list$ma[,-match(out$dat$bad.factor.cols,names(out.list$ma))]
-
 
         out.list$dims <- dim(out.list$ma)
         out.list$ratio <- min(sum(out$input$model.fitting.subset)/out.list$dims[1],1)
