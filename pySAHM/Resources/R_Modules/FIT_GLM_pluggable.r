@@ -293,10 +293,10 @@ if(debug.mode | responseCurveForm=="pdf"){
             class(mssg)<-"try-error"
             } else {
             cat("\nproducing prediction maps...","\n","\n");flush.console()
-            mssg <- try(proc.tiff(model=out$mods$final.mod,vnames=attr(terms(formula(out$mods$final.mod)),"term.labels"),
+            mssg <- proc.tiff(model=out$mods$final.mod,vnames=attr(terms(formula(out$mods$final.mod)),"term.labels"),
                 tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=glm.predict,factor.levels=out$dat$ma$factor.levels,make.binary.tif=make.binary.tif,
                 thresh=out$mods$auc.output$thresh,make.p.tif=make.p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
-                outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50,NAval=-3000,fnames=out$dat$tif.names,logname=logname))     #"brt.prob.map.tif"
+                outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50,NAval=-3000,fnames=out$dat$tif.names,logname=logname)     #"brt.prob.map.tif"
             }
       #  model=out$mods$final.mod;vnames=attr(terms(formula(out$mods$final.mod)),"term.labels");
 #                tif.dir=out$dat$tif.dir$dname;pred.fct=glm.predict;factor.levels=out$dat$ma$factor.levels;make.binary.tif=make.binary.tif;
