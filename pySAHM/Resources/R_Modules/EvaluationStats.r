@@ -5,8 +5,8 @@ make.auc.plot.jpg<-function(ma.reduced,pred,plotname,modelname,train.split=FALSE
     n.pres <- sum(auc.data$pres.abs)
     n.abs <- nrow(auc.data)-n.pres
 
-    null.dev<-calc.deviance(auc.data$pres.abs, rep(p.bar,times=length(auc.data$pres.abs)), weight, family="binomial")*nrow(ma.reduced)
-    dev.fit<-calc.deviance(auc.data$pres.abs, pred, weight, family="binomial")*nrow(ma.reduced)
+    null.dev<-calc.dev(auc.data$pres.abs, rep(p.bar,times=length(auc.data$pres.abs)), weight, family="binomial")$deviance*nrow(ma.reduced)
+    dev.fit<-calc.dev(auc.data$pres.abs, pred, weight, family="binomial")$deviance*nrow(ma.reduced)
     dev.exp <- null.dev - dev.fit
     pct.dev.exp <- dev.exp/null.dev*100
    correlation<-cor(auc.data$pres.abs,pred)
@@ -49,8 +49,8 @@ make.poisson.jpg<-function(ma.reduced,pred,plotname,modelname,train.split=FALSE,
 
     #takes into account potential weights but not offset
 
-    null.dev<-calc.deviance(pois.data$pres.abs, rep(p.bar,times=length(pois.data$pres.abs)), weight, family="poisson")*nrow(ma.reduced)
-    dev.fit<-calc.deviance(pois.data$pres.abs, pred, weight, family="poisson")*nrow(ma.reduced)
+    null.dev<-calc.dev(pois.data$pres.abs, rep(p.bar,times=length(pois.data$pres.abs)), weight, family="poisson")$deviance*nrow(ma.reduced)
+    dev.fit<-calc.dev(pois.data$pres.abs, pred, weight, family="poisson")$deviance*nrow(ma.reduced)
     dev.exp <- null.dev - dev.fit
     pct.dev.exp <- dev.exp/null.dev*100 #this is the pseudo R^2 using definition in the course notes
     correlation<-cor(pois.data$pres.abs,pred)
@@ -63,21 +63,43 @@ make.poisson.jpg<-function(ma.reduced,pred,plotname,modelname,train.split=FALSE,
 
    if(train.split==TRUE){
       if(is.null(train.weight)) train.weight=rep(1,times=nrow(train))
-        null.dev.train<-calc.deviance(train$response, rep(mean(train$response),times=nrow(train)), train.weight, family="poisson")*nrow(train)
-        dev.fit.train<-calc.deviance(train$response, train.pred, train.weight, family="poisson")*nrow(train)
+        null.dev.train<-calc.dev(train$response, rep(mean(train$response),times=nrow(train)), train.weight, family="poisson")$deviance*nrow(train)
+        dev.fit.train<-calc.dev(train$response, train.pred, train.weight, family="poisson")$deviance*nrow(train)
         dev.exp.train <- null.dev.train - dev.fit.train
         pct.dev.exp.train <- dev.exp.train/null.dev.train*100
         correlation.train<-cor(train$response,train.pred)
-    
+        browser()
               jpeg(file=plotname)
-    par(mfrow=c(2,1))
-        plot(train.pred,(train$response-train.pred),xlab="Predicted Values",ylab="Residuals",pch=19,col="lightgrey",main="Residual plot for train split")
-          panel.smooth(train.pred,(train$response-train.pred),lwd=2,col.smooth="grey")
-          abline(0,0)
+           dev.contrib<-calc.dev(pois.data$pres.abs, pred, weight, family="poisson")$dev.cont
+              z<-sign(pred-pois.data$pres.abs)*dev.contrib
+              breaks<-quantile(z, probs = seq(0, .95,length=25))
+              a<-outer(z,breaks,"<")
+              res.mag<-apply(a,1,sum)
+              plot(out$dat$ma$train.xy,col=heat.colors(24)[res.mag],cex=4,pch=19)
+              x<-out$dat$ma$train.xy[,1]
+              y<-out$dat$ma$train.xy[,2]
+              a<-loess(z~x*y)
+              x.lim<-rep(seq(from=min(out$dat$ma$train.xy[,1]),to=max(out$dat$ma$train.xy[,1]),length=100),each=100)
+              y.lim<-rep(seq(from=min(out$dat$ma$train.xy[,2]),to=max(out$dat$ma$train.xy[,2]),length=100),times=100)
+              z<-predict(a,newdata=cbind("x"=x.lim,"y"=y.lim))
+              breaks<-quantile(z, probs = seq(0, .95,length=25))
+              a<-outer(z,breaks,"<")
+              res.mag<-apply(a,1,sum)
+              z<-matrix(data=z,ncol=100,nrow=100,byrow=TRUE)
+              res.mag<-matrix(data=res.mag,ncol=100,nrow=100,byrow=TRUE)
 
-        plot(pois.data$pred,(pois.data$pres.abs-pois.data$pred),xlab="Predicted Values",ylab="Residuals",col="red",pch=19,main="Residual plot for test split")
-          panel.smooth(pois.data$pred,(pois.data$pres.abs-pois.data$pred),lwd=2)
-          abline(0,0)
+              image(x=seq(from=min(x.lim),to=max(x.lim),length=100),y=seq(from=min(y.lim),to=max(y.lim),length=100),z=matrix(data=z,ncol=100,nrow=100,byrow=TRUE))
+              points(out$dat$ma$train.xy,pch=19,cex=.5)
+              #plot(unique(x.lim),apply(z,2,sum))
+              #plot(unique(y.lim),apply(z,1,sum))
+
+              mod.resids<-residuals(out$mods$final.mod,type="deviance")
+              plot(pred,(pois.data$pres.abs-pred),xlab="Predicted Values",ylab="Residuals",main="Residuals vs Fitted")
+              panel.smooth(pred,(pois.data$pres.abs-pred))
+              plot(pred,sqrt(2*dev.contrib),ylab="sqrt(Std.deviance residuals)",xlab="Predicted Values",main="Scale Location")
+              panel.smooth(pred,sqrt(2*dev.contrib))
+              qqnorm((sqrt(2*dev.contrib)-mean(sqrt(2*dev.contrib))),ylab="Std.Deviance residuals")
+              abline(0,1)
 
         graphics.off()
         return(list(null.dev=null.dev,dev.fit=dev.fit,dev.exp=dev.exp,pct.dev.exp=pct.dev.exp,correlation=correlation,
@@ -85,10 +107,41 @@ make.poisson.jpg<-function(ma.reduced,pred,plotname,modelname,train.split=FALSE,
 
      }else{
      jpeg(file=plotname)
-        par(mfrow=c(1,1))
-        plot(pois.data$pred,(pois.data$pres.abs-pois.data$pred),xlab="Predicted Values",ylab="Residuals")
-        panel.smooth(pois.data$pred,(pois.data$pres.abs-pois.data$pred),lwd=2)
-        abline(0,0)
+
+        dev.contrib<-calc.dev(pois.data$pres.abs, pred, weight, family="poisson")$dev.cont
+        par(mfrow=c(3,2))
+
+              dev.contrib<-calc.dev(pois.data$pres.abs, pred, weight, family="poisson")$dev.cont
+              z<-sign(pred-pois.data$pres.abs)*dev.contrib
+              breaks<-quantile(z, probs = seq(0, .95,length=25))
+              a<-outer(z,breaks,"<")
+              res.mag<-apply(a,1,sum)
+              plot(out$dat$ma$train.xy,col=heat.colors(24)[res.mag],cex=4,pch=19)
+              x<-out$dat$ma$train.xy[,1]
+              y<-out$dat$ma$train.xy[,2]
+              a<-loess(z~x*y)
+              x.lim<-rep(seq(from=min(out$dat$ma$train.xy[,1]),to=max(out$dat$ma$train.xy[,1]),length=100),each=100)
+              y.lim<-rep(seq(from=min(out$dat$ma$train.xy[,2]),to=max(out$dat$ma$train.xy[,2]),length=100),times=100)
+              z<-predict(a,newdata=cbind("x"=x.lim,"y"=y.lim))
+              breaks<-quantile(z, probs = seq(0, .95,length=25))
+              a<-outer(z,breaks,"<")
+              res.mag<-apply(a,1,sum)
+              z<-matrix(data=z,ncol=100,nrow=100,byrow=TRUE)
+              res.mag<-matrix(data=res.mag,ncol=100,nrow=100,byrow=TRUE)
+
+              image(x=seq(from=min(x.lim),to=max(x.lim),length=100),y=seq(from=min(y.lim),to=max(y.lim),length=100),z=matrix(data=z,ncol=100,nrow=100,byrow=TRUE))
+              points(out$dat$ma$train.xy,pch=19,cex=.5)
+              #plot(unique(x.lim),apply(z,2,sum))
+              #plot(unique(y.lim),apply(z,1,sum))
+
+              mod.resids<-residuals(out$mods$final.mod,type="deviance")
+              plot(pred,(pois.data$pres.abs-pred),xlab="Predicted Values",ylab="Residuals",main="Residuals vs Fitted")
+              panel.smooth(pred,(pois.data$pres.abs-pred))
+              plot(pred,sqrt(2*dev.contrib),ylab="sqrt(Std.deviance residuals)",xlab="Predicted Values",main="Scale Location")
+              panel.smooth(pred,sqrt(2*dev.contrib))
+              qqnorm((sqrt(2*dev.contrib)-mean(sqrt(2*dev.contrib))),ylab="Std.Deviance residuals")
+              abline(0,1)
+
         graphics.off()
         return(list(null.dev=null.dev,dev.fit=dev.fit,dev.exp=dev.exp,pct.dev.exp=pct.dev.exp,correlation=correlation))
         }
@@ -211,7 +264,7 @@ EvaluationStats<-function(out,thresh,train,train.pred,opt.methods=opt.methods){
       return(calibration.result)
 }
 
-"calc.deviance" <-
+"calc.dev" <-
         function(obs.values, fitted.values, weights = rep(1,length(obs.values)), family="binomial", calc.mean = TRUE)
         {
         # j. leathwick/j. elith
@@ -255,7 +308,7 @@ EvaluationStats<-function(out,thresh,train,train.pred,opt.methods=opt.methods){
 
 
         if (calc.mean) deviance <- deviance/length(obs.values)
-
-        return(deviance)
+        dev=list(deviance=deviance,dev.cont=deviance.contribs)
+        return(dev)
 
 }
