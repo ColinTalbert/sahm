@@ -133,847 +133,632 @@ K:\GIS_LIBRARY\Climate\WorldClim\BioclimaticVariables\bio_30s_esri\bio\bio_16,Pr
 K:\GIS_LIBRARY\Climate\WorldClim\BioclimaticVariables\bio_30s_esri\bio\bio_17,Precipitation of driest quarter,Climate,"WorldClim (1950-2000) Normals, 1km.",N
 K:\GIS_LIBRARY\Climate\WorldClim\BioclimaticVariables\bio_30s_esri\bio\bio_18,Precipitiation of warmest quarter,Climate,"WorldClim (1950-2000) Normals, 1km.",N
 K:\GIS_LIBRARY\Climate\WorldClim\BioclimaticVariables\bio_30s_esri\bio\bio_19,Precipitation of coldest quarter,Climate,"WorldClim (1950-2000) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\ppt_1971_2000_01.img,Average Jan. Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\ppt_1971_2000_02.img,Average Feb. Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\ppt_1971_2000_03.img,Average March Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\ppt_1971_2000_04.img,Average April Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\ppt_1971_2000_05.img,Average May Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\ppt_1971_2000_06.img,Average June Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\ppt_1971_2000_07.img,Average July Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\ppt_1971_2000_08.img,Average Aug. Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\ppt_1971_2000_09.img,Average Sept. Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\ppt_1971_2000_10.img,Average Oct. Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\ppt_1971_2000_11.img,Average Nov. Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\ppt_1971_2000_12.img,Average Dec. Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmax_1971_2000_01.img,Average Jan. Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmax_1971_2000_02.img,Average Feb. Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmax_1971_2000_03.img,Average March Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmax_1971_2000_04.img,Average April Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmax_1971_2000_05.img,Average May Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmax_1971_2000_06.img,Average June Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmax_1971_2000_07.img,Average July Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmax_1971_2000_08.img,Average Aug. Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmax_1971_2000_09.img,Average Sept. Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmax_1971_2000_10.img,Average Oct. Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmax_1971_2000_11.img,Average Nov. Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmax_1971_2000_12.img,Average Dec. Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmin_1971_2000_01.img,Average Jan. Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmin_1971_2000_02.img,Average Feb. Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmin_1971_2000_03.img,Average March Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmin_1971_2000_04.img,Average April Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmin_1971_2000_05.img,Average May Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmin_1971_2000_06.img,Average June Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmin_1971_2000_07.img,Average July Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmin_1971_2000_08.img,Average Aug. Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmin_1971_2000_09.img,Average Sept. Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmin_1971_2000_10.img,Average Oct. Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmin_1971_2000_11.img,Average Nov. Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\Input_1971_2000\tmin_1971_2000_12.img,Average Dec. Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\BioClim_1971_2000\bio_01_1971_2000.img,Annual mean temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\BioClim_1971_2000\bio_02_1971_2000.img,Mean diurnal range,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\BioClim_1971_2000\bio_03_1971_2000.img,Isothermality,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\BioClim_1971_2000\bio_04_1971_2000.img,Temperature seasonality,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\BioClim_1971_2000\bio_05_1971_2000.img,Max. temperature of warmest month,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\BioClim_1971_2000\bio_06_1971_2000.img,Min. temperature of coldest month,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\BioClim_1971_2000\bio_07_1971_2000.img,Temperature annual range,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\BioClim_1971_2000\bio_08_1971_2000.img,Mean temperature of wettest quarter,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\BioClim_1971_2000\bio_09_1971_2000.img,Mean temperature of driest quarter,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\BioClim_1971_2000\bio_10_1971_2000.img,Mean temperature of warmest quarter,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\BioClim_1971_2000\bio_11_1971_2000.img,Mean temperature of coldest quarter,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\BioClim_1971_2000\bio_12_1971_2000.img,Annual precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\BioClim_1971_2000\bio_13_1971_2000.img,Precipitation of wettest month,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\BioClim_1971_2000\bio_14_1971_2000.img,Precipitation of driest month,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\BioClim_1971_2000\bio_15_1971_2000.img,Precipitation seasonality,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\BioClim_1971_2000\bio_16_1971_2000.img,Precipitation of wettest quarter,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\BioClim_1971_2000\bio_17_1971_2000.img,Precipitation of driest quarter,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\BioClim_1971_2000\bio_18_1971_2000.img,Precipitiation of warmest quarter,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Derived\BioClim_1971_2000\bio_19_1971_2000.img,Precipitation of coldest quarter,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Veg_LandCover\MODIS\LatLon.NA.2001.bare.tif,VCF Bare Landcover,Remote Sensing,MODIS / GLCF North America (2001) .5 km.,N
-K:\GIS_LIBRARY\Veg_LandCover\MODIS\LatLon.NA.2001.herbaceous.tif,VCF Herbaceous Landcover,Remote Sensing,MODIS / GLCF North America (2001) .5 km.,N
-K:\GIS_LIBRARY\Veg_LandCover\MODIS\LatLon.NA.2001.tree.tif,VCF Tree Landcover,Remote Sensing,MODIS / GLCF North America (2001) .5 km.,N
-K:\GIS_LIBRARY\Veg_LandCover\MODIS\LatLon.SA.2001.bare.tif,VCF Bare Landcover,Remote Sensing,MODIS / GLCF North America (2001) .5 km.,N
-K:\GIS_LIBRARY\Veg_LandCover\MODIS\LatLon.SA.2001.herbaceous.tif,VCF Herbaceous Landcover,Remote Sensing,MODIS / GLCF North America (2001) .5 km.,N
-K:\GIS_LIBRARY\Veg_LandCover\MODIS\LatLon.SA.2001.tree.tif,VCF Tree Landcover,Remote Sensing,MODIS / GLCF North America (2001) .5 km.,N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_01.img,Average Jan. Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_02.img,Average Feb. Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_03.img,Average March Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_04.img,Average April Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_05.img,Average May Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_06.img,Average June Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_07.img,Average July Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_08.img,Average Aug. Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_09.img,Average Sept. Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_10.img,Average Oct. Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_11.img,Average Nov. Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_12.img,Average Dec. Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_01.img,Average Jan. Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_02.img,Average Feb. Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_03.img,Average March Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_04.img,Average April Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_05.img,Average May Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_06.img,Average June Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_07.img,Average July Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_08.img,Average Aug. Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_09.img,Average Sept. Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_10.img,Average Oct. Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_11.img,Average Nov. Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_12.img,Average Dec. Max. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_01.img,Average Jan. Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_02.img,Average Feb. Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_03.img,Average March Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_04.img,Average April Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_05.img,Average May Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_06.img,Average June Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_07.img,Average July Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_08.img,Average Aug. Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_09.img,Average Sept. Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_10.img,Average Oct. Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_11.img,Average Nov. Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_12.img,Average Dec. Min. Temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_01_1971_2000.img,Annual mean temperature,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_02_1971_2000.img,Mean diurnal range,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_03_1971_2000.img,Isothermality,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_04_1971_2000.img,Temperature seasonality,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_05_1971_2000.img,Max. temperature of warmest month,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_06_1971_2000.img,Min. temperature of coldest month,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_07_1971_2000.img,Temperature annual range,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_08_1971_2000.img,Mean temperature of wettest quarter,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_09_1971_2000.img,Mean temperature of driest quarter,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_10_1971_2000.img,Mean temperature of warmest quarter,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_11_1971_2000.img,Mean temperature of coldest quarter,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_12_1971_2000.img,Annual precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_13_1971_2000.img,Precipitation of wettest month,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_14_1971_2000.img,Precipitation of driest month,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_15_1971_2000.img,Precipitation seasonality,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_16_1971_2000.img,Precipitation of wettest quarter,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_17_1971_2000.img,Precipitation of driest quarter,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_18_1971_2000.img,Precipitiation of warmest quarter,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_19_1971_2000.img,Precipitation of coldest quarter,Climate,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Veg_LandCover\MODIS\LatLon.NA.2001.bare.tif,VCF Bare Landcover,Remote Sensing,MODIS / GLCF North America (2001) .5 km,N
+K:\GIS_LIBRARY\Veg_LandCover\MODIS\LatLon.NA.2001.herbaceous.tif,VCF Herbaceous Landcover,Remote Sensing,MODIS / GLCF North America (2001) .5 km,N
+K:\GIS_LIBRARY\Veg_LandCover\MODIS\LatLon.NA.2001.tree.tif,VCF Tree Landcover,Remote Sensing,MODIS / GLCF North America (2001) .5 km,N
+K:\GIS_LIBRARY\Veg_LandCover\MODIS\LatLon.SA.2001.bare.tif,VCF Bare Landcover,Remote Sensing,MODIS / GLCF South America (2001) .5 km,N
+K:\GIS_LIBRARY\Veg_LandCover\MODIS\LatLon.SA.2001.herbaceous.tif,VCF Herbaceous Landcover,Remote Sensing,MODIS / GLCF South America (2001) .5 km,N
+K:\GIS_LIBRARY\Veg_LandCover\MODIS\LatLon.SA.2001.tree.tif,VCF Tree Landcover,Remote Sensing,MODIS / GLCF South America (2001) .5 km,N
 K:\GIS_LIBRARY\Elevation\EDNA\dem\dem,DEM,Elevation / Topography,"EDNA Continental US, 30 m.",N
 K:\GIS_LIBRARY\Elevation\EDNA\aspect\aspect,DEM Derivative: Aspect,Elevation / Topography,"EDNA Continental US, 30 m.",N
 K:\GIS_LIBRARY\Elevation\EDNA\slopedeg\slopedeg,DEM Derivative: Slope in Degrees,Elevation / Topography,"EDNA Continental US, 30 m.",N
 K:\GIS_LIBRARY\Elevation\EDNA\facc\facc,DEM Derivative: Flow Accumulation,Hydrology,"EDNA Continental US, 30 m.",N
 K:\GIS_LIBRARY\Elevation\EDNA\fdir\fdir,DEM Derivative: Flow Direction,Hydrology,"EDNA Continental US, 30 m.",N
 K:\GIS_LIBRARY\Elevation\EDNA\cti\cti,DEM Derivative: CTI/Steady State Wetness,Hydrology,"EDNA Continental US, 30 m.",N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Month03_tasseled_cap_Band1.tif,Month03_tasseled_cap_Band1,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Month03_tasseled_cap_Band2.tif,Month03_tasseled_cap_Band2,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Month03_tasseled_cap_Band3.tif,Month03_tasseled_cap_Band3,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Month03_tasseled_cap_Band4.tif,Month03_tasseled_cap_Band4,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Month04_tasseled_cap_Band1.tif,Month04_tasseled_cap_Band1,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Month04_tasseled_cap_Band2.tif,Month04_tasseled_cap_Band2,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Month04_tasseled_cap_Band3.tif,Month04_tasseled_cap_Band3,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Month04_tasseled_cap_Band4.tif,Month04_tasseled_cap_Band4,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Month05_tasseled_cap_Band1.tif,Month05_tasseled_cap_Band1,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Month05_tasseled_cap_Band2.tif,Month05_tasseled_cap_Band2,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Month05_tasseled_cap_Band3.tif,Month05_tasseled_cap_Band3,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Month05_tasseled_cap_Band4.tif,Month05_tasseled_cap_Band4,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Month06_tasseled_cap_Band1.tif,Month06_tasseled_cap_Band1,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Month06_tasseled_cap_Band2.tif,Month06_tasseled_cap_Band2,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Month06_tasseled_cap_Band3.tif,Month06_tasseled_cap_Band3,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Month06_tasseled_cap_Band4.tif,Month06_tasseled_cap_Band4,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Week13_tasseled_cap_Band1.tif,Week13_tasseled_cap_Band1,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Week13_tasseled_cap_Band2.tif,Week13_tasseled_cap_Band2,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Week13_tasseled_cap_Band3.tif,Week13_tasseled_cap_Band3,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Week13_tasseled_cap_Band4.tif,Week13_tasseled_cap_Band4,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Week15_tasseled_cap_Band1.tif,Week15_tasseled_cap_Band1,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Week15_tasseled_cap_Band2.tif,Week15_tasseled_cap_Band2,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Week15_tasseled_cap_Band3.tif,Week15_tasseled_cap_Band3,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Week15_tasseled_cap_Band4.tif,Week15_tasseled_cap_Band4,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Week18_tasseled_cap_Band1.tif,Week18_tasseled_cap_Band1,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Week18_tasseled_cap_Band2.tif,Week18_tasseled_cap_Band2,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Week18_tasseled_cap_Band3.tif,Week18_tasseled_cap_Band3,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Week18_tasseled_cap_Band4.tif,Week18_tasseled_cap_Band4,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Week28_tasseled_cap_Band1.tif,Week28_tasseled_cap_Band1,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Week28_tasseled_cap_Band2.tif,Week28_tasseled_cap_Band2,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Week28_tasseled_cap_Band3.tif,Week28_tasseled_cap_Band3,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Week28_tasseled_cap_Band4.tif,Week28_tasseled_cap_Band4,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month03_tasseled_cap_Band1_Max.tif,Month03_tasseled_cap_Band1_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month03_tasseled_cap_Band1_Mean.tif,Month03_tasseled_cap_Band1_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month03_tasseled_cap_Band1_Min.tif,Month03_tasseled_cap_Band1_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month03_tasseled_cap_Band1_StdDev.tif,Month03_tasseled_cap_Band1_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month03_tasseled_cap_Band2_Max.tif,Month03_tasseled_cap_Band2_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month03_tasseled_cap_Band2_Mean.tif,Month03_tasseled_cap_Band2_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month03_tasseled_cap_Band2_Min.tif,Month03_tasseled_cap_Band2_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month03_tasseled_cap_Band2_StdDev.tif,Month03_tasseled_cap_Band2_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month03_tasseled_cap_Band3_Max.tif,Month03_tasseled_cap_Band3_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month03_tasseled_cap_Band3_Mean.tif,Month03_tasseled_cap_Band3_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month03_tasseled_cap_Band3_Min.tif,Month03_tasseled_cap_Band3_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month03_tasseled_cap_Band3_StdDev.tif,Month03_tasseled_cap_Band3_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month03_tasseled_cap_Band4_Max.tif,Month03_tasseled_cap_Band4_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month03_tasseled_cap_Band4_Mean.tif,Month03_tasseled_cap_Band4_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month03_tasseled_cap_Band4_Min.tif,Month03_tasseled_cap_Band4_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month03_tasseled_cap_Band4_StdDev.tif,Month03_tasseled_cap_Band4_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month04_tasseled_cap_Band1_Max.tif,Month04_tasseled_cap_Band1_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month04_tasseled_cap_Band1_Mean.tif,Month04_tasseled_cap_Band1_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month04_tasseled_cap_Band1_Min.tif,Month04_tasseled_cap_Band1_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month04_tasseled_cap_Band1_StdDev.tif,Month04_tasseled_cap_Band1_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month04_tasseled_cap_Band2_Max.tif,Month04_tasseled_cap_Band2_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month04_tasseled_cap_Band2_Mean.tif,Month04_tasseled_cap_Band2_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month04_tasseled_cap_Band2_Min.tif,Month04_tasseled_cap_Band2_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month04_tasseled_cap_Band2_StdDev.tif,Month04_tasseled_cap_Band2_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month04_tasseled_cap_Band3_Max.tif,Month04_tasseled_cap_Band3_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month04_tasseled_cap_Band3_Mean.tif,Month04_tasseled_cap_Band3_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month04_tasseled_cap_Band3_Min.tif,Month04_tasseled_cap_Band3_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month04_tasseled_cap_Band3_StdDev.tif,Month04_tasseled_cap_Band3_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month04_tasseled_cap_Band4_Max.tif,Month04_tasseled_cap_Band4_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month04_tasseled_cap_Band4_Mean.tif,Month04_tasseled_cap_Band4_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month04_tasseled_cap_Band4_Min.tif,Month04_tasseled_cap_Band4_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month04_tasseled_cap_Band4_StdDev.tif,Month04_tasseled_cap_Band4_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month05_tasseled_cap_Band1_Max.tif,Month05_tasseled_cap_Band1_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month05_tasseled_cap_Band1_Mean.tif,Month05_tasseled_cap_Band1_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month05_tasseled_cap_Band1_Min.tif,Month05_tasseled_cap_Band1_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month05_tasseled_cap_Band1_StdDev.tif,Month05_tasseled_cap_Band1_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month05_tasseled_cap_Band2_Max.tif,Month05_tasseled_cap_Band2_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month05_tasseled_cap_Band2_Mean.tif,Month05_tasseled_cap_Band2_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month05_tasseled_cap_Band2_Min.tif,Month05_tasseled_cap_Band2_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month05_tasseled_cap_Band2_StdDev.tif,Month05_tasseled_cap_Band2_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month05_tasseled_cap_Band3_Max.tif,Month05_tasseled_cap_Band3_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month05_tasseled_cap_Band3_Mean.tif,Month05_tasseled_cap_Band3_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month05_tasseled_cap_Band3_Min.tif,Month05_tasseled_cap_Band3_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month05_tasseled_cap_Band3_StdDev.tif,Month05_tasseled_cap_Band3_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month05_tasseled_cap_Band4_Max.tif,Month05_tasseled_cap_Band4_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month05_tasseled_cap_Band4_Mean.tif,Month05_tasseled_cap_Band4_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month05_tasseled_cap_Band4_Min.tif,Month05_tasseled_cap_Band4_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month05_tasseled_cap_Band4_StdDev.tif,Month05_tasseled_cap_Band4_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month06_tasseled_cap_Band1_Max.tif,Month06_tasseled_cap_Band1_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month06_tasseled_cap_Band1_Mean.tif,Month06_tasseled_cap_Band1_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month06_tasseled_cap_Band1_Min.tif,Month06_tasseled_cap_Band1_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month06_tasseled_cap_Band1_StdDev.tif,Month06_tasseled_cap_Band1_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month06_tasseled_cap_Band2_Max.tif,Month06_tasseled_cap_Band2_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month06_tasseled_cap_Band2_Mean.tif,Month06_tasseled_cap_Band2_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month06_tasseled_cap_Band2_Min.tif,Month06_tasseled_cap_Band2_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month06_tasseled_cap_Band2_StdDev.tif,Month06_tasseled_cap_Band2_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month06_tasseled_cap_Band3_Max.tif,Month06_tasseled_cap_Band3_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month06_tasseled_cap_Band3_Mean.tif,Month06_tasseled_cap_Band3_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month06_tasseled_cap_Band3_Min.tif,Month06_tasseled_cap_Band3_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month06_tasseled_cap_Band3_StdDev.tif,Month06_tasseled_cap_Band3_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month06_tasseled_cap_Band4_Max.tif,Month06_tasseled_cap_Band4_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month06_tasseled_cap_Band4_Mean.tif,Month06_tasseled_cap_Band4_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month06_tasseled_cap_Band4_Min.tif,Month06_tasseled_cap_Band4_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month06_tasseled_cap_Band4_StdDev.tif,Month06_tasseled_cap_Band4_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week13_tasseled_cap_Band1_Max.tif,Week13_tasseled_cap_Band1_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week13_tasseled_cap_Band1_Mean.tif,Week13_tasseled_cap_Band1_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week13_tasseled_cap_Band1_Min.tif,Week13_tasseled_cap_Band1_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week13_tasseled_cap_Band1_StdDev.tif,Week13_tasseled_cap_Band1_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week13_tasseled_cap_Band2_Max.tif,Week13_tasseled_cap_Band2_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week13_tasseled_cap_Band2_Mean.tif,Week13_tasseled_cap_Band2_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week13_tasseled_cap_Band2_Min.tif,Week13_tasseled_cap_Band2_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week13_tasseled_cap_Band2_StdDev.tif,Week13_tasseled_cap_Band2_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week13_tasseled_cap_Band3_Max.tif,Week13_tasseled_cap_Band3_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week13_tasseled_cap_Band3_Mean.tif,Week13_tasseled_cap_Band3_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week13_tasseled_cap_Band3_Min.tif,Week13_tasseled_cap_Band3_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week13_tasseled_cap_Band3_StdDev.tif,Week13_tasseled_cap_Band3_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week13_tasseled_cap_Band4_Max.tif,Week13_tasseled_cap_Band4_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week13_tasseled_cap_Band4_Mean.tif,Week13_tasseled_cap_Band4_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week13_tasseled_cap_Band4_Min.tif,Week13_tasseled_cap_Band4_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week13_tasseled_cap_Band4_StdDev.tif,Week13_tasseled_cap_Band4_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week15_tasseled_cap_Band1_Max.tif,Week15_tasseled_cap_Band1_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week15_tasseled_cap_Band1_Mean.tif,Week15_tasseled_cap_Band1_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week15_tasseled_cap_Band1_Min.tif,Week15_tasseled_cap_Band1_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week15_tasseled_cap_Band1_StdDev.tif,Week15_tasseled_cap_Band1_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week15_tasseled_cap_Band2_Max.tif,Week15_tasseled_cap_Band2_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week15_tasseled_cap_Band2_Mean.tif,Week15_tasseled_cap_Band2_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week15_tasseled_cap_Band2_Min.tif,Week15_tasseled_cap_Band2_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week15_tasseled_cap_Band2_StdDev.tif,Week15_tasseled_cap_Band2_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week15_tasseled_cap_Band3_Max.tif,Week15_tasseled_cap_Band3_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week15_tasseled_cap_Band3_Mean.tif,Week15_tasseled_cap_Band3_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week15_tasseled_cap_Band3_Min.tif,Week15_tasseled_cap_Band3_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week15_tasseled_cap_Band3_StdDev.tif,Week15_tasseled_cap_Band3_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week15_tasseled_cap_Band4_Max.tif,Week15_tasseled_cap_Band4_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week15_tasseled_cap_Band4_Mean.tif,Week15_tasseled_cap_Band4_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week15_tasseled_cap_Band4_Min.tif,Week15_tasseled_cap_Band4_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week15_tasseled_cap_Band4_StdDev.tif,Week15_tasseled_cap_Band4_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week18_tasseled_cap_Band1_Max.tif,Week18_tasseled_cap_Band1_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week18_tasseled_cap_Band1_Mean.tif,Week18_tasseled_cap_Band1_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week18_tasseled_cap_Band1_Min.tif,Week18_tasseled_cap_Band1_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week18_tasseled_cap_Band1_StdDev.tif,Week18_tasseled_cap_Band1_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week18_tasseled_cap_Band2_Max.tif,Week18_tasseled_cap_Band2_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week18_tasseled_cap_Band2_Mean.tif,Week18_tasseled_cap_Band2_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week18_tasseled_cap_Band2_Min.tif,Week18_tasseled_cap_Band2_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week18_tasseled_cap_Band2_StdDev.tif,Week18_tasseled_cap_Band2_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week18_tasseled_cap_Band3_Max.tif,Week18_tasseled_cap_Band3_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week18_tasseled_cap_Band3_Mean.tif,Week18_tasseled_cap_Band3_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week18_tasseled_cap_Band3_Min.tif,Week18_tasseled_cap_Band3_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week18_tasseled_cap_Band3_StdDev.tif,Week18_tasseled_cap_Band3_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week18_tasseled_cap_Band4_Max.tif,Week18_tasseled_cap_Band4_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week18_tasseled_cap_Band4_Mean.tif,Week18_tasseled_cap_Band4_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week18_tasseled_cap_Band4_Min.tif,Week18_tasseled_cap_Band4_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week18_tasseled_cap_Band4_StdDev.tif,Week18_tasseled_cap_Band4_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week28_tasseled_cap_Band1_Max.tif,Week28_tasseled_cap_Band1_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week28_tasseled_cap_Band1_Mean.tif,Week28_tasseled_cap_Band1_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week28_tasseled_cap_Band1_Min.tif,Week28_tasseled_cap_Band1_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week28_tasseled_cap_Band1_StdDev.tif,Week28_tasseled_cap_Band1_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week28_tasseled_cap_Band2_Max.tif,Week28_tasseled_cap_Band2_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week28_tasseled_cap_Band2_Mean.tif,Week28_tasseled_cap_Band2_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week28_tasseled_cap_Band2_Min.tif,Week28_tasseled_cap_Band2_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week28_tasseled_cap_Band2_StdDev.tif,Week28_tasseled_cap_Band2_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week28_tasseled_cap_Band3_Max.tif,Week28_tasseled_cap_Band3_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week28_tasseled_cap_Band3_Mean.tif,Week28_tasseled_cap_Band3_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week28_tasseled_cap_Band3_Min.tif,Week28_tasseled_cap_Band3_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week28_tasseled_cap_Band3_StdDev.tif,Week28_tasseled_cap_Band3_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week28_tasseled_cap_Band4_Max.tif,Week28_tasseled_cap_Band4_Max,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week28_tasseled_cap_Band4_Mean.tif,Week28_tasseled_cap_Band4_Mean,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week28_tasseled_cap_Band4_Min.tif,Week28_tasseled_cap_Band4_Min,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week28_tasseled_cap_Band4_StdDev.tif,Week28_tasseled_cap_Band4_StdDev,TAPR_,Tasseled_Cap,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Month03_2010_NDVI_TOA.tif,Month03_2010_NDVI_TOA,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Month04_2010_NDVI_TOA.tif,Month04_2010_NDVI_TOA,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Month05_2010_NDVI_TOA.tif,Month05_2010_NDVI_TOA,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Month06_2010_NDVI_TOA.tif,Month06_2010_NDVI_TOA,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Week13_2010_NDVI_TOA.tif,Week13_2010_NDVI_TOA,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Week15_2010_NDVI_TOA.tif,Week15_2010_NDVI_TOA,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Week18_2010_NDVI_TOA.tif,Week18_2010_NDVI_TOA,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\TIFsWithNoDataValues\Week28_2010_NDVI_TOA.tif,Week28_2010_NDVI_TOA,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month03_2010_NDVI_TOA_Max.tif,Month03_2010_NDVI_TOA_Max,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month03_2010_NDVI_TOA_Mean.tif,Month03_2010_NDVI_TOA_Mean,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month03_2010_NDVI_TOA_Min.tif,Month03_2010_NDVI_TOA_Min,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month03_2010_NDVI_TOA_StdDev.tif,Month03_2010_NDVI_TOA_StdDev,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month04_2010_NDVI_TOA_Max.tif,Month04_2010_NDVI_TOA_Max,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month04_2010_NDVI_TOA_Mean.tif,Month04_2010_NDVI_TOA_Mean,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month04_2010_NDVI_TOA_Min.tif,Month04_2010_NDVI_TOA_Min,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month04_2010_NDVI_TOA_StdDev.tif,Month04_2010_NDVI_TOA_StdDev,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month05_2010_NDVI_TOA_Max.tif,Month05_2010_NDVI_TOA_Max,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month05_2010_NDVI_TOA_Mean.tif,Month05_2010_NDVI_TOA_Mean,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month05_2010_NDVI_TOA_Min.tif,Month05_2010_NDVI_TOA_Min,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month05_2010_NDVI_TOA_StdDev.tif,Month05_2010_NDVI_TOA_StdDev,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month06_2010_NDVI_TOA_Max.tif,Month06_2010_NDVI_TOA_Max,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month06_2010_NDVI_TOA_Mean.tif,Month06_2010_NDVI_TOA_Mean,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month06_2010_NDVI_TOA_Min.tif,Month06_2010_NDVI_TOA_Min,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Month06_2010_NDVI_TOA_StdDev.tif,Month06_2010_NDVI_TOA_StdDev,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week13_2010_NDVI_TOA_Max.tif,Week13_2010_NDVI_TOA_Max,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week13_2010_NDVI_TOA_Mean.tif,Week13_2010_NDVI_TOA_Mean,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week13_2010_NDVI_TOA_Min.tif,Week13_2010_NDVI_TOA_Min,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week13_2010_NDVI_TOA_StdDev.tif,Week13_2010_NDVI_TOA_StdDev,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week15_2010_NDVI_TOA_Max.tif,Week15_2010_NDVI_TOA_Max,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week15_2010_NDVI_TOA_Mean.tif,Week15_2010_NDVI_TOA_Mean,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week15_2010_NDVI_TOA_Min.tif,Week15_2010_NDVI_TOA_Min,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week15_2010_NDVI_TOA_StdDev.tif,Week15_2010_NDVI_TOA_StdDev,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week18_2010_NDVI_TOA_Max.tif,Week18_2010_NDVI_TOA_Max,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week18_2010_NDVI_TOA_Mean.tif,Week18_2010_NDVI_TOA_Mean,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week18_2010_NDVI_TOA_Min.tif,Week18_2010_NDVI_TOA_Min,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week18_2010_NDVI_TOA_StdDev.tif,Week18_2010_NDVI_TOA_StdDev,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week28_2010_NDVI_TOA_Max.tif,Week28_2010_NDVI_TOA_Max,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week28_2010_NDVI_TOA_Mean.tif,Week28_2010_NDVI_TOA_Mean,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week28_2010_NDVI_TOA_Min.tif,Week28_2010_NDVI_TOA_Min,TAPR_,NDVI,N
-I:\WELD_Data_TallGrass\RasterStatistics\Week28_2010_NDVI_TOA_StdDev.tif,Week28_2010_NDVI_TOA_StdDev,TAPR_,NDVI,N
-I:\NPS_NPMP_data\DerivedData\NPScape_densities\gden_13.tif,gden_13,TAPR_,NPScape,Y
-I:\NPS_NPMP_data\DerivedData\NPScape_densities\gden_13_grouped.tif,gden_13_grouped,TAPR_,NPScape,Y
-I:\NPS_NPMP_data\DerivedData\NPScape_densities\gden_243.tif,gden_243,TAPR_,NPScape,Y
-I:\NPS_NPMP_data\DerivedData\NPScape_densities\gden_243_grouped.tif,gden_243_grouped,TAPR_,NPScape,Y
-I:\NPS_NPMP_data\DerivedData\NPScape_densities\gden_27.tif,gden_27,TAPR_,NPScape,Y
-I:\NPS_NPMP_data\DerivedData\NPScape_densities\gden_27_grouped.tif,gden_27_grouped,TAPR_,NPScape,Y
-I:\NPS_NPMP_data\DerivedData\NPScape_densities\gden_7.tif,gden_7,TAPR_,NPScape,Y
-I:\NPS_NPMP_data\DerivedData\NPScape_densities\gden_729.tif,gden_729,TAPR_,NPScape,Y
-I:\NPS_NPMP_data\DerivedData\NPScape_densities\gden_729_grouped.tif,gden_729_grouped,TAPR_,NPScape,Y
-I:\NPS_NPMP_data\DerivedData\NPScape_densities\gden_7_grouped.tif,gden_7_grouped,TAPR_,NPScape,Y
-I:\NPS_NPMP_data\DerivedData\NPScape_densities\gden_81.tif,gden_81,TAPR_,NPScape,Y
-I:\NPS_NPMP_data\DerivedData\NPScape_densities\gden_81_grouped.tif,gden_81_grouped,TAPR_,NPScape,Y
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2000\DoublePeakRemoved\greenups\MOD09A1P_EVI.A2000001.h10v05.005.2009343013110.01greenups.tif,GreenUps_2000 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2000\DoublePeakRemoved\browndowns\MOD09A1P_EVI.A2000001.h10v05.005.2009343013110.02browndowns.tif,BrownDowns_2000 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2000\DoublePeakRemoved\seasonlengths\MOD09A1P_EVI.A2000001.h10v05.005.2009343013110.03seasonlengths.tif,SeasonLengths_2000 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2000\DoublePeakRemoved\baselevels\MOD09A1P_EVI.A2000001.h10v05.005.2009343013110.04baselevels.tif,BaseLevels_2000 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2000\DoublePeakRemoved\peakdates\MOD09A1P_EVI.A2000001.h10v05.005.2009343013110.05peakdates.tif,PeakDates_2000 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2000\DoublePeakRemoved\maxpeakvalues\MOD09A1P_EVI.A2000001.h10v05.005.2009343013110.06maxpeakvalues.tif,MaxPeakValues_2000 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2000\DoublePeakRemoved\amplitudes\MOD09A1P_EVI.A2000001.h10v05.005.2009343013110.07amplitudes.tif,Amplitudes_2000 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2000\DoublePeakRemoved\greenuprates\MOD09A1P_EVI.A2000001.h10v05.005.2009343013110.08greenuprates.tif,GreenUpRates_2000 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2000\DoublePeakRemoved\browndownrates\MOD09A1P_EVI.A2000001.h10v05.005.2009343013110.09browndownrates.tif,BrownDownRates_2000 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2000\DoublePeakRemoved\largeintegrals\MOD09A1P_EVI.A2000001.h10v05.005.2009343013110.10largeintegrals.tif,LargeIntegrals_2000 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2000\DoublePeakRemoved\smallintegrals\MOD09A1P_EVI.A2000001.h10v05.005.2009343013110.11smallintegrals.tif,SmallIntegrals_2000 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2000\001\AnnualMaximumValue\WGS84\MOD09A1P_EVI.A2000001.h10v05.005.2009343013110.AnnualMaximumValue.tif,AnnualMaxValue_2000,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2000\001\AnnualMeanValue\WGS84\MOD09A1P_EVI.A2000001.h10v05.005.2009343013110.AnnualMeanValue.tif,AnnualMeanValue_2000,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2000\001\AnnualMinimumValue\WGS84\MOD09A1P_EVI.A2000001.h10v05.005.2009343013110.AnnualMinimumValue.tif,AnnualMinValue_2000,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2000\001\Landcover\WGS84\MOD09A1P_EVI.A2000001.h10v05.005.2009343013110.Landcover.tif,Landcover_2000,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2000\001\QualityFlag\WGS84\MOD09A1P_EVI.A2000001.h10v05.005.2009343013110.QualityFlag.tif,QualityFlag_2000,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2000\001\RMSE\WGS84\MOD09A1P_EVI.A2000001.h10v05.005.2009343013110.RMSE.tif,RMSE_2000,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2001\DoublePeakRemoved\greenups\MOD09A1P_EVI.A2001001.h10v05.005.2010101004802.01greenups.tif,GreenUps_2001 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2001\DoublePeakRemoved\browndowns\MOD09A1P_EVI.A2001001.h10v05.005.2010101004802.02browndowns.tif,BrownDowns_2001 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2001\DoublePeakRemoved\seasonlengths\MOD09A1P_EVI.A2001001.h10v05.005.2010101004802.03seasonlengths.tif,SeasonLengths_2001 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2001\DoublePeakRemoved\baselevels\MOD09A1P_EVI.A2001001.h10v05.005.2010101004802.04baselevels.tif,BaseLevels_2001 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2001\DoublePeakRemoved\peakdates\MOD09A1P_EVI.A2001001.h10v05.005.2010101004802.05peakdates.tif,PeakDates_2001 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2001\DoublePeakRemoved\maxpeakvalues\MOD09A1P_EVI.A2001001.h10v05.005.2010101004802.06maxpeakvalues.tif,MaxPeakValues_2001 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2001\DoublePeakRemoved\amplitudes\MOD09A1P_EVI.A2001001.h10v05.005.2010101004802.07amplitudes.tif,Amplitudes_2001 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2001\DoublePeakRemoved\greenuprates\MOD09A1P_EVI.A2001001.h10v05.005.2010101004802.08greenuprates.tif,GreenUpRates_2001 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2001\DoublePeakRemoved\browndownrates\MOD09A1P_EVI.A2001001.h10v05.005.2010101004802.09browndownrates.tif,BrownDownRates_2001 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2001\DoublePeakRemoved\largeintegrals\MOD09A1P_EVI.A2001001.h10v05.005.2010101004802.10largeintegrals.tif,LargeIntegrals_2001 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2001\DoublePeakRemoved\smallintegrals\MOD09A1P_EVI.A2001001.h10v05.005.2010101004802.11smallintegrals.tif,SmallIntegrals_2001 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2001\001\AnnualMaximumValue\WGS84\MOD09A1P_EVI.A2001001.h10v05.005.2010101004802.AnnualMaximumValue.tif,AnnualMaxValue_2001,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2001\001\AnnualMeanValue\WGS84\MOD09A1P_EVI.A2001001.h10v05.005.2010101004802.AnnualMeanValue.tif,AnnualMeanValue_2001,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2001\001\AnnualMinimumValue\WGS84\MOD09A1P_EVI.A2001001.h10v05.005.2010101004802.AnnualMinimumValue.tif,AnnualMinValue_2001,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2001\001\Landcover\WGS84\MOD09A1P_EVI.A2001001.h10v05.005.2010101004802.Landcover.tif,Landcover_2001,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2001\001\QualityFlag\WGS84\MOD09A1P_EVI.A2001001.h10v05.005.2010101004802.QualityFlag.tif,QualityFlag_2001,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2001\001\RMSE\WGS84\MOD09A1P_EVI.A2001001.h10v05.005.2010101004802.RMSE.tif,RMSE_2001,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2002\DoublePeakRemoved\greenups\MOD09A1P_EVI.A2002001.h10v05.005.2010121040801.01greenups.tif,GreenUps_2002 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2002\DoublePeakRemoved\browndowns\MOD09A1P_EVI.A2002001.h10v05.005.2010121040801.02browndowns.tif,BrownDowns_2002 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2002\DoublePeakRemoved\seasonlengths\MOD09A1P_EVI.A2002001.h10v05.005.2010121040801.03seasonlengths.tif,SeasonLengths_2002 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2002\DoublePeakRemoved\baselevels\MOD09A1P_EVI.A2002001.h10v05.005.2010121040801.04baselevels.tif,BaseLevels_2002 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2002\DoublePeakRemoved\peakdates\MOD09A1P_EVI.A2002001.h10v05.005.2010121040801.05peakdates.tif,PeakDates_2002 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2002\DoublePeakRemoved\maxpeakvalues\MOD09A1P_EVI.A2002001.h10v05.005.2010121040801.06maxpeakvalues.tif,MaxPeakValues_2002 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2002\DoublePeakRemoved\amplitudes\MOD09A1P_EVI.A2002001.h10v05.005.2010121040801.07amplitudes.tif,Amplitudes_2002 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2002\DoublePeakRemoved\greenuprates\MOD09A1P_EVI.A2002001.h10v05.005.2010121040801.08greenuprates.tif,GreenUpRates_2002 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2002\DoublePeakRemoved\browndownrates\MOD09A1P_EVI.A2002001.h10v05.005.2010121040801.09browndownrates.tif,BrownDownRates_2002 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2002\DoublePeakRemoved\largeintegrals\MOD09A1P_EVI.A2002001.h10v05.005.2010121040801.10largeintegrals.tif,LargeIntegrals_2002 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2002\DoublePeakRemoved\smallintegrals\MOD09A1P_EVI.A2002001.h10v05.005.2010121040801.11smallintegrals.tif,SmallIntegrals_2002 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2002\001\AnnualMaximumValue\WGS84\MOD09A1P_EVI.A2002001.h10v05.005.2010121040801.AnnualMaximumValue.tif,AnnualMaxValue_2002,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2002\001\AnnualMeanValue\WGS84\MOD09A1P_EVI.A2002001.h10v05.005.2010121040801.AnnualMeanValue.tif,AnnualMeanValue_2002,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2002\001\AnnualMinimumValue\WGS84\MOD09A1P_EVI.A2002001.h10v05.005.2010121040801.AnnualMinimumValue.tif,AnnualMinValue_2002,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2002\001\Landcover\WGS84\MOD09A1P_EVI.A2002001.h10v05.005.2010121040801.Landcover.tif,Landcover_2002,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2002\001\QualityFlag\WGS84\MOD09A1P_EVI.A2002001.h10v05.005.2010121040801.QualityFlag.tif,QualityFlag_2002,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2002\001\RMSE\WGS84\MOD09A1P_EVI.A2002001.h10v05.005.2010121040801.RMSE.tif,RMSE_2002,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2003\DoublePeakRemoved\greenups\MOD09A1P_EVI.A2003001.h10v05.005.2010216230858.01greenups.tif,GreenUps_2003 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2003\DoublePeakRemoved\browndowns\MOD09A1P_EVI.A2003001.h10v05.005.2010216230858.02browndowns.tif,BrownDowns_2003 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2003\DoublePeakRemoved\seasonlengths\MOD09A1P_EVI.A2003001.h10v05.005.2010216230858.03seasonlengths.tif,SeasonLengths_2003 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2003\DoublePeakRemoved\baselevels\MOD09A1P_EVI.A2003001.h10v05.005.2010216230858.04baselevels.tif,BaseLevels_2003 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2003\DoublePeakRemoved\peakdates\MOD09A1P_EVI.A2003001.h10v05.005.2010216230858.05peakdates.tif,PeakDates_2003 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2003\DoublePeakRemoved\maxpeakvalues\MOD09A1P_EVI.A2003001.h10v05.005.2010216230858.06maxpeakvalues.tif,MaxPeakValues_2003 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2003\DoublePeakRemoved\amplitudes\MOD09A1P_EVI.A2003001.h10v05.005.2010216230858.07amplitudes.tif,Amplitudes_2003 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2003\DoublePeakRemoved\greenuprates\MOD09A1P_EVI.A2003001.h10v05.005.2010216230858.08greenuprates.tif,GreenUpRates_2003 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2003\DoublePeakRemoved\browndownrates\MOD09A1P_EVI.A2003001.h10v05.005.2010216230858.09browndownrates.tif,BrownDownRates_2003 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2003\DoublePeakRemoved\largeintegrals\MOD09A1P_EVI.A2003001.h10v05.005.2010216230858.10largeintegrals.tif,LargeIntegrals_2003 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2003\DoublePeakRemoved\smallintegrals\MOD09A1P_EVI.A2003001.h10v05.005.2010216230858.11smallintegrals.tif,SmallIntegrals_2003 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2003\001\AnnualMaximumValue\WGS84\MOD09A1P_EVI.A2003001.h10v05.005.2010216230858.AnnualMaximumValue.tif,AnnualMaxValue_2003,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2003\001\AnnualMeanValue\WGS84\MOD09A1P_EVI.A2003001.h10v05.005.2010216230858.AnnualMeanValue.tif,AnnualMeanValue_2003,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2003\001\AnnualMinimumValue\WGS84\MOD09A1P_EVI.A2003001.h10v05.005.2010216230858.AnnualMinimumValue.tif,AnnualMinValue_2003,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2003\001\Landcover\WGS84\MOD09A1P_EVI.A2003001.h10v05.005.2010216230858.Landcover.tif,Landcover_2003,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2003\001\QualityFlag\WGS84\MOD09A1P_EVI.A2003001.h10v05.005.2010216230858.QualityFlag.tif,QualityFlag_2003,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2003\001\RMSE\WGS84\MOD09A1P_EVI.A2003001.h10v05.005.2010216230858.RMSE.tif,RMSE_2003,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2004\DoublePeakRemoved\greenups\MOD09A1P_EVI.A2004001.h10v05.005.2010358015123.01greenups.tif,GreenUps_2004 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2004\DoublePeakRemoved\browndowns\MOD09A1P_EVI.A2004001.h10v05.005.2010358015123.02browndowns.tif,BrownDowns_2004 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2004\DoublePeakRemoved\seasonlengths\MOD09A1P_EVI.A2004001.h10v05.005.2010358015123.03seasonlengths.tif,SeasonLengths_2004 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2004\DoublePeakRemoved\baselevels\MOD09A1P_EVI.A2004001.h10v05.005.2010358015123.04baselevels.tif,BaseLevels_2004 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2004\DoublePeakRemoved\peakdates\MOD09A1P_EVI.A2004001.h10v05.005.2010358015123.05peakdates.tif,PeakDates_2004 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2004\DoublePeakRemoved\maxpeakvalues\MOD09A1P_EVI.A2004001.h10v05.005.2010358015123.06maxpeakvalues.tif,MaxPeakValues_2004 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2004\DoublePeakRemoved\amplitudes\MOD09A1P_EVI.A2004001.h10v05.005.2010358015123.07amplitudes.tif,Amplitudes_2004 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2004\DoublePeakRemoved\greenuprates\MOD09A1P_EVI.A2004001.h10v05.005.2010358015123.08greenuprates.tif,GreenUpRates_2004 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2004\DoublePeakRemoved\browndownrates\MOD09A1P_EVI.A2004001.h10v05.005.2010358015123.09browndownrates.tif,BrownDownRates_2004 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2004\DoublePeakRemoved\largeintegrals\MOD09A1P_EVI.A2004001.h10v05.005.2010358015123.10largeintegrals.tif,LargeIntegrals_2004 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2004\DoublePeakRemoved\smallintegrals\MOD09A1P_EVI.A2004001.h10v05.005.2010358015123.11smallintegrals.tif,SmallIntegrals_2004 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2004\001\AnnualMaximumValue\WGS84\MOD09A1P_EVI.A2004001.h10v05.005.2010358015123.AnnualMaximumValue.tif,AnnualMaxValue_2004,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2004\001\AnnualMeanValue\WGS84\MOD09A1P_EVI.A2004001.h10v05.005.2010358015123.AnnualMeanValue.tif,AnnualMeanValue_2004,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2004\001\AnnualMinimumValue\WGS84\MOD09A1P_EVI.A2004001.h10v05.005.2010358015123.AnnualMinimumValue.tif,AnnualMinValue_2004,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2004\001\Landcover\WGS84\MOD09A1P_EVI.A2004001.h10v05.005.2010358015123.Landcover.tif,Landcover_2004,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2004\001\QualityFlag\WGS84\MOD09A1P_EVI.A2004001.h10v05.005.2010358015123.QualityFlag.tif,QualityFlag_2004,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2004\001\RMSE\WGS84\MOD09A1P_EVI.A2004001.h10v05.005.2010358015123.RMSE.tif,RMSE_2004,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2005\DoublePeakRemoved\greenups\MOD09A1P_EVI.A2005001.h10v05.005.2009300142933.01greenups.tif,GreenUps_2005 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2005\DoublePeakRemoved\browndowns\MOD09A1P_EVI.A2005001.h10v05.005.2009300142933.02browndowns.tif,BrownDowns_2005 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2005\DoublePeakRemoved\seasonlengths\MOD09A1P_EVI.A2005001.h10v05.005.2009300142933.03seasonlengths.tif,SeasonLengths_2005 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2005\DoublePeakRemoved\baselevels\MOD09A1P_EVI.A2005001.h10v05.005.2009300142933.04baselevels.tif,BaseLevels_2005 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2005\DoublePeakRemoved\peakdates\MOD09A1P_EVI.A2005001.h10v05.005.2009300142933.05peakdates.tif,PeakDates_2005 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2005\DoublePeakRemoved\maxpeakvalues\MOD09A1P_EVI.A2005001.h10v05.005.2009300142933.06maxpeakvalues.tif,MaxPeakValues_2005 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2005\DoublePeakRemoved\amplitudes\MOD09A1P_EVI.A2005001.h10v05.005.2009300142933.07amplitudes.tif,Amplitudes_2005 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2005\DoublePeakRemoved\greenuprates\MOD09A1P_EVI.A2005001.h10v05.005.2009300142933.08greenuprates.tif,GreenUpRates_2005 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2005\DoublePeakRemoved\browndownrates\MOD09A1P_EVI.A2005001.h10v05.005.2009300142933.09browndownrates.tif,BrownDownRates_2005 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2005\DoublePeakRemoved\largeintegrals\MOD09A1P_EVI.A2005001.h10v05.005.2009300142933.10largeintegrals.tif,LargeIntegrals_2005 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2005\DoublePeakRemoved\smallintegrals\MOD09A1P_EVI.A2005001.h10v05.005.2009300142933.11smallintegrals.tif,SmallIntegrals_2005 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2005\001\AnnualMaximumValue\WGS84\MOD09A1P_EVI.A2005001.h10v05.005.2009300142933.AnnualMaximumValue.tif,AnnualMaxValue_2005,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2005\001\AnnualMeanValue\WGS84\MOD09A1P_EVI.A2005001.h10v05.005.2009300142933.AnnualMeanValue.tif,AnnualMeanValue_2005,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2005\001\AnnualMinimumValue\WGS84\MOD09A1P_EVI.A2005001.h10v05.005.2009300142933.AnnualMinimumValue.tif,AnnualMinValue_2005,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2005\001\Landcover\WGS84\MOD09A1P_EVI.A2005001.h10v05.005.2009300142933.Landcover.tif,Landcover_2005,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2005\001\QualityFlag\WGS84\MOD09A1P_EVI.A2005001.h10v05.005.2009300142933.QualityFlag.tif,QualityFlag_2005,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2005\001\RMSE\WGS84\MOD09A1P_EVI.A2005001.h10v05.005.2009300142933.RMSE.tif,RMSE_2005,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2006\DoublePeakRemoved\greenups\MOD09A1P_EVI.A2006001.h10v05.005.2010197062928.01greenups.tif,GreenUps_2006 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2006\DoublePeakRemoved\browndowns\MOD09A1P_EVI.A2006001.h10v05.005.2010197062928.02browndowns.tif,BrownDowns_2006 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2006\DoublePeakRemoved\seasonlengths\MOD09A1P_EVI.A2006001.h10v05.005.2010197062928.03seasonlengths.tif,SeasonLengths_2006 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2006\DoublePeakRemoved\baselevels\MOD09A1P_EVI.A2006001.h10v05.005.2010197062928.04baselevels.tif,BaseLevels_2006 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2006\DoublePeakRemoved\peakdates\MOD09A1P_EVI.A2006001.h10v05.005.2010197062928.05peakdates.tif,PeakDates_2006 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2006\DoublePeakRemoved\maxpeakvalues\MOD09A1P_EVI.A2006001.h10v05.005.2010197062928.06maxpeakvalues.tif,MaxPeakValues_2006 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2006\DoublePeakRemoved\amplitudes\MOD09A1P_EVI.A2006001.h10v05.005.2010197062928.07amplitudes.tif,Amplitudes_2006 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2006\DoublePeakRemoved\greenuprates\MOD09A1P_EVI.A2006001.h10v05.005.2010197062928.08greenuprates.tif,GreenUpRates_2006 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2006\DoublePeakRemoved\browndownrates\MOD09A1P_EVI.A2006001.h10v05.005.2010197062928.09browndownrates.tif,BrownDownRates_2006 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2006\DoublePeakRemoved\largeintegrals\MOD09A1P_EVI.A2006001.h10v05.005.2010197062928.10largeintegrals.tif,LargeIntegrals_2006 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2006\DoublePeakRemoved\smallintegrals\MOD09A1P_EVI.A2006001.h10v05.005.2010197062928.11smallintegrals.tif,SmallIntegrals_2006 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2006\001\AnnualMaximumValue\WGS84\MOD09A1P_EVI.A2006001.h10v05.005.2010197062928.AnnualMaximumValue.tif,AnnualMaxValue_2006,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2006\001\AnnualMeanValue\WGS84\MOD09A1P_EVI.A2006001.h10v05.005.2010197062928.AnnualMeanValue.tif,AnnualMeanValue_2006,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2006\001\AnnualMinimumValue\WGS84\MOD09A1P_EVI.A2006001.h10v05.005.2010197062928.AnnualMinimumValue.tif,AnnualMinValue_2006,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2006\001\Landcover\WGS84\MOD09A1P_EVI.A2006001.h10v05.005.2010197062928.Landcover.tif,Landcover_2006,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2006\001\QualityFlag\WGS84\MOD09A1P_EVI.A2006001.h10v05.005.2010197062928.QualityFlag.tif,QualityFlag_2006,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2006\001\RMSE\WGS84\MOD09A1P_EVI.A2006001.h10v05.005.2010197062928.RMSE.tif,RMSE_2006,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2007\DoublePeakRemoved\greenups\MOD09A1P_EVI.A2007001.h10v05.005.2010013232229.01greenups.tif,GreenUps_2007 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2007\DoublePeakRemoved\browndowns\MOD09A1P_EVI.A2007001.h10v05.005.2010013232229.02browndowns.tif,BrownDowns_2007 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2007\DoublePeakRemoved\seasonlengths\MOD09A1P_EVI.A2007001.h10v05.005.2010013232229.03seasonlengths.tif,SeasonLengths_2007 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2007\DoublePeakRemoved\baselevels\MOD09A1P_EVI.A2007001.h10v05.005.2010013232229.04baselevels.tif,BaseLevels_2007 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2007\DoublePeakRemoved\peakdates\MOD09A1P_EVI.A2007001.h10v05.005.2010013232229.05peakdates.tif,PeakDates_2007 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2007\DoublePeakRemoved\maxpeakvalues\MOD09A1P_EVI.A2007001.h10v05.005.2010013232229.06maxpeakvalues.tif,MaxPeakValues_2007 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2007\DoublePeakRemoved\amplitudes\MOD09A1P_EVI.A2007001.h10v05.005.2010013232229.07amplitudes.tif,Amplitudes_2007 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2007\DoublePeakRemoved\greenuprates\MOD09A1P_EVI.A2007001.h10v05.005.2010013232229.08greenuprates.tif,GreenUpRates_2007 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2007\DoublePeakRemoved\browndownrates\MOD09A1P_EVI.A2007001.h10v05.005.2010013232229.09browndownrates.tif,BrownDownRates_2007 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2007\DoublePeakRemoved\largeintegrals\MOD09A1P_EVI.A2007001.h10v05.005.2010013232229.10largeintegrals.tif,LargeIntegrals_2007 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2007\DoublePeakRemoved\smallintegrals\MOD09A1P_EVI.A2007001.h10v05.005.2010013232229.11smallintegrals.tif,SmallIntegrals_2007 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2007\001\AnnualMaximumValue\WGS84\MOD09A1P_EVI.A2007001.h10v05.005.2010013232229.AnnualMaximumValue.tif,AnnualMaxValue_2007,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2007\001\AnnualMeanValue\WGS84\MOD09A1P_EVI.A2007001.h10v05.005.2010013232229.AnnualMeanValue.tif,AnnualMeanValue_2007,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2007\001\AnnualMinimumValue\WGS84\MOD09A1P_EVI.A2007001.h10v05.005.2010013232229.AnnualMinimumValue.tif,AnnualMinValue_2007,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2007\001\Landcover\WGS84\MOD09A1P_EVI.A2007001.h10v05.005.2010013232229.Landcover.tif,Landcover_2007,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2007\001\QualityFlag\WGS84\MOD09A1P_EVI.A2007001.h10v05.005.2010013232229.QualityFlag.tif,QualityFlag_2007,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2007\001\RMSE\WGS84\MOD09A1P_EVI.A2007001.h10v05.005.2010013232229.RMSE.tif,RMSE_2007,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2008\DoublePeakRemoved\greenups\MOD09A1P_EVI.A2008001.h10v05.005.2011047000000.01greenups.tif,GreenUps_2008 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2008\DoublePeakRemoved\browndowns\MOD09A1P_EVI.A2008001.h10v05.005.2011047000000.02browndowns.tif,BrownDowns_2008 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2008\DoublePeakRemoved\seasonlengths\MOD09A1P_EVI.A2008001.h10v05.005.2011047000000.03seasonlengths.tif,SeasonLengths_2008 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2008\DoublePeakRemoved\baselevels\MOD09A1P_EVI.A2008001.h10v05.005.2011047000000.04baselevels.tif,BaseLevels_2008 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2008\DoublePeakRemoved\peakdates\MOD09A1P_EVI.A2008001.h10v05.005.2011047000000.05peakdates.tif,PeakDates_2008 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2008\DoublePeakRemoved\maxpeakvalues\MOD09A1P_EVI.A2008001.h10v05.005.2011047000000.06maxpeakvalues.tif,MaxPeakValues_2008 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2008\DoublePeakRemoved\amplitudes\MOD09A1P_EVI.A2008001.h10v05.005.2011047000000.07amplitudes.tif,Amplitudes_2008 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2008\DoublePeakRemoved\greenuprates\MOD09A1P_EVI.A2008001.h10v05.005.2011047000000.08greenuprates.tif,GreenUpRates_2008 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2008\DoublePeakRemoved\browndownrates\MOD09A1P_EVI.A2008001.h10v05.005.2011047000000.09browndownrates.tif,BrownDownRates_2008 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2008\DoublePeakRemoved\largeintegrals\MOD09A1P_EVI.A2008001.h10v05.005.2011047000000.10largeintegrals.tif,LargeIntegrals_2008 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2008\DoublePeakRemoved\smallintegrals\MOD09A1P_EVI.A2008001.h10v05.005.2011047000000.11smallintegrals.tif,SmallIntegrals_2008 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2008\001\AnnualMaximumValue\WGS84\MOD09A1P_EVI.A2008001.h10v05.005.2011047000000.AnnualMaximumValue.tif,AnnualMaxValue_2008,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2008\001\AnnualMeanValue\WGS84\MOD09A1P_EVI.A2008001.h10v05.005.2011047000000.AnnualMeanValue.tif,AnnualMeanValue_2008,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2008\001\AnnualMinimumValue\WGS84\MOD09A1P_EVI.A2008001.h10v05.005.2011047000000.AnnualMinimumValue.tif,AnnualMinValue_2008,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2008\001\Landcover\WGS84\MOD09A1P_EVI.A2008001.h10v05.005.2011047000000.Landcover.tif,Landcover_2008,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2008\001\QualityFlag\WGS84\MOD09A1P_EVI.A2008001.h10v05.005.2011047000000.QualityFlag.tif,QualityFlag_2008,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2008\001\RMSE\WGS84\MOD09A1P_EVI.A2008001.h10v05.005.2011047000000.RMSE.tif,RMSE_2008,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2009\DoublePeakRemoved\greenups\MOD09A1P_EVI.A2009001.h10v05.005.2011043000000.01greenups.tif,GreenUps_2009 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2009\DoublePeakRemoved\browndowns\MOD09A1P_EVI.A2009001.h10v05.005.2011043000000.02browndowns.tif,BrownDowns_2009 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2009\DoublePeakRemoved\seasonlengths\MOD09A1P_EVI.A2009001.h10v05.005.2011043000000.03seasonlengths.tif,SeasonLengths_2009 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2009\DoublePeakRemoved\baselevels\MOD09A1P_EVI.A2009001.h10v05.005.2011043000000.04baselevels.tif,BaseLevels_2009 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2009\DoublePeakRemoved\peakdates\MOD09A1P_EVI.A2009001.h10v05.005.2011043000000.05peakdates.tif,PeakDates_2009 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2009\DoublePeakRemoved\maxpeakvalues\MOD09A1P_EVI.A2009001.h10v05.005.2011043000000.06maxpeakvalues.tif,MaxPeakValues_2009 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2009\DoublePeakRemoved\amplitudes\MOD09A1P_EVI.A2009001.h10v05.005.2011043000000.07amplitudes.tif,Amplitudes_2009 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2009\DoublePeakRemoved\greenuprates\MOD09A1P_EVI.A2009001.h10v05.005.2011043000000.08greenuprates.tif,GreenUpRates_2009 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2009\DoublePeakRemoved\browndownrates\MOD09A1P_EVI.A2009001.h10v05.005.2011043000000.09browndownrates.tif,BrownDownRates_2009 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2009\DoublePeakRemoved\largeintegrals\MOD09A1P_EVI.A2009001.h10v05.005.2011043000000.10largeintegrals.tif,LargeIntegrals_2009 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2009\DoublePeakRemoved\smallintegrals\MOD09A1P_EVI.A2009001.h10v05.005.2011043000000.11smallintegrals.tif,SmallIntegrals_2009 (Db. Pk. Removed),TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2009\001\AnnualMaximumValue\WGS84\MOD09A1P_EVI.A2009001.h10v05.005.2011043000000.AnnualMaximumValue.tif,AnnualMaxValue_2009,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2009\001\AnnualMeanValue\WGS84\MOD09A1P_EVI.A2009001.h10v05.005.2011043000000.AnnualMeanValue.tif,AnnualMeanValue_2009,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2009\001\AnnualMinimumValue\WGS84\MOD09A1P_EVI.A2009001.h10v05.005.2011043000000.AnnualMinimumValue.tif,AnnualMinValue_2009,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2009\001\Landcover\WGS84\MOD09A1P_EVI.A2009001.h10v05.005.2011043000000.Landcover.tif,Landcover_2009,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2009\001\QualityFlag\WGS84\MOD09A1P_EVI.A2009001.h10v05.005.2011043000000.QualityFlag.tif,QualityFlag_2009,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_EVI\2009\001\RMSE\WGS84\MOD09A1P_EVI.A2009001.h10v05.005.2011043000000.RMSE.tif,RMSE_2009,TAPR_,MODIS EVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2000\DoublePeakRemoved\greenups\MOD09A1P_NDVI.A2000001.h10v05.005.2009340185821.01greenups.tif,GreenUps_2000 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2000\DoublePeakRemoved\browndowns\MOD09A1P_NDVI.A2000001.h10v05.005.2009340185821.02browndowns.tif,BrownDowns_2000 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2000\DoublePeakRemoved\seasonlengths\MOD09A1P_NDVI.A2000001.h10v05.005.2009340185821.03seasonlengths.tif,SeasonLengths_2000 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2000\DoublePeakRemoved\baselevels\MOD09A1P_NDVI.A2000001.h10v05.005.2009340185821.04baselevels.tif,BaseLevels_2000 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2000\DoublePeakRemoved\peakdates\MOD09A1P_NDVI.A2000001.h10v05.005.2009340185821.05peakdates.tif,PeakDates_2000 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2000\DoublePeakRemoved\maxpeakvalues\MOD09A1P_NDVI.A2000001.h10v05.005.2009340185821.06maxpeakvalues.tif,MaxPeakValues_2000 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2000\DoublePeakRemoved\amplitudes\MOD09A1P_NDVI.A2000001.h10v05.005.2009340185821.07amplitudes.tif,Amplitudes_2000 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2000\DoublePeakRemoved\greenuprates\MOD09A1P_NDVI.A2000001.h10v05.005.2009340185821.08greenuprates.tif,GreenUpRates_2000 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2000\DoublePeakRemoved\browndownrates\MOD09A1P_NDVI.A2000001.h10v05.005.2009340185821.09browndownrates.tif,BrownDownRates_2000 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2000\DoublePeakRemoved\largeintegrals\MOD09A1P_NDVI.A2000001.h10v05.005.2009340185821.10largeintegrals.tif,LargeIntegrals_2000 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2000\DoublePeakRemoved\smallintegrals\MOD09A1P_NDVI.A2000001.h10v05.005.2009340185821.11smallintegrals.tif,SmallIntegrals_2000 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2000\001\AnnualMaximumValue\WGS84\MOD09A1P_NDVI.A2000001.h10v05.005.2009340185821.AnnualMaximumValue.tif,AnnualMaxValue_2000,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2000\001\AnnualMeanValue\WGS84\MOD09A1P_NDVI.A2000001.h10v05.005.2009340185821.AnnualMeanValue.tif,AnnualMeanValue_2000,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2000\001\AnnualMinimumValue\WGS84\MOD09A1P_NDVI.A2000001.h10v05.005.2009340185821.AnnualMinimumValue.tif,AnnualMinValue_2000,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2000\001\Landcover\WGS84\MOD09A1P_NDVI.A2000001.h10v05.005.2009340185821.Landcover.tif,Landcover_2000,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2000\001\QualityFlag\WGS84\MOD09A1P_NDVI.A2000001.h10v05.005.2009340185821.QualityFlag.tif,QualityFlag_2000,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2000\001\RMSE\WGS84\MOD09A1P_NDVI.A2000001.h10v05.005.2009340185821.RMSE.tif,RMSE_2000,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2001\DoublePeakRemoved\greenups\MOD09A1P_NDVI.A2001001.h10v05.005.2010098194112.01greenups.tif,GreenUps_2001 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2001\DoublePeakRemoved\browndowns\MOD09A1P_NDVI.A2001001.h10v05.005.2010098194112.02browndowns.tif,BrownDowns_2001 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2001\DoublePeakRemoved\seasonlengths\MOD09A1P_NDVI.A2001001.h10v05.005.2010098194112.03seasonlengths.tif,SeasonLengths_2001 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2001\DoublePeakRemoved\baselevels\MOD09A1P_NDVI.A2001001.h10v05.005.2010098194112.04baselevels.tif,BaseLevels_2001 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2001\DoublePeakRemoved\peakdates\MOD09A1P_NDVI.A2001001.h10v05.005.2010098194112.05peakdates.tif,PeakDates_2001 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2001\DoublePeakRemoved\maxpeakvalues\MOD09A1P_NDVI.A2001001.h10v05.005.2010098194112.06maxpeakvalues.tif,MaxPeakValues_2001 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2001\DoublePeakRemoved\amplitudes\MOD09A1P_NDVI.A2001001.h10v05.005.2010098194112.07amplitudes.tif,Amplitudes_2001 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2001\DoublePeakRemoved\greenuprates\MOD09A1P_NDVI.A2001001.h10v05.005.2010098194112.08greenuprates.tif,GreenUpRates_2001 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2001\DoublePeakRemoved\browndownrates\MOD09A1P_NDVI.A2001001.h10v05.005.2010098194112.09browndownrates.tif,BrownDownRates_2001 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2001\DoublePeakRemoved\largeintegrals\MOD09A1P_NDVI.A2001001.h10v05.005.2010098194112.10largeintegrals.tif,LargeIntegrals_2001 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2001\DoublePeakRemoved\smallintegrals\MOD09A1P_NDVI.A2001001.h10v05.005.2010098194112.11smallintegrals.tif,SmallIntegrals_2001 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2001\001\AnnualMaximumValue\WGS84\MOD09A1P_NDVI.A2001001.h10v05.005.2010098194112.AnnualMaximumValue.tif,AnnualMaxValue_2001,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2001\001\AnnualMeanValue\WGS84\MOD09A1P_NDVI.A2001001.h10v05.005.2010098194112.AnnualMeanValue.tif,AnnualMeanValue_2001,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2001\001\AnnualMinimumValue\WGS84\MOD09A1P_NDVI.A2001001.h10v05.005.2010098194112.AnnualMinimumValue.tif,AnnualMinValue_2001,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2001\001\Landcover\WGS84\MOD09A1P_NDVI.A2001001.h10v05.005.2010098194112.Landcover.tif,Landcover_2001,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2001\001\QualityFlag\WGS84\MOD09A1P_NDVI.A2001001.h10v05.005.2010098194112.QualityFlag.tif,QualityFlag_2001,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2001\001\RMSE\WGS84\MOD09A1P_NDVI.A2001001.h10v05.005.2010098194112.RMSE.tif,RMSE_2001,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2002\DoublePeakRemoved\greenups\MOD09A1P_NDVI.A2002001.h10v05.005.2010119013205.01greenups.tif,GreenUps_2002 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2002\DoublePeakRemoved\browndowns\MOD09A1P_NDVI.A2002001.h10v05.005.2010119013205.02browndowns.tif,BrownDowns_2002 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2002\DoublePeakRemoved\seasonlengths\MOD09A1P_NDVI.A2002001.h10v05.005.2010119013205.03seasonlengths.tif,SeasonLengths_2002 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2002\DoublePeakRemoved\baselevels\MOD09A1P_NDVI.A2002001.h10v05.005.2010119013205.04baselevels.tif,BaseLevels_2002 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2002\DoublePeakRemoved\peakdates\MOD09A1P_NDVI.A2002001.h10v05.005.2010119013205.05peakdates.tif,PeakDates_2002 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2002\DoublePeakRemoved\maxpeakvalues\MOD09A1P_NDVI.A2002001.h10v05.005.2010119013205.06maxpeakvalues.tif,MaxPeakValues_2002 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2002\DoublePeakRemoved\amplitudes\MOD09A1P_NDVI.A2002001.h10v05.005.2010119013205.07amplitudes.tif,Amplitudes_2002 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2002\DoublePeakRemoved\greenuprates\MOD09A1P_NDVI.A2002001.h10v05.005.2010119013205.08greenuprates.tif,GreenUpRates_2002 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2002\DoublePeakRemoved\browndownrates\MOD09A1P_NDVI.A2002001.h10v05.005.2010119013205.09browndownrates.tif,BrownDownRates_2002 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2002\DoublePeakRemoved\largeintegrals\MOD09A1P_NDVI.A2002001.h10v05.005.2010119013205.10largeintegrals.tif,LargeIntegrals_2002 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2002\DoublePeakRemoved\smallintegrals\MOD09A1P_NDVI.A2002001.h10v05.005.2010119013205.11smallintegrals.tif,SmallIntegrals_2002 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2002\001\AnnualMaximumValue\WGS84\MOD09A1P_NDVI.A2002001.h10v05.005.2010119013205.AnnualMaximumValue.tif,AnnualMaxValue_2002,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2002\001\AnnualMeanValue\WGS84\MOD09A1P_NDVI.A2002001.h10v05.005.2010119013205.AnnualMeanValue.tif,AnnualMeanValue_2002,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2002\001\AnnualMinimumValue\WGS84\MOD09A1P_NDVI.A2002001.h10v05.005.2010119013205.AnnualMinimumValue.tif,AnnualMinValue_2002,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2002\001\Landcover\WGS84\MOD09A1P_NDVI.A2002001.h10v05.005.2010119013205.Landcover.tif,Landcover_2002,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2002\001\QualityFlag\WGS84\MOD09A1P_NDVI.A2002001.h10v05.005.2010119013205.QualityFlag.tif,QualityFlag_2002,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2002\001\RMSE\WGS84\MOD09A1P_NDVI.A2002001.h10v05.005.2010119013205.RMSE.tif,RMSE_2002,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2003\DoublePeakRemoved\greenups\MOD09A1P_NDVI.A2003001.h10v05.005.2010128070617.01greenups.tif,GreenUps_2003 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2003\DoublePeakRemoved\browndowns\MOD09A1P_NDVI.A2003001.h10v05.005.2010128070617.02browndowns.tif,BrownDowns_2003 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2003\DoublePeakRemoved\seasonlengths\MOD09A1P_NDVI.A2003001.h10v05.005.2010128070617.03seasonlengths.tif,SeasonLengths_2003 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2003\DoublePeakRemoved\baselevels\MOD09A1P_NDVI.A2003001.h10v05.005.2010128070617.04baselevels.tif,BaseLevels_2003 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2003\DoublePeakRemoved\peakdates\MOD09A1P_NDVI.A2003001.h10v05.005.2010128070617.05peakdates.tif,PeakDates_2003 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2003\DoublePeakRemoved\maxpeakvalues\MOD09A1P_NDVI.A2003001.h10v05.005.2010128070617.06maxpeakvalues.tif,MaxPeakValues_2003 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2003\DoublePeakRemoved\amplitudes\MOD09A1P_NDVI.A2003001.h10v05.005.2010128070617.07amplitudes.tif,Amplitudes_2003 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2003\DoublePeakRemoved\greenuprates\MOD09A1P_NDVI.A2003001.h10v05.005.2010128070617.08greenuprates.tif,GreenUpRates_2003 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2003\DoublePeakRemoved\browndownrates\MOD09A1P_NDVI.A2003001.h10v05.005.2010128070617.09browndownrates.tif,BrownDownRates_2003 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2003\DoublePeakRemoved\largeintegrals\MOD09A1P_NDVI.A2003001.h10v05.005.2010128070617.10largeintegrals.tif,LargeIntegrals_2003 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2003\DoublePeakRemoved\smallintegrals\MOD09A1P_NDVI.A2003001.h10v05.005.2010128070617.11smallintegrals.tif,SmallIntegrals_2003 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2003\001\AnnualMaximumValue\WGS84\MOD09A1P_NDVI.A2003001.h10v05.005.2010128070617.AnnualMaximumValue.tif,AnnualMaxValue_2003,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2003\001\AnnualMeanValue\WGS84\MOD09A1P_NDVI.A2003001.h10v05.005.2010128070617.AnnualMeanValue.tif,AnnualMeanValue_2003,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2003\001\AnnualMinimumValue\WGS84\MOD09A1P_NDVI.A2003001.h10v05.005.2010128070617.AnnualMinimumValue.tif,AnnualMinValue_2003,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2003\001\Landcover\WGS84\MOD09A1P_NDVI.A2003001.h10v05.005.2010128070617.Landcover.tif,Landcover_2003,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2003\001\QualityFlag\WGS84\MOD09A1P_NDVI.A2003001.h10v05.005.2010128070617.QualityFlag.tif,QualityFlag_2003,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2003\001\RMSE\WGS84\MOD09A1P_NDVI.A2003001.h10v05.005.2010128070617.RMSE.tif,RMSE_2003,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2004\DoublePeakRemoved\greenups\MOD09A1P_NDVI.A2004001.h10v05.005.2010174175953.01greenups.tif,GreenUps_2004 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2004\DoublePeakRemoved\browndowns\MOD09A1P_NDVI.A2004001.h10v05.005.2010174175953.02browndowns.tif,BrownDowns_2004 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2004\DoublePeakRemoved\seasonlengths\MOD09A1P_NDVI.A2004001.h10v05.005.2010174175953.03seasonlengths.tif,SeasonLengths_2004 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2004\DoublePeakRemoved\baselevels\MOD09A1P_NDVI.A2004001.h10v05.005.2010174175953.04baselevels.tif,BaseLevels_2004 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2004\DoublePeakRemoved\peakdates\MOD09A1P_NDVI.A2004001.h10v05.005.2010174175953.05peakdates.tif,PeakDates_2004 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2004\DoublePeakRemoved\maxpeakvalues\MOD09A1P_NDVI.A2004001.h10v05.005.2010174175953.06maxpeakvalues.tif,MaxPeakValues_2004 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2004\DoublePeakRemoved\amplitudes\MOD09A1P_NDVI.A2004001.h10v05.005.2010174175953.07amplitudes.tif,Amplitudes_2004 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2004\DoublePeakRemoved\greenuprates\MOD09A1P_NDVI.A2004001.h10v05.005.2010174175953.08greenuprates.tif,GreenUpRates_2004 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2004\DoublePeakRemoved\browndownrates\MOD09A1P_NDVI.A2004001.h10v05.005.2010174175953.09browndownrates.tif,BrownDownRates_2004 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2004\DoublePeakRemoved\largeintegrals\MOD09A1P_NDVI.A2004001.h10v05.005.2010174175953.10largeintegrals.tif,LargeIntegrals_2004 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2004\DoublePeakRemoved\smallintegrals\MOD09A1P_NDVI.A2004001.h10v05.005.2010174175953.11smallintegrals.tif,SmallIntegrals_2004 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2004\001\AnnualMaximumValue\WGS84\MOD09A1P_NDVI.A2004001.h10v05.005.2010174175953.AnnualMaximumValue.tif,AnnualMaxValue_2004,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2004\001\AnnualMeanValue\WGS84\MOD09A1P_NDVI.A2004001.h10v05.005.2010174175953.AnnualMeanValue.tif,AnnualMeanValue_2004,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2004\001\AnnualMinimumValue\WGS84\MOD09A1P_NDVI.A2004001.h10v05.005.2010174175953.AnnualMinimumValue.tif,AnnualMinValue_2004,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2004\001\Landcover\WGS84\MOD09A1P_NDVI.A2004001.h10v05.005.2010174175953.Landcover.tif,Landcover_2004,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2004\001\QualityFlag\WGS84\MOD09A1P_NDVI.A2004001.h10v05.005.2010174175953.QualityFlag.tif,QualityFlag_2004,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2004\001\RMSE\WGS84\MOD09A1P_NDVI.A2004001.h10v05.005.2010174175953.RMSE.tif,RMSE_2004,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2005\DoublePeakRemoved\greenups\MOD09A1P_NDVI.A2005001.h10v05.005.2009298122841.01greenups.tif,GreenUps_2005 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2005\DoublePeakRemoved\browndowns\MOD09A1P_NDVI.A2005001.h10v05.005.2009298122841.02browndowns.tif,BrownDowns_2005 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2005\DoublePeakRemoved\seasonlengths\MOD09A1P_NDVI.A2005001.h10v05.005.2009298122841.03seasonlengths.tif,SeasonLengths_2005 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2005\DoublePeakRemoved\baselevels\MOD09A1P_NDVI.A2005001.h10v05.005.2009298122841.04baselevels.tif,BaseLevels_2005 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2005\DoublePeakRemoved\peakdates\MOD09A1P_NDVI.A2005001.h10v05.005.2009298122841.05peakdates.tif,PeakDates_2005 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2005\DoublePeakRemoved\maxpeakvalues\MOD09A1P_NDVI.A2005001.h10v05.005.2009298122841.06maxpeakvalues.tif,MaxPeakValues_2005 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2005\DoublePeakRemoved\amplitudes\MOD09A1P_NDVI.A2005001.h10v05.005.2009298122841.07amplitudes.tif,Amplitudes_2005 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2005\DoublePeakRemoved\greenuprates\MOD09A1P_NDVI.A2005001.h10v05.005.2009298122841.08greenuprates.tif,GreenUpRates_2005 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2005\DoublePeakRemoved\browndownrates\MOD09A1P_NDVI.A2005001.h10v05.005.2009298122841.09browndownrates.tif,BrownDownRates_2005 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2005\DoublePeakRemoved\largeintegrals\MOD09A1P_NDVI.A2005001.h10v05.005.2009298122841.10largeintegrals.tif,LargeIntegrals_2005 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2005\DoublePeakRemoved\smallintegrals\MOD09A1P_NDVI.A2005001.h10v05.005.2009298122841.11smallintegrals.tif,SmallIntegrals_2005 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2005\001\AnnualMaximumValue\WGS84\MOD09A1P_NDVI.A2005001.h10v05.005.2009298122841.AnnualMaximumValue.tif,AnnualMaxValue_2005,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2005\001\AnnualMeanValue\WGS84\MOD09A1P_NDVI.A2005001.h10v05.005.2009298122841.AnnualMeanValue.tif,AnnualMeanValue_2005,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2005\001\AnnualMinimumValue\WGS84\MOD09A1P_NDVI.A2005001.h10v05.005.2009298122841.AnnualMinimumValue.tif,AnnualMinValue_2005,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2005\001\Landcover\WGS84\MOD09A1P_NDVI.A2005001.h10v05.005.2009298122841.Landcover.tif,Landcover_2005,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2005\001\QualityFlag\WGS84\MOD09A1P_NDVI.A2005001.h10v05.005.2009298122841.QualityFlag.tif,QualityFlag_2005,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2005\001\RMSE\WGS84\MOD09A1P_NDVI.A2005001.h10v05.005.2009298122841.RMSE.tif,RMSE_2005,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2006\DoublePeakRemoved\greenups\MOD09A1P_NDVI.A2006001.h10v05.005.2010195033037.01greenups.tif,GreenUps_2006 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2006\DoublePeakRemoved\browndowns\MOD09A1P_NDVI.A2006001.h10v05.005.2010195033037.02browndowns.tif,BrownDowns_2006 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2006\DoublePeakRemoved\seasonlengths\MOD09A1P_NDVI.A2006001.h10v05.005.2010195033037.03seasonlengths.tif,SeasonLengths_2006 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2006\DoublePeakRemoved\baselevels\MOD09A1P_NDVI.A2006001.h10v05.005.2010195033037.04baselevels.tif,BaseLevels_2006 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2006\DoublePeakRemoved\peakdates\MOD09A1P_NDVI.A2006001.h10v05.005.2010195033037.05peakdates.tif,PeakDates_2006 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2006\DoublePeakRemoved\maxpeakvalues\MOD09A1P_NDVI.A2006001.h10v05.005.2010195033037.06maxpeakvalues.tif,MaxPeakValues_2006 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2006\DoublePeakRemoved\amplitudes\MOD09A1P_NDVI.A2006001.h10v05.005.2010195033037.07amplitudes.tif,Amplitudes_2006 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2006\DoublePeakRemoved\greenuprates\MOD09A1P_NDVI.A2006001.h10v05.005.2010195033037.08greenuprates.tif,GreenUpRates_2006 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2006\DoublePeakRemoved\browndownrates\MOD09A1P_NDVI.A2006001.h10v05.005.2010195033037.09browndownrates.tif,BrownDownRates_2006 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2006\DoublePeakRemoved\largeintegrals\MOD09A1P_NDVI.A2006001.h10v05.005.2010195033037.10largeintegrals.tif,LargeIntegrals_2006 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2006\DoublePeakRemoved\smallintegrals\MOD09A1P_NDVI.A2006001.h10v05.005.2010195033037.11smallintegrals.tif,SmallIntegrals_2006 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2006\001\AnnualMaximumValue\WGS84\MOD09A1P_NDVI.A2006001.h10v05.005.2010195033037.AnnualMaximumValue.tif,AnnualMaxValue_2006,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2006\001\AnnualMeanValue\WGS84\MOD09A1P_NDVI.A2006001.h10v05.005.2010195033037.AnnualMeanValue.tif,AnnualMeanValue_2006,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2006\001\AnnualMinimumValue\WGS84\MOD09A1P_NDVI.A2006001.h10v05.005.2010195033037.AnnualMinimumValue.tif,AnnualMinValue_2006,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2006\001\Landcover\WGS84\MOD09A1P_NDVI.A2006001.h10v05.005.2010195033037.Landcover.tif,Landcover_2006,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2006\001\QualityFlag\WGS84\MOD09A1P_NDVI.A2006001.h10v05.005.2010195033037.QualityFlag.tif,QualityFlag_2006,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2006\001\RMSE\WGS84\MOD09A1P_NDVI.A2006001.h10v05.005.2010195033037.RMSE.tif,RMSE_2006,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2007\DoublePeakRemoved\greenups\MOD09A1P_NDVI.A2007001.h10v05.005.2010011175343.01greenups.tif,GreenUps_2007 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2007\DoublePeakRemoved\browndowns\MOD09A1P_NDVI.A2007001.h10v05.005.2010011175343.02browndowns.tif,BrownDowns_2007 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2007\DoublePeakRemoved\seasonlengths\MOD09A1P_NDVI.A2007001.h10v05.005.2010011175343.03seasonlengths.tif,SeasonLengths_2007 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2007\DoublePeakRemoved\baselevels\MOD09A1P_NDVI.A2007001.h10v05.005.2010011175343.04baselevels.tif,BaseLevels_2007 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2007\DoublePeakRemoved\peakdates\MOD09A1P_NDVI.A2007001.h10v05.005.2010011175343.05peakdates.tif,PeakDates_2007 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2007\DoublePeakRemoved\maxpeakvalues\MOD09A1P_NDVI.A2007001.h10v05.005.2010011175343.06maxpeakvalues.tif,MaxPeakValues_2007 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2007\DoublePeakRemoved\amplitudes\MOD09A1P_NDVI.A2007001.h10v05.005.2010011175343.07amplitudes.tif,Amplitudes_2007 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2007\DoublePeakRemoved\greenuprates\MOD09A1P_NDVI.A2007001.h10v05.005.2010011175343.08greenuprates.tif,GreenUpRates_2007 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2007\DoublePeakRemoved\browndownrates\MOD09A1P_NDVI.A2007001.h10v05.005.2010011175343.09browndownrates.tif,BrownDownRates_2007 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2007\DoublePeakRemoved\largeintegrals\MOD09A1P_NDVI.A2007001.h10v05.005.2010011175343.10largeintegrals.tif,LargeIntegrals_2007 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2007\DoublePeakRemoved\smallintegrals\MOD09A1P_NDVI.A2007001.h10v05.005.2010011175343.11smallintegrals.tif,SmallIntegrals_2007 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2007\001\AnnualMaximumValue\WGS84\MOD09A1P_NDVI.A2007001.h10v05.005.2010011175343.AnnualMaximumValue.tif,AnnualMaxValue_2007,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2007\001\AnnualMeanValue\WGS84\MOD09A1P_NDVI.A2007001.h10v05.005.2010011175343.AnnualMeanValue.tif,AnnualMeanValue_2007,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2007\001\AnnualMinimumValue\WGS84\MOD09A1P_NDVI.A2007001.h10v05.005.2010011175343.AnnualMinimumValue.tif,AnnualMinValue_2007,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2007\001\Landcover\WGS84\MOD09A1P_NDVI.A2007001.h10v05.005.2010011175343.Landcover.tif,Landcover_2007,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2007\001\QualityFlag\WGS84\MOD09A1P_NDVI.A2007001.h10v05.005.2010011175343.QualityFlag.tif,QualityFlag_2007,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2007\001\RMSE\WGS84\MOD09A1P_NDVI.A2007001.h10v05.005.2010011175343.RMSE.tif,RMSE_2007,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2008\DoublePeakRemoved\greenups\MOD09A1P_NDVI.A2008001.h10v05.005.2011047000000.01greenups.tif,GreenUps_2008 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2008\DoublePeakRemoved\browndowns\MOD09A1P_NDVI.A2008001.h10v05.005.2011047000000.02browndowns.tif,BrownDowns_2008 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2008\DoublePeakRemoved\seasonlengths\MOD09A1P_NDVI.A2008001.h10v05.005.2011047000000.03seasonlengths.tif,SeasonLengths_2008 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2008\DoublePeakRemoved\baselevels\MOD09A1P_NDVI.A2008001.h10v05.005.2011047000000.04baselevels.tif,BaseLevels_2008 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2008\DoublePeakRemoved\peakdates\MOD09A1P_NDVI.A2008001.h10v05.005.2011047000000.05peakdates.tif,PeakDates_2008 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2008\DoublePeakRemoved\maxpeakvalues\MOD09A1P_NDVI.A2008001.h10v05.005.2011047000000.06maxpeakvalues.tif,MaxPeakValues_2008 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2008\DoublePeakRemoved\amplitudes\MOD09A1P_NDVI.A2008001.h10v05.005.2011047000000.07amplitudes.tif,Amplitudes_2008 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2008\DoublePeakRemoved\greenuprates\MOD09A1P_NDVI.A2008001.h10v05.005.2011047000000.08greenuprates.tif,GreenUpRates_2008 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2008\DoublePeakRemoved\browndownrates\MOD09A1P_NDVI.A2008001.h10v05.005.2011047000000.09browndownrates.tif,BrownDownRates_2008 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2008\DoublePeakRemoved\largeintegrals\MOD09A1P_NDVI.A2008001.h10v05.005.2011047000000.10largeintegrals.tif,LargeIntegrals_2008 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2008\DoublePeakRemoved\smallintegrals\MOD09A1P_NDVI.A2008001.h10v05.005.2011047000000.11smallintegrals.tif,SmallIntegrals_2008 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2008\001\AnnualMaximumValue\WGS84\MOD09A1P_NDVI.A2008001.h10v05.005.2011047000000.AnnualMaximumValue.tif,AnnualMaxValue_2008,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2008\001\AnnualMeanValue\WGS84\MOD09A1P_NDVI.A2008001.h10v05.005.2011047000000.AnnualMeanValue.tif,AnnualMeanValue_2008,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2008\001\AnnualMinimumValue\WGS84\MOD09A1P_NDVI.A2008001.h10v05.005.2011047000000.AnnualMinimumValue.tif,AnnualMinValue_2008,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2008\001\Landcover\WGS84\MOD09A1P_NDVI.A2008001.h10v05.005.2011047000000.Landcover.tif,Landcover_2008,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2008\001\QualityFlag\WGS84\MOD09A1P_NDVI.A2008001.h10v05.005.2011047000000.QualityFlag.tif,QualityFlag_2008,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2008\001\RMSE\WGS84\MOD09A1P_NDVI.A2008001.h10v05.005.2011047000000.RMSE.tif,RMSE_2008,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2009\DoublePeakRemoved\greenups\MOD09A1P_NDVI.A2009001.h10v05.005.2011043000000.01greenups.tif,GreenUps_2009 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2009\DoublePeakRemoved\browndowns\MOD09A1P_NDVI.A2009001.h10v05.005.2011043000000.02browndowns.tif,BrownDowns_2009 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2009\DoublePeakRemoved\seasonlengths\MOD09A1P_NDVI.A2009001.h10v05.005.2011043000000.03seasonlengths.tif,SeasonLengths_2009 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2009\DoublePeakRemoved\baselevels\MOD09A1P_NDVI.A2009001.h10v05.005.2011043000000.04baselevels.tif,BaseLevels_2009 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2009\DoublePeakRemoved\peakdates\MOD09A1P_NDVI.A2009001.h10v05.005.2011043000000.05peakdates.tif,PeakDates_2009 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2009\DoublePeakRemoved\maxpeakvalues\MOD09A1P_NDVI.A2009001.h10v05.005.2011043000000.06maxpeakvalues.tif,MaxPeakValues_2009 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2009\DoublePeakRemoved\amplitudes\MOD09A1P_NDVI.A2009001.h10v05.005.2011043000000.07amplitudes.tif,Amplitudes_2009 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2009\DoublePeakRemoved\greenuprates\MOD09A1P_NDVI.A2009001.h10v05.005.2011043000000.08greenuprates.tif,GreenUpRates_2009 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2009\DoublePeakRemoved\browndownrates\MOD09A1P_NDVI.A2009001.h10v05.005.2011043000000.09browndownrates.tif,BrownDownRates_2009 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2009\DoublePeakRemoved\largeintegrals\MOD09A1P_NDVI.A2009001.h10v05.005.2011043000000.10largeintegrals.tif,LargeIntegrals_2009 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2009\DoublePeakRemoved\smallintegrals\MOD09A1P_NDVI.A2009001.h10v05.005.2011043000000.11smallintegrals.tif,SmallIntegrals_2009 (Db. Pk. Removed),TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2009\001\AnnualMaximumValue\WGS84\MOD09A1P_NDVI.A2009001.h10v05.005.2011043000000.AnnualMaximumValue.tif,AnnualMaxValue_2009,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2009\001\AnnualMeanValue\WGS84\MOD09A1P_NDVI.A2009001.h10v05.005.2011043000000.AnnualMeanValue.tif,AnnualMeanValue_2009,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2009\001\AnnualMinimumValue\WGS84\MOD09A1P_NDVI.A2009001.h10v05.005.2011043000000.AnnualMinimumValue.tif,AnnualMinValue_2009,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2009\001\Landcover\WGS84\MOD09A1P_NDVI.A2009001.h10v05.005.2011043000000.Landcover.tif,Landcover_2009,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2009\001\QualityFlag\WGS84\MOD09A1P_NDVI.A2009001.h10v05.005.2011043000000.QualityFlag.tif,QualityFlag_2009,TAPR_,MODIS NDVI (460 m.),N
-P:\ExtractedData\NebraskaStudyArea\MOD09A1P_NDVI\2009\001\RMSE\WGS84\MOD09A1P_NDVI.A2009001.h10v05.005.2011043000000.RMSE.tif,RMSE_2009,TAPR_,MODIS NDVI (460 m.),N
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
-,,,,
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\amplitudes1\amplitudes1_2000.tif,amplitudes1_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\amplitudes1\amplitudes1_2001.tif,amplitudes1_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\amplitudes1\amplitudes1_2002.tif,amplitudes1_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\amplitudes1\amplitudes1_2003.tif,amplitudes1_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\amplitudes1\amplitudes1_2004.tif,amplitudes1_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\amplitudes1\amplitudes1_2005.tif,amplitudes1_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\amplitudes1\amplitudes1_2006.tif,amplitudes1_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\amplitudes1\amplitudes1_2007.tif,amplitudes1_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\amplitudes1\amplitudes1_2008.tif,amplitudes1_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\amplitudes1\amplitudes1_2009.tif,amplitudes1_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\amplitudes2\amplitudes2_2000.tif,amplitudes2_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\amplitudes2\amplitudes2_2001.tif,amplitudes2_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\amplitudes2\amplitudes2_2002.tif,amplitudes2_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\amplitudes2\amplitudes2_2003.tif,amplitudes2_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\amplitudes2\amplitudes2_2004.tif,amplitudes2_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\amplitudes2\amplitudes2_2005.tif,amplitudes2_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\amplitudes2\amplitudes2_2006.tif,amplitudes2_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\amplitudes2\amplitudes2_2007.tif,amplitudes2_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\amplitudes2\amplitudes2_2008.tif,amplitudes2_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\amplitudes2\amplitudes2_2009.tif,amplitudes2_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMaximumValue\annualMaximumValue_2000.tif,annualMaximumValue_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMaximumValue\annualMaximumValue_2001.tif,annualMaximumValue_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMaximumValue\annualMaximumValue_2002.tif,annualMaximumValue_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMaximumValue\annualMaximumValue_2003.tif,annualMaximumValue_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMaximumValue\annualMaximumValue_2004.tif,annualMaximumValue_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMaximumValue\annualMaximumValue_2005.tif,annualMaximumValue_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMaximumValue\annualMaximumValue_2006.tif,annualMaximumValue_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMaximumValue\annualMaximumValue_2007.tif,annualMaximumValue_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMaximumValue\annualMaximumValue_2008.tif,annualMaximumValue_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMaximumValue\annualMaximumValue_2009.tif,annualMaximumValue_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMeanValue\annualMeanValue_2000.tif,annualMeanValue_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMeanValue\annualMeanValue_2001.tif,annualMeanValue_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMeanValue\annualMeanValue_2002.tif,annualMeanValue_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMeanValue\annualMeanValue_2003.tif,annualMeanValue_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMeanValue\annualMeanValue_2004.tif,annualMeanValue_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMeanValue\annualMeanValue_2005.tif,annualMeanValue_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMeanValue\annualMeanValue_2006.tif,annualMeanValue_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMeanValue\annualMeanValue_2007.tif,annualMeanValue_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMeanValue\annualMeanValue_2008.tif,annualMeanValue_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMeanValue\annualMeanValue_2009.tif,annualMeanValue_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMinimumValue\annualMinimumValue_2000.tif,annualMinimumValue_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMinimumValue\annualMinimumValue_2001.tif,annualMinimumValue_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMinimumValue\annualMinimumValue_2002.tif,annualMinimumValue_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMinimumValue\annualMinimumValue_2003.tif,annualMinimumValue_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMinimumValue\annualMinimumValue_2004.tif,annualMinimumValue_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMinimumValue\annualMinimumValue_2005.tif,annualMinimumValue_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMinimumValue\annualMinimumValue_2006.tif,annualMinimumValue_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMinimumValue\annualMinimumValue_2007.tif,annualMinimumValue_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMinimumValue\annualMinimumValue_2008.tif,annualMinimumValue_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\annualMinimumValue\annualMinimumValue_2009.tif,annualMinimumValue_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\baselevels1\baselevels1_2000.tif,baselevels1_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\baselevels1\baselevels1_2001.tif,baselevels1_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\baselevels1\baselevels1_2002.tif,baselevels1_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\baselevels1\baselevels1_2003.tif,baselevels1_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\baselevels1\baselevels1_2004.tif,baselevels1_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\baselevels1\baselevels1_2005.tif,baselevels1_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\baselevels1\baselevels1_2006.tif,baselevels1_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\baselevels1\baselevels1_2007.tif,baselevels1_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\baselevels1\baselevels1_2008.tif,baselevels1_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\baselevels1\baselevels1_2009.tif,baselevels1_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\baselevels2\baselevels2_2000.tif,baselevels2_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\baselevels2\baselevels2_2001.tif,baselevels2_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\baselevels2\baselevels2_2002.tif,baselevels2_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\baselevels2\baselevels2_2003.tif,baselevels2_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\baselevels2\baselevels2_2004.tif,baselevels2_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\baselevels2\baselevels2_2005.tif,baselevels2_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\baselevels2\baselevels2_2006.tif,baselevels2_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\baselevels2\baselevels2_2007.tif,baselevels2_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\baselevels2\baselevels2_2008.tif,baselevels2_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\baselevels2\baselevels2_2009.tif,baselevels2_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndownrates1\browndownrates1_2000.tif,browndownrates1_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndownrates1\browndownrates1_2001.tif,browndownrates1_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndownrates1\browndownrates1_2002.tif,browndownrates1_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndownrates1\browndownrates1_2003.tif,browndownrates1_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndownrates1\browndownrates1_2004.tif,browndownrates1_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndownrates1\browndownrates1_2005.tif,browndownrates1_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndownrates1\browndownrates1_2006.tif,browndownrates1_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndownrates1\browndownrates1_2007.tif,browndownrates1_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndownrates1\browndownrates1_2008.tif,browndownrates1_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndownrates1\browndownrates1_2009.tif,browndownrates1_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndownrates1\browndownrates1_2000.tif,browndownrates1_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndownrates1\browndownrates1_2001.tif,browndownrates1_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndownrates1\browndownrates1_2002.tif,browndownrates1_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndownrates1\browndownrates1_2003.tif,browndownrates1_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndownrates1\browndownrates1_2004.tif,browndownrates1_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndownrates1\browndownrates1_2005.tif,browndownrates1_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndownrates1\browndownrates1_2006.tif,browndownrates1_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndownrates1\browndownrates1_2007.tif,browndownrates1_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndownrates1\browndownrates1_2008.tif,browndownrates1_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndownrates1\browndownrates1_2009.tif,browndownrates1_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndowns1\browndowns1_2000.tif,browndowns1_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndowns1\browndowns1_2001.tif,browndowns1_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndowns1\browndowns1_2002.tif,browndowns1_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndowns1\browndowns1_2003.tif,browndowns1_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndowns1\browndowns1_2004.tif,browndowns1_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndowns1\browndowns1_2005.tif,browndowns1_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndowns1\browndowns1_2006.tif,browndowns1_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndowns1\browndowns1_2007.tif,browndowns1_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndowns1\browndowns1_2008.tif,browndowns1_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndowns1\browndowns1_2009.tif,browndowns1_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndowns1\browndowns2_2000.tif,browndowns2_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndowns1\browndowns2_2001.tif,browndowns2_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndowns1\browndowns2_2002.tif,browndowns2_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndowns1\browndowns2_2003.tif,browndowns2_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndowns1\browndowns2_2004.tif,browndowns2_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndowns1\browndowns2_2005.tif,browndowns2_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndowns1\browndowns2_2006.tif,browndowns2_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndowns1\browndowns2_2007.tif,browndowns2_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndowns1\browndowns2_2008.tif,browndowns2_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\browndowns1\browndowns2_2009.tif,browndowns2_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenuprates1\greenuprates1_2000.tif,greenuprates1_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenuprates1\greenuprates1_2001.tif,greenuprates1_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenuprates1\greenuprates1_2002.tif,greenuprates1_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenuprates1\greenuprates1_2003.tif,greenuprates1_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenuprates1\greenuprates1_2004.tif,greenuprates1_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenuprates1\greenuprates1_2005.tif,greenuprates1_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenuprates1\greenuprates1_2006.tif,greenuprates1_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenuprates1\greenuprates1_2007.tif,greenuprates1_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenuprates1\greenuprates1_2008.tif,greenuprates1_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenuprates1\greenuprates1_2009.tif,greenuprates1_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenuprates2\greenuprates2_2000.tif,greenuprates2_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenuprates2\greenuprates2_2001.tif,greenuprates2_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenuprates2\greenuprates2_2002.tif,greenuprates2_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenuprates2\greenuprates2_2003.tif,greenuprates2_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenuprates2\greenuprates2_2004.tif,greenuprates2_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenuprates2\greenuprates2_2005.tif,greenuprates2_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenuprates2\greenuprates2_2006.tif,greenuprates2_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenuprates2\greenuprates2_2007.tif,greenuprates2_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenuprates2\greenuprates2_2008.tif,greenuprates2_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenuprates2\greenuprates2_2009.tif,greenuprates2_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenups1\greenups1_2000.tif,greenups1_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenups1\greenups1_2001.tif,greenups1_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenups1\greenups1_2002.tif,greenups1_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenups1\greenups1_2003.tif,greenups1_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenups1\greenups1_2004.tif,greenups1_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenups1\greenups1_2005.tif,greenups1_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenups1\greenups1_2006.tif,greenups1_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenups1\greenups1_2007.tif,greenups1_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenups1\greenups1_2008.tif,greenups1_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenups1\greenups1_2009.tif,greenups1_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenups2\greenups2_2000.tif,greenups2_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenups2\greenups2_2001.tif,greenups2_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenups2\greenups2_2002.tif,greenups2_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenups2\greenups2_2003.tif,greenups2_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenups2\greenups2_2004.tif,greenups2_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenups2\greenups2_2005.tif,greenups2_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenups2\greenups2_2006.tif,greenups2_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenups2\greenups2_2007.tif,greenups2_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenups2\greenups2_2008.tif,greenups2_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\greenups2\greenups2_2009.tif,greenups2_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\landcover\landcover_2000.tif,landcover_2000,MODIS Phenology,NDVI (230 m),Y
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\landcover\landcover_2001.tif,landcover_2001,MODIS Phenology,NDVI (230 m),Y
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\landcover\landcover_2002.tif,landcover_2002,MODIS Phenology,NDVI (230 m),Y
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\landcover\landcover_2003.tif,landcover_2003,MODIS Phenology,NDVI (230 m),Y
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\landcover\landcover_2004.tif,landcover_2004,MODIS Phenology,NDVI (230 m),Y
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\landcover\landcover_2005.tif,landcover_2005,MODIS Phenology,NDVI (230 m),Y
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\landcover\landcover_2006.tif,landcover_2006,MODIS Phenology,NDVI (230 m),Y
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\landcover\landcover_2007.tif,landcover_2007,MODIS Phenology,NDVI (230 m),Y
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\landcover\landcover_2008.tif,landcover_2008,MODIS Phenology,NDVI (230 m),Y
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\landcover\landcover_2009.tif,landcover_2009,MODIS Phenology,NDVI (230 m),Y
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\largeintegrals1\largeintegrals1_2000.tif,largeintegrals1_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\largeintegrals1\largeintegrals1_2001.tif,largeintegrals1_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\largeintegrals1\largeintegrals1_2002.tif,largeintegrals1_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\largeintegrals1\largeintegrals1_2003.tif,largeintegrals1_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\largeintegrals1\largeintegrals1_2004.tif,largeintegrals1_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\largeintegrals1\largeintegrals1_2005.tif,largeintegrals1_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\largeintegrals1\largeintegrals1_2006.tif,largeintegrals1_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\largeintegrals1\largeintegrals1_2007.tif,largeintegrals1_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\largeintegrals1\largeintegrals1_2008.tif,largeintegrals1_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\largeintegrals1\largeintegrals1_2009.tif,largeintegrals1_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\largeintegrals2\largeintegrals2_2000.tif,largeintegrals2_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\largeintegrals2\largeintegrals2_2001.tif,largeintegrals2_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\largeintegrals2\largeintegrals2_2002.tif,largeintegrals2_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\largeintegrals2\largeintegrals2_2003.tif,largeintegrals2_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\largeintegrals2\largeintegrals2_2004.tif,largeintegrals2_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\largeintegrals2\largeintegrals2_2005.tif,largeintegrals2_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\largeintegrals2\largeintegrals2_2006.tif,largeintegrals2_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\largeintegrals2\largeintegrals2_2007.tif,largeintegrals2_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\largeintegrals2\largeintegrals2_2008.tif,largeintegrals2_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\largeintegrals2\largeintegrals2_2009.tif,largeintegrals2_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\maxpeakvalues1\maxpeakvalues1_2000.tif,maxpeakvalues1_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\maxpeakvalues1\maxpeakvalues1_2001.tif,maxpeakvalues1_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\maxpeakvalues1\maxpeakvalues1_2002.tif,maxpeakvalues1_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\maxpeakvalues1\maxpeakvalues1_2003.tif,maxpeakvalues1_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\maxpeakvalues1\maxpeakvalues1_2004.tif,maxpeakvalues1_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\maxpeakvalues1\maxpeakvalues1_2005.tif,maxpeakvalues1_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\maxpeakvalues1\maxpeakvalues1_2006.tif,maxpeakvalues1_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\maxpeakvalues1\maxpeakvalues1_2007.tif,maxpeakvalues1_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\maxpeakvalues1\maxpeakvalues1_2008.tif,maxpeakvalues1_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\maxpeakvalues1\maxpeakvalues1_2009.tif,maxpeakvalues1_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\maxpeakvalues2\maxpeakvalues2_2000.tif,maxpeakvalues2_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\maxpeakvalues2\maxpeakvalues2_2001.tif,maxpeakvalues2_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\maxpeakvalues2\maxpeakvalues2_2002.tif,maxpeakvalues2_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\maxpeakvalues2\maxpeakvalues2_2003.tif,maxpeakvalues2_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\maxpeakvalues2\maxpeakvalues2_2004.tif,maxpeakvalues2_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\maxpeakvalues2\maxpeakvalues2_2005.tif,maxpeakvalues2_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\maxpeakvalues2\maxpeakvalues2_2006.tif,maxpeakvalues2_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\maxpeakvalues2\maxpeakvalues2_2007.tif,maxpeakvalues2_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\maxpeakvalues2\maxpeakvalues2_2008.tif,maxpeakvalues2_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\maxpeakvalues2\maxpeakvalues2_2009.tif,maxpeakvalues2_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\peakdates1\peakdates1_2000.tif,peakdates1_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\peakdates1\peakdates1_2001.tif,peakdates1_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\peakdates1\peakdates1_2002.tif,peakdates1_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\peakdates1\peakdates1_2003.tif,peakdates1_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\peakdates1\peakdates1_2004.tif,peakdates1_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\peakdates1\peakdates1_2005.tif,peakdates1_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\peakdates1\peakdates1_2006.tif,peakdates1_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\peakdates1\peakdates1_2007.tif,peakdates1_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\peakdates1\peakdates1_2008.tif,peakdates1_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\peakdates1\peakdates1_2009.tif,peakdates1_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\peakdates2\peakdates2_2000.tif,peakdates2_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\peakdates2\peakdates2_2001.tif,peakdates2_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\peakdates2\peakdates2_2002.tif,peakdates2_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\peakdates2\peakdates2_2003.tif,peakdates2_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\peakdates2\peakdates2_2004.tif,peakdates2_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\peakdates2\peakdates2_2005.tif,peakdates2_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\peakdates2\peakdates2_2006.tif,peakdates2_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\peakdates2\peakdates2_2007.tif,peakdates2_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\peakdates2\peakdates2_2008.tif,peakdates2_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\peakdates2\peakdates2_2009.tif,peakdates2_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\qualityFlag\qualityFlag_2000.tif,qualityFlag_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\qualityFlag\qualityFlag_2001.tif,qualityFlag_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\qualityFlag\qualityFlag_2002.tif,qualityFlag_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\qualityFlag\qualityFlag_2003.tif,qualityFlag_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\qualityFlag\qualityFlag_2004.tif,qualityFlag_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\qualityFlag\qualityFlag_2005.tif,qualityFlag_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\qualityFlag\qualityFlag_2006.tif,qualityFlag_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\qualityFlag\qualityFlag_2007.tif,qualityFlag_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\qualityFlag\qualityFlag_2008.tif,qualityFlag_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\qualityFlag\qualityFlag_2009.tif,qualityFlag_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\RMSE\RMSE_2000.tif,RMSE_2000.tif,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\RMSE\RMSE_2001.tif,RMSE_2001.tif,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\RMSE\RMSE_2002.tif,RMSE_2002.tif,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\RMSE\RMSE_2003.tif,RMSE_2003.tif,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\RMSE\RMSE_2004.tif,RMSE_2004.tif,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\RMSE\RMSE_2005.tif,RMSE_2005.tif,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\RMSE\RMSE_2006.tif,RMSE_2006.tif,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\RMSE\RMSE_2007.tif,RMSE_2007.tif,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\RMSE\RMSE_2008.tif,RMSE_2008.tif,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\RMSE\RMSE_2009.tif,RMSE_2009.tif,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\seasonlengths1\seasonlengths1_2000.tif,seasonlengths1_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\seasonlengths1\seasonlengths1_2001.tif,seasonlengths1_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\seasonlengths1\seasonlengths1_2002.tif,seasonlengths1_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\seasonlengths1\seasonlengths1_2003.tif,seasonlengths1_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\seasonlengths1\seasonlengths1_2004.tif,seasonlengths1_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\seasonlengths1\seasonlengths1_2005.tif,seasonlengths1_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\seasonlengths1\seasonlengths1_2006.tif,seasonlengths1_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\seasonlengths1\seasonlengths1_2007.tif,seasonlengths1_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\seasonlengths1\seasonlengths1_2008.tif,seasonlengths1_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\seasonlengths1\seasonlengths1_2009.tif,seasonlengths1_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\seasonlengths2\seasonlengths2_2000.tif,seasonlengths2_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\seasonlengths2\seasonlengths2_2001.tif,seasonlengths2_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\seasonlengths2\seasonlengths2_2002.tif,seasonlengths2_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\seasonlengths2\seasonlengths2_2003.tif,seasonlengths2_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\seasonlengths2\seasonlengths2_2004.tif,seasonlengths2_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\seasonlengths2\seasonlengths2_2005.tif,seasonlengths2_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\seasonlengths2\seasonlengths2_2006.tif,seasonlengths2_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\seasonlengths2\seasonlengths2_2006.tif,seasonlengths2_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\seasonlengths2\seasonlengths2_2007.tif,seasonlengths2_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\seasonlengths2\seasonlengths2_2008.tif,seasonlengths2_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\seasonlengths2\seasonlengths2_2009.tif,seasonlengths2_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\smallintegrals1\smallintegrals1_2000.tif,smallintegrals1_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\smallintegrals1\smallintegrals1_2001.tif,smallintegrals1_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\smallintegrals1\smallintegrals1_2002.tif,smallintegrals1_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\smallintegrals1\smallintegrals1_2003.tif,smallintegrals1_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\smallintegrals1\smallintegrals1_2004.tif,smallintegrals1_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\smallintegrals1\smallintegrals1_2005.tif,smallintegrals1_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\smallintegrals1\smallintegrals1_2006.tif,smallintegrals1_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\smallintegrals1\smallintegrals1_2007.tif,smallintegrals1_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\smallintegrals1\smallintegrals1_2008.tif,smallintegrals1_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\smallintegrals1\smallintegrals1_2009.tif,smallintegrals1_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\smallintegrals2\smallintegrals2_2000.tif,smallintegrals2_2000,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\smallintegrals2\smallintegrals2_2001.tif,smallintegrals2_2001,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\smallintegrals2\smallintegrals2_2002.tif,smallintegrals2_2002,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\smallintegrals2\smallintegrals2_2003.tif,smallintegrals2_2003,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\smallintegrals2\smallintegrals2_2004.tif,smallintegrals2_2004,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\smallintegrals2\smallintegrals2_2005.tif,smallintegrals2_2005,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\smallintegrals2\smallintegrals2_2006.tif,smallintegrals2_2006,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\smallintegrals2\smallintegrals2_2007.tif,smallintegrals2_2007,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\smallintegrals2\smallintegrals2_2008.tif,smallintegrals2_2008,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\smallintegrals2\smallintegrals2_2009.tif,smallintegrals2_2009,MODIS Phenology,NDVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\amplitudes1\amplitudes1_2000.tif,amplitudes1_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\amplitudes1\amplitudes1_2001.tif,amplitudes1_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\amplitudes1\amplitudes1_2002.tif,amplitudes1_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\amplitudes1\amplitudes1_2003.tif,amplitudes1_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\amplitudes1\amplitudes1_2004.tif,amplitudes1_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\amplitudes1\amplitudes1_2005.tif,amplitudes1_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\amplitudes1\amplitudes1_2006.tif,amplitudes1_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\amplitudes1\amplitudes1_2007.tif,amplitudes1_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\amplitudes1\amplitudes1_2008.tif,amplitudes1_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\amplitudes1\amplitudes1_2009.tif,amplitudes1_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\amplitudes2\amplitudes2_2000.tif,amplitudes2_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\amplitudes2\amplitudes2_2001.tif,amplitudes2_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\amplitudes2\amplitudes2_2002.tif,amplitudes2_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\amplitudes2\amplitudes2_2003.tif,amplitudes2_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\amplitudes2\amplitudes2_2004.tif,amplitudes2_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\amplitudes2\amplitudes2_2005.tif,amplitudes2_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\amplitudes2\amplitudes2_2006.tif,amplitudes2_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\amplitudes2\amplitudes2_2007.tif,amplitudes2_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\amplitudes2\amplitudes2_2008.tif,amplitudes2_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\amplitudes2\amplitudes2_2009.tif,amplitudes2_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMaximumValue\annualMaximumValue_2000.tif,annualMaximumValue_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMaximumValue\annualMaximumValue_2001.tif,annualMaximumValue_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMaximumValue\annualMaximumValue_2002.tif,annualMaximumValue_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMaximumValue\annualMaximumValue_2003.tif,annualMaximumValue_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMaximumValue\annualMaximumValue_2004.tif,annualMaximumValue_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMaximumValue\annualMaximumValue_2005.tif,annualMaximumValue_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMaximumValue\annualMaximumValue_2006.tif,annualMaximumValue_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMaximumValue\annualMaximumValue_2007.tif,annualMaximumValue_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMaximumValue\annualMaximumValue_2008.tif,annualMaximumValue_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMaximumValue\annualMaximumValue_2009.tif,annualMaximumValue_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMeanValue\annualMeanValue_2000.tif,annualMeanValue_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMeanValue\annualMeanValue_2001.tif,annualMeanValue_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMeanValue\annualMeanValue_2002.tif,annualMeanValue_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMeanValue\annualMeanValue_2003.tif,annualMeanValue_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMeanValue\annualMeanValue_2004.tif,annualMeanValue_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMeanValue\annualMeanValue_2005.tif,annualMeanValue_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMeanValue\annualMeanValue_2006.tif,annualMeanValue_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMeanValue\annualMeanValue_2007.tif,annualMeanValue_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMeanValue\annualMeanValue_2008.tif,annualMeanValue_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMeanValue\annualMeanValue_2009.tif,annualMeanValue_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMinimumValue\annualMinimumValue_2000.tif,annualMinimumValue_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMinimumValue\annualMinimumValue_2001.tif,annualMinimumValue_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMinimumValue\annualMinimumValue_2002.tif,annualMinimumValue_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMinimumValue\annualMinimumValue_2003.tif,annualMinimumValue_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMinimumValue\annualMinimumValue_2004.tif,annualMinimumValue_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMinimumValue\annualMinimumValue_2005.tif,annualMinimumValue_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMinimumValue\annualMinimumValue_2006.tif,annualMinimumValue_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMinimumValue\annualMinimumValue_2007.tif,annualMinimumValue_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMinimumValue\annualMinimumValue_2008.tif,annualMinimumValue_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\annualMinimumValue\annualMinimumValue_2009.tif,annualMinimumValue_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\baselevels1\baselevels1_2000.tif,baselevels1_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\baselevels1\baselevels1_2001.tif,baselevels1_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\baselevels1\baselevels1_2002.tif,baselevels1_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\baselevels1\baselevels1_2003.tif,baselevels1_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\baselevels1\baselevels1_2004.tif,baselevels1_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\baselevels1\baselevels1_2005.tif,baselevels1_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\baselevels1\baselevels1_2006.tif,baselevels1_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\baselevels1\baselevels1_2007.tif,baselevels1_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\baselevels1\baselevels1_2008.tif,baselevels1_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\baselevels1\baselevels1_2009.tif,baselevels1_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\baselevels2\baselevels2_2000.tif,baselevels2_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\baselevels2\baselevels2_2001.tif,baselevels2_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\baselevels2\baselevels2_2002.tif,baselevels2_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\baselevels2\baselevels2_2003.tif,baselevels2_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\baselevels2\baselevels2_2004.tif,baselevels2_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\baselevels2\baselevels2_2005.tif,baselevels2_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\baselevels2\baselevels2_2006.tif,baselevels2_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\baselevels2\baselevels2_2007.tif,baselevels2_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\baselevels2\baselevels2_2008.tif,baselevels2_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\baselevels2\baselevels2_2009.tif,baselevels2_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndownrates1\browndownrates1_2000.tif,browndownrates1_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndownrates1\browndownrates1_2001.tif,browndownrates1_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndownrates1\browndownrates1_2002.tif,browndownrates1_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndownrates1\browndownrates1_2003.tif,browndownrates1_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndownrates1\browndownrates1_2004.tif,browndownrates1_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndownrates1\browndownrates1_2005.tif,browndownrates1_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndownrates1\browndownrates1_2006.tif,browndownrates1_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndownrates1\browndownrates1_2007.tif,browndownrates1_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndownrates1\browndownrates1_2008.tif,browndownrates1_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndownrates1\browndownrates1_2009.tif,browndownrates1_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndownrates1\browndownrates1_2000.tif,browndownrates1_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndownrates1\browndownrates1_2001.tif,browndownrates1_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndownrates1\browndownrates1_2002.tif,browndownrates1_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndownrates1\browndownrates1_2003.tif,browndownrates1_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndownrates1\browndownrates1_2004.tif,browndownrates1_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndownrates1\browndownrates1_2005.tif,browndownrates1_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndownrates1\browndownrates1_2006.tif,browndownrates1_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndownrates1\browndownrates1_2007.tif,browndownrates1_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndownrates1\browndownrates1_2008.tif,browndownrates1_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndownrates1\browndownrates1_2009.tif,browndownrates1_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndowns1\browndowns1_2000.tif,browndowns1_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndowns1\browndowns1_2001.tif,browndowns1_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndowns1\browndowns1_2002.tif,browndowns1_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndowns1\browndowns1_2003.tif,browndowns1_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndowns1\browndowns1_2004.tif,browndowns1_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndowns1\browndowns1_2005.tif,browndowns1_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndowns1\browndowns1_2006.tif,browndowns1_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndowns1\browndowns1_2007.tif,browndowns1_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndowns1\browndowns1_2008.tif,browndowns1_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndowns1\browndowns1_2009.tif,browndowns1_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndowns1\browndowns2_2000.tif,browndowns2_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndowns1\browndowns2_2001.tif,browndowns2_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndowns1\browndowns2_2002.tif,browndowns2_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndowns1\browndowns2_2003.tif,browndowns2_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndowns1\browndowns2_2004.tif,browndowns2_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndowns1\browndowns2_2005.tif,browndowns2_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndowns1\browndowns2_2006.tif,browndowns2_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndowns1\browndowns2_2007.tif,browndowns2_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndowns1\browndowns2_2008.tif,browndowns2_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\browndowns1\browndowns2_2009.tif,browndowns2_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenuprates1\greenuprates1_2000.tif,greenuprates1_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenuprates1\greenuprates1_2001.tif,greenuprates1_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenuprates1\greenuprates1_2002.tif,greenuprates1_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenuprates1\greenuprates1_2003.tif,greenuprates1_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenuprates1\greenuprates1_2004.tif,greenuprates1_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenuprates1\greenuprates1_2005.tif,greenuprates1_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenuprates1\greenuprates1_2006.tif,greenuprates1_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenuprates1\greenuprates1_2007.tif,greenuprates1_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenuprates1\greenuprates1_2008.tif,greenuprates1_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenuprates1\greenuprates1_2009.tif,greenuprates1_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenuprates2\greenuprates2_2000.tif,greenuprates2_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenuprates2\greenuprates2_2001.tif,greenuprates2_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenuprates2\greenuprates2_2002.tif,greenuprates2_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenuprates2\greenuprates2_2003.tif,greenuprates2_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenuprates2\greenuprates2_2004.tif,greenuprates2_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenuprates2\greenuprates2_2005.tif,greenuprates2_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenuprates2\greenuprates2_2006.tif,greenuprates2_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenuprates2\greenuprates2_2007.tif,greenuprates2_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenuprates2\greenuprates2_2008.tif,greenuprates2_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenuprates2\greenuprates2_2009.tif,greenuprates2_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenups1\greenups1_2000.tif,greenups1_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenups1\greenups1_2001.tif,greenups1_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenups1\greenups1_2002.tif,greenups1_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenups1\greenups1_2003.tif,greenups1_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenups1\greenups1_2004.tif,greenups1_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenups1\greenups1_2005.tif,greenups1_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenups1\greenups1_2006.tif,greenups1_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenups1\greenups1_2007.tif,greenups1_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenups1\greenups1_2008.tif,greenups1_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenups1\greenups1_2009.tif,greenups1_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenups2\greenups2_2000.tif,greenups2_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenups2\greenups2_2001.tif,greenups2_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenups2\greenups2_2002.tif,greenups2_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenups2\greenups2_2003.tif,greenups2_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenups2\greenups2_2004.tif,greenups2_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenups2\greenups2_2005.tif,greenups2_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenups2\greenups2_2006.tif,greenups2_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenups2\greenups2_2007.tif,greenups2_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenups2\greenups2_2008.tif,greenups2_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\greenups2\greenups2_2009.tif,greenups2_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\landcover\landcover_2000.tif,landcover_2000,MODIS Phenology,EVI (230 m),Y
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\landcover\landcover_2001.tif,landcover_2001,MODIS Phenology,EVI (230 m),Y
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\landcover\landcover_2002.tif,landcover_2002,MODIS Phenology,EVI (230 m),Y
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\landcover\landcover_2003.tif,landcover_2003,MODIS Phenology,EVI (230 m),Y
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\landcover\landcover_2004.tif,landcover_2004,MODIS Phenology,EVI (230 m),Y
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\landcover\landcover_2005.tif,landcover_2005,MODIS Phenology,EVI (230 m),Y
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\landcover\landcover_2006.tif,landcover_2006,MODIS Phenology,EVI (230 m),Y
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\landcover\landcover_2007.tif,landcover_2007,MODIS Phenology,EVI (230 m),Y
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\landcover\landcover_2008.tif,landcover_2008,MODIS Phenology,EVI (230 m),Y
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\landcover\landcover_2009.tif,landcover_2009,MODIS Phenology,EVI (230 m),Y
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\largeintegrals1\largeintegrals1_2000.tif,largeintegrals1_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\largeintegrals1\largeintegrals1_2001.tif,largeintegrals1_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\largeintegrals1\largeintegrals1_2002.tif,largeintegrals1_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\largeintegrals1\largeintegrals1_2003.tif,largeintegrals1_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\largeintegrals1\largeintegrals1_2004.tif,largeintegrals1_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\largeintegrals1\largeintegrals1_2005.tif,largeintegrals1_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\largeintegrals1\largeintegrals1_2006.tif,largeintegrals1_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\largeintegrals1\largeintegrals1_2007.tif,largeintegrals1_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\largeintegrals1\largeintegrals1_2008.tif,largeintegrals1_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\largeintegrals1\largeintegrals1_2009.tif,largeintegrals1_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\largeintegrals2\largeintegrals2_2000.tif,largeintegrals2_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\largeintegrals2\largeintegrals2_2001.tif,largeintegrals2_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\largeintegrals2\largeintegrals2_2002.tif,largeintegrals2_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\largeintegrals2\largeintegrals2_2003.tif,largeintegrals2_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\largeintegrals2\largeintegrals2_2004.tif,largeintegrals2_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\largeintegrals2\largeintegrals2_2005.tif,largeintegrals2_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\largeintegrals2\largeintegrals2_2006.tif,largeintegrals2_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\largeintegrals2\largeintegrals2_2007.tif,largeintegrals2_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\largeintegrals2\largeintegrals2_2008.tif,largeintegrals2_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\largeintegrals2\largeintegrals2_2009.tif,largeintegrals2_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\maxpeakvalues1\maxpeakvalues1_2000.tif,maxpeakvalues1_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\maxpeakvalues1\maxpeakvalues1_2001.tif,maxpeakvalues1_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\maxpeakvalues1\maxpeakvalues1_2002.tif,maxpeakvalues1_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\maxpeakvalues1\maxpeakvalues1_2003.tif,maxpeakvalues1_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\maxpeakvalues1\maxpeakvalues1_2004.tif,maxpeakvalues1_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\maxpeakvalues1\maxpeakvalues1_2005.tif,maxpeakvalues1_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\maxpeakvalues1\maxpeakvalues1_2006.tif,maxpeakvalues1_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\maxpeakvalues1\maxpeakvalues1_2007.tif,maxpeakvalues1_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\maxpeakvalues1\maxpeakvalues1_2008.tif,maxpeakvalues1_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\maxpeakvalues1\maxpeakvalues1_2009.tif,maxpeakvalues1_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\maxpeakvalues2\maxpeakvalues2_2000.tif,maxpeakvalues2_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\maxpeakvalues2\maxpeakvalues2_2001.tif,maxpeakvalues2_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\maxpeakvalues2\maxpeakvalues2_2002.tif,maxpeakvalues2_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\maxpeakvalues2\maxpeakvalues2_2003.tif,maxpeakvalues2_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\maxpeakvalues2\maxpeakvalues2_2004.tif,maxpeakvalues2_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\maxpeakvalues2\maxpeakvalues2_2005.tif,maxpeakvalues2_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\maxpeakvalues2\maxpeakvalues2_2006.tif,maxpeakvalues2_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\maxpeakvalues2\maxpeakvalues2_2007.tif,maxpeakvalues2_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\maxpeakvalues2\maxpeakvalues2_2008.tif,maxpeakvalues2_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\maxpeakvalues2\maxpeakvalues2_2009.tif,maxpeakvalues2_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\peakdates1\peakdates1_2000.tif,peakdates1_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\peakdates1\peakdates1_2001.tif,peakdates1_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\peakdates1\peakdates1_2002.tif,peakdates1_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\peakdates1\peakdates1_2003.tif,peakdates1_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\peakdates1\peakdates1_2004.tif,peakdates1_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\peakdates1\peakdates1_2005.tif,peakdates1_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\peakdates1\peakdates1_2006.tif,peakdates1_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\peakdates1\peakdates1_2007.tif,peakdates1_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\peakdates1\peakdates1_2008.tif,peakdates1_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\peakdates1\peakdates1_2009.tif,peakdates1_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\peakdates2\peakdates2_2000.tif,peakdates2_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\peakdates2\peakdates2_2001.tif,peakdates2_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\peakdates2\peakdates2_2002.tif,peakdates2_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\peakdates2\peakdates2_2003.tif,peakdates2_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\peakdates2\peakdates2_2004.tif,peakdates2_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\peakdates2\peakdates2_2005.tif,peakdates2_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\peakdates2\peakdates2_2006.tif,peakdates2_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\peakdates2\peakdates2_2007.tif,peakdates2_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\peakdates2\peakdates2_2008.tif,peakdates2_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\peakdates2\peakdates2_2009.tif,peakdates2_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\qualityFlag\qualityFlag_2000.tif,qualityFlag_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\qualityFlag\qualityFlag_2001.tif,qualityFlag_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\qualityFlag\qualityFlag_2002.tif,qualityFlag_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\qualityFlag\qualityFlag_2003.tif,qualityFlag_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\qualityFlag\qualityFlag_2004.tif,qualityFlag_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\qualityFlag\qualityFlag_2005.tif,qualityFlag_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\qualityFlag\qualityFlag_2006.tif,qualityFlag_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\qualityFlag\qualityFlag_2007.tif,qualityFlag_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\qualityFlag\qualityFlag_2008.tif,qualityFlag_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\qualityFlag\qualityFlag_2009.tif,qualityFlag_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\RMSE\RMSE_2000.tif,RMSE_2000.tif,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\RMSE\RMSE_2001.tif,RMSE_2001.tif,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\RMSE\RMSE_2002.tif,RMSE_2002.tif,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\RMSE\RMSE_2003.tif,RMSE_2003.tif,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\RMSE\RMSE_2004.tif,RMSE_2004.tif,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\RMSE\RMSE_2005.tif,RMSE_2005.tif,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\RMSE\RMSE_2006.tif,RMSE_2006.tif,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\RMSE\RMSE_2007.tif,RMSE_2007.tif,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\RMSE\RMSE_2008.tif,RMSE_2008.tif,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\RMSE\RMSE_2009.tif,RMSE_2009.tif,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\seasonlengths1\seasonlengths1_2000.tif,seasonlengths1_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\seasonlengths1\seasonlengths1_2001.tif,seasonlengths1_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\seasonlengths1\seasonlengths1_2002.tif,seasonlengths1_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\seasonlengths1\seasonlengths1_2003.tif,seasonlengths1_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\seasonlengths1\seasonlengths1_2004.tif,seasonlengths1_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\seasonlengths1\seasonlengths1_2005.tif,seasonlengths1_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\seasonlengths1\seasonlengths1_2006.tif,seasonlengths1_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\seasonlengths1\seasonlengths1_2007.tif,seasonlengths1_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\seasonlengths1\seasonlengths1_2008.tif,seasonlengths1_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\seasonlengths1\seasonlengths1_2009.tif,seasonlengths1_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\seasonlengths2\seasonlengths2_2000.tif,seasonlengths2_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\seasonlengths2\seasonlengths2_2001.tif,seasonlengths2_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\seasonlengths2\seasonlengths2_2002.tif,seasonlengths2_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\seasonlengths2\seasonlengths2_2003.tif,seasonlengths2_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\seasonlengths2\seasonlengths2_2004.tif,seasonlengths2_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\seasonlengths2\seasonlengths2_2005.tif,seasonlengths2_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\seasonlengths2\seasonlengths2_2006.tif,seasonlengths2_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\seasonlengths2\seasonlengths2_2006.tif,seasonlengths2_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\seasonlengths2\seasonlengths2_2007.tif,seasonlengths2_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\seasonlengths2\seasonlengths2_2008.tif,seasonlengths2_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\seasonlengths2\seasonlengths2_2009.tif,seasonlengths2_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals1\smallintegrals1_2000.tif,smallintegrals1_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals1\smallintegrals1_2001.tif,smallintegrals1_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals1\smallintegrals1_2002.tif,smallintegrals1_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals1\smallintegrals1_2003.tif,smallintegrals1_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals1\smallintegrals1_2004.tif,smallintegrals1_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals1\smallintegrals1_2005.tif,smallintegrals1_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals1\smallintegrals1_2006.tif,smallintegrals1_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals1\smallintegrals1_2007.tif,smallintegrals1_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals1\smallintegrals1_2008.tif,smallintegrals1_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals1\smallintegrals1_2009.tif,smallintegrals1_2009,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals2\smallintegrals2_2000.tif,smallintegrals2_2000,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals2\smallintegrals2_2001.tif,smallintegrals2_2001,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals2\smallintegrals2_2002.tif,smallintegrals2_2002,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals2\smallintegrals2_2003.tif,smallintegrals2_2003,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals2\smallintegrals2_2004.tif,smallintegrals2_2004,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals2\smallintegrals2_2005.tif,smallintegrals2_2005,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals2\smallintegrals2_2006.tif,smallintegrals2_2006,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals2\smallintegrals2_2007.tif,smallintegrals2_2007,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals2\smallintegrals2_2008.tif,smallintegrals2_2008,MODIS Phenology,EVI (230 m),N
+P:\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals2\smallintegrals2_2009.tif,smallintegrals2_2009,MODIS Phenology,EVI (230 m),N
