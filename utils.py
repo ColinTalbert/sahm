@@ -12,7 +12,6 @@ import csv
 import time
 import tempfile
 import subprocess
-import shutil
 
 from PyQt4 import QtCore, QtGui
 
