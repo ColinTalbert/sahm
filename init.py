@@ -22,7 +22,7 @@ from SelectPredictorsLayers import SelectListDialog
 #from maxent_module import MAXENTRunner
 import utils
 
-#import packages.sahm.pySAHM.Utilites
+
 
 #import our python SAHM Processing files
 import packages.sahm.pySAHM.FieldDataQuery as FDQ
@@ -719,11 +719,11 @@ class MDSBuilder(Module):
     regions within a study area polygon, or a region determined by the known bias present in the field data).
     Specifying a background probability surface raster allows a user to control where random points will be
     scattered within the extent of the study area. The raster layer specified by a user should have the same
-    projection and extent as the template layer and contain values ranging from 0 to 1. These values represent
+    projection and extent as the template layer and contain values ranging from 0 to 100. These values represent
     the probability that a randomly generated point will be retained should it fall within a particular cell.
     That is, randomly generated points will not be generated in any part of the probability grid with a value
-    of "0," while all points falling in an area with a value of "1" will be retained. A point falling in an
-    area with a value of "0.5" will be kept as a background point 50% of the time.
+    of "0" while all points falling in an area with a value of "100" will be retained. A point falling in an
+    area with a value of "50" will be kept as a background point 50% of the time.
     
     4. Field Data: The field data input corresponds to a .csv file containing presence/absence points or count
     data recorded across a landscape for the phenomenon being modeled (e.g., plant sightings, evidence of
@@ -741,15 +741,25 @@ class MDSBuilder(Module):
     _output_ports = expand_ports([('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)')])
 
     def compute(self):
-        port_map = {'RastersWithPARCInfoCSV': ('inputsCSV', None, True),
-                    'fieldData': ('fieldData', None, True),
+        port_map = {'fieldData': ('fieldData', None, True),
                     'backgroundPointCount': ('pointcount', None, False),
                     'backgroundProbSurf': ('probsurf', None, False),}
         
         MDSParams = utils.map_ports(self, port_map)            
         MDSParams['outputMDS'] = utils.mknextfile(prefix='MergedDataset_', suffix='.csv')
         
-        inputsCSV = utils.path_port(self, 'RastersWithPARCInfoCSV')
+        #allow multiple CSV of inputs to be provided.  
+        #if more than one then combine into a single CSV before sending to MDSBuilder
+        inputs_csvs = self.forceGetInputListFromPort('RastersWithPARCInfoCSV')
+        if len(inputs_csvs) > 1:
+            inputs_csv = utils.mknextfile(prefix='CombinedPARCFiles_', suffix='.csv')
+            inputs_names = [f.name for f in inputs_csvs]
+            utils.merge_inputs_csvs(inputs_names, inputs_csv)
+        else:
+            inputs_csv = inputs_csvs[0].name
+        MDSParams['inputsCSV'] = inputs_csv
+        
+        #inputsCSV = utils.path_port(self, 'RastersWithPARCInfoCSV')
         
         ourMDSBuilder = MDSB.MDSBuilder()
         utils.PySAHM_instance_params(ourMDSBuilder, MDSParams)
@@ -1125,18 +1135,26 @@ class CovariateCorrelationAndSelection(Module):
     kwargs = {}
     kwargs['defaults'] = str(['initial'])
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
-                    ('selectionName', '(edu.utah.sci.vistrails.basic:String)', kwargs)]
+                    ('selectionName', '(edu.utah.sci.vistrails.basic:String)', kwargs),
+                    ('ShowGUI', '(edu.utah.sci.vistrails.basic:Boolean)')]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
 
     def compute(self):
         writetolog("\nOpening Select Predictors Layers widget", True)
         inputMDS = utils.dir_path_value(self.forceGetInputFromPort('inputMDS'))
         selectionName = self.forceGetInputFromPort('selectionName', 'initial')
-        outputMDS = utils.mknextfile(prefix='SelectPredictorsLayers_' + selectionName + "_", suffix='.csv')
-        displayJPEG = utils.mknextfile(prefix='PredictorCorrelation_' + selectionName + "_", suffix='.jpg')
+#        outputMDS = utils.mknextfile(prefix='SelectPredictorsLayers_' + selectionName + "_", suffix='.csv')
+#        displayJPEG = utils.mknextfile(prefix='PredictorCorrelation_' + selectionName + "_", suffix='.jpg')
+        global session_dir
+        outputMDS = os.path.join(session_dir, "CovariateCorrelationOutputMDS_" + selectionName + ".csv")
+        displayJPEG = os.path.join(session_dir, "CovariateCorrelationDisplay.jpg")
         writetolog("    inputMDS = " + inputMDS, False, False)
         writetolog("    displayJPEG = " + displayJPEG, False, False)
         writetolog("    outputMDS = " + outputMDS, False, False)
+        
+        if os.path.exists(outputMDS):
+            utils.applyMDS_selection(outputMDS, inputMDS)
+            os.remove(outputMDS)
         
         self.callDisplayMDS(inputMDS, outputMDS, displayJPEG)
 
@@ -1150,8 +1168,9 @@ class CovariateCorrelationAndSelection(Module):
 #        print " ... finished with dialog "  
         retVal = dialog.exec_()
         #outputPredictorList = dialog.outputList
+        if retVal == 1:
+            raise ModuleError(self, "Cancel or Close selected (not OK) workflow halted.")
 
-        return inputMDS
 
 class ProjectionLayers(Module):
     '''
@@ -1618,14 +1637,17 @@ _modules = generate_namespaces({'DataInput': [
                                            MARS,
                                            MAXENT,
                                            BoostedRegressionTree],
-                                'Other':  [Model,
-                                           ResampleMethod,
-                                           AggregationMethod,
-                                           PredictorList,
-                                           MergedDataSet,
-                                           RastersWithPARCInfoCSV],
+                                'Other':  [(Model, {'abstract': True}),
+                                           (ResampleMethod, {'abstract': True}),
+                                           (AggregationMethod, {'abstract': True}),
+                                           (PredictorList, {'abstract': True}),
+                                           (MergedDataSet, {'abstract': True}),
+                                           (RastersWithPARCInfoCSV, {'abstract': True})]
 #                                           ClimateModel,
 #                                           ClimateScenario,
 #                                           ClimateYear
 
                                 })
+
+#_modules = [(Predictor, {'namespace': 'DataInput'}), (Model, {'abstract': True})]
+
