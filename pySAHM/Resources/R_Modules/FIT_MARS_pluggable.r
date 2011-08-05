@@ -289,6 +289,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     cat("\nfinished with final model summarization, t=",round(t4-t3,2),"sec\n");flush.console()
     if(!debug.mode) {sink();cat("Progress:80%\n");flush.console();sink(logname,append=T)} else cat("70%\n")   
     # Make .tif of predictions #
+
     if(out$input$make.p.tif==T | out$input$make.binary.tif==T){
         if((n.var <- nrow(out$mods$summary))<1){
             mssg <- "Error producing geotiff output:  null model selected by stepwise procedure - pointless to make maps"
@@ -1057,7 +1058,7 @@ function (data,                         # the input data frame
 # create storage space for glm model results
 
   n.cases <- nrow(xdat)
- 
+
   fitted.values <- matrix(0,ncol = n.spp, nrow = n.cases)
   model.residuals <- matrix(0,ncol = n.spp, nrow = n.cases)
   null.deviances <- rep(0,n.spp)
@@ -1073,7 +1074,7 @@ function (data,                         # the input data frame
 
   mars.object <- mars(x = xdat, y = ydat, degree = mars.degree, w = site.weights, 
        wp = spp.weights, penalty = penalty)
-  if(length(mars.object$coefficients==1)) stop("MARS has fit the null model (intercept only) \n new predictors are required")
+  if(length(mars.object$coefficients)==1) stop("MARS has fit the null model (intercept only) \n new predictors are required")
   bf.data <- as.data.frame(eval(mars.object$x))
   n.bfs <- ncol(bf.data)
   bf.names <- paste("bf", 1:n.bfs, sep = "")
@@ -1090,7 +1091,7 @@ function (data,                         # the input data frame
 # now cycle through the species fitting glm models 
 
   cat("fitting glms for individual responses","\n")
-      browser()
+
   for (i in 1:n.spp) {
 
     cat(names(ydat)[i],"\n")

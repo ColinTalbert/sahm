@@ -64,6 +64,7 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     times <- as.data.frame(matrix(NA,nrow=7,ncol=1,dimnames=list(c("start","read data","model fit",
             "model summary","response curves","tif output","done"),c("time"))))
     times[1,1] <- unclass(Sys.time())
+    t0 <- unclass(Sys.time())
     #simp.method <- match.arg(simp.method)
     out <- list(
       input=list(ma.name=ma.name,
@@ -218,7 +219,7 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     flush.console()
     times[3,1] <- unclass(Sys.time())
     if(!debug.mode) {sink();cat("Progress:40%\n");flush.console();sink(logname,append=T)} else cat("40%\n")
-    # browser()
+
      #r<-residuals(out$mods$final.mod, "deviance")
 
     if(length(coef(out$mods$final.mod))==1) stop("Null model was selected.  \nEvaluation metrics and plots will not be produced")
@@ -243,6 +244,16 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
       }
 
     out$mods$auc.output<-auc.output
+
+
+    txt0 <- paste("Generalized LIinear Results\n",out$input$run.time,"\n\n","Data:\n\t ",ma.name,"\n\t ","n(pres)=",
+        out$dat$ma$n.pres[2],"\n\t n(abs)=",out$dat$ma$n.abs[2],"\n\t number of covariates considered=",(length(names(out$dat$ma$ma))-1),
+        "\n\n","Settings:\n","\n\t model family=",out$input$model.family,
+        "\n\n","Results:\n\t ","number covariates in final model=",length(out$dat$ma$used.covs),
+        "\n\t pct deviance explained on train data =",round(out$mods$auc.output$pct.dev.exp,1),"%\n",
+        "\n\t total time for model fitting=",round((unclass(Sys.time())-t0)/60,2),"min\n",sep="")
+
+    capture.output(cat(txt0),file=paste(bname,"_output.txt",sep=""),append=TRUE)
 
     times[4,1] <- unclass(Sys.time())
     if(!debug.mode) {sink();cat("Progress:70%\n");flush.console();sink(logname,append=T)} else cat("70%\n")

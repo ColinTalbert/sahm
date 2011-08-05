@@ -1,4 +1,4 @@
-Pairs.Explore<-function(num.plots=10,min.cor=.7,input.file,output.file,response.col="ResponseBinary",cors.w.highest=FALSE,pres=TRUE,absn=TRUE,bgd=TRUE,Debug=FALSE){
+Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.col="ResponseBinary",cors.w.highest=FALSE,pres=TRUE,absn=TRUE,bgd=TRUE,Debug=FALSE){
 
 
       #num.plots=plots per page of display
@@ -76,7 +76,7 @@ Pairs.Explore<-function(num.plots=10,min.cor=.7,input.file,output.file,response.
     dat<-try(dat[,as.vector(apply(dat,2,varr)==0)!=1],silent=TRUE)
     if(class(dat)=="try-error") stop("mds file contains nonnumeric columns please remove and continue")
   #record correlations for later plots
-    browser()
+
     cmat<-cor(dat,use="pairwise.complete.obs")
     smat<-cor(dat,method="spearman",use="pairwise.complete.obs")
     if(dim(dat)[1]<2000){
@@ -106,7 +106,7 @@ Pairs.Explore<-function(num.plots=10,min.cor=.7,input.file,output.file,response.
           High.cor<-sort(High.cor[names(CorWHigh)],decreasing=TRUE)
           HighToPlot<-dat[,match(names(High.cor),names(dat))[1:min(num.plots,length(High.cor))]]
           }}
-              cor.hightoplot<-abs(cor(HighToPlot))
+              cor.hightoplot<-abs(cor(HighToPlot,use="pairwise.complete.obs"))
               diag(cor.hightoplot)<-0
     cor.range<-c(quantile(as.vector(cor.hightoplot),probs=c(0,.5,.7,.85)),1)
 
@@ -130,9 +130,9 @@ Pairs.Explore<-function(num.plots=10,min.cor=.7,input.file,output.file,response.
       a<-colors()
           usr <- par("usr"); on.exit(par(usr))
           par(usr = c(0, 1, 0, 1))
-          r <- abs(cor(x, y))
-          spear<-abs(cor(x,y,method="spearman"))
-          ken<- abs(cor(x,y,method="kendall"))
+          r <- abs(cor(x, y,use="pairwise.complete.obs"))
+          spear<-abs(cor(x,y,method="spearman",use="pairwise.complete.obs"))
+          ken<- abs(cor(x,y,method="kendall",use="pairwise.complete.obs"))
           all.cor<-max(r,spear,ken)
           #range.seq<-seq(from=cor.range[1],to=cor.range[2],length=20)
           if(all.cor>=cor.range[4]){
@@ -150,8 +150,8 @@ Pairs.Explore<-function(num.plots=10,min.cor=.7,input.file,output.file,response.
          
               txt2=""
             if(max(all.cor)>cor.range[2]){
-            if(spear==max(all.cor) && spear!=cor(x,y)) {txt2 <- " s"
-              } else if(ken==max(all.cor) && ken!=cor(x,y)){
+            if(spear==max(all.cor) && spear!=cor(x,y,use="pairwise.complete.obs")) {txt2 <- " s"
+              } else if(ken==max(all.cor) && ken!=cor(x,y,use="pairwise.complete.obs")){
               txt2 <-" k"
               }
 
@@ -293,7 +293,8 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
                   if(i==1) title(main="Response",line=.04,cex.main=1.5)
 
                   box()
-                     my.lab<-paste("cor=",round(max(abs(cor(x[,(i)],response)),abs(cor(x[,(i)],response,method="spearman")),abs(cor(x[,(i)],response,method="kendall"))),digits=2),sep="")
+                     my.lab<-paste("cor=",round(max(abs(cor(x[,(i)],response,use="pairwise.complete.obs")),abs(cor(x[,(i)],response,method="spearman",use="pairwise.complete.obs")),
+                     abs(cor(x[,(i)],response,method="kendall",use="pairwise.complete.obs"))),digits=2),sep="")
 
                   #panel smooth doesn't work for two reasons: one, the response is binary and it requires more than two unique values
                   #second I don't think it can use weights which is necessary with an overwhelming amount of background points so that presnce points
@@ -305,7 +306,8 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
                    else my.panel.smooth(as.vector(x[, (i)]), as.vector(response),weights=
                           c(rep(table(response)[2]/table(response)[1],times=table(response)[1]),rep(1,times=table(response)[2])),...)
                           
-                          title(ylab=paste("cor=",round(max(abs(cor(x[,(i)],response)),abs(cor(x[,(i)],response,method="spearman")),abs(cor(x[,(i)],response,method="kendall"))),digits=2),
+                          title(ylab=paste("cor=",round(max(abs(cor(x[,(i)],response,use="pairwise.complete.obs")),
+                          abs(cor(x[,(i)],response,method="spearman",use="pairwise.complete.obs")),abs(cor(x[,(i)],response,method="kendall",use="pairwise.complete.obs"))),digits=2),
                           sep=""),line=.02,cex.lab=1.5)
                           #,y=.85,x=max(x[,(i)])-.2*diff(range(x[,(i)])),cex=1.5)
 
@@ -333,6 +335,7 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
                     l.wid <- strwidth(labels, "user")
                     cex.labels <- max(0.8, min(2, 0.9/max(l.wid)))
                   }
+
                   text.panel(0.5, label.pos, labels[i], cex = cex.labels,
                     font = font.labels)
                 }
@@ -368,10 +371,12 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
 my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),
     cex = 1, col.smooth = "red", span = 2/3, iter = 3, weights=rep(1,times=length(y)), ...)
 {
+    o<-order(x)
     points(x, y, pch = pch, col = col, bg = bg, cex = cex)
     ok <- is.finite(x) & is.finite(y)
     if (any(ok) && length(unique(x))>3)
-        lines(smooth.spline(x,w=weights,jitter(y,amount=(max(y)-min(y))/100),nknots=min(length(unique(x)),4)),col="red")
+    lines(lowess(x[o],y[o],iter=0),col="red")
+        #lines(smooth.spline(x,w=weights,jitter(y,amount=(max(y)-min(y))/100),nknots=min(length(unique(x)),4)),col="red")
 
 }
 

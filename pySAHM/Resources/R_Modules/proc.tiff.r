@@ -129,14 +129,18 @@ ymax(RasterInfo) <- ymax(RasterInfo) + 0.5 * rs[2]
       binaryRaster <- writeStart(binaryRaster, filename=outfile.bin, overwrite=TRUE)
       }
 temp <- data.frame(matrix(ncol=nvars,nrow=tr$size*ncol(RasterInfo))) # temp data.frame.
+
 names(temp) <- vnames
 
   for (i in 1:tr$n) {
     strt <- c((i-1)*nrows,0)
      region.dims <- c(min(dims[1]-strt[1],nrows),dims[2])
-        if (i==tr$n) temp <- temp[1:(tr$nrows[i]*dims[2]),] # for the last tile...
+        if (i==tr$n) if(is.null(dim(temp))) { temp <- temp[1:(tr$nrows[i]*dims[2])]
+        } else temp <- temp[1:(tr$nrows[i]*dims[2]),] # for the last tile...
       for(k in 1:nvars) { # fill temp data frame
-            temp[,k]<- getValuesBlock(raster(fullnames[k]), row=tr$row[i], nrows=tr$size)
+            if(is.null(dim(temp))){
+              temp<- getValuesBlock(raster(fullnames[k]), row=tr$row[i], nrows=tr$size)
+            } else temp[,k]<- getValuesBlock(raster(fullnames[k]), row=tr$row[i], nrows=tr$size)
             }
     temp[temp==NAval] <- NA # replace missing values #
     temp[is.na(temp)]<-NA #this seemingly worthless line switches NaNs to NA so they aren't predicted

@@ -29,8 +29,12 @@
           } else {
           out.list$status[2]<-T
           }
+        #out$dat$ma<-out$dat$ma[,-c(which(include==0,arr.ind=TRUE))]
+      # ma<-ma[,-c(which(include==0,arr.ind=TRUE))]
+      # tif.info<-tif.info[-c(which(include==0,arr.ind=TRUE))]
+      # paths<-paths[-c(which(include==0,arr.ind=TRUE))]
+      # include<-include[-c(which(include==0,arr.ind=TRUE))]
 
-        browser()
           r.name <- out$input$response.col
           if(r.name=="responseCount") out$input$model.family="poisson"
         # check to make sure that response column exists in the model array #
@@ -59,6 +63,7 @@
           if(is.null(out$input$tif.dir)){
            include<-include[-xy.cols]
            paths<-paths[-xy.cols]
+
       }}
 
 
@@ -71,6 +76,8 @@
            if(is.null(out$input$tif.dir)){
            include<-include[-site.weights]
            paths<-paths[-site.weights]
+           print(paths)
+           print(include)
             }
           },
           out.list$train.weights<-rep(1,times=dim(ma)[1]))
@@ -84,6 +91,7 @@
             include<-include[-c(split.indx)]
             split.col<-ma[,split.indx]
             ma <- ma[,-split.indx]
+            paths<-paths[-c(split.indx)]
             out.list$ma.test<-ma[split.col=="test",]
             ma<-ma[split.col=="train",]
             out.list$test.weights<-out.list$train.weights[split.col=="test"]
@@ -176,9 +184,12 @@
                  #remove columns that shouldn't be used from tiff based on the indicator
                 include<-include[-r.col]
                 paths<-paths[-r.col]
+
                 paths<-paths[include==1]
+
                  #creates a list of predictors from tif.ind and response column
-               ma.use <- c(r.col,match(sub(".tif","",basename(paths)),ma.names))
+
+               ma.use <- c(r.col,na.omit(match(sub(".tif","",basename(paths)),ma.names)))
                 ma<-ma[,ma.use]
                 ma.names<-names(ma)
                 #Now check that tiffs to be used exist

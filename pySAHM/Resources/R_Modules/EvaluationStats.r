@@ -68,28 +68,37 @@ make.poisson.jpg<-function(ma.reduced,pred,plotname,modelname,train.split=FALSE,
         dev.exp.train <- null.dev.train - dev.fit.train
         pct.dev.exp.train <- dev.exp.train/null.dev.train*100
         correlation.train<-cor(train$response,train.pred)
-        browser()
+
               jpeg(file=plotname)
            dev.contrib<-calc.dev(pois.data$pres.abs, pred, weight, family="poisson")$dev.cont
+              par(mfrow=c(3,2))
               z<-sign(pred-pois.data$pres.abs)*dev.contrib
+              z.range<-max(z)-min(z)
+              z.lim<-c((min(z)-.1*z.range),(max(z)+.1*z.range))
               breaks<-quantile(z, probs = seq(0, .95,length=25))
               a<-outer(z,breaks,"<")
               res.mag<-apply(a,1,sum)
-              plot(out$dat$ma$train.xy,col=heat.colors(24)[res.mag],cex=4,pch=19)
-              x<-out$dat$ma$train.xy[,1]
-              y<-out$dat$ma$train.xy[,2]
+              plot(out$dat$ma$test.xy,col=beachcolours(heightrange=c(min(res.mag),max(res.mag)),sealevel=mean(res.mag),ncolours=length(table(res.mag)))[res.mag],cex=4,pch=19)
+              x<-out$dat$ma$test.xy[,1]
+              y<-out$dat$ma$test.xy[,2]
               a<-loess(z~x*y)
-              x.lim<-rep(seq(from=min(out$dat$ma$train.xy[,1]),to=max(out$dat$ma$train.xy[,1]),length=100),each=100)
-              y.lim<-rep(seq(from=min(out$dat$ma$train.xy[,2]),to=max(out$dat$ma$train.xy[,2]),length=100),times=100)
+              x.lim<-rep(seq(from=min(out$dat$ma$test.xy[,1]),to=max(out$dat$ma$test.xy[,1]),length=100),each=100)
+              y.lim<-rep(seq(from=min(out$dat$ma$test.xy[,2]),to=max(out$dat$ma$test.xy[,2]),length=100),times=100)
               z<-predict(a,newdata=cbind("x"=x.lim,"y"=y.lim))
-              breaks<-quantile(z, probs = seq(0, .95,length=25))
+              z[z>z.lim[2]]<-NA
+              z[z<z.lim[1]]<-NA
+              breaks<-quantile(na.omit(z), probs = seq(0, .95,length=25))
               a<-outer(z,breaks,"<")
               res.mag<-apply(a,1,sum)
               z<-matrix(data=z,ncol=100,nrow=100,byrow=TRUE)
               res.mag<-matrix(data=res.mag,ncol=100,nrow=100,byrow=TRUE)
+                 image(x=seq(from=min(x.lim),to=max(x.lim),length=100),y=seq(from=min(y.lim),to=max(y.lim),length=100),
+                  z=res.mag,
+                  col=beachcolours(heightrange=c(min(na.omit(res.mag)),max(na.omit(res.mag))),sealevel=mean(na.omit(res.mag)),
+                  ncolours=length(table(na.omit(res.mag)))),xlab="Latitude",ylab="Longitude",
+                  main="Smoothed deviance residuals over space")
 
-              image(x=seq(from=min(x.lim),to=max(x.lim),length=100),y=seq(from=min(y.lim),to=max(y.lim),length=100),z=matrix(data=z,ncol=100,nrow=100,byrow=TRUE))
-              points(out$dat$ma$train.xy,pch=19,cex=.5)
+                  points(out$dat$ma$train.xy,pch=19,cex=1)
               #plot(unique(x.lim),apply(z,2,sum))
               #plot(unique(y.lim),apply(z,1,sum))
 
@@ -129,8 +138,11 @@ make.poisson.jpg<-function(ma.reduced,pred,plotname,modelname,train.split=FALSE,
               z<-matrix(data=z,ncol=100,nrow=100,byrow=TRUE)
               res.mag<-matrix(data=res.mag,ncol=100,nrow=100,byrow=TRUE)
 
-              image(x=seq(from=min(x.lim),to=max(x.lim),length=100),y=seq(from=min(y.lim),to=max(y.lim),length=100),z=matrix(data=z,ncol=100,nrow=100,byrow=TRUE))
-              points(out$dat$ma$train.xy,pch=19,cex=.5)
+              image(x=seq(from=min(x.lim),to=max(x.lim),length=100),y=seq(from=min(y.lim),to=max(y.lim),length=100),
+                  z=res.mag,
+                  col=beachcolours(heightrange=c(min(res.mag),max(res.mag)),sealevel=mean(res.mag),ncolours=length(table(res.mag))),xlab="Latitude",ylab="Longitude",
+                  main="Smoothed deviance residuals over space")
+              points(out$dat$ma$train.xy,pch=19)
               #plot(unique(x.lim),apply(z,2,sum))
               #plot(unique(y.lim),apply(z,1,sum))
 
@@ -311,4 +323,35 @@ EvaluationStats<-function(out,thresh,train,train.pred,opt.methods=opt.methods){
         dev=list(deviance=deviance,dev.cont=deviance.contribs)
         return(dev)
 
+}
+
+beachcolours<-function (heightrange, sealevel = 0, monochrome = FALSE, ncolours = if (monochrome) 16 else 64)
+{
+#this function was robbed from the spatstat library internals
+    if (monochrome)
+        return(grey(seq(0, 1, length = ncolours)))
+    stopifnot(is.numeric(heightrange) && length(heightrange) ==
+        2)
+    stopifnot(all(is.finite(heightrange)))
+    depths <- heightrange[1]
+    peaks <- heightrange[2]
+    dv <- diff(heightrange)/(ncolours - 1)
+    epsilon <- dv/2
+    lowtide <- max(sealevel - epsilon, depths)
+    hightide <- min(sealevel + epsilon, peaks)
+    countbetween <- function(a, b, delta) {
+        max(0, round((b - a)/delta))
+    }
+    nsea <- countbetween(depths, lowtide, dv)
+    nbeach <- countbetween(lowtide, hightide, dv)
+    nland <- countbetween(hightide, peaks, dv)
+    colours <- character(0)
+    if (nsea > 0)
+        colours <- rev(rainbow(nsea, start = 3/6, end = 4/6))
+    if (nbeach > 0)
+        colours <- c(colours, rev(rainbow(nbeach, start = 3/12,
+            end = 5/12)))
+    if (nland > 0)
+        colours <- c(colours, rev(rainbow(nland, start = 0, end = 1/6)))
+    return(colours)
 }

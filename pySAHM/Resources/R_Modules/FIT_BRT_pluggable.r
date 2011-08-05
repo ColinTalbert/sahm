@@ -271,7 +271,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
           cat(saveXML(brt.to.xml(out),indent=T),'\n')
           return()}
 
-    cat("\nfinished with learning rate estimation, lr=",out$mods$lr.mod$lr0,", t=",try(round(out$mods$lr.mod$t.elapsed,2)),"sec\n")
+    cat("\nfinished with learning rate estimation, lr=",out$mods$lr.mod$lr0,", t=",round(out$mods$lr.mod$t.elapsed,2),"sec\n")
     cat("\nfor final fit, lr=",out$mods$lr.mod$lr,"and tc=",out$mods$parms$tc.full,"\n");flush.console()
     if(!debug.mode) {sink();cat("Progress:30%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("30%\n")}
 
@@ -280,11 +280,11 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
         print(debug.mode)
         t1 <- unclass(Sys.time())
 
-        m0 <- try(gbm.step.fast(dat=out$dat$ma$ma.subset,gbm.x=out$mods$lr.mod$good.cols,gbm.y=1,family=out$input$model.family,
+        m0 <- gbm.step.fast(dat=out$dat$ma$ma.subset,gbm.x=out$mods$lr.mod$good.cols,gbm.y=1,family=out$input$model.family,
               n.trees = c(300,600,800,1000,1200,1500,1800),step.size=out$input$step.size,max.trees=out$input$max.trees,
               tolerance.method=out$input$tolerance.method,tolerance=out$input$tolerance, n.folds=out$input$n.folds,tree.complexity=out$mods$parms$tc.sub,
               learning.rate=out$mods$lr.mod$lr0,bag.fraction=out$input$bag.fraction,site.weights=out$dat$ma$weight.subset,autostop=T,debug.mode=F,silent=!debug.mode,
-              plot.main=F,superfast=F))
+              plot.main=F,superfast=F)
         if(debug.mode) assign("m0",m0,envir=.GlobalEnv)
         if(class(m0)=="try-error"){
               if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
@@ -297,7 +297,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
         if(!debug.mode) {sink();cat("Progress:40%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("40%\n")}
         cat("\nfinished with trimmed model fitting, n.trees=",m0$target.trees,", t=",round(t1b-t1,2),"sec\n");flush.console()
         cat("\nbeginning model simplification - very slow...\n");flush.console()
-        out$mods$simp.mod <- try(gbm.simplify(m0,n.folds=out$input$n.folds,plot=F,verbose=F,alpha=out$input$alpha)) # this step is very slow #
+        out$mods$simp.mod <- gbm.simplify(m0,n.folds=out$input$n.folds,plot=F,verbose=F,alpha=out$input$alpha) # this step is very slow #
         if(debug.mode) assign("out",out,envir=.GlobalEnv)
         if(class(out$mods$simp.mod)=="try-error"){
             if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
@@ -356,7 +356,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
       }
     # Generate and store text summary #
     #source('F:/code for Jeff and Roger/boosted regression trees/brt.functions.aks.021709.r')
-    y <- try(gbm.interactions(out$mods$final.mod))
+    y <- gbm.interactions(out$mods$final.mod)
     if(debug.mode) assign("out",out,envir=.GlobalEnv)
     if(class(y)!="try-error"){
         int <- y$rank.list;
@@ -371,7 +371,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
         out$error.mssg[[out$ec]] <- paste("ERROR: problem assessing interactions:",y)
         }
 
-    model.summary <- try(summary(out$mods$final.mod,plotit=F))
+    model.summary <- summary(out$mods$final.mod,plotit=F)
     if(class(model.summary)=="try-error"){
         if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
         out$ec<-out$ec+1
@@ -2066,7 +2066,7 @@ require(gbm)
 
   orig.data <- data
   orig.gbm.x <- gbm.x
-
+  verbose=TRUE
 #  if (!is.null(eval.data)) independent.test <- TRUE
 #    else independent.test <- FALSE
 
@@ -2113,9 +2113,9 @@ require(gbm)
 
 # create gbm.fixed function call
 
-  gbm.call.string <- paste("try(gbm.fixed(data=train.data,gbm.x=gbm.new.x,gbm.y=gbm.y,",sep="")
+  gbm.call.string <- paste("gbm.fixed(data=train.data,gbm.x=gbm.new.x,gbm.y=gbm.y,",sep="")
   gbm.call.string <- paste(gbm.call.string,"family=family,learning.rate=lr,tree.complexity=tc,",sep="")
-  gbm.call.string <- paste(gbm.call.string,"n.trees = ",n.trees,", site.weights = weights.subset,verbose=FALSE))",sep="")
+  gbm.call.string <- paste(gbm.call.string,"n.trees = ",n.trees,", site.weights = weights.subset,verbose=FALSE)",sep="")
 
 # now set up the fold structure
 
@@ -2254,9 +2254,9 @@ require(gbm)
 
   if(verbose) cat("\nnow processing final dropping of variables with full data \n\n") #aks
 
-  gbm.call.string <- paste("try(gbm.fixed(data=orig.data,gbm.x=gbm.new.x,gbm.y=gbm.y,",sep="")
+  gbm.call.string <- paste("gbm.fixed(data=orig.data,gbm.x=gbm.new.x,gbm.y=gbm.y,",sep="")
   gbm.call.string <- paste(gbm.call.string,"family=family,learning.rate=lr,tree.complexity=tc,",sep="")
-  gbm.call.string <- paste(gbm.call.string,"n.trees = ",n.trees,", site.weights = weights,verbose=FALSE))",sep="")
+  gbm.call.string <- paste(gbm.call.string,"n.trees = ",n.trees,", site.weights = weights,verbose=FALSE)",sep="")
 
   n.steps <- n.steps - 1 #decrement by one to reverse last increment in prev loop
 
@@ -2362,6 +2362,7 @@ function (data,                        # the input dataframe
 
   dataframe.name <- deparse(substitute(data))   # get the dataframe name
 
+  if(length(gbm.x)<=1) stop("Only one predictor remains in backward selection\nplease select more predictors")
   x.data <- eval(data[, gbm.x])                 #form the temporary datasets
   names(x.data) <- names(data)[gbm.x]
   y.data <- eval(data[, gbm.y])
@@ -2371,7 +2372,7 @@ function (data,                        # the input dataframe
   assign("x.data", x.data, pos = 1)             #and assign them for later use
   assign("y.data", y.data, pos = 1)
 
-# fit the gbm model
+#fit the gbm model
 
   z1 <- unclass(Sys.time())
 
