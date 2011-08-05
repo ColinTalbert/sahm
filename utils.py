@@ -3,6 +3,8 @@ These are utilites used by the VisTrails
 wrappers of the SAHM command line applications
 
 @author: talbertc
+test
+
 '''
 import os, sys, shutil
 import traceback
@@ -10,6 +12,7 @@ import csv
 import time
 import tempfile
 import subprocess
+import shutil
 
 from PyQt4 import QtCore, QtGui
 
@@ -430,11 +433,68 @@ def runRScript(script, args, module=None):
 
     del(ret)
     writetolog("\nFinished R Processing of " + script, True)
-    
 
+def merge_inputs_csvs(inputCSVs_list, outputFile):
+    oFile = open(outputFile, "wb")
+    outputCSV = csv.writer(oFile)
+    outputCSV.writerow(["PARCOutputFile", "Categorical",
+                         "Resampling", "Aggregation", "OriginalFile"])
+    for inputCSV in inputCSVs_list:
+        iFile = open(inputCSV, "rb")
+        inputreader = csv.reader(iFile)
+        inputreader.next()
+        for row in inputreader:
+            outputCSV.writerow(row)
+        iFile.close()
+    oFile.close()
 
-
+def applyMDS_selection(oldMDS, newMDS):
+    """Takes a selection from a previous MDS and '
+        applies it to a new MDS file.
+    """
+    oldvals = {}
+    if os.path.exists(oldMDS):
+        iFile = open(oldMDS, 'r')
+        previousout = csv.reader(iFile)
+        oldheader1 = previousout.next()
+        oldheader2 = previousout.next()
+        oldvals = dict(zip(oldheader1, oldheader2))
+        iFile.close()
+        del previousout
         
+    tmpnewMDS = newMDS + ".tmp.csv"
+    oFile = open(tmpnewMDS, "wb")
+    tmpOutCSV = csv.writer(oFile)
+    iFile = open(newMDS, "rb")
+    outCSV = csv.reader(iFile)
+    
+    oldHeader1 = outCSV.next()
+    oldHeader2 = outCSV.next()
+    oldHeader3 = outCSV.next()
+    
+    selectionline = []
+    for i in range(len(oldHeader1)):
+        if oldvals.has_key(oldHeader1[i]) and \
+        oldvals[oldHeader1[i]] == '0':
+            selectionline.append('0')
+        else:
+            selectionline.append('1')
+            
+    tmpOutCSV.writerow(oldHeader1)
+    tmpOutCSV.writerow(selectionline)    
+    tmpOutCSV.writerow(oldHeader3)
+    for row in outCSV:
+        tmpOutCSV.writerow(row)
+    
+    iFile.close()
+    oFile.close()
+    shutil.copyfile(tmpnewMDS, newMDS)
+    os.remove(tmpnewMDS)
+    
+
 
     
+    
+    
+
     
