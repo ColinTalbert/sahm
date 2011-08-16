@@ -16,6 +16,7 @@
 #   RandomForest - duh
 #   sp - used by rdgal library
 
+options(error=NULL)
 
 fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^response.binary",make.p.tif=T,make.binary.tif=T,
       debug.mode=F,responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL, samp.replace=FALSE, sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
@@ -664,9 +665,11 @@ do.trace<-as.logical(do.trace)
 keep.inbag<-as.logical(keep.inbag)
 make.r.curves<-as.logical(make.r.curves)
 save.model<-make.p.tif | make.binary.tif
-#save.model<-as.logical(save.model)
-
+mtry<-as.numeric(mtry)
+ntree<-as.numeric(ntree)
+opt.methods<-as.numeric(opt.methods)
 ScriptPath<-dirname(ScriptPath)
+
 source(paste(ScriptPath,"EvaluationStats.r",sep="\\"))
 source(paste(ScriptPath,"TestTrainRocPlot.r",sep="\\"))
 source(paste(ScriptPath,"read.ma.r",sep="\\"))

@@ -17,7 +17,7 @@
 #   rgdal - for geotiff i/o
 #   sp - used by rdgal library
 #   raster for geotiff o
-
+options(error=NULL)
 
 fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^response.binary",make.p.tif=T,make.binary.tif=T,
       simp.method="AIC",responseCurveForm=NULL,debug.mode=F,model.family="binomial",script.name="glm.r",opt.methods=2,save.model=TRUE){
@@ -246,7 +246,7 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     out$mods$auc.output<-auc.output
 
 
-    txt0 <- paste("Generalized LIinear Results\n",out$input$run.time,"\n\n","Data:\n\t ",ma.name,"\n\t ","n(pres)=",
+    txt0 <- paste("Generalized Liinear Results\n",out$input$run.time,"\n\n","Data:\n\t ",ma.name,"\n\t ","n(pres)=",
         out$dat$ma$n.pres[2],"\n\t n(abs)=",out$dat$ma$n.abs[2],"\n\t number of covariates considered=",(length(names(out$dat$ma$ma))-1),
         "\n\n","Settings:\n","\n\t model family=",out$input$model.family,
         "\n\n","Results:\n\t ","number covariates in final model=",length(out$dat$ma$used.covs),
@@ -734,7 +734,6 @@ my.termplot <- function (model, data = NULL, envir = environment(formula(model))
 make.p.tif=T
 make.binary.tif=T
 simp.method="AIC"
-model.family="binomial"
 opt.methods=2
 save.model=FALSE
 
@@ -754,7 +753,6 @@ Args <- commandArgs(trailingOnly=FALSE)
     	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="mpt") make.p.tif <- argSplit[[1]][2]
  			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="mf")  model.family <- argSplit[[1]][2]
  			if(argSplit[[1]][1]=="om")  opt.methods <- argSplit[[1]][2]
  			if(argSplit[[1]][1]=="savm")  save.model <- argSplit[[1]][2]
  			if(argSplit[[1]][1]=="sm")  simp.method <- argSplit[[1]][2]
@@ -772,8 +770,9 @@ source(paste(ScriptPath,"proc.tiff.r",sep="\\"))
 make.p.tif<-as.logical(make.p.tif)
 make.binary.tif<-as.logical(make.binary.tif)
 save.model<-make.p.tif | make.binary.tif
+opt.methods<-as.numeric(opt.methods)
 
  fit.glm.fct(ma.name=csv,
       tif.dir=NULL,output.dir=output,
       response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
-      simp.method=simp.method,debug.mode=F,responseCurveForm="pdf",script.name="glm.r",save.model=save.model)
+      simp.method=simp.method,debug.mode=F,responseCurveForm="pdf",script.name="glm.r",opt.methods=opt.methods,save.model=save.model)

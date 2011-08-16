@@ -20,11 +20,18 @@ source("PredictModel.r")
 #options(error=expression(if(interactive()) recover() else dump.calls()))
 #options(error=NULL)
 #trace(proc.tiff,browser)
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\talbertc_20110519T121044\\TestTrainingSplit_1.csv"
-output.dir="I:\\VisTrails\\WorkingFiles\\workspace\\talbertc_20110519T121044\\brtoutput_1"
+list.files("I:\\VisTrails\\WorkingFiles\\workspace\\morisettej_20110810T153126")
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\morisettej_20110810T153126\\CovariateCorrelationOutputMDS_anothertry.csv"
+output.dir="C:\\temp\\SAHMDebugJunk"
 rc="responseBinary"
-PredictModel(workspace="I:\\VisTrails\\WorkingFiles\\workspace\\talbertc_20110519T130214\\brtoutput_1\\modelWorkspace",out.dir="C:\\VisTrails")
-PredictModel(workspace="I:\\VisTrails\\WorkingFiles\\workspace\\talbertc_20110519T130214\\brtoutput_1\\modelWorkspace",out.dir="C:\\VisTrails\\mtalbert_20110505T161105",make.btif=TRUE,make.ptif=TRUE)
+fit.rf.fct(ma.name=input.file,
+  tif.dir=NULL,
+  output.dir=output.dir,
+  response.col=rc,make.p.tif=F,make.binary.tif=F,
+      debug.mode=T,n.trees=1000)
+
+PredictModel(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir)
+
 #######################################################
 ## BRT TESTING
 

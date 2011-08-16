@@ -17,7 +17,7 @@
 #   rgdal - for geotiff i/o
 #   sp - used by rdgal library
 #   raster for geotiff o
-
+options(error=NULL)
 
 fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^response.binary",make.p.tif=T,make.binary.tif=T,
       mars.degree=1,mars.penalty=2,responseCurveForm=NULL,debug.mode=T,model.family="binomial",script.name="mars.r",opt.methods=2,save.model=TRUE){
@@ -333,7 +333,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     if(!debug.mode) {
         sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))
         cat("Progress:100%\n");flush.console()
-        cat(saveXML(doc,indent=T),'\n')
+        #cat(saveXML(doc,indent=T),'\n')
         } else #unlink(outfile)
     capture.output(cat(saveXML(doc,indent=T)),file=paste(out$dat$bname,"_output.xml",sep=""))
     if(debug.mode) assign("fit",out$mods$final.mod,envir=.GlobalEnv)
@@ -1706,8 +1706,9 @@ source(paste(ScriptPath,"proc.tiff.r",sep="\\"))
 make.p.tif<-as.logical(make.p.tif)
 make.binary.tif<-as.logical(make.binary.tif)
 save.model<-make.p.tif | make.binary.tif
+opt.methods<-as.numeric(opt.methods)
 
 fit.mars.fct(ma.name=csv,
         tif.dir=NULL,output.dir=output,
         response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
-            mars.degree=mars.degree,mars.penalty=mars.penalty,debug.mode=F,responseCurveForm="pdf",model.family=model.family,script.name="mars.r",save.model=save.model)
+            mars.degree=mars.degree,mars.penalty=mars.penalty,debug.mode=F,responseCurveForm="pdf",model.family=model.family,script.name="mars.r",save.model=save.model,as.numeric(opt.methods))

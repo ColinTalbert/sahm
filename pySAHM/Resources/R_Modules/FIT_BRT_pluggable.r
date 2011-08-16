@@ -45,9 +45,9 @@
 #   splines -  used by gbm library
 #   lattice -  used by gbm library
 #   sp - used by rdgal library
+options(error=NULL)
 
-
-fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^response.binary",test.resp.col="response",make.p.tif=T,make.binary.tif=T,
+fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^response.binary",make.p.tif=T,make.binary.tif=T,
       simp.method="cross-validation",debug.mode=F,responseCurveForm="jpg",tc=NULL,n.folds=3,alpha=1,script.name="brt.r",
      learning.rate = NULL, bag.fraction = 0.5,
  prev.stratify = TRUE, model.family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
@@ -129,7 +129,6 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
                  tif.dir=tif.dir,
                  output.dir=output.dir,
                  response.col=response.col,
-                 test.resp.col=test.resp.col,
                  make.p.tif=make.p.tif,
                  make.binary.tif=make.binary.tif,
                  tc=tc,
@@ -279,7 +278,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
         # remove variables with <1% relative influence and re-fit model
         print(debug.mode)
         t1 <- unclass(Sys.time())
-
+            if(length(out$mods$lr.mod$good.cols)<=1) stop("BRT must have at least two independent variables")
         m0 <- gbm.step.fast(dat=out$dat$ma$ma.subset,gbm.x=out$mods$lr.mod$good.cols,gbm.y=1,family=out$input$model.family,
               n.trees = c(300,600,800,1000,1200,1500,1800),step.size=out$input$step.size,max.trees=out$input$max.trees,
               tolerance.method=out$input$tolerance.method,tolerance=out$input$tolerance, n.folds=out$input$n.folds,tree.complexity=out$mods$parms$tc.sub,
@@ -2468,7 +2467,6 @@ alpha=1
 learning.rate = NULL
 bag.fraction = 0.5
 prev.stratify = TRUE
-model.family = "bernoulli"
 max.trees = 10000
 tolerance.method = "auto"
 tolerance = 0.001
@@ -2498,7 +2496,6 @@ Args <- commandArgs(trailingOnly=FALSE)
  			if(argSplit[[1]][1]=="alp")  alpha <- argSplit[[1]][2]
       if(argSplit[[1]][1]=="lr")  learning.rate <- argSplit[[1]][2]
  			if(argSplit[[1]][1]=="bf")  bag.fraction <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="mf")  model.family <- argSplit[[1]][2]
  			if(argSplit[[1]][1]=="ps")  prev.stratify <- argSplit[[1]][2]
  			if(argSplit[[1]][1]=="mt")  max.trees <- argSplit[[1]][2]
  			if(argSplit[[1]][1]=="om")  opt.methods <- argSplit[[1]][2]
@@ -2523,14 +2520,16 @@ make.p.tif<-as.logical(make.p.tif)
 make.binary.tif<-as.logical(make.binary.tif)
 prev.stratify<-as.logical(prev.stratify)
 save.model<-make.p.tif | make.binary.tif
+opt.methods<-as.numeric(opt.methods)
 
     fit.brt.fct(ma.name=csv,
 		tif.dir=NULL,
 		output.dir=output,
 		response.col=responseCol,
-		test.resp.col="response",make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
+		make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
 		simp.method="cross-validation",debug.mode=F,responseCurveForm="pdf",tc=tc,n.folds=n.folds,alpha=alpha,script.name="brt.r",
-		learning.rate =learning.rate, bag.fraction = bag.fraction,prev.stratify = prev.stratify, model.family = model.family, max.trees = max.trees,seed=seed,save.model=save.model)
+		learning.rate =learning.rate, bag.fraction = bag.fraction,prev.stratify = prev.stratify,max.trees = max.trees,seed=seed,
+    save.model=save.model,opt.methods=opt.methods)
 
 
 
