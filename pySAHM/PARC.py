@@ -7,7 +7,8 @@ import shutil
 import struct
 import sys
 import csv
-
+import Queue
+import thread
 import subprocess
 
 from optparse import OptionParser
@@ -34,18 +35,18 @@ def main(args_in):
     
     parser = OptionParser(usage=usageStmt, description=desc)
     parser.add_option("-l", dest="listMethodFlag", default=False, action="store_true", help="print the names of all known aggregation methods")
-    parser.add_option("-o", dest="outDir", default="./", help="directory in which to put processed images, defaults to current directory")
+    parser.add_option("-o", dest="out_dir", default="./", help="directory in which to put processed images, defaults to current directory")
     parser.add_option("-v", dest="verbose", default=False, action="store_true", help="the verbose flag causes diagnostic output to print")
     parser.add_option("-t", dest="templateRaster", help="The template raster used for projection, origin, cell size and extent")
-    parser.add_option("-i", dest="inputsCSV", help="The CSV containing the list of files to process.  Format is 'FilePath, Categorical, Resampling, Aggreagtion")
+    parser.add_option("-i", dest="inputs_CSV", help="The CSV containing the list of files to process.  Format is 'FilePath, Categorical, Resampling, Aggreagtion")
     parser.add_option("-m", dest="multicore", default=True, help="'True', 'False' indicating whether to use multiple cores or not") 
     (options, args) = parser.parse_args(args_in)
     
     ourPARC = PARC()
     ourPARC.verbose = options.verbose
     ourPARC.template = options.templateRaster
-    ourPARC.outDir = options.outDir
-    ourPARC.inputsCSV = options.inputsCSV
+    ourPARC.out_dir = options.out_dir
+    ourPARC.inputs_CSV = options.inputs_CSV
     ourPARC.multicores = options.multicore
     ourPARC.parcFiles()
 
@@ -68,19 +69,19 @@ class PARC:
         #instance level variables
         self.verbose = False
         self.template = ""
-        self.templateParams = {}
-        self.outDir = ""
-        self.inputsCSV = ''
+        self.template_params = {}
+        self.out_dir = ""
+        self.inputs_CSV = ''
         self.inputs = []
-        self.aggMethods = ['Min', 'Mean', 'Max', 'Majority']
-        self.resampleMethods = ['NearestNeighbor', 'Bilinear', 'Cubic', 'CubicSpline', 'Lanczos']
+        self.agg_methods = ['Min', 'Mean', 'Max', 'Majority']
+        self.resample_methods = ['NearestNeighbor', 'Bilinear', 'Cubic', 'CubicSpline', 'Lanczos']
         self.logger = None
         self.multicores = 'False'
         self.module = None
 
     def parcFiles(self):
         '''
-            1: Parse the inputsCSV into our inputs list
+            1: Parse the inputs_CSV into our inputs list
             2: Make sure all of our instance variables are good and proper
             3: Loop through the list of sourceImages and PARC each one.
             4: The outputs will be stored in the output directory
@@ -88,8 +89,10 @@ class PARC:
             inputs, parameters used, and outputs
         '''
         
-        self.validateArgs()
+        
         self.logger.writetolog("Starting PARC", True, True)
+        self.validateArgs()
+        self.logger.writetolog("    Arguments validated successfully", True, True)
         if self.multicores.lower() in ['true', 'yes', 't', 'y', '1']:
             self.processFilesMC()
         else:
@@ -104,7 +107,7 @@ class PARC:
             #if not os.path.samefile(template, image):
             inPath, inFileName = os.path.split(image[0])
             outFile, ext = os.path.splitext(inFileName) 
-            outFile = os.path.join(self.outDir, outFile + ".tif")
+            outFile = os.path.join(self.out_dir, outFile + ".tif")
             
             # os.path.samefile(image, outFile):
             if os.path.exists(outFile) and \
@@ -124,13 +127,15 @@ class PARC:
         '''This function has the same functionality as parcFiles
         with the addition of utilizing multiple cores to do the processing.
         '''
-        processes = []
+        results= Queue.Queue()
+        process_count= 0
+        
         for image in self.inputs:
             # Ensure source is different from template.
             #if not os.path.samefile(template, image):
             inPath, inFileName = os.path.split(image[0])
             outFile, ext = os.path.splitext(inFileName) 
-            outFile = os.path.join(self.outDir, outFile + ".tif")
+            outFile = os.path.join(self.out_dir, outFile + ".tif")
             
             # os.path.samefile(image, outFile):
             if os.path.exists(outFile) and \
@@ -140,19 +145,38 @@ class PARC:
                 outFile = baseName + "-PARC.tif"
             
             if os.path.abspath(self.template) != os.path.abspath(image[0]):
-                args = '-s ' + image[0]
-                args += ' -d ' + outFile
-                args += ' -t ' + self.template
+                image_short_name = os.path.split(image[0])[1]
+                args = '-s ' + os.path.abspath(image[0])
+                args += ' -c ' + image[1]
+                args += ' -d ' + os.path.abspath(outFile)
+                args += ' -t ' + os.path.abspath(self.template)
                 args += ' -r ' + image[2]
                 args += ' -a ' + image[3]
                 
-                execDir = os.path.split(sys.argv[0])[0]
+                execDir = os.path.split(__file__)[0]
                 executable = os.path.join(execDir, 'singlePARC.py')
                 
                 pyEx = sys.executable
                 command = ' '.join([pyEx, executable, args])
-                processes.append(subprocess.Popen(command))
+                self.logger.writetolog(command, False, False)
+                proc = subprocess.Popen( command )
+                thread.start_new_thread(utilities.process_waiter,
+                        (proc, image_short_name, results))
+                #processes.append(subprocess.Popen(command))
+                process_count+= 1
             
+        while process_count > 0:
+            description, rc= results.get()
+            
+            if rc == 0:
+                if self.verbose:
+                    msg = "    " + description + " finished successfully:  " + \
+                        str(len(self.inputs) - process_count + 1)  + " done out of " \
+                        + str(len(self.inputs))
+                    self.logger.writetolog(msg, True, True)
+            else:
+                self.logger.writetolog("There was a problem with: " + description , True, True)
+            process_count-= 1
                 
         
         
@@ -184,9 +208,9 @@ class PARC:
         #Open dgal dataset of the source to pull some values from
         srcDs = gdal.Open(source[0])
         
-        cellRatio = self.getTemplateSRSCellSize(sourceParams)/self.templateParams["xScale"]
+        cellRatio = self.getTemplateSRSCellSize(sourceParams)/self.template_params["xScale"]
         msg = "  ratio of source cell size to template cell size = " + str(cellRatio)
-        msg += "    template cell size = " + str(self.templateParams["xScale"])
+        msg += "    template cell size = " + str(self.template_params["xScale"])
         msg += "    " + shortName + " cell size = " + str(self.getTemplateSRSCellSize(sourceParams))
         self.writetolog(msg)
             
@@ -195,8 +219,8 @@ class PARC:
             #or smaller so
             #that all we need to do is reproject and resample.
             self.logger.writetolog("  cell ratio > .5: reprojecting and resampling to template parameters only")
-            self.reprojectRaster(srcDs, sourceParams, self.templateParams, dest, 
-                                gdalType, shortName, self.templateParams["xScale"])
+            self.reprojectRaster(srcDs, sourceParams, self.template_params, dest, 
+                                gdalType, shortName, self.template_params["xScale"])
         else:
             #Our Target cell size is much bigger than our source we need to do 
             #some aggregation to make things work.
@@ -207,16 +231,19 @@ class PARC:
             targetCellSize, numSourcePerTarget = self.getAggregateTargetCellSize(sourceParams)
             tmpOutput = os.path.join(os.path.dirname(dest), "tmp_" + os.path.basename(dest))
             
-            self.reprojectRaster(srcDs, sourceParams, self.templateParams,
+            self.reprojectRaster(srcDs, sourceParams, self.template_params,
                                 tmpOutput, gdalType,  shortName, targetCellSize)
-            self.writetolog("   Stating on Aggregating: " + shortName)
+            self.writetolog("   Starting on Aggregating: " + shortName)
                 
             tmpOutput2 = os.path.splitext(tmpOutput)[0] + ".tif"
             self.Aggregate(tmpOutput2, dest, 
-                        sourceParams, self.templateParams,
+                        sourceParams, self.template_params,
                         source[3], numSourcePerTarget)
             
-            os.remove(tmpOutput2)
+            try:
+                os.remove(tmpOutput2)
+            except WindowsError:
+                pass
             
     
     def getTemplateSRSCellSize(self, sourceParams):
@@ -224,21 +251,21 @@ class PARC:
         Calculate what size our source image pixels would be in the template SRS
         """
         #first convert our template origin into the source srs
-        tOriginX, tOriginY = self.transformPoint(self.templateParams["west"], self.templateParams["north"], 
-                                        self.templateParams["srs"], sourceParams["srs"])
+        tOriginX, tOriginY = self.transformPoint(self.template_params["west"], self.template_params["north"], 
+                                        self.template_params["srs"], sourceParams["srs"])
         #next add the source xScale to the converted origin x and convert that back to template srs
         tOriginX1 = self.transformPoint (tOriginX + sourceParams["xScale"], tOriginY, 
-                                                sourceParams["srs"], self.templateParams["srs"])[0]                        
+                                                sourceParams["srs"], self.template_params["srs"])[0]                        
         
         
-#        templateCellXCorner1 = (self.templateParams["west"], self.templateParams["north"], 
-#                                        self.templateParams["srs"], sourceParams["srs"])[0]
+#        templateCellXCorner1 = (self.template_params["west"], self.template_params["north"], 
+#                                        self.template_params["srs"], sourceParams["srs"])[0]
 #        
 #        targetCellXCorner1 = (sourceParams["west"], sourceParams["north"], 
-#                                                sourceParams["srs"], self.templateParams["srs"])[0]
+#                                                sourceParams["srs"], self.template_params["srs"])[0]
 #        targetCellXCorner2 = self.transformPoint(sourceParams["west"] + sourceParams["xScale"], 
-#                                                sourceParams["north"], sourceParams["srs"], self.templateParams["srs"])[0]
-        templateSRSCellSize = abs(abs(tOriginX1) - abs(self.templateParams["west"]))
+#                                                sourceParams["north"], sourceParams["srs"], self.template_params["srs"])[0]
+        templateSRSCellSize = abs(abs(tOriginX1) - abs(self.template_params["west"]))
         return templateSRSCellSize
 
     def getAggregateTargetCellSize(self, sourceParams):
@@ -257,13 +284,13 @@ class PARC:
         templateSRSCellSize = self.getTemplateSRSCellSize(sourceParams)
         #step 2:  round this up or down to an even fraction of the template cell size
         # for example source = 30, target = 250 resampledSource = 250/round(250/30)
-        sourcePixelsPerTarget = round(self.templateParams["xScale"]/templateSRSCellSize)
-        nearestWholeCellSize = (self.templateParams["xScale"] / 
+        sourcePixelsPerTarget = round(self.template_params["xScale"]/templateSRSCellSize)
+        nearestWholeCellSize = (self.template_params["xScale"] / 
                             sourcePixelsPerTarget)
         return nearestWholeCellSize, sourcePixelsPerTarget
         
         
-    def Aggregate(self, inFile, outFile, sourceParams, templateParams, method, numSourcePerTarget):
+    def Aggregate(self, inFile, outFile, sourceParams, templateParams, method=None, numSourcePerTarget=10):
         sourceDs = gdal.Open(inFile, gdalconst.GA_ReadOnly)
         sourceBand  = sourceDs.GetRasterBand(1)
         
@@ -278,7 +305,10 @@ class PARC:
         col = 0
         
         
-        pcntDone = 0
+        pcntDone = 0.0
+        if self.verbose:
+            print "    % Done:    0.0",
+            
         while row < templateParams["width"]:
             while col < templateParams["height"]:
                 sourceRow = row * numSourcePerTarget
@@ -289,17 +319,25 @@ class PARC:
                                                     int(sourceCol), 
                                                     int(numSourcePerTarget),
                                                     int(numSourcePerTarget))
-                #convert kenel values of our nodata to nan
+                #convert kernel values of our nodata to nan
                 ndMask = ma.masked_array(kernel, mask=(kernel==sourceParams["NoData"]))
                 #print kernel
-                if self.aggMethod == "Min":
+                if method == "Min":
                     ans = ndMask.min()
-                elif self.aggMethod == "Max":
+                elif method == "Max":
                     ans = ndMask.max()
-                elif self.aggMethod == "Majority":
+                elif method == "Majority":
+#                    ndMask = ndMask.flatten()
                     uniques = np.unique(ndMask)
-                    histogram = np.histogram(ndMask, uniques)
-                    ans = histogram[1][histogram[0].argmax()]
+                    curMajority = -3.40282346639e+038
+                    for val in uniques:
+                        numOccurances = (array(ndMask)==val).sum()
+                        if numOccurances > curMajority:
+                            ans = val
+                            curMajority = numOccurances
+                            
+#                    histogram = np.histogram(ndMask, uniques)
+#                    ans = histogram[1][histogram[0].argmax()]
                 else:
                     ans = ndMask.mean()
                 
@@ -321,10 +359,13 @@ class PARC:
                 
             row += 1
             col  = 0
-            if float(row)/templateParams["width"] > float(pcntDone)/100:
-                pcntDone += 10
-                if self.verbose:
-                    print str(pcntDone) + "...",
+            if self.verbose:
+                if float(row)/templateParams["width"] > float(pcntDone)/100:
+                    pcntDone += 2.5
+                    if int(pcntDone) % 10 == 0:
+                        print str(pcntDone),
+                    else:
+                        print ".",
         if self.verbose:
             print "Done"
 #        if self.verbose:
@@ -342,10 +383,10 @@ class PARC:
         
     def getRasterParams(self, rasterFile):
         """
-        Extracts a series of bits of information from a passed raster
+        Extracts properties from a passed raster
         All values are stored in a dictionary which is returned.
         If errors are encountered along the way the error messages will
-        be returned as a list in the Error element.
+        be returned as a list in the 'Error' element.
         """
         try:
             #initialize our params dictionary to have None for all parma
@@ -354,11 +395,13 @@ class PARC:
                             "east", "north", "west", "south",  
                             "tEast", "tNorth", "tWest", "tSouth",
                             "gEast", "gNorth", "gWest", "gSouth",  
-                            "Wkt", "srs", "gt", "prj", "NoData", "PixelType"]
+                            "Wkt", "srs", "gt", "prj", "NoData", "PixelType", "file_name"]
             
             for param in allRasterParams:
                 params[param] = None
             params["Error"] = []
+            params["file_name"] = rasterFile
+
             
             # Get the PARC parameters from the rasterFile.
             dataset = gdal.Open(rasterFile, gdalconst.GA_ReadOnly)
@@ -394,13 +437,13 @@ class PARC:
                     if rasterFile == self.template:
                         params["tWest"], params["tNorth"] = params["west"], params["north"]
                         params["tEast"], params["tSouth"] = params["east"], params["south"]
-                    elif params["srs"].ExportToWkt() == self.templateParams["srs"].ExportToWkt():
+                    elif params["srs"].ExportToWkt() == self.template_params["srs"].ExportToWkt():
                         params["tWest"], params["tNorth"] = params["west"], params["north"]
                         params["tEast"], params["tSouth"] = params["east"], params["south"]
                     else:
                         try:
-                            params["tWest"], params["tNorth"] = self.transformPoint(params["west"], params["north"], params["srs"], self.templateParams["srs"])
-                            params["tEast"], params["tSouth"] = self.transformPoint(params["east"], params["south"], params["srs"], self.templateParams["srs"])
+                            params["tWest"], params["tNorth"] = self.transformPoint(params["west"], params["north"], params["srs"], self.template_params["srs"])
+                            params["tEast"], params["tSouth"] = self.transformPoint(params["east"], params["south"], params["srs"], self.template_params["srs"])
                         except:
                             params["Error"].append("Could not transform extent coordinates to template spatial reference")
                             #params["Error"] = "We ran into problems converting projected coordinates to template for " +  rasterFile
@@ -469,35 +512,68 @@ class PARC:
 
         return gx, gy
         
-    def TemplateCoversImage(self, sourceParams):
+    def ImageCoversTemplate(self, sourceParams):
         """
-        Checks to see if the templatate images 
+        Checks to see if the template images 
         falls completely inside the source raster
+        
+        it does this by generating a list of 16 coordinate
+        pairs equally distributed across the template,
+        including the four absolute corners.  
+        These points are in the CRS of the image.
+        If all of these points have a valid data or nodata
+        value in the image, then the image covers the template.
+        (in nearly every case anyway)
         """
-        if not sourceParams["tWest"] <= self.templateParams["tWest"]:
-            return False
-        elif not sourceParams["tEast"] >= self.templateParams["tEast"]:
-            return False
-        elif not sourceParams["tNorth"] >= self.templateParams["tNorth"]:
-            return False
-        elif not sourceParams["tSouth"] <= self.templateParams["tSouth"]:
+        
+        n = 5
+        xOffset = (self.template_params["east"] - self.template_params["west"]) / n
+        yOffset = (self.template_params["north"] - self.template_params["south"]) / n
+        curX = self.template_params["west"]
+        curY = self.template_params["north"]
+        testPoints =[self.transformPoint(curX, curY, self.template_params["srs"], 
+                                                    sourceParams["srs"])]
+        for x in range(n):
+            for y in range(n):
+                curY -= yOffset
+                testPoints.append(self.transformPoint(curX, curY, self.template_params["srs"], 
+                                                    sourceParams["srs"]))
+            curX += xOffset
+            curY = self.template_params["north"]  
+                
+        rasterDS = gdal.Open(sourceParams["file_name"], gdalconst.GA_ReadOnly)
+        band = rasterDS.GetRasterBand(1)
+        badPoint = False        
+        for point in testPoints:
+            try:
+                xOffset = int((point[0] - sourceParams["west"]) / sourceParams["xScale"])
+                yOffset = int((point[1] - sourceParams["north"]) / sourceParams["yScale"])
+                data = band.ReadAsArray(xOffset, yOffset, 1, 1)
+                value = data[0,0]
+            except:
+                badPoint = True
+        
+        #if valid values were returned from each of our points then
+        #the template falls entirely within the Source image.
+        if badPoint:
             return False
         else:
             return True
+        
 
     def validateArgs(self):
         """
         Make sure the user sent us some stuff we can work with
         """
 
-        if not os.path.exists(self.outDir):
-            raise utilities.TrappedError("Specified Output directory " + self.outDir + " not found on file system")
+        if not os.path.exists(self.out_dir):
+            raise utilities.TrappedError("Specified Output directory " + self.out_dir + " not found on file system")
         
-        if not os.path.isdir(self.outDir):
-            raise utilities.TrappedError("Specified Output directory " + self.outDir + " is not a directory")
+        if not os.path.isdir(self.out_dir):
+            raise utilities.TrappedError("Specified Output directory " + self.out_dir + " is not a directory")
      
         if self.logger is None:
-            self.logger = utilities.logger(self.outDir, self.verbose)
+            self.logger = utilities.logger(self.out_dir, self.verbose)
         self.writetolog = self.logger.writetolog
 
         # Validate template image.
@@ -507,29 +583,29 @@ class PARC:
         if not os.path.exists(self.template):
             raise utilities.TrappedError("Template file, " + self.template + ", does not exist on file system")
 
-        self.templateParams = self.getRasterParams(self.template)
-        if len(self.templateParams["Error"]) <> 0:
+        self.template_params = self.getRasterParams(self.template)
+        if len(self.template_params["Error"]) <> 0:
             raise utilities.TrappedError("There was a problem with the provided template: \n    " + 
-                                    "    " + "\n    ".join(self.templateParams["Error"]))
+                                    "    " + "\n    ".join(self.template_params["Error"]))
         
         # Ensure the template has square pixels.
-        if abs(abs(self.templateParams["xScale"]) - abs(self.templateParams["yScale"])) > 1e-6:
+        if abs(abs(self.template_params["xScale"]) - abs(self.template_params["yScale"])) > 1e-6:
             raise utilities.TrappedError("template image must have square pixels." + 
                             "/n    x pixel scale = " + str(xScale) +
                             "/n    y pixel scale = " + str(yScale))
 
         
         #Validate input rasters
-        if not os.path.exists(self.inputsCSV):
-            raise utilities.TrappedError("Inputs CSV, " + self.inputsCSV + ", does not exist on file system.")
+        if not os.path.exists(self.inputs_CSV):
+            raise utilities.TrappedError("Inputs CSV, " + self.inputs_CSV + ", does not exist on file system.")
         
-        inputsCSV = csv.reader(open(self.inputsCSV, 'r'))
+        inputsCSV = csv.reader(open(self.inputs_CSV, 'r'))
         header = inputsCSV.next()
         strInputFileErrors = ""
 
-        outputCSV = os.path.join(self.outDir, "PARC_Files.csv")
+        outputCSV = os.path.join(self.out_dir, "PARC_Files.csv")
         output = csv.writer(open(outputCSV, "wb"))
-        output.writerow(["PARCOutputFile", "Categorical", "Resampling", "Aggregation", "OriginalFile"])
+        output.writerow(["PARCOutputFile", "Categorical", "Resampling", "Aggregation", "OriginalFile", os.path.abspath(self.template), os.path.abspath(self.out_dir)])
         
         for row in inputsCSV:
             inputFile = row[0]
@@ -539,15 +615,15 @@ class PARC:
                                     "    " + "\n    ".join(sourceParams["Error"])) + "\n"
             else:
                 pass
-#                if not self.TemplateCoversImage(sourceParams):
-#                    strInputFileErrors += ("\n  Some part of the template image falls outside of " + os.path.split(inputFile)[1])
-#                    strInputFileErrors += "\n        template upper left  = (" + str(self.templateParams["west"]) + ", " + str(self.templateParams["north"]) + ")"
-#                    strInputFileErrors += "\n        template lower right = (" + str(self.templateParams["east"]) + ", " + str(self.templateParams["south"]) + ")"
-#                    strInputFileErrors += "\n        image    upper left  = (" + str(sourceParams["west"]) + ", " + str(sourceParams["north"]) + ")"
-#                    strInputFileErrors += "\n        image    lower right = (" + str(sourceParams["east"]) + ", " + str(sourceParams["south"]) + ")"
+                if not self.ImageCoversTemplate(sourceParams):
+                    strInputFileErrors += ("\n  Some part of the template image falls outside of " + os.path.split(inputFile)[1])
+                    strInputFileErrors += "\n        template upper left  = (" + str(self.template_params["gWest"]) + ", " + str(self.template_params["gNorth"]) + ")"
+                    strInputFileErrors += "\n        template lower right = (" + str(self.template_params["gEast"]) + ", " + str(self.template_params["gSouth"]) + ")"
+                    strInputFileErrors += "\n        image    upper left  = (" + str(sourceParams["gWest"]) + ", " + str(sourceParams["gNorth"]) + ")"
+                    strInputFileErrors += "\n        image    lower right = (" + str(sourceParams["gEast"]) + ", " + str(sourceParams["gSouth"]) + ")"
 #                    strInputFileErrors += "\n        points are given in projected coordinates."
-#                    strInputFileErrors += "\n        template upper left  = (" + str(self.templateParams["tWest"]) + ", " + str(self.templateParams["tNorth"]) + ")"
-#                    strInputFileErrors += "\n        template lower right = (" + str(self.templateParams["tEast"]) + ", " + str(self.templateParams["tSouth"]) + ")"
+#                    strInputFileErrors += "\n        template upper left  = (" + str(self.template_params["tWest"]) + ", " + str(self.template_params["tNorth"]) + ")"
+#                    strInputFileErrors += "\n        template lower right = (" + str(self.template_params["tEast"]) + ", " + str(self.template_params["tSouth"]) + ")"
 #                    strInputFileErrors += "\n        image    upper left  = (" + str(sourceParams["tWest"]) + ", " + str(sourceParams["tNorth"]) + ")"
 #                    strInputFileErrors += "\n        image    lower right = (" + str(sourceParams["tEast"]) + ", " + str(sourceParams["tSouth"]) + ")"
 #                    strInputFileErrors += "\n        Note: points are given in the template coordinates." + "\n"
@@ -559,9 +635,9 @@ class PARC:
                 else:
                     row[1] = '0'
                  
-            if len(row) < 3 or not row[2].lower() in [item.lower() for item in self.resampleMethods]:
+            if len(row) < 3 or not row[2].lower() in [item.lower() for item in self.resample_methods]:
                  self.writetolog("  " + os.path.split(inputFile)[1] + " resample method either missing or not one of " + 
-                                        ", ".join(self.resampleMethods) + "\n  Defaulting to 'Bilinear'")                  
+                                        ", ".join(self.resample_methods) + "\n  Defaulting to 'Bilinear'")                  
                  
                  if row[1] == '0':
                      default = 'Bilinear'
@@ -572,9 +648,9 @@ class PARC:
                  else:
                      row[2] = default
 
-            if len(row) < 4 or not row[3].lower() in [item.lower() for item in self.aggMethods]:
+            if len(row) < 4 or not row[3].lower() in [item.lower() for item in self.agg_methods]:
                  self.writetolog("  " + os.path.split(inputFile)[1] + " aggregation method either missing or not one of " + 
-                                        ", ".join(self.aggMethods) + "\n  Defaulting to 'Mean'")
+                                        ", ".join(self.agg_methods) + "\n  Defaulting to 'Mean'")
                  if row[1] == '0':
                      default = 'Mean'
                  else:
@@ -587,8 +663,8 @@ class PARC:
             self.inputs.append(row)
             #also write the output row, reconfigured to our output file
             fileName = self.getShortName(row[0])
-            fileName = os.path.join(self.outDir, fileName + ".tif")
-            outputrow = [fileName] + row[1:4] + [row[0]]
+            fileName = os.path.abspath(os.path.join(self.out_dir, fileName + ".tif"))
+            outputrow = [fileName] + row[1:4] + [os.path.abspath(row[0]), os.path.abspath(self.out_dir)]
             output.writerow(outputrow)
         del output
         
@@ -599,7 +675,7 @@ class PARC:
     def reprojectRaster(self, srcDs, sourceParams, templateParams, 
                     destFile, resamplingType, shortName='', outputCellSize = None):
         """
-        Reprojects a raster to match the templateParams
+        Reprojects a raster to match the template_params
         if outputCellSize is not provided defaults to the template cellSize
         """
 #        driver = gdal.GetDriverByName("AAIGrid")
@@ -622,11 +698,11 @@ class PARC:
         """
         Creates an output dataset (tiff format) that
           has the nodata value of the sourceParams but
-          all other attributes from the templateParams
+          all other attributes from the template_params
         This output is saved to tmpOutput.
         
         The optional cell size will override the cell size 
-            specified in the templateParams
+            specified in the template_params
         """
         tifDriver = gdal.GetDriverByName("GTiff")
         
@@ -670,10 +746,10 @@ class PARC:
             tmpOutDataset.GetRasterBand(1).PixelType = "SIGNEDBYTE"
             tmpOutDataset.GetRasterBand(1).SetMetadata({'PIXELTYPE': 'SIGNEDBYTE'}, 'IMAGE_STRUCTURE')
             
-        if self.verbose:
-            print tmpOutput
-            print "noDataValue = ", tmpOutDataset.GetRasterBand(1).GetNoDataValue()
-            print "Pixel type = ", gdal.GetDataTypeName(tmpOutDataset.GetRasterBand(1).DataType)
+#        if self.verbose:
+#            print tmpOutput
+#            print "noDataValue = ", tmpOutDataset.GetRasterBand(1).GetNoDataValue()
+#            print "Pixel type = ", gdal.GetDataTypeName(tmpOutDataset.GetRasterBand(1).DataType)
         return tmpOutDataset
 
     def getShortName(self, fullPathName):

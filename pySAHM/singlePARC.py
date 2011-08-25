@@ -1,4 +1,17 @@
 #!/usr/bin/python
+"""
+This was an experiment to explore breaking the
+individual raster processes into individual
+runs that could be either run on separate 
+processes on the same computer with a command line
+popopen perhaps or sent out individually to our 
+Condor distributed coputing cluster.
+
+
+"""
+
+
+
 
 import glob
 import math
@@ -33,6 +46,7 @@ def main(args_in):
     
     parser = OptionParser(usage=usageStmt, description=desc)
     parser.add_option("-s", dest="source", help="print the names of all known aggregation methods")
+    parser.add_option("-c", dest="categorical")
     parser.add_option("-d", dest="dest", default="./", help="directory in which to put processed images, defaults to current directory")
     parser.add_option("-v", dest="verbose", default=False, action="store_true", help="the verbose flag causes diagnostic output to print")
     parser.add_option("-t", dest="template", help="The template raster used for projection, origin, cell size and extent")
@@ -47,8 +61,8 @@ def main(args_in):
     ourPARC.outDir = outDir
     ourPARC.logger = utilities.logger(outDir, ourPARC.verbose)
     ourPARC.writetolog = ourPARC.logger.writetolog
-    ourPARC.templateParams = ourPARC.getRasterParams(options.template)
-    ourPARC.parcFile([options.source, options.resampling, options.aggregation], options.dest)
+    ourPARC.template_params = ourPARC.getRasterParams(options.template)
+    ourPARC.parcFile([options.source, options.categorical, options.resampling, options.aggregation], options.dest)
 
 
 
