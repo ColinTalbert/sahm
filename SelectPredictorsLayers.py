@@ -23,6 +23,11 @@ class SelectListDialog(QtGui.QDialog):
     def __init__(self, inputMDS, outputMDS, displayJPEG, rPath, parent=None):
         #print inputMDS, outputMDS, rPath, modelsPath
         self.rPath = rPath
+        
+        self.selection_name = os.path.split(outputMDS)[1]
+        self.selection_name = os.path.splitext(self.selection_name)[0]
+        self.selection_name = self.selection_name.split('_')[-1]
+        
         self.displayJPEG = displayJPEG
         
         QtGui.QDialog.__init__(self, parent)
@@ -209,8 +214,10 @@ class SelectListDialog(QtGui.QDialog):
         self.done(0)
 
     def cancel(self):
-        shutil.copyfile(self.inputMDS, self.outputMDS)
         self.done(1)
+        #raise Exception
+#        shutil.copyfile(self.inputMDS, self.outputMDS)
+        
     
     def PopulateTreeview(self):
         ''' Reads in the input MDS and populates the treeview widget
@@ -219,7 +226,11 @@ class SelectListDialog(QtGui.QDialog):
         '''
         writetolog("    PopulateTreeview inputMDS = " + self.inputMDS, False, False)
         self.treeview.setColumnCount(1)
-        
+        #If an outputMDS already exists then the user has run this module before.
+        #We need to pull and apply their previous selections from that output file
+
+
+            
         csvfile = open(self.inputMDS, "r")
         #print "MDS", self.inputMDS
         reader = csv.reader(csvfile)
@@ -235,18 +246,22 @@ class SelectListDialog(QtGui.QDialog):
             headerList.append([header[i], header2[i], header3[i]])
         
         #headerList.sort()
-        for item in headerList:
-            if item[2] <> '':
-                child_item = QtGui.QTreeWidgetItem([item[0],])
-                child_item.setFlags(QtCore.Qt.ItemIsUserCheckable |
-                                QtCore.Qt.ItemIsEnabled)
-                if int(item[1]) == 0:
-                    child_item.setCheckState(0, QtCore.Qt.Unchecked)
-                else:
-                    child_item.setCheckState(0, QtCore.Qt.Checked)
-                self.treeview.addTopLevelItem(child_item)
-                #self.tree_items[file] = child_item
-                n += 1
+        for item in headerList[3:]:
+            child_item = QtGui.QTreeWidgetItem([item[0],])
+            child_item.setFlags(QtCore.Qt.ItemIsUserCheckable |
+                            QtCore.Qt.ItemIsEnabled)
+            checked = True
+            if int(item[1]) == 0:
+                checked = False 
+            
+            if not checked:
+                child_item.setCheckState(0, QtCore.Qt.Unchecked)
+            else:
+                child_item.setCheckState(0, QtCore.Qt.Checked)
+            
+            self.treeview.addTopLevelItem(child_item)
+            #self.tree_items[file] = child_item
+            n += 1
         csvfile.close()
         #update the tree view label to show how many covariates there are
         self.label_2.setText(_fromUtf8("Covariates   (n=" + str(n) + ")"))
@@ -265,17 +280,14 @@ class SelectListDialog(QtGui.QDialog):
         for i in range(0, len(header)):
             headerList.append([header[i], header2[i], header3[i]])
         
-        outHeader2 = []
-        for item in headerList:
-            if item[2] == '': #append our empty columns to header line 2
-                outHeader2.append('')
-                
+        outHeader2 = header2[:2] + [self.selection_name]        
+                  
         treeviewIter = QtGui.QTreeWidgetItemIterator(self.treeview)
         while treeviewIter.value():
             if treeviewIter.value().checkState(0) == QtCore.Qt.Checked:
                 outHeader2.append("1")
             else:
-                outHeader2.append("0")
+                outHeader2.append ("0")
             treeviewIter += 1
 
         
