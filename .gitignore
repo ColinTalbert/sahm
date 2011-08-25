@@ -2,3 +2,6 @@
 *~
 .project
 .pydevproject
+.metadata
+*Thumbs.db
+.gitignore

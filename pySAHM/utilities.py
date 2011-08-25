@@ -133,7 +133,11 @@ def isMDSFile(MDSFile):
     return True
     del MDSreader
 
-
+def process_waiter(popen, description, que):
+    try: 
+        popen.wait()     
+    finally: 
+        que.put( (description, popen.returncode) ) 
 
 #class SAHMLogger(object):
 #    def __init__(self, sessiondir):
