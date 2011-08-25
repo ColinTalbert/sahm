@@ -22,8 +22,6 @@ from SelectPredictorsLayers import SelectListDialog
 #from maxent_module import MAXENTRunner
 import utils
 
-
-
 #import our python SAHM Processing files
 import packages.sahm.pySAHM.FieldDataQuery as FDQ
 import packages.sahm.pySAHM.MDSBuilder as MDSB
@@ -328,17 +326,6 @@ class PredictorListFile(Module):
         output_file = utils.create_file_module(output_fname)
         self.setResult('csvFileList', output_file)
         
-#        v = self.forceGetInputFromPort("value", [])
-#        b = self.validate(v)
-#        if not b:
-#            raise ModuleError(self, "Internal Error: Constant failed validation")
-#        if len(v) > 0 and type(v[0]) == tuple:
-#            f_list = [create_file_module(v_elt[1]) for v_elt in v]
-#        else:
-#            f_list = v
-#        p_list += f_list
-#        self.setResult("value", p_list)
-
 class TemplateLayer(Path):
     '''
     Template Layer
@@ -487,9 +474,6 @@ class ApplyModel(Module):
             output_file2 = utils.create_file_module(outFileName)
             self.setResult('BinaryMap', output_file2)
         
-        
-        
-
 class Model(Module):
     '''
     This module is a required class for other modules and scripts within the
@@ -643,12 +627,6 @@ class MARS(Model):
                          'MarsPenalty':('pen', None, False), #This is a MARS specific port
                          }
 
-#class MAXENT(Model):
-#    def __init__(self):
-#        global models_path
-#        Model.__init__(self)
-#        self.name = 'RunMaxEnt.jar'
-
 class BoostedRegressionTree(Model):
     _input_ports = list(Model._input_ports)
     _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', True),
@@ -679,8 +657,7 @@ class BoostedRegressionTree(Model):
                          'ToleranceMethod':('tolm', None, False), #This is a BRT specific port
                          'Tolerance':('tol', None, False) #This is a BRT specific port
                          }
-
-    
+   
 class MDSBuilder(Module):
     '''
     MDS Builder
@@ -751,6 +728,8 @@ class MDSBuilder(Module):
         #allow multiple CSV of inputs to be provided.  
         #if more than one then combine into a single CSV before sending to MDSBuilder
         inputs_csvs = self.forceGetInputListFromPort('RastersWithPARCInfoCSV')
+        if len(inputs_csvs) == 0:
+            raise ModuleError(self, "Must supply at least one 'RastersWithPARCInfoCSV'/nThis is the output from the PARC module")
         if len(inputs_csvs) > 1:
             inputs_csv = utils.mknextfile(prefix='CombinedPARCFiles_', suffix='.csv')
             inputs_names = [f.name for f in inputs_csvs]
@@ -868,13 +847,14 @@ class PARC(Module):
     _input_ports = [('predictor', "(gov.usgs.sahm:Predictor:DataInput)"),
                                 ('PredictorList', '(gov.usgs.sahm:PredictorList:Other)'),
                                 ('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
-                                ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)')]
+                                ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
+                                ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':True})]
 
     _output_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
     
 
     def compute(self):
-        writetolog("\nRunning PARC", True)
+        #writetolog("\nRunning PARC", True)
         
         ourPARC = parc.PARC()
         output_dname = utils.mknextdir(prefix='PARC_')
@@ -883,7 +863,11 @@ class PARC(Module):
             ourPARC.verbose = True
         ourPARC.logger = utils.getLogger()
         writetolog("    output_dname=" + output_dname, False, False)
-        ourPARC.outDir = output_dname
+        ourPARC.out_dir = output_dname
+
+        if self.hasInputFromPort("multipleCores"):
+             if self.getInputFromPort("multipleCores"):
+                ourPARC.multicores = "True"
 
         workingCSV = utils.mknextfile(prefix='tmpFilesToPARC_', suffix='.csv')
         outputCSV = utils.mknextfile(prefix='PARCOutput_', suffix='.csv')
@@ -912,9 +896,9 @@ class PARC(Module):
                 csvWriter.writerow(list(predictor))
         f.close()
         del csvWriter
-        ourPARC.inputsCSV = workingCSV
+        ourPARC.inputs_CSV = workingCSV
         ourPARC.template = self.forceGetInputFromPort('templateLayer').name
-        writetolog('    template layer = ' + self.forceGetInputFromPort('templateLayer').name)
+        #writetolog('    template layer = ' + self.forceGetInputFromPort('templateLayer').name)
 
         try:
             ourPARC.parcFiles()
@@ -1509,12 +1493,12 @@ def initialize():
     global session_dir
     utils.config = configuration
     
-    r_path = configuration.r_path
-    maxent_path = configuration.maxent_path
+    r_path = os.path.abspath(configuration.r_path)
+    maxent_path = os.path.abspath(configuration.maxent_path)
     
     #append to our path variable the location of the GDAL dependencies
     #Proj, GDAL, and GDAL data
-    proj_path = os.path.join(configuration.gdal_path, "proj", "bin")
+    proj_path = os.path.abspath(os.path.join(configuration.gdal_path, "proj", "bin"))
     currentPath = os.environ['Path']
     appendedPath = currentPath + ";" + proj_path
     os.environ['Path'] = appendedPath
@@ -1522,7 +1506,7 @@ def initialize():
     gdal_data = os.path.join(configuration.gdal_path, "gdal-data")
     os.putenv("GDAL_DATA", gdal_data)
 
-    gdal_folder = os.path.join(configuration.gdal_path, "GDAL")
+    gdal_folder = os.path.abspath(os.path.join(configuration.gdal_path, "GDAL"))
     currentPath = os.environ['Path']
     appendedPath = currentPath + ";" + gdal_folder
     os.environ['Path'] = appendedPath     
@@ -1531,18 +1515,18 @@ def initialize():
     utils.createLogger(session_dir, configuration.output_dir)
     #log_file = Utilities.createsessionlog(session_dir, configuration.verbose)
     
-    color_breaks_csv = os.path.join(os.path.dirname(__file__),  "ColorBreaks.csv")
+    color_breaks_csv = os.path.abspath(os.path.join(os.path.dirname(__file__),  "ColorBreaks.csv"))
     
     load_max_ent_params()
     
     writetolog("*" * 79)
     writetolog("Initializing:", True, True)
     writetolog("  Locations of dependencies")
-    writetolog("   layers csv = " + os.path.join(os.path.dirname(__file__), "layers.csv"))
-    writetolog("   ColorBreaks csv = " + color_breaks_csv)
-    writetolog("   R path = " + configuration.r_path)
-    writetolog("   GDAL folder = " + configuration.gdal_path)
+    writetolog("   Layers CSV = " + os.path.join(os.path.dirname(__file__), 'layers.csv'))
+    writetolog("   R path = " + r_path)
+    writetolog("   GDAL folder = " + os.path.abspath(configuration.gdal_path))
     writetolog("        Must contain subfolders proj, gdal-data, GDAL")
+    writetolog("   Maxent folder = " + maxent_path)
     writetolog("    ")
     writetolog("*" * 79)
     
@@ -1571,6 +1555,7 @@ def generate_namespaces(modules):
 def build_available_trees():
     trees = {}
 
+    #layers_fname = os.path.abspath(configuration.layers_csv_path)
     layers_fname = os.path.join(os.path.dirname(__file__), 'layers.csv')
     csv_reader = csv.reader(open(layers_fname, 'rU'))
     # pass on header
