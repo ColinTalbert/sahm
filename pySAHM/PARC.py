@@ -25,7 +25,7 @@ import utilities
 
 def main(args_in):
     """
-    Process commandline Arguments, 
+    Process commandline Arguments,  
     Create an instance of PARC with the Variables,
     Kick off the parkFiles function of our PARC instance
     """
