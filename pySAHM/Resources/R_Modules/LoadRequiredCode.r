@@ -1,0 +1,6 @@
+source(paste(ScriptPath,"EvaluationStats.r",sep="\\"))
+source(paste(ScriptPath,"TestTrainRocPlot.r",sep="\\"))
+source(paste(ScriptPath,"read.ma.r",sep="\\"))
+source(paste(ScriptPath,"proc.tiff.r",sep="\\"))
+source(paste(ScriptPath,"check.libs.r",sep="\\"))
+source(paste(ScriptPath,"modalDialog.r",sep="\\"))
