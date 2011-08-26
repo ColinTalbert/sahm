@@ -6,12 +6,7 @@ runs that could be either run on separate
 processes on the same computer with a command line
 popopen perhaps or sent out individually to our 
 Condor distributed coputing cluster.
-
-
 """
-
-
-
 
 import glob
 import math
@@ -65,13 +60,6 @@ def main(args_in):
     ourPARC.parcFile([options.source, options.categorical, options.resampling, options.aggregation], options.dest)
 
 
-
-    
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
-#    try:
-##        PARC().testing()
-#        sys.exit(PARC().main(sys.argv[1:]))
-#    except Exception as e:
-#        print e
-#        sys.exit(1)
+
