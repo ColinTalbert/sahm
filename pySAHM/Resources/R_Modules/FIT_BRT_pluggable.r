@@ -186,7 +186,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
       )
       if(!is.null(seed)) set.seed(seed)
     # load libaries #
-    out <- check.libs(list("PresenceAbsence","rgdal","XML","sp","survival","lattice","raster"),out)
+    out <- check.libs(list("PresenceAbsence","rgdal","XML","sp","survival","lattice","raster","tcltk2"),out)
 
     # exit program now if there are missing libraries #
       if(!is.null(out$error.mssg[[1]])){
@@ -339,20 +339,6 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
 
     # Store .jpg ROC plot #
 
-  if(out$input$model.family=="bernoulli"){
-      auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=predict.gbm(out$mods$final.mod,out$dat$ma$ma,
-            out$mods$final.mod$target.trees,type="response"),plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",opt.methods=opt.methods,
-            weight=out$dat$ma$train.weights)
-
-      out$mods$auc.output<-auc.output
-      }
-  if(out$input$model.family=="poisson"){
-      auc.output <- make.poisson.jpg(out$dat$ma$ma,pred=predict.gbm(out$mods$final.mod,out$dat$ma$ma,
-            out$mods$final.mod$target.trees,type="response"),plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",
-            weight=out$dat$ma$train.weights)
-
-      out$mods$auc.output<-auc.output
-      }
     # Generate and store text summary #
     #source('F:/code for Jeff and Roger/boosted regression trees/brt.functions.aks.021709.r')
     y <- gbm.interactions(out$mods$final.mod)
@@ -382,33 +368,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
         }
     if(debug.mode) assign("out",out,envir=.GlobalEnv)
     
-   if(out$input$model.family=="bernoulli"){
-    txt0 <- paste("Boosted Regression Tree Modeling Results\n",out$input$run.time,"\n\n","Data:\n",ma.name,"\n","n(pres)=",
-        out$dat$ma$n.pres[2],", n(abs)=",out$dat$ma$n.abs[2],", n covariates considered=",length(out$dat$ma$used.covs),
-        "\n\n","Settings:\n","tree complexity=",out$mods$parms$tc.full,", learning rate=",round(out$mods$lr.mod$lr,4),
-        ", n(trees)=",out$mods$final.mod$target.trees,",\n","model simplification=",out$input$simp.method,", n folds=",out$input$n.folds,
-        "\n\n","Results:\n","AUC=",round(out$mods$auc.output$auc,4),", n covariates in final model=",nrow(out$mods$final.mod$contributions),
-        ", pct deviance explained=",round(out$mods$auc.output$pct.dev.exp,1),"%\n",
-        "total time for model fitting=",round((unclass(Sys.time())-t0)/60,2),"min\n",sep="")
-    txt1 <- "\nRelative influence of predictors in final model:\n\n"
-    txt2 <- "\nImportant interactions in final model:\n\n"
-    capture.output(cat(txt0),cat(txt1),print(out$mods$final.mod$contributions),cat(txt2),print(out$mods$interactions,row.names=F),file=paste(bname,"_output.txt",sep=""))
-    cat(txt0);cat(txt1);print(out$mods$final.mod$contributions);cat(txt2);print(out$mods$interactions,row.names=F)
-    }
 
-  if(out$input$model.family=="poisson"){
-    txt0 <- paste("Boosted Regression Tree Modeling Results\n",out$input$run.time,"\n\n","Data:\n\t ",ma.name,"\n\t ","n(pres)=",
-        out$dat$ma$n.pres[2],"\n\t n(abs)=",out$dat$ma$n.abs[2],"\n\t number of covariates considered=",length(out$dat$ma$used.covs),
-        "\n\n","Settings:\n","\t tree complexity=",out$mods$parms$tc.full,"\n\t learning rate=",round(out$mods$lr.mod$lr,4),
-        "\n\t n(trees)=",out$mods$final.mod$target.trees,"\n","\t model simplification=",out$input$simp.method,"\n\t n folds=",out$input$n.folds,
-        "\n\n","Results:\n\t ","number covariates in final model=",nrow(out$mods$final.mod$contributions),
-        "\n\t pct deviance explained on train data =",round(out$mods$auc.output$pct.dev.exp,1),"%\n",
-        "\n\t total time for model fitting=",round((unclass(Sys.time())-t0)/60,2),"min\n",sep="")
-    txt1 <- "\nRelative influence of predictors in final model:\n\n"
-    txt2 <- "\nImportant interactions in final model:\n\n"
-    capture.output(cat(txt0),cat(txt1),print(out$mods$final.mod$contributions),cat(txt2),print(out$mods$interactions,row.names=F),file=paste(bname,"_output.txt",sep=""))
-    cat(txt0);cat(txt1);print(out$mods$final.mod$contributions);cat(txt2);print(out$mods$interactions,row.names=F)
-    }
     
     if(!is.null(out$dat$bad.factor.cols)){
         capture.output(cat("\nWarning: the following categorical response variables were removed from consideration\n",
@@ -419,6 +379,39 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
         }
 
 
+    txt0 <- paste("\nBoosted Regression Tree Modeling Results\n",out$input$run.time,"\n\n",
+                  "Data:\n",ma.name,"\n",
+                  "\n\tn(pres)=",out$dat$ma$n.pres[2],
+                  "\n\tn(abs)=",out$dat$ma$n.abs[2],
+                  "\n\tn covariates considered=",length(out$dat$ma$used.covs),
+        "\n\n","Settings:\n",
+                "\n\ttree complexity=",out$mods$parms$tc.full,
+                "\n\tlearning rate=",round(out$mods$lr.mod$lr,4),
+                "\n\tn(trees)=",out$mods$final.mod$target.trees,
+                "\n\tmodel simplification=",out$input$simp.method,
+                "\n\tn folds=",out$input$n.folds,
+                "\n\tn covariates in final model=",nrow(out$mods$final.mod$contributions),
+        "\n\ttotal time for model fitting=",round((unclass(Sys.time())-t0)/60,2),"min\n",sep="")
+    txt1 <- "\nRelative influence of predictors in final model:\n\n"
+    txt2 <- "\nImportant interactions in final model:\n\n"
+
+    capture.output(cat(txt0),cat(txt1),print(out$mods$final.mod$contributions),cat(txt2),print(out$mods$interactions,row.names=F),file=paste(bname,"_output.txt",sep=""))
+    cat(txt0);cat(txt1);print(out$mods$final.mod$contributions);cat(txt2);print(out$mods$interactions,row.names=F)
+
+  if(out$input$model.family=="bernoulli"){
+      auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=predict.gbm(out$mods$final.mod,out$dat$ma$ma,
+            out$mods$final.mod$target.trees,type="response"),plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",opt.methods=opt.methods,
+            weight=out$dat$ma$train.weights,out=out)
+
+      out$mods$auc.output<-auc.output
+      }
+  if(out$input$model.family=="poisson"){
+      auc.output <- make.poisson.jpg(out$dat$ma$ma,pred=predict.gbm(out$mods$final.mod,out$dat$ma$ma,
+            out$mods$final.mod$target.trees,type="response"),plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",
+            weight=out$dat$ma$train.weights)
+
+      out$mods$auc.output<-auc.output
+      }
 
     if(!debug.mode) {sink();cat("Progress:70%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("70%\n")}
 
@@ -720,17 +713,6 @@ est.lr <- function(out){
     return(out)
     }
 
-
-
-check.libs <- function(libs,out){
-      lib.mssg <- unlist(suppressMessages(suppressWarnings(lapply(libs,require,quietly = T, warn.conflicts=F,character.only=T))))
-      if(any(!lib.mssg)){
-            out$ec <- out$ec+1
-            out$dat$missing.libs <-  paste(unlist(libs)[!lib.mssg],collapse="; ")
-            out$error.mssg[[out$ec]] <- paste("ERROR: the following package(s) could not be loaded:",out$dat$missing.libs)
-            }
-      return(out)
-      }
 
 check.dir <- function(dname){
     if(is.null(dname)) dname <- getwd()
@@ -1621,12 +1603,16 @@ function(gbm.object,
   n.trees <- gbm.call$best.trees
 
   if (is.null(x.range)) {
-    x.var <- seq(min(data[,x],na.rm=T),max(data[,x],na.rm=T),length = 50)
+   if(!is.factor(data[,x]))
+        x.var <- seq(min(data[,x],na.rm=T),max(data[,x],na.rm=T),length = 50)
+      else x.var<- sort(unique(as.numeric(levels(data[,x]))))
   }
   else {x.var <- seq(x.range[1],x.range[2],length = 50)}
 
   if (is.null(y.range)) {
-    y.var <- seq(min(data[,y],na.rm=T),max(data[,y],na.rm=T),length = 50)
+      if(!is.factor(data[,y]))
+        y.var <- seq(min(data[,y],na.rm=T),max(data[,y],na.rm=T),length = 50)
+      else y.var<- sort(unique(as.numeric(levels(data[,y]))))
   }
   else {y.var <- seq(y.range[1],y.range[2],length = 50)}
 
@@ -1672,11 +1658,12 @@ function(gbm.object,
 # report the maximum value and set up realistic ranges for z
 
   max.pred <- max(prediction)
+  min.pred<-min(prediction)
   if(verbose) cat("maximum value = ",round(max.pred,2),"\n")    #AKS
 
   if (is.null(z.range)) {
     if (family == "bernoulli") {
-      z.range <- c(0,1)
+      z.range <- c(min.pred,max.pred)
     }
     else if (family == "poisson") {
       z.range <- c(0,max.pred * 1.1)
@@ -1690,14 +1677,14 @@ function(gbm.object,
   }
 # form the matrix
 
-  pred.matrix <- matrix(prediction,ncol=50,nrow=50)
+  pred.matrix <- matrix(prediction,ncol=length(y.var),nrow=length(x.var))
 
 # kernel smooth if required
 
   if (smooth == "average") {  #apply a 3 x 3 smoothing average
      pred.matrix.smooth <- pred.matrix
-     for (i in 2:49) {
-       for (j in 2:49) {
+     for (i in 2:(length(x.var)-1)) {
+       for (j in 2:(length(y.var)-1)) {
          pred.matrix.smooth[i,j] <- mean(pred.matrix[c((i-1):(i+1)),c((j-1):(j+1))])
        }
      }
@@ -1714,7 +1701,7 @@ function(gbm.object,
   }
 #
 # and finally plot the result
-#
+
   if (!perspective) {
     image(x = x.var, y = y.var, z = pred.matrix, zlim = z.range)
   }
@@ -2510,10 +2497,8 @@ Args <- commandArgs(trailingOnly=FALSE)
 	print(responseCol)
 
 ScriptPath<-dirname(ScriptPath)
-source(paste(ScriptPath,"EvaluationStats.r",sep="\\"))
-source(paste(ScriptPath,"TestTrainRocPlot.r",sep="\\"))
-source(paste(ScriptPath,"read.ma.r",sep="\\"))
-source(paste(ScriptPath,"proc.tiff.r",sep="\\"))
+source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
+
 
 alpha<-as.numeric(alpha)
 make.p.tif<-as.logical(make.p.tif)

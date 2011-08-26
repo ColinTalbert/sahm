@@ -16,12 +16,32 @@
 
           tif.info<-readLines(ma.name,3)
           tif.info<-strsplit(tif.info,',')
-          include<-(as.numeric(tif.info[[2]]))
+          temp<-tif.info[[2]]
+          temp[1:3]<-0
+          include<-as.numeric(temp)
+
           paths<-as.character(tif.info[[3]])
-          #paths<-paths[!is.na(include)]
-          #include[is.na(include)]<-0
 
             }
+
+                temp<-strsplit(tif.info[[2]][1],split="\\\\")[[1]]
+            out.list$input$FieldDataTemp<-temp[length(temp)]
+
+                temp<-strsplit(tif.info[[2]][2],split="\\\\")[[1]]
+            out.list$input$OrigFieldData<-temp[length(temp)]
+            
+               temp<-strsplit(tif.info[[2]][3],split="\\\\")[[1]]
+            out.list$input$CovSelectName<-temp[length(temp)]
+            
+                temp<-strsplit(tif.info[[3]][1],split="\\\\")[[1]]
+            out.list$input$ParcTemplate<-temp[length(temp)]
+            
+            temp<-strsplit(tif.info[[3]][2],split="\\\\")[[1]]
+            out.list$input$ParcOutputFolder<-temp[length(temp)]
+            
+            temp<-strsplit(tif.info[[2]][2],split="\\\\")[[1]]
+            out.list$input$OrigFieldData<-temp[length(temp)]
+            
       if(class(ma)=="try-error"){
           out$ec <- out$ec+1
           out$error.mssg[[out$ec]] <- paste("ERROR: model array",ma.name,"is not readable")
@@ -29,14 +49,11 @@
           } else {
           out.list$status[2]<-T
           }
-        #out$dat$ma<-out$dat$ma[,-c(which(include==0,arr.ind=TRUE))]
-      # ma<-ma[,-c(which(include==0,arr.ind=TRUE))]
-      # tif.info<-tif.info[-c(which(include==0,arr.ind=TRUE))]
-      # paths<-paths[-c(which(include==0,arr.ind=TRUE))]
-      # include<-include[-c(which(include==0,arr.ind=TRUE))]
+
 
           r.name <- out$input$response.col
           if(r.name=="responseCount") out$input$model.family="poisson"
+
         # check to make sure that response column exists in the model array #
 
       r.col <- grep(r.name,names(ma))
@@ -68,7 +85,7 @@
 
 
        # remove weights column except for Random Forest
-       if(out$input$model.source.file!="rf.r"){
+
        site.weights<-match("site.weights",tolower(names(ma)))
        ifelse(!is.na(site.weights),{
           out.list$train.weights<-ma[,site.weights]
@@ -81,12 +98,42 @@
             }
           },
           out.list$train.weights<-rep(1,times=dim(ma)[1]))
-            }
-            
-           ma[ma==-9999]<-NA
+
 
      #remove test training split column if present
-          split.indx<-match("split",tolower(names(ma)))
+       ma.names <- names(ma)
+      # identify factors (this will eventually be derived from image metadata) #
+
+      factor.cols <- grep("categorical",names(ma))
+      factor.cols <- factor.cols[!is.na(factor.cols)]
+      if(length(factor.cols)==0){
+          out.list$factor.levels <- NA
+          } else {
+
+          names(ma) <- ma.names <-  sub("_categorical","",ma.names)
+          factor.names <- ma.names[factor.cols]
+          factor.levels <- list()
+          for (i in 1:length(factor.cols)){
+              f.col <- factor.cols[i]
+                  x <- table(ma[,f.col])
+                  if(nrow(x)<2){
+                        out$dat$bad.factor.cols <- c(out$dat$bad.factor.cols,factor.names[i])
+                        }
+                  lc.levs <-  as.numeric(row.names(x))[x>0] # make sure there is at least one "available" observation at each level
+                  lc.levs <- data.frame(number=lc.levs,class=lc.levs)
+                  factor.levels[[i]] <- lc.levs
+
+              ma[,f.col] <- factor(ma[,f.col],levels=lc.levs$number,labels=lc.levs$class)
+
+
+              }
+
+              names(factor.levels)<-factor.names
+              out.list$factor.levels <- factor.levels
+
+          }
+          
+        split.indx<-match("split",tolower(names(ma)))
           if(length(na.omit(split.indx))>0){
             include<-include[-c(split.indx)]
             split.col<-ma[,split.indx]
@@ -115,6 +162,7 @@
           out.list$n.abs[1] <- nrow(ma)-sum(ma[,r.col])
           out.list$resp.name <- names(ma)[r.col]
           ma.names <- names(ma)
+
           }
 
 
@@ -134,40 +182,6 @@
           ma.names <- names(ma)
           }
 
-      # identify factors (this will eventually be derived from image metadata) #
-
-      factor.cols <- grep("categorical",names(ma))
-      factor.cols <- factor.cols[!is.na(factor.cols)]
-      if(length(factor.cols)==0){
-          out.list$factor.levels <- NA
-          } else {
-          if(length(na.omit(split.indx))>0) names(out.list$ma.test)<-sub("_categorical","",names(out.list$ma.test))
-          names(ma) <- ma.names <-  sub("_categorical","",ma.names)
-          factor.names <- ma.names[factor.cols]
-          factor.levels <- list()
-          for (i in 1:length(factor.cols)){
-
-
-              f.col <- factor.cols[i]
-
-                  x <- table(ma[,f.col])
-                  if(nrow(x)<2){
-                        out$dat$bad.factor.cols <- c(out$dat$bad.factor.cols,factor.names[i])
-                        }
-                  lc.levs <-  as.numeric(row.names(x))[x>0] # make sure there is at least one "available" observation at each level
-                  lc.levs <- data.frame(number=lc.levs,class=lc.levs)
-                  factor.levels[[i]] <- lc.levs
-
-              ma[,f.col] <- factor(ma[,f.col],levels=lc.levs$number,labels=lc.levs$class)
-
-
-              }
-
-              names(factor.levels)<-factor.names
-              out.list$factor.levels <- factor.levels
-
-          }
-          
 
       #out.list$ma <- ma[,c(r.col,c(1:ncol(ma))[-r.col])]
 
@@ -177,6 +191,7 @@
           if(is.null(out$input$tif.dir)){
               ma.cols <- match(ma.names[-r.col],sub(".tif","",basename(paths[-r.col])))
                 if(any(is.na(ma.cols))){
+
                   stop("the following geotiff(s) are missing in ",
                         tif.dir,":  ",paste(ma.names[-r.col][is.na(ma.cols)],collapse=" ,"),
                         "\nif these are intentionally left blank, uncheck makeBinMap and makeProbabilityMap options",sep="")
@@ -184,7 +199,6 @@
                  #remove columns that shouldn't be used from tiff based on the indicator
                 include<-include[-r.col]
                 paths<-paths[-r.col]
-
                 paths<-paths[include==1]
 
                  #creates a list of predictors from tif.ind and response column
@@ -196,15 +210,17 @@
               #out$dat$tif.names <- tif.names[ma.cols]
 
               if(sum(file.access(paths),mode=0)!=0){
-                  out$ec <- out$ec+1
-                  out$error.mssg[[out$ec]] <- paste("ERROR: the following geotiff(s) are missing : ",
-                        paths[(file.access(paths)!=0),][1],"\nif these are intentionally left blank, uncheck makeBinMap and makeProbabilityMap options", sep="")
-                return(out)
+                a<-paste("ERROR: the following geotiff(s) are missing : ",
+                        "\nif these are intentionally left blank, uncheck makeBinMap and makeProbabilityMap options.\n",
+                        paste(paths[(file.access(paths)!=0)],sep=",",collapse="\n"), sep="")
+                        stop(a)
+
                 }
                 out$dat$tif.ind<-paths
                 }
           if(!is.null(out$input$tif.dir)){
               tif.names <- out$dat$tif.names
+
               ma.cols <- match(ma.names[-r.col],sub(".tif","",basename(tif.names)))
               if(any(is.na(ma.cols))){
                   out$ec <- out$ec+1

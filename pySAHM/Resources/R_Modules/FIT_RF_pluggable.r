@@ -136,11 +136,11 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
       error.mssg=list(NULL),
       ec=0
       )
-    
+
    if(!is.null(seed)) set.seed(seed)
     #if(simplify.brt==T) out$input$simp.method<-"cross-validation" else out$input$simp.method<-">1% rel. influence"
     # load libaries #
-    out <- check.libs(list("randomForest","PresenceAbsence","rgdal","XML","sp","raster"),out)
+    out <- check.libs(list("randomForest","PresenceAbsence","rgdal","XML","sp","raster","tcltk2"),out)
     
     # exit program now if there are missing libraries #
     if(!is.null(out$error.mssg[[1]])){
@@ -166,7 +166,7 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
     
     # sink console output to log file #
     if(!debug.mode) {sink(logname <- paste(bname,"_log.txt",sep=""));on.exit(sink)} else logname<-NULL
-    options(warn=1)
+    #options(warn=1)
     
     # check tif dir #
         # check tif dir #
@@ -276,16 +276,7 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
            
     # ROC plot #
 
-    auc.output <- try(make.auc.plot.jpg(out$dat$ma$ma,pred=tweak.p(as.vector(predict(out$mods$final.mod,,newdata=out$dat$ma$ma[,-1],type="prob")[,2])),
-            plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="RF",opt.methods=opt.methods,weight=rep(1,times=dim(out$dat$ma$ma)[1])),
-            silent=T)
-   
-    if(class(auc.output)=="try-error"){
-          out$ec<-out$ec+1
-          out$error.mssg[[out$ec]] <- paste("Error making ROC plot:",auc.output)
-    } else { out$mods$auc.output<-auc.output}
-        
-    model.summary <- try(importance(out$mods$final.mod),silent=T)
+      model.summary <- try(importance(out$mods$final.mod),silent=T)
     if(class(model.summary)=="try-error"){
         if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
         out$ec<-out$ec+1
@@ -296,15 +287,16 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
         model.summary<-model.summary[order(model.summary[,3],decreasing=T),]
         out$mods$summary <- model.summary
         }
-    #assign("out",out,envir=.GlobalEnv)   
-    
-    # Text summary #
-    txt0 <- paste("Random Forest Modeling Results\n",out$input$run.time,"\n\n","Data:\n",ma.name,"\n","n(pres)=",
-        out$dat$ma$n.pres[2],", n(abs)=",out$dat$ma$n.abs[2],", n covariates considered=",length(out$dat$ma$used.covs),
-        "\n\n","Settings:\n","n covariates considered at each split =",out$mods$parms$mtry,", n trees=",out$mods$parms$n.tree,
-        "\n\n","Results:\n","AUC=",round(out$mods$auc.output$auc,4),
-        ", pct deviance explained=",round(out$mods$auc.output$pct.dev.exp,1),"%\n",
-        "total time for model fitting=",round((unclass(Sys.time())-t0)/60,2),"min\n",sep="")
+        
+   txt0 <- paste("Random Forest Modeling Results\n",out$input$run.time,"\n\n",
+          "Data:\n\t",ma.name,
+          "\n\tn(pres)=",out$dat$ma$n.pres[2],
+          "\n\tn(abs)=",out$dat$ma$n.abs[2],
+          "\n\tn covariates considered=",length(out$dat$ma$used.covs),
+        "\n\n","Settings:",
+        "\n\tn covariates considered at each split =",out$mods$parms$mtry,
+        "\n\tn trees=",out$mods$parms$n.tree,
+        "\n\ttotal time for model fitting=",round((unclass(Sys.time())-t0)/60,2),"min\n",sep="")
     txt1 <- "\nRelative performance of predictors in final model:\n\n"
     txt2 <- "\nDefault summary of random forest fit:\n"
     capture.output(cat(txt0),cat(txt1),print(round(model.summary,4)),cat(txt2),print(out$mods$final.mod),file=paste(bname,"_output.txt",sep=""))
@@ -316,6 +308,21 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
         cat("\nWarning: the following categorical response variables were removed from consideration\n",
             "because they had only one level:",paste(out$dat$bad.factor.cols,collapse=","),"\n\n")
         }
+        
+        
+    auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=tweak.p(as.vector(predict(out$mods$final.mod,,newdata=out$dat$ma$ma[,-1],type="prob")[,2])),
+            plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="RF",opt.methods=opt.methods,weight=rep(1,times=dim(out$dat$ma$ma)[1]),out=out)
+   
+    if(class(auc.output)=="try-error"){
+          out$ec<-out$ec+1
+          out$error.mssg[[out$ec]] <- paste("Error making ROC plot:",auc.output)
+    } else { out$mods$auc.output<-auc.output}
+        
+
+    #assign("out",out,envir=.GlobalEnv)   
+    
+    # Text summary #
+
       
     if(!debug.mode) {sink();cat("Progress:70%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("60%\n")}  ### print time
     
@@ -521,16 +528,6 @@ get.cov.names <- function(model){
     return(attr(terms(formula(model)),"term.labels"))
     }
 
-check.libs <- function(libs,out){
-      lib.mssg <- unlist(suppressMessages(suppressWarnings(lapply(libs,require,quietly = T, warn.conflicts=F,character.only=T))))
-      if(any(!lib.mssg)){
-            out$ec <- out$ec+1
-            out$dat$missing.libs <-  paste(unlist(libs)[!lib.mssg],collapse="; ")
-            out$error.mssg[[out$ec]] <- paste("ERROR: the following package(s) could not be loaded:",out$dat$missing.libs)
-            }
-      return(out)
-      }
-
 check.dir <- function(dname){
     if(is.null(dname)) dname <- getwd()
     dname <- gsub("[\\]","/",dname)
@@ -665,15 +662,11 @@ do.trace<-as.logical(do.trace)
 keep.inbag<-as.logical(keep.inbag)
 make.r.curves<-as.logical(make.r.curves)
 save.model<-make.p.tif | make.binary.tif
-mtry<-as.numeric(mtry)
-ntree<-as.numeric(ntree)
+n.trees<-as.numeric(n.trees)
 opt.methods<-as.numeric(opt.methods)
 ScriptPath<-dirname(ScriptPath)
 
-source(paste(ScriptPath,"EvaluationStats.r",sep="\\"))
-source(paste(ScriptPath,"TestTrainRocPlot.r",sep="\\"))
-source(paste(ScriptPath,"read.ma.r",sep="\\"))
-source(paste(ScriptPath,"proc.tiff.r",sep="\\"))
+source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
 
 fit.rf.fct(ma.name=csv,tif.dir=NULL,output.dir=output,response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
       debug.mode=F,responseCurveForm="pdf",xtest=xtest,ytest=ytest,n.trees=n.trees,mtry=mtry,samp.replace=samp.replace, sampsize=sampsize,

@@ -20,7 +20,7 @@
 options(error=NULL)
 
 fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^response.binary",make.p.tif=T,make.binary.tif=T,
-      mars.degree=1,mars.penalty=2,responseCurveForm=NULL,debug.mode=T,model.family="binomial",script.name="mars.r",opt.methods=2,save.model=TRUE){
+      mars.degree=1,mars.penalty=2,responseCurveForm=NULL,debug.mode=T,script.name="mars.r",opt.methods=2,save.model=TRUE){
     # This function fits a stepwise GLM model to presence-absence data.
     # written by Alan Swanson, 2008-2009
     # # Maintained and edited by Marian Talbert September 2010-
@@ -65,6 +65,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     times[1,1] <- unclass(Sys.time())
     t0 <- unclass(Sys.time())
     #simp.method <- match.arg(simp.method)
+
     out <- list(
       input=list(ma.name=ma.name,
                  tif.dir=tif.dir,
@@ -79,7 +80,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
                  model.type="stepwise with pruning",
                  model.source.file=script.name,
                  model.fitting.subset=NULL, # not used.
-                 model.family=model.family,
+                 model.family="binomial",
                  run.time=paste(c(format(Sys.time(),"%Y-%m-%d"),format(Sys.time(),"%H:%M:%S")),collapse="T"),
                  sig.test="chi-squared anova p-value"),
       dat = list(missing.libs=NULL,
@@ -102,8 +103,8 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
                           factor.levels=NA,
                           used.covs=NULL,
                           ma=NULL,
-                          ma.subset=NULL),
-                 ma.test=NULL),
+                          ma.subset=NULL,
+                          ma.test=NULL)),
       mods=list(final.mod=NULL,
                 r.curves=NULL,
                 tif.output=list(prob=NULL,bin=NULL),
@@ -116,7 +117,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
       )
 
       # load libaries #
-      out <- check.libs(list("PresenceAbsence","rgdal","XML","sp","survival","mda","raster"),out)
+      out <- check.libs(list("PresenceAbsence","rgdal","XML","sp","survival","mda","raster","tcltk2"),out)
       
       # exit program now if there are missing libraries #
       if(!is.null(out$error.mssg[[1]])){
@@ -132,13 +133,13 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
               }
 
     # generate a filename for output #
-    if(debug.mode==T){  #paste(bname,"_summary.txt",sep="")
+          if(debug.mode==T){
             outfile <- paste(bname<-paste(out$dat$output.dir$dname,"/mars_",n<-1,sep=""),"_output.txt",sep="")
             while(file.access(outfile)==0) outfile<-paste(bname<-paste(out$dat$output.dir$dname,"/mars_",n<-n+1,sep=""),"_output.txt",sep="")
             capture.output(cat("temp"),file=outfile) # reserve the new basename #
-    } else bname <- paste(out$dat$output.dir$dname,"/mars",sep="")
-    out$dat$bname <- bname    
-    
+            } else bname<-paste(out$dat$output.dir$dname,"/mars",sep="")
+            out$dat$bname <- bname
+            
     # sink console output to log file #
     if(!debug.mode) {sink(logname <- paste(bname,"_log.txt",sep=""));on.exit(sink)} else logname<-NULL
     options(warn=1)
@@ -162,6 +163,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
 
     # check for model array #
     out$input$ma.name <- check.dir(out$input$ma.name)$dname
+    print("*************************** ENTER MA")
     out <- read.ma(out)
         
     
@@ -208,6 +210,14 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     row.names(x) <- x[,1]
     x$df <- -1*x$df
     x <- x[,-1]
+    
+     txt0 <- paste("\nMARS Model Results\n","\n","Data:\n",ma.name,"\n","\n\t n(pres)=",
+        out$dat$ma$n.pres[2],"\n\t n(abs)=",out$dat$ma$n.abs[2],"\n\t n covariates considered=",length(out$dat$ma$used.covs),
+        "\n",
+        "\n   total time for model fitting=",round((unclass(Sys.time())-t0)/60,2),"min\n",sep="")
+
+    capture.output(cat(txt0),file=paste(bname,"_output.txt",sep=""))
+    
     cat("\n","Finished with MARS","\n")
     cat("Summary of Model:","\n")
     print(out$mods$summary <- x)
@@ -217,7 +227,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
         }
     cat("\n","Storing output...","\n","\n")
     #flush.console()
-    capture.output(cat("Summary of MARS Model:\n"),file=paste(bname,"_output.txt",sep=""))
+    capture.output(cat("\n\nSummary of Model:\n"),file=paste(bname,"_output.txt",sep=""),append=TRUE)
     capture.output(print(out$mods$summary),file=paste(bname,"_output.txt",sep=""),append=TRUE)
     if(!is.null(out$dat$bad.factor.cols)){
         capture.output(cat("\nWarning: the following categorical response variables were removed from consideration\n",
@@ -234,28 +244,22 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
            
     # Store .jpg ROC plot #
 
+
     if(out$input$model.family=="bernoulli" |out$input$model.family=="binomial"){
       auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=mars.predict(fit,out$dat$ma$ma)$prediction[,1],
       plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",opt.methods=opt.methods,
-            weight=out$dat$ma$train.weights)
+            weight=out$dat$ma$train.weights,out=out)
 
       out$mods$auc.output<-auc.output
       }
   if(out$input$model.family=="poisson"){
       auc.output <- make.poisson.jpg(out$dat$ma$ma,pred=mars.predict(fit,out$dat$ma$ma)$prediction[,1],
       plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",
-            weight=out$dat$ma$train.weights)
+            weight=out$dat$ma$train.weights,out=out)
 
       out$mods$auc.output<-auc.output
       }
 
-    txt0 <- paste("\n\n","Data:\n",ma.name,"\n","\n\t n(pres)=",
-        out$dat$ma$n.pres[2],"\n\t n(abs)=",out$dat$ma$n.abs[2],"\n\t n covariates considered=",length(out$dat$ma$used.covs),
-        "\n\n","Results on training data:\n", "\t correlation between predicted values and true response=",round(out$mods$auc.output$correlation,3),
-        "\n\t pct deviance explained=",round(out$mods$auc.output$pct.dev.exp,1),"%\n",
-        "\n total time for model fitting=",round((unclass(Sys.time())-t0)/60,2),"min\n",sep="")
-
-    capture.output(cat(txt0),file=paste(bname,"_output.txt",sep=""),append=T)
 
 
     if(!debug.mode) {sink();cat("Progress:70%\n");flush.console();sink(logname,append=T)} else cat("70%\n")
@@ -456,15 +460,6 @@ get.cov.names <- function(model){
     return(attr(terms(formula(model)),"term.labels"))
     }
 
-check.libs <- function(libs,out){
-      lib.mssg <- unlist(suppressMessages(suppressWarnings(lapply(libs,require,quietly = T, warn.conflicts=F,character.only=T))))
-      if(any(!lib.mssg)){
-            out$ec <- out$ec+1
-            out$dat$missing.libs <-  paste(unlist(libs)[!lib.mssg],collapse="; ")
-            out$error.mssg[[out$ec]] <- paste("ERROR: the following package(s) could not be loaded:",out$dat$missing.libs)
-            }
-      return(out)
-      }
 
 check.dir <- function(dname){
     if(is.null(dname)) dname <- getwd()
@@ -1664,7 +1659,6 @@ make.p.tif=T
 make.binary.tif=T
 mars.degree=1
 mars.penalty=2
-model.family="binomial"
 script.name="mars.r"
 opt.methods=2
 save.model=TRUE
@@ -1689,7 +1683,6 @@ Args <- commandArgs(trailingOnly=FALSE)
  			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="deg") mars.degree <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="pen") mars.penalty <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="mf") model.family <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="om")  opt.methods <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="savm")  save.model <- argSplit[[1]][2]
     }
@@ -1698,10 +1691,8 @@ Args <- commandArgs(trailingOnly=FALSE)
 	print(responseCol)
 
 ScriptPath<-dirname(ScriptPath)
-source(paste(ScriptPath,"EvaluationStats.r",sep="\\"))
-source(paste(ScriptPath,"TestTrainRocPlot.r",sep="\\"))
-source(paste(ScriptPath,"read.ma.r",sep="\\"))
-source(paste(ScriptPath,"proc.tiff.r",sep="\\"))
+source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
+print(ScriptPath)
 
 make.p.tif<-as.logical(make.p.tif)
 make.binary.tif<-as.logical(make.binary.tif)
@@ -1711,4 +1702,4 @@ opt.methods<-as.numeric(opt.methods)
 fit.mars.fct(ma.name=csv,
         tif.dir=NULL,output.dir=output,
         response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
-            mars.degree=mars.degree,mars.penalty=mars.penalty,debug.mode=F,responseCurveForm="pdf",model.family=model.family,script.name="mars.r",save.model=save.model,as.numeric(opt.methods))
+            mars.degree=mars.degree,mars.penalty=mars.penalty,debug.mode=F,responseCurveForm="pdf",script.name="mars.r",save.model=save.model,opt.methods=as.numeric(opt.methods))

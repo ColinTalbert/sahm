@@ -1,4 +1,5 @@
-make.auc.plot.jpg<-function(ma.reduced,pred,plotname,modelname,train.split=FALSE,thresh=NULL,train=NULL,train.pred=NULL,opt.methods=2,weight){
+make.auc.plot.jpg<-function(ma.reduced,pred,plotname,modelname,test.split=FALSE,thresh=NULL,train=NULL,train.pred=NULL,opt.methods=2,weight,out){
+
       if(is.null(weight)) weight=rep(1,times=dim(ma.reduced)[1])
     auc.data <- data.frame(ID=1:nrow(ma.reduced),pres.abs=ma.reduced[,1],pred=pred)
     p.bar <- sum(auc.data$pres.abs * weight) / sum(weight)
@@ -14,7 +15,7 @@ make.auc.plot.jpg<-function(ma.reduced,pred,plotname,modelname,train.split=FALSE
     if(is.null(thresh)){
     thresh <- as.numeric(optimal.thresholds(auc.data,opt.methods=opt.methods))[2]}
     auc.fit <- auc(auc.data,st.dev=T)
-    if(train.split==TRUE){
+    if(test.split==TRUE){
 
       jpeg(file=plotname)
       d<-data.frame(ID=1:nrow(train),pres.abs=train[,1],pred=train.pred)
@@ -30,17 +31,130 @@ make.auc.plot.jpg<-function(ma.reduced,pred,plotname,modelname,train.split=FALSE
       }
 
     cmx <- cmx(auc.data,threshold=thresh)
-    PCC <- pcc(cmx,st.dev=F)
+    PCC <- pcc(cmx,st.dev=F)*100
     SENS <- sensitivity(cmx,st.dev=F)
     SPEC <- specificity(cmx,st.dev=F)
     KAPPA <- Kappa(cmx,st.dev=F)
     TSS <- SENS+SPEC-1
+      response<-ma.reduced$response
+
+    capture.output(cat("\n\n============================================================",
+                        "\n\nEvaluation Statistics"),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
+          if(!is.null(out$dat$ma$ma.test))
+                        capture.output(cat(" applied to",ifelse(!test.split,"train","test"), "split:\n",sep=" "),
+                        file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
+                      capture.output(cat( "\n",
+                       "\n\t Correlation Coefficient      : ",cor.test(pred,response)$estimate,
+                       "\n\t NULL Deviance                : ",null.dev,
+                       "\n\t Fit Deviance                 : ",dev.fit,
+                       "\n\t Explained Deviance           : ",dev.exp,
+                       "\n\t Percent Deviance Explained   : ",pct.dev.exp,
+                       file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE))
+
+                           capture.output(cat(
+                             "\n\n  Threshold Methods based on", switch(opt.methods,
+                            "1"=".5 threshold",
+                            "2"="Sens=Spec",
+                            "3"="maximize (sensitivity+specificity)/2",
+                            "4"="maximize Kappa",
+                            "5"="maximize percent correctly classified",
+                            "6"="predicted prevalence=observed prevalence",
+                            "7"="threshold=observed prevalence",
+                            "8"="mean predicted probability",
+                            "9"="minimize distance between ROC plot and (0,1)",
+                            ),
+                            "\n\t Threshold                    : ",
+                            thresh,
+                            "\n\n\t Confusion Matrix: \n\n"),
+                            print.table(cmx),
+                       cat("\n\t AUC                          : ",auc.fit[1,1],
+                       "\n\t Percent Correctly Classified : ",PCC,
+                       "\n\t Sensitivity                  : ",SENS,
+                       "\n\t Specificity                  : ",SPEC,
+                       "\n\t Kappa                        : ",KAPPA,
+                       "\n\t True Skill Statistic         : ",TSS,"\n"),
+                       file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
+
+                       last.dir<-strsplit(out$input$output.dir,split="\\\\")
+                        parent<-sub(paste("\\\\",last.dir[[1]][length(last.dir[[1]])],sep=""),"",out$input$output.dir)
+
+                         if(!is.null(out$dat$ma$ma.test)) compile.out<-paste(parent,"AppendedOutputTestTrain.csv",sep="/")
+                          else compile.out<-paste(parent,"AppendedOutput.csv",sep="/")
+
+                       x=data.frame(cbind(c("Correlation Coefficient","Percent Deviance Explained","Percent Correctly Classified","Sensitivity","Specificity"),
+                            c(as.vector(cor.test(pred,response)$estimate),pct.dev.exp,PCC,SENS,SPEC)))
+
+                           
+                        Header<-cbind(c("","Original Field Data","Field Data Template","PARC Output Folder","PARC Template","Covariate Selection Name",""),
+                            c(last.dir[[1]][length(last.dir[[1]])],
+                            out$dat$ma$input$OrigFieldData,out$dat$ma$input$FieldDataTemp,out$dat$ma$input$ParcOutputFolder,
+                            out$dat$ma$input$ParcTemplate,ifelse(length(out$dat$ma$input$CovSelectName)==0,"NONE",out$dat$ma$input$CovSelectName),""))
+                       Header.Length<-nrow(Header)
+                       Parm.Len<-nrow(x)
+
+             #Very first time through
+             if(file.access(compile.out,mode=0)==-1){
+                  #A more complex than necessary way of writing a csv with several header lines
+                  write.table(Header,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=",")
+                   if(!is.null(out$dat$ma$ma.test))
+                   write.table(cbind("","Train Split"),file=compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=",")
+                  write.table(x,file=compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=",")
+                      } else {
+                      input<-read.table(compile.out,fill=TRUE,sep=",")
+                      Orig.Header<-input[1:Header.Length,]
+
+                      if(!is.null(out$dat$ma$ma.test)){
+                              Train.x<-input[(Header.Length+2):(Header.Length+Parm.Len+1),]
+                              Orig.Train<-input[(Header.Length+1),]
+
+                              if(nrow(input)>15){
+                                 Test.x<-input[(Header.Length+Parm.Len+4):nrow(input),]
+                                 Orig.Test<-input[(Header.Length+Parm.Len+2):(Header.Length+Parm.Len+3),]
+                                  if(test.split){
+                                        Test.x[,ncol(Test.x)]<-x[,2]
+                                         class(Orig.Test[,ncol(Orig.Test)])="character"
+                                        Orig.Test[1,ncol(Orig.Test)]<-""
+                                        Orig.Test[2,ncol(Orig.Test)]<-"Test Split"
+                                        } else{
+                                        Orig.Header<-cbind(Orig.Header,Header[,2])
+                                        Train.x<-cbind(Train.x,x[,2])
+                                        Orig.Train<-cbind(Orig.Train,"Train Split")
+                                        }
+                                } else{
+                                 Orig.Test=rbind(c("",""),cbind("","Test Split"))
+                                 Test.x=x
+                                }
+
+                              temp<-try(write.table(Orig.Header,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=","),silent=TRUE)
+                              
+                              while(class(temp)=="try-error"){
+                                  modalDialog("","Please Close the AppendedOutput.exe\ so that R can write to it then press ok to continue ","")
+                                  temp<-try(write.table(Orig.Header,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=","),silent=TRUE)
+                              }
+                              
+                              try(write.table(Orig.Train,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=","))
+                              try(write.table(Train.x,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=","))
+                              try(write.table(Orig.Test,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=","))
+                              try(write.table(Test.x,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=","))
+                          }  else{
+
+                      Orig.x<-input[(Header.Length+1):nrow(input),]
+                      temp<-try(write.table(cbind(Orig.Header,Header[,2]),file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=","),silent=TRUE)
+                       while(class(temp)=="try-error"){
+                                  modalDialog("","Please Close the AppendedOutput.exe\ so that R can write to it then press ok to continue ","")
+                                  temp<-try(write.table(cbind(Orig.Header,Header[,2]),file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=","),silent=TRUE)
+                              }
+
+                              
+                      try(write.table(cbind(Orig.x,x[,2]),file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=","))
+                      }}
+                      
     return(list(thresh=thresh,cmx=cmx,null.dev=null.dev,dev.fit=dev.fit,dev.exp=dev.exp,pct.dev.exp=pct.dev.exp,auc=auc.fit[1,1],auc.sd=auc.fit[1,2],
         plotname=plotname,pcc=PCC,sens=SENS,spec=SPEC,kappa=KAPPA,tss=TSS,correlation=correlation))
 }
 
 
-make.poisson.jpg<-function(ma.reduced,pred,plotname,modelname,train.split=FALSE,thresh=NULL,train=NULL,train.pred=NULL,weight,train.weight=NULL){
+make.poisson.jpg<-function(ma.reduced,pred,plotname,modelname,test.split=FALSE,thresh=NULL,train=NULL,train.pred=NULL,weight,train.weight=NULL,out){
 
     pois.data <- data.frame(ID=1:nrow(ma.reduced),pres.abs=ma.reduced[,1],pred=pred)
     p.bar <- sum(pois.data$pres.abs * weight) / sum(weight)
@@ -61,7 +175,7 @@ make.poisson.jpg<-function(ma.reduced,pred,plotname,modelname,train.split=FALSE,
     #function (y, mu, wt)
     #2 * wt * (y * log(ifelse(y == 0, 1, y/mu)) - (y - mu))
 
-   if(train.split==TRUE){
+   if(test.split==TRUE){
       if(is.null(train.weight)) train.weight=rep(1,times=nrow(train))
         null.dev.train<-calc.dev(train$response, rep(mean(train$response),times=nrow(train)), train.weight, family="poisson")$deviance*nrow(train)
         dev.fit.train<-calc.dev(train$response, train.pred, train.weight, family="poisson")$deviance*nrow(train)
@@ -155,6 +269,15 @@ make.poisson.jpg<-function(ma.reduced,pred,plotname,modelname,train.split=FALSE,
               abline(0,1)
 
         graphics.off()
+        
+         capture.output(cat("\n\nEvaluation Statistics applied to test split:\n",
+                       "\n\t Correlation Coefficient      : ",cor.test(pred,response)$estimate,
+                       "\n\t NULL Deviance                : ",auc.output$null.dev,
+                       "\n\t Fit Deviance                 : ",auc.output$dev.fit,
+                       "\n\t Explained Deviance           : ",auc.output$dev.exp,
+                       "\n\t Percent Deviance Explained   : ",auc.output$pct.dev.exp,
+                       file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE))
+                       
         return(list(null.dev=null.dev,dev.fit=dev.fit,dev.exp=dev.exp,pct.dev.exp=pct.dev.exp,correlation=correlation))
         }
 }
@@ -181,55 +304,11 @@ EvaluationStats<-function(out,thresh,train,train.pred,opt.methods=opt.methods){
 
   ifelse(out$input$model.family!="poisson",
                   auc.output<-make.auc.plot.jpg(out$dat$ma$ma.test,pred=pred,plotname=paste(out$dat$bname,"_auc_plot.jpg",sep=""),
-                      modelname=modelname,train.split=TRUE,thresh=thresh,train=train,train.pred,opt.methods=opt.methods,weight=out$dat$ma$test.weights),
+                      modelname=modelname,test.split=TRUE,thresh=thresh,train=train,train.pred,opt.methods=opt.methods,weight=out$dat$ma$test.weights,out=out),
                   auc.output<-make.poisson.jpg(out$dat$ma$ma.test,pred=pred,plotname=paste(out$dat$bname,"_auc_plot.jpg",sep=""),
-                      modelname=modelname,train.split=TRUE,thresh=thresh,train=train,train.pred,weight=out$dat$ma$test.weights))
+                      modelname=modelname,test.split=TRUE,thresh=thresh,train=train,train.pred,weight=out$dat$ma$test.weights,out=out))
 
-
-
-
-                 if(class(auc.output)=="try-error"){
-              out$ec<-out$ec+1
-              out$error.mssg[[out$ec]] <- paste("Error making ROC plot:",auc.output)
-              } else { out$mods$auc.output<-auc.output}
-    #sink(file=paste(out$dat$bname,"Evaluation.metrics.txt",sep=""))
-
-    #deviance calcuation from Elith Leathwich code
-
-    capture.output(cat("\n\nEvaluation Statistics applied to test split:\n",
-                       "\n\t Correlation Coefficient      : ",cor.test(pred,response)$estimate,
-                       "\n\t NULL Deviance                : ",auc.output$null.dev,
-                       "\n\t Fit Deviance                 : ",auc.output$dev.fit,
-                       "\n\t Explained Deviance           : ",auc.output$dev.exp,
-                       "\n\t Percent Deviance Explained   : ",auc.output$pct.dev.exp,
-                       file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE))
-                       
-                      if(out$input$model.family!="poisson"){
-                           capture.output(cat(
-                             "\n\n  Threshold Methods based on", switch(opt.methods,
-                            "1"=".5 threshold",
-                            "2"="Sens=Spec",
-                            "3"="maximize (sensitivity+specificity)/2",
-                            "4"="maximize Kappa",
-                            "5"="maximize percent correctly classified",
-                            "6"="predicted prevalence=observed prevalence",
-                            "7"="threshold=observed prevalence",
-                            "8"="mean predicted probability",
-                            "9"="minimize distance between ROC plot and (0,1)",
-                            ),
-                            "\n\t Threshold                    : ",
-                            auc.output$thresh,
-                            "\n\n\t Confusion Matrix: \n\n"),
-                            print.table(auc.output$cmx),
-                       cat("\n\t AUC                          : ",auc.output$auc,
-                       "\n\t Percent Correctly Classified : ",auc.output$pcc,
-                       "\n\t Sensitivity                  : ",auc.output$sens,
-                       "\n\t Specificity                  : ",auc.output$spec,
-                       "\n\t Kappa                        : ",auc.output$kappa,
-                       "\n\t True Skill Statistic         : ",auc.output$tss),
-                       file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)}
-
-    #possibly add confusion matrix or calibration as well
+                out$mods$auc.output<-auc.output
 
 }
 

@@ -3,28 +3,24 @@
 setwd("I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
 source("TestTrainSplit.r")
 
-input.file="I:\\NPS_NPMP_data\\ModelingSession_June\\GRSP_MDS.csv"
-output.file="C:\\VisTrails\\GRSP_TestTrain.csv"
-response.col="responseCount"
+input.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSetNullModelTest.csv"
+output.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSetNullSplit.csv"
+
+input.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSetIncludeTest.csv"
+output.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSetIncludeSplit.csv"
+
+input.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSet_1.csv"
+output.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSplitTest.csv"
+
+input.file="N:/Active/FORT_RAM/VisTrails/workspace/mtalbert_20110817T104421/MergedDataset_1.csv"
+input.file="I:/VisTrails/WorkingFiles/workspace/morisettej_20110810T153126/CovariateCorrelationOutputMDS_anothertry.csv"
+output.file="N:/Active/FORT_RAM/VisTrails/workspace/mtalbert_20110817T104421/MergedDatasetTestTrain_1.csv"
+response.col="ResponseBinary"
+
+## Running the code
 TestTrainSplit(input.file,output.file,response.col=response.col,trainProp=.7)  #tried also with .8, and no RatioPresAb
 
-
-input.file="I:\\NPS_NPMP_data\\ModelingSession_June\\HESP_MDS.csv"
-output.file="C:\\VisTrails\\HESP_TestTrain.csv"
-response.col="responseCount"
-TestTrainSplit(input.file,output.file,response.col=response.col,trainProp=.7)  #tried also with .8, and no RatioPresAb
-
-
-input.file="I:\\NPS_NPMP_data\\ModelingSession_June\\EAME_MDS.csv"
-output.file="C:\\VisTrails\\EAME_TestTrain.csv"
-response.col="responseCount"
-TestTrainSplit(input.file,output.file,response.col=response.col,trainProp=.7)  #tried also with .8, and no RatioPresAb
-
-input.file="I:\\NPS_NPMP_data\\ModelingSession_June\\DICK_MDS.csv"
-output.file="C:\\VisTrails\\EAME_TestTrain.csv"
-response.col="responseCount"
-TestTrainSplit(input.file,output.file,response.col=response.col,trainProp=.7)  #tried also with .8, and no RatioPresAb
-
+## Running some tests on the output
 input.file<-output.file
 dat<-read.csv(input.file,skip=3,header=FALSE)
 
@@ -37,7 +33,7 @@ dat<-read.csv(input.file,skip=3,header=FALSE)
           include<-(as.numeric(tif.info[[2]]))
           
 # checking that trainProp is correct
-ta<-table(dat$Split,dat$responseCount)
+ta<-table(dat$Split,dat$responseBinary)
 ta
 #if there are background points, remove them here
 ta<-ta[-1,]

@@ -112,7 +112,7 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
       ec=0    # error count #
       )
     # load libaries #
-    out <- check.libs(list("PresenceAbsence","rgdal","XML","sp","survival","tools","raster"),out)
+    out <- check.libs(list("PresenceAbsence","rgdal","XML","sp","survival","tools","raster","tcltk2"),out)
     
     # exit program now if there are missing libraries #
     if(!is.null(out$error.mssg[[1]])){
@@ -210,12 +210,7 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
             "because they had only one level:",paste(out$dat$bad.factor.cols,collapse=","),"\n\n")
         }
     flush.console()
-    capture.output(out$mods$summary,file=paste(bname,"_output.txt",sep=""))
-    if(!is.null(out$dat$bad.factor.cols)){
-        capture.output(cat("\nWarning: the following categorical response variables were removed from consideration\n",
-            "because they had only one level:",paste(out$dat$bad.factor.cols,collapse=","),"\n"),
-            file=paste(bname,"_output.txt",sep=""),append=T)
-        }
+
     flush.console()
     times[3,1] <- unclass(Sys.time())
     if(!debug.mode) {sink();cat("Progress:40%\n");flush.console();sink(logname,append=T)} else cat("40%\n")
@@ -228,17 +223,31 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     #  Begin model output #
     ##############################################################################################################
            
-    # Store .jpg ROC plot #                            
+    # Store .jpg ROC plot #
+     txt0 <- paste("Generalized Linear Results\n",out$input$run.time,"\n\n","Data:\n\t ",ma.name,"\n\t ","n(pres)=",
+        out$dat$ma$n.pres[2],"\n\t n(abs)=",out$dat$ma$n.abs[2],"\n\t number of covariates considered=",(length(names(out$dat$ma$ma))-1),
+        "\n\n","Settings:\n","\n\t model family=",out$input$model.family,
+        "\n\n","Results:\n\t ","number covariates in final model=",length(out$dat$ma$used.covs),
+        "\n\t total time for model fitting=",round((unclass(Sys.time())-t0)/60,2),"min\n",sep="")
+
+    capture.output(cat(txt0),file=paste(bname,"_output.txt",sep=""))
+
+        capture.output(out$mods$summary,file=paste(bname,"_output.txt",sep=""),append=TRUE)
+    if(!is.null(out$dat$bad.factor.cols)){
+        capture.output(cat("\nWarning: the following categorical response variables were removed from consideration\n",
+            "because they had only one level:",paste(out$dat$bad.factor.cols,collapse=","),"\n"),
+            file=paste(bname,"_output.txt",sep=""),append=T)
+        }
     if(out$input$model.family=="bernoulli" || out$input$model.family=="binomial"){
       auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=predict(mymodel.glm.step,type='response'),plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",opt.methods=opt.methods,
-            weight=out$dat$ma$train.weights)
+            weight=out$dat$ma$train.weights,out=out)
 
       out$mods$auc.output<-auc.output
       }
   if(out$input$model.family=="poisson"){
       auc.output <- make.poisson.jpg(out$dat$ma$ma,pred=predict(mymodel.glm.step,type='response'),
       plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",
-            weight=out$dat$ma$train.weights)
+            weight=out$dat$ma$train.weights,out=out)
 
       out$mods$auc.output<-auc.output
       }
@@ -246,14 +255,7 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     out$mods$auc.output<-auc.output
 
 
-    txt0 <- paste("Generalized Liinear Results\n",out$input$run.time,"\n\n","Data:\n\t ",ma.name,"\n\t ","n(pres)=",
-        out$dat$ma$n.pres[2],"\n\t n(abs)=",out$dat$ma$n.abs[2],"\n\t number of covariates considered=",(length(names(out$dat$ma$ma))-1),
-        "\n\n","Settings:\n","\n\t model family=",out$input$model.family,
-        "\n\n","Results:\n\t ","number covariates in final model=",length(out$dat$ma$used.covs),
-        "\n\t pct deviance explained on train data =",round(out$mods$auc.output$pct.dev.exp,1),"%\n",
-        "\n\t total time for model fitting=",round((unclass(Sys.time())-t0)/60,2),"min\n",sep="")
 
-    capture.output(cat(txt0),file=paste(bname,"_output.txt",sep=""),append=TRUE)
 
     times[4,1] <- unclass(Sys.time())
     if(!debug.mode) {sink();cat("Progress:70%\n");flush.console();sink(logname,append=T)} else cat("70%\n")
@@ -466,15 +468,6 @@ get.cov.names <- function(model){
     return(attr(terms(formula(model)),"term.labels"))
     }
 
-check.libs <- function(libs,out){
-      lib.mssg <- unlist(suppressMessages(suppressWarnings(lapply(libs,require,quietly = T, warn.conflicts=F,character.only=T))))
-      if(any(!lib.mssg)){
-            out$ec <- out$ec+1
-            out$dat$missing.libs <-  paste(unlist(libs)[!lib.mssg],collapse="; ")
-            out$error.mssg[[out$ec]] <- paste("ERROR: the following package(s) could not be loaded:",out$dat$missing.libs)
-            }
-      return(out)
-      }
 
 check.dir <- function(dname){
     if(is.null(dname)) dname <- getwd()
@@ -762,10 +755,7 @@ Args <- commandArgs(trailingOnly=FALSE)
 	print(responseCol)
 
 ScriptPath<-dirname(ScriptPath)
-source(paste(ScriptPath,"EvaluationStats.r",sep="\\"))
-source(paste(ScriptPath,"TestTrainRocPlot.r",sep="\\"))
-source(paste(ScriptPath,"read.ma.r",sep="\\"))
-source(paste(ScriptPath,"proc.tiff.r",sep="\\"))
+source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
 
 make.p.tif<-as.logical(make.p.tif)
 make.binary.tif<-as.logical(make.binary.tif)
