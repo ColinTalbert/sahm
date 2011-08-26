@@ -164,14 +164,15 @@ class FieldDataQuery(object):
             return params
     
     def processCSV(self):
+        
+        self.validateArgs()
         if self.verbose:
-            self.validateArgs() 
             self.writetolog("Starting on Field Data Query for " + os.path.split(self.csv)[1])
-            templatename = os.path.split(self.template)[1]
-            if templatename == 'hdr.adf':
-                templatename = os.path.split(os.path.split(self.template)[0])[1]
             self.writetolog("  using template " + os.path.split(self.template)[1])
          
+        templatename = os.path.split(self.template)[1]
+        if templatename == 'hdr.adf':
+            templatename = os.path.split(os.path.split(self.template)[0])[1]
          
             
         csvfile = open(self.csv, "r")
@@ -189,6 +190,8 @@ class FieldDataQuery(object):
         header.append("numPresence")
         header.append("pixelColumn")
         header.append("pixelRow")
+        header.append(os.path.abspath(self.template))
+        header.append(os.path.abspath(self.csv))
     
         #loop through each row (observation) and 
         #if that particular pixel hasn't been encountered before

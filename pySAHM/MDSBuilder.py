@@ -129,20 +129,30 @@ class MDSBuilder(object):
             
             pcntDone = 0
             i = 1
+            badpoints = []
             for row in outputRows:
                 x = float(row[0])
                 y = float(row[1])
                 # compute pixel offset
                 xOffset = int((x - xOrigin) / pixelWidth)
                 yOffset = int((y - yOrigin) / pixelHeight)
-                data = band.ReadAsArray(xOffset, yOffset, 1, 1)
-                # xOffset, yOffset
-                value = data[0,0]
-                if value <> inputND:
-                    row.append(value)
-                else:
+#                try:
+                if xOffset < 0 or yOffset < 0:
+                    if row[:3] not in badpoints:
+                        badpoints.append(row[:3])
                     row.append(str(self.NDFlag))
-                #print value
+                else:
+                    try:
+                        data = band.ReadAsArray(xOffset, yOffset, 1, 1)
+                        value = data[0,0]
+                        if value <> inputND:
+                            row.append(value)
+                        else:
+                            row.append(str(self.NDFlag))
+                    except:
+                        badpoints.append(row[:3])
+                        row.append(str(self.NDFlag))
+                
                 if self.verbose:
                     if i/float(len(outputRows)) > float(pcntDone)/100:
                         pcntDone += 10
@@ -150,10 +160,36 @@ class MDSBuilder(object):
                 i += 1
             if self.verbose:
                 self.writetolog("    Done")
+        if len(badpoints) > 0:
+                msg =  "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+                msg += "\n!!!!!!!!!!!!!!!!!!!!!WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
+                msg += str(len(badpoints)) + " point fell outside the Covariate coverage."
+                msg += "\nThese points were assigned the NoData value of -9999 for all covariates and will"
+                msg += "not be included in subsequent models.\n     These points are:"
+                for badpoint in badpoints:
+                    msg += "     x:" + str(row[0]) + " Y: " + str(row[1]) + " response: " + str(row[2]) 
+                self.writetolog(msg)
+            
             
         outputMDS = csv.writer(open(self.outputMDS, 'ab'))
+        thrownOut = 0
+        kept = 0
         for row in outputRows:
-            outputMDS.writerow(row)
+            #remove this if when Marian handles the ND   
+            if not str(self.NDFlag) in row[3:]:
+                outputMDS.writerow(row)
+                kept += 1
+            else:
+                outputMDS.writerow(row)
+                thrownOut += 1
+        if thrownOut > 0:
+            msg =  "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+            msg += "\n!!!!!!!!!!!!!!!!!!!!!WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
+            msg += str(thrownOut) + " points had 'nodata' in at least one of the covariates."
+            msg += "\nThese points will not be considered in subsequent Models."
+            msg +=  "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+            msg +=  "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+            self.writetolog(msg)
         del outputMDS
         
         # figure out how long the script took to run
@@ -175,12 +211,18 @@ class MDSBuilder(object):
         to the covariate names of all categorical inputs.
         '''        
         
-        fieldDataCSV = csv.reader(open(self.fieldData, "r"))
-        origHeader = fieldDataCSV.next()
-        fullHeader = origHeader[:3]
+        field_data_CSV = csv.reader(open(self.fieldData, "r"))
+        orig_header = field_data_CSV.next()
+        full_header = ["x", "y"]
+        if orig_header[2].lower not in ["responsebinary", "responsecount"]:
+            #inputs not conforming to our expected format will be assumed
+            #to be binary data
+            full_header.append("responseBinary")
+        else:
+            full_header.append(orig_header[2])
         
-        inputsCSV = csv.reader(open(self.inputsCSV, "r"))
-        inputsCSV.next()
+        inputs_CSV = csv.reader(open(self.inputsCSV, "r"))
+        inputs_header = inputs_CSV.next()
         self.inputs = []
 
         #each row contains a covariate raster layer
@@ -188,24 +230,45 @@ class MDSBuilder(object):
         #item 1 is 0/1 indicating categorical
         #Construct our output header by extracting each individual 
         #file (raster) name and appending '_categorical' if the flag is 1
-        for row in inputsCSV:
-            tmpRaster = row[0]
-            self.inputs.append(tmpRaster)
-            rasterShortName = os.path.split(tmpRaster)[1]
-            rasterShortName = os.path.splitext(rasterShortName)[0]
-            if row[1] == '1':
-                rasterShortName += "_categorical"
-            fullHeader.append(rasterShortName)
-                
-    
+        rasters = {}
+        for row in inputs_CSV:
+            temp_raster = row[0]
+#            self.inputs.append(temp_raster)
+            raster_shortname = os.path.split(temp_raster)[1]
+            raster_shortname = os.path.splitext(raster_shortname)[0]
+            if len(row) > 1 and row[1] == '1':
+                raster_shortname += "_categorical"
+            rasters[raster_shortname] = temp_raster
+            
+        keys = rasters.keys()
+        keys.sort(key=lambda s: s.lower())
+        keys.sort(key=lambda s: s.lower())
+        for key in keys:
+            self.inputs.append(rasters[key])
+            full_header.append(key)
+
         #Open up and write to an output file
         oFile = open(self.outputMDS, 'wb')
         fOut = csv.writer(oFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         
         #Format and write out our three header lines
-        secondRow = ["0" for elem in ["x", "y", "Response"]] + ["1" for elem in self.inputs]
-        thirdRow = ["" for elem in ["x", "y", "Response"]] + self.inputs
-        fOut.writerow(fullHeader)
+        #    the original template, fieldData, and parc folder are 
+        #    stored in spots 1,2,3 in the second header line
+        if os.path.exists(orig_header[7]):
+            #The input is an output from Field data query
+            original_field_data = orig_header[7]
+            field_data_template = orig_header[8]
+        else:
+            #The input is a raw field data file
+            original_field_data = self.fieldData
+            field_data_template = "NA"
+        
+        parc_template = inputs_header[5]
+        parc_workspace = inputs_header[6]
+        
+        secondRow = [original_field_data, field_data_template, ""] + ["1" for elem in self.inputs]
+        thirdRow = [parc_template, parc_workspace, ""] + self.inputs
+        fOut.writerow(full_header)
         fOut.writerow(secondRow)
         fOut.writerow(thirdRow)
         oFile.close()
@@ -239,6 +302,7 @@ class MDSBuilder(object):
             rasterDS = gdal.Open(self.probsurf, gdalconst.GA_ReadOnly)
             useProbSurf = True
         else:
+            print self.inputs[0]
             rasterDS = gdal.Open(self.inputs[0], gdalconst.GA_ReadOnly)
             useProbSurf = False
             
@@ -261,9 +325,9 @@ class MDSBuilder(object):
         
         
         if self.verbose:
-            self.writetolog('    Starting generation of ' + str(self.pointcount) + 'random background points, ')
+            self.writetolog('    Starting generation of ' + str(self.pointcount) + ' random background points, ')
             if self.probsurf <> '':
-                self.writetolog('      using ' + self.probsurf + ' as the probablity surface.')
+                self.writetolog('      using ' + self.probsurf + ' as the probability surface.')
             print "    Percent Done:    ",
         
         foundPoints = 0 # The running count of how many we've found
