@@ -139,6 +139,18 @@ class PredictorListWidget(QtGui.QTreeWidget):
                 self.tree_items[value].setCheckState(0, QtCore.Qt.Unchecked)
             else:
                 self.tree_items[value].setCheckState(0, QtCore.Qt.Checked)
+                
+    def query_add(self, query_text):
+        for value, item in self.tree_items.iteritems():
+            if str(query_text) in value[0]:
+                self.tree_items[value].setCheckState(0, QtCore.Qt.Checked)
+
+
+    
+    def query_remove(self, query_text):
+        for value, item in self.tree_items.iteritems():
+            if str(query_text) in value[0]:
+                self.tree_items[value].setCheckState(0, QtCore.Qt.Unchecked)
 
 class PredictorListConfigurationWidget(PredictorListWidget, 
                                        ConstantWidgetMixin):
@@ -284,20 +296,38 @@ class PredictorListConfiguration(StandardModuleConfigurationWidget):
         self.buttonLayout = QtGui.QHBoxLayout()
         self.buttonLayout.setMargin(5)
         self.okButton = QtGui.QPushButton('&OK', self)
-        self.okButton.setFixedWidth(100)
+        self.okButton.setFixedWidth(110)
         self.buttonLayout.addWidget(self.okButton)
         self.cancelButton = QtGui.QPushButton('&Cancel', self)
         self.cancelButton.setShortcut('Esc')
-        self.cancelButton.setFixedWidth(100)
+        self.cancelButton.setFixedWidth(110)
         self.buttonLayout.addWidget(self.cancelButton)
         
         self.selectAllButton = QtGui.QPushButton('&Select All', self)
-        self.selectAllButton.setFixedWidth(120)
+        self.selectAllButton.setFixedWidth(110)
         self.buttonLayout.addWidget(self.selectAllButton)
         
         self.switchSelectionButton = QtGui.QPushButton('&Switch Selection', self)
-        self.switchSelectionButton.setFixedWidth(120)
+        self.switchSelectionButton.setFixedWidth(110)
         self.buttonLayout.addWidget(self.switchSelectionButton)
+        
+        spacerItem = QtGui.QSpacerItem(10, 0, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.buttonLayout.addItem(spacerItem)
+        
+        self.queryLabel = QtGui.QLabel("Query")
+        self.buttonLayout.addWidget(self.queryLabel)
+        
+        self.queryText = QtGui.QLineEdit(self)
+        self.queryText.setFixedWidth(110)
+        self.buttonLayout.addWidget(self.queryText)
+        
+        self.addQuery = QtGui.QPushButton('&Add', self)
+        self.addQuery.setFixedWidth(60)
+        self.buttonLayout.addWidget(self.addQuery)
+        
+        self.removeQuery = QtGui.QPushButton('&Remove', self)
+        self.removeQuery.setFixedWidth(60)
+        self.buttonLayout.addWidget(self.removeQuery)
         
         layout.addLayout(self.buttonLayout)
         self.connect(self.okButton, QtCore.SIGNAL('clicked(bool)'), 
@@ -308,6 +338,10 @@ class PredictorListConfiguration(StandardModuleConfigurationWidget):
                      self.selectAllTriggered)
         self.connect(self.switchSelectionButton, QtCore.SIGNAL('clicked(bool)'), 
                      self.switchSelectionTriggered)
+        self.connect(self.addQuery, QtCore.SIGNAL('clicked(bool)'), 
+                     self.queryAdd)
+        self.connect(self.removeQuery, QtCore.SIGNAL('clicked(bool)'), 
+                     self.queryRemove)
         self.setLayout(layout)
 
     def okTriggered(self):
@@ -327,6 +361,12 @@ class PredictorListConfiguration(StandardModuleConfigurationWidget):
 
     def sizeHint(self):
         return QtCore.QSize(912, 912)
+    
+    def queryAdd(self):
+        self.list_config.query_add(self.queryText.text())
+        
+    def queryRemove(self):
+        self.list_config.query_remove(self.queryText.text())
 
 def get_predictor_widget(class_name, tree):
     def __init__(self, param, parent=None):
