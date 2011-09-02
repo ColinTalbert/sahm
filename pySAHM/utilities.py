@@ -122,13 +122,14 @@ def isMDSFile(MDSFile):
     header2 = MDSreader.next()
     header3 = MDSreader.next()
 
-    for i in [0, 1, 2]:
-        if not(header2[0] == '' or header2[0] == '0'):
-            return False
+#These no longer apply with the new agg feature.
+#    for i in [0, 1, 2]:
+#        if not(header2[0] == '' or header2[0] == '0'):
+#            return False
     
-    for item in header2[3:-1]:
-        if not item in ['0', '1']:
-            return False
+#    for item in header2[3:-1]:
+#        if not item in ['0', '1']:
+#            return False
     
     return True
     del MDSreader
