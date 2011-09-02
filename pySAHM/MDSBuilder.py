@@ -254,7 +254,7 @@ class MDSBuilder(object):
         #Format and write out our three header lines
         #    the original template, fieldData, and parc folder are 
         #    stored in spots 1,2,3 in the second header line
-        if os.path.exists(orig_header[7]):
+        if len(orig_header) > 7 and os.path.exists(orig_header[7]):
             #The input is an output from Field data query
             original_field_data = orig_header[7]
             field_data_template = orig_header[8]
@@ -263,8 +263,12 @@ class MDSBuilder(object):
             original_field_data = self.fieldData
             field_data_template = "NA"
         
-        parc_template = inputs_header[5]
-        parc_workspace = inputs_header[6]
+        if len(inputs_header) > 5:
+            parc_template = inputs_header[5]
+            parc_workspace = inputs_header[6]
+        else:
+            parc_template = "Unknown"
+            parc_workspace = "Unknown"
         
         secondRow = [original_field_data, field_data_template, ""] + ["1" for elem in self.inputs]
         thirdRow = [parc_template, parc_workspace, ""] + self.inputs
