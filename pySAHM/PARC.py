@@ -162,7 +162,6 @@ class PARC:
                 proc = subprocess.Popen( command )
                 thread.start_new_thread(utilities.process_waiter,
                         (proc, image_short_name, results))
-                #processes.append(subprocess.Popen(command))
                 process_count+= 1
             
         while process_count > 0:
@@ -186,6 +185,8 @@ class PARC:
         """
         Processes a single file
         """
+        gdal.UseExceptions()
+        
         shortName = os.path.split(os.path.splitext(source[0])[0])[1]
         self.logger.writetolog("    Starting processing of " + source[0])
         sourceParams = self.getRasterParams(source[0])
@@ -527,17 +528,20 @@ class PARC:
         """
         
         n = 5
-        xOffset = (self.template_params["east"] - self.template_params["west"]) / n
-        yOffset = (self.template_params["north"] - self.template_params["south"]) / n
+        xOffset = (self.template_params["east"] - self.template_params["west"]) / (n) - \
+                    ((self.template_params["east"] - self.template_params["west"]) / self.template_params["width"] / 1000)
+        yOffset = (self.template_params["north"] - self.template_params["south"]) / (n) - \
+                    ((self.template_params["north"] - self.template_params["south"]) / self.template_params["height"] / 1000)
         curX = self.template_params["west"]
         curY = self.template_params["north"]
-        testPoints =[self.transformPoint(curX, curY, self.template_params["srs"], 
-                                                    sourceParams["srs"])]
-        for x in range(n):
-            for y in range(n):
-                curY -= yOffset
+        testPoints =[]
+        
+        for x in range(n + 1):
+            for y in range(n + 1):
                 testPoints.append(self.transformPoint(curX, curY, self.template_params["srs"], 
                                                     sourceParams["srs"]))
+                curY -= yOffset
+                
             curX += xOffset
             curY = self.template_params["north"]  
                 
