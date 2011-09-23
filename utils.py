@@ -89,6 +89,8 @@ def createrootdir(rootWorkspace):
     VisTrails/Sahm session.
     '''
     global _roottempdir
+    user_nospace = getpass.getuser().split(' ')[0]
+    _roottempdir = os.path.join(rootWorkspace, user_nospace + '_' + time.strftime("%Y%m%dT%H%M%S"))
 #    global _logfile
     _roottempdir = os.path.join(rootWorkspace, getpass.getuser() + '_' + time.strftime("%Y%m%dT%H%M%S"))
     if not os.path.exists(_roottempdir):
