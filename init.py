@@ -438,9 +438,9 @@ class ApplyModel(Module):
         output_dname = utils.mknextdir(prefix='AppliedModel_')
         if self.hasInputFromPort('projectionTarget'):
             mdsFile = self.forceGetInputFromPort('projectionTarget').name
-            args = "ws=" + workspace + " c=" + mdsFile + " o=" + output_dname
+            args = "ws=" + '"' + workspace + '"' + " c=" + '"' + mdsFile + '"' + " o=" + '"' + output_dname + '"'
         else:
-            args = "ws=" + workspace + " o=" + output_dname 
+            args = "ws=" + '"' + workspace + '"' + " o=" + '"' + output_dname + '"'
         
         if self.hasInputFromPort('makeBinMap'):
             makeBinMap = self.forceGetInputFromPort('makeBinMap')
@@ -507,8 +507,11 @@ class Model(Module):
         
         args = ''
         for k, v in argsDict.iteritems():
-            args += ' ' + '='.join([str(k),str(v)])
-        args += " o=" + output_dname 
+            if k == 'c':
+                args += ' ' + '='.join([str(k),'"' + str(v) + '"'])
+            else:
+                args += ' ' + '='.join([str(k),str(v)])
+        args += " o=" + '"' + output_dname + '"'
         args += " rc=" + utils.MDSresponseCol(mdsFile)
 #        if self.hasInputFromPort('makeBinMap'):
 #            makeBinMap = self.forceGetInputFromPort('makeBinMap')
@@ -862,7 +865,7 @@ class PARC(Module):
         if configuration.verbose:
             ourPARC.verbose = True
         ourPARC.logger = utils.getLogger()
-        writetolog("    output_dname=" + output_dname, False, False)
+        
         ourPARC.out_dir = output_dname
 
         if self.hasInputFromPort("multipleCores"):
@@ -871,7 +874,7 @@ class PARC(Module):
 
         workingCSV = utils.mknextfile(prefix='tmpFilesToPARC_', suffix='.csv')
         outputCSV = utils.mknextfile(prefix='PARCOutput_', suffix='.csv')
-        writetolog("    workingCSV=" + workingCSV, False, False)
+
         #append additional inputs to the existing CSV if one was supplied
         #otherwise start a new CSV
         if self.hasInputFromPort("RastersWithPARCInfoCSV"):
@@ -898,8 +901,9 @@ class PARC(Module):
         del csvWriter
         ourPARC.inputs_CSV = workingCSV
         ourPARC.template = self.forceGetInputFromPort('templateLayer').name
-        #writetolog('    template layer = ' + self.forceGetInputFromPort('templateLayer').name)
-
+        writetolog('    template layer = ' + self.forceGetInputFromPort('templateLayer').name)
+        writetolog("    output_dname=" + output_dname, False, False)
+        writetolog("    workingCSV=" + workingCSV, False, False)
         try:
             ourPARC.parcFiles()
         except TrappedError as e:
@@ -1055,8 +1059,8 @@ class TestTrainingSplit(Module):
 
         global models_path
         
-        args = "i=" + inputMDS + " o=" + outputMDS 
-        args += " rc=" + utils.MDSresponseCol(inputMDS)
+        args = "i=" + '"' + inputMDS + '"' + " o=" + '"' + outputMDS + '"'
+        args += " rc=" + utils.MDSresponseCol(inputMDS) 
         if (self.hasInputFromPort("trainingProportion")):
             try:
                 trainingProportion = float(self.getInputFromPort("trainingProportion"))
@@ -1555,7 +1559,6 @@ def generate_namespaces(modules):
 def build_available_trees():
     trees = {}
 
-    #layers_fname = os.path.abspath(configuration.layers_csv_path)
     layers_fname = os.path.join(os.path.dirname(__file__), 'layers.csv')
     csv_reader = csv.reader(open(layers_fname, 'rU'))
     # pass on header
