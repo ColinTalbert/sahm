@@ -274,7 +274,7 @@ class PredictorListFile(Module):
     '''
     _input_ports = expand_ports([('csvFileList', '(edu.utah.sci.vistrails.basic:File)'),
                                  ('addPredictor', 'DataInput|Predictor')])
-    _output_ports = expand_ports([('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')])
+    _output_ports = expand_ports([('PredictorListFile', '(gov.usgs.sahm:PredictorListFile:DataInput)')])
 
     #copies the input predictor list csv to our working directory
     #and appends any additionally added predictors
@@ -324,7 +324,7 @@ class PredictorListFile(Module):
         del csv_writer
         
         output_file = utils.create_file_module(output_fname)
-        self.setResult('csvFileList', output_file)
+        self.setResult('PredictorListFile', output_file)
         
 class TemplateLayer(Path):
     '''
@@ -918,7 +918,8 @@ class PARC(Module):
         predictorsDir = utils.create_dir_module(output_dname)
         outputCSV = os.path.join(output_dname, "PARC_Files.csv")
         output_file = utils.create_file_module(outputCSV)
-         
+        
+        
         writetolog("Finished running PARC", True)
         self.setResult('RastersWithPARCInfoCSV', output_file)
         
@@ -1496,7 +1497,7 @@ def initialize():
     global maxent_path, color_breaks_csv
     global session_dir
     utils.config = configuration
-    
+       
     r_path = os.path.abspath(configuration.r_path)
     maxent_path = os.path.abspath(configuration.maxent_path)
     
