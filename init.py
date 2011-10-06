@@ -10,18 +10,18 @@ import traceback
 
 from core.modules.vistrails_module import Module, ModuleError, ModuleConnector
 from core.modules.basic_modules import File, Directory, Path, new_constant, Constant
+
 from core.modules.basic_modules import List
 from core.modules.basic_modules import String
 
-#from enum_modules import myEnum
 
 from widgets import get_predictor_widget, get_predictor_config
 from enum_widget import build_enum_widget
 
 from SelectPredictorsLayers import SelectListDialog
 #from maxent_module import MAXENTRunner
-import utils
 
+import utils
 #import our python SAHM Processing files
 import packages.sahm.pySAHM.FieldDataQuery as FDQ
 import packages.sahm.pySAHM.MDSBuilder as MDSB
@@ -31,6 +31,7 @@ import packages.sahm.pySAHM.MaxentRunner as MaxentRunner
 
 from utils import writetolog
 from pySAHM.utilities import TrappedError
+
 
 identifier = 'gov.usgs.sahm' 
 
@@ -77,7 +78,7 @@ def expand_ports(port_list):
 #    print new_port_list
     return new_port_list
 
-class FieldData(File): 
+class FieldData(Path): 
     '''
     Field Data
 
@@ -364,7 +365,7 @@ class MergedDataSet(File):
     
     pass
     
-class RastersWithPARCInfoCSV(File):
+class RastersWithPARCInfoCSV(Path):
     '''
     This module is a required class for other modules and scripts within the
     SAHM package. It is not intended for direct use or incorporation into
@@ -718,6 +719,7 @@ class MDSBuilder(Module):
                                  ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
                                  ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)')]
                                  )
+    
     _output_ports = expand_ports([('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)')])
 
     def compute(self):
@@ -855,7 +857,6 @@ class PARC(Module):
 
     _output_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
     
-
     def compute(self):
         #writetolog("\nRunning PARC", True)
         
