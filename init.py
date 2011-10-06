@@ -1076,7 +1076,7 @@ class TestTrainingSplit(Module):
                 RatioPresAbs = float(self.getInputFromPort("RatioPresAbs"))
                 if RatioPresAbs <= 0:
                     raise ModuleError(self, "The ratio of presence to absence (RatioPresAbs) must be a number greater than 0") 
-                args += " m=" + str(trainingProportion)
+                args += " m=" + str(trainingProportion) 
             except:
                 raise ModuleError(self, "The ratio of presence to absence (RatioPresAbs) must be a number greater than 0") 
         
@@ -1536,10 +1536,10 @@ def initialize():
     writetolog("    ")
     writetolog("*" * 79)
     
-    print "*" * 79
-    print " output directory:   " + session_dir
-    print "*" * 79
-    print "*" * 79
+    writetolog("*" * 79)
+    writetolog(" output directory:   " + session_dir)
+    writetolog("*" * 79)
+    writetolog("*" * 79)
     
 def finalize():
     pass
