@@ -35,6 +35,27 @@ from pySAHM.utilities import TrappedError
 
 identifier = 'gov.usgs.sahm' 
 
+def menu_items():
+    """ Add a menu item which allows users to specify their session directory
+    """
+    def change_session_folder():
+        global session_dir
+        
+        path = str(QtGui.QFileDialog.getExistingDirectory(None,
+                                        'Browse to new session folder -'))
+        session_dir = path
+        utils.setrootdir(path)
+        
+        writetolog("*" * 79 + "\n" + "*" * 79)
+        writetolog(" output directory:   " + session_dir)
+        writetolog("*" * 79 + "\n" + "*" * 79)
+    
+    lst = []
+    lst.append(("Change session folder", change_session_folder))
+    return(lst)
+
+
+
 
 def expand_ports(port_list):
     new_port_list = []
