@@ -299,10 +299,11 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
     if(!debug.mode) {sink();cat("Progress:70%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("60%\n")}  ### print time
     
     if(debug.mode) flush.console()
-    
+
     # Response curves #
     t4 <- unclass(Sys.time())
     if(make.r.curves){
+
             r.curves <- list(names=row.names(out$mods$summary),preds=list(),resp=list())
             inc <- 10/length(r.curves$names)
             assign("r.curves",r.curves,envir=.GlobalEnv)   
@@ -319,14 +320,9 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
                 }
             for(i in 1:length(r.curves$names)){
                     assign("i",i,envir=.GlobalEnv)
-                    if(debug.mode){
+
                             x<-try(partialPlot(out$mods$final.mod,out$dat$ma$ma.subset,r.curves$names[i],n.pt=50,plot=T,main="",
                                     xlab=r.curves$names[i]))
-                            #cat("response curve generated for",r.curves$names[i],"\n");flush.console()
-                        } else {
-                            x<-try(partialPlot(out$mods$final.mod,out$dat$ma$ma.subset,r.curves$names[i],n.pt=50,plot=F))
-                        }
-                        
                     if(class(x)=="try-error"){
                         if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))} else graphics.off()
                         out$ec<-out$ec+1
