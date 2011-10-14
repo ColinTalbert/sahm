@@ -20,7 +20,7 @@
 options(error=NULL)
 
 fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^response.binary",make.p.tif=T,make.binary.tif=T,
-      simp.method="AIC",responseCurveForm=NULL,debug.mode=F,model.family="binomial",script.name="glm.r",opt.methods=2,save.model=TRUE){
+      simp.method="AIC",responseCurveForm=NULL,debug.mode=F,model.family="binomial",script.name="glm.r",opt.methods=2,save.model=TRUE,UnitTest=FALSE,MESS=FALSE){
     # This function fits a stepwise GLM model to presence-absence data.
     # written by Alan Swanson, 2008-2009
     ## Maintained and edited by Marian Talbert September 2010-
@@ -80,7 +80,8 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
                  model.fitting.subset=NULL,
                  save.model=save.model,
                  run.time=paste(c(format(Sys.time(),"%Y-%m-%d"),format(Sys.time(),"%H:%M:%S")),collapse="T"),
-                 sig.test="t-test p-value"),
+                 sig.test="t-test p-value",
+                 MESS=MESS),
       dat = list(missing.libs=NULL,
                  output.dir=list(dname=NULL,exist=F,readable=F,writable=F),
                  tif.dir=list(dname=NULL,exist=F,readable=F,writable=F),
@@ -112,17 +113,14 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
       ec=0    # error count #
       )
     # load libaries #
-    out <- check.libs(list("PresenceAbsence","rgdal","XML","sp","survival","tools","raster","tcltk2"),out)
+    out <- check.libs(list("PresenceAbsence","rgdal","XML","sp","survival","tools","raster","tcltk2","foreign","ade4"),out)
     
     # exit program now if there are missing libraries #
     if(!is.null(out$error.mssg[[1]])){
           cat(saveXML(glm.to.xml(out),indent=T),'\n')
           return()
           }
-
-
-      
-
+          
     if(is.na(match(simp.method,c("AIC","BIC")))){
         return()
         }
@@ -166,7 +164,10 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     
     # check for model array #
     out$input$ma.name <- check.dir(out$input$ma.name)$dname
+    if(UnitTest!=FALSE) options(warn=2)
     out <- read.ma(out)
+    if(UnitTest==1) return(out)
+    
     if(!is.null(out$error.mssg[[1]])){
           if(!debug.mode) {sink();on.exit();unlink(logname)}
           cat(saveXML(glm.to.xml(out),indent=T),'\n')
@@ -198,7 +199,7 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
           direction='both',scope=scope.glm,trace=0,k=penalty)
     
     out$mods$final.mod <- mymodel.glm.step
-    
+
     out$dat$ma$used.covs <- attr(terms(formula(out$mods$final.mod)),"term.labels")
     #assign("out",out,envir=.GlobalEnv)
     t3 <- unclass(Sys.time())
@@ -238,21 +239,22 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
             "because they had only one level:",paste(out$dat$bad.factor.cols,collapse=","),"\n"),
             file=paste(bname,"_output.txt",sep=""),append=T)
         }
-    if(out$input$model.family=="bernoulli" || out$input$model.family=="binomial"){
-      auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=predict(mymodel.glm.step,type='response'),plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",opt.methods=opt.methods,
+
+
+      auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=predict(mymodel.glm.step,type='response'),plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="GLM",opt.methods=opt.methods,
             weight=out$dat$ma$train.weights,out=out)
 
       out$mods$auc.output<-auc.output
-      }
-  if(out$input$model.family=="poisson"){
-      auc.output <- make.poisson.jpg(out$dat$ma$ma,pred=predict(mymodel.glm.step,type='response'),
-      plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",
-            weight=out$dat$ma$train.weights,out=out)
 
-      out$mods$auc.output<-auc.output
-      }
+ # if(out$input$model.family=="poisson"){
+ #     auc.output <- make.poisson.jpg(out$dat$ma$ma,pred=predict(mymodel.glm.step,type='response'),
+ #     plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",
+ #           weight=out$dat$ma$train.weights,out=out)
 
-    out$mods$auc.output<-auc.output
+  #    out$mods$auc.output<-auc.output
+   #   }
+
+  #  out$mods$auc.output<-auc.output
 
 
 
@@ -298,7 +300,7 @@ if(debug.mode | responseCurveForm=="pdf"){
     ##############################################################################################################
         out$mods$final.mod$contributions$var<-attr(terms(formula(out$mods$final.mod)),"term.labels")
          assign("out",out,envir=.GlobalEnv)
-         
+
  save.image(paste(output.dir,"modelWorkspace",sep="\\"))
     if(out$input$make.p.tif==T | out$input$make.binary.tif==T){
         if((n.var <- length(coef(out$mods$final.mod)))<2){
@@ -309,7 +311,7 @@ if(debug.mode | responseCurveForm=="pdf"){
             mssg <- proc.tiff(model=out$mods$final.mod,vnames=attr(terms(formula(out$mods$final.mod)),"term.labels"),
                 tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=glm.predict,factor.levels=out$dat$ma$factor.levels,make.binary.tif=make.binary.tif,
                 thresh=out$mods$auc.output$thresh,make.p.tif=make.p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
-                outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50,NAval=-3000,fnames=out$dat$tif.names,logname=logname)     #"brt.prob.map.tif"
+                outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50,NAval=-3000,fnames=out$dat$tif.names,logname=logname,out=out)     #"brt.prob.map.tif"
             }
       #  model=out$mods$final.mod;vnames=attr(terms(formula(out$mods$final.mod)),"term.labels");
 #                tif.dir=out$dat$tif.dir$dname;pred.fct=glm.predict;factor.levels=out$dat$ma$factor.levels;make.binary.tif=make.binary.tif;
@@ -556,6 +558,7 @@ my.termplot <- function (model, data = NULL, envir = environment(formula(model))
     use.factor.levels = TRUE, smooth = NULL, ylim = "common",plot.it=F,
     ...)
 {   # this function is borrowed from the stats library #
+
     which.terms <- terms
     terms <- if (is.null(terms))
         predict(model, type = "terms", se.fit = se)
@@ -656,6 +659,7 @@ my.termplot <- function (model, data = NULL, envir = environment(formula(model))
                 xlims[1] <- xlims[1] - 0.07 * diff(xlims)
                 xlims[2] <- xlims[2] + 0.03 * diff(xlims)
             }
+
             if(plot.it){
                 plot(1, 0, type = "n", xlab = xlabs[i], ylab = ylabs[i],
                     xlim = xlims, ylim = ylims, main = main[i], xaxt = "n",
@@ -729,6 +733,7 @@ make.binary.tif=T
 simp.method="AIC"
 opt.methods=2
 save.model=FALSE
+MESS=FALSE
 
 Args <- commandArgs(trailingOnly=FALSE)
 
@@ -749,6 +754,7 @@ Args <- commandArgs(trailingOnly=FALSE)
  			if(argSplit[[1]][1]=="om")  opt.methods <- argSplit[[1]][2]
  			if(argSplit[[1]][1]=="savm")  save.model <- argSplit[[1]][2]
  			if(argSplit[[1]][1]=="sm")  simp.method <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="mes")  MESS <- argSplit[[1]][2]
     }
 	print(csv)
 	print(output)
@@ -765,4 +771,4 @@ opt.methods<-as.numeric(opt.methods)
  fit.glm.fct(ma.name=csv,
       tif.dir=NULL,output.dir=output,
       response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
-      simp.method=simp.method,debug.mode=F,responseCurveForm="pdf",script.name="glm.r",opt.methods=opt.methods,save.model=save.model)
+      simp.method=simp.method,debug.mode=F,responseCurveForm="pdf",script.name="glm.r",opt.methods=opt.methods,save.model=save.model,MESS=MESS)

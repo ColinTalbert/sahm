@@ -21,7 +21,7 @@ options(error=NULL)
 fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^response.binary",make.p.tif=T,make.binary.tif=T,
       debug.mode=F,responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL, samp.replace=FALSE, sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
       localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=proximity,norm.votes=TRUE,do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE, make.r.curves=T,
-      seed=NULL,script.name="rf.r",opt.methods=2,save.model=TRUE){
+      seed=NULL,script.name="rf.r",opt.methods=2,save.model=TRUE,UnitTest=FALSE,MESS=FALSE){
     # This function fits a boosted regression tree model to presence-absence data.
     # written by Alan Swanson, Jan-March 2009
     # uses code modified from that published in Elith et al 2008
@@ -101,7 +101,8 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
                  model.source.file=script.name,
                  model.fitting.subset=c(n.pres=50,n.abs=50),#subset used for response curves
                  run.time=paste(c(format(Sys.time(),"%Y-%m-%d"),format(Sys.time(),"%H:%M:%S")),collapse="T"),
-                 sig.test="mean decrease in accuracy"),
+                 sig.test="mean decrease in accuracy",
+                 MESS=MESS),
       dat = list(missing.libs=NULL,
                  output.dir=list(dname=NULL,exist=F,readable=F,writable=F),
                  tif.dir=list(dname=NULL,exist=F,readable=F,writable=F),
@@ -140,7 +141,7 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
    if(!is.null(seed)) set.seed(seed)
     #if(simplify.brt==T) out$input$simp.method<-"cross-validation" else out$input$simp.method<-">1% rel. influence"
     # load libaries #
-    out <- check.libs(list("randomForest","PresenceAbsence","rgdal","XML","sp","raster","tcltk2"),out)
+    out <- check.libs(list("randomForest","PresenceAbsence","rgdal","XML","sp","raster","tcltk2","foreign","ade4"),out)
     
     # exit program now if there are missing libraries #
     if(!is.null(out$error.mssg[[1]])){
@@ -187,8 +188,9 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
     
     # check for model array #
     out$input$ma.name <- check.dir(out$input$ma.name)$dname
+    if(UnitTest!=FALSE) options(warn=2)
     out <- read.ma(out)
-        
+    if(UnitTest==1) return(out)
     # exit program now if there are errors in the input data #
     if(!is.null(out$error.mssg[[1]])){
           if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
@@ -210,30 +212,12 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
 
     # tune the mtry parameter - this controls the number of covariates randomly subset for each split #
     cat("\ntuning mtry parameter\n")
-    
-   # rf.full <- randomForest(x=out$dat$ma$ma[,-1],y=factor(out$dat$ma$ma[,1]),xtest=xtest,ytest=ytest,importance=TRUE, ntree=n.trees,
-    #    mtry=mtry,replace=samp.replace,sampsize=ifelse(is.null(sampsize),(ifelse(samp.replace,nrow(x),ceiling(.632*nrow(x)))),sampsize),
-     #   nodesize=ifelse(is.null(nodesize),(if (!is.null(y) && !is.factor(y)) 5 else 1),nodesize),maxnodes=maxnodes,
-    #    localImp=localImp, nPerm=nPerm, keep.forest=ifelse(is.null(keep.forest),!is.null(y) && is.null(xtest),keep.forest),
-    #    corr.bias=corr.bias, keep.inbag=keep.inbag)
-
 
   x=out$dat$ma$ma[,-1]
   y=factor(out$dat$ma$ma[,1])
       if(is.null(mtry)){
-          mtry <- tuneRF(x=out$dat$ma$ma[,-1],y=factor(out$dat$ma$ma[,1]),mtryStart=3,importance=TRUE,ntreeTry=100,
-            replace=samp.replace,sampsize=ifelse(is.null(sampsize),(ifelse(samp.replace,nrow(x),ceiling(.632*nrow(x)))),sampsize),
-            nodesize=ifelse(is.null(nodesize),(if (!is.null(y) && !is.factor(y)) 5 else 1),nodesize),maxnodes=maxnodes,
-            localImp=localImp, nPerm=nPerm,corr.bias=corr.bias, keep.inbag=keep.inbag,doBest=F, plot=F)
-
-              if(class(mtry)=="try-error"){
-                 if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
-                    out$ec<-out$ec+1
-                    out$error.mssg[[out$ec]] <- paste("Error tuning mtry parameter:",mtry)
-                    cat(saveXML(rf.to.xml(out),indent=T),'\n')
-                    return()
-                    }
-    
+     mtry <- try(tuneRF(x=out$dat$ma$ma[,-1],y=factor(out$dat$ma$ma[,1]),mtryStart=3,importance=TRUE,ntreeTry=100,
+        replace=FALSE, doBest=F, plot=F),silent=T)
           mtry <- try(mtry[mtry[,2]==min(mtry[,2]),1][1])
           t2 <- unclass(Sys.time())
           if(!debug.mode) {sink();cat("Progress:30%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("30%\n")}
@@ -244,26 +228,15 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
     cat("\nnow fitting full random forest model using mtry=",mtry,"\n")  
     if(debug.mode) flush.console() 
 
-
-     rf.full <- try(randomForest(x=out$dat$ma$ma[,-1],y=factor(out$dat$ma$ma[,1]),xtest=xtest,ytest=ytest,importance=TRUE, ntree=n.trees,
+     rf.full <- randomForest(x=out$dat$ma$ma[,-1],y=factor(out$dat$ma$ma[,1]),xtest=xtest,ytest=ytest,importance=TRUE, ntree=n.trees,
         mtry=mtry,replace=samp.replace,sampsize=ifelse(is.null(sampsize),(ifelse(samp.replace,nrow(x),ceiling(.632*nrow(x)))),sampsize),
         nodesize=ifelse(is.null(nodesize),(if (!is.null(y) && !is.factor(y)) 5 else 1),nodesize),maxnodes=maxnodes,
         localImp=localImp, nPerm=nPerm, keep.forest=ifelse(is.null(keep.forest),!is.null(y) && is.null(xtest),keep.forest),
-        corr.bias=corr.bias, keep.inbag=keep.inbag),silent=TRUE)
+        corr.bias=corr.bias, keep.inbag=keep.inbag)
 
-     rf.full <- randomForest(x=out$dat$ma$ma[,-1],y=factor(out$dat$ma$ma[,1]),importance=TRUE,
-        ntree=out$mods$parms$n.tree, replace=FALSE, mtry=mtry)
-        
-    if(class(rf.full)=="try-error"){
-              if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
-              out$ec<-out$ec+1
-              out$error.mssg[[out$ec]] <- paste("Error fitting full random forest model:",rf.full)
-              cat(saveXML(rf.to.xml(out),indent=T),'\n')
-              return()
-              } else {
               out$mods$parms$mtry<-mtry
               out$mods$final.mod <- rf.full
-              }
+
     t3 <- unclass(Sys.time())
     if(!debug.mode) {sink();cat("Progress:40%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("40%\n")}  ### print time
     
@@ -309,8 +282,7 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
             "because they had only one level:",paste(out$dat$bad.factor.cols,collapse=","),"\n\n")
         }
         
-        
-    auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=tweak.p(as.vector(predict(out$mods$final.mod,,newdata=out$dat$ma$ma[,-1],type="prob")[,2])),
+    auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=tweak.p(as.vector(predict(out$mods$final.mod,type="prob")[,2])),
             plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="RF",opt.methods=opt.methods,weight=rep(1,times=dim(out$dat$ma$ma)[1]),out=out)
    
     if(class(auc.output)=="try-error"){
@@ -386,7 +358,7 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
         mssg <- try(proc.tiff(model=out$mods$final.mod,vnames=as.character(row.names(out$mods$summary)),
             tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=rf.predict,factor.levels=out$dat$ma$factor.levels,make.binary.tif=make.binary.tif,
             thresh=out$mods$auc.output$thresh,make.p.tif=make.p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
-            outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50.0,NAval=-3000,fnames=out$dat$tif.names,logname=logname),silent=T)     #"brt.prob.map.tif"
+            outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50.0,NAval=-3000,fnames=out$dat$tif.names,logname=logname,out=out),silent=T)     #"brt.prob.map.tif"
 
         if(class(mssg)=="try-error" | mssg!=0){
           if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
@@ -610,6 +582,7 @@ seed=NULL
 opt.methods=2
 save.model=TRUE
 seed=NULL
+MESS=FALSE
 
 Args <- commandArgs(trailingOnly=FALSE)
 
@@ -646,6 +619,7 @@ Args <- commandArgs(trailingOnly=FALSE)
  		  if(argSplit[[1]][1]=="curves")  make.r.curves <- argSplit[[1]][2]
  		  if(argSplit[[1]][1]=="om")  opt.methods <- argSplit[[1]][2]
       if(argSplit[[1]][1]=="savm")  save.model <- argSplit[[1]][2]
+      if(argSplit[[1]][1]=="mes")  MESS <- argSplit[[1]][2]
  		  
     }
 	print(csv)
@@ -673,6 +647,6 @@ fit.rf.fct(ma.name=csv,tif.dir=NULL,output.dir=output,response.col=responseCol,m
       nodesize=nodesize,maxnodes=maxnodes,importance=importance,
       localImp=localImp,nPerm=nPerm,proximity=proximity,oob.prox=oob.prox,norm.votes=norm.votes,do.trace=do.trace,keep.forest=keep.forest,
       keep.inbag=keep.inbag,make.r.curves=make.r.curves,
-      seed=seed,script.name="rf.r",opt.methods=opt.methods,save.model=save.model)
+      seed=seed,script.name="rf.r",opt.methods=opt.methods,save.model=save.model,MESS=MESS)
 
  

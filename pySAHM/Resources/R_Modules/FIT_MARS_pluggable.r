@@ -20,7 +20,7 @@
 options(error=NULL)
 
 fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^response.binary",make.p.tif=T,make.binary.tif=T,
-      mars.degree=1,mars.penalty=2,responseCurveForm=NULL,debug.mode=T,script.name="mars.r",opt.methods=2,save.model=TRUE){
+      mars.degree=1,mars.penalty=2,responseCurveForm=NULL,debug.mode=T,script.name="mars.r",opt.methods=2,save.model=TRUE,UnitTest=FALSE,MESS=FALSE){
     # This function fits a stepwise GLM model to presence-absence data.
     # written by Alan Swanson, 2008-2009
     # # Maintained and edited by Marian Talbert September 2010-
@@ -82,7 +82,8 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
                  model.fitting.subset=NULL, # not used.
                  model.family="binomial",
                  run.time=paste(c(format(Sys.time(),"%Y-%m-%d"),format(Sys.time(),"%H:%M:%S")),collapse="T"),
-                 sig.test="chi-squared anova p-value"),
+                 sig.test="chi-squared anova p-value",
+                 MESS=MESS),
       dat = list(missing.libs=NULL,
                  output.dir=list(dname=NULL,exist=F,readable=F,writable=F),
                  tif.dir=list(dname=NULL,exist=F,readable=F,writable=F),
@@ -117,7 +118,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
       )
 
       # load libaries #
-      out <- check.libs(list("PresenceAbsence","rgdal","XML","sp","survival","mda","raster","tcltk2"),out)
+      out <- check.libs(list("PresenceAbsence","rgdal","XML","sp","survival","mda","raster","tcltk2","foreign","ade4"),out)
       
       # exit program now if there are missing libraries #
       if(!is.null(out$error.mssg[[1]])){
@@ -163,9 +164,10 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
 
     # check for model array #
     out$input$ma.name <- check.dir(out$input$ma.name)$dname
-    print("*************************** ENTER MA")
+
+    if(UnitTest!=FALSE) options(warn=2)
     out <- read.ma(out)
-        
+    if(UnitTest==1) return(out)
     
     # exit program now if there are errors in the input data #
     if(!is.null(out$error.mssg[[1]])){
@@ -243,24 +245,10 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     ##############################################################################################################
            
     # Store .jpg ROC plot #
-
-
-    if(out$input$model.family=="bernoulli" |out$input$model.family=="binomial"){
       auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=mars.predict(fit,out$dat$ma$ma)$prediction[,1],
-      plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",opt.methods=opt.methods,
+      plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="MARS",opt.methods=opt.methods,
             weight=out$dat$ma$train.weights,out=out)
-
       out$mods$auc.output<-auc.output
-      }
-  if(out$input$model.family=="poisson"){
-      auc.output <- make.poisson.jpg(out$dat$ma$ma,pred=mars.predict(fit,out$dat$ma$ma)$prediction[,1],
-      plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",
-            weight=out$dat$ma$train.weights,out=out)
-
-      out$mods$auc.output<-auc.output
-      }
-
-
 
     if(!debug.mode) {sink();cat("Progress:70%\n");flush.console();sink(logname,append=T)} else cat("70%\n")
     
@@ -274,7 +262,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
         pcol <- min(ceiling(sqrt(nvar)),4)
         prow <- min(ceiling(nvar/pcol),3)
         r.curves <- try(mars.plot(fit,plot.layout=c(prow,pcol),file.name=paste(bname,"_response_curves.pdf",sep="")))
-        
+
         } else r.curves<-try(mars.plot(fit,plot.it=F))
         
         if(class(r.curves)!="try-error") {
@@ -304,7 +292,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
                 tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=pred.mars,factor.levels=out$dat$ma$factor.levels,make.binary.tif=make.binary.tif,
                 thresh=out$mods$auc.output$thresh,make.p.tif=make.p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
                 outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50.0,NAval=-3000,
-                fnames=out$dat$tif.names,logname=logname))     #"brt.prob.map.tif"
+                fnames=out$dat$tif.names,logname=logname,out=out))     #"brt.prob.map.tif"
             }
 
         if(class(mssg)=="try-error"){
@@ -1662,6 +1650,7 @@ mars.penalty=2
 script.name="mars.r"
 opt.methods=2
 save.model=TRUE
+MESS=FALSE
 
 # Interpret command line argurments #
 # Make Function Call #
@@ -1685,6 +1674,7 @@ Args <- commandArgs(trailingOnly=FALSE)
     	if(argSplit[[1]][1]=="pen") mars.penalty <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="om")  opt.methods <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="savm")  save.model <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="mes")  MESS <- argSplit[[1]][2]
     }
 	print(csv)
 	print(output)
@@ -1702,4 +1692,5 @@ opt.methods<-as.numeric(opt.methods)
 fit.mars.fct(ma.name=csv,
         tif.dir=NULL,output.dir=output,
         response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
-            mars.degree=mars.degree,mars.penalty=mars.penalty,debug.mode=F,responseCurveForm="pdf",script.name="mars.r",save.model=save.model,opt.methods=as.numeric(opt.methods))
+            mars.degree=mars.degree,mars.penalty=mars.penalty,debug.mode=F,responseCurveForm="pdf",
+            script.name="mars.r",save.model=save.model,opt.methods=as.numeric(opt.methods),MESS=MESS)

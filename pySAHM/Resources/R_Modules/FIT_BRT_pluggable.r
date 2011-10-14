@@ -51,7 +51,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
       simp.method="cross-validation",debug.mode=F,responseCurveForm="jpg",tc=NULL,n.folds=3,alpha=1,script.name="brt.r",
      learning.rate = NULL, bag.fraction = 0.5,
  prev.stratify = TRUE, model.family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
-  tolerance = 0.001,seed=NULL,opt.methods=2,save.model=TRUE){
+  tolerance = 0.001,seed=NULL,opt.methods=2,save.model=TRUE,UnitTest=FALSE,MESS=FALSE){
 
 # Possibly to add later
 # offset = NULL, fold.vector = NULL, var.monotone = rep(0,length(gbm.x))
@@ -147,7 +147,8 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
                  model.source.file=script.name,
                  model.fitting.subset=c(n.pres=500,n.abs=500),
                  run.time=paste(c(format(Sys.time(),"%Y-%m-%d"),format(Sys.time(),"%H:%M:%S")),collapse="T"),
-                 sig.test="relative influence"),
+                 sig.test="relative influence",
+                 MESS=MESS),
       dat = list(missing.libs=NULL,
                  output.dir=list(dname=NULL,exist=F,readable=F,writable=F),
                  tif.dir=list(dname=NULL,exist=F,readable=F,writable=F),
@@ -186,7 +187,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
       )
       if(!is.null(seed)) set.seed(seed)
     # load libaries #
-    out <- check.libs(list("PresenceAbsence","rgdal","XML","sp","survival","lattice","raster","tcltk2"),out)
+    out <- check.libs(list("PresenceAbsence","rgdal","XML","sp","survival","lattice","raster","tcltk2","foreign","ade4"),out)
 
     # exit program now if there are missing libraries #
       if(!is.null(out$error.mssg[[1]])){
@@ -242,7 +243,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     # check for model array #
     out$input$ma.name <- check.dir(out$input$ma.name)$dname
     out <- read.ma(out)
-
+    if(UnitTest==1) return(out)
     # exit program now if there are errors in the input data #
     if(!is.null(out$error.mssg[[1]])){
           if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
@@ -279,39 +280,28 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
         print(debug.mode)
         t1 <- unclass(Sys.time())
             if(length(out$mods$lr.mod$good.cols)<=1) stop("BRT must have at least two independent variables")
-        m0 <- gbm.step.fast(dat=out$dat$ma$ma.subset,gbm.x=out$mods$lr.mod$good.cols,gbm.y=1,family=out$input$model.family,
+        m0 <- gbm.step.fast(dat=out$dat$ma$ma.subset,gbm.x=out$mods$lr.mod  $good.cols,gbm.y=1,family=out$input$model.family,
               n.trees = c(300,600,800,1000,1200,1500,1800),step.size=out$input$step.size,max.trees=out$input$max.trees,
               tolerance.method=out$input$tolerance.method,tolerance=out$input$tolerance, n.folds=out$input$n.folds,tree.complexity=out$mods$parms$tc.sub,
               learning.rate=out$mods$lr.mod$lr0,bag.fraction=out$input$bag.fraction,site.weights=out$dat$ma$weight.subset,autostop=T,debug.mode=F,silent=!debug.mode,
               plot.main=F,superfast=F)
-        if(debug.mode) assign("m0",m0,envir=.GlobalEnv)
-        if(class(m0)=="try-error"){
-              if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
-              out$ec<-out$ec+1
-              out$error.mssg[[out$ec]] <- paste("Error fitting reduced BRT model:",m0)
-              cat(saveXML(brt.to.xml(out),indent=T),'\n')
-              return()
-              }
-        t1b <- unclass(Sys.time())
-        if(!debug.mode) {sink();cat("Progress:40%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("40%\n")}
-        cat("\nfinished with trimmed model fitting, n.trees=",m0$target.trees,", t=",round(t1b-t1,2),"sec\n");flush.console()
-        cat("\nbeginning model simplification - very slow...\n");flush.console()
-        out$mods$simp.mod <- gbm.simplify(m0,n.folds=out$input$n.folds,plot=F,verbose=F,alpha=out$input$alpha) # this step is very slow #
-        if(debug.mode) assign("out",out,envir=.GlobalEnv)
-        if(class(out$mods$simp.mod)=="try-error"){
-            if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
-            out$error.mssg[[out$ec<-out$ec+1]] <- paste("Error simplifying BRT model:",out$mods$simp.mod)
-            cat(saveXML(brt.to.xml(out),indent=T),'\n')
-            return()
-            }
-        out$mods$simp.mod$good.cols <- out$mods$simp.mod$pred.list[[length(out$mods$simp.mod$pred.list)]]
-        out$mods$simp.mod$good.vars <- names(out$dat$ma$ma)[out$mods$simp.mod$good.cols]
-        cat("\nfinished with model simplification, t=",round((unclass(Sys.time())-t1b)/60,2),"min\n");flush.console()
-        if(!debug.mode) {sink();cat("Progress:50%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("50%\n")}
-        }
+              if(debug.mode) assign("m0",m0,envir=.GlobalEnv)
 
-    # fit final model #
-    t2 <- unclass(Sys.time())
+              t1b <- unclass(Sys.time())
+              if(!debug.mode) {sink();cat("Progress:40%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("40%\n")}
+              cat("\nfinished with trimmed model fitting, n.trees=",m0$target.trees,", t=",round(t1b-t1,2),"sec\n");flush.console()
+              cat("\nbeginning model simplification - very slow...\n");flush.console()
+        out$mods$simp.mod <- gbm.simplify(m0,n.folds=out$input$n.folds,plot=F,verbose=F,alpha=out$input$alpha) # this step is very slow #
+              if(debug.mode) assign("out",out,envir=.GlobalEnv)
+
+              out$mods$simp.mod$good.cols <- out$mods$simp.mod$pred.list[[length(out$mods$simp.mod$pred.list)]]
+              out$mods$simp.mod$good.vars <- names(out$dat$ma$ma)[out$mods$simp.mod$good.cols]
+              cat("\nfinished with model simplification, t=",round((unclass(Sys.time())-t1b)/60,2),"min\n");flush.console()
+              if(!debug.mode) {sink();cat("Progress:50%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("50%\n")}
+              }
+
+          # fit final model #
+          t2 <- unclass(Sys.time())
 
    if(out$mods$lr.mod$lr==0) out$mods$lr.mod$lr<-out$mods$lr.mod$lr0
   out$mods$final.mod <- gbm.step.fast(dat=out$dat$ma$ma,gbm.x=out$mods$simp.mod$good.cols,gbm.y = 1,family=out$input$model.family,
@@ -322,13 +312,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
 
 
     assign("out",out,envir=.GlobalEnv)
-    if(class(out$mods$final.mod)=="try-error"){
-          if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
-          out$ec<-out$ec+1
-          out$error.mssg[[out$ec]]<- paste("Error fitting final BRT model:",out$mods$final.mod)
-          cat(saveXML(brt.to.xml(out),indent=T),'\n')
-          return()
-          }
+
     t3 <- unclass(Sys.time())
     cat("\nfinished with final model fitting, n.trees=",out$mods$final.mod$target.trees,", t=",round(t3-t2,2),"sec\n\n\n");flush.console()
     if(!debug.mode) {sink();cat("Progress:60%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("60%\n")}
@@ -340,7 +324,6 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     # Store .jpg ROC plot #
 
     # Generate and store text summary #
-    #source('F:/code for Jeff and Roger/boosted regression trees/brt.functions.aks.021709.r')
     y <- gbm.interactions(out$mods$final.mod)
     if(debug.mode) assign("out",out,envir=.GlobalEnv)
     if(class(y)!="try-error"){
@@ -408,7 +391,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
   if(out$input$model.family=="poisson"){
       auc.output <- make.poisson.jpg(out$dat$ma$ma,pred=predict.gbm(out$mods$final.mod,out$dat$ma$ma,
             out$mods$final.mod$target.trees,type="response"),plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",
-            weight=out$dat$ma$train.weights)
+            weight=out$dat$ma$train.weights,out=out)
 
       out$mods$auc.output<-auc.output
       }
@@ -457,7 +440,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
         mssg <- proc.tiff(model=out$mods$final.mod,vnames=as.character(out$mods$final.mod$contributions$var),
             tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=brt.predict,factor.levels=out$dat$ma$factor.levels,make.binary.tif=make.binary.tif,
             thresh=out$mods$auc.output$thresh,make.p.tif=make.p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
-            outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50.0,NAval=-3000,logname=logname)     #"brt.prob.map.tif"
+            outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50.0,NAval=-3000,logname=logname,out=out)     #"brt.prob.map.tif"
 
         if(class(mssg)=="try-error" | mssg!=0){
           if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
@@ -2460,7 +2443,7 @@ tolerance = 0.001
 seed=NULL
 opt.methods=2
 save.model=TRUE
-
+MESS=FALSE
 # Interpret command line argurments #
 # Make Function Call #
 Args <- commandArgs(trailingOnly=FALSE)
@@ -2490,6 +2473,7 @@ Args <- commandArgs(trailingOnly=FALSE)
  		  if(argSplit[[1]][1]=="savm")  save.model <- argSplit[[1]][2]
  		  if(argSplit[[1]][1]=="tolm")  tolerance.method <- argSplit[[1]][2]
  		  if(argSplit[[1]][1]=="tol")  tolerance <- argSplit[[1]][2]
+ 		  if(argSplit[[1]][1]=="mes")  MESS <- argSplit[[1]][2]
  			
     }
 	print(csv)
@@ -2514,7 +2498,7 @@ opt.methods<-as.numeric(opt.methods)
 		make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
 		simp.method="cross-validation",debug.mode=F,responseCurveForm="pdf",tc=tc,n.folds=n.folds,alpha=alpha,script.name="brt.r",
 		learning.rate =learning.rate, bag.fraction = bag.fraction,prev.stratify = prev.stratify,max.trees = max.trees,seed=seed,
-    save.model=save.model,opt.methods=opt.methods)
+    save.model=save.model,opt.methods=opt.methods,MESS=MESS)
 
 
 
