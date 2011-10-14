@@ -32,17 +32,15 @@ PredictModel<-function(workspace=NULL,new.tifs=NULL,out.dir=NULL,thresh=NULL,mak
             paths<-paths[ma.cols]
             #checking that all tifs are present
             if(any(is.na(ma.cols))){
-                              out$ec <- out$ec+1
-                              out$error.mssg[[out$ec]] <- paste("ERROR: the following geotiff(s) are missing in ",
+
+                              stop("ERROR: the following geotiff(s) are missing in ",
                                     tif.dir,":  ",paste(ma.names[-r.col][is.na(ma.cols)],collapse=" ,"),sep="")
-                              return(out)
                             }
             #checking that we have read access to all tiffs
              if(sum(file.access(paths),mode=0)!=0){
-                              out$ec <- out$ec+1
-                              out$error.mssg[[out$ec]] <- paste("ERROR: the following geotiff(s) are missing : ",
+                              stop("ERROR: the following geotiff(s) are missing : ",
                                     paths[(file.access(paths)!=0),][1],sep="")
-                            return(out)
+
                             }
                             out$dat$tif.ind<-paths
       }
@@ -65,16 +63,13 @@ PredictModel<-function(workspace=NULL,new.tifs=NULL,out.dir=NULL,thresh=NULL,mak
     if(!is.null(make.btif)) make.binary.tif<-make.btif
     if(!is.null(make.ptif)) make.p.tif<-make.ptif
 
+
+       assign("Pred.Surface",Pred.Surface,envir=.GlobalEnv)
       mssg <- proc.tiff(model=out$mods$final.mod,vnames=as.character(out$mods$final.mod$contributions$var),
                   tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=pred.fct,factor.levels=out$dat$ma$factor.levels,make.binary.tif=make.binary.tif,
                   thresh=out$mods$auc.output$thresh,make.p.tif=make.p.tif,outfile.p=paste(out.dir,"prob_map.tif",sep="\\"),
-                  outfile.bin=paste(out.dir,"bin_map.tif",sep="\\"),tsize=50.0,NAval=-3000)
-                  
-#              mssg <- try(proc.tiff(model=out$mods$final.mod,vnames=names(out$dat$ma$ma)[-1],
-#                tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=pred.mars,factor.levels=out$dat$ma$factor.levels,make.binary.tif=make.binary.tif,
-#                thresh=out$mods$auc.output$thresh,make.p.tif=make.p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
-#                outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50.0,NAval=-3000,
-#                fnames=out$dat$tif.names,logname=logname),silent=T)
+                  outfile.bin=paste(out.dir,"bin_map.tif",sep="\\"),tsize=50.0,NAval=-3000,logname=logname,out=out)
+
 
 }
 
@@ -330,7 +325,6 @@ Args <- commandArgs(trailingOnly=FALSE)
     	if(argSplit[[1]][1]=="new.tifs") new.tifs <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="o") out.dir <- argSplit[[1]][2]
     }
-#source(paste(ScriptPath,"FIT_MARS_pluggable.r",sep="\\"))
 
 PredictModel(workspace=ws,new.tifs=new.tifs,out.dir=out.dir)
 

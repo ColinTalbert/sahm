@@ -69,6 +69,11 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
     #now remove all columns except predictors
     dat<-dat[-rm.cols]
      dat[dat==-9999]<-NA
+      response<-response[complete.cases(dat)]
+      TrueResponse<-TrueResponse[complete.cases(dat)]
+     dat<-dat[complete.cases(dat),]
+
+
     #dat<-dat[1:2000,]
   #Remove columns with only one unique value
       varr <- function(x) var(x,na.rm=TRUE)

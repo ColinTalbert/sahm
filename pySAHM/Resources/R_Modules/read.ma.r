@@ -5,11 +5,8 @@
       tif.dir <- out$dat$tif.dir$dname
       out.list <- out$dat$ma
       out.list$status[1] <- file.access(ma.name,mode=0)==0
-      if(!is.null(out$input$tif.dir)){
-          ma <- try(read.csv(ma.name, header=TRUE))}
 
-      if(is.null(out$input$tif.dir)){
-          try(ma<-read.csv(ma.name,skip=3))
+          try(ma<-read.csv(ma.name,skip=2))
           hl<-readLines(ma.name,1)
           hl=strsplit(hl,',')
           colnames(ma) = hl[[1]]
@@ -22,236 +19,170 @@
 
           paths<-as.character(tif.info[[3]])
 
-            }
+      if(class(ma)=="try-error") stop("Error reading MDS")
+          else out.list$status[2]<-T
 
-                temp<-strsplit(tif.info[[2]][1],split="\\\\")[[1]]
+              temp<-strsplit(tif.info[[2]][1],split="\\\\")[[1]]
             out.list$input$FieldDataTemp<-temp[length(temp)]
 
                 temp<-strsplit(tif.info[[2]][2],split="\\\\")[[1]]
             out.list$input$OrigFieldData<-temp[length(temp)]
-            
+
                temp<-strsplit(tif.info[[2]][3],split="\\\\")[[1]]
             out.list$input$CovSelectName<-temp[length(temp)]
-            
+
                 temp<-strsplit(tif.info[[3]][1],split="\\\\")[[1]]
             out.list$input$ParcTemplate<-temp[length(temp)]
-            
+
             temp<-strsplit(tif.info[[3]][2],split="\\\\")[[1]]
             out.list$input$ParcOutputFolder<-temp[length(temp)]
-            
+
             temp<-strsplit(tif.info[[2]][2],split="\\\\")[[1]]
             out.list$input$OrigFieldData<-temp[length(temp)]
-            
-      if(class(ma)=="try-error"){
-          out$ec <- out$ec+1
-          out$error.mssg[[out$ec]] <- paste("ERROR: model array",ma.name,"is not readable")
-          return(out)
-          } else {
-          out.list$status[2]<-T
-          }
-
 
           r.name <- out$input$response.col
           if(r.name=="responseCount") out$input$model.family="poisson"
 
-        # check to make sure that response column exists in the model array #
-
       r.col <- grep(r.name,names(ma))
-      if(length(r.col)==0){
-          out$ec <- out$ec+1
-          out$error.mssg[[out$ec]] <- paste("ERROR: response column (",r.name,") not found in ",ma.name,sep="")
-          return(out)
-          }
-      if(length(r.col)>1){
-          out$ec <- out$ec+1
-          out$error.mssg[[out$ec]] <- paste("ERROR: multiple columns in ",ma.name," match:",r.name,sep="")
-          return(out)
-          }
+      if(length(r.col)==0) stop("Response column was not found")
+      if(length(r.col)>1) stop("Multiple columns matched the response column")
+         rm.list<-r.col
 
         # remove background points which aren't used here
          if(length(which(ma[,r.col]==-9999,arr.ind=TRUE))>0) ma<-ma[-c(which(ma[,r.col]==-9999,arr.ind=TRUE)),]
 
-      # remove x and y columns #
-      xy.cols <- c(match("x",tolower(names(ma))),match("y",tolower(names(ma))))
-      xy.cols <- xy.cols[!is.na(xy.cols)]
-      if(length(xy.cols)>0){
-      out.list$train.xy<-ma[,xy.cols]
-      ma <- ma[,-xy.cols]
-          if(is.null(out$input$tif.dir)){
-           include<-include[-xy.cols]
-           paths<-paths[-xy.cols]
+       # remove incomplete cases and warn user if this number is more than 10% of the data
 
-      }}
-
+      # find and save xy columns#
+      xy.cols <- na.omit(c(match("x",tolower(names(ma))),match("y",tolower(names(ma)))))
+      if(length(xy.cols)>0)  rm.list<-c(rm.list,xy.cols)
 
        # remove weights column except for Random Forest
-
        site.weights<-match("site.weights",tolower(names(ma)))
-       ifelse(!is.na(site.weights),{
+        if(!is.na(site.weights)) rm.list<-c(rm.list,site.weights)
+        
+        # and index as well
+       split.indx<-match("split",tolower(names(ma)))
+        if(length(na.omit(split.indx))>0) rm.list<-c(rm.list,split.indx)
+
+       #complete the list of columns to include
+          include[is.na(include)]<-0
+          rm.list<-c(rm.list,(which(include!=1,arr.ind=TRUE)))
+          rm.list<-unique(rm.list[!is.na(rm.list)])
+          
+      ######################### REMOVING INCOMPLETE CASES ###############
+        #remove incomplete cases but only for include variables
+       all.cases<-nrow(ma)
+          out.list$n.pres[1] <- NA
+          out.list$n.abs[1] <- NA
+          ma<-ma[complete.cases(ma[,-c(rm.list)]),]
+          comp.cases<-nrow(ma)
+          if(comp.cases/all.cases<.9) warning(paste(round((1-comp.cases/all.cases)*100,digits=2),"% of cases were removed because of missing values",sep=""))
+      #########################################################################
+        #split out the weights,response, and xy.columns after removing incomplete cases
+       if(!is.na(site.weights)){
           out.list$train.weights<-ma[,site.weights]
-          ma <- ma[,-site.weights]
-           if(is.null(out$input$tif.dir)){
-           include<-include[-site.weights]
-           paths<-paths[-site.weights]
-           print(paths)
-           print(include)
-            }
-          },
-          out.list$train.weights<-rep(1,times=dim(ma)[1]))
-
-
-     #remove test training split column if present
-       ma.names <- names(ma)
-      # identify factors (this will eventually be derived from image metadata) #
-
-      factor.cols <- grep("categorical",names(ma))
+          } else out.list$train.weights<-rep(1,times=dim(ma)[1])
+        if(length(xy.cols)>0) out.list$train.xy<-ma[,xy.cols]
+        response<-ma[,r.col]
+        
+      ma.names<-names(ma)
+      # tagging factors and looking at their levels
+         factor.cols <- grep("categorical",names(ma))
       factor.cols <- factor.cols[!is.na(factor.cols)]
       if(length(factor.cols)==0){
           out.list$factor.levels <- NA
           } else {
+                names(ma) <- ma.names <-  sub("_categorical","",ma.names)
+                factor.names <- ma.names[factor.cols]
+                factor.levels <- list()
+                for (i in 1:length(factor.cols)){
+                 f.col <- factor.cols[i]
 
-          names(ma) <- ma.names <-  sub("_categorical","",ma.names)
-          factor.names <- ma.names[factor.cols]
-          factor.levels <- list()
-          for (i in 1:length(factor.cols)){
-              f.col <- factor.cols[i]
-                  x <- table(ma[,f.col])
-                  if(nrow(x)<2){
-                        out$dat$bad.factor.cols <- c(out$dat$bad.factor.cols,factor.names[i])
-                        }
-                  lc.levs <-  as.numeric(row.names(x))[x>0] # make sure there is at least one "available" observation at each level
-                  lc.levs <- data.frame(number=lc.levs,class=lc.levs)
-                  factor.levels[[i]] <- lc.levs
+                        x <- table(ma[,f.col])
+                        if(nrow(x)<2){
+                              out$dat$bad.factor.cols <- c(out$dat$bad.factor.cols,factor.names[i])
+                              }
+                        lc.levs <-  as.numeric(row.names(x))[x>0] # make sure there is at least one "available" observation at each level
+                        lc.levs <- data.frame(number=lc.levs,class=lc.levs)
+                        factor.levels[[i]] <- lc.levs
 
-              ma[,f.col] <- factor(ma[,f.col],levels=lc.levs$number,labels=lc.levs$class)
+                    ma[,f.col] <- factor(ma[,f.col],levels=lc.levs$number,labels=lc.levs$class)
+                    }
 
+                    names(factor.levels)<-factor.names
+                    out.list$factor.levels <- factor.levels
 
-              }
-
-              names(factor.levels)<-factor.names
-              out.list$factor.levels <- factor.levels
-
+                if(!is.null(out$dat$bad.factor.cols)) rm.list<-c(rm.list,match(out$dat$bad.factor.cols,names(ma)))
           }
-          
-        split.indx<-match("split",tolower(names(ma)))
+
+            if(length(which(lapply(apply(ma,2,unique),length)==1,arr.ind=TRUE))>0){
+                rm.list<-c(rm.list,which(lapply(apply(ma,2,unique),length)==1,arr.ind=TRUE))
+                warning(paste("The Following Predictors will be removed because they have only 1 unique value: ",
+                names(which(lapply(apply(ma,2,unique),length)==1,arr.ind=TRUE))))
+                }
+     #remove test training split column if present
+
           if(length(na.omit(split.indx))>0){
-            include<-include[-c(split.indx)]
-            split.col<-ma[,split.indx]
-            ma <- ma[,-split.indx]
-            paths<-paths[-c(split.indx)]
-            out.list$ma.test<-ma[split.col=="test",]
-            ma<-ma[split.col=="train",]
-            out.list$test.weights<-out.list$train.weights[split.col=="test"]
-            out.list$train.weights<-out.list$train.weights[split.col=="train"]
-            out.list$test.xy<-out.list$train.xy[split.col=="test",]
-            out.list$train.xy<-out.list$train.xy[split.col=="train",]
+              split.col<-ma[,split.indx]
+              out.list$ma.test<-ma[split.col=="test",]
+              ma<-ma[split.col=="train",]
+              out.list$test.weights<-out.list$train.weights[split.col=="test"]
+              out.list$train.weights<-out.list$train.weights[split.col=="train"]
+              out.list$test.xy<-out.list$train.xy[split.col=="test",]
+              out.list$train.xy<-out.list$train.xy[split.col=="train",]
+              out.list$n.pres[4] <- sum(out.list$ma.test[,r.col]!=0)
+              out.list$n.abs[4] <- sum(out.list$ma.test[,r.col]==0)
             }
 
-           r.col <- grep(r.name,names(ma))
-
+         # Complete cases n.pres and n.abs must be calculated after splitting data (this is train cases reported)
+          out.list$n.pres[2] <- sum(ma[,r.col]!=0)
+          out.list$n.abs[2] <- sum(ma[,r.col]==0)
+          
       # check that response column contains only 1's and 0's, but not all 1's or all 0's if GLMFamily==binomial
       if(out$input$model.source.file=="rf.r") out$input$model.family="bernoulli"
+      
       if(tolower(out$input$model.family)=="bernoulli" || tolower(out$input$model.family)=="binomial"){
-      if(any(ma[,r.col]!=1 & ma[,r.col]!=0) | sum(ma[,r.col]==1)==nrow(ma) | sum(ma[,r.col]==0)==nrow(ma)){
-          out$ec <- out$ec+1
-          out$error.mssg[[out$ec]] <- paste("ERROR: response column (#",r.col,") in ",ma.name," is not binary 0/1",sep="")
-          return(out)
-          }
-           out$dat$ma$resp.name <- names(ma)[r.col]<-"response"
-          out.list$n.pres[1] <- sum(ma[,r.col])
-          out.list$n.abs[1] <- nrow(ma)-sum(ma[,r.col])
-          out.list$resp.name <- names(ma)[r.col]
-          ma.names <- names(ma)
-
+          if(any(ma[,r.col]!=1 & ma[,r.col]!=0) | sum(ma[,r.col]==1)==nrow(ma) | sum(ma[,r.col]==0)==nrow(ma))
+          stop("response column (#",r.col,") in ",ma.name," is not binary 0/1",sep="")
           }
 
-
-
-     #check that response column contains at least two unique values for counts
+  #check that response column contains at least two unique values for counts
 
       if(tolower(out$input$model.family)=="poisson"){
-      if(length(table(unique(ma[,r.col])))==1){
-          out$ec <- out$ec+1
-          out$error.mssg[[out$ec]] <- paste("ERROR: response column (#",r.col,") in ",ma.name," does not have at least two unique values",sep="")
-          return(out)
-          }
-          out$dat$ma$resp.name <- names(ma)[r.col]<-"response"
-          out.list$n.pres[1] <- sum(ma[,r.col]!=0)
-          out.list$n.abs[1] <- sum(ma[,r.col]==0)
-          out.list$resp.name <- names(ma)[r.col]
-          ma.names <- names(ma)
+          if(length(table(unique(ma[,r.col])))==1)
+          stop("response column (#",r.col,") in ",ma.name," does not have at least two unique values",sep="")
           }
 
-
-      #out.list$ma <- ma[,c(r.col,c(1:ncol(ma))[-r.col])]
+          #ma has the first column equal to the response and removes all other remove columns
+         ma <- cbind(ma[,r.col],ma[,-c(rm.list)]) #ma still needs the response column
+         if(length(na.omit(split.indx))>0) out.list$ma.test <- cbind(out.list$ma.test[,r.col],out.list$ma.test[,-c(rm.list)])
+                    paths<-paths[-c(rm.list)]
+                    include<-include[-c(rm.list)]
+                    
+           out.list$resp.name <- names(ma)[1]<-"response"
+           if(length(na.omit(split.indx))>0) names(out.list$ma.test)[1]<-"response"
+         ma.names<-names(ma)
 
       # if producing geotiff output, check to make sure geotiffs are available for each column of the model array #
-        if(out$input$make.binary.tif==T | out$input$make.p.tif==T | out$input$save.model==TRUE){
-               # test that geotiffs match ma.columns
-          if(is.null(out$input$tif.dir)){
-              ma.cols <- match(ma.names[-r.col],sub(".tif","",basename(paths[-r.col])))
-                if(any(is.na(ma.cols))){
+        if(out$input$make.binary.tif==T | out$input$make.p.tif==T){
+                #Check that tiffs to be used exist
+         if(sum(file.access(paths),mode=0)!=0){
+                         temp<-as.vector(file.access(paths))==-1
+                         temp.paths<-paths[temp]
+                  stop("the following geotiff(s) are missing:",
+                      "\nif these are intentionally left blank, uncheck makeBinMap and makeProbabilityMap options\n",
+                        paste(paths[temp],collapse="\n"),sep="")
+                          }
 
-                  stop("the following geotiff(s) are missing in ",
-                        tif.dir,":  ",paste(ma.names[-r.col][is.na(ma.cols)],collapse=" ,"),
-                        "\nif these are intentionally left blank, uncheck makeBinMap and makeProbabilityMap options",sep="")
-                }
-                 #remove columns that shouldn't be used from tiff based on the indicator
-                include<-include[-r.col]
-                paths<-paths[-r.col]
-                paths<-paths[include==1]
+                 } else out$dat$tif.names <- ma.names[-1]
 
-                 #creates a list of predictors from tif.ind and response column
+                 out$dat$tif.ind<-paths
 
-               ma.use <- c(r.col,na.omit(match(sub(".tif","",basename(paths)),ma.names)))
-                ma<-ma[,ma.use]
-                ma.names<-names(ma)
-                #Now check that tiffs to be used exist
-              #out$dat$tif.names <- tif.names[ma.cols]
-
-              if(sum(file.access(paths),mode=0)!=0){
-                a<-paste("ERROR: the following geotiff(s) are missing : ",
-                        "\nif these are intentionally left blank, uncheck makeBinMap and makeProbabilityMap options.\n",
-                        paste(paths[(file.access(paths)!=0)],sep=",",collapse="\n"), sep="")
-                        stop(a)
-
-                }
-                out$dat$tif.ind<-paths
-                }
-          if(!is.null(out$input$tif.dir)){
-              tif.names <- out$dat$tif.names
-
-              ma.cols <- match(ma.names[-r.col],sub(".tif","",basename(tif.names)))
-              if(any(is.na(ma.cols))){
-                  out$ec <- out$ec+1
-                  out$error.mssg[[out$ec]] <- paste("ERROR: the following geotiff(s) are missing in ",
-                        tif.dir,":  ",paste(ma.names[-r.col][is.na(ma.cols)],collapse=" ,"),sep="")
-                return(out)
-                }
-            out$dat$tif.names <- tif.names[ma.cols]
-            }} else out$dat$tif.names <- ma.names[-1]
-       #trying leaving the na's in
-      out.list$ma <- ma[complete.cases(ma),c(r.col,c(1:ncol(ma))[-r.col])]
-      # out.list$ma <- ma[,c(r.col,c(1:ncol(ma))[-r.col])]
-         if(length(na.omit(split.indx))>0) out.list$test.xy<-out.list$test.xy[complete.cases(out.list$ma.test),]
-            out.list$train.xy<-out.list$train.xy[complete.cases(ma),]
-
-      if(!is.null(out.list$ma.test)){
-      if(out$input$model.source.file!="rf.r") out.list$test.weights<- out.list$test.weights[complete.cases(out.list$ma.test)]
-        out.list$ma.test<-out.list$ma.test[complete.cases(out.list$ma.test),c(r.col,c(1:ncol(out.list$ma.test))[-r.col])]
-        if(out$input$model.source.file!="rf.r") out.list$test.weights<- out.list$test.weights[complete.cases(out.list$ma.test)]
-        # out.list$ma.test<-out.list$ma.test[,c(r.col,c(1:ncol(out.list$ma.test))[-r.col])]
-        #if(out$input$model.source.file!="rf.r") out.list$test.weights<- out.list$test.weights
-        out.list$n.pres[4] <- sum(out.list$ma.test[,r.col]!=0)
-        out.list$n.abs[4] <- nrow(out.list$ma.test)-sum(out.list$ma.test[,r.col]!=0)
-        }
-      if(out$input$model.source.file!="rf.r") out.list$train.weights <- out.list$train.weights[complete.cases(ma)]
-      if(!is.null(out$dat$bad.factor.cols)) out.list$ma <- out.list$ma[,-match(out$dat$bad.factor.cols,names(out.list$ma))]
+          out.list$ma <- ma
 
         out.list$dims <- dim(out.list$ma)
         out.list$ratio <- min(sum(out$input$model.fitting.subset)/out.list$dims[1],1)
-        out.list$n.pres[2] <- sum(out.list$ma[,1]!=0)
-        out.list$n.abs[2] <- nrow(out.list$ma)-sum(out.list$ma[,1]!=0)
         out.list$used.covs <- names(out.list$ma)[-1]
 
       if(!is.null(out$input$model.fitting.subset)){
@@ -271,7 +202,6 @@ if(tolower(out$input$model.family)=="poisson"){
 out.list$ma.subset<-out.list$ma
 out.list$weight.subset<-out.list$train.weights
 }
-
 
           out$dat$ma <- out.list
 
