@@ -374,7 +374,7 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
   # Evaluation Statistics on Test Data#
 
     if(!is.null(out$dat$ma$ma.test)) Eval.Stat<-EvaluationStats(out,thresh=auc.output$thresh,train=out$dat$ma$ma,
-        train.pred=tweak.p(as.vector(predict(out$mods$final.mod,newdata=out$dat$ma$ma[,-1],type="prob")[,2])),opt.methods)
+        train.pred=tweak.p(as.vector(predict(out$mods$final.mod,type="prob")[,2])),opt.methods)
 
     
 
