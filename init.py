@@ -1547,10 +1547,13 @@ def initialize():
     
     load_max_ent_params()
     
+    global layers_csv_fname
+    
     writetolog("*" * 79)
     writetolog("Initializing:", True, True)
     writetolog("  Locations of dependencies")
-    writetolog("   Layers CSV = " + os.path.join(os.path.dirname(__file__), 'layers.csv'))
+#    writetolog("   Layers CSV = " + os.path.join(os.path.dirname(__file__), 'layers.csv'))
+    writetolog("   Layers CSV = " + layers_csv_fname)
     writetolog("   R path = " + r_path)
     writetolog("   GDAL folder = " + os.path.abspath(configuration.gdal_path))
     writetolog("        Must contain subfolders proj, gdal-data, GDAL")
@@ -1582,9 +1585,24 @@ def generate_namespaces(modules):
 
 def build_available_trees():
     trees = {}
-
-    layers_fname = os.path.join(os.path.dirname(__file__), 'layers.csv')
-    csv_reader = csv.reader(open(layers_fname, 'rU'))
+    global layers_csv_fname
+    layers_csv_fname = os.path.join(os.path.dirname(__file__), 'layers.csv')
+    csv_reader = csv.reader(open(layers_csv_fname, 'rU'))
+    csv_reader.next()
+    first_file = csv_reader.next()[0]
+    
+    #if the first file in the layers file does not exist assume that none
+    #of them do and use the exampledata version
+    if not os.path.exists(first_file):
+        print (("!" * 30) + " WARNING " + ("!" * 30) + "\n")*3
+        print "The first grid in your layers CSV could not be found."
+        print "Defaulting to the example data csv."
+        print "fix/set paths in file " + layers_csv_fname + " to enable this functionality."
+        print "See documentation for more information on setting up the layers.csv\n"
+        print (("!" * 30) + " WARNING " + ("!" * 30) + "\n")*3
+        layers_csv_fname = os.path.join(os.path.dirname(__file__), 'layers.exampledata.csv')
+    
+    csv_reader = csv.reader(open(layers_csv_fname, 'rU'))
     # pass on header
     csv_reader.next()
     for row in csv_reader:
