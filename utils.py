@@ -98,15 +98,7 @@ def createrootdir(rootWorkspace):
     if not os.path.exists(_roottempdir):
         os.makedirs(_roottempdir) 
 
-#No longer used
-#def cleantemps():
-#    pass
-#    global _temp_files, _temp_dirs, _roottempdir
-#    for file in _temp_files:
-#        os.remove(file)
-#    for dir in _temp_dirs:
-#        shutil.rmtree(dir)
-#    shutil.rmtree(_roottempdir)
+    return _roottempdir
 
 def map_ports(module, port_map):
     args = {}
@@ -150,21 +142,6 @@ def PySAHM_instance_params(instance, mappedPorts):
     instance.__dict__['verbose'] = _logger.verbose
     for k, v in mappedPorts.iteritems():
             instance.__dict__[k] = v
-    
-
-#def path_value(value):
-#    return value.name
-#
-#def path_exists(value):
-#    '''checks to see if a file or dir passed
-#    exists and returns the string to the path is so.
-#    otherwise raises an error'''
-#    path = value.name
-#    if os.path.exists(path):
-#        return path
-#    else:
-#        raise RuntimeError, 'The indicated file or directory, ' + \
-#            path + ', does not exist on the file system.  Cannot continue!'
     
 def R_boolean(value):
     if value:
