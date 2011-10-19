@@ -99,6 +99,9 @@ def createrootdir(rootWorkspace):
     
     return _roottempdir
 
+def setrootdir(session_dir):
+    global _roottempdir
+    _roottempdir = session_dir
 #No longer used
 #def cleantemps():
 #    pass

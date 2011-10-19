@@ -14,6 +14,7 @@ from core.modules.basic_modules import File, Directory, Path, new_constant, Cons
 from core.modules.basic_modules import List
 from core.modules.basic_modules import String
 
+from PyQt4 import QtCore, QtGui
 
 from widgets import get_predictor_widget, get_predictor_config
 from enum_widget import build_enum_widget
