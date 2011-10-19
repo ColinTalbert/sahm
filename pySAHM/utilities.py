@@ -5,9 +5,10 @@ between all of the Python SAHM command line
 modules
 '''
 
-import os
+import os, sys
 import time
 import csv
+import string
 
 from osgeo import gdal
 from osgeo import osr
