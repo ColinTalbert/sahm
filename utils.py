@@ -83,6 +83,10 @@ def mknextdir(prefix, directory=""):
     os.mkdir(os.path.join(directory, dirname))
     return os.path.join(directory, dirname)
 
+def setrootdir(session_dir):
+    global _roottempdir
+    _roottempdir = session_dir
+
 def createrootdir(rootWorkspace):
     '''Creates a session Directory which will
     contain all of the output produced in a single
@@ -91,17 +95,9 @@ def createrootdir(rootWorkspace):
     global _roottempdir
     user_nospace = getpass.getuser().split(' ')[0]
     _roottempdir = os.path.join(rootWorkspace, user_nospace + '_' + time.strftime("%Y%m%dT%H%M%S"))
-#    global _logfile
-    _roottempdir = os.path.join(rootWorkspace, getpass.getuser() + '_' + time.strftime("%Y%m%dT%H%M%S"))
     if not os.path.exists(_roottempdir):
         os.makedirs(_roottempdir) 
-#    _logfile = os.path.join(_roottempdir, "sessionLog.txt")
-    
-    return _roottempdir
 
-def setrootdir(session_dir):
-    global _roottempdir
-    _roottempdir = session_dir
 #No longer used
 #def cleantemps():
 #    pass
