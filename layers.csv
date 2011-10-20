@@ -1,71 +1,71 @@
 FileName,LayerName,Group,Source,Categorical
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\bio_1_wgs84,Annual mean temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\bio_2_wgs84,Mean diurnal range,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\bio_3_wgs84,Isothermality,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\bio_4_wgs84,Temperature seasonality,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\bio_5_wgs84,Max. temperature of warmest month,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\bio_6_wgs84,Min. temperature of coldest month,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\bio_7_wgs84,Temperature annual range,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\bio_8_wgs84,Mean temperature of wettest quarter,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\bio_9_wgs84,Mean temperature of driest quarter,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\bio_10_wgs84,Mean temperature of warmest quarter,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\bio_11_wgs84,Mean temperature of coldest quarter,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\bio_12_wgs84,Annual precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\bio_13_wgs84,Precipitation of wettest month,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\bio_14_wgs84,Precipitation of driest month,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\bio_15_wgs84,Precipitation seasonality,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\bio_16_wgs84,Precipitation of wettest quarter,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\bio_17_wgs84,Precipitation of driest quarter,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\bio_18_wgs84,Precipitiation of warmest quarter,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\bio_19_wgs84,Precipitation of coldest quarter,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmax1_wgs84,Average Jan. Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmax2_wgs84,Average Feb. Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmax3_wgs84,Average March Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmax4_wgs84,Average April Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmax5_wgs84,Average May Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmax6_wgs84,Average June Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmax7_wgs84,Average July Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmax8_wgs84,Average Aug. Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmax9_wgs84,Average Sept. Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmax10_wgs84,Average Oct. Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmax11_wgs84,Average Nov. Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmax12_wgs84,Average Dec. Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmean1_wgs84,Average Jan. Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmean2_wgs84,Average Feb. Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmean3_wgs84,Average March Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmean4_wgs84,Average April Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmean5_wgs84,Average May Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmean6_wgs84,Average June Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmean7_wgs84,Average July Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmean8_wgs84,Average Aug. Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmean9_wgs84,Average Sept. Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmean10_wgs84,Average Oct. Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmean11_wgs84,Average Nov. Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmean12_wgs84,Average Dec. Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmin1_wgs84,Average Jan. Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmin2_wgs84,Average Feb. Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmin3_wgs84,Average March Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmin4_wgs84,Average April Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmin5_wgs84,Average May Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmin6_wgs84,Average June Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmin7_wgs84,Average July Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmin8_wgs84,Average Aug. Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmin9_wgs84,Average Sept. Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmin10_wgs84,Average Oct. Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmin11_wgs84,Average Nov. Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\tmin12_wgs84,Average Dec. Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\ppt1_wgs84,Average Jan. Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\ppt2_wgs84,Average Feb. Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\ppt3_wgs84,Average March Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\ppt4_wgs84,Average April Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\ppt5_wgs84,Average May Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\ppt6_wgs84,Average June Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\ppt7_wgs84,Average July Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\ppt8_wgs84,Average Aug. Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\ppt9_wgs84,Average Sept. Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\ppt10_wgs84,Average Oct. Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\ppt11_wgs84,Average Nov. Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
-K:\GIS_LIBRARY\Climate\DAYMET\DAYMET_WGS84\ppt12_wgs84,Average Dec. Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_1.tif,Annual mean temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_2.tif,Mean diurnal range,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_3.tif,Isothermality,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_4.tif,Temperature seasonality,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_5.tif,Max. temperature of warmest month,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_6.tif,Min. temperature of coldest month,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_7.tif,Temperature annual range,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_8.tif,Mean temperature of wettest quarter,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_9.tif,Mean temperature of driest quarter,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_10.tif,Mean temperature of warmest quarter,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_11.tif,Mean temperature of coldest quarter,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_12.tif,Annual precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_13.tif,Precipitation of wettest month,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_14.tif,Precipitation of driest month,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_15.tif,Precipitation seasonality,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_16.tif,Precipitation of wettest quarter,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_17.tif,Precipitation of driest quarter,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_18.tif,Precipitiation of warmest quarter,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_19.tif,Precipitation of coldest quarter,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMaxTemp\tmax1.tif,Average Jan. Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMaxTemp\tmax2.tif,Average Feb. Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMaxTemp\tmax3.tif,Average March Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMaxTemp\tmax4.tif,Average April Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMaxTemp\tmax5.tif,Average May Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMaxTemp\tmax6.tif,Average June Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMaxTemp\tmax7.tif,Average July Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMaxTemp\tmax8.tif,Average Aug. Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMaxTemp\tmax9.tif,Average Sept. Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMaxTemp\tmax10.tif,Average Oct. Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMaxTemp\tmax11.tif,Average Nov. Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMaxTemp\tmax12.tif,Average Dec. Max. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMeanTemp\tmean1.tif,Average Jan. Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMeanTemp\tmean2.tif,Average Feb. Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMeanTemp\tmean3.tif,Average March Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMeanTemp\tmean4.tif,Average April Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMeanTemp\tmean5.tif,Average May Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMeanTemp\tmean6.tif,Average June Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMeanTemp\tmean7.tif,Average July Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMeanTemp\tmean8.tif,Average Aug. Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMeanTemp\tmean9.tif,Average Sept. Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMeanTemp\tmean10.tif,Average Oct. Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMeanTemp\tmean11.tif,Average Nov. Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMeanTemp\tmean12.tif,Average Dec. Mean Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMinTemp\tmin1.tif,Average Jan. Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMinTemp\tmin2.tif,Average Feb. Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMinTemp\tmin3.tif,Average March Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMinTemp\tmin4.tif,Average April Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMinTemp\tmin5.tif,Average May Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMinTemp\tmin6.tif,Average June Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMinTemp\tmin7.tif,Average July Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMinTemp\tmin8.tif,Average Aug. Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMinTemp\tmin9.tif,Average Sept. Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMinTemp\tmin10.tif,Average Oct. Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMinTemp\tmin11.tif,Average Nov. Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMinTemp\tmin12.tif,Average Dec. Min. Temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMonthlyPrecip\ppt1.tif,Average Jan. Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMonthlyPrecip\ppt2.tif,Average Feb. Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMonthlyPrecip\ppt3.tif,Average March Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMonthlyPrecip\ppt4.tif,Average April Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMonthlyPrecip\ppt5.tif,Average May Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMonthlyPrecip\ppt6.tif,Average June Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMonthlyPrecip\ppt7.tif,Average July Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMonthlyPrecip\ppt8.tif,Average Aug. Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMonthlyPrecip\ppt9.tif,Average Sept. Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMonthlyPrecip\ppt10.tif,Average Oct. Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMonthlyPrecip\ppt11.tif,Average Nov. Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
+K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMonthlyPrecip\ppt12.tif,Average Dec. Precipitation,Climate,"Daymet (1980-1997) Normals, 1km.",N
 K:\GIS_LIBRARY\Climate\WorldClim\MaxTempAvg1950-2000\tmax_30s_esri\tmax\tmax_1,Average Jan. Max. Temperature,Climate,"WorldClim (1950-2000) Normals, 1km.",N
 K:\GIS_LIBRARY\Climate\WorldClim\MaxTempAvg1950-2000\tmax_30s_esri\tmax\tmax_2,Average Feb. Max. Temperature,Climate,"WorldClim (1950-2000) Normals, 1km.",N
 K:\GIS_LIBRARY\Climate\WorldClim\MaxTempAvg1950-2000\tmax_30s_esri\tmax\tmax_3,Average March Max. Temperature,Climate,"WorldClim (1950-2000) Normals, 1km.",N
