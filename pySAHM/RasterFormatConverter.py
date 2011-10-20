@@ -11,6 +11,10 @@ import time
 import random
 import shutil
 
+import Queue
+import thread
+import subprocess
+
 from osgeo import gdalconst
 from osgeo import gdal
 
@@ -28,6 +32,7 @@ class FormatConverter(object):
         self.outputDir = ''
         self.format = 'asc'
         self.logger = None
+        self.multicore = True
         self.driverExt = {'asc':'AAIGrid', 'bil':'EHdr', 'img':'HFA', 'jpg':'JPEG'}
         
     def run(self):
@@ -37,7 +42,10 @@ class FormatConverter(object):
         else:
             usedTifs = self.fileNamesFromFolder()
         #self.writetolog('    Converting: ' + ','.join(usedTifs))
-        self.convertEnvironmentalLayers(usedTifs, self.outputDir, self.format)
+        if self.multicore:
+            self.convertEnvironmentalLayers_mc(usedTifs, self.outputDir, self.format)
+        else:
+            self.convertEnvironmentalLayers(usedTifs, self.outputDir, self.format)
         
     def validateArgs(self):
         argProblem = ""
@@ -65,8 +73,6 @@ class FormatConverter(object):
         if argProblem:
             raise utilities.TrappedError("There was a problem with one or more of the inputs to RasterFormatConverter")
         
-
-        
     def extractFileNames(self):
         #Read through the MDS and pull the headers
         MDSreader = csv.reader(open(self.MDSFile, 'r'))
@@ -84,7 +90,7 @@ class FormatConverter(object):
         usedRasters = []
         items = os.listdir(self.inputDir)
         for item in items:
-            print item
+#            print item
             fullPath = os.path.join(self.inputDir, item)
             try:
                 if os.path.isdir(fullPath) or \
@@ -98,7 +104,6 @@ class FormatConverter(object):
                 pass
         return usedRasters
 
-    
     def convertEnvironmentalLayers(self, files, outputFolder, type):
         
         i = 1
@@ -110,7 +115,48 @@ class FormatConverter(object):
             if self.verbose:
                 self.writetolog('   Finished converting ' + f_name + '    ' + str(i) + ' out of ' + str(len(files)) + ' finished.')
             i += 1
+           
+    def convertEnvironmentalLayers_mc(self, files, outputFolder, type):
+        '''This function has the same functionality as convertEnvironmentalLayers
+        with the addition of utilizing multiple cores to do the processing.
+        '''
+        results = Queue.Queue()
+        process_count= 0
+        
+        i = 1
+        for f in files:
+            f_name = os.path.splitext(os.path.split(f)[1])[0]
+            args = '-i ' + f
+            args += ' -o ' + outputFolder 
+            args += ' -f ' + type
+#            if self.verbose:
+#                args += " -v"
             
+            execDir = os.path.split(__file__)[0]
+            executable = os.path.join(execDir, 'singleRasterFormatConverter.py')
+            
+            pyEx = sys.executable
+            command = ' '.join([pyEx, executable, args])
+            self.logger.writetolog(command, False, False)
+            proc = subprocess.Popen( command )
+            thread.start_new_thread(utilities.process_waiter,
+                    (proc, f_name, results))
+            process_count+= 1
+            
+        while process_count > 0:
+            description, rc= results.get()
+            
+            if rc == 0:
+                if self.verbose:
+                    msg = "    " + description + " finished successfully:  " + \
+                        str(len(files) - process_count + 1)  + " done out of " \
+                        + str(len(files))
+                    self.logger.writetolog(msg, True, True)
+            else:
+                self.logger.writetolog("There was a problem with: " + description , True, True)
+            process_count-= 1
+        
+        
     def convertFormat(self, file, outfile, driver):
         inds = gdal.Open(file, gdalconst.GA_ReadOnly)
        
@@ -138,7 +184,11 @@ def main(argv):
     parser.add_option("-f", "--format", 
                       dest="format",
                       default='asc', 
-                      help="The format to convert into.  Currently only 'bil' is supported.")
+                      help="The format to convert into. 'bil', 'img', 'tif', 'jpg', 'bmp', 'asc'")
+    parser.add_option("-s", dest="multicore", 
+                      default=True, 
+                      action="store_true", 
+                      help="the use single-core flag causes each iteration to run on the same thread.") 
     
     (options, args) = parser.parse_args(argv)
     
@@ -147,6 +197,7 @@ def main(argv):
     ourFC.MDSFile = options.MDSFile
     ourFC.outputDir = options.outputDir
     ourFC.format = options.format
+    ourFC.multicore = options.multicore
     ourFC.run()
 
 if __name__ == "__main__":
