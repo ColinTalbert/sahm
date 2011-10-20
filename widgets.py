@@ -112,22 +112,8 @@ class PredictorListWidget(QtGui.QTreeWidget):
                 aggMethod = str(self.itemWidget(item, 4).currentText())
                    
                 values.append((value[0], categorical, resampleMethod, aggMethod))
-        print 'get_vals = ', str(values)
+#        print 'get_vals = ', str(values)
         return str(values)
-    
-#    def testing (self, test):
-##        print test
-##        print dir(test)
-##        print self.currentIndex()
-##        print self.currentItem()
-#        curItem = self.currentItem()
-#        if not curItem is None:
-#            f = str(self.currentItem().data(0, 0).toString())
-#            print f
-#            self.tree_items[f].setData(3,2, test)
-#            print self.tree_items[f].data(3,2).toString()
-##        print self.selectedItems()
-##        print self.selectedIndexes()
         
     def select_all(self):
         for value, item in self.tree_items.iteritems():
@@ -198,9 +184,6 @@ class PredictorListConfigurationWidget(PredictorListWidget,
 
         """
         return self.get_values()
-#         return 'abc'
-#         self.update_text()
-#         return str(self.text())
 
     def setContents(self, strValue, silent=True):
         """setContents(strValue: str) -> None
@@ -233,17 +216,17 @@ class PredictorListConfigurationWidget(PredictorListWidget,
 #             except:
 #                 self.setText(base)
 
-    def sizeHint(self):
-        return QtCore.QSize(912, 912)
+#    def sizeHint(self):
+#        return QtCore.QSize(912, 912)
 
-#     def sizeHint(self):
-#         metrics = QtGui.QFontMetrics(self.font())
-#         width = min(metrics.width(self.text())+10,70)
-#         return QtCore.QSize(width, 
-#                             metrics.height()+6)
+    def sizeHint(self):
+        metrics = QtGui.QFontMetrics(self.font())
+        width = min(metrics.width(self.text())+10,70)
+        return QtCore.QSize(width, 
+                            metrics.height()+6)
     
-#     def minimumSizeHint(self):
-#         return self.sizeHint()
+    def minimumSizeHint(self):
+        return self.sizeHint()
     
     ###########################################################################
     # event handlers

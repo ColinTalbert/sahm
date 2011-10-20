@@ -310,7 +310,7 @@ class SelectListDialog(QtGui.QDialog):
 #        program = os.path.join(self.rPath, "i386", "Rterm.exe") 
 #        script = os.path.join(utils.getModelsPath(), "PairsExplore.r")
 
-        args = "i=" + MDSfile + " o=" + self.displayJPEG + " m=" + str(self.lineEdit.text())
+        args = "i=" + '"' + MDSfile + '"' + " o=" + '"' + self.displayJPEG + '"' + " m=" + str(self.lineEdit.text())
         args += " rc=" + self.responseCol
         
         if self.chkPresence.checkState() == QtCore.Qt.Checked:
@@ -365,19 +365,7 @@ class SelectListDialog(QtGui.QDialog):
                                             QtCore.Qt.KeepAspectRatio, 
                                             QtCore.Qt.SmoothTransformation) 
         self.view_current()
-
-#    def setup_view(self):
-#            #print "setup_view" 
-#            self.zoom_step = 0.06 
-#            self.w_vsize = self.view.size().width() 
-#            self.h_vsize = self.view.size().height() 
-##            if self.w_vsize <= self.h_vsize: 
-##                self.max_vsize = self.w_vsize * 1.5
-##            else: 
-##                self.max_vsize = self.h_vsize * 1.5
-##            self.l_pix = "" 
-#    
-    
+   
     def view_current(self):
         #print "view_current"
         size_img = self.c_view.size() 

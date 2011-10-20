@@ -10,6 +10,9 @@ import traceback
 
 from core.modules.vistrails_module import Module, ModuleError, ModuleConnector
 from core.modules.basic_modules import File, Directory, Path, new_constant, Constant
+from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
+from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
+#from packages.persistence.init import PersistentPath, PersistentFile, PersistentDir
 
 from core.modules.basic_modules import List
 from core.modules.basic_modules import String
@@ -20,7 +23,6 @@ from widgets import get_predictor_widget, get_predictor_config
 from enum_widget import build_enum_widget
 
 from SelectPredictorsLayers import SelectListDialog
-#from maxent_module import MAXENTRunner
 
 import utils
 #import our python SAHM Processing files
@@ -29,10 +31,13 @@ import packages.sahm.pySAHM.MDSBuilder as MDSB
 import packages.sahm.pySAHM.PARC as parc
 import packages.sahm.pySAHM.RasterFormatConverter as RFC
 import packages.sahm.pySAHM.MaxentRunner as MaxentRunner
+from SahmOutputViewer import SAHMModelOutputViewerCell
+from SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell 
 
 from utils import writetolog
 from pySAHM.utilities import TrappedError
 
+from SahmSpatialOutputViewer import setQGIS
 
 identifier = 'gov.usgs.sahm' 
 
@@ -297,7 +302,7 @@ class PredictorListFile(Module):
     '''
     _input_ports = expand_ports([('csvFileList', '(edu.utah.sci.vistrails.basic:File)'),
                                  ('addPredictor', 'DataInput|Predictor')])
-    _output_ports = expand_ports([('PredictorListFile', '(gov.usgs.sahm:PredictorListFile:DataInput)')])
+    _output_ports = expand_ports([('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')])
 
     #copies the input predictor list csv to our working directory
     #and appends any additionally added predictors
@@ -347,7 +352,7 @@ class PredictorListFile(Module):
         del csv_writer
         
         output_file = utils.create_file_module(output_fname)
-        self.setResult('PredictorListFile', output_file)
+        self.setResult('RastersWithPARCInfoCSV', output_file)
         
 class TemplateLayer(Path):
     '''
@@ -387,7 +392,7 @@ class MergedDataSet(File):
     
     pass
     
-class RastersWithPARCInfoCSV(Path):
+class RastersWithPARCInfoCSV(File):
     '''
     This module is a required class for other modules and scripts within the
     SAHM package. It is not intended for direct use or incorporation into
@@ -397,6 +402,8 @@ class RastersWithPARCInfoCSV(Path):
     _output_ports = expand_ports([('value', '(gov.usgs.sahm:MergedDataSet:Other)')])
     
     pass
+#    def compute(self, is_input=None):
+#        PersistentPath.compute(self, is_input, 'blob')
 
 class ApplyModel(Module):
     '''
@@ -504,9 +511,10 @@ class Model(Module):
     the VisTrails workflow by the user.
     '''
     _input_ports = [('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)'),
-                    ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':True}),
-                    ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':True}),
-                    ('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['2']), 'optional':True})
+                    ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':False}),
+                    ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':False}),
+                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['False']), 'optional':False}),
+                    ('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['2']), 'optional':False})
                     ]
     _output_ports = [('modelWorkspace', '(edu.utah.sci.vistrails.basic:File)'), 
                      ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
@@ -567,9 +575,9 @@ class Model(Module):
         input_fname = os.path.join(output_dname, ModelAbbrev + "_prob_map.tif")
         output_fname = os.path.join(output_dname, ModelAbbrev + "_prob_map.jpeg")
         if os.path.exists(input_fname):
-            utils.tif_to_color_jpeg(input_fname, output_fname, color_breaks_csv)
-            output_file4 = utils.create_file_module(output_fname)
-            self.setResult('ProbabilityMap', output_file4)
+#            utils.tif_to_color_jpeg(input_fname, output_fname, color_breaks_csv)
+#            output_file4 = utils.create_file_module(output_fname)
+            self.setResult('ProbabilityMap', input_fname)
         elif (argsDict.has_key('mpt') and argsDict['mpt'] == True) or \
             not argsDict.has_key('mpt'):
             msg = "Expected output from " + ModelAbbrev + " was not found."
@@ -615,7 +623,8 @@ class GLM(Model):
         self.name = 'FIT_GLM_pluggable.r'
         self.port_map = {'mdsFile':('c', None, True),#These ports are for all Models
                          'makeProbabilityMap':('mpt', utils.R_boolean, False),
-                         'makeBinMap':('mbt', utils.R_boolean, False), 
+                         'makeBinMap':('mbt', utils.R_boolean, False),
+                         'makeMESMap':('mes', utils.R_boolean, False),
                          'ThresholdOptimizationMethod':('om', None, False),
                          'ModelFamily':('mf', None, False), #This is a GLM specific port
                          'SimplificationMethod':('sm', None, False) #This is a GLM specific port
@@ -631,7 +640,8 @@ class RandomForest(Model):
         self.name = 'FIT_RF_pluggable.r'
         self.port_map = {'mdsFile':('c', None, True),#These ports are for all Models
                          'makeProbabilityMap':('mpt', utils.R_boolean, False),
-                         'makeBinMap':('mbt', utils.R_boolean, False), 
+                         'makeBinMap':('mbt', utils.R_boolean, False),
+                         'makeMESMap':('mes', utils.R_boolean, False), 
                          'ThresholdOptimizationMethod':('om', None, False),
                          'MTRY': ('mtry', None, False) #This is a Random Forest specific port
                          }
@@ -647,7 +657,8 @@ class MARS(Model):
         self.name = 'FIT_MARS_pluggable.r'
         self.port_map = {'mdsFile':('c', None, True),#These ports are for all Models
                          'makeProbabilityMap':('mpt', utils.R_boolean, False),
-                         'makeBinMap':('mbt', utils.R_boolean, False), 
+                         'makeBinMap':('mbt', utils.R_boolean, False),
+                         'makeMESMap':('mes', utils.R_boolean, False), 
                          'ThresholdOptimizationMethod':('om', None, False),
                          'MarsDegree':('deg', None, False), #This is a MARS specific port
                          'MarsPenalty':('pen', None, False), #This is a MARS specific port
@@ -671,7 +682,8 @@ class BoostedRegressionTree(Model):
         self.name = 'FIT_BRT_pluggable.r'
         self.port_map = {'mdsFile':('c', None, True),#These ports are for all Models
                          'makeProbabilityMap':('mpt', utils.R_boolean, False),
-                         'makeBinMap':('mbt', utils.R_boolean, False), 
+                         'makeBinMap':('mbt', utils.R_boolean, False),
+                         'makeMESMap':('mes', utils.R_boolean, False), 
                          'ThresholdOptimizationMethod':('om', None, False),
                          'Seed':('seed', None, False), #This is a BRT specific port
                          'TreeComplexity':('tc', None, False), #This is a BRT specific port
@@ -736,7 +748,17 @@ class MDSBuilder(Module):
 
     '''
 
-    _input_ports = expand_ports([('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
+#    _input_ports = expand_ports([('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
+#                                 ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
+#                                 ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
+#                                 ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)')]
+#                                 )
+#    _input_ports = expand_ports([('RastersWithPARCInfoCSV', '(edu.utah.sci.vistrails.persistence:PersistentFile)'),
+#                                 ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
+#                                 ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
+#                                 ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)')]
+#                                 )
+    _input_ports = expand_ports([('RastersWithPARCInfoCSV', '(edu.utah.sci.vistrails.basic:File)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
                                  ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
                                  ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)')]
@@ -877,7 +899,9 @@ class PARC(Module):
                                 ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                                 ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':True})]
 
-    _output_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
+#    _output_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
+#    _output_ports = [('RastersWithPARCInfoCSV', '(edu.utah.sci.vistrails.persistence:PersistentFile)')]
+    _output_ports = [('RastersWithPARCInfoCSV', '(edu.utah.sci.vistrails.basic:File)')]
     
     def compute(self):
         #writetolog("\nRunning PARC", True)
@@ -901,7 +925,7 @@ class PARC(Module):
         #append additional inputs to the existing CSV if one was supplied
         #otherwise start a new CSV
         if self.hasInputFromPort("RastersWithPARCInfoCSV"):
-            inputCSV = self.getInputFromPort("RastersWithPARCInfoCSV").name
+            inputCSV = self.forceGetInputFromPort("RastersWithPARCInfoCSV").name
             shutil.copy(inputCSV, workingCSV)
             f = open(workingCSV, "ab")
             csvWriter = csv.writer(f)
@@ -989,7 +1013,8 @@ class RasterFormatConverter(Module):
     #configuration = []
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('inputDir', '(edu.utah.sci.vistrails.basic:Directory)'),
-                    ('format', '(edu.utah.sci.vistrails.basic:String)'),]
+                    ('format', '(edu.utah.sci.vistrails.basic:String)'),
+                    ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':True})]
 
     _output_ports = [('outputDir', '(edu.utah.sci.vistrails.basic:Directory)')]
 
@@ -1007,6 +1032,10 @@ class RasterFormatConverter(Module):
                 format = 'asc'
             ourRFC.format = format
              
+        if self.hasInputFromPort("multipleCores"):
+             if self.getInputFromPort("multipleCores"):
+                ourRFC.multicores = "True"
+        
         ourRFC.outputDir = utils.mknextdir(prefix='ConvertedRasters_')
         if configuration.verbose:
             ourRFC.verbose = True
@@ -1516,6 +1545,64 @@ def load_max_ent_params():
         classmethod(provide_input_port_documentation)
 
 
+#class ModelOutputCell(SpreadsheetCell):
+#    _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
+#                    ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
+#                    ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)')]
+#    
+#    def __init__(self):
+#        SpreadsheetCell.__init__(self)
+#        self.cellWidget = None
+#
+#    def compute(self):
+#        renderView = self.forceGetInputFromPort('SetRenderView')
+#        if renderView==None:
+#            raise ModuleError(self, 'A vtkRenderView input is required.')
+#        self.cellWidget = self.displayAndWait(QVTKViewWidget, (renderView,))
+
+#class SAHMViewWidget(QCellWidget):
+#    def __init__(self, parent=None, f=QtCore.Qt.WindowFlags()):
+#        QCellWidget.__init__(self, parent, f | QtCore.Qt.MSWindowsOwnDC)
+#        
+
+#class RasterLayer(Module):
+#    _input_ports = [('file', '(edu.utah.sci.vistrails.basic:File)'), 
+#                    ('name', '(edu.utah.sci.vistrails.basic:String)')]
+#    _output_ports = [('self', '(gov.usgs.sahm:RasterLayer:DataInput)')]
+#
+#    def __init__(self):
+#        Module.__init__(self)
+#        self.qgis_obj = None
+#
+#    def compute(self):
+#        fname = self.getInputFromPort('file').name
+#        if self.hasInputFromPort('name'):
+#            name = self.getInputFromPort('name')
+#        else:
+#            name = os.path.splitext(os.path.basename(fname))[0]
+#        self.qgis_obj = qgis.core.QgsRasterLayer(fname, name)
+#        self.setResult('self', self)
+#
+#class VectorLayer(Module):
+#    _input_ports = [('file', '(edu.utah.sci.vistrails.basic:File)'), 
+#                    ('name', '(edu.utah.sci.vistrails.basic:String)')]
+#    _output_ports = [('self', '(gov.usgs.sahm:VectorLayer:DataInput)')]
+#
+#    def __init__(self):
+#        Module.__init__(self)
+#        self.qgis_obj = None
+#
+#    def compute(self):
+#        fname = self.getInputFromPort('file').name
+#        if self.hasInputFromPort('name'):
+#            name = self.getInputFromPort('name')
+#        else:
+#            name = os.path.splitext(os.path.basename(fname))[0]
+#        self.qgis_obj = qgis.core.QgsVectorLayer(fname, name, "ogr")
+#        self.setResult('self', self)
+
+
+
 def initialize():
     global maxent_path, color_breaks_csv
     global session_dir
@@ -1527,18 +1614,42 @@ def initialize():
     #append to our path variable the location of the GDAL dependencies
     #Proj, GDAL, and GDAL data
     proj_path = os.path.abspath(os.path.join(configuration.gdal_path, "proj", "bin"))
-    currentPath = os.environ['Path']
-    appendedPath = currentPath + ";" + proj_path
-    os.environ['Path'] = appendedPath
+    appendedPath = proj_path + ";" + os.environ['Path']
 
     gdal_data = os.path.join(configuration.gdal_path, "gdal-data")
     os.putenv("GDAL_DATA", gdal_data)
 
+    PROJ_LIB = os.path.join(configuration.gdal_path, "proj", "nad")
+    os.environ['PROJ_LIB'] = PROJ_LIB
+
     gdal_folder = os.path.abspath(os.path.join(configuration.gdal_path, "GDAL"))
     currentPath = os.environ['Path']
-    appendedPath = currentPath + ";" + gdal_folder
-    os.environ['Path'] = appendedPath     
+    appendedPath += gdal_folder
+         
 
+
+
+    qgis_python = os.path.join(configuration.qgis_path, "qgis1.7.0", "python")
+    sys.path.append(qgis_python)
+    
+    qgis_bin = os.path.join(configuration.qgis_path, "qgis1.7.0", "bin")
+    appendedPath = ";".join([qgis_bin, appendedPath])
+    other_bin = os.path.join(configuration.qgis_path, "OSGeo4W", "bin")
+    appendedPath = ";".join([other_bin, appendedPath])
+
+    os.environ['Path'] = appendedPath  
+    
+     
+    import qgis.core
+    import qgis.gui
+    globals()["qgis"] = qgis
+    setQGIS(qgis)
+    
+    qgis_prefix = os.path.join(configuration.qgis_path, "qgis1.7.0")
+    qgis.core.QgsApplication.setPrefixPath(qgis_prefix, True)
+    qgis.core.QgsApplication.initQgis() 
+    
+    
     session_dir = utils.createrootdir(configuration.output_dir)
     utils.createLogger(session_dir, configuration.output_dir)
     #log_file = Utilities.createsessionlog(session_dir, configuration.verbose)
@@ -1558,6 +1669,8 @@ def initialize():
     writetolog("   GDAL folder = " + os.path.abspath(configuration.gdal_path))
     writetolog("        Must contain subfolders proj, gdal-data, GDAL")
     writetolog("   Maxent folder = " + maxent_path)
+    writetolog("   QGIS folder = " + os.path.abspath(configuration.qgis_path))
+    writetolog("        Must contain subfolders qgis1.7.0, OSGeo4W")
     writetolog("    ")
     writetolog("*" * 79)
     
@@ -1632,12 +1745,6 @@ def build_predictor_modules():
             def get_widget_class():
                 return w_class
             return get_widget_class
-#        print class_name
-#        print PredictorList
-#        print dir(PredictorList)
-#        print widget_class
-#        print config_class
-#        print get_widget_method(widget_class)
         module = type(class_name, (PredictorList,),
                       {'get_widget_class': get_widget_method(widget_class),
                        '_input_ports': \
@@ -1645,14 +1752,19 @@ def build_predictor_modules():
                              '(gov.usgs.sahm:%s:DataInput)' % class_name, True)]})
         
         modules.append((module, {'configureWidgetType': config_class}))
+        for module in modules:
+            module[0]._output_ports.append(('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True))
+            
     return modules
+
+
+ 
 
 _modules = generate_namespaces({'DataInput': [
                                               Predictor,
                                               PredictorListFile,
                                               FieldData,
-                                              TemplateLayer,
-                                              ] + \
+                                              TemplateLayer] + \
                                               build_predictor_modules(),
                                 'Tools': [FieldDataAggregateAndWeight,
                                           MDSBuilder,
@@ -1661,7 +1773,7 @@ _modules = generate_namespaces({'DataInput': [
                                           ProjectionLayers,
                                           TestTrainingSplit,
                                           CovariateCorrelationAndSelection,
-                                          ApplyModel],
+                                          ApplyModel],                                          
                                 'Models': [GLM,
                                            RandomForest,
                                            MARS,
@@ -1672,12 +1784,12 @@ _modules = generate_namespaces({'DataInput': [
                                            (AggregationMethod, {'abstract': True}),
                                            (PredictorList, {'abstract': True}),
                                            (MergedDataSet, {'abstract': True}),
-                                           (RastersWithPARCInfoCSV, {'abstract': True})]
+                                           (RastersWithPARCInfoCSV, {'abstract': True})],
+                                'Output': [SAHMModelOutputViewerCell,
+                                          SAHMSpatialOutputViewerCell,
+                                          ]
 #                                           ClimateModel,
 #                                           ClimateScenario,
 #                                           ClimateYear
 
                                 })
-
-#_modules = [(Predictor, {'namespace': 'DataInput'}), (Model, {'abstract': True})]
-

@@ -89,7 +89,6 @@ class PARC:
             inputs, parameters used, and outputs
         '''
         
-        
         self.logger.writetolog("Starting PARC", True, True)
         self.validateArgs()
         self.logger.writetolog("    Arguments validated successfully", True, True)
@@ -215,7 +214,7 @@ class PARC:
         msg += "    " + shortName + " cell size = " + str(self.getTemplateSRSCellSize(sourceParams))
         self.writetolog(msg)
             
-        if cellRatio > .5:
+        if cellRatio > 0.5:
             #The source cell size is close enough to our template cell size,
             #or smaller so
             #that all we need to do is reproject and resample.
@@ -688,12 +687,14 @@ class PARC:
         tmpOutput = os.path.splitext(destFile)[0] + ".tif"
         
         tmpOutDataset = self.generateOutputDS(sourceParams, templateParams, tmpOutput, outputCellSize)
+        
+        self.writetolog("    Starting intermediate reprocection of: " + shortName)
 
         err = gdal.ReprojectImage(srcDs, tmpOutDataset, sourceParams["srs"].ExportToWkt(), 
                                 templateParams["srs"].ExportToWkt(), resamplingType)
-        self.writetolog("    Saving " + shortName)
+        
 #        dst_ds = driver.CreateCopy(destFile, tmpOutDataset, 0)
-        self.writetolog("    Finished Saving " + shortName)
+        self.writetolog("    Finished reprojection " + shortName)
         dst_ds = None
         tmpOutDataset = None
         

@@ -5,12 +5,9 @@ individual raster processes into individual
 runs that could be either run on separate 
 processes on the same computer with a command line
 popopen perhaps or sent out individually to our 
-Condor distributed coputing cluster.
-
+Condor distributed computing cluster.
 
 """
-
-
 
 
 import glob
@@ -63,12 +60,9 @@ def main(args_in):
     ourPARC.writetolog = ourPARC.logger.writetolog
     ourPARC.template_params = ourPARC.getRasterParams(options.template)
     ourPARC.parcFile([options.source, options.categorical, options.resampling, options.aggregation], options.dest)
-
-
-
     
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    main(sys.argv[1:])
 #    try:
 ##        PARC().testing()
 #        sys.exit(PARC().main(sys.argv[1:]))

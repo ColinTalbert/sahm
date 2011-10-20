@@ -192,6 +192,10 @@ class MDSBuilder(object):
             self.writetolog(msg)
         del outputMDS
         
+        #convert the mds csv to a shapefile
+        output_shp = self.outputMDS.replace(".csv", ".mds")
+        utilities.mds_to_shape(self.outputMDS, output_shp)
+        
         # figure out how long the script took to run
         endTime = time.time()
         
