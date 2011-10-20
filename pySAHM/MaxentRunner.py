@@ -238,7 +238,7 @@ class MAXENTRunner(object):
 
     def usedIndexes(self, header1, header2):
         covariateIndexes = []
-        for i in range(len(header1) - 1):
+        for i in range(len(header1)):
             if header2[i] == '1' and header1[i] <> 'Split':
                 covariateIndexes.append(i)
         return covariateIndexes
