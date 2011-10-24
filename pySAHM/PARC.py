@@ -145,8 +145,8 @@ class PARC:
             
             if os.path.abspath(self.template) != os.path.abspath(image[0]):
                 image_short_name = os.path.split(image[0])[1]
-                args = '-s ' + os.path.abspath(image[0])
-                args += ' -c ' + image[1]
+                args = '-s ' + '"' + os.path.abspath(image[0]) + '"'
+                args += ' -c '  + '"' + image[1] + '"'
                 args += ' -d ' + os.path.abspath(outFile)
                 args += ' -t ' + os.path.abspath(self.template)
                 args += ' -r ' + image[2]
@@ -688,7 +688,7 @@ class PARC:
         
         tmpOutDataset = self.generateOutputDS(sourceParams, templateParams, tmpOutput, outputCellSize)
         
-        self.writetolog("    Starting intermediate reprocection of: " + shortName)
+        self.writetolog("    Starting intermediate reprojection of: " + shortName)
 
         err = gdal.ReprojectImage(srcDs, tmpOutDataset, sourceParams["srs"].ExportToWkt(), 
                                 templateParams["srs"].ExportToWkt(), resamplingType)
