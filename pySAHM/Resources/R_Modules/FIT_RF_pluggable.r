@@ -635,6 +635,7 @@ save.model<-make.p.tif | make.binary.tif
 n.trees<-as.numeric(n.trees)
 opt.methods<-as.numeric(opt.methods)
 ScriptPath<-dirname(ScriptPath)
+MESS<-as.logical(MESS)
 
 source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
 

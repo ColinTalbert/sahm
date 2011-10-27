@@ -767,6 +767,7 @@ make.p.tif<-as.logical(make.p.tif)
 make.binary.tif<-as.logical(make.binary.tif)
 save.model<-make.p.tif | make.binary.tif
 opt.methods<-as.numeric(opt.methods)
+MESS<-as.logical(MESS)
 
  fit.glm.fct(ma.name=csv,
       tif.dir=NULL,output.dir=output,
