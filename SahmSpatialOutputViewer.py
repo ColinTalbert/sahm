@@ -140,7 +140,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         centralLayout.setMargin(0)
         centralLayout.setSpacing(0)
 
-        self.setAnimationEnabled(True)
+#        self.setAnimationEnabled(True)
 
         self.Frame = QtGui.QFrame()
         self.ui = Ui_Frame()

@@ -78,7 +78,7 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         centralLayout.setSpacing(0)
 
         
-        self.setAnimationEnabled(True)
+#        self.setAnimationEnabled(True)
         
         self.Frame = QtGui.QFrame()
         self.ui = Ui_Frame()
@@ -105,6 +105,7 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         self.response_browser.setControl("{8856F961-340A-11D0-A96B-00C04FD705A2}")
         self.ui.response_curves_layout.addWidget(self.response_browser)
         self.response_urlSrc = None
+        
         
         self.layout().addWidget(self.Frame)
 
@@ -241,6 +242,7 @@ class SAHMOutputViewerCellWidget(QCellWidget):
 #                                                         QtCore.Qt.KeepAspectRatio,
 #                                                         QtCore.Qt.SmoothTransformation))
 #                
+
 class ImageViewerFitToCellAction(QtGui.QAction):
     """
     ImageViewerFitToCellAction is the action to stretch the image to

@@ -216,14 +216,14 @@ class PredictorListConfigurationWidget(PredictorListWidget,
 #             except:
 #                 self.setText(base)
 
-#    def sizeHint(self):
-#        return QtCore.QSize(912, 912)
-
     def sizeHint(self):
-        metrics = QtGui.QFontMetrics(self.font())
-        width = min(metrics.width(self.text())+10,70)
-        return QtCore.QSize(width, 
-                            metrics.height()+6)
+        return QtCore.QSize(912, 912)
+
+#    def sizeHint(self):
+#        metrics = QtGui.QFontMetrics(self.font())
+#        width = min(metrics.width(self.text())+10,70)
+#        return QtCore.QSize(width, 
+#                            metrics.height()+6)
     
     def minimumSizeHint(self):
         return self.sizeHint()

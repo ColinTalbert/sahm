@@ -1603,7 +1603,7 @@ def load_max_ent_params():
 
 
 
-def initialize():
+def initialize():    
     global maxent_path, color_breaks_csv
     global session_dir
     utils.config = configuration
@@ -1611,33 +1611,25 @@ def initialize():
     r_path = os.path.abspath(configuration.r_path)
     maxent_path = os.path.abspath(configuration.maxent_path)
     
-    #append to our path variable the location of the GDAL dependencies
-    #Proj, GDAL, and GDAL data
-    proj_path = os.path.abspath(os.path.join(configuration.gdal_path, "proj", "bin"))
-    appendedPath = proj_path + ";" + os.environ['Path']
-
-    gdal_data = os.path.join(configuration.gdal_path, "gdal-data")
-    os.putenv("GDAL_DATA", gdal_data)
-
-    PROJ_LIB = os.path.join(configuration.gdal_path, "proj", "nad")
-    os.environ['PROJ_LIB'] = PROJ_LIB
-
-    gdal_folder = os.path.abspath(os.path.join(configuration.gdal_path, "GDAL"))
-    currentPath = os.environ['Path']
-    appendedPath += gdal_folder
-         
-
-
-
-    qgis_python = os.path.join(configuration.qgis_path, "qgis1.7.0", "python")
-    sys.path.append(qgis_python)
     
-    qgis_bin = os.path.join(configuration.qgis_path, "qgis1.7.0", "bin")
-    appendedPath = ";".join([qgis_bin, appendedPath])
-    other_bin = os.path.join(configuration.qgis_path, "OSGeo4W", "bin")
-    appendedPath = ";".join([other_bin, appendedPath])
-
-    os.environ['Path'] = appendedPath  
+    #I was previously setting the following environmental variables and path additions 
+    #so that each user wouldn't have to do this on their individual machines.  
+    #I was running into problems with imports occuring before this initialize routine so 
+    #I moved the setting of these to an external .net application that sets these before 
+    #starting up VisTrails.py.
+    
+    #This should also make this package easier to port to other systems as this stuff would
+    #only work on a windows instance.
+    #the current dependencies are:
+    #an installation of GDAL and Proj.4
+    # this includes the GDAL_DATA and PROJ_LIB directories as environmental variables
+    #GDAL bindings for python in the python path.
+    #QGIS built for the version of Python, QT, PyQt, and SIP used by VisTrails.
+    #  This one was a painful bear on Windows.
+    #All of the DLLs required by the above QGIS build must be on the path.
+    #In my case these were in a folder in the OSGeoW installation that QGIS was built 
+    #off of.
+    #And finally QGIS bindings for python in the python path.
     
      
     import qgis.core
