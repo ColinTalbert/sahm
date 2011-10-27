@@ -126,8 +126,8 @@ class FormatConverter(object):
         i = 1
         for f in files:
             f_name = os.path.splitext(os.path.split(f)[1])[0]
-            args = '-i ' + + '"' + f + '"'
-            args += ' -o ' + + '"' + outputFolder + '"'
+            args = '-i ' + '"' + f + '"'
+            args += ' -o '  + '"' + outputFolder + '"'
             args += ' -f ' + type
 #            if self.verbose:
 #                args += " -v"
