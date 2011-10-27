@@ -2490,6 +2490,7 @@ make.binary.tif<-as.logical(make.binary.tif)
 prev.stratify<-as.logical(prev.stratify)
 save.model<-make.p.tif | make.binary.tif
 opt.methods<-as.numeric(opt.methods)
+MESS<-as.logical(MESS)
 
     fit.brt.fct(ma.name=csv,
 		tif.dir=NULL,
