@@ -489,8 +489,8 @@ brt.predict <- function(model,x) {
     # make predictions from full data #
     y <- predict.gbm(model,x,model$target.trees,type="response")
     # encode missing values as -1.
-    a<-apply(x,1,sum)
-    y[is.na(a)]<- NaN
+     a<-complete.cases(x)
+    y[!(a)]<- NaN
 
     # return predictions.
     return(y)
