@@ -1185,8 +1185,8 @@ class CovariateCorrelationAndSelection(Module):
         writetolog("\nOpening Select Predictors Layers widget", True)
         inputMDS = utils.dir_path_value(self.forceGetInputFromPort('inputMDS'))
         selectionName = self.forceGetInputFromPort('selectionName', 'initial')
-#        outputMDS = utils.mknextfile(prefix='SelectPredictorsLayers_' + selectionName + "_", suffix='.csv')
-#        displayJPEG = utils.mknextfile(prefix='PredictorCorrelation_' + selectionName + "_", suffix='.jpg')
+        utils.mknextfile(prefix='PredictorCorrelation_' + selectionName + "_", suffix='.jpg')
+        
         global session_dir
         outputMDS = os.path.join(session_dir, "CovariateCorrelationOutputMDS_" + selectionName + ".csv")
         displayJPEG = os.path.join(session_dir, "CovariateCorrelationDisplay.jpg")
@@ -1457,9 +1457,7 @@ class MAXENT(Module):
                         port_val = port_val.name
                     argWriter.writerow([port[0], port_val])
                 else:
-                    #print "   has no input "
                     kwargs = port[2]
-                    #print kwargs
                     try:
                         if port[1] == "(edu.utah.sci.vistrails.basic:Boolean)":
                             default = kwargs['defaults'][2:-2].lower()
