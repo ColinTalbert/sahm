@@ -898,6 +898,7 @@ class PARC(Module):
                                 ('PredictorList', '(gov.usgs.sahm:PredictorList:Other)'),
                                 ('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                 ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
+                                ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['False']), 'optional':True}),
                                 ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':True})]
 
 #    _output_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
@@ -917,8 +918,10 @@ class PARC(Module):
         ourPARC.out_dir = output_dname
 
         if self.hasInputFromPort("multipleCores"):
-             if self.getInputFromPort("multipleCores"):
-                ourPARC.multicores = "True"
+            ourPARC.multicores = self.getInputFromPort("multipleCores")            
+
+        if self.hasInputFromPort("ignoreNonOverlap"):
+            ourPARC.ignoreNonOverlap = self.getInputFromPort("ignoreNonOverlap")
 
         workingCSV = utils.mknextfile(prefix='tmpFilesToPARC_', suffix='.csv')
         outputCSV = utils.mknextfile(prefix='PARCOutput_', suffix='.csv')
