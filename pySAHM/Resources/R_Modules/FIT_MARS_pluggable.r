@@ -13,7 +13,7 @@
 
 # Libraries required to run this program #
 #   PresenceAbsence - for ROC plots
-#   XML - for XML i/o
+
 #   rgdal - for geotiff i/o
 #   sp - used by rdgal library
 #   raster for geotiff o
@@ -36,7 +36,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     # simp.method: model simplification method.  valid methods include: "AIC" and "BIC". NOT CURRENTLY FUNCTIONAL 
     # debug.mode: if T, output is directed to the console during the run.  also, a pdf is generated which contains response curve plots and perspective plots
     #    showing the effects of interactions deemed important.  if F, output is diverted to a text file and the console is kept clear 
-    #    except for final output of an xml file.  in either case, a set of standard output files are created in the output directory.
+
     # 
 
     # Value:
@@ -44,8 +44,8 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     # "output.dir" named above.  These output files consist of:
     #
     # glm_output.txt:  a text file with fairly detailed results of the final model.
-    # glm_output.xml:  an xml-formatted text file with results from the final model.
-    # glm_response_curves.xml:  an xml-formatted text file with response curves for
+
+
     #   each covariate in the final model.
     # glm_prob_map.tif:  a geotiff of the response surface
     # glm_bin_map.tif:  a geotiff of the binary response surface.  threhold is based on the roc curve at the point where sensitivity=specificity.
@@ -118,20 +118,17 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
       )
 
       # load libaries #
-      out <- check.libs(list("PresenceAbsence","rgdal","XML","sp","survival","mda","raster","tcltk2","foreign","ade4"),out)
+      out <- check.libs(list("PresenceAbsence","rgdal","sp","survival","mda","raster","tcltk2","foreign","ade4"),out)
       
       # exit program now if there are missing libraries #
       if(!is.null(out$error.mssg[[1]])){
-          cat(saveXML(mars.to.xml(out),indent=T),'\n')
           return()
           }
         
     # check output dir #
     out$dat$output.dir <- check.dir(output.dir)    
-    if(out$dat$output.dir$writable==F) {out$ec<-out$ec+1
-              out$error.mssg[[out$ec]] <- paste("ERROR: output directory",output.dir,"is not writable")
-              out$dat$output.dir$dname <- getwd()
-              }
+    if(out$dat$output.dir$writable==F) stop(paste("output directory",output.dir,"is not writable"))
+
 
     # generate a filename for output #
           if(debug.mode==T){
@@ -147,18 +144,9 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     
     # check tif dir #
         # check tif dir #
-    if(!is.null(tif.dir)){
       out$dat$tif.dir <- check.dir(tif.dir)
-      if(out$dat$tif.dir$readable==F & (out$input$make.binary.tif | out$input$make.p.tif)) {
-                out$ec<-out$ec+1
-                out$error.mssg[[out$ec]] <- paste("ERROR: tif directory",tif.dir,"is not readable")
-                if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
-              cat(saveXML(brt.to.xml(out),indent=T),'\n')
-              return()
-              }
-            }
+      if(out$dat$tif.dir$readable==F & (out$input$make.binary.tif | out$input$make.p.tif)) stop(paste("ERROR: tif directory",tif.dir,"is not readable"))
 
-    
     # find .tif files in tif dir #
     if(out$dat$tif.dir$readable)  out$dat$tif.names <- list.files(out$dat$tif.dir$dname,pattern=".tif",recursive=T)
 
@@ -168,13 +156,6 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     if(UnitTest!=FALSE) options(warn=2)
     out <- read.ma(out)
     if(UnitTest==1) return(out)
-    
-    # exit program now if there are errors in the input data #
-    if(!is.null(out$error.mssg[[1]])){
-          if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
-          cat(saveXML(mars.to.xml(out),indent=T),'\n')
-          return()
-          }
         
     cat("\nbegin processing of model array:",out$input$ma.name,"\n")
     cat("\nfile basename set to:",out$dat$bname,"\n")
@@ -198,13 +179,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     assign("out",out,envir=.GlobalEnv)
     t3 <- unclass(Sys.time())
     fit_contribs <- try(mars.contribs(fit))
-    if(class(fit_contribs)=="try-error"){
-          if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
-          out$ec<-out$ec+1
-          out$error.mssg[[out$ec]]<- paste("Error summarizing MARS model:",fit_contribs)
-          cat(saveXML(mars.to.xml(out),indent=T),'\n')
-          return()
-          } 
+    if(class(fit_contribs)=="try-error") stop(paste("Error summarizing MARS model:",fit_contribs))
        
     x<-fit_contribs$deviance.table
     x <- x[x[,2]!=0,]
@@ -265,12 +240,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
 
         } else r.curves<-try(mars.plot(fit,plot.it=F))
         
-        if(class(r.curves)!="try-error") {
-            out$mods$r.curves <- r.curves
-                } else {
-            out$ec<-out$ec+1
-            out$error.mssg[[out$ec]] <- paste("ERROR: problem fitting response curves",r.curves)
-            }
+        if(class(r.curves)=="try-error") stop(paste("ERROR: problem fitting response curves",r.curves))
 
         pred.fct<-pred.mars
 
@@ -288,20 +258,15 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
             class(mssg)<-"try-error"
             } else {
             cat("\nproducing prediction maps...","\n","\n");flush.console()
-            mssg <- try(proc.tiff(model=out$mods$final.mod,vnames=names(out$dat$ma$ma)[-1],
+            mssg <- proc.tiff(model=out$mods$final.mod,vnames=names(out$dat$ma$ma)[-1],
                 tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=pred.mars,factor.levels=out$dat$ma$factor.levels,make.binary.tif=make.binary.tif,
                 thresh=out$mods$auc.output$thresh,make.p.tif=make.p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
                 outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50.0,NAval=-3000,
-                fnames=out$dat$tif.names,logname=logname,out=out))     #"brt.prob.map.tif"
+                fnames=out$dat$tif.names,logname=logname,out=out)     #"brt.prob.map.tif"
             }
 
-        if(class(mssg)=="try-error"){
-          if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
-          out$ec<-out$ec+1
-          out$error.mssg[[out$ec]] <- paste("Error producing prediction maps:",mssg)
-          cat(saveXML(mars.to.xml(out),indent=T),'\n')
-          return()
-        }  else {
+        if(class(mssg)=="try-error") stop(paste("Error producing prediction maps:",mssg))
+         else {
             if(make.p.tif) out$mods$tif.output$prob <- paste(out$dat$bname,"_prob_map.tif",sep="")
             if(make.binary.tif) out$mods$tif.output$bin <- paste(out$dat$bname,"_bin_map.tif",sep="")
             t5 <- unclass(Sys.time())
@@ -314,20 +279,18 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
 
     if(!is.null(out$dat$ma$ma.test)) Eval.Stat<-EvaluationStats(out,thresh=auc.output$thresh,train=out$dat$ma$ma,
           train.pred=mars.predict(fit,out$dat$ma$ma)$prediction[,1],opt.methods)
-
-
     
-    # Write summaries to xml #
+
     if(debug.mode) assign("out",out,envir=.GlobalEnv)
-    doc <- mars.to.xml(out)
+
     
     cat(paste("\ntotal time=",round((unclass(Sys.time())-t0)/60,2),"min\n\n\n",sep=""))
     if(!debug.mode) {
         sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))
         cat("Progress:100%\n");flush.console()
-        #cat(saveXML(doc,indent=T),'\n')
+
         } else #unlink(outfile)
-    capture.output(cat(saveXML(doc,indent=T)),file=paste(out$dat$bname,"_output.xml",sep=""))
+
     if(debug.mode) assign("fit",out$mods$final.mod,envir=.GlobalEnv)
     invisible(out)
     }
@@ -374,74 +337,6 @@ file_path_as_absolute <- function (x){
 }
 #file_path_as_absolute(".")
 
-mars.to.xml <- function(out){
-    require(XML)
-    schema.http="http://www.w3.org/2001/XMLSchema-instance"
-    schema.fname="file:/Users/isfs2/Desktop/Source/2008-04-09/src/gov/nasa/gsfc/quickmap/ModelBuilder/modelRun_output_v2.xsd"
-    xml.out <- newXMLDoc()
-    mr <- newXMLNode("modelRunOutput",doc=xml.out,namespaceDefinitions=c(xsi=schema.http,noNamespaceSchemaLocation=schema.fname))#,parent=xml.out
-    sm <- newXMLNode("singleModel",parent=mr)
-    bg <- newXMLNode("background",parent=sm)
-        newXMLNode("mdsName",out$input$ma.name,parent=bg)
-        newXMLNode("runDate",out$input$run.time,parent=bg)
-        lc <- newXMLNode("layersConsidered",parent=bg)#, parent = xml.out)
-        kids <- lapply(paste(out$dat$tif.dir$dname,"/",out$dat$tif.names,sep=""),function(x) newXMLNode("layer", x))
-        addChildren(lc, kids)
-    mo <- newXMLNode("modelOutput",parent=sm)
-        newXMLNode("modelType",out$input$model.type,parent=mo)
-        newXMLNode("modelSourceFile",out$input$model.source.file,parent=mo)
-        newXMLNode("devianceExplained",out$mods$auc.output$pct_dev_exp,parent=mo,attrs=list(type="percentage"))
-        newXMLNode("nativeOutput",paste(out$dat$bname,"_output.txt",sep=""),parent=mo)
-        newXMLNode("binaryOutputFile",out$mods$tif.output[[2]],parent=mo)
-        newXMLNode("probOutputFile",out$mods$tif.output[[1]],parent=mo)
-        newXMLNode("auc",out$mods$auc.output$auc,parent=mo)
-        newXMLNode("rocGraphic",out$mods$auc.output$plotname,parent=mo)
-        newXMLNode("rocThresh",out$mods$auc.output$thresh,parent=mo)
-        newXMLNode("modelDeviance",out$mods$auc.output$dev_fit,parent=mo)
-        newXMLNode("nullDeviance",out$mods$auc.output$null_dev,parent=mo)
-        if(is.null(out$mods$r.curves)) rc.name <- NULL else rc.name <- paste(out$dat$bname,"_response_curves.xml",sep="")
-        newXMLNode("responsePlotsFile",rc.name,parent=mo)
-        newXMLNode("significanceDescription",out$input$sig.test,parent=mo)
-        mfp <- newXMLNode("modelFitParmas",parent=mo)
-            newXMLNode("marsDegree",out$input$mars.degree,parent=mfp)
-            newXMLNode("marsPenalty",out$input$mars.penalty,parent=mfp)
-        
-        sv <- newXMLNode("significantVariables",parent=mo)
-        if(!is.null(out$mods$summary)) {
-            t.table <- out$mods$summary#$coefficients
-            names(t.table)[3]<-"significanceMeasurement"
-            for(i in 1:nrow(t.table)){
-                x <- newXMLNode("sigVar",parent=sv)
-                newXMLNode(name="name", row.names(t.table)[i],parent=x)
-                kids <- lapply(1:ncol(t.table),function(j) newXMLNode(name=names(t.table)[j], t.table[i,j]))
-                addChildren(x, kids)
-                }
-            }
-        
-    if(!is.null(out$mods$r.curves)){
-        r.curves <-  out$mods$r.curves
-        factor.levels <- out$dat$ma$factor.levels
-        rc.out <- newXMLDoc()
-        root <- newXMLNode("responseCurves",doc=rc.out,namespaceDefinitions=c(xsi=schema.http,noNamespaceSchemaLocation=schema.fname))
-        for(i in 1:length(r.curves$names)){
-            if(!is.na(f.index<-match(r.curves$names[i],names(factor.levels)))){
-                  vartype <- "factor"} else vartype="continuous"
-            x <- newXMLNode("responseCurve",attrs=list(covariate=r.curves$names[i],type=vartype),parent=root)
-            kids <- lapply(1:length(r.curves$preds[[i]]),function(j){
-                    newXMLNode(name="responsePt",parent=x,.children=list(
-                        newXMLNode(name="explanatory",as.character(r.curves$preds[[i]])[j]),
-                        newXMLNode(name="response",r.curves$resp[[i]][j])))})
-            addChildren(x, kids)
-            }
-        saveXML(rc.out,rc.name,indent=T)
-        
-        } 
-    if(!is.null(out$error.mssg[[1]])) {
-        kids <- lapply(out$error.mssg,function(j) newXMLNode(name="error",j))
-        addChildren(mo,kids)
-        }
-    return(xml.out)
-    }
 
 
 get.cov.names <- function(model){
