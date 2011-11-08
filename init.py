@@ -537,8 +537,9 @@ class Model(Module):
                        "FIT_MARS_pluggable.r":"mars"}
         self.ModelAbbrev = ModelOutput[self.name]
         
-        output_dname = utils.mknextdir(prefix=self.ModelAbbrev + 'output_')
+        self.output_dname = utils.mknextdir(prefix=self.ModelAbbrev + 'output_')
         self.argsDict = utils.map_ports(self, self.port_map)
+
         mdsFile = self.forceGetInputFromPort('mdsFile').name
         
         args = ''
@@ -547,11 +548,13 @@ class Model(Module):
                 args += ' ' + '='.join([str(k),'"' + str(v) + '"'])
             else:
                 args += ' ' + '='.join([str(k),str(v)])
-        args += " o=" + '"' + output_dname + '"'
+        args += " o=" + '"' + self.output_dname + '"'
         args += " rc=" + utils.MDSresponseCol(mdsFile)
                 
         utils.runRScript(self.name, args, self)
         
+        if not self.argsDict.has_key('mes'):
+            self.argsDict['mes'] = 'FALSE'
         self.setModelResult(self.ModelAbbrev + "_prob_map.tif", 'ProbabilityMap', 'mpt')
         self.setModelResult(self.ModelAbbrev + "_bin_map.tif", 'BinaryMap', 'mbt')
         self.setModelResult(self.ModelAbbrev + "_resid_map.tif", 'ResidualsMap', 'mes')
@@ -560,45 +563,13 @@ class Model(Module):
         self.setModelResult(self.ModelAbbrev + "_output.txt", 'Text_Output')
         self.setModelResult(self.ModelAbbrev + "_auc_plot.jpg", 'AUC_plot') 
         self.setModelResult(self.ModelAbbrev + "_response_curves.pdf", 'ResponseCurves')
-        
-        input_fname = os.path.join(output_dname, self.ModelAbbrev + "_prob_map.tif")
-        if os.path.exists(input_fname):
-            self.setResult('ProbabilityMap', input_fname)
-        elif (argsDict.has_key('mpt') and argsDict['mpt'] == True) or \
-            not argsDict.has_key('mpt'):
-            msg = "Expected output from " + self.ModelAbbrev + " was not found."
-            msg += "\nThis might indicate problems with the inputs to the R module."
-            msg += "\nCheck the console output for additional R warnings "
-            writetolog(msg, False, True)
-            raise ModuleError(self, msg)
-        
-        if (argsDict.has_key('mbt') and argsDict['mbt'] == True) or \
-            not argsDict.has_key('mbt'):
-            outFileName = os.path.join(output_dname, self.ModelAbbrev + "_bin_map.tif")
-            output_file1 = utils.create_file_module(outFileName)
-            self.setResult('BinaryMap', output_file1)
-        
-        outFileName = os.path.join(output_dname, self.ModelAbbrev + "_output.txt")
-        output_file2 = utils.create_file_module(outFileName)
-        self.setResult('Text_Output', output_file2)
-        
-        outFileName = os.path.join(output_dname, self.ModelAbbrev + "_auc_plot.jpg")
-        output_file3 = utils.create_file_module(outFileName)
-        self.setResult('AUC_plot', output_file3)
-        
-        outFileName = os.path.join(output_dname, self.ModelAbbrev + "_response_curves.pdf")
-        output_file5 = utils.create_file_module(outFileName)
-        self.setResult('ResponseCurves', output_file5)
-        
-        outFileName = os.path.join(output_dname, "modelWorkspace")
-        output_file6 = utils.create_file_module(outFileName)
-        self.setResult('modelWorkspace', output_file6)
-        
+        self.setModelResult("modelWorkspace", 'modelWorkspace')        
         writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
         
     def setModelResult(self, filename, portname, arg_key=None):
-        outFileName = os.path.join(output_dname, filename)
-        required = not (argsDict.has_key(arg_key) and argsDict[arg_key] == False)
+        outFileName = os.path.join(self.output_dname, filename)
+        required = not (self.argsDict.has_key(arg_key) and 
+                        self.argsDict[arg_key].lower() == 'false')
         if required and not os.path.exists(outFileName):
             msg = "Expected output from " + self.ModelAbbrev + " was not found."
             msg += "\nThis might indicate problems with the inputs to the R module."
@@ -606,7 +577,8 @@ class Model(Module):
             writetolog(msg, False, True)
             raise ModuleError(self, msg)
             
-        output_file6 = utils.create_file_module(outFileName)
+        output_file = utils.create_file_module(outFileName)
+        self.setResult(portname, output_file)
         
 class GLM(Model):
     _input_ports = list(Model._input_ports)
