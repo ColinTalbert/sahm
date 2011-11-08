@@ -34,7 +34,7 @@ class logger(object):
             logDir = os.path.split(self.logfile)[0]
             if not os.path.exists(logDir):
                 raise RuntimeError('Directory of specified logfile does not exist.')
-            f = open(self.logfile, "w")
+            f = open(self.logfile, "a")
             del f
             self.writetolog("\nSession started\n", True, False)
             
