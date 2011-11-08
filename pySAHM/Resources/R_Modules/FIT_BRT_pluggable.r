@@ -17,7 +17,6 @@
 # Modified 12-30-08 to use directories that don't end with a forward slash
 #
 # Modified 8-19-08 to include the creation of a image info table.
-# Modified 8-8-8 to modularize the model array input, and to include and xml output summary.
 #  also added "debug.mode" to make debugging easier on my end.
 # Modified on 6-30-08 to avoid writing to directories other the 'output.dir' spec'd in the
 #  command line arguements.  If this arguement is not defined, output may still be written
@@ -37,7 +36,7 @@
 
 # Libraries required to run this program #
 #   PresenceAbsence - for ROC plots
-#   XML - for XML i/o
+
 #   rgdal - for geotiff i/o
 #   gbm
 #   gbmplus - not on CRAN, see elith et al or contact me.
@@ -95,7 +94,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     #  less than 1%.  cross-validation is very slow - it can add up to 10min to a run.
     # debug.mode: if T, output is directed to the console during the run.  also, a pdf is generated which contains response curve plots and perspective plots
     #    showing the effects of interactions deemed important.  if F, output is diverted to a text file and the console is kept clear
-    #    except for final output of an xml file.  in either case, a set of standard output files are created in the output directory.
+    #      in either case, a set of standard output files are created in the output directory.
     # tc:  tree-complexity for brt fits.  if specified, this sets the tree-complexity of the final model fit.  A lower tree-complexity will be used for
     #    model selection steps.  if not set, this will be estimated loosely following the guidelines given by Elith et al, 2008.
     #
@@ -105,8 +104,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     # "output.dir" named above.  These output files consist of:
     #
     # brt_output.txt:  a text file with fairly detailed results of the final model.
-    # brt_output.xml:  an xml-formatted text file with results from the final model.
-    # brt_response_curves.xml:  an xml-formatted text file with response curves for
+
     #   each covariate in the final model.
     # brt_prob_map.tif:  a geotiff of the response surface
     # brt_bin_map.tif:  a geotiff of the binary response surface.  threhold is based on the roc curve at the point where sensitivity=specificity.
@@ -187,18 +185,18 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
       )
       if(!is.null(seed)) set.seed(seed)
     # load libaries #
-    out <- check.libs(list("PresenceAbsence","rgdal","XML","sp","survival","lattice","raster","tcltk2","foreign","ade4"),out)
+    out <- check.libs(list("PresenceAbsence","rgdal","sp","survival","lattice","raster","tcltk2","foreign","ade4"),out)
 
     # exit program now if there are missing libraries #
       if(!is.null(out$error.mssg[[1]])){
-          cat(saveXML(brt.to.xml(out),indent=T),'\n')
+
           return()
           }
 
     if(is.na(match(simp.method,c("cross-validation","rel-inf","none")))){
         out$ec <- out$ec+1
         out$error.mssg[[out$ec]] <- "ERROR: arguement simp.method must be either cross-validation, rel-inf, or none"
-        cat(saveXML(brt.to.xml(out),indent=T),'\n')
+
         return()
         }
 
@@ -231,7 +229,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
                 out$ec<-out$ec+1
                 out$error.mssg[[out$ec]] <- paste("ERROR: tif directory",tif.dir,"is not readable")
                 if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
-              cat(saveXML(brt.to.xml(out),indent=T),'\n')
+
               return()
               }
             }
@@ -247,7 +245,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     # exit program now if there are errors in the input data #
     if(!is.null(out$error.mssg[[1]])){
           if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
-          cat(saveXML(brt.to.xml(out),indent=T),'\n')
+
           return()
           }
 
@@ -268,7 +266,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     # exit program now if lr estimation fails #
     if(!is.null(out$error.mssg[[1]])){
           if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
-          cat(saveXML(brt.to.xml(out),indent=T),'\n')
+
           return()}
 
     cat("\nfinished with learning rate estimation, lr=",out$mods$lr.mod$lr0,", t=",round(out$mods$lr.mod$t.elapsed,2),"sec\n")
@@ -344,7 +342,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
         if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
         out$ec<-out$ec+1
         out$error.mssg[[out$ec]] <- paste("ERROR: can't generate summary of final model:",model.summary)
-        cat(saveXML(brt.to.xml(out),indent=T),'\n')
+
         return()
     } else {
         out$mods$summary <- model.summary
@@ -446,7 +444,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
           if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
           out$ec<-out$ec+1
           out$error.mssg[[out$ec]] <- paste("Error producing prediction maps:",mssg)
-          cat(saveXML(brt.to.xml(out),indent=T),'\n')
+
           return()
         }  else {
             if(make.p.tif) out$mods$tif.output$prob <- paste(out$dat$bname,"_prob_map.tif",sep="")
@@ -462,20 +460,17 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     if(!is.null(out$dat$ma$ma.test)) Eval.Stat<-EvaluationStats(out,thresh=auc.output$thresh,train=out$dat$ma$ma,train.pred=predict.gbm(out$mods$final.mod,out$dat$ma$ma,
             out$mods$final.mod$target.trees,type="response"),opt.methods)
 
-
-    
-    # Write summaries to xml #
     if(debug.mode) assign("out",out,envir=.GlobalEnv)
-    doc <- brt.to.xml(out)
+
 
     cat(paste("\ntotal time=",round((unclass(Sys.time())-t0)/60,2),"min\n\n\n",sep=""))
     if(!debug.mode) {
         sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))
         cat("Progress:100%\n");flush.console() ### print time
 
-        cat(saveXML(doc,indent=T),'\n')
+
         }
-    capture.output(cat(saveXML(doc,indent=T)),file=paste(out$dat$bname,"_output.xml",sep=""))
+
     if(debug.mode) assign("fit",out$mods$final.mod,envir=.GlobalEnv)
     invisible(out)
 }
@@ -515,96 +510,7 @@ file_path_as_absolute <- function (x){
         file.path(getwd(), basename(epath))
     }
 }
-#file_path_as_absolute(".")
 
-brt.to.xml <- function(out){
-    require(XML)
-    schema.http="http://www.w3.org/2001/XMLSchema-instance"
-    schema.fname="file:/Users/isfs2/Desktop/Source/2008-04-09/src/gov/nasa/gsfc/quickmap/ModelBuilder/modelRun_output_v2.xsd"
-    xml.out <- newXMLDoc()
-    mr <- newXMLNode("modelRunOutput",doc=xml.out,namespaceDefinitions=c(xsi=schema.http,noNamespaceSchemaLocation=schema.fname))#,parent=xml.out
-    sm <- newXMLNode("singleModel",parent=mr)
-    bg <- newXMLNode("background",parent=sm)
-        newXMLNode("mdsName",out$input$ma.name,parent=bg)
-        newXMLNode("runDate",out$input$run.time,parent=bg)
-        lc <- newXMLNode("layersConsidered",parent=bg)#, parent = xml.out)
-        kids <- lapply(paste(out$dat$tif.dir$dname,"/",out$dat$ma$used.covs,".tif",sep=""),function(x) newXMLNode("layer", x))
-        addChildren(lc, kids)
-    mo <- newXMLNode("modelOutput",parent=sm)
-        newXMLNode("modelType",out$input$model.type,parent=mo)
-        newXMLNode("modelSourceFile",out$input$model.source.file,parent=mo)
-        newXMLNode("devianceExplained",out$mods$auc.output$pct_dev_exp,parent=mo,attrs=list(type="percentage"))
-        if(!is.null(out$mods$summary)){
-              newXMLNode("nativeOutput",paste(out$dat$bname,"_output.txt",sep=""),parent=mo)
-              } else {
-              newXMLNode("nativeOutput",NULL,parent=mo)
-              }
-        newXMLNode("binaryOutputFile",out$mods$tif.output[[2]],parent=mo)
-        newXMLNode("probOutputFile",out$mods$tif.output[[1]],parent=mo)
-        newXMLNode("auc",out$mods$auc.output$auc,parent=mo)
-        newXMLNode("rocGraphic",out$mods$auc.output$plotname,parent=mo)
-        newXMLNode("rocThresh",out$mods$auc.output$thresh,parent=mo)
-        newXMLNode("modelDeviance",out$mods$auc.output$dev_fit,parent=mo)
-        newXMLNode("nullDeviance",out$mods$auc.output$null_dev,parent=mo)
-        if(is.null(out$mods$r.curves)) rc.name <- NULL else rc.name <- paste(out$dat$bname,"_response_curves.xml",sep="")
-        newXMLNode("responsePlotsFile",rc.name,parent=mo)
-        newXMLNode("significanceDescription",out$input$sig.test,parent=mo)
-        mfp <- newXMLNode("modelFitParmas",parent=mo)
-            newXMLNode("treeComplexity",out$input$tc,parent=mfp)
-            newXMLNode("bagFraction",out$input$bag.fraction,parent=mfp)
-            newXMLNode("simpMethod",out$input$simp.method,parent=mfp)
-            newXMLNode("alpha",out$input$alpha,parent=mfp)
-
-        sv <- newXMLNode("significantVariables",parent=mo)
-        if(!is.null(out$mods$summary)) {
-            t.table <- data.frame(significanceMeasurement=out$mods$summary$rel.inf,row.names=out$mods$summary$var)
-            if(!is.null(out$mods$interactions)){
-                int1 <- int2 <- out$mods$interactions
-                int2$name1 <- int1$name2
-                int2$name2 <- int1$name1
-                int <- rbind(int1,int2)
-                }
-
-            for(i in 1:nrow(t.table)){
-                x <- newXMLNode("sigVar",parent=sv)
-                newXMLNode(name="name", row.names(t.table)[i],parent=x)
-                kids <- lapply(1:ncol(t.table),function(j) newXMLNode(name=names(t.table)[j], t.table[i,j]))
-                addChildren(x, kids)
-                if(!is.null(out$mods$interactions)){
-                    ints <-  c(1:nrow(int))[int$name1 %in% row.names(t.table)[i]]
-                    if(length(ints)>0){
-                        kids <- lapply(ints,function(j) newXMLNode(name="sigInteraction",attrs=list(name=as.character(int$name2)[j],size=int$int.size[j],p=int$"p-value"[j])))
-                        addChildren(x,kids)
-                        }
-
-                    }
-                }
-            }
-
-    if(!is.null(out$mods$r.curves)){
-        r.curves <-  out$mods$r.curves
-        factor.levels <- out$dat$ma$factor.levels
-        rc.out <- newXMLDoc()
-        root <- newXMLNode("responseCurves",doc=rc.out,namespaceDefinitions=c(xsi=schema.http,noNamespaceSchemaLocation=schema.fname))
-        for(i in 1:length(r.curves$names)){
-            if(!is.na(f.index<-match(r.curves$names[i],names(factor.levels)))){
-                  vartype <- "factor"} else vartype="continuous"
-            x <- newXMLNode("responseCurve",attrs=list(covariate=r.curves$names[i],type=vartype),parent=root)
-            kids <- lapply(1:length(r.curves$preds[[i]]),function(j){
-                    newXMLNode(name="responsePt",parent=x,.children=list(
-                        newXMLNode(name="explanatory",as.character(r.curves$preds[[i]])[j]),
-                        newXMLNode(name="response",r.curves$resp[[i]][j])))})
-            addChildren(x, kids)
-            }
-        saveXML(rc.out,rc.name,indent=T)
-
-        }
-    if(!is.null(out$error.mssg[[1]])) {
-        kids <- lapply(out$error.mssg,function(j) newXMLNode(name="error",j))
-        addChildren(mo,kids)
-        }
-    return(xml.out)
-    }
 
 
 get.cov.names <- function(model){
