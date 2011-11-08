@@ -36,6 +36,7 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,pred.fct,factor.le
     # is retained.
     #
     #HELLO!!!
+    #ColinTEST
     # Start of function #
     library(rgdal)
     library(raster)
