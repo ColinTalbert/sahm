@@ -1,4 +1,5 @@
-#another test
+'''
+'''
 import csv
 from datetime import datetime
 import glob
@@ -521,6 +522,9 @@ class Model(Module):
     _output_ports = [('modelWorkspace', '(edu.utah.sci.vistrails.basic:File)'), 
                      ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
                      ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)'),
+                     ('ResidualsMap', '(edu.utah.sci.vistrails.basic:File)'),
+                     ('MessMap', '(edu.utah.sci.vistrails.basic:File)'),
+                     ('MoDMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('AUC_plot', '(edu.utah.sci.vistrails.basic:File)'),
                      ('ResponseCurves', '(edu.utah.sci.vistrails.basic:File)'),
                      ('Text_Output', '(edu.utah.sci.vistrails.basic:File)')]
@@ -531,57 +535,38 @@ class Model(Module):
                        "FIT_GLM_pluggable.r":"glm",
                        "FIT_RF_pluggable.r":"rf",
                        "FIT_MARS_pluggable.r":"mars"}
-        ModelAbbrev = ModelOutput[self.name]
+        self.ModelAbbrev = ModelOutput[self.name]
         
-        output_dname = utils.mknextdir(prefix=ModelAbbrev + 'output_')
-        argsDict = utils.map_ports(self, self.port_map)
+        output_dname = utils.mknextdir(prefix=self.ModelAbbrev + 'output_')
+        self.argsDict = utils.map_ports(self, self.port_map)
         mdsFile = self.forceGetInputFromPort('mdsFile').name
         
         args = ''
-        for k, v in argsDict.iteritems():
+        for k, v in self.argsDict.iteritems():
             if k == 'c':
                 args += ' ' + '='.join([str(k),'"' + str(v) + '"'])
             else:
                 args += ' ' + '='.join([str(k),str(v)])
         args += " o=" + '"' + output_dname + '"'
         args += " rc=" + utils.MDSresponseCol(mdsFile)
-#        if self.hasInputFromPort('makeBinMap'):
-#            makeBinMap = self.forceGetInputFromPort('makeBinMap')
-#            args += ' mbt=' + str(makeBinMap).upper()
-#        else:
-#            makeBinMap = True
-#            args += ' mbt=TRUE'
-#            
-#        if self.hasInputFromPort('makeProbabilityMap'):
-#            makeProbabilityMap = self.forceGetInputFromPort('makeProbabilityMap')
-#            args += ' mpt=' + str(makeProbabilityMap).upper()
-#        else:
-#            makeProbabilityMap = True
-#            args += ' mpt=TRUE'  
-#        
-#        if self.hasInputFromPort('seed'):
-#            args += ' seed=' + str(self.forceGetInputFromPort('seed'))
-#        
-#        if self.hasInputFromPort('someParam'):
-#            x = self.forceGetInputFromPort('someParam')
-#            if x > 1:
-#                msg = "Expected output from " + ModelAbbrev + " was not found."
-#                msg += "\nThis likely indicates problems with the inputs to the R module."
-#                writetolog(msg, False, True)
-#            args += " abr=" + x
                 
         utils.runRScript(self.name, args, self)
-#        utils.runRScript('FIT_BRT_pluggableErrorMessage.r', args, self)
         
-        input_fname = os.path.join(output_dname, ModelAbbrev + "_prob_map.tif")
-        output_fname = os.path.join(output_dname, ModelAbbrev + "_prob_map.jpeg")
+        self.setModelResult(self.ModelAbbrev + "_prob_map.tif", 'ProbabilityMap', 'mpt')
+        self.setModelResult(self.ModelAbbrev + "_bin_map.tif", 'BinaryMap', 'mbt')
+        self.setModelResult(self.ModelAbbrev + "_resid_map.tif", 'ResidualsMap', 'mes')
+        self.setModelResult(self.ModelAbbrev + "_mess_map.tif", 'MessMap', 'mes')
+        self.setModelResult(self.ModelAbbrev + "_MoD_map.tif", 'MoDMap', 'mes')
+        self.setModelResult(self.ModelAbbrev + "_output.txt", 'Text_Output')
+        self.setModelResult(self.ModelAbbrev + "_auc_plot.jpg", 'AUC_plot') 
+        self.setModelResult(self.ModelAbbrev + "_response_curves.pdf", 'ResponseCurves')
+        
+        input_fname = os.path.join(output_dname, self.ModelAbbrev + "_prob_map.tif")
         if os.path.exists(input_fname):
-#            utils.tif_to_color_jpeg(input_fname, output_fname, color_breaks_csv)
-#            output_file4 = utils.create_file_module(output_fname)
             self.setResult('ProbabilityMap', input_fname)
         elif (argsDict.has_key('mpt') and argsDict['mpt'] == True) or \
             not argsDict.has_key('mpt'):
-            msg = "Expected output from " + ModelAbbrev + " was not found."
+            msg = "Expected output from " + self.ModelAbbrev + " was not found."
             msg += "\nThis might indicate problems with the inputs to the R module."
             msg += "\nCheck the console output for additional R warnings "
             writetolog(msg, False, True)
@@ -589,29 +574,39 @@ class Model(Module):
         
         if (argsDict.has_key('mbt') and argsDict['mbt'] == True) or \
             not argsDict.has_key('mbt'):
-            outFileName = os.path.join(output_dname, ModelAbbrev + "_bin_map.tif")
+            outFileName = os.path.join(output_dname, self.ModelAbbrev + "_bin_map.tif")
             output_file1 = utils.create_file_module(outFileName)
             self.setResult('BinaryMap', output_file1)
         
-        outFileName = os.path.join(output_dname, ModelAbbrev + "_output.txt")
+        outFileName = os.path.join(output_dname, self.ModelAbbrev + "_output.txt")
         output_file2 = utils.create_file_module(outFileName)
         self.setResult('Text_Output', output_file2)
         
-        outFileName = os.path.join(output_dname, ModelAbbrev + "_auc_plot.jpg")
-#        print "out auc: ", outFileName
+        outFileName = os.path.join(output_dname, self.ModelAbbrev + "_auc_plot.jpg")
         output_file3 = utils.create_file_module(outFileName)
         self.setResult('AUC_plot', output_file3)
         
-        outFileName = os.path.join(output_dname, ModelAbbrev + "_response_curves.pdf")
+        outFileName = os.path.join(output_dname, self.ModelAbbrev + "_response_curves.pdf")
         output_file5 = utils.create_file_module(outFileName)
         self.setResult('ResponseCurves', output_file5)
         
         outFileName = os.path.join(output_dname, "modelWorkspace")
-#        print "out auc: ", outFileName
         output_file6 = utils.create_file_module(outFileName)
         self.setResult('modelWorkspace', output_file6)
         
-        writetolog("Finished " + ModelAbbrev   +  " builder\n", True, True) 
+        writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
+        
+    def setModelResult(self, filename, portname, arg_key=None):
+        outFileName = os.path.join(output_dname, filename)
+        required = not (argsDict.has_key(arg_key) and argsDict[arg_key] == False)
+        if required and not os.path.exists(outFileName):
+            msg = "Expected output from " + self.ModelAbbrev + " was not found."
+            msg += "\nThis might indicate problems with the inputs to the R module."
+            msg += "\nCheck the console output for additional R warnings "
+            writetolog(msg, False, True)
+            raise ModuleError(self, msg)
+            
+        output_file6 = utils.create_file_module(outFileName)
         
 class GLM(Model):
     _input_ports = list(Model._input_ports)
