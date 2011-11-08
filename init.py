@@ -52,6 +52,7 @@ def menu_items():
                                         'Browse to new session folder -'))
         session_dir = path
         utils.setrootdir(path)
+        utils.createLogger(session_dir, configuration.output_dir)
         
         writetolog("*" * 79 + "\n" + "*" * 79)
         writetolog(" output directory:   " + session_dir)
