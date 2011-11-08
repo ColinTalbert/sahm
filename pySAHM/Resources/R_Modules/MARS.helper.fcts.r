@@ -1,396 +1,5 @@
-# A set of "pluggable" R functions for automated model fitting of glm models to presence/absence data #
-#
-# Modified 12-2-09 to:  remove categorical covariates from consideration if they only contain one level
-#                       ID factor variables based on "categorical" prefix and look for tifs in subdir
-#                       Give progress reports
-#                       write large output tif files in blocks to alleviate memory issues
-#                       various bug fixes
-#
-#
-# Modified 3-4-09 to use a list object for passing of arguements and data
-#
-
-
-# Libraries required to run this program #
-#   PresenceAbsence - for ROC plots
-
-#   rgdal - for geotiff i/o
-#   sp - used by rdgal library
-#   raster for geotiff o
-options(error=NULL)
-
-fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^response.binary",make.p.tif=T,make.binary.tif=T,
-      mars.degree=1,mars.penalty=2,responseCurveForm=NULL,debug.mode=T,script.name="mars.r",opt.methods=2,save.model=TRUE,UnitTest=FALSE,MESS=FALSE){
-    # This function fits a stepwise GLM model to presence-absence data.
-    # written by Alan Swanson, 2008-2009
-    # # Maintained and edited by Marian Talbert September 2010-
-    # Arguements.
-    # ma.name: is the name of a .csv file with a model array.  full path must be included unless it is in the current
-    #  R working directory # THIS FILE CAN NOW INCLUDE AN OPTIONAL COLUMN OF SITE WEIGHTS WHICH MUST BE LABELED "site.weights"
-    # tif.dir: is the directory containing geotiffs for each covariate.  only required if geotiffs output of the 
-    #   response surface is requested #    # cov.list.name: is the name of a text file with the names of covariates to be included in models (one per line).
-    # output.dir: is the directory that output files will be stored in.  if not given, files will go to the current working directory. 
-    # response.col: column number of the model array containing a binary 0/1 response.  all other columns will be considered explanatory variables.
-    # make.p.tif: T if a geotiff of the response surface is desired.
-    # make.binary.tif: T if a geotiff of the response surface is desired.
-    # simp.method: model simplification method.  valid methods include: "AIC" and "BIC". NOT CURRENTLY FUNCTIONAL 
-    # debug.mode: if T, output is directed to the console during the run.  also, a pdf is generated which contains response curve plots and perspective plots
-    #    showing the effects of interactions deemed important.  if F, output is diverted to a text file and the console is kept clear 
-
-    # 
-
-    # Value:
-    # returns nothing but generates a number of output files in the directory
-    # "output.dir" named above.  These output files consist of:
-    #
-    # glm_output.txt:  a text file with fairly detailed results of the final model.
-
-
-    #   each covariate in the final model.
-    # glm_prob_map.tif:  a geotiff of the response surface
-    # glm_bin_map.tif:  a geotiff of the binary response surface.  threhold is based on the roc curve at the point where sensitivity=specificity.
-    # glm_log.txt:   a file containing text output diverted from the console when debug.mode=F
-    # glm_auc_plot.jpg:  a jpg file of a ROC plot.
-    # glm_response_curves.pdf:  an pdf file with response curves for
-    #   each covariate in the final model and perspective plots showing the effect of interactions deemed significant.
-    #   only produced when debug.mode=T
-    # #  seed=NULL                                 # sets a seed for the algorithm, any inegeger is acceptable
-    #  opt.methods=2                             # sets the method used for threshold optimization used in the
-    #                                            # the evaluation statistics module
-    #  save.model=FALSE                          # whether the model will be used to later produce tifs
-    # when debug.mode is true, these filenames will include a number in them so that they will not overwrite preexisting files. eg brt_1_output.txt.
-    #
-    times <- as.data.frame(matrix(NA,nrow=7,ncol=1,dimnames=list(c("start","read data","model fit",
-            "model summary","response curves","tif output","done"),c("time"))))
-    times[1,1] <- unclass(Sys.time())
-    t0 <- unclass(Sys.time())
-    #simp.method <- match.arg(simp.method)
-
-    out <- list(
-      input=list(ma.name=ma.name,
-                 tif.dir=tif.dir,
-                 output.dir=output.dir,
-                 response.col=response.col,
-                 make.p.tif=make.p.tif,
-                 make.binary.tif=make.binary.tif,
-                 site.weights=NULL,
-                 save.model=save.model,
-                 mars.degree=mars.degree,
-                 mars.penalty=mars.penalty,
-                 model.type="stepwise with pruning",
-                 model.source.file=script.name,
-                 model.fitting.subset=NULL, # not used.
-                 model.family="binomial",
-                 run.time=paste(c(format(Sys.time(),"%Y-%m-%d"),format(Sys.time(),"%H:%M:%S")),collapse="T"),
-                 sig.test="chi-squared anova p-value",
-                 MESS=MESS),
-      dat = list(missing.libs=NULL,
-                 output.dir=list(dname=NULL,exist=F,readable=F,writable=F),
-                 tif.dir=list(dname=NULL,exist=F,readable=F,writable=F),
-                 tif.ind=NULL,
-                 tif.names=NULL,
-                 bname=NULL,
-                 bad.factor.covs=NULL, # factorchange
-                 ma=list( status=c(exists=F,readable=F),
-                          dims=c(NA,NA),
-                          n.pres=c(all=NA,complete=NA,subset=NA),
-                          n.abs=c(all=NA,complete=NA,subset=NA),
-                          ratio=NA,
-                          resp.name=NULL,
-                          train.weights=NULL,
-                          test.weights=NULL,
-                          train.xy=NULL,
-                          test.xy=NULL,
-                          factor.levels=NA,
-                          used.covs=NULL,
-                          ma=NULL,
-                          ma.subset=NULL,
-                          ma.test=NULL)),
-      mods=list(final.mod=NULL,
-                r.curves=NULL,
-                tif.output=list(prob=NULL,bin=NULL),
-                auc.output=NULL,
-                interactions=NULL,  # not used #
-                summary=NULL),
-      time=list(strt=unclass(Sys.time()),end=NULL),
-      error.mssg=list(NULL),
-      ec=0    # error count #
-      )
-
-      # load libaries #
-      out <- check.libs(list("PresenceAbsence","rgdal","sp","survival","mda","raster","tcltk2","foreign","ade4"),out)
-      
-      # exit program now if there are missing libraries #
-      if(!is.null(out$error.mssg[[1]])){
-          return()
-          }
-        
-    # check output dir #
-    out$dat$output.dir <- check.dir(output.dir)    
-    if(out$dat$output.dir$writable==F) stop(paste("output directory",output.dir,"is not writable"))
-
-
-    # generate a filename for output #
-          if(debug.mode==T){
-            outfile <- paste(bname<-paste(out$dat$output.dir$dname,"/mars_",n<-1,sep=""),"_output.txt",sep="")
-            while(file.access(outfile)==0) outfile<-paste(bname<-paste(out$dat$output.dir$dname,"/mars_",n<-n+1,sep=""),"_output.txt",sep="")
-            capture.output(cat("temp"),file=outfile) # reserve the new basename #
-            } else bname<-paste(out$dat$output.dir$dname,"/mars",sep="")
-            out$dat$bname <- bname
-            
-    # sink console output to log file #
-    if(!debug.mode) {sink(logname <- paste(bname,"_log.txt",sep=""));on.exit(sink)} else logname<-NULL
-    options(warn=1)
-    
-    # check tif dir #
-        # check tif dir #
-      out$dat$tif.dir <- check.dir(tif.dir)
-      if(out$dat$tif.dir$readable==F & (out$input$make.binary.tif | out$input$make.p.tif)) stop(paste("ERROR: tif directory",tif.dir,"is not readable"))
-
-    # find .tif files in tif dir #
-    if(out$dat$tif.dir$readable)  out$dat$tif.names <- list.files(out$dat$tif.dir$dname,pattern=".tif",recursive=T)
-
-    # check for model array #
-    out$input$ma.name <- check.dir(out$input$ma.name)$dname
-
-    if(UnitTest!=FALSE) options(warn=2)
-    out <- read.ma(out)
-    if(UnitTest==1) return(out)
-        
-    cat("\nbegin processing of model array:",out$input$ma.name,"\n")
-    cat("\nfile basename set to:",out$dat$bname,"\n")
-    assign("out",out,envir=.GlobalEnv)
-    if(!debug.mode) {sink();cat("Progress:20%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("20%\n")}  ### print time
-    ##############################################################################################################
-    #  Begin model fitting #
-    ##############################################################################################################
-
-    # Fit null GLM and run stepwise, then print results #
-    cat("\n","Fitting MARS model","\n")
-    flush.console()
-
-    fit <- mars.glm(data=out$dat$ma$ma, mars.x=c(2:ncol(out$dat$ma$ma)), mars.y=1, mars.degree=out$input$mars.degree, family=out$input$model.family,
-          site.weights=out$dat$ma$train.weights, penalty=out$input$mars.penalty)
-      
-    out$mods$final.mod <- fit
-
-  out$mods$final.mod$contributions$var<-names(out$dat$ma$ma)[-1]
-
-    assign("out",out,envir=.GlobalEnv)
-    t3 <- unclass(Sys.time())
-    fit_contribs <- try(mars.contribs(fit))
-    if(class(fit_contribs)=="try-error") stop(paste("Error summarizing MARS model:",fit_contribs))
-       
-    x<-fit_contribs$deviance.table
-    x <- x[x[,2]!=0,]
-    x <- x[order(x[,4]),]
-    row.names(x) <- x[,1]
-    x$df <- -1*x$df
-    x <- x[,-1]
-    
-     txt0 <- paste("\nMARS Model Results\n","\n","Data:\n",ma.name,"\n","\n\t n(pres)=",
-        out$dat$ma$n.pres[2],"\n\t n(abs)=",out$dat$ma$n.abs[2],"\n\t n covariates considered=",length(out$dat$ma$used.covs),
-        "\n",
-        "\n   total time for model fitting=",round((unclass(Sys.time())-t0)/60,2),"min\n",sep="")
-
-    capture.output(cat(txt0),file=paste(bname,"_output.txt",sep=""))
-    
-    cat("\n","Finished with MARS","\n")
-    cat("Summary of Model:","\n")
-    print(out$mods$summary <- x)
-    if(!is.null(out$dat$bad.factor.cols)){
-        cat("\nWarning: the following categorical response variables were removed from consideration\n",
-            "because they had only one level:",paste(out$dat$bad.factor.cols,collapse=","),"\n\n")
-        }
-    cat("\n","Storing output...","\n","\n")
-    #flush.console()
-    capture.output(cat("\n\nSummary of Model:\n"),file=paste(bname,"_output.txt",sep=""),append=TRUE)
-    capture.output(print(out$mods$summary),file=paste(bname,"_output.txt",sep=""),append=TRUE)
-    if(!is.null(out$dat$bad.factor.cols)){
-        capture.output(cat("\nWarning: the following categorical response variables were removed from consideration\n",
-            "because they had only one level:",paste(out$dat$bad.factor.cols,collapse=","),"\n"),
-            file=paste(bname,"_output.txt",sep=""),append=T)
-        }
-    
-    if(!debug.mode) {sink();cat("Progress:40%\n");flush.console();sink(logname,append=T)} else cat("40%\n")
-    
-    
-    ##############################################################################################################
-    #  Begin model output #
-    ##############################################################################################################
-           
-    # Store .jpg ROC plot #
-      auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=mars.predict(fit,out$dat$ma$ma)$prediction[,1],
-      plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="MARS",opt.methods=opt.methods,
-            weight=out$dat$ma$train.weights,out=out)
-      out$mods$auc.output<-auc.output
-
-    if(!debug.mode) {sink();cat("Progress:70%\n");flush.console();sink(logname,append=T)} else cat("70%\n")
-    
-    # Response curves #
-
-    if(is.null(responseCurveForm)){
-    responseCurveForm<-0}    
-    
-    if(debug.mode | responseCurveForm=="pdf"){
-        nvar <- nrow(out$mods$summary)
-        pcol <- min(ceiling(sqrt(nvar)),4)
-        prow <- min(ceiling(nvar/pcol),3)
-        r.curves <- try(mars.plot(fit,plot.layout=c(prow,pcol),file.name=paste(bname,"_response_curves.pdf",sep="")))
-
-        } else r.curves<-try(mars.plot(fit,plot.it=F))
-        
-        if(class(r.curves)=="try-error") stop(paste("ERROR: problem fitting response curves",r.curves))
-
-        pred.fct<-pred.mars
-
-     assign("out",out,envir=.GlobalEnv)
-
- save.image(paste(output.dir,"modelWorkspace",sep="\\"))
-    t4 <- unclass(Sys.time())
-    cat("\nfinished with final model summarization, t=",round(t4-t3,2),"sec\n");flush.console()
-    if(!debug.mode) {sink();cat("Progress:80%\n");flush.console();sink(logname,append=T)} else cat("70%\n")   
-    # Make .tif of predictions #
-
-    if(out$input$make.p.tif==T | out$input$make.binary.tif==T){
-        if((n.var <- nrow(out$mods$summary))<1){
-            mssg <- "Error producing geotiff output:  null model selected by stepwise procedure - pointless to make maps"
-            class(mssg)<-"try-error"
-            } else {
-            cat("\nproducing prediction maps...","\n","\n");flush.console()
-            mssg <- proc.tiff(model=out$mods$final.mod,vnames=names(out$dat$ma$ma)[-1],
-                tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=pred.mars,factor.levels=out$dat$ma$factor.levels,make.binary.tif=make.binary.tif,
-                thresh=out$mods$auc.output$thresh,make.p.tif=make.p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
-                outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50.0,NAval=-3000,
-                fnames=out$dat$tif.names,logname=logname,out=out)     #"brt.prob.map.tif"
-            }
-
-        if(class(mssg)=="try-error") stop(paste("Error producing prediction maps:",mssg))
-         else {
-            if(make.p.tif) out$mods$tif.output$prob <- paste(out$dat$bname,"_prob_map.tif",sep="")
-            if(make.binary.tif) out$mods$tif.output$bin <- paste(out$dat$bname,"_bin_map.tif",sep="")
-            t5 <- unclass(Sys.time())
-            cat("\nfinished with prediction maps, t=",round(t5-t4,2),"sec\n");flush.console()
-          }
-        }
-    if(!debug.mode) {sink();cat("Progress:90%\n");flush.console();sink(logname,append=T)} else cat("90%\n")
-
-     # Evaluation Statistics on Test Data#
-
-    if(!is.null(out$dat$ma$ma.test)) Eval.Stat<-EvaluationStats(out,thresh=auc.output$thresh,train=out$dat$ma$ma,
-          train.pred=mars.predict(fit,out$dat$ma$ma)$prediction[,1],opt.methods)
-    
-
-    if(debug.mode) assign("out",out,envir=.GlobalEnv)
-
-    
-    cat(paste("\ntotal time=",round((unclass(Sys.time())-t0)/60,2),"min\n\n\n",sep=""))
-    if(!debug.mode) {
-        sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))
-        cat("Progress:100%\n");flush.console()
-
-        } else #unlink(outfile)
-
-    if(debug.mode) assign("fit",out$mods$final.mod,envir=.GlobalEnv)
-    invisible(out)
-    }
-################################################################################
-###########          End fit.mars.fct       ####################################
-
-pred.mars <- function(model,x) {
-    # retrieve key items from the global environment #
-    # make predictionss.
-    y <- rep(NA,nrow(x))
-    y[complete.cases(x)] <- as.vector(mars.predict(model,x[complete.cases(x),])$prediction[,1])
-
-#if(sum(is.na(x))/dim(x)[2]!=sum(is.na(y)))
-#h<-is.na(x)
-#h<-apply(h,1,sum)
-#h=h/35
-#f<-is.na(y)
-#which((h-f)!=0,arr.ind=TRUE)
-#b<-cbind(x[which((h-f)!=0,arr.ind=TRUE),],y[which((h-f)!=0,arr.ind=TRUE)])
-
-#which(is.na(y)  
-    # encode missing values as -1.
-    y[is.na(y)]<- NaN
-    
-    # return predictions.
-    return(y)
-    }
-
-logit <- function(x) 1/(1+exp(-x))
-
-file_path_as_absolute <- function (x){
-    if (!file.exists(epath <- path.expand(x))) 
-        stop(gettextf("file '%s' does not exist", x), domain = NA)
-    cwd <- getwd()
-    on.exit(setwd(cwd))
-    if (file_test("-d", epath)) {
-        setwd(epath)
-        getwd()
-    }
-    else {
-        setwd(dirname(epath))
-        file.path(getwd(), basename(epath))
-    }
-}
-#file_path_as_absolute(".")
-
-
-
-get.cov.names <- function(model){
-    return(attr(terms(formula(model)),"term.labels"))
-    }
-
-
-check.dir <- function(dname){
-    if(is.null(dname)) dname <- getwd()
-    dname <- gsub("[\\]","/",dname)
-    end.char <- substr(dname,nchar(dname),nchar(dname))
-    if(end.char == "/") dname <- substr(dname,1,nchar(dname)-1)
-    exist <- suppressWarnings(as.numeric(file.access(dname,mode=0))==0) # -1 if bad, 0 if ok #
-    if(exist) dname <- file_path_as_absolute(dname)
-    readable <- suppressWarnings(as.numeric(file.access(dname,mode=4))==0) # -1 if bad, 0 if ok #
-    writable <- suppressWarnings(as.numeric(file.access(dname,mode=2))==0) # -1 if bad, 0 if ok #
-    return(list(dname=dname,exist=exist,readable=readable,writable=writable))
-    }
-
-
-get.image.info <- function(image.names){
-    # this function creates a data.frame with summary image info for a set of images #
-    require(rgdal)
-    n.images <- length(image.names)
-
-    full.names <- image.names
-    out <- data.frame(image=full.names,available=rep(F,n.images),size=rep(NA,n.images),
-        type=factor(rep("unk",n.images),levels=c("asc","envi","tif","unk")))
-    out$type[grep(".tif",image.names)]<-"tif"
-    out$type[grep(".asc",image.names)]<-"asc"
-    for(i in 1:n.images){
-        if(out$type[i]=="tif"){
-            x <-try(GDAL.open(full.names[1],read.only=T))
-            suppressMessages(try(GDAL.close(x)))
-            if(class(x)!="try-error") out$available[i]<-T
-            x<-try(file.info(full.names[i]))
-        } else {
-            x<-try(file.info(full.names[i]))
-            if(!is.na(x$size)) out$available[i]<-T
-        }
-        if(out$available[i]==T){
-            out$size[i]<-x$size
-            if(out$type[i]=="unk"){
-                # if extension not known, look for envi .hdr file in same directory #
-                if(file.access(paste(file_path_sans_ext(full.names[i]),".hdr",sep=""))==0) 
-                    out$type[i]<-"envi"
-                }
-        }
-    }
-    return(out)
-}
-
 ###########################################################################################
-#  The following functions are from Elith et al. 
+#  The following functions are from Elith et al.
 ###########################################################################################
 
 "calc.deviance" <-
@@ -405,15 +14,15 @@ function(obs.values, fitted.values, weights = rep(1,length(obs.values)), family=
 #
 #
 
-if (length(obs.values) != length(fitted.values)) 
+if (length(obs.values) != length(fitted.values))
    stop("observations and predictions must be of equal length")
 
 y_i <- obs.values
 
 u_i <- fitted.values
- 
+
 if (family == "binomial" | family == "bernoulli") {
- 
+
    deviance.contribs <- (y_i * log(u_i)) + ((1-y_i) * log(1 - u_i))
    deviance <- -2 * sum(deviance.contribs * weights)
 
@@ -433,7 +42,7 @@ if (family == "laplace") {
 if (family == "gaussian") {
     deviance <- sum((y_i - u_i) * (y_i - u_i))
     }
-    
+
 
 
 if (calc.mean) deviance <- deviance/length(obs.values)
@@ -448,7 +57,7 @@ function(obs, preds, family = family)
 #
 # j elith/j leathwick 17th March 2005
 # calculates calibration statistics for either binomial or count data
-# but the family argument must be specified for the latter 
+# but the family argument must be specified for the latter
 # a conditional test for the latter will catch most failures to specify
 # the family
 #
@@ -486,7 +95,7 @@ return(calibration.result)
 }
 
 "mars.contribs" <-
-function (mars.glm.object,sp.no = 1, verbose = TRUE) 
+function (mars.glm.object,sp.no = 1, verbose = TRUE)
 {
 
 # j leathwick/j elith August 2006
@@ -495,7 +104,7 @@ function (mars.glm.object,sp.no = 1, verbose = TRUE)
 #
 # takes a mars/glm model and uses the updated mars export table
 # stored as the second list item from mars.binomial
-# assessing the contribution of the fitted functions, 
+# assessing the contribution of the fitted functions,
 # amalgamating terms for variables as required
 #
 # amended 29/9/04 to pass original mars model details
@@ -528,7 +137,7 @@ function (mars.glm.object,sp.no = 1, verbose = TRUE)
        spp.names[sp.no]),quote=F)
 
   n.bfs <- length(m.table[,1])
- 
+
   delta.deviance <- rep(0,n.preds)
   df <- rep(0,n.preds)
   signif <- rep(0,n.preds)
@@ -553,17 +162,17 @@ function (mars.glm.object,sp.no = 1, verbose = TRUE)
       if(dim(x.data.new)[2]==0){
            new.model <- glm(y.data[,sp.no] ~ 1, family = family)
            }else new.model <- glm(y.data[,sp.no] ~ ., data=x.data.new, family = family)
-           
+
       comparison <- anova(glm.model,new.model,test="Chisq")
 
       df[i] <- comparison[2,3]
       delta.deviance[i] <- zapsmall(comparison[2,4],4)
       signif[i] <- zapsmall(comparison[2,5],6)
     }
-    
+
   }
 
-  rm(x.data,y.data,sp.no,pos=1)  # tidy up temporary files    
+  rm(x.data,y.data,sp.no,pos=1)  # tidy up temporary files
 
   #deviance.table <- as.data.frame(cbind(pred.names,delta.deviance,df,signif))
   #names(deviance.table) <- c("variable","delta_dev","deg. free.","p-value")
@@ -572,51 +181,51 @@ function (mars.glm.object,sp.no = 1, verbose = TRUE)
 }
 
 "mars.cv" <-
-function (mars.glm.object, nk = 10, sp.no = 1, prev.stratify = F) 
+function (mars.glm.object, nk = 10, sp.no = 1, prev.stratify = F)
 {
 #
 # j. leathwick/j. elith - August 2006
 #
 # version 3.1 - developed in R 2.3.1 using mda 0.3-1
 #
-# function to perform k-fold cross validation 
+# function to perform k-fold cross validation
 # with full model perturbation for each subset
 #
 # requires mda library from Cran
 # requires functions mw and calibration
 #
 # takes a mars/glm object produced by mars.glm
-# and first assesses the full model, and then 
-# randomly subsets the dataset into nk folds and drops 
-# each subset in turn, fitting on remaining data 
+# and first assesses the full model, and then
+# randomly subsets the dataset into nk folds and drops
+# each subset in turn, fitting on remaining data
 # and predicting for withheld data
 #
 # caters for both single species and community models via the argument sp.no
 # for the first, sp.no can be left on its default of 1
 # for community models, sp.no can be varied from 1 to n.spp
 #
-# modified 29/9/04 to 
+# modified 29/9/04 to
 #   1. return mars analysis details for audit trail
 #   2. calculate roc and calibration on subsets as well as full data
-#      returning the mean and se of the ROC scores 
+#      returning the mean and se of the ROC scores
 #      and the mean calibration statistics
 #
 # modified 8/10/04 to add prevalence stratification
 # modified 7th January to test for binomial family and return if not
-# 
+#
 # updated 15th March to cater for both binomial and poisson families
 #
 # updated 16th June 2005 to calculate residual deviance
 #
 
   data <- mars.glm.object$mars.call$dataframe    #get the dataframe name
-  dataframe.name <- deparse(substitute(data))   
-    
+  dataframe.name <- deparse(substitute(data))
+
   data <- as.data.frame(eval(parse(text=data)))   #and now the data
   n.cases <- nrow(data)
 
   mars.call <- mars.glm.object$mars.call          #and the mars call details
-  mars.x <- mars.call$mars.x    
+  mars.x <- mars.call$mars.x
   mars.y <- mars.call$mars.y
   mars.degree <- mars.call$degree
   mars.penalty <- mars.call$penalty
@@ -630,7 +239,7 @@ function (mars.glm.object, nk = 10, sp.no = 1, prev.stratify = F)
     print(paste("exceeds the total number of species, which is ",n.spp),quote=F)
     return()
   }
-  
+
   xdat <- as.data.frame(data[,mars.x])
   xdat <- mars.new.dataframe(xdat)[[1]]
   ydat <- mars.glm.object$y.values[,sp.no]
@@ -649,26 +258,26 @@ function (mars.glm.object, nk = 10, sp.no = 1, prev.stratify = F)
   y_i <- ydat
 
   if (family == "binomial") {
-    full.resid.deviance <- calc.deviance(y_i,u_i, weights = site.weights, family="binomial") 
+    full.resid.deviance <- calc.deviance(y_i,u_i, weights = site.weights, family="binomial")
     full.test <- roc(y_i, u_i)
     full.calib <- calibration(y_i, u_i)
   }
 
   if (family=="poisson") {
     full.resid.deviance <- calc.deviance(y_i,u_i, weights = site.weights, family="poisson")
-    full.test <- cor(y_i, u_i) 
+    full.test <- cor(y_i, u_i)
     full.calib <- calibration(y_i, u_i, family = "poisson")
   }
 
 # set up for results storage
-  
+
   subset.test <- rep(0,nk)
   subset.calib <- as.data.frame(matrix(0,ncol=5,nrow=nk))
   names(subset.calib) <- c("intercept","slope","test1","test2","test3")
   subset.resid.deviance <- rep(0,nk)
 
 # now setup for withholding random subsets
-    
+
   pred.values <- rep(0, n.cases)
   fitted.values <- rep(0, n.cases)
 
@@ -694,7 +303,7 @@ function (mars.glm.object, nk = 10, sp.no = 1, prev.stratify = F)
     selector <- rep(seq(1, nk, by = 1), length = n.cases)
     selector <- selector[order(runif(n.cases, 1, 100))]
   }
- 
+
   print("", quote = FALSE)
   print("Creating predictions for subsets...", quote = F)
 
@@ -707,7 +316,7 @@ function (mars.glm.object, nk = 10, sp.no = 1, prev.stratify = F)
 
     # fit new mars model
 
-    mars.object <- mars(y = species.subset, x = predictor.subset, 
+    mars.object <- mars(y = species.subset, x = predictor.subset,
       degree = mars.degree, penalty = mars.penalty)
 
     # and extract basis functions
@@ -721,7 +330,7 @@ function (mars.glm.object, nk = 10, sp.no = 1, prev.stratify = F)
 
     mars.binomial <- glm(species.subset ~ .,data=bf.data[,-1], family= family, maxit = 100)
 
-    pred.basis.functions <- as.data.frame(mda:::model.matrix.mars(mars.object, 
+    pred.basis.functions <- as.data.frame(mda:::model.matrix.mars(mars.object,
       xdat[pred.mask, ]))
 
     #now name the bfs to match the approach used in mars.binomial
@@ -730,66 +339,66 @@ function (mars.glm.object, nk = 10, sp.no = 1, prev.stratify = F)
 
     # and form predictions for them and evaluate performance
 
-    fitted.values[pred.mask] <- predict(mars.binomial, 
+    fitted.values[pred.mask] <- predict(mars.binomial,
       pred.basis.functions, type = "response")
 
     y_i <- ydat[pred.mask]
-    u_i <- fitted.values[pred.mask]  
+    u_i <- fitted.values[pred.mask]
     weights.subset <- site.weights[pred.mask]
 
     if (family == "binomial") {
-      subset.resid.deviance[i] <- calc.deviance(y_i,u_i,weights = weights.subset, family="binomial") 
+      subset.resid.deviance[i] <- calc.deviance(y_i,u_i,weights = weights.subset, family="binomial")
       subset.test[i] <- roc(y_i,u_i)
       subset.calib[i,] <- calibration(y_i, u_i)
     }
 
     if (family=="poisson"){
-      subset.resid.deviance[i] <- calc.deviance(y_i,u_i,weights = weights.subset, family="poisson") 
-      subset.test[i] <- cor(y_i, u_i) 
+      subset.resid.deviance[i] <- calc.deviance(y_i,u_i,weights = weights.subset, family="poisson")
+      subset.test[i] <- cor(y_i, u_i)
       subset.calib[i,] <- calibration(y_i, u_i, family = family)
     }
   }
- 
+
   cat("","\n")
 
 # tidy up temporary files
 
-  rm(species.subset,predictor.subset,bf.data,pos=1) 
+  rm(species.subset,predictor.subset,bf.data,pos=1)
 
 # and assemble results for return
 
 #  mars.detail <- list(dataframe = dataframe.name,
-#    x = mars.x, x.names = names(xdat), 
-#    y = mars.y, y.names = names(data)[mars.y], 
+#    x = mars.x, x.names = names(xdat),
+#    y = mars.y, y.names = names(data)[mars.y],
 #    target.sp = target.sp, degree=mars.degree, penalty = mars.penalty, family = family)
 
   y_i <- ydat
   u_i <- fitted.values
 
   if (family=="binomial") {
-    cv.resid.deviance <- calc.deviance(y_i,u_i,weights = site.weights, family="binomial") 
+    cv.resid.deviance <- calc.deviance(y_i,u_i,weights = site.weights, family="binomial")
     cv.test <- roc(y_i, u_i)
     cv.calib <- calibration(y_i, u_i)
   }
 
   if (family=="poisson"){
-    cv.resid.deviance <- calc.deviance(y_i,u_i,weights = site.weights, family="poisson") 
-    cv.test <- cor(y_i, u_i) 
+    cv.resid.deviance <- calc.deviance(y_i,u_i,weights = site.weights, family="poisson")
+    cv.test <- cor(y_i, u_i)
     cv.calib <- calibration(y_i, u_i, family = "poisson")
   }
 
   subset.test.mean <- mean(subset.test)
   subset.test.se <- sqrt(var(subset.test))/sqrt(nk)
 
-  subset.test <- list(test.scores = subset.test, subset.test.mean = subset.test.mean, 
+  subset.test <- list(test.scores = subset.test, subset.test.mean = subset.test.mean,
     subset.test.se = subset.test.se)
 
   subset.calib.mean <- apply(subset.calib[,c(1:2)],2,mean)
   names(subset.calib.mean) <- names(subset.calib)[c(1:2)] #mean only of parameters
 
-  subset.calib <- list(subset.calib = subset.calib, 
+  subset.calib <- list(subset.calib = subset.calib,
     subset.calib.mean = subset.calib.mean)
-    
+
   subset.deviance.mean <- mean(subset.resid.deviance)
   subset.deviance.se <- sqrt(var(subset.resid.deviance))/sqrt(nk)
 
@@ -797,18 +406,18 @@ function (mars.glm.object, nk = 10, sp.no = 1, prev.stratify = F)
     subset.deviance.se = subset.deviance.se)
 
   return(list(mars.call = mars.call, full.resid.deviance = full.resid.deviance,
-    full.test = full.test, full.calib = full.calib, pooled.deviance = cv.resid.deviance, pooled.test = cv.test, 
+    full.test = full.test, full.calib = full.calib, pooled.deviance = cv.resid.deviance, pooled.test = cv.test,
     pooled.calib = cv.calib,subset.deviance = subset.deviance, subset.test = subset.test, subset.calib = subset.calib))
 }
 
 "mars.export" <-
-function (object,lineage) 
+function (object,lineage)
 {
 #
 # j leathwick/j elith August 2006
 #
 # takes a mars model fitted using library mda
-# and extracts the basis functions and their 
+# and extracts the basis functions and their
 # coefficients, returning them as a table
 # caters for models with degree up to 2
 #
@@ -869,7 +478,7 @@ if(nterms>1){
       }
     }
     }
-  mars.export.table <- data.frame(names1, types1, levels1, signs1, cuts1, 
+  mars.export.table <- data.frame(names1, types1, levels1, signs1, cuts1,
        names2, types2, levels2, signs2, cuts2, coefs)
 
   return(mars.export.table)
@@ -891,8 +500,8 @@ function (data,                         # the input data frame
 # version 3.1 - developed in R 2.3.1 using mda 0.3-1
 #
 # calculates a mars/glm object in which basis functions are calculated
-# using an initial mars model with single or multiple responses 
-# data for individual species are then fitted as glms using the 
+# using an initial mars model with single or multiple responses
+# data for individual species are then fitted as glms using the
 # common set of mars basis functions with results returned as a list
 #
 # takes as input a dataset and args selecting x and y variables, and degree of interaction
@@ -950,7 +559,7 @@ function (data,                         # the input data frame
   cat("fitting initial mars model for",n.spp,"responses","\n")
   cat("followed by a glm model with a family of",family,"\n")
 
-  mars.object <- mars(x = xdat, y = ydat, degree = mars.degree, w = site.weights, 
+  mars.object <- mars(x = xdat, y = ydat, degree = mars.degree, w = site.weights,
        wp = spp.weights, penalty = penalty)
   if(length(mars.object$coefficients)==1) stop("MARS has fit the null model (intercept only) \n new predictors are required")
   bf.data <- as.data.frame(eval(mars.object$x))
@@ -966,14 +575,14 @@ function (data,                         # the input data frame
   rownames(p.values) <- paste("bf", 1:n.bfs, sep = "")
   colnames(p.values) <- names(ydat)
 
-# now cycle through the species fitting glm models 
+# now cycle through the species fitting glm models
 
   cat("fitting glms for individual responses","\n")
 
   for (i in 1:n.spp) {
 
     cat(names(ydat)[i],"\n")
-    model.glm <- glm(ydat[, i] ~ ., data = bf.data, weights = site.weights, 
+    model.glm <- glm(ydat[, i] ~ ., data = bf.data, weights = site.weights,
   	  family = family, maxit = 100)
 
 # update the coefficients and other results
@@ -1005,9 +614,9 @@ function (data,                         # the input data frame
 
   weights = list(site.weights = site.weights, spp.weights = spp.weights)
 
-  mars.detail <- list(dataframe = dataframe.name, mars.x = mars.x, 
-    predictor.base.names = predictor.base.names, predictor.dummy.names = predictor.dummy.names, 
-    mars.y = mars.y, y.names = names(ydat), degree=mars.degree, penalty = penalty, 
+  mars.detail <- list(dataframe = dataframe.name, mars.x = mars.x,
+    predictor.base.names = predictor.base.names, predictor.dummy.names = predictor.dummy.names,
+    mars.y = mars.y, y.names = names(ydat), degree=mars.degree, penalty = penalty,
     family = family)
 
   rm(xdat,ydat,pos=1)           #finally, clean up the temporary dataframes
@@ -1018,14 +627,14 @@ function (data,                         # the input data frame
 }
 
 "mars.new.dataframe" <-
-function (input.data) 
+function (input.data)
 {
 #
 # j leathwick, j elith - August 2006
 #
 # version 3.1 - developed in R 2.3.1 using mda 0.3-1
 #
-# takes an input data frame and checks for factor variables 
+# takes an input data frame and checks for factor variables
 # converting these to dummy variables, one each for each factor level
 # returning it for use with mars.glm so that factor vars can be included
 # in a mars analysis
@@ -1040,7 +649,7 @@ function (input.data)
   for (i in 1:ncol(input.data)) {  #first transfer the vector variables
     if (is.vector(input.data[,i])) {
       if (n == 1) {
-        output.data <- as.data.frame(input.data[,i]) 
+        output.data <- as.data.frame(input.data[,i])
         names.list <- names(input.data)[i]
         var.type <- "vector"
         factor.level <- "na"
@@ -1073,7 +682,7 @@ function (input.data)
   lineage <- data.frame(names(output.data),names.list,var.type,factor.level)
   for (i in 1:4) lineage[,i] <- as.character(lineage[,i])
   names(lineage) <- c("full.name","base.name","type","level")
-   
+
   return(list(dataframe = output.data, lineage = lineage))
 }
 
@@ -1091,8 +700,8 @@ function (mars.glm.object,  #the input mars object
 # version 3.1 - developed in R 2.3.1 using mda 0.3-1
 #
 # requires mars.export of leathwick/elith
-# 
-# takes a mars or mars/glm model and either 
+#
+# takes a mars or mars/glm model and either
 # creates a mars export table (vanilla mars object)
 # and works from this or uses the updated mars export table
 # stored as the first list item from mars.binomial
@@ -1107,7 +716,7 @@ function (mars.glm.object,  #the input mars object
   max.plots <- plot.layout[1] * plot.layout[2]
   if(plot.it){ #aks
       if (is.na(file.name)) {
-        use.windows = TRUE 
+        use.windows = TRUE
         windows(width = 11, height = 8, record=T) #AKS
         par(mfrow = plot.layout) #AKS
                }
@@ -1144,7 +753,7 @@ function (mars.glm.object,  #the input mars object
   spp.names <- names(m.table)[(10+1):(10+n.spp)]
 
   if (sp.no == 0) {
-    wanted.species <- seq(1:n.spp) 
+    wanted.species <- seq(1:n.spp)
   }
   else {
     wanted.species <- sp.no
@@ -1157,7 +766,7 @@ function (mars.glm.object,  #the input mars object
   if(sum(factor.filter>1)) {
   xrange[,factor.filter] <- sapply(xdat[,factor.filter], range)
   } else  xrange[,factor.filter]<-range(xdat[,factor.filter])
-  
+
   for (i in wanted.species) {
     n.pages <- 1
     plotit <- rep(TRUE, n.bfs)
@@ -1167,10 +776,10 @@ function (mars.glm.object,  #the input mars object
     for (j in 2:n.bfs) {
       if (m.table$names2[j] == "null") {
         if (plotit[j]) {
-          varno <- pmatch(as.character(m.table$names1[j]), 
+          varno <- pmatch(as.character(m.table$names1[j]),
           names(xdat))
           if (factor.filter[varno]) {
-            Xi <- seq(xrange[1, varno], xrange[2, varno], 
+            Xi <- seq(xrange[1, varno], xrange[2, varno],
                length = 100)
             bf <- pmax(0, m.table$signs1[j] * (Xi - m.table$cuts1[j]))
             bf <- bf * m.table[j, i + 10]
@@ -1187,7 +796,7 @@ function (mars.glm.object,  #the input mars object
             for (k in ((j + 1):n.bfs)) {
               if (m.table$names1[j] == m.table$names1[k] & m.table$names2[k] == "null") {
                     if (factor.filter[varno]) {
-                      bf.add <- pmax(0, m.table$signs1[k] * 
+                      bf.add <- pmax(0, m.table$signs1[k] *
                           (Xi - m.table$cuts1[k]))
                       bf.add <- bf.add * m.table[k, i + 10]
                       bf <- bf + bf.add
@@ -1214,7 +823,7 @@ function (mars.glm.object,  #the input mars object
               if(plot.it) plot(factor.table$levels, factor.table$coefficients, xlab = names(xdat)[varno]) #aks
               r.curves$preds[[cntr]] <- factor.table$levels #aks
               r.curves$resp[[cntr]] <- factor.table$coefficients #aks
-              
+
             }
             r.curves$names <- c(r.curves$names,names(xdat)[varno])  #aks
             cntr <- cntr + 1  #aks
@@ -1250,7 +859,7 @@ function (mars.glm.object,  #the input mars object
     #            par(mfrow = plot.layout)
     #          }
                 if(plot.it){
-                    persp(x = X1, y = X2, z = zmat, xlab = names(xdat)[varno1], 
+                    persp(x = X1, y = X2, z = zmat, xlab = names(xdat)[varno1],
                               ylab = names(xdat)[varno2], theta = 45, phi = 25) }
                 r.curves$preds[[cntr]] <- X1 #aks
                 r.curves$resp[[cntr]] <- apply(zmat,1,mean,na.rm=T) #aks
@@ -1258,7 +867,7 @@ function (mars.glm.object,  #the input mars object
                 } else {
                     r.curves$preds[[cntr]] <- NA #aks
                     r.curves$resp[[cntr]] <- NA #aks
-                    
+
                 }
         r.curves$names <- c(r.curves$names,names(xdat)[varno]) #aks
         cntr <- cntr + 1 #aks
@@ -1302,7 +911,7 @@ function(mars.glm.object,    # the input mars object
   max.plots <- plot.layout[1] * plot.layout[2]
 
   if (is.na(file.name)) {    #setup for windows or file output
-    use.windows = TRUE 
+    use.windows = TRUE
   }
   else {
     pdf(file.name, width=8, height = 11)
@@ -1317,7 +926,7 @@ function(mars.glm.object,    # the input mars object
   n.cases <- nrow(dat)
 
   mars.call <- mars.glm.object$mars.call	#and the mars call details
-  mars.x <- mars.call$mars.x    
+  mars.x <- mars.call$mars.x
   mars.y <- mars.call$mars.y
   family <- mars.call$family
 
@@ -1333,7 +942,7 @@ function(mars.glm.object,    # the input mars object
   spp.names <- names(dat)[mars.y]
 
   if (sp.no == 0) {
-    wanted.species <- seq(1:n.spp) 
+    wanted.species <- seq(1:n.spp)
     }
   else {
     wanted.species <- sp.no
@@ -1344,7 +953,7 @@ function(mars.glm.object,    # the input mars object
     if (mask.presence) {
 	mask <- ydat[,i] == 1 }
     else {
-      mask <- rep(TRUE, length = n.cases) 
+      mask <- rep(TRUE, length = n.cases)
     }
 
     robust.max.fit <- approx(ppoints(fitted.values[mask,i]), sort(fitted.values[mask,i]), 0.99) #find 99%ile value
@@ -1356,7 +965,7 @@ function(mars.glm.object,    # the input mars object
         par(mfrow = plot.layout)
         par(cex = 0.5)
       }
-	nplots <- nplots + 1    
+	nplots <- nplots + 1
       if (is.vector(xdat[,j])) wt.mean <- mean((xdat[mask, j] * fitted.values[mask, i]^5)/mean(fitted.values[mask, i]^5))
         else wt.mean <- 0
 	if (use.factor) {
@@ -1369,7 +978,7 @@ function(mars.glm.object,    # the input mars object
 	}
 	else {
 	  if (family == "binomial") {
-	    plot(xdat[mask, j], fitted.values[mask,i], xlab = pred.names[j], ylab = "fitted values", 
+	    plot(xdat[mask, j], fitted.values[mask,i], xlab = pred.names[j], ylab = "fitted values",
 					ylim = c(0, 1))
         }
 	  else {
@@ -1377,7 +986,7 @@ function(mars.glm.object,    # the input mars object
         }
 	}
 	abline(h = (0.333 * robust.max.fit$y), lty = 2.)
-	if (nplots == 1) { 
+	if (nplots == 1) {
   	  title(paste(spp.names[i], ", wtm = ", zapsmall(wt.mean, 4.)))}
 	else {
 	  title(paste("wtm = ", zapsmall(wt.mean, 4.)))}
@@ -1388,7 +997,7 @@ function(mars.glm.object,    # the input mars object
 }
 
 "mars.predict" <-
-function (mars.glm.object,new.data) 
+function (mars.glm.object,new.data)
 {
 #
 # j leathwick, j elith - August 2006
@@ -1396,8 +1005,8 @@ function (mars.glm.object,new.data)
 # version 3.1 - developed in R 2.3.1 using mda 0.3-1
 #
 # calculates a mars/glm object in which basis functions are calculated
-# using an initial mars model with single or multiple responses 
-# data for individual species are then fitted as glms using the 
+# using an initial mars model with single or multiple responses
+# data for individual species are then fitted as glms using the
 # common set of mars basis functions with results returned as a list
 #
 # takes as input a dataset and args selecting x and y variables, and degree of interaction
@@ -1433,7 +1042,7 @@ function (mars.glm.object,new.data)
   base.names <- names(x.temp)
 
   xdat <- mars.new.dataframe(x.temp)[[1]]
-   
+
   ydat <- as.data.frame(base.data[, mars.y])
   names(ydat) <- names(base.data)[mars.y]
 
@@ -1449,7 +1058,7 @@ function (mars.glm.object,new.data)
   for (i in 1:length(base.names)) {
 
     name <- base.names[i]
-   
+
     if (!(name %in% new.names)) {
       print(paste("Variable ",name," missing from new data",sep=""),quote = FALSE)  #aks
       return()
@@ -1469,7 +1078,7 @@ function (mars.glm.object,new.data)
   print(paste("re-fitting initial mars model for",n.spp,"responses"),quote = FALSE)
   print(paste("using glm family of",family),quote = FALSE)
 
-  #mars.fit <- mars(x = xdat, y = ydat, degree = mars.degree, w = site.weights, 
+  #mars.fit <- mars(x = xdat, y = ydat, degree = mars.degree, w = site.weights,
   #  wp = spp.weights, penalty = penalty)
 
   mars.fit <- mars.glm.object$mars.object  #AKS
@@ -1484,7 +1093,7 @@ function (mars.glm.object,new.data)
   new.bf.data <- as.data.frame(new.bf.data[,-1])
   names(new.bf.data) <- bf.names[-1]
 
-# now cycle through the species fitting glm models 
+# now cycle through the species fitting glm models
 
   print("fitting glms for individual responses", quote = F)
 
@@ -1496,19 +1105,19 @@ function (mars.glm.object,new.data)
   for (i in 1:n.spp) {
 
     print(names(ydat)[i], quote = FALSE)
-    model.glm <- glm(ydat[, i] ~ ., data = old.bf.data, weights = site.weights, 
+    model.glm <- glm(ydat[, i] ~ ., data = old.bf.data, weights = site.weights,
       family = family, maxit = 100)
     temp <- predict.glm(model.glm,new.bf.data,type="response",se.fit=TRUE)
     prediction[,i] <- temp[[1]]
     standard.errors[,i] <- temp[[2]]
-  
+
     }
-   
+
   return(list("prediction"=prediction,"ses"=standard.errors))
 }
 
 "roc" <-
-function (obsdat, preddat) 
+function (obsdat, preddat)
 {
 # code adapted from Ferrier, Pearce and Watson's code, by J.Elith
 #
@@ -1520,73 +1129,100 @@ function (obsdat, preddat)
 # Pearce, J. & Ferrier, S. (2000) Evaluating the predictive performance
 # of habitat models developed using logistic regression.
 # Ecological Modelling, 133, 225-245.
-# this is the non-parametric calculation for area under the ROC curve, 
+# this is the non-parametric calculation for area under the ROC curve,
 # using the fact that a MannWhitney U statistic is closely related to
 # the area
 #
-    if (length(obsdat) != length(preddat)) 
+    if (length(obsdat) != length(preddat))
         stop("obs and preds must be equal lengths")
     n.x <- length(obsdat[obsdat == 0])
     n.y <- length(obsdat[obsdat == 1])
     xy <- c(preddat[obsdat == 0], preddat[obsdat == 1])
     rnk <- rank(xy)
-    wilc <- ((n.x * n.y) + ((n.x * (n.x + 1))/2) - sum(rnk[1:n.x]))/(n.x * 
+    wilc <- ((n.x * n.y) + ((n.x * (n.x + 1))/2) - sum(rnk[1:n.x]))/(n.x *
         n.y)
     return(round(wilc, 4))
 }
 
+pred.mars <- function(model,x) {
+    # retrieve key items from the global environment #
+    # make predictionss.
+    y <- rep(NA,nrow(x))
+    y[complete.cases(x)] <- as.vector(mars.predict(model,x[complete.cases(x),])$prediction[,1])
 
+#which(is.na(y)
+    # encode missing values as -1.
+    y[is.na(y)]<- NaN
 
-#set defaults
-make.p.tif=T
-make.binary.tif=T
-mars.degree=1
-mars.penalty=2
-script.name="mars.r"
-opt.methods=2
-save.model=TRUE
-MESS=FALSE
-
-# Interpret command line argurments #
-# Make Function Call #
-Args <- commandArgs(trailingOnly=FALSE)
-
-    for (i in 1:length(Args)){
-     if(Args[i]=="-f") ScriptPath<-Args[i+1]
-     }
-
-    print(Args)
-    for (arg in Args) {
-    	argSplit <- strsplit(arg, "=")
-    	argSplit[[1]][1]
-    	argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="c") csv <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="o") output <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="mpt") make.p.tif <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="deg") mars.degree <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="pen") mars.penalty <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="om")  opt.methods <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="savm")  save.model <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="mes")  MESS <- argSplit[[1]][2]
+    # return predictions.
+    return(y)
     }
-	print(csv)
-	print(output)
-	print(responseCol)
 
-ScriptPath<-dirname(ScriptPath)
-source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
-print(ScriptPath)
+logit <- function(x) 1/(1+exp(-x))
 
-make.p.tif<-as.logical(make.p.tif)
-make.binary.tif<-as.logical(make.binary.tif)
-save.model<-make.p.tif | make.binary.tif
-opt.methods<-as.numeric(opt.methods)
-MESS<-as.logical(MESS)
+file_path_as_absolute <- function (x){
+    if (!file.exists(epath <- path.expand(x)))
+        stop(gettextf("file '%s' does not exist", x), domain = NA)
+    cwd <- getwd()
+    on.exit(setwd(cwd))
+    if (file_test("-d", epath)) {
+        setwd(epath)
+        getwd()
+    }
+    else {
+        setwd(dirname(epath))
+        file.path(getwd(), basename(epath))
+    }
+}
 
-fit.mars.fct(ma.name=csv,
-        tif.dir=NULL,output.dir=output,
-        response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
-            mars.degree=mars.degree,mars.penalty=mars.penalty,debug.mode=F,responseCurveForm="pdf",
-            script.name="mars.r",save.model=save.model,opt.methods=as.numeric(opt.methods),MESS=MESS)
+get.cov.names <- function(model){
+    return(attr(terms(formula(model)),"term.labels"))
+    }
+
+
+check.dir <- function(dname){
+    if(is.null(dname)) dname <- getwd()
+    dname <- gsub("[\\]","/",dname)
+    end.char <- substr(dname,nchar(dname),nchar(dname))
+    if(end.char == "/") dname <- substr(dname,1,nchar(dname)-1)
+    exist <- suppressWarnings(as.numeric(file.access(dname,mode=0))==0) # -1 if bad, 0 if ok #
+    if(exist) dname <- file_path_as_absolute(dname)
+    readable <- suppressWarnings(as.numeric(file.access(dname,mode=4))==0) # -1 if bad, 0 if ok #
+    writable <- suppressWarnings(as.numeric(file.access(dname,mode=2))==0) # -1 if bad, 0 if ok #
+    return(list(dname=dname,exist=exist,readable=readable,writable=writable))
+    }
+
+
+get.image.info <- function(image.names){
+    # this function creates a data.frame with summary image info for a set of images #
+    require(rgdal)
+    n.images <- length(image.names)
+
+    full.names <- image.names
+    out <- data.frame(image=full.names,available=rep(F,n.images),size=rep(NA,n.images),
+        type=factor(rep("unk",n.images),levels=c("asc","envi","tif","unk")))
+    out$type[grep(".tif",image.names)]<-"tif"
+    out$type[grep(".asc",image.names)]<-"asc"
+    for(i in 1:n.images){
+        if(out$type[i]=="tif"){
+            x <-try(GDAL.open(full.names[1],read.only=T))
+            suppressMessages(try(GDAL.close(x)))
+            if(class(x)!="try-error") out$available[i]<-T
+            x<-try(file.info(full.names[i]))
+        } else {
+            x<-try(file.info(full.names[i]))
+            if(!is.na(x$size)) out$available[i]<-T
+        }
+        if(out$available[i]==T){
+            out$size[i]<-x$size
+            if(out$type[i]=="unk"){
+                # if extension not known, look for envi .hdr file in same directory #
+                if(file.access(paste(file_path_sans_ext(full.names[i]),".hdr",sep=""))==0)
+                    out$type[i]<-"envi"
+                }
+        }
+    }
+    return(out)
+}
+
+

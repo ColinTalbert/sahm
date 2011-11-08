@@ -102,9 +102,9 @@ ymax(RasterInfo) <- ymax(RasterInfo) + 0.5 * rs[2]
       MessRaster <- writeStart(MessRaster, filename=sub("bin","mess",outfile.bin), overwrite=TRUE)
       ModRaster <- writeStart(ModRaster, filename=sub("bin","MoD",outfile.bin), overwrite=TRUE)
       }
-
-temp <- data.frame(matrix(ncol=nvars,nrow=tr$nrows[1]*ncol(RasterInfo))) # temp data.frame.
-names(temp) <- vnames
+ browser()
+temp <- data.frame(matrix(ncol=nvars,nrow=tr$size*ncol(RasterInfo))) # temp data.frame.
+colnames(temp) <- vnames
 FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
   if((nvars-length(FactorInd))==0) MESS<-FALSE #turn this off if only one factor column was selected
     if(MESS) {
@@ -124,6 +124,7 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
 
   min.pred<-1
   max.pred<-0
+
   for (i in 1:tr$n) {
     strt <- c((i-1)*nrows,0)
      region.dims <- c(min(dims[1]-strt[1],nrows),dims[2])
@@ -132,12 +133,11 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
         } else {temp <- temp[1:(tr$nrows[i]*dims[2]),]
                       if(MESS) pred.rng<-pred.rng[1:(tr$nrows[i]*dims[2]),]
                 }
-
          # for the last tile...
       for(k in 1:nvars) { # fill temp data frame
             if(is.null(dim(temp))){
-              temp<- getValuesBlock(raster(fullnames[k]), row=tr$row[i], nrows=tr$nrows[i])
-            } else {temp[,k]<- getValuesBlock(raster(fullnames[k]), row=tr$row[i], nrows=tr$nrows[i])
+              temp<- getValuesBlock(raster(fullnames[k]), row=tr$row[i], nrows=tr$size)
+            } else {temp[,k]<- getValuesBlock(raster(fullnames[k]), row=tr$row[i], nrows=tr$size)
                     }
                   if(MESS & !k%in%FactorInd){
                         pred.range<-out$dat$ma$ma[,c(match(sub(".tif","",basename(fullnames[k])),names(out$dat$ma$ma)))]
@@ -157,10 +157,9 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
                 }
             }
                    }}
-    ifelse(sum(complete.cases(temp))==0,  # does not calculate predictions if all predictors in the region are na
+    ifelse(sum(!is.na(temp))==0,  # does not calculate predictions if all predictors in the region are na
         preds<-matrix(data=NaN,nrow=region.dims[1],ncol=region.dims[2]),
         preds <- t(matrix(pred.fct(model,temp),ncol=dims[2],byrow=T)))
-
         min.pred<-min(na.omit(preds),min.pred)
         max.pred<-max(na.omit(preds),max.pred)
         preds[is.na(preds)]<-NAval

@@ -2,6 +2,7 @@ unit.test<-function(i,use.list,model.list,model,outpur.dir,rc){
   list.fct<-function(x,i) sum(!is.na(match(x=i,table=x)))
       valid.params<-which(unlist(lapply(use.list,list.fct,i=i))!=0,arr.ind=TRUE)
        Model.Out<-list()
+       if(model.list[[1]]$UnitTest==FALSE){
        Model.Out[[i]]<-data.frame(list("FctFailed"=rep(FALSE,times=length(valid.params)),
                               "PredictFailed"=rep(FALSE,times=length(valid.params)),
                               "NullDev"=rep(0,times=length(valid.params)),
@@ -10,6 +11,7 @@ unit.test<-function(i,use.list,model.list,model,outpur.dir,rc){
                               "ErrorMessage"=rep("No Error",times=length(valid.params))),row.names=valid.params)
 
                             class(Model.Out[[i]]$ErrorMessage)<-"character"
+                            }   else Model.Out<-list()
       if(length(valid.params)!=0){
       for(j in 1:length(valid.params)){
 
@@ -24,26 +26,30 @@ unit.test<-function(i,use.list,model.list,model,outpur.dir,rc){
                       if(Debug==FALSE) {call.fct<-paste("try(",call.fct,",silent=TRUE)",sep="")
                                       call.predict<-paste("try(",call.predict,")",sep="")
                      #so that we don't predict on an old copy in the next loop
-                     file.remove(paste(output.dir,"modelWorkspace",sep="/"))
+                     try(file.remove(paste(output.dir,"modelWorkspace",sep="/")))
                                         }
 
                   fct.output<-eval(parse(text=call.fct))
                     sink()
-                  pred.output<-eval(parse(text=call.predict))
-                    sink()
-                if(class(fct.output)=="try-error") {
-                Model.Out[[i]][j,1]=TRUE
-                Model.Out[[i]][j,6]=fct.output[1]
-                  }  else {
-                  Model.Out[[i]][j,1]=FALSE
-                  Model.Out[[i]][j,3]<-fct.output$mods$auc.output$null.dev
-                  Model.Out[[i]][j,4]<-fct.output$mods$auc.output$dev.fit
-                  Model.Out[[i]][j,5]<-fct.output$mods$auc.output$correlation
-                    }
-                if(class(pred.output)=="try-error") Model.Out[[i]][j,2]=TRUE
 
+                     if(model.list[[1]]$UnitTest==FALSE){
+                          if(class(fct.output)=="try-error") {
+                          Model.Out[[i]][j,1]=TRUE
+                          Model.Out[[i]][j,6]=fct.output[1]
+                            }  else {
+                                pred.output<-eval(parse(text=call.predict))
+                                sink()
+                            Model.Out[[i]][j,1]=FALSE
+                            Model.Out[[i]][j,3]<-fct.output$mods$auc.output$null.dev
+                            Model.Out[[i]][j,4]<-fct.output$mods$auc.output$dev.fit
+                            Model.Out[[i]][j,5]<-fct.output$mods$auc.output$correlation
+                            if(class(pred.output)=="try-error") Model.Out[[i]][j,2]=TRUE
+                              }
+
+                   } else {if(class(fct.output)=="try-error") Model.Out[[i]]<-fct.output
+                        else Model.Out[[i]]<-fct.output$dat$ma}
           }
-          print(Model.Out)
+
           } ## END BRT
 return(Model.Out)
  }

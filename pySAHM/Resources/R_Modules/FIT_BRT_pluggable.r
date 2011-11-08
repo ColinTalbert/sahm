@@ -379,20 +379,13 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     capture.output(cat(txt0),cat(txt1),print(out$mods$final.mod$contributions),cat(txt2),print(out$mods$interactions,row.names=F),file=paste(bname,"_output.txt",sep=""))
     cat(txt0);cat(txt1);print(out$mods$final.mod$contributions);cat(txt2);print(out$mods$interactions,row.names=F)
 
-  if(out$input$model.family=="bernoulli"){
-      auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=predict.gbm(out$mods$final.mod,out$dat$ma$ma,
-            out$mods$final.mod$target.trees,type="response"),plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",opt.methods=opt.methods,
-            weight=out$dat$ma$train.weights,out=out)
 
-      out$mods$auc.output<-auc.output
-      }
-  if(out$input$model.family=="poisson"){
-      auc.output <- make.poisson.jpg(out$dat$ma$ma,pred=predict.gbm(out$mods$final.mod,out$dat$ma$ma,
-            out$mods$final.mod$target.trees,type="response"),plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",
+   auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=predict.gbm(out$mods$final.mod,out$dat$ma$ma,
+            out$mods$final.mod$target.trees,type="response"),plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="GLM",opt.methods=opt.methods,
             weight=out$dat$ma$train.weights,out=out)
-
+            
       out$mods$auc.output<-auc.output
-      }
+
 
     if(!debug.mode) {sink();cat("Progress:70%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("70%\n")}
 
@@ -2397,7 +2390,8 @@ prev.stratify<-as.logical(prev.stratify)
 save.model<-make.p.tif | make.binary.tif
 opt.methods<-as.numeric(opt.methods)
 MESS<-as.logical(MESS)
-
+print(getwd())
+print(ScriptPath)
     fit.brt.fct(ma.name=csv,
 		tif.dir=NULL,
 		output.dir=output,

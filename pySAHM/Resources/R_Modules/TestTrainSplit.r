@@ -30,6 +30,7 @@
     if(RatioPresAbs<=0) stop("The ratio of presence to absence (RatioPresAbs) must be a \ngreater than 0")}
 
    #Read input data and remove any columns to be excluded
+          browser()
           dat.in<-read.csv(input.file,header=FALSE,as.is=TRUE)
           dat<-as.data.frame(dat.in[4:dim(dat.in)[1],])
           names(dat)<-dat.in[1,]
@@ -38,7 +39,7 @@
 
           if(sum(as.numeric(response)==0)==0 && !is.null(RatioPresAbs)) stop("The ratio of presence to absence cannot be set with only presence data")
           
-      #Ignoring background data that might be present in the mds
+  #Ignoring background data that might be present in the mds
 
           bg.dat<-dat[response==-9999,]
 
