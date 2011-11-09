@@ -511,8 +511,8 @@ class PARC:
         Transforms a point from one srs to another
         """
         coordXform = osr.CoordinateTransformation(from_srs, to_srs)
-        yRound = round(y, 4)
-        xRound = round(x, 4)
+        yRound = round(y, 8)
+        xRound = round(x, 8)
 
         result = coordXform.TransformPoint(xRound, yRound)
         
@@ -526,7 +526,7 @@ class PARC:
         Checks to see if the template images 
         falls completely inside the source raster
         
-        it does this by generating a list of 16 coordinate
+        it does this by generating a list of 25 coordinate
         pairs equally distributed across the template,
         including the four absolute corners.  
         These points are in the CRS of the image.
@@ -573,8 +573,53 @@ class PARC:
             return True
         
     def shrink_template_extent(self, sourceParams):
-        '''The template extent will be reduced by
+        '''The template extent will be reduced by the extent of 
+        an individual source layer if the layer has a smaller extent
+        This results in the intersection of the grids being used.
         '''
+        gt = list(self.template_params["gt"])
+        
+        #The four corners of the sourceGrid
+        nw = self.transformPoint(sourceParams['west'], sourceParams['north'], 
+                    sourceParams["srs"], self.template_params["srs"])
+        ne = self.transformPoint(sourceParams['east'], sourceParams['north'], 
+                    sourceParams["srs"], self.template_params["srs"])
+        sw = self.transformPoint(sourceParams['west'], sourceParams['south'], 
+                    sourceParams["srs"], self.template_params["srs"])
+        se = self.transformPoint(sourceParams['east'], sourceParams['south'], 
+                    sourceParams["srs"], self.template_params["srs"])
+        #because the translation of a rectangle between crs's results 
+        #in a paralellogram (or worse) I'm taking the four corner points in 
+        #source projection and transforming these to template crs and then 
+        #using the maximum/minimum for each extent.
+        largest_north = max(nw[1], ne[1])
+        smallest_south = min(sw[1], se[1])
+        largest_east = max(ne[0], se[0])
+        smallest_west =min(nw[0], sw[0])
+        
+        #Now for each direction step through the pixels until we have one smaller
+        #or larger than our min/max source extent.
+        while self.template_params['tNorth'] > largest_north:
+            #yScale is negative
+            self.template_params['tNorth'] += self.template_params['yScale']
+            self.template_params['height'] -= 1
+            
+        while self.template_params['tSouth'] < smallest_south:
+            self.template_params['tSouth'] -= self.template_params['yScale']
+            self.template_params['height'] -= 1
+        gt[3] = self.template_params['tNorth']
+        
+        while self.template_params['tWest'] < smallest_west:
+            #yScale is negative
+            self.template_params['tWest'] += self.template_params['xScale']
+            self.template_params['width'] -= 1
+            
+        while self.template_params['tEast'] > largest_east:
+            self.template_params['tEast'] -= self.template_params['xScale']
+            self.template_params['width'] -= 1
+        gt[0] = self.template_params['tWest']
+        #set the template geotransform to be our modified one.
+        self.template_params["gt"] = tuple(gt)
 
     def validateArgs(self):
         """
@@ -692,8 +737,6 @@ class PARC:
         Reprojects a raster to match the template_params
         if outputCellSize is not provided defaults to the template cellSize
         """
-#        driver = gdal.GetDriverByName("AAIGrid")
-#        driver.Register()
         
         tmpOutput = os.path.splitext(destFile)[0] + ".tif"
         
@@ -703,11 +746,16 @@ class PARC:
 
         err = gdal.ReprojectImage(srcDs, tmpOutDataset, sourceParams["srs"].ExportToWkt(), 
                                 templateParams["srs"].ExportToWkt(), resamplingType)
-        
-#        dst_ds = driver.CreateCopy(destFile, tmpOutDataset, 0)
+        self.calc_stats(tmpOutput)
         self.writetolog("    Finished reprojection " + shortName)
         dst_ds = None
         tmpOutDataset = None
+
+    def calc_stats(self, filename):
+        dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
+        band = dataset.GetRasterBand(1)
+        band.GetStatistics(0,1)
+        
 
     def generateOutputDS(self, sourceParams, templateParams, 
                         tmpOutput, outputCellSize = None):

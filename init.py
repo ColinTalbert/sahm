@@ -868,8 +868,6 @@ class PARC(Module):
                                 ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['False']), 'optional':True}),
                                 ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':True})]
 
-#    _output_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
-#    _output_ports = [('RastersWithPARCInfoCSV', '(edu.utah.sci.vistrails.persistence:PersistentFile)')]
     _output_ports = [('RastersWithPARCInfoCSV', '(edu.utah.sci.vistrails.basic:File)')]
     
     def compute(self):
