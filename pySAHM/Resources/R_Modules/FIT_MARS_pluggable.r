@@ -178,8 +178,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
 
     assign("out",out,envir=.GlobalEnv)
     t3 <- unclass(Sys.time())
-    fit_contribs <- try(mars.contribs(fit))
-    if(class(fit_contribs)=="try-error") stop(paste("Error summarizing MARS model:",fit_contribs))
+    fit_contribs <- mars.contribs(fit)
        
     x<-fit_contribs$deviance.table
     x <- x[x[,2]!=0,]
@@ -236,11 +235,9 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
         nvar <- nrow(out$mods$summary)
         pcol <- min(ceiling(sqrt(nvar)),4)
         prow <- min(ceiling(nvar/pcol),3)
-        r.curves <- try(mars.plot(fit,plot.layout=c(prow,pcol),file.name=paste(bname,"_response_curves.pdf",sep="")))
+        r.curves <- mars.plot(fit,plot.layout=c(prow,pcol),file.name=paste(bname,"_response_curves.pdf",sep=""))
 
-        } else r.curves<-try(mars.plot(fit,plot.it=F))
-        
-        if(class(r.curves)=="try-error") stop(paste("ERROR: problem fitting response curves",r.curves))
+        } else r.curves<-mars.plot(fit,plot.it=F)
 
         pred.fct<-pred.mars
 
@@ -255,7 +252,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     if(out$input$make.p.tif==T | out$input$make.binary.tif==T){
         if((n.var <- nrow(out$mods$summary))<1){
             mssg <- "Error producing geotiff output:  null model selected by stepwise procedure - pointless to make maps"
-            class(mssg)<-"try-error"
+            stop(mssg)
             } else {
             cat("\nproducing prediction maps...","\n","\n");flush.console()
             mssg <- proc.tiff(model=out$mods$final.mod,vnames=names(out$dat$ma$ma)[-1],
@@ -265,13 +262,12 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
                 fnames=out$dat$tif.names,logname=logname,out=out)     #"brt.prob.map.tif"
             }
 
-        if(class(mssg)=="try-error") stop(paste("Error producing prediction maps:",mssg))
-         else {
+
             if(make.p.tif) out$mods$tif.output$prob <- paste(out$dat$bname,"_prob_map.tif",sep="")
             if(make.binary.tif) out$mods$tif.output$bin <- paste(out$dat$bname,"_bin_map.tif",sep="")
             t5 <- unclass(Sys.time())
             cat("\nfinished with prediction maps, t=",round(t5-t4,2),"sec\n");flush.console()
-          }
+
         }
     if(!debug.mode) {sink();cat("Progress:90%\n");flush.console();sink(logname,append=T)} else cat("90%\n")
 
@@ -356,38 +352,6 @@ check.dir <- function(dname){
     return(list(dname=dname,exist=exist,readable=readable,writable=writable))
     }
 
-
-get.image.info <- function(image.names){
-    # this function creates a data.frame with summary image info for a set of images #
-    require(rgdal)
-    n.images <- length(image.names)
-
-    full.names <- image.names
-    out <- data.frame(image=full.names,available=rep(F,n.images),size=rep(NA,n.images),
-        type=factor(rep("unk",n.images),levels=c("asc","envi","tif","unk")))
-    out$type[grep(".tif",image.names)]<-"tif"
-    out$type[grep(".asc",image.names)]<-"asc"
-    for(i in 1:n.images){
-        if(out$type[i]=="tif"){
-            x <-try(GDAL.open(full.names[1],read.only=T))
-            suppressMessages(try(GDAL.close(x)))
-            if(class(x)!="try-error") out$available[i]<-T
-            x<-try(file.info(full.names[i]))
-        } else {
-            x<-try(file.info(full.names[i]))
-            if(!is.na(x$size)) out$available[i]<-T
-        }
-        if(out$available[i]==T){
-            out$size[i]<-x$size
-            if(out$type[i]=="unk"){
-                # if extension not known, look for envi .hdr file in same directory #
-                if(file.access(paste(file_path_sans_ext(full.names[i]),".hdr",sep=""))==0) 
-                    out$type[i]<-"envi"
-                }
-        }
-    }
-    return(out)
-}
 
 ###########################################################################################
 #  The following functions are from Elith et al. 
