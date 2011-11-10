@@ -151,10 +151,22 @@ class PARC:
                 image_short_name = os.path.split(image[0])[1]
                 args = '-s ' + '"' + os.path.abspath(image[0]) + '"'
                 args += ' -c '  + '"' + image[1] + '"'
-                args += ' -d ' + os.path.abspath(outFile)
-                args += ' -t ' + os.path.abspath(self.template)
+                args += ' -d ' + '"' + os.path.abspath(outFile) + '"'
+                args += ' -t ' + '"' + os.path.abspath(self.template)+ '"' 
                 args += ' -r ' + image[2]
                 args += ' -a ' + image[3]
+                if self.ignoreNonOverlap:
+                    args += ' -i '
+                    args += ' --gt0 ' + str(self.template_params['gt'][0])
+                    args += ' --gt3 ' + str(self.template_params['gt'][3])
+                    args += ' --tNorth ' + str(self.template_params['tNorth'])
+                    args += ' --tSouth ' + str(self.template_params['tSouth'])
+                    args += ' --tEast ' + str(self.template_params['tEast'])
+                    args += ' --tWest ' + str(self.template_params['tWest'])
+                    args += ' --tHeight ' + str(self.template_params['height'])
+                    args += ' --tWidth ' + str(self.template_params['width'])
+
+                    
                 
                 execDir = os.path.split(__file__)[0]
                 executable = os.path.join(execDir, 'singlePARC.py')
@@ -176,7 +188,7 @@ class PARC:
                     msg = "    " + description + " finished successfully:  " + \
                         str(len(self.inputs) - process_count + 1)  + " done out of " \
                         + str(len(self.inputs))
-                    self.logger.writetolog(msg, True, False)
+                    self.logger.writetolog(msg, True, True)
             else:
                 msg += "There was a problem with: " + description
                 error_msg += msg + "\n"
@@ -186,8 +198,7 @@ class PARC:
                 
         if error_msg <> "":
             raise utilities.TrappedError(error_msg)
-        
-        self.logger.writetolog("Finished PARC", True, True)
+
 
     def parcFile(self, source, dest):
         """

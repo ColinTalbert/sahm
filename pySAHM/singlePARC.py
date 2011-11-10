@@ -48,7 +48,18 @@ def main(args_in):
     parser.add_option("-v", dest="verbose", default=False, action="store_true", help="the verbose flag causes diagnostic output to print")
     parser.add_option("-t", dest="template", help="The template raster used for projection, origin, cell size and extent")
     parser.add_option("-r", dest="resampling", help="The CSV containing the list of files to process.  Format is 'FilePath, Categorical, Resampling, Aggreagtion")
-    parser.add_option("-a", dest="aggregation", default=True, help="'True', 'False' indicating whether to use multiple cores or not") 
+    parser.add_option("-a", dest="aggregation") 
+    
+    parser.add_option('-i', dest='ignoreNonOverlap',default=False, action="store_true")
+    parser.add_option('--gt0', dest='gt0')
+    parser.add_option('--gt3', dest='gt3')
+    parser.add_option('--tNorth', dest='tNorth')
+    parser.add_option('--tSouth', dest='tSouth')
+    parser.add_option('--tEast', dest='tEast')
+    parser.add_option('--tWest', dest='tWest')
+    parser.add_option('--tHeight', dest='height')
+    parser.add_option('--tWidth', dest='width')
+    
     (options, args) = parser.parse_args(args_in)
     
     ourPARC = PARC()
@@ -59,6 +70,20 @@ def main(args_in):
     ourPARC.logger = utilities.logger(outDir, ourPARC.verbose)
     ourPARC.writetolog = ourPARC.logger.writetolog
     ourPARC.template_params = ourPARC.getRasterParams(options.template)
+    
+    if options.ignoreNonOverlap:
+        gt = list(ourPARC.template_params['gt'])
+        gt[0] = float(options.gt0)
+        gt[3] = float(options.gt3)
+        ourPARC.template_params["gt"] = tuple(gt)
+        
+        ourPARC.template_params['tNorth'] = float(options.tNorth)
+        ourPARC.template_params['tSouth'] = float(options.tSouth)
+        ourPARC.template_params['tEast'] = float(options.tEast)
+        ourPARC.template_params['tWest'] = float(options.tWest)
+        ourPARC.template_params['height'] = int(options.height)
+        ourPARC.template_params['width'] = int(options.width)
+    
     ourPARC.parcFile([options.source, options.categorical, options.resampling, options.aggregation], options.dest)
     
 if __name__ == "__main__":

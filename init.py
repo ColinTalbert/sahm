@@ -936,7 +936,7 @@ class PARC(Module):
         output_file = utils.create_file_module(outputCSV)
         
         
-        writetolog("Finished running PARC", True)
+#        writetolog("Finished running PARC", True)
         self.setResult('RastersWithPARCInfoCSV', output_file)
         
 
