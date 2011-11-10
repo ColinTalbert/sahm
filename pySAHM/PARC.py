@@ -190,7 +190,7 @@ class PARC:
                         + str(len(self.inputs))
                     self.logger.writetolog(msg, True, True)
             else:
-                msg += "There was a problem with: " + description
+                msg = "There was a problem with: " + description
                 error_msg += msg + "\n"
                 self.logger.writetolog(msg , True, True)
                 
