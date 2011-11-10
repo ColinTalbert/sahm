@@ -1,23 +1,13 @@
-setwd("I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
-ScriptPath="I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
-output.dir<-"C:\\temp\\SAHMDebugJunk\\BRTOut1"
+setwd("I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
+
 #The idea here is to run this code then change above directories then rerun with the new code and compare (using append output and possible comparing maps)
 source("FIT_BRT_pluggable.r")
 source("FIT_MARS_pluggable.r")
 source("FIT_RF_pluggable.r")
 source("FIT_GLM_pluggable.r")
-source("EvalStats.r")
-source("make.auc.r")
-source("EvalStatsHelperFcts.r")
-source("AppendOut.r")
-source("ResidualImage.r")
-source("TestTrainRocPlot.r")
-source("read.ma.r")
-source("proc.tiff.r")
-source("PredictModel.r")
-source("modalDialog.R")
-source("check.libs.r")
-source("Pred.Surface.r")
+source("LoadRequiredCode.r")
+
 rc=c(rep("responseBinary",times=9),rep("responseCount",times=2))
 input.file<-vector()
 input.file[1]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/BadPath.csv"
@@ -32,11 +22,17 @@ input.file[9]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNe
 input.file[10]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
 input.file[11]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
 
+output.dir<-vector()
+output.dir[1]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\MarianDebugBranch\\rf"
+output.dir[2]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\MarianDebugBranch\\brt"
+output.dir[3]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\MarianDebugBranch\\mars"
+output.dir[4]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\MarianDebugBranch\\glm"
+
 for(i in 1:length(input.file)){
 set.seed(1)
 try(fit.rf.fct(ma.name=input.file[i],
       tif.dir=NULL,
-      output.dir=output.dir,
+      output.dir=output.dir[1],
       response.col=rc[i],make.p.tif=T,make.binary.tif=T,
           debug.mode=T))
          }
@@ -46,7 +42,7 @@ try(fit.rf.fct(ma.name=input.file[i],
  for(i in 1:length(input.file)){
  set.seed(1)
     try(fit.brt.fct(ma.name=input.file[i],
-          tif.dir=NULL,output.dir=output.dir,
+          tif.dir=NULL,output.dir=output.dir[2],
           response.col=rc[i],make.p.tif=T,make.binary.tif=T,
           simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",tc=NULL,n.folds=6,alpha=.3,script.name="brt.r",
           learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,seed=1,save.model=TRUE))
@@ -56,7 +52,7 @@ try(fit.rf.fct(ma.name=input.file[i],
 ##MARS
 for(i in 1:length(input.file)){
     try(fit.mars.fct(ma.name=input.file[i],
-            tif.dir=NULL,output.dir=output.dir,
+            tif.dir=NULL,output.dir=output.dir[3],
             response.col=rc[i],make.p.tif=T,make.binary.tif=T,
             mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars.r"))
         }
@@ -66,7 +62,7 @@ for(i in 1:length(input.file)){
 for(i in 1:length(input.file)){
     try(fit.glm.fct(ma.name=input.file[i],
           tif.dir=NULL,
-          output.dir=output.dir,
+          output.dir=output.dir[4],
           response.col=rc[i],make.p.tif=T,make.binary.tif=T,
           simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm.r",MESS=TRUE))
           }
