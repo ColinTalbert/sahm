@@ -22,19 +22,19 @@ from core.modules.basic_modules import String
 from PyQt4 import QtCore, QtGui
 
 from widgets import get_predictor_widget, get_predictor_config
-from enum_widget import build_enum_widget
 
 from SelectPredictorsLayers import SelectListDialog
 
 import utils
 #import our python SAHM Processing files
-import packages.sahm.pySAHM.FieldDataQuery as FDQ
+import packages.sahm.pySAHM.FieldDataAggreagateAndWeight as FDAW
 import packages.sahm.pySAHM.MDSBuilder as MDSB
 import packages.sahm.pySAHM.PARC as parc
 import packages.sahm.pySAHM.RasterFormatConverter as RFC
 import packages.sahm.pySAHM.MaxentRunner as MaxentRunner
-from SahmOutputViewer import SAHMModelOutputViewerCell
-from SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell 
+from packages.sahm.SahmOutputViewer import SAHMModelOutputViewerCell
+from packages.sahm.SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
+from packages.sahm.sahm_picklists import ResponseType, AggregationMethod, ResampleMethod
 
 from utils import writetolog
 from pySAHM.utilities import TrappedError
@@ -62,8 +62,6 @@ def menu_items():
     lst = []
     lst.append(("Change session folder", change_session_folder))
     return(lst)
-
-
 
 
 def expand_ports(port_list):
@@ -137,37 +135,7 @@ class FieldData(Path):
     _output_ports = [('value', '(gov.usgs.sahm:FieldData:DataInput)'),
                      ('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
     
-    
-    
-class AggregationMethod(String):
-    '''
-    This module is a required class for other modules and scripts within the
-    SAHM package. It is not intended for direct use or incorporation into
-    the VisTrails workflow by the user.
-    '''
-    _input_ports = [('value', '(gov.usgs.sahm:AggregationMethod:Other)')]
-    _output_ports = [('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
-    _widget_class = build_enum_widget('AggregationMethod', 
-                                      ['Mean', 'Max', 'Min', 'Majority', 'None'])
 
-    @staticmethod
-    def get_widget_class():
-        return AggregationMethod._widget_class
-
-class ResampleMethod(String):
-    '''
-    This module is a required class for other modules and scripts within the
-    SAHM package. It is not intended for direct use or incorporation into
-    the VisTrails workflow by the user.
-    '''
-    _input_ports = [('value', '(gov.usgs.sahm:ResampleMethod:Other)')]
-    _output_ports = [('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
-    _widget_class = build_enum_widget('ResampleMethod', 
-                                      ['NearestNeighbor', 'Bilinear', 'Cubic', 'CubicSpline', 'Lanczos'])
-
-    @staticmethod
-    def get_widget_class():
-        return ResampleMethod._widget_class
 
 class Predictor(Constant):
     '''
@@ -716,16 +684,6 @@ class MDSBuilder(Module):
 
     '''
 
-#    _input_ports = expand_ports([('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
-#                                 ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
-#                                 ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
-#                                 ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)')]
-#                                 )
-#    _input_ports = expand_ports([('RastersWithPARCInfoCSV', '(edu.utah.sci.vistrails.persistence:PersistentFile)'),
-#                                 ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
-#                                 ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
-#                                 ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)')]
-#                                 )
     _input_ports = expand_ports([('RastersWithPARCInfoCSV', '(edu.utah.sci.vistrails.basic:File)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
                                  ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
@@ -775,35 +733,131 @@ class MDSBuilder(Module):
         
         self.setResult('mdsFile', output_file)
 
+class FieldDataQuery(Module):
+    '''
+    columns can be specified with either a number (1 based) or the header string name.
+    The string is not case sensitive and does not need to be enclosed in quotes.
+    if the name or number of any of the columns cannot be found an error will be thrown.
+    
+    For the Query column you can either enter a single value or 
+        enter an equality statement with x used as a 
+        placeholder to represent the values in the query column.
+        
+        For example:
+            x < 2005 (would return values less than 2005)
+            x == 2000 or x == 2009 (would return 2000 or 2009)
+            The syntax is python in case you want to create an involved query.
+    '''    
+    _input_ports = expand_ports([('fieldData_file', '(gov.usgs.sahm:FieldData:DataInput)'),
+                                 ('x_column', 'basic:String', {'defaults':str('1')}),
+                                 ('y_column', 'basic:String', {'defaults':str('2')}),
+                                 ('Response_column', 'basic:String', {'defaults':str('3')}),
+                                 ('ResponseType', '(gov.usgs.sahm:ResponseType:Other)', {'defaults':str(['Presence(Absence)'])}),
+                                  ('Query_column', 'basic:String'),
+                                  ('Query', 'basic:String')])
+    _output_ports = expand_ports([('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')])
+    
+    def compute(self):
+        writetolog("\nRunning FieldDataQuery", True)
+        port_map = {'fieldData_file': ('fieldData', None, True),
+            'x_column': ('x_col', None, True),
+            'y_column': ('y_col', None, True),
+            'Response_column': ('res_col', None, True),
+            'ResponseType': ('response_type', None, True),
+            'Query_column': ('query_col', None, False),
+            'Query': ('query', None, False),}
+        
+        FDQParams = utils.map_ports(self, port_map)
+        FDQOutput = utils.mknextfile(prefix='FDQ_', suffix='.csv')
+        
+        infile = open(FDQParams['fieldData'], "rb")
+        csvReader = csv.reader(infile)
+        header = csvReader.next()
+        
+
+        outfile = open(FDQOutput, "wb")
+        csvwriter = csv.writer(outfile)
+        if FDQParams["response_type"] == 'Count':
+            responsetype = 'responseCount'
+        else:
+            responsetype = 'responseBinary'
+            
+        csvwriter.writerow(['X','Y',responsetype])
+        x_index = self.find_column(header,FDQParams['x_col'])
+        y_index = self.find_column(header,FDQParams['y_col'])
+        res_index = self.find_column(header,FDQParams['res_col'])
+        
+        use_query = False
+        if self.hasInputFromPort('Query_column'):
+            use_query = True
+
+            query_col_index = self.find_column(header,FDQParams['query_col'])
+        
+        for row in csvReader:
+            if not use_query or \
+             FDQParams['query'] == row[query_col_index] or \
+             self.check_query(row[query_col_index], FDQParams['query']):
+                csvwriter.writerow([row[x_index], row[y_index], row[res_index]])
+        
+        del infile
+        del outfile 
+    
+    def find_column(self, header, column_name):
+        try:
+            index = int(column_name) - 1
+            if index > len(header) - 1:
+                msg = "Field data input contains fewer columns than the number specified\n"
+                msg += str(index + 1) + " is greater than " + str(len(header))
+                raise ModuleError(self, msg)
+        except:
+            try:
+                all_lowers = [item.lower() for item in header]
+                index = header.index(column_name.lower())
+            except:
+                msg = "The specified column wasn't in the input file\n"
+                msg += column_name + " not in " + str(header)
+                raise ModuleError(self, msg)
+        return index
+
+    def check_query(self, value, query):
+        #if our query doesn't contain <, > or = then we're done
+        if "<" in query or \
+            ">" in query or \
+            "=" in query:
+            toevaluate = query.replace('x', value)
+            return eval(toevaluate)
+        else:
+            return False
+            
+    
 class FieldDataAggregateAndWeight(Module):
     '''
     Documentation to be updated when module finalized.
     '''
     _input_ports = expand_ports([('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
-                                 ('aggregateRows', 'basic:Boolean'),
-                                 ('aggregateRowsByYear', 'basic:Boolean')])
+                                 ('aggregateRows', 'basic:Boolean')])
     _output_ports = expand_ports([('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')])
     
     def compute(self):
-        writetolog("\nRunning FieldDataQuery", True)
+        writetolog("\nFieldDataAggregateAndWeight", True)
         port_map = {'templateLayer': ('template', None, True),
             'fieldData': ('csv', None, True),
             'aggregateRowsByYear': ('aggRows', None, False),
             'addKDE': ('addKDE', None, False),}
         
         KDEParams = utils.map_ports(self, port_map)
-        output_fname = utils.mknextfile(prefix='FDQ_', suffix='.csv')
+        output_fname = utils.mknextfile(prefix='FDAW_', suffix='.csv')
         writetolog("    output_fname=" + output_fname, True, False)
         KDEParams['output'] = output_fname
         
-        output_fname = utils.mknextfile(prefix='FDQ_', suffix='.csv')
+        output_fname = utils.mknextfile(prefix='FDAW_', suffix='.csv')
         writetolog("    output_fname=" + output_fname, True, False)
         
-        ourFDQ = FDQ.FieldDataQuery()
-        utils.PySAHM_instance_params(ourFDQ, KDEParams)
+        ourFDAW = FDAW.FieldDataQuery()
+        utils.PySAHM_instance_params(ourFDAW, KDEParams)
             
-        ourFDQ.processCSV()
+        ourFDAW.processCSV()
         
         output_file = utils.create_file_module(output_fname)
         writetolog("Finished running FieldDataQuery", True)
@@ -1181,7 +1235,6 @@ class CovariateCorrelationAndSelection(Module):
         if retVal == 1:
             raise ModuleError(self, "Cancel or Close selected (not OK) workflow halted.")
 
-
 class ProjectionLayers(Module):
     '''
     Projection Layers
@@ -1295,7 +1348,7 @@ class ProjectionLayers(Module):
         
         if self.hasInputFromPort('directoryCrosswalkCSV'):
             crosswalkCSV = csv.reader(open(self.forceGetInputFromPort('directoryCrosswalkCSV'), 'r'))
-            header = crosswalkCSV
+            header = crosswalkCSV.next()
             for row in crosswalkCSV:
                 fromto.append(row[0], row[1])
             del crosswalkCSV    
@@ -1724,7 +1777,8 @@ _modules = generate_namespaces({'DataInput': [
                                               FieldData,
                                               TemplateLayer] + \
                                               build_predictor_modules(),
-                                'Tools': [FieldDataAggregateAndWeight,
+                                'Tools': [FieldDataQuery,
+                                          FieldDataAggregateAndWeight,
                                           MDSBuilder,
                                           PARC,
                                           RasterFormatConverter,
@@ -1742,6 +1796,7 @@ _modules = generate_namespaces({'DataInput': [
                                            (AggregationMethod, {'abstract': True}),
                                            (PredictorList, {'abstract': True}),
                                            (MergedDataSet, {'abstract': True}),
+                                           (ResponseType, {'abstract': True}),
                                            (RastersWithPARCInfoCSV, {'abstract': True})],
                                 'Output': [SAHMModelOutputViewerCell,
                                           SAHMSpatialOutputViewerCell,
