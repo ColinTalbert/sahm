@@ -276,16 +276,8 @@ if(debug.mode | responseCurveForm=="pdf"){
             mtext(paste("GLM response curves for",basename(ma.name)),outer=T,side=3,cex=1.3)
             par(mfrow=c(1,1))
             graphics.off()
-        } else r.curves<-try(my.termplot(out$mods$final.mod,plot.it=F))
-            
-    
-        if(class(r.curves)!="try-error") {
-            out$mods$r.curves <- r.curves
-                } else {
-            out$ec<-out$ec+1
-            out$error.mssg[[out$ec]] <- paste("ERROR: problem fitting response curves",r.curves)
-            }
-        
+        } else out$mods$r.curves<-my.termplot(out$mods$final.mod,plot.it=F)
+
     
     t4 <- unclass(Sys.time())
     cat("\nfinished with final model summarization, t=",round(t4-t3,2),"sec\n");flush.console()
@@ -303,7 +295,7 @@ if(debug.mode | responseCurveForm=="pdf"){
     if(out$input$make.p.tif==T | out$input$make.binary.tif==T){
         if((n.var <- length(coef(out$mods$final.mod)))<2){
             mssg <- "Error producing geotiff output:  null model selected by stepwise procedure - pointless to make maps"
-            class(mssg)<-"try-error"
+            stop(mssg)
             } else {
             cat("\nproducing prediction maps...","\n","\n");flush.console()
             mssg <- proc.tiff(model=out$mods$final.mod,vnames=attr(terms(formula(out$mods$final.mod)),"term.labels"),
@@ -315,18 +307,12 @@ if(debug.mode | responseCurveForm=="pdf"){
 #                tif.dir=out$dat$tif.dir$dname;pred.fct=glm.predict;factor.levels=out$dat$ma$factor.levels;make.binary.tif=make.binary.tif;
 #                thresh=out$mods$auc.output$thresh;make.p.tif=make.p.tif;outfile.p=paste(out$dat$bname,"_prob_map.tif",sep="");
 #                outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep="");tsize=50;NAval=-3000;fnames=out$dat$tif.names
-        if(class(mssg)=="try-error"){
-          if(!debug.mode) {sink();on.exit();unlink(logname)}
-          out$ec<-out$ec+1
-          out$error.mssg[[out$ec]] <- paste("Error producing prediction maps:",mssg)
 
-          return()
-        }  else {
             if(make.p.tif) out$mods$tif.output$prob <- paste(out$dat$bname,"_prob_map.tif",sep="")
             if(make.binary.tif) out$mods$tif.output$bin <- paste(out$dat$bname,"_bin_map.tif",sep="")
             t5 <- unclass(Sys.time())
             cat("\nfinished with prediction maps, t=",round(t5-t4,2),"sec\n");flush.console()
-          }
+
         }
     times[6,1] <- unclass(Sys.time())
     if(!debug.mode) {sink();cat("Progress:90%\n");flush.console();sink(logname,append=T)} else cat("90%\n")
@@ -409,71 +395,7 @@ check.dir <- function(dname){
     }
 
 
-get.image.info <- function(image.names){
-    # this function creates a data.frame with summary image info for a set of images #
-    require(rgdal)
-    require(tools)
-    n.images <- length(image.names)
 
-    full.names <- image.names
-    out <- data.frame(image=full.names,available=rep(F,n.images),size=rep(NA,n.images),
-        type=factor(rep("unk",n.images),levels=c("asc","envi","tif","unk")))
-    out$type[grep(".tif",image.names)]<-"tif"
-    out$type[grep(".asc",image.names)]<-"asc"
-    for(i in 1:n.images){
-        if(out$type[i]=="tif"){
-            x <-try(GDAL.open(full.names[1],read.only=T))
-            suppressMessages(try(GDAL.close(x)))
-            if(class(x)!="try-error") out$available[i]<-T
-            x<-try(file.info(full.names[i]))
-        } else {
-            x<-try(file.info(full.names[i]))
-            if(!is.na(x$size)) out$available[i]<-T
-        }
-        if(out$available[i]==T){
-            out$size[i]<-x$size
-            if(out$type[i]=="unk"){
-                # if extension not known, look for envi .hdr file in same directory #
-                if(file.access(paste(file_path_sans_ext(full.names[i]),".hdr",sep=""))==0) 
-                    out$type[i]<-"envi"
-                }
-        }
-    }
-    return(out)
-}
-
-#make.r.curves.glm <- function(model){
-#    tms <- as.matrix(predict(model,type="terms"))
-#    mf <- model.frame(model)
-#    preds <- list()
-#    response <- list()
-#    p.names <- colnames(tms)
-#    is.fac <- sapply(p.names, function(i) is.factor(mf[, i]))
-#    for(i in 1:length(p.names)){
-#        if(is.fac[i]){
-#            ff <- mf[, p.names[i]]
-#            if (!is.null(model$na.action)) ff <- naresid(model$na.action,ff)
-#            xx <- as.numeric(ff)
-#            ll <- levels(ff)
-#            out <- rep(NA,length(ll))
-#            for (j in seq_along(ll)) {
-#                    ww <- which(ff == ll[j])[1]
-#                    out[j]<-tms[ww,i]
-#                    #out[j]<-tms[ff==ll[j],i][1]
-#                    }
-#            
-#            }
-#    
-#        
-#    
-#data = NULL; envir = environment(formula(model));
-#    partial.resid = FALSE; rug = FALSE; terms = NULL; se = FALSE;
-#    xlabs = NULL; ylabs = NULL; main = NULL; col.term = 2; lwd.term = 1.5;
-#    col.se = "orange"; lty.se = 2; lwd.se = 1; col.res = "gray";
-#    cex = 1; pch = par("pch"); col.smth = "darkred"; lty.smth = 2;
-#    span.smth = 2/3; ask = dev.interactive() && nb.fig < n.tms;
-#    use.factor.levels = TRUE; smooth = NULL; ylim = "common";plot.it=F;
-#terms="yell_250m_evi_16landcovermap_4ag05"
 my.termplot <- function (model, data = NULL, envir = environment(formula(model)),
     partial.resid = FALSE, rug = FALSE, terms = NULL, se = FALSE,
     xlabs = NULL, ylabs = NULL, main = NULL, col.term = 2, lwd.term = 1.5,
