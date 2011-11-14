@@ -220,7 +220,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
            
     # Store .jpg ROC plot #
       auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=mars.predict(fit,out$dat$ma$ma)$prediction[,1],
-      plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="MARS",opt.methods=opt.methods,
+      plotname=paste(bname,"_modelEvalPlot.jpg",sep=""),modelname="MARS",opt.methods=opt.methods,
             weight=out$dat$ma$train.weights,out=out)
       out$mods$auc.output<-auc.output
 

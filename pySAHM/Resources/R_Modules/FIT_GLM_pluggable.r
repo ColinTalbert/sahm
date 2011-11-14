@@ -239,7 +239,7 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
         }
 
 
-      auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=predict(mymodel.glm.step,type='response'),plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="GLM",opt.methods=opt.methods,
+      auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=predict(mymodel.glm.step,type='response'),plotname=paste(bname,"_modelEvalPlot.jpg",sep=""),modelname="GLM",opt.methods=opt.methods,
             weight=out$dat$ma$train.weights,out=out)
 
       out$mods$auc.output<-auc.output
