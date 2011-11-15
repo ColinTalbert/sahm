@@ -119,11 +119,6 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
 
       # load libaries #
       out <- check.libs(list("PresenceAbsence","rgdal","sp","survival","mda","raster","tcltk2","foreign","ade4"),out)
-      
-      # exit program now if there are missing libraries #
-      if(!is.null(out$error.mssg[[1]])){
-          return()
-          }
         
     # check output dir #
     out$dat$output.dir <- check.dir(output.dir)    

@@ -112,24 +112,14 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
       )
     # load libaries #
     out <- check.libs(list("PresenceAbsence","rgdal","sp","survival","tools","raster","tcltk2","foreign","ade4"),out)
-    
-    # exit program now if there are missing libraries #
-    if(!is.null(out$error.mssg[[1]])){
 
-          return()
-          }
           
-    if(is.na(match(simp.method,c("AIC","BIC")))){
-        return()
-        }
+    if(is.na(match(simp.method,c("AIC","BIC")))) stop("invalid input supplied for simp.method")
         
     # check output dir #
-    
     out$dat$output.dir <- check.dir(output.dir)    
-    if(out$dat$output.dir$writable==F) {out$ec<-out$ec+1
-              out$error.mssg[[out$ec]] <- paste("ERROR: output directory",output.dir,"is not writable")
-              out$dat$output.dir$dname <- getwd()
-              }
+    if(out$dat$output.dir$writable==F) stop(paste("ERROR: output directory",output.dir,"is not writable"))
+
     
     # generate a filename for output #
     if(debug.mode==T){  #paste(bname,"_summary.txt",sep="")
@@ -147,11 +137,8 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
      if(!is.null(tif.dir)){
       out$dat$tif.dir <- check.dir(tif.dir)
       if(out$dat$tif.dir$readable==F & (out$input$make.binary.tif | out$input$make.p.tif)) {
-                out$ec<-out$ec+1
-                out$error.mssg[[out$ec]] <- paste("ERROR: tif directory",tif.dir,"is not readable")
-                if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
+                stop(paste("ERROR: tif directory",tif.dir,"is not readable"))
 
-              return()
               }
             }
 
@@ -166,11 +153,7 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     out <- read.ma(out)
     if(UnitTest==1) return(out)
     
-    if(!is.null(out$error.mssg[[1]])){
-          if(!debug.mode) {sink();on.exit();unlink(logname)}
 
-          return()
-          }
       #allowing site weights    
 
     times[2,1] <- unclass(Sys.time())
@@ -243,18 +226,6 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
             weight=out$dat$ma$train.weights,out=out)
 
       out$mods$auc.output<-auc.output
-
- # if(out$input$model.family=="poisson"){
- #     auc.output <- make.poisson.jpg(out$dat$ma$ma,pred=predict(mymodel.glm.step,type='response'),
- #     plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="BRT",
- #           weight=out$dat$ma$train.weights,out=out)
-
-  #    out$mods$auc.output<-auc.output
-   #   }
-
-  #  out$mods$auc.output<-auc.output
-
-
 
 
     times[4,1] <- unclass(Sys.time())
