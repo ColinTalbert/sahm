@@ -678,8 +678,16 @@ class PARC:
         output = csv.writer(open(outputCSV, "wb"))
         output.writerow(["PARCOutputFile", "Categorical", "Resampling", "Aggregation", "OriginalFile", os.path.abspath(self.template), os.path.abspath(self.out_dir)])
         
+        inputs = []
         for row in inputsCSV:
             inputFile = row[0]
+            input_just_file = os.path.splitext(os.path.split(inputFile)[1])[0]
+            if input_just_file in inputs:
+                strInputFileErrors += "\n  PARC not currently set up to handle identically named inputs."
+                strInputFileErrors += "\n\t" + input_just_file + " used multiple times"
+            else:
+                inputs.append(input_just_file)
+                
             sourceParams = self.getRasterParams(inputFile)
             if len(sourceParams["Error"]) > 0:
                 strInputFileErrors += ("  " + os.path.split(inputFile)[1] + " had the following errors:\n" + 
@@ -739,7 +747,7 @@ class PARC:
         del output
         
         if strInputFileErrors <> "":
-            self.writetolog(strInputFileErrors)
+            self.writetolog(strInputFileErrors, False, False)
             raise utilities.TrappedError("There was one or more problems with your input rasters: \n" + strInputFileErrors)
 
     def reprojectRaster(self, srcDs, sourceParams, templateParams, 
