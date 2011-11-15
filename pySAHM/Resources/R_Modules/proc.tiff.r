@@ -35,11 +35,12 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,pred.fct,factor.le
     # the same directory as the input files.  Geographic information from the input images
     # is retained.
     #
-
+    #HELLO!!!
+    #ColinTEST
     # Start of function #
     library(rgdal)
     library(raster)
-    
+
     MESS=out$input$MESS
     if(is.null(thresh)) thresh<-.5
     nvars<-length(vnames)
@@ -185,28 +186,20 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
 }
 
   continuousRaster <- writeStop(continuousRaster)
-    a<-readGDAL(continuousRaster@file@name)
-    writeGDAL(a,continuousRaster@file@name, drivername = "GTiff",setStatistics=TRUE,mvFlag=NAval)
-
-
 
   if(make.binary.tif) {
     writeStop(binaryRaster)
-     a<-readGDAL(binaryRaster@file@name)
-    writeGDAL(a,binaryRaster@file@name, drivername = "GTiff",setStatistics=TRUE,mvFlag=NAval)
   }
    if(MESS) {
     writeStop(MessRaster)
-      a<-readGDAL(MessRaster@file@name)
-      writeGDAL(a,MessRaster@file@name, drivername = "GTiff",setStatistics=TRUE,mvFlag=NAval)
 
     writeStop(ModRaster)
-      a<-readGDAL(ModRaster@file@name)
+
       d<-data.frame(as.integer(seq(1:ncol(pred.rng))),names(pred.rng))
       names(d)=c("Value","Class")
       ModRaster@file@datanotation<-"INT1U"
       write.dbf(d, sub(".tif",".tif.vat.dbf",ModRaster@file@name), factor2char = TRUE, max_nchar = 254)
-      writeGDAL(a,ModRaster@file@name, drivername = "GTiff",setStatistics=TRUE,mvFlag=255,type="UInt16")
+
   }
 
    return(0)

@@ -1,6 +1,5 @@
-setwd("I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
-setwd("I:\\VisTrails\\Central_VisTrailsInstall\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
-ScriptPath="I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
+setwd("I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
 
 #setwd("I:\\VisTrails\\Central_VisTrailsInstall\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
 source("FIT_BRT_pluggable.r")
@@ -28,11 +27,10 @@ trace(proc.tiff,browser)
 list.files()
 #Testing Compile Output on data with no test train and with a test train
 output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
-rc="responseBinary"
-input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
-input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Split.csv"
-input.file="C:\\temp\\SAHM_workspace\\mtalbert_20111014T113851\\TestTrainingSplit_1.csv"
+rc="responseCount"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
 
+input.file[11]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
 
 #fit.model(ma.name=input.file,output.dir=output.dir,response.col=rc,make.p.tif=T,make.binary.tif=T,script.name="glm.r",
 #opt.methods=2,save.model=TRUE,UnitTest=FALSE,MESS=FALSE,aic.form=TRUE,parm2=4)
