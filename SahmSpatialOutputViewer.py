@@ -79,8 +79,12 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
 
 
     def find_file(self, model_dir, suffix):
-        return [file_name for file_name in os.listdir(model_dir)
-                                    if file_name.endswith(suffix)][0]
+        try:
+            return [file_name for file_name in os.listdir(model_dir)
+                                     if file_name.endswith(suffix)][0]
+        except IndexError:
+            raise RuntimeError('The expected model output ' 
+                               + suffix + ' was not found in the model output directory')
 
     def find_mds(self, model_dir):
         model_text = os.path.join(model_dir,
