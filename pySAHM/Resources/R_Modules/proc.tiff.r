@@ -35,11 +35,12 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,pred.fct,factor.le
     # the same directory as the input files.  Geographic information from the input images
     # is retained.
     #
-
+    #HELLO!!!
+    #ColinTEST
     # Start of function #
     library(rgdal)
     library(raster)
-    
+
     MESS=out$input$MESS
     if(is.null(thresh)) thresh<-.5
     nvars<-length(vnames)

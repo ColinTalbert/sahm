@@ -215,9 +215,9 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
   x=out$dat$ma$ma[,-1]
   y=factor(out$dat$ma$ma[,1])
       if(is.null(mtry)){
-     mtry <- try(tuneRF(x=out$dat$ma$ma[,-1],y=factor(out$dat$ma$ma[,1]),mtryStart=3,importance=TRUE,ntreeTry=100,
-        replace=FALSE, doBest=F, plot=F),silent=T)
-          mtry <- try(mtry[mtry[,2]==min(mtry[,2]),1][1])
+     mtry <- tuneRF(x=out$dat$ma$ma[,-1],y=factor(out$dat$ma$ma[,1]),mtryStart=3,importance=TRUE,ntreeTry=100,
+        replace=FALSE, doBest=F, plot=F)
+          mtry <- mtry[mtry[,2]==min(mtry[,2]),1][1]
           t2 <- unclass(Sys.time())
           if(!debug.mode) {sink();cat("Progress:30%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("30%\n")}
     
@@ -248,17 +248,10 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
            
     # ROC plot #
 
-      model.summary <- try(importance(out$mods$final.mod),silent=T)
-    if(class(model.summary)=="try-error"){
-        if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
-        out$ec<-out$ec+1
-        out$error.mssg[[out$ec]] <- paste("ERROR: can't generate summary of final model:",model.summary)
-
-        return()
-    } else {
+      model.summary <- importance(out$mods$final.mod)
         model.summary<-model.summary[order(model.summary[,3],decreasing=T),]
         out$mods$summary <- model.summary
-        }
+
         
    txt0 <- paste("Random Forest Modeling Results\n",out$input$run.time,"\n\n",
           "Data:\n\t",ma.name,
@@ -284,10 +277,7 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
     auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=tweak.p(as.vector(predict(out$mods$final.mod,type="prob")[,2])),
             plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="RF",opt.methods=opt.methods,weight=rep(1,times=dim(out$dat$ma$ma)[1]),out=out)
    
-    if(class(auc.output)=="try-error"){
-          out$ec<-out$ec+1
-          out$error.mssg[[out$ec]] <- paste("Error making ROC plot:",auc.output)
-    } else { out$mods$auc.output<-auc.output}
+   out$mods$auc.output<-auc.output
         
 
     #assign("out",out,envir=.GlobalEnv)   
@@ -320,18 +310,12 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
             for(i in 1:length(r.curves$names)){
                     assign("i",i,envir=.GlobalEnv)
 
-                            x<-try(partialPlot(out$mods$final.mod,out$dat$ma$ma.subset,r.curves$names[i],n.pt=50,plot=T,main="",
-                                    xlab=r.curves$names[i]))
-                    if(class(x)=="try-error"){
-                        if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))} else graphics.off()
-                        out$ec<-out$ec+1
-                        out$error.mssg[[out$ec]] <- paste("ERROR: can't generate response curves:",x)
+                            x<-partialPlot(out$mods$final.mod,out$dat$ma$ma.subset,r.curves$names[i],n.pt=50,plot=T,main="",
+                                    xlab=r.curves$names[i])
 
-                        return()
-                    } else {
                         r.curves$preds[[i]] <- x$x
                         r.curves$resp[[i]] <- x$y
-                        }
+
                      if(!debug.mode) {sink();cat(paste("Progress:",round(70+i*inc,1),"%\n",sep=""));flush.console();sink(logname,append=T)} else {cat("\n");cat(paste(round(70+i*inc,1),"%\n",sep=""))}  ### print time
                     }
             if(debug.mode) graphics.off()
@@ -350,23 +334,16 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
      save.image(paste(output.dir,"modelWorkspace",sep="\\"))
     if(out$input$make.p.tif==T | out$input$make.binary.tif==T){
         cat("\nproducing prediction maps...","\n","\n");flush.console()
-        mssg <- try(proc.tiff(model=out$mods$final.mod,vnames=as.character(row.names(out$mods$summary)),
+        mssg <- proc.tiff(model=out$mods$final.mod,vnames=as.character(row.names(out$mods$summary)),
             tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=rf.predict,factor.levels=out$dat$ma$factor.levels,make.binary.tif=make.binary.tif,
             thresh=out$mods$auc.output$thresh,make.p.tif=make.p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
-            outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50.0,NAval=-3000,fnames=out$dat$tif.names,logname=logname,out=out),silent=T)     #"brt.prob.map.tif"
+            outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50.0,NAval=-3000,fnames=out$dat$tif.names,logname=logname,out=out)    #"brt.prob.map.tif"
 
-        if(class(mssg)=="try-error" | mssg!=0){
-          if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
-          out$ec<-out$ec+1
-          out$error.mssg[[out$ec]] <- paste("Error producing prediction maps:",mssg)
-
-          return()
-        }  else {
             if(make.p.tif) out$mods$tif.output$prob <- paste(out$dat$bname,"_prob_map.tif",sep="")
             if(make.binary.tif) out$mods$tif.output$bin <- paste(out$dat$bname,"_bin_map.tif",sep="")
             t5 <- unclass(Sys.time())
             cat("\nfinished with prediction maps, t=",round(t5-t4,2),"sec\n");flush.console()
-          }
+
         }
     if(!debug.mode) {sink();cat("Progress:90%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("90%\n")}  ### print time
 
@@ -441,39 +418,6 @@ check.dir <- function(dname){
     writable <- suppressWarnings(as.numeric(file.access(dname,mode=2))==0) # -1 if bad, 0 if ok #
     return(list(dname=dname,exist=exist,readable=readable,writable=writable))
     }
-
-
-get.image.info <- function(image.names){
-    # this function creates a data.frame with summary image info for a set of images #
-    require(rgdal)
-    n.images <- length(image.names)
-
-    full.names <- image.names
-    out <- data.frame(image=full.names,available=rep(F,n.images),size=rep(NA,n.images),
-        type=factor(rep("unk",n.images),levels=c("asc","envi","tif","unk")))
-    out$type[grep(".tif",image.names)]<-"tif"
-    out$type[grep(".asc",image.names)]<-"asc"
-    for(i in 1:n.images){
-        if(out$type[i]=="tif"){
-            x <-try(GDAL.open(full.names[1],read.only=T),silent=T)
-            suppressMessages(try(GDAL.close(x),silent=T))
-            if(class(x)!="try-error") out$available[i]<-T
-            x<-try(file.info(full.names[i]))
-        } else {
-            x<-try(file.info(full.names[i]))
-            if(!is.na(x$size)) out$available[i]<-T
-        }
-        if(out$available[i]==T){
-            out$size[i]<-x$size
-            if(out$type[i]=="unk"){
-                # if extension not known, look for envi .hdr file in same directory #
-                if(file.access(paste(file_path_sans_ext(full.names[i]),".hdr",sep=""))==0) 
-                    out$type[i]<-"envi"
-                }
-        }
-    }
-    return(out)
-}
 
 tweak.p <- function(p){
 	p[p==1]<-max(p[p<1])

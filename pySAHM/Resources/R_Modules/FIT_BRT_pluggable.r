@@ -324,7 +324,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     # Generate and store text summary #
     y <- gbm.interactions(out$mods$final.mod)
     if(debug.mode) assign("out",out,envir=.GlobalEnv)
-    if(class(y)!="try-error"){
+
         int <- y$rank.list;
         int<-int[int$p<.05,]
         int <- int[order(int$p),]
@@ -332,21 +332,10 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
         names(int) <- c("v1","name1","v2","name2","int.size","p-value")
         row.names(int)<-NULL
         if(nrow(int)>0) out$mods$interactions <- int else out$mods$interactions <- NULL
-        } else {
-        out$ec <-out$ec+1
-        out$error.mssg[[out$ec]] <- paste("ERROR: problem assessing interactions:",y)
-        }
 
-    model.summary <- summary(out$mods$final.mod,plotit=F)
-    if(class(model.summary)=="try-error"){
-        if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
-        out$ec<-out$ec+1
-        out$error.mssg[[out$ec]] <- paste("ERROR: can't generate summary of final model:",model.summary)
 
-        return()
-    } else {
-        out$mods$summary <- model.summary
-        }
+    out$mods$summary <- summary(out$mods$final.mod,plotit=F)
+
     if(debug.mode) assign("out",out,envir=.GlobalEnv)
     
 
@@ -400,9 +389,9 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
 
         pdf(paste(bname,"_response_curves.pdf",sep=""),width=11,height=8.5,onefile=T)
             par(oma=c(2,2,4,2))
-            r.curves <- try(gbm.plot(out$mods$final.mod,plotit=T,plot.layout=c(prow,pcol)))
-            if(class(r.curves)!="try-error") {out$mods$r.curves <- r.curves
-            mtext(paste("BRT response curves for",basename(ma.name)),outer=T,side=3,cex=1.3)}
+            out$mods$r.curves <- gbm.plot(out$mods$final.mod,plotit=T,plot.layout=c(prow,pcol))
+            mtext(paste("BRT response curves for",basename(ma.name)),outer=T,side=3,cex=1.3)
+            
             par(mfrow=c(1,1))
             #for(i in 1:min(nrow(int),2)) gbm.perspec(fit,int$var1.index[i],int$var2.index[i])
             if(!is.null(out$mods$interactions)){
@@ -411,12 +400,7 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
                 }
         graphics.off()
         } else {
-            r.curves <- try(gbm.plot(out$mods$final.mod,plotit=F))
-            if(class(r.curves)!="try-error") {out$mods$r.curves <- r.curves
-              } else {
-              out$ec<-out$ec+1
-              out$error.mssg[[out$ec]] <- paste("ERROR: problem fitting response curves",r.curves)
-              }
+            out$mods$r.curves <- gbm.plot(out$mods$final.mod,plotit=F)
         }
     t4 <- unclass(Sys.time())
     cat("\nfinished with final model summarization, t=",round(t4-t3,2),"sec\n");flush.console()
@@ -433,18 +417,12 @@ fit.brt.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
             thresh=out$mods$auc.output$thresh,make.p.tif=make.p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
             outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50.0,NAval=-3000,logname=logname,out=out)     #"brt.prob.map.tif"
 
-        if(class(mssg)=="try-error" | mssg!=0){
-          if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
-          out$ec<-out$ec+1
-          out$error.mssg[[out$ec]] <- paste("Error producing prediction maps:",mssg)
 
-          return()
-        }  else {
             if(make.p.tif) out$mods$tif.output$prob <- paste(out$dat$bname,"_prob_map.tif",sep="")
             if(make.binary.tif) out$mods$tif.output$bin <- paste(out$dat$bname,"_bin_map.tif",sep="")
             t5 <- unclass(Sys.time())
             cat("\nfinished with prediction maps, t=",round(t5-t4,2),"sec\n");flush.console()
-          }
+
         }
     if(!debug.mode) {sink();cat("Progress:90%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("90%\n")}  ### print time
 
@@ -545,7 +523,7 @@ est.lr <- function(out){
 
     while(max.trees<800 & i<=nrow(lr.out)){
 
-       tryCatch(gbm.fit <- gbm.step.fast(dat=dat,
+      gbm.fit <- gbm.step.fast(dat=dat,
           gbm.x = gbm.x,
           gbm.y = gbm.y,
           family = out$input$model.family,
@@ -555,15 +533,9 @@ est.lr <- function(out){
           learning.rate = lrs[i],
           bag.fraction = out$input$bag.fraction,
           site.weights=out$dat$ma$weight.subset,
-          autostop=T,verbose=F,silent=T,plot.main=F),error=function(ex){cat("Error: learning rate estimation failed.\n");
-          print(ex);
-          stop();})
+          autostop=T,verbose=F,silent=T,plot.main=F)
           
-       if(class(gbm.fit)=="try-error"){
-            out$ec <- out$ec+1
-            out$error.mssg[[out$ec]] <- paste("ERROR: learning rate estimation failed:",gbm.fit)
-            return(out)
-            }
+
        lr.out$max.trees[i] <- max.trees <- gbm.fit$target.trees
        assign(paste("gbm.fit",i,sep="_"),gbm.fit)
        cat("lr =",lrs[i],"  optimal n trees =",max.trees,"\n");flush.console()
@@ -609,38 +581,6 @@ check.dir <- function(dname){
     }
 
 
-
-get.image.info <- function(image.names){
-    # this function creates a data.frame with summary image info for a set of images #
-    require(rgdal)
-    n.images <- length(image.names)
-
-    full.names <- image.names
-    out <- data.frame(image=full.names,available=rep(F,n.images),size=rep(NA,n.images),
-        type=factor(rep("unk",n.images),levels=c("asc","envi","tif","unk")))
-    out$type[grep(".tif",image.names)]<-"tif"
-    out$type[grep(".asc",image.names)]<-"asc"
-    for(i in 1:n.images){
-        if(out$type[i]=="tif"){
-            x <-try(GDAL.open(full.names[1],read.only=T))
-            suppressMessages(try(GDAL.close(x)))
-            if(class(x)!="try-error") out$available[i]<-T
-            x<-try(file.info(full.names[i]))
-        } else {
-            x<-try(file.info(full.names[i]))
-            if(!is.na(x$size)) out$available[i]<-T
-        }
-        if(out$available[i]==T){
-            out$size[i]<-x$size
-            if(out$type[i]=="unk"){
-                # if extension not known, look for envi .hdr file in same directory #
-                if(file.access(paste(file_path_sans_ext(full.names[i]),".hdr",sep=""))==0)
-                    out$type[i]<-"envi"
-                }
-        }
-    }
-    return(out)
-}
 
 gbm.step.fast <- function(
   dat,                             # the input dataframe

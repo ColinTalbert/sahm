@@ -1,4 +1,4 @@
-#test from marian
+#another test
 import csv
 from datetime import datetime
 import glob
@@ -525,7 +525,6 @@ class Model(Module):
                      ('Text_Output', '(edu.utah.sci.vistrails.basic:File)')]
 
     def compute(self):
-        global color_breaks_csv
         
         ModelOutput = {"FIT_BRT_pluggable.r":"brt",
                        "FIT_GLM_pluggable.r":"glm",
@@ -1644,9 +1643,8 @@ def initialize():
     
     
     session_dir = utils.createrootdir(configuration.output_dir)
-    utils.createLogger(session_dir, configuration.output_dir)
-    #log_file = Utilities.createsessionlog(session_dir, configuration.verbose)
-    
+    utils.createLogger(session_dir, configuration.verbose)
+
     color_breaks_csv = os.path.abspath(os.path.join(os.path.dirname(__file__),  "ColorBreaks.csv"))
     
     load_max_ent_params()
