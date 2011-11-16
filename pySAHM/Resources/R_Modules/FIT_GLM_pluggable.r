@@ -59,9 +59,7 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     #
     # when debug.mode is true, these filenames will include a number in them so that they will not overwrite preexisting files. eg brt_1_output.txt.
     #
-    times <- as.data.frame(matrix(NA,nrow=7,ncol=1,dimnames=list(c("start","read data","model fit",
-            "model summary","response curves","tif output","done"),c("time"))))
-    times[1,1] <- unclass(Sys.time())
+
     t0 <- unclass(Sys.time())
     #simp.method <- match.arg(simp.method)
     out <- list(
@@ -156,7 +154,7 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
 
       #allowing site weights    
 
-    times[2,1] <- unclass(Sys.time())
+
     if(!debug.mode) {sink();cat("Progress:20%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("20%\n")}  ### print time
     cat("\nbegin processing of model array:",out$input$ma.name,"\n")
     cat("\nfile basename set to:",out$dat$bname,"\n")
@@ -193,8 +191,7 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
         }
     flush.console()
 
-    flush.console()
-    times[3,1] <- unclass(Sys.time())
+
     if(!debug.mode) {sink();cat("Progress:40%\n");flush.console();sink(logname,append=T)} else cat("40%\n")
 
      #r<-residuals(out$mods$final.mod, "deviance")
@@ -228,7 +225,6 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
       out$mods$auc.output<-auc.output
 
 
-    times[4,1] <- unclass(Sys.time())
     if(!debug.mode) {sink();cat("Progress:70%\n");flush.console();sink(logname,append=T)} else cat("70%\n")
     
     # Response curves #
@@ -252,7 +248,7 @@ if(debug.mode | responseCurveForm=="pdf"){
     
     t4 <- unclass(Sys.time())
     cat("\nfinished with final model summarization, t=",round(t4-t3,2),"sec\n");flush.console()
-    times[5,1] <- unclass(Sys.time())
+
     if(!debug.mode) {sink();cat("Progress:80%\n");flush.console();sink(logname,append=T)} else cat("80%\n")
     
    
@@ -285,7 +281,7 @@ if(debug.mode | responseCurveForm=="pdf"){
             cat("\nfinished with prediction maps, t=",round(t5-t4,2),"sec\n");flush.console()
 
         }
-    times[6,1] <- unclass(Sys.time())
+
     if(!debug.mode) {sink();cat("Progress:90%\n");flush.console();sink(logname,append=T)} else cat("90%\n")
     
      # Evaluation Statistics on Test Data#
@@ -307,13 +303,6 @@ if(debug.mode | responseCurveForm=="pdf"){
         } else {cat("100%\n")}
 
     assign("fit",out$mods$final.mod,envir=.GlobalEnv)
-    times[7,1] <- unclass(Sys.time())
-    
-    times$net <- times$time - times$time[1]
-    times$pct <- round(times$net/times$net[7]*100,2)
-    times$process <- c(0,times$time[-1]-times$time[-7])
-    times$ppcnt <- round(times$process/times$net[7]*100,2)
-    write.csv(times,paste(bname,"times.csv",sep="_"))
     invisible(out)
 }
 
