@@ -729,8 +729,7 @@ class MDSBuilder(Module):
         except:
             utils.informative_untrapped_error(self, "MDSBuilder")
 
-        output_file = utils.create_file_module(ourMDSBuilder.outputMDS)
-        
+        output_file = utils.create_file_module(ourMDSBuilder.outputMDS) 
         self.setResult('mdsFile', output_file)
 
 class FieldDataQuery(Module):
@@ -800,7 +799,10 @@ class FieldDataQuery(Module):
                 csvwriter.writerow([row[x_index], row[y_index], row[res_index]])
         
         del infile
-        del outfile 
+        del outfile
+        
+        output_file = utils.create_file_module(FDQOutput) 
+        self.setResult('fieldData', output_file) 
     
     def find_column(self, header, column_name):
         try:
