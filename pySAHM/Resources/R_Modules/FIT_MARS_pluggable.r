@@ -13,7 +13,7 @@
 
 # Libraries required to run this program #
 #   PresenceAbsence - for ROC plots
-#   XML - for XML i/o
+
 #   rgdal - for geotiff i/o
 #   sp - used by rdgal library
 #   raster for geotiff o
@@ -38,30 +38,10 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     # simp.method: model simplification method.  valid methods include: "AIC" and "BIC". NOT CURRENTLY FUNCTIONAL 
     # debug.mode: if T, output is directed to the console during the run.  also, a pdf is generated which contains response curve plots and perspective plots
     #    showing the effects of interactions deemed important.  if F, output is diverted to a text file and the console is kept clear 
-    #    except for final output of an xml file.  in either case, a set of standard output files are created in the output directory.
+    #    in either case, a set of standard output files are created in the output directory.
     # 
 
-    # Value:
-    # returns nothing but generates a number of output files in the directory
-    # "output.dir" named above.  These output files consist of:
-    #
-    # glm_output.txt:  a text file with fairly detailed results of the final model.
-    # glm_output.xml:  an xml-formatted text file with results from the final model.
-    # glm_response_curves.xml:  an xml-formatted text file with response curves for
-    #   each covariate in the final model.
-    # glm_prob_map.tif:  a geotiff of the response surface
-    # glm_bin_map.tif:  a geotiff of the binary response surface.  threhold is based on the roc curve at the point where sensitivity=specificity.
-    # glm_log.txt:   a file containing text output diverted from the console when debug.mode=F
-    # glm_auc_plot.jpg:  a jpg file of a ROC plot.
-    # glm_response_curves.pdf:  an pdf file with response curves for
-    #   each covariate in the final model and perspective plots showing the effect of interactions deemed significant.
-    #   only produced when debug.mode=T
-    # #  seed=NULL                                 # sets a seed for the algorithm, any inegeger is acceptable
-    #  opt.methods=2                             # sets the method used for threshold optimization used in the
-    #                                            # the evaluation statistics module
-    #  save.model=FALSE                          # whether the model will be used to later produce tifs
-    # when debug.mode is true, these filenames will include a number in them so that they will not overwrite preexisting files. eg brt_1_output.txt.
-    #
+
 
     t0 <- unclass(Sys.time())
 
@@ -80,7 +60,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
       )
 
       # load libaries #
-      out <- check.libs(list("PresenceAbsence","rgdal","XML","sp","survival","mda","raster","tcltk2","foreign","ade4"),out)
+      out <- check.libs(list("PresenceAbsence","rgdal","sp","survival","mda","raster","tcltk2","foreign","ade4"),out)
       
       # exit program now if there are missing libraries #
       if(!is.null(out$error.mssg[[1]])) stop("There are missing libraries")
@@ -124,8 +104,8 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
 
     assign("out",out,envir=.GlobalEnv)
     t3 <- unclass(Sys.time())
-    fit_contribs <- try(mars.contribs(out$mods$final.mod))
-    if(class(fit_contribs)=="try-error") stop(paste("Error summarizing MARS model:",fit_contribs))
+    fit_contribs <- mars.contribs(out$mods$final.mod)
+
        
     x<-fit_contribs$deviance.table
     x <- x[x[,2]!=0,]
@@ -187,11 +167,9 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
         nvar <- nrow(out$mods$summary)
         pcol <- min(ceiling(sqrt(nvar)),4)
         prow <- min(ceiling(nvar/pcol),3)
-        r.curves <- try(mars.plot(fit,plot.layout=c(prow,pcol),file.name=paste(bname,"_response_curves.pdf",sep="")))
+        r.curves <- mars.plot(fit,plot.layout=c(prow,pcol),file.name=paste(bname,"_response_curves.pdf",sep=""))
 
-        } else r.curves<-try(mars.plot(fit,plot.it=F))
-        
-        if(class(r.curves)!="try-error") stop(paste("ERROR: problem fitting response curves",r.curves))
+        } else r.curves<-mars.plot(fit,plot.it=F)
 
         pred.fct<-pred.mars
 
@@ -205,8 +183,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
 
     if(out$input$make.p.tif==T | out$input$make.binary.tif==T){
         if((n.var <- nrow(out$mods$summary))<1){
-            mssg <- "Error producing geotiff output:  null model selected by stepwise procedure - pointless to make maps"
-            class(mssg)<-"try-error"
+            stop("Error producing geotiff output:  null model selected by stepwise procedure - pointless to make maps")
             } else {
             cat("\nproducing prediction maps...","\n","\n");flush.console()
             proc.tiff(model=out$mods$final.mod,vnames=names(out$dat$ma$train$dat)[-1],

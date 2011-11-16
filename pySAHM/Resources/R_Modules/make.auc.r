@@ -77,12 +77,14 @@ make.auc.plot.jpg<-function(out=out){
                                 switch(out$dat$split.type,"test"="TestTrain","crossValidation"="CV","none"=""),
                               "AppendedOutput.csv",sep=""),sep="/")
 
-                               lapply(train.stats,function(lst){browser()
-                               return(c(lst$correlaiton,lst$pct.dev.exp))})
-                              a<-c(train.stats$correlation,train.stats$pct.dev.exp,train.stats$Pcc,train.stats$Sens,train.stats$Specf)
+                               binom.stats<-lapply(Stats,function(lst){
+                               return(c(lst$correlation,lst$pct.dev.exp,lst$Pcc,lst$Sens,lst$Specf))})
+
                        if(out$input$model.family%in%c("binomial","bernoulli")){
+                           binom.stats<-lapply(Stats,function(lst){
+                               return(c(lst$correlation,lst$pct.dev.exp,lst$Pcc,lst$Sens,lst$Specf))})
                        x=data.frame(cbind(c("Correlation Coefficient","Percent Deviance Explained","Percent Correctly Classified","Sensitivity","Specificity"),
-                            c(as.vector(cor.test(pred,response)$estimate),pct.dev.exp,PCC,SENS,SPEC)))
+                            c(binom.stats[[train.mask]])))
                        }else  x=data.frame(cbind(c("Correlation Coefficient","Percent Deviance Explained","Prediction Error"),
                             c(as.vector(cor.test(pred,response)$estimate),pct.dev.exp,prediction.error)))
 

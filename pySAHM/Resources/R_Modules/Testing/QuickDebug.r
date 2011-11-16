@@ -6,19 +6,9 @@ source("FIT_BRT_pluggable.r")
 source("FIT_MARS_pluggable.r")
 source("FIT_RF_pluggable.r")
 source("FIT_GLM_pluggable.r")
-#source("EvaluationStats.r")
-source("EvalStats.r")
-source("make.auc.r")
-source("EvalStatsHelperFcts.r")
-source("AppendOut.r")
-source("ResidualImage.r")
-source("TestTrainRocPlot.r")
-source("read.ma.r")
-source("proc.tiff.r")
-source("PredictModel.r")
-source("modalDialog.R")
-source("check.libs.r")
-source("Pred.Surface.r")
+
+source("LoadRequiredCode.r")
+source("MARS.helper.fcts.r")
 
 options(error=expression(if(interactive()) recover() else dump.calls()))
 options(error=NULL)
@@ -37,7 +27,7 @@ input.file[11]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv
 
 ###########################################################################
 ############### Quick debug  ##############################################
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\morisettej_20111027T131301\\CovariateCorrelationOutputMDS_Both.csv"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Split.csv"
 output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
 rc="responseBinary"
 #######################################################################
