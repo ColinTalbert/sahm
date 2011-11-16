@@ -92,6 +92,10 @@ def setrootdir(session_dir):
     global _roottempdir
     _roottempdir = session_dir
 
+def getrootdir():
+    global _roottempdir
+    return _roottempdir
+
 def createrootdir(rootWorkspace):
     '''Creates a session Directory which will
     contain all of the output produced in a single

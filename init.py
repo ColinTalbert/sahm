@@ -928,7 +928,11 @@ class PARC(Module):
         #writetolog("\nRunning PARC", True)
         
         ourPARC = parc.PARC()
-        output_dname = utils.mknextdir(prefix='PARC_')
+        template = self.forceGetInputFromPort('templateLayer').name
+        template_fname = os.path.splitext(os.path.split(template)[1])[0]
+        output_dname = os.path.join(utils.getrootdir(), 'PARC_' + template_fname)
+        if not os.path.exists(output_dname):
+            os.mkdir(output_dname)
         
         if configuration.verbose:
             ourPARC.verbose = True
@@ -937,13 +941,12 @@ class PARC(Module):
         ourPARC.out_dir = output_dname
 
         if self.hasInputFromPort("multipleCores"):
-            ourPARC.multicores = self.getInputFromPort("multipleCores")            
+            ourPARC.multicores = self.getInputFromPort("multipleCores")         
 
         if self.hasInputFromPort("ignoreNonOverlap"):
             ourPARC.ignoreNonOverlap = self.getInputFromPort("ignoreNonOverlap")
 
-        workingCSV = utils.mknextfile(prefix='tmpFilesToPARC_', suffix='.csv')
-        outputCSV = utils.mknextfile(prefix='PARCOutput_', suffix='.csv')
+        workingCSV = os.path.join(output_dname, "tmpFilesToPARC.csv")
 
         #append additional inputs to the existing CSV if one was supplied
         #otherwise start a new CSV
@@ -970,8 +973,8 @@ class PARC(Module):
         f.close()
         del csvWriter
         ourPARC.inputs_CSV = workingCSV
-        ourPARC.template = self.forceGetInputFromPort('templateLayer').name
-        writetolog('    template layer = ' + self.forceGetInputFromPort('templateLayer').name)
+        ourPARC.template = template
+        writetolog('    template layer = ' + template)
         writetolog("    output_dname=" + output_dname, False, False)
         writetolog("    workingCSV=" + workingCSV, False, False)
         try:

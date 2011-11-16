@@ -79,7 +79,7 @@ class PARC:
         self.agg_methods = ['Min', 'Mean', 'Max', 'Majority']
         self.resample_methods = ['NearestNeighbor', 'Bilinear', 'Cubic', 'CubicSpline', 'Lanczos']
         self.logger = None
-        self.multicores = False
+        self.multicores = True
         self.ignoreNonOverlap = False
         self.module = None
 
@@ -96,89 +96,77 @@ class PARC:
         self.logger.writetolog("Starting PARC", True, True)
         self.validateArgs()
         self.logger.writetolog("    Arguments validated successfully", True, True)
-        if self.multicores:
-            self.processFilesMC()
-        else:
-            self.processFiles()
+        self.processFiles()
         
         self.logger.writetolog("Finished PARC", True, True)
         
     def processFiles(self):
+        if self.multicores:
+            results= Queue.Queue()
+            process_count= 0
+        
         # Clip and reproject each source image.
         for image in self.inputs:
-            # Ensure source is different from template.
-            #if not os.path.samefile(template, image):
             inPath, inFileName = os.path.split(image[0])
             outFile, ext = os.path.splitext(inFileName) 
             outFile = os.path.join(self.out_dir, outFile + ".tif")
+            shortname = (os.path.split(outFile)[1])
             
-            # os.path.samefile(image, outFile):
-            if os.path.exists(outFile) and \
-               os.path.abspath(image[0]) == os.path.abspath(outFile):
-
-                baseName, extension = os.path.splitext(outFile)
-                outFile = baseName + "-PARC.tif"
+            if os.path.exists(outFile):
+                try: 
+                    gdal.Open(outFile)
+                     
+                    msg = "The output " + shortname + " already exists. \tSkipping this file."
+                    self.logger.writetolog(msg, True, True)
+                except:
+                    #we bombed trying to open the outFile with gdal. Lets rerun it.
+                    pass
                 
-            if os.path.abspath(self.template) != os.path.abspath(image[0]):
-                self.parcFile(image, outFile)
-            elif os.path.abspath(self.template) == os.path.abspath(image[0]): 
-                shutil.copyfile(self.template, outFile)
-                
-		
-        
-    def processFilesMC(self):
-        '''This function has the same functionality as parcFiles
-        with the addition of utilizing multiple cores to do the processing.
-        '''
-        results= Queue.Queue()
-        process_count= 0
-        
-        for image in self.inputs:
-            # Ensure source is different from template.
-            #if not os.path.samefile(template, image):
-            inPath, inFileName = os.path.split(image[0])
-            outFile, ext = os.path.splitext(inFileName) 
-            outFile = os.path.join(self.out_dir, outFile + ".tif")
-            
-            # os.path.samefile(image, outFile):
-            if os.path.exists(outFile) and \
-               os.path.abspath(image[0]) == os.path.abspath(outFile):
-
-                baseName, extension = os.path.splitext(outFile)
-                outFile = baseName + "-PARC.tif"
-            
-            if os.path.abspath(self.template) != os.path.abspath(image[0]):
-                image_short_name = os.path.split(image[0])[1]
-                args = '-s ' + '"' + os.path.abspath(image[0]) + '"'
-                args += ' -c '  + '"' + image[1] + '"'
-                args += ' -d ' + '"' + os.path.abspath(outFile) + '"'
-                args += ' -t ' + '"' + os.path.abspath(self.template)+ '"' 
-                args += ' -r ' + image[2]
-                args += ' -a ' + image[3]
-                if self.ignoreNonOverlap:
-                    args += ' -i '
-                    args += ' --gt0 ' + str(self.template_params['gt'][0])
-                    args += ' --gt3 ' + str(self.template_params['gt'][3])
-                    args += ' --tNorth ' + str(self.template_params['tNorth'])
-                    args += ' --tSouth ' + str(self.template_params['tSouth'])
-                    args += ' --tEast ' + str(self.template_params['tEast'])
-                    args += ' --tWest ' + str(self.template_params['tWest'])
-                    args += ' --tHeight ' + str(self.template_params['height'])
-                    args += ' --tWidth ' + str(self.template_params['width'])
-
+            else:    
+                if os.path.abspath(self.template) != os.path.abspath(image[0]):
+                    if self.multicores:
+                        self.gen_singlePARC_thread(image, outFile, results)
+                        process_count += 1
+                    else:
+                        self.parcFile(image, outFile)
+                elif os.path.abspath(self.template) == os.path.abspath(image[0]): 
+                    msg = shortname + " is the same as our template. \tOnly copying this file."
+                    self.logger.writetolog(msg, True, True)
+                    shutil.copyfile(self.template, outFile)
                     
+        if self.multicores:
+            self.manage_singlePARC_threads(results, process_count)
                 
-                execDir = os.path.split(__file__)[0]
-                executable = os.path.join(execDir, 'singlePARC.py')
-                
-                pyEx = sys.executable
-                command = ' '.join([pyEx, executable, args])
-                self.logger.writetolog(command, False, False)
-                proc = subprocess.Popen( command )
-                thread.start_new_thread(utilities.process_waiter,
-                        (proc, image_short_name, results))
-                process_count+= 1
+    def gen_singlePARC_thread(self, image, outFile, results):
+            image_short_name = os.path.split(image[0])[1]
+            args = '-s ' + '"' + os.path.abspath(image[0]) + '"'
+            args += ' -c '  + '"' + image[1] + '"'
+            args += ' -d ' + '"' + os.path.abspath(outFile) + '"'
+            args += ' -t ' + '"' + os.path.abspath(self.template)+ '"' 
+            args += ' -r ' + image[2]
+            args += ' -a ' + image[3]
+            if self.ignoreNonOverlap:
+                args += ' -i '
+                args += ' --gt0 ' + str(self.template_params['gt'][0])
+                args += ' --gt3 ' + str(self.template_params['gt'][3])
+                args += ' --tNorth ' + str(self.template_params['tNorth'])
+                args += ' --tSouth ' + str(self.template_params['tSouth'])
+                args += ' --tEast ' + str(self.template_params['tEast'])
+                args += ' --tWest ' + str(self.template_params['tWest'])
+                args += ' --tHeight ' + str(self.template_params['height'])
+                args += ' --tWidth ' + str(self.template_params['width'])
+    
+            execDir = os.path.split(__file__)[0]
+            executable = os.path.join(execDir, 'singlePARC.py')
             
+            pyEx = sys.executable
+            command = ' '.join([pyEx, executable, args])
+            self.logger.writetolog(command, False, False)
+            proc = subprocess.Popen( command )
+            thread.start_new_thread(utilities.process_waiter,
+                    (proc, image_short_name, results))
+        
+    def manage_singlePARC_threads(self, results, process_count):
         error_msg = ""
         while process_count > 0:
             description, rc= results.get()
