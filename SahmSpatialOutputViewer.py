@@ -38,7 +38,7 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
         inputs["model_workspace"] = self.forceGetInputFromPort('model_workspace').name
         inputs["model_dir"] = os.path.split(inputs["model_workspace"])[0]
 
-        for model_output in ['prob', 'bin', 'resid', 'mess', 'mod']:
+        for model_output in ['prob', 'bin', 'resid', 'mess', 'MoD']:
             try:
                 inputs[model_output +"_map"] = os.path.join(inputs["model_dir"],
                                 self.find_file(inputs["model_dir"], "_" + model_output + "_map.tif"))
@@ -165,7 +165,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         self.all_layers = {}
         self.add_raster(inputs["prob_map"], "prob_map")
         self.add_raster(inputs["bin_map"], "bin_map")
-        self.add_raster(inputs["res_map"], "res_map")
+        self.add_raster(inputs["resid_map"], "resid_map")
         self.add_raster(inputs["mess_map"], "mess_map")
         self.add_raster(inputs["MoD_map"], "MoD_map")
 
