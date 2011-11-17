@@ -275,7 +275,7 @@ fit.rf.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^respo
         }
         
     auc.output <- make.auc.plot.jpg(out$dat$ma$ma,pred=tweak.p(as.vector(predict(out$mods$final.mod,type="prob")[,2])),
-            plotname=paste(bname,"_auc_plot.jpg",sep=""),modelname="RF",opt.methods=opt.methods,weight=rep(1,times=dim(out$dat$ma$ma)[1]),out=out)
+            plotname=paste(bname,"_modelEvalPlot.jpg",sep=""),modelname="RF",opt.methods=opt.methods,weight=rep(1,times=dim(out$dat$ma$ma)[1]),out=out)
    
    out$mods$auc.output<-auc.output
         
