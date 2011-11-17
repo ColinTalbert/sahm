@@ -38,24 +38,13 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
         inputs["model_workspace"] = self.forceGetInputFromPort('model_workspace').name
         inputs["model_dir"] = os.path.split(inputs["model_workspace"])[0]
 
-        inputs["prob_map"] = os.path.join(inputs["model_dir"],
-                                self.find_file(inputs["model_dir"], "_prob_map.tif"))
-        inputs["bin_map"] = os.path.join(inputs["model_dir"],
-                               self.find_file(inputs["model_dir"], "_bin_map.tif"))
-        inputs["res_map"] = os.path.join(inputs["model_dir"],
-                               self.find_file(inputs["model_dir"], "_resid_map.tif"))
-        try:
-            inputs["mes_map"] = os.path.join(inputs["model_dir"],
-                                   self.find_file(inputs["model_dir"], "_mess_map.tif"))
-        except:
-            inputs["mes_map"] = ""
-        
-        try:
-            inputs["mod_map"] = os.path.join(inputs["model_dir"],
-                               self.find_file(inputs["model_dir"], "_MoD_map.tif"))
-        except:
-            inputs["mod_map"] = ""
-
+        for model_output in ['prob', 'bin', 'resid', 'mess', 'mod']:
+            try:
+                inputs[model_output +"_map"] = os.path.join(inputs["model_dir"],
+                                self.find_file(inputs["model_dir"], "_" + model_output + "_map.tif"))
+            except:
+                inputs[model_output + "_map"] = ""
+            
         mds = self.find_mds(inputs["model_dir"])
         shaperoot = self.gen_points_shp(mds)
         inputs["pres_points"] = shaperoot + "_pres.shp"
@@ -79,8 +68,12 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
 
 
     def find_file(self, model_dir, suffix):
-        return [file_name for file_name in os.listdir(model_dir)
-                                    if file_name.endswith(suffix)][0]
+        try:
+            return [file_name for file_name in os.listdir(model_dir)
+                                     if file_name.endswith(suffix)][0]
+        except IndexError:
+            raise RuntimeError('The expected model output ' 
+                               + suffix + ' was not found in the model output directory')
 
     def find_mds(self, model_dir):
         model_text = os.path.join(model_dir,
@@ -173,8 +166,8 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         self.add_raster(inputs["prob_map"], "prob_map")
         self.add_raster(inputs["bin_map"], "bin_map")
         self.add_raster(inputs["res_map"], "res_map")
-        self.add_raster(inputs["mes_map"], "mes_map")
-        self.add_raster(inputs["mod_map"], "mod_map")
+        self.add_raster(inputs["mess_map"], "mess_map")
+        self.add_raster(inputs["MoD_map"], "MoD_map")
 
         self.add_vector(inputs['pres_points'], "pres_points", '255,0,0')
         self.add_vector(inputs['abs_points'], "abs_points", '0,255,0')
@@ -220,7 +213,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         QgsColorRampShader = qgis.core.QgsColorRampShader
 
 
-        if layer_type == "mod_map":
+        if layer_type == "MoD_map":
             #raster.setDrawingStyle(qgis.core.QgsRasterLayer.PalettedColor)
             raster.setDrawingStyle(qgis.core.QgsRasterLayer.SingleBandPseudoColor)
             raster.setColorShadingAlgorithm(qgis.core.QgsRasterLayer.PseudoColorShader)
@@ -461,10 +454,10 @@ class SAHMSpatialViewerToolBar(QCellToolBar):
                    {"tag":"res_map", "icon":"ResMap.png",
                      "checked":False, "label":"Display residuals map",
                      "group":"Grids"},
-                   {"tag":"mes_map", "icon":"MesMap.png",
+                   {"tag":"mess_map", "icon":"MesMap.png",
                      "checked":False, "label":"Display Multivariate Environmental Similarity Surface (Mess) map",
                      "group":"Grids"},
-                    {"tag":"mod_map", "icon":"ModMap.png",
+                    {"tag":"MoD_map", "icon":"ModMap.png",
                      "checked":False, "label":"Display Most Dissimilar Variable (MoD) map",
                      "group":"Grids"}]
 

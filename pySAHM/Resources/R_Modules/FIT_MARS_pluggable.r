@@ -119,11 +119,6 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
 
       # load libaries #
       out <- check.libs(list("PresenceAbsence","rgdal","sp","survival","mda","raster","tcltk2","foreign","ade4"),out)
-      
-      # exit program now if there are missing libraries #
-      if(!is.null(out$error.mssg[[1]])){
-          return()
-          }
         
     # check output dir #
     out$dat$output.dir <- check.dir(output.dir)    
@@ -227,7 +222,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     if(!debug.mode) {sink();cat("Progress:70%\n");flush.console();sink(logname,append=T)} else cat("70%\n")
     
     # Response curves #
-    
+
     if(is.null(responseCurveForm)){
     responseCurveForm<-0}    
     
@@ -960,9 +955,6 @@ function (data,                         # the input data frame
 
   fitted.values <- as.data.frame(fitted.values)
   names(fitted.values) <- names(ydat)
-
-  model.residuals <- as.data.frame(model.residuals)
-  names(model.residuals) <- names(ydat)
 
   deviances <- data.frame(names(ydat),null.deviances,null.dfs,residual.deviances,residual.dfs,converged)
   names(deviances) <- c("species","null.dev","null.df","resid.dev","resid.df","converged")

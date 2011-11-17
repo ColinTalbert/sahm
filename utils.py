@@ -92,6 +92,10 @@ def setrootdir(session_dir):
     global _roottempdir
     _roottempdir = session_dir
 
+def getrootdir():
+    global _roottempdir
+    return _roottempdir
+
 def createrootdir(rootWorkspace):
     '''Creates a session Directory which will
     contain all of the output produced in a single
@@ -115,9 +119,14 @@ def map_ports(module, port_map):
                 raise ModuleError(module, 'Multiple items found from Port ' + 
                     port + '.  Only single entry handled.  Please remove extraneous items.')
             elif len(value)  == 0:
-                raise ModuleError(module, 'Multiple items found from Port ' + 
-                    port + '.  Only single entry handled.  Please remove extraneous items.')
-            value = module.forceGetInputFromPort(port)
+                try:
+                    value = [item for item in module._input_ports if item[0] == port][0][2]['defaults']
+                except:
+                    raise ModuleError(module, 'No items found from Port ' + 
+                        port + '.  Input is required.')
+            else:
+                value = module.forceGetInputFromPort(port)
+                
             if access is not None:
                 value = access(value)
             if isinstance(value, File) or \

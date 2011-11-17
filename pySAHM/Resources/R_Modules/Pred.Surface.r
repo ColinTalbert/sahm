@@ -8,7 +8,8 @@ Pred.Surface<-function(object, model, filename="", na.rm=TRUE,NAval) {
 		xylyrnames <- c('x', 'y', lyrnames)
 		v <- matrix(NA, ncol=nrow(predrast), nrow=ncol(predrast))
       na.rm <- FALSE
-		tr <- blockSize(predrast, n=nlayers(object)+3)
+
+    tr <- blockSize(predrast, n=nlayers(object)+5)
 		ablock <- 1:(ncol(object) * tr$nrows[1])
 		napred <- rep(NA, ncol(predrast)*tr$nrows[1])
   	predrast <- writeStart(predrast, filename=filename,overwrite=TRUE)
@@ -46,9 +47,10 @@ Pred.Surface<-function(object, model, filename="", na.rm=TRUE,NAval) {
 				predv = as.numeric(predv)
 				predrast <- writeValues(predrast, predv, tr$row[i])
 				NAvalue(predrast)<-NAval
+				print(i)
 			}
+
 	predrast <- writeStop(predrast)
-	a<-readGDAL(predrast@file@name)
-    writeGDAL(a,predrast@file@name, drivername = "GTiff",setStatistics=TRUE,mvFlag=NAval)
+
 		return(predrast)
 	}

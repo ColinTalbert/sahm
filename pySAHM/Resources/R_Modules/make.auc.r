@@ -12,6 +12,7 @@ make.auc.plot.jpg<-function(ma.reduced,pred,plotname,modelname,test.split=FALSE,
     pct.dev.exp <- dev.exp/null.dev*100
    correlation<-cor(auc.data$pres.abs,pred)
     residual.smooth.fct<-NULL
+
      if(test.split==FALSE) residual.smooth.fct<-resid.image(calc.dev(auc.data$pres.abs, pred, weight, family=out$input$model.family)$dev.cont,pred,
           auc.data$pres.abs,out$dat$ma$train.xy[,1],out$dat$ma$train.xy[,2],out$input$model.family,out$input$output.dir,out)
 
@@ -51,6 +52,7 @@ make.auc.plot.jpg<-function(ma.reduced,pred,plotname,modelname,test.split=FALSE,
              plot(log(pred[pred!=0]),(auc.data$pres.abs[pred!=0]-pred[pred!=0]),xlab="Predicted Values (log scale)",ylab="Residuals",main="Residuals vs Fitted",ylim=c(-3,3))
               abline(h=0,lty=2)
               #this is the residual plot from glm but I don't think it will work for anything else
+
               qqnorm(residuals(out$mods$final.mod),ylab="Std. deviance residuals")
               qqline(residuals(out$mods$final.mod))
                yl <- as.expression(substitute(sqrt(abs(YL)), list(YL = as.name("Std. Deviance Resid"))))
@@ -115,7 +117,7 @@ make.auc.plot.jpg<-function(ma.reduced,pred,plotname,modelname,test.split=FALSE,
 
                          compile.out<-paste(parent,
                               paste(switch(out$input$model.family,"binomial"="Binary","bernoulli"="Binary","poisson"="Count"),ifelse(!is.null(out$dat$ma$ma.test),"TestTrain",""),
-                              "AppendedOutput.csv",sep="."),sep="/")
+                              "AppendedOutput.csv",sep=""),sep="/")
 
                        if(out$input$model.family%in%c("binomial","bernoulli")){
                        x=data.frame(cbind(c("Correlation Coefficient","Percent Deviance Explained","Percent Correctly Classified","Sensitivity","Specificity"),

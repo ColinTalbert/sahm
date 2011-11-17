@@ -167,4 +167,3 @@ AppendOut<-function(compile.out,Header,x,out,test.split,parent){
           try(write.table(cbind(Orig.x,x[,2]),file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=","))
           }}
                }
-               

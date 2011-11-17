@@ -30,14 +30,16 @@
     if(RatioPresAbs<=0) stop("The ratio of presence to absence (RatioPresAbs) must be a \ngreater than 0")}
 
    #Read input data and remove any columns to be excluded
+          browser()
           dat.in<-read.csv(input.file,header=FALSE,as.is=TRUE)
           dat<-as.data.frame(dat.in[4:dim(dat.in)[1],])
           names(dat)<-dat.in[1,]
 
         response<-dat[,match(tolower(response.col),tolower(names(dat)))]
 
-
-      #Ignoring background data that might be present in the mds
+          if(sum(as.numeric(response)==0)==0 && !is.null(RatioPresAbs)) stop("The ratio of presence to absence cannot be set with only presence data")
+          
+  #Ignoring background data that might be present in the mds
 
           bg.dat<-dat[response==-9999,]
 
@@ -48,13 +50,6 @@
             bg.dat$TrainSplit=""
             }
 
-             if(sum(as.numeric(response)==0)==0 && !is.null(RatioPresAbs)) stop("The ratio of presence to absence cannot be set with only presence data")
-          if(length(response)<100) stop("A test training split is not advisable for less than 100 observations consider cross validation as an alternative")
-          if(length(response)<200) warning(paste("There are less than 200 observations. Cross validation might be preferable to a test ",
-          "training split \n weigh this decision while keeping in mind the number of predictors being considered: " , ncol(dat)-3,sep=""))
-          if(tolower(response.col)=="responsebinary" & any(table(response)<10))
-            stop("Use of a test training split is not recommended when the dataset contains less than 10 presence or absence points")
-          
          temp<-if(!is.null(RatioPresAbs))(sum(response>=1)/sum(response==0)==RatioPresAbs)
          if(is.null(temp)) temp<-FALSE
        if(is.null(RatioPresAbs)| temp){

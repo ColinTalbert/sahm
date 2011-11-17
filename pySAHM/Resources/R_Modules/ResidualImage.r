@@ -1,5 +1,7 @@
 resid.image<-function(dev.contrib,pred,raw.dat,x,y,model.type,file.name,out){
    z<-sign(pred-raw.dat)*dev.contrib
+
+              #####################################################
               a<-loess(z~x*y)
                x.lim<-rep(seq(from=min(out$dat$ma$train.xy[,1]),to=max(out$dat$ma$train.xy[,1]),length=100),each=100)
                y.lim<-rep(seq(from=min(out$dat$ma$train.xy[,2]),to=max(out$dat$ma$train.xy[,2]),length=100),times=100)

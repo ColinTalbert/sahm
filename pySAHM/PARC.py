@@ -39,7 +39,9 @@ def main(args_in):
     parser.add_option("-v", dest="verbose", default=False, action="store_true", help="the verbose flag causes diagnostic output to print")
     parser.add_option("-t", dest="templateRaster", help="The template raster used for projection, origin, cell size and extent")
     parser.add_option("-i", dest="inputs_CSV", help="The CSV containing the list of files to process.  Format is 'FilePath, Categorical, Resampling, Aggreagtion")
-    parser.add_option("-m", dest="multicore", default=True, help="'True', 'False' indicating whether to use multiple cores or not") 
+    parser.add_option("-m", dest="multicore", default=True, action="store_true", help="Flag indicating to use multiple cores")
+    parser.add_option("-i", dest="ignoreNonOverlap", default=False, action="store_true", help="Flag indicating to use ignore non-overlapping area")
+    
     (options, args) = parser.parse_args(args_in)
     
     ourPARC = PARC()
@@ -48,6 +50,7 @@ def main(args_in):
     ourPARC.out_dir = options.out_dir
     ourPARC.inputs_CSV = options.inputs_CSV
     ourPARC.multicores = options.multicore
+    ourPARC.ignoreNonOverlap = options.ignoreNonOverlap
     ourPARC.parcFiles()
 
 class PARC:
@@ -76,7 +79,8 @@ class PARC:
         self.agg_methods = ['Min', 'Mean', 'Max', 'Majority']
         self.resample_methods = ['NearestNeighbor', 'Bilinear', 'Cubic', 'CubicSpline', 'Lanczos']
         self.logger = None
-        self.multicores = 'False'
+        self.multicores = True
+        self.ignoreNonOverlap = False
         self.module = None
 
     def parcFiles(self):
@@ -92,77 +96,78 @@ class PARC:
         self.logger.writetolog("Starting PARC", True, True)
         self.validateArgs()
         self.logger.writetolog("    Arguments validated successfully", True, True)
-        if self.multicores.lower() in ['true', 'yes', 't', 'y', '1']:
-            self.processFilesMC()
-        else:
-            self.processFiles()
+        self.processFiles()
         
         self.logger.writetolog("Finished PARC", True, True)
         
     def processFiles(self):
+        if self.multicores:
+            results= Queue.Queue()
+            process_count= 0
+        
         # Clip and reproject each source image.
         for image in self.inputs:
-            # Ensure source is different from template.
-            #if not os.path.samefile(template, image):
             inPath, inFileName = os.path.split(image[0])
             outFile, ext = os.path.splitext(inFileName) 
             outFile = os.path.join(self.out_dir, outFile + ".tif")
+            shortname = (os.path.split(outFile)[1])
             
-            # os.path.samefile(image, outFile):
-            if os.path.exists(outFile) and \
-               os.path.abspath(image[0]) == os.path.abspath(outFile):
-
-                baseName, extension = os.path.splitext(outFile)
-                outFile = baseName + "-PARC.tif"
+            if os.path.exists(outFile):
+                try: 
+                    gdal.Open(outFile)
+                     
+                    msg = "The output " + shortname + " already exists. \tSkipping this file."
+                    self.logger.writetolog(msg, True, True)
+                except:
+                    #we bombed trying to open the outFile with gdal. Lets rerun it.
+                    pass
                 
-            if os.path.abspath(self.template) != os.path.abspath(image[0]):
-                self.parcFile(image, outFile)
-            elif os.path.abspath(self.template) == os.path.abspath(image[0]): 
-                shutil.copyfile(self.template, outFile)
+            else:    
+                if os.path.abspath(self.template) != os.path.abspath(image[0]):
+                    if self.multicores:
+                        self.gen_singlePARC_thread(image, outFile, results)
+                        process_count += 1
+                    else:
+                        self.parcFile(image, outFile)
+                elif os.path.abspath(self.template) == os.path.abspath(image[0]): 
+                    msg = shortname + " is the same as our template. \tOnly copying this file."
+                    self.logger.writetolog(msg, True, True)
+                    shutil.copyfile(self.template, outFile)
+                    
+        if self.multicores:
+            self.manage_singlePARC_threads(results, process_count)
                 
-		
+    def gen_singlePARC_thread(self, image, outFile, results):
+            image_short_name = os.path.split(image[0])[1]
+            args = '-s ' + '"' + os.path.abspath(image[0]) + '"'
+            args += ' -c '  + '"' + image[1] + '"'
+            args += ' -d ' + '"' + os.path.abspath(outFile) + '"'
+            args += ' -t ' + '"' + os.path.abspath(self.template)+ '"' 
+            args += ' -r ' + image[2]
+            args += ' -a ' + image[3]
+            if self.ignoreNonOverlap:
+                args += ' -i '
+                args += ' --gt0 ' + str(self.template_params['gt'][0])
+                args += ' --gt3 ' + str(self.template_params['gt'][3])
+                args += ' --tNorth ' + str(self.template_params['tNorth'])
+                args += ' --tSouth ' + str(self.template_params['tSouth'])
+                args += ' --tEast ' + str(self.template_params['tEast'])
+                args += ' --tWest ' + str(self.template_params['tWest'])
+                args += ' --tHeight ' + str(self.template_params['height'])
+                args += ' --tWidth ' + str(self.template_params['width'])
+    
+            execDir = os.path.split(__file__)[0]
+            executable = os.path.join(execDir, 'singlePARC.py')
+            
+            pyEx = sys.executable
+            command = ' '.join([pyEx, executable, args])
+            self.logger.writetolog(command, False, False)
+            proc = subprocess.Popen( command )
+            thread.start_new_thread(utilities.process_waiter,
+                    (proc, image_short_name, results))
         
-    def processFilesMC(self):
-        '''This function has the same functionality as parcFiles
-        with the addition of utilizing multiple cores to do the processing.
-        '''
-        results= Queue.Queue()
-        process_count= 0
-        
-        for image in self.inputs:
-            # Ensure source is different from template.
-            #if not os.path.samefile(template, image):
-            inPath, inFileName = os.path.split(image[0])
-            outFile, ext = os.path.splitext(inFileName) 
-            outFile = os.path.join(self.out_dir, outFile + ".tif")
-            
-            # os.path.samefile(image, outFile):
-            if os.path.exists(outFile) and \
-               os.path.abspath(image[0]) == os.path.abspath(outFile):
-
-                baseName, extension = os.path.splitext(outFile)
-                outFile = baseName + "-PARC.tif"
-            
-            if os.path.abspath(self.template) != os.path.abspath(image[0]):
-                image_short_name = os.path.split(image[0])[1]
-                args = '-s ' + '"' + os.path.abspath(image[0]) + '"'
-                args += ' -c '  + '"' + image[1] + '"'
-                args += ' -d ' + os.path.abspath(outFile)
-                args += ' -t ' + os.path.abspath(self.template)
-                args += ' -r ' + image[2]
-                args += ' -a ' + image[3]
-                
-                execDir = os.path.split(__file__)[0]
-                executable = os.path.join(execDir, 'singlePARC.py')
-                
-                pyEx = sys.executable
-                command = ' '.join([pyEx, executable, args])
-                self.logger.writetolog(command, False, False)
-                proc = subprocess.Popen( command )
-                thread.start_new_thread(utilities.process_waiter,
-                        (proc, image_short_name, results))
-                process_count+= 1
-            
+    def manage_singlePARC_threads(self, results, process_count):
+        error_msg = ""
         while process_count > 0:
             description, rc= results.get()
             
@@ -173,12 +178,15 @@ class PARC:
                         + str(len(self.inputs))
                     self.logger.writetolog(msg, True, True)
             else:
-                self.logger.writetolog("There was a problem with: " + description , True, True)
+                msg = "There was a problem with: " + description
+                error_msg += msg + "\n"
+                self.logger.writetolog(msg , True, True)
+                
             process_count-= 1
                 
-        
-        
-        self.logger.writetolog("Finished PARC", True, True)
+        if error_msg <> "":
+            raise utilities.TrappedError(error_msg)
+
 
     def parcFile(self, source, dest):
         """
@@ -502,8 +510,8 @@ class PARC:
         Transforms a point from one srs to another
         """
         coordXform = osr.CoordinateTransformation(from_srs, to_srs)
-        yRound = round(y, 4)
-        xRound = round(x, 4)
+        yRound = round(y, 8)
+        xRound = round(x, 8)
 
         result = coordXform.TransformPoint(xRound, yRound)
         
@@ -517,7 +525,7 @@ class PARC:
         Checks to see if the template images 
         falls completely inside the source raster
         
-        it does this by generating a list of 16 coordinate
+        it does this by generating a list of 25 coordinate
         pairs equally distributed across the template,
         including the four absolute corners.  
         These points are in the CRS of the image.
@@ -525,7 +533,7 @@ class PARC:
         value in the image, then the image covers the template.
         (in nearly every case anyway)
         """
-        
+        gdal.UseExceptions()
         n = 5
         xOffset = (self.template_params["east"] - self.template_params["west"]) / (n) - \
                     ((self.template_params["east"] - self.template_params["west"]) / self.template_params["width"] / 1000)
@@ -563,6 +571,54 @@ class PARC:
         else:
             return True
         
+    def shrink_template_extent(self, sourceParams):
+        '''The template extent will be reduced by the extent of 
+        an individual source layer if the layer has a smaller extent
+        This results in the intersection of the grids being used.
+        '''
+        gt = list(self.template_params["gt"])
+        
+        #The four corners of the sourceGrid
+        nw = self.transformPoint(sourceParams['west'], sourceParams['north'], 
+                    sourceParams["srs"], self.template_params["srs"])
+        ne = self.transformPoint(sourceParams['east'], sourceParams['north'], 
+                    sourceParams["srs"], self.template_params["srs"])
+        sw = self.transformPoint(sourceParams['west'], sourceParams['south'], 
+                    sourceParams["srs"], self.template_params["srs"])
+        se = self.transformPoint(sourceParams['east'], sourceParams['south'], 
+                    sourceParams["srs"], self.template_params["srs"])
+        #because the translation of a rectangle between crs's results 
+        #in a paralellogram (or worse) I'm taking the four corner points in 
+        #source projection and transforming these to template crs and then 
+        #using the maximum/minimum for each extent.
+        largest_north = max(nw[1], ne[1])
+        smallest_south = min(sw[1], se[1])
+        largest_east = max(ne[0], se[0])
+        smallest_west =min(nw[0], sw[0])
+        
+        #Now for each direction step through the pixels until we have one smaller
+        #or larger than our min/max source extent.
+        while self.template_params['tNorth'] > largest_north:
+            #yScale is negative
+            self.template_params['tNorth'] += self.template_params['yScale']
+            self.template_params['height'] -= 1
+            
+        while self.template_params['tSouth'] < smallest_south:
+            self.template_params['tSouth'] -= self.template_params['yScale']
+            self.template_params['height'] -= 1
+        gt[3] = self.template_params['tNorth']
+        
+        while self.template_params['tWest'] < smallest_west:
+            #yScale is negative
+            self.template_params['tWest'] += self.template_params['xScale']
+            self.template_params['width'] -= 1
+            
+        while self.template_params['tEast'] > largest_east:
+            self.template_params['tEast'] -= self.template_params['xScale']
+            self.template_params['width'] -= 1
+        gt[0] = self.template_params['tWest']
+        #set the template geotransform to be our modified one.
+        self.template_params["gt"] = tuple(gt)
 
     def validateArgs(self):
         """
@@ -610,27 +666,34 @@ class PARC:
         output = csv.writer(open(outputCSV, "wb"))
         output.writerow(["PARCOutputFile", "Categorical", "Resampling", "Aggregation", "OriginalFile", os.path.abspath(self.template), os.path.abspath(self.out_dir)])
         
+        inputs = []
         for row in inputsCSV:
             inputFile = row[0]
+            input_just_file = os.path.splitext(os.path.split(inputFile)[1])[0]
+            if input_just_file in inputs:
+                strInputFileErrors += "\n  PARC not currently set up to handle identically named inputs."
+                strInputFileErrors += "\n\t" + input_just_file + " used multiple times"
+            else:
+                inputs.append(input_just_file)
+                
             sourceParams = self.getRasterParams(inputFile)
             if len(sourceParams["Error"]) > 0:
                 strInputFileErrors += ("  " + os.path.split(inputFile)[1] + " had the following errors:\n" + 
                                     "    " + "\n    ".join(sourceParams["Error"])) + "\n"
             else:
                 pass
-                if not self.ImageCoversTemplate(sourceParams):
+                if not self.ignoreNonOverlap and not self.ImageCoversTemplate(sourceParams):
                     strInputFileErrors += ("\n  Some part of the template image falls outside of " + os.path.split(inputFile)[1])
                     strInputFileErrors += "\n        template upper left  = (" + str(self.template_params["gWest"]) + ", " + str(self.template_params["gNorth"]) + ")"
                     strInputFileErrors += "\n        template lower right = (" + str(self.template_params["gEast"]) + ", " + str(self.template_params["gSouth"]) + ")"
                     strInputFileErrors += "\n        image    upper left  = (" + str(sourceParams["gWest"]) + ", " + str(sourceParams["gNorth"]) + ")"
                     strInputFileErrors += "\n        image    lower right = (" + str(sourceParams["gEast"]) + ", " + str(sourceParams["gSouth"]) + ")"
-#                    strInputFileErrors += "\n        points are given in projected coordinates."
-#                    strInputFileErrors += "\n        template upper left  = (" + str(self.template_params["tWest"]) + ", " + str(self.template_params["tNorth"]) + ")"
-#                    strInputFileErrors += "\n        template lower right = (" + str(self.template_params["tEast"]) + ", " + str(self.template_params["tSouth"]) + ")"
-#                    strInputFileErrors += "\n        image    upper left  = (" + str(sourceParams["tWest"]) + ", " + str(sourceParams["tNorth"]) + ")"
-#                    strInputFileErrors += "\n        image    lower right = (" + str(sourceParams["tEast"]) + ", " + str(sourceParams["tSouth"]) + ")"
-#                    strInputFileErrors += "\n        Note: points are given in the template coordinates." + "\n"
-#            
+
+                if self.ignoreNonOverlap:
+                   #if this input is smaller in any of the dimensions
+                   self.shrink_template_extent(sourceParams)
+
+
             if len(row) < 2 or not row[1] in ['0', '1']:
                 self.writetolog("  " + os.path.split(inputFile)[1] + " categorical either missing or not 0 or 1:\n   Defaulting to 0 (continuous)")
                 if len(row) < 2:
@@ -672,7 +735,7 @@ class PARC:
         del output
         
         if strInputFileErrors <> "":
-            self.writetolog(strInputFileErrors)
+            self.writetolog(strInputFileErrors, False, False)
             raise utilities.TrappedError("There was one or more problems with your input rasters: \n" + strInputFileErrors)
 
     def reprojectRaster(self, srcDs, sourceParams, templateParams, 
@@ -681,8 +744,6 @@ class PARC:
         Reprojects a raster to match the template_params
         if outputCellSize is not provided defaults to the template cellSize
         """
-#        driver = gdal.GetDriverByName("AAIGrid")
-#        driver.Register()
         
         tmpOutput = os.path.splitext(destFile)[0] + ".tif"
         
@@ -692,12 +753,17 @@ class PARC:
 
         err = gdal.ReprojectImage(srcDs, tmpOutDataset, sourceParams["srs"].ExportToWkt(), 
                                 templateParams["srs"].ExportToWkt(), resamplingType)
-        
-#        dst_ds = driver.CreateCopy(destFile, tmpOutDataset, 0)
+        self.calc_stats(tmpOutput)
         self.writetolog("    Finished reprojection " + shortName)
         dst_ds = None
         tmpOutDataset = None
+
+    def calc_stats(self, filename):
+        dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
+        band = dataset.GetRasterBand(1)
+        band.GetStatistics(0,1)
         
+
     def generateOutputDS(self, sourceParams, templateParams, 
                         tmpOutput, outputCellSize = None):
         """

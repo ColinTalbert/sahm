@@ -4,7 +4,7 @@
     #response.col= "ResponseBinary"
     #min.cor<-.7
     #num.plots<-10
-source("I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules\\PairsExplore.r")
+source("I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\PairsExplore.r")
 
 
 
@@ -54,8 +54,9 @@ input.file="I:\\NPS_NPMP_data\\ModelingSession_June\\HESP_MDS.csv"
 input.file="I:\\NPS_NPMP_data\\ModelingSession_June\\GRSP_MDS.csv"
 input.file="N:\\Active\\FORT_RAM\\VisTrails\\workspace\\talbertc_20110621T083827\\MergedDataset_1.csv"
 
-input.file="N:\\Active\\FORT_RAM\\VisTrails\\workspace\\talbertc_20110621T114212\\MergedDataset_1.csv"
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\talbertc_test\\TestTrainingSplit_1.csv"
 responseCol="responseBinary"
+output.file="c:\\temp\\output.jpg"
 Pairs.Explore(num.plots=num.plots,
     min.cor=min.cor,
     input.file=input.file,

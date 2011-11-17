@@ -1,11 +1,21 @@
 ### This file runs the TestTrainSplit and checks that all ratios end up being what they should if RatioPresAbs is set at an extreme value
 ### an excessive number of values are deleted and ratios and be drastically off might want to include future error checking
-setwd("I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
+setwd("I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
 source("TestTrainSplit.r")
 
 input.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSetNullModelTest.csv"
-output.file="C:\\temp\\testsplit.csv"
-response.col="responseBinary"
+output.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSetNullSplit.csv"
+
+input.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSetIncludeTest.csv"
+output.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSetIncludeSplit.csv"
+
+input.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSet_1.csv"
+output.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSplitTest.csv"
+
+input.file="N:/Active/FORT_RAM/VisTrails/workspace/mtalbert_20110817T104421/MergedDataset_1.csv"
+input.file="I:/VisTrails/WorkingFiles/workspace/morisettej_20110810T153126/CovariateCorrelationOutputMDS_anothertry.csv"
+output.file="N:/Active/FORT_RAM/VisTrails/workspace/mtalbert_20110817T104421/MergedDatasetTestTrain_1.csv"
+response.col="ResponseBinary"
 
 ## Running the code
 TestTrainSplit(input.file,output.file,response.col=response.col,trainProp=.7)  #tried also with .8, and no RatioPresAb

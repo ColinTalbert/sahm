@@ -1,4 +1,5 @@
-#another test
+'''
+'''
 import csv
 from datetime import datetime
 import glob
@@ -21,19 +22,19 @@ from core.modules.basic_modules import String
 from PyQt4 import QtCore, QtGui
 
 from widgets import get_predictor_widget, get_predictor_config
-from enum_widget import build_enum_widget
 
 from SelectPredictorsLayers import SelectListDialog
 
 import utils
 #import our python SAHM Processing files
-import packages.sahm.pySAHM.FieldDataQuery as FDQ
+import packages.sahm.pySAHM.FieldDataAggreagateAndWeight as FDAW
 import packages.sahm.pySAHM.MDSBuilder as MDSB
 import packages.sahm.pySAHM.PARC as parc
 import packages.sahm.pySAHM.RasterFormatConverter as RFC
 import packages.sahm.pySAHM.MaxentRunner as MaxentRunner
-from SahmOutputViewer import SAHMModelOutputViewerCell
-from SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell 
+from packages.sahm.SahmOutputViewer import SAHMModelOutputViewerCell
+from packages.sahm.SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
+from packages.sahm.sahm_picklists import ResponseType, AggregationMethod, ResampleMethod
 
 from utils import writetolog
 from pySAHM.utilities import TrappedError
@@ -52,6 +53,7 @@ def menu_items():
                                         'Browse to new session folder -'))
         session_dir = path
         utils.setrootdir(path)
+        utils.createLogger(session_dir, configuration.output_dir)
         
         writetolog("*" * 79 + "\n" + "*" * 79)
         writetolog(" output directory:   " + session_dir)
@@ -60,8 +62,6 @@ def menu_items():
     lst = []
     lst.append(("Change session folder", change_session_folder))
     return(lst)
-
-
 
 
 def expand_ports(port_list):
@@ -135,37 +135,7 @@ class FieldData(Path):
     _output_ports = [('value', '(gov.usgs.sahm:FieldData:DataInput)'),
                      ('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
     
-    
-    
-class AggregationMethod(String):
-    '''
-    This module is a required class for other modules and scripts within the
-    SAHM package. It is not intended for direct use or incorporation into
-    the VisTrails workflow by the user.
-    '''
-    _input_ports = [('value', '(gov.usgs.sahm:AggregationMethod:Other)')]
-    _output_ports = [('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
-    _widget_class = build_enum_widget('AggregationMethod', 
-                                      ['Mean', 'Max', 'Min', 'Majority', 'None'])
 
-    @staticmethod
-    def get_widget_class():
-        return AggregationMethod._widget_class
-
-class ResampleMethod(String):
-    '''
-    This module is a required class for other modules and scripts within the
-    SAHM package. It is not intended for direct use or incorporation into
-    the VisTrails workflow by the user.
-    '''
-    _input_ports = [('value', '(gov.usgs.sahm:ResampleMethod:Other)')]
-    _output_ports = [('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
-    _widget_class = build_enum_widget('ResampleMethod', 
-                                      ['NearestNeighbor', 'Bilinear', 'Cubic', 'CubicSpline', 'Lanczos'])
-
-    @staticmethod
-    def get_widget_class():
-        return ResampleMethod._widget_class
 
 class Predictor(Constant):
     '''
@@ -520,6 +490,9 @@ class Model(Module):
     _output_ports = [('modelWorkspace', '(edu.utah.sci.vistrails.basic:File)'), 
                      ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
                      ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)'),
+                     ('ResidualsMap', '(edu.utah.sci.vistrails.basic:File)'),
+                     ('MessMap', '(edu.utah.sci.vistrails.basic:File)'),
+                     ('MoDMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('AUC_plot', '(edu.utah.sci.vistrails.basic:File)'),
                      ('ResponseCurves', '(edu.utah.sci.vistrails.basic:File)'),
                      ('Text_Output', '(edu.utah.sci.vistrails.basic:File)')]
@@ -530,87 +503,50 @@ class Model(Module):
                        "FIT_GLM_pluggable.r":"glm",
                        "FIT_RF_pluggable.r":"rf",
                        "FIT_MARS_pluggable.r":"mars"}
-        ModelAbbrev = ModelOutput[self.name]
+        self.ModelAbbrev = ModelOutput[self.name]
         
-        output_dname = utils.mknextdir(prefix=ModelAbbrev + 'output_')
-        argsDict = utils.map_ports(self, self.port_map)
+        self.output_dname = utils.mknextdir(prefix=self.ModelAbbrev + 'output_')
+        self.argsDict = utils.map_ports(self, self.port_map)
+
         mdsFile = self.forceGetInputFromPort('mdsFile').name
         
         args = ''
-        for k, v in argsDict.iteritems():
+        for k, v in self.argsDict.iteritems():
             if k == 'c':
                 args += ' ' + '='.join([str(k),'"' + str(v) + '"'])
             else:
                 args += ' ' + '='.join([str(k),str(v)])
-        args += " o=" + '"' + output_dname + '"'
+        args += " o=" + '"' + self.output_dname + '"'
         args += " rc=" + utils.MDSresponseCol(mdsFile)
-#        if self.hasInputFromPort('makeBinMap'):
-#            makeBinMap = self.forceGetInputFromPort('makeBinMap')
-#            args += ' mbt=' + str(makeBinMap).upper()
-#        else:
-#            makeBinMap = True
-#            args += ' mbt=TRUE'
-#            
-#        if self.hasInputFromPort('makeProbabilityMap'):
-#            makeProbabilityMap = self.forceGetInputFromPort('makeProbabilityMap')
-#            args += ' mpt=' + str(makeProbabilityMap).upper()
-#        else:
-#            makeProbabilityMap = True
-#            args += ' mpt=TRUE'  
-#        
-#        if self.hasInputFromPort('seed'):
-#            args += ' seed=' + str(self.forceGetInputFromPort('seed'))
-#        
-#        if self.hasInputFromPort('someParam'):
-#            x = self.forceGetInputFromPort('someParam')
-#            if x > 1:
-#                msg = "Expected output from " + ModelAbbrev + " was not found."
-#                msg += "\nThis likely indicates problems with the inputs to the R module."
-#                writetolog(msg, False, True)
-#            args += " abr=" + x
                 
         utils.runRScript(self.name, args, self)
-#        utils.runRScript('FIT_BRT_pluggableErrorMessage.r', args, self)
         
-        input_fname = os.path.join(output_dname, ModelAbbrev + "_prob_map.tif")
-        output_fname = os.path.join(output_dname, ModelAbbrev + "_prob_map.jpeg")
-        if os.path.exists(input_fname):
-#            utils.tif_to_color_jpeg(input_fname, output_fname, color_breaks_csv)
-#            output_file4 = utils.create_file_module(output_fname)
-            self.setResult('ProbabilityMap', input_fname)
-        elif (argsDict.has_key('mpt') and argsDict['mpt'] == True) or \
-            not argsDict.has_key('mpt'):
-            msg = "Expected output from " + ModelAbbrev + " was not found."
+        if not self.argsDict.has_key('mes'):
+            self.argsDict['mes'] = 'FALSE'
+        self.setModelResult(self.ModelAbbrev + "_prob_map.tif", 'ProbabilityMap', 'mpt')
+        self.setModelResult(self.ModelAbbrev + "_bin_map.tif", 'BinaryMap', 'mbt')
+        self.setModelResult(self.ModelAbbrev + "_resid_map.tif", 'ResidualsMap', 'mes')
+        self.setModelResult(self.ModelAbbrev + "_mess_map.tif", 'MessMap', 'mes')
+        self.setModelResult(self.ModelAbbrev + "_MoD_map.tif", 'MoDMap', 'mes')
+        self.setModelResult(self.ModelAbbrev + "_output.txt", 'Text_Output')
+        self.setModelResult(self.ModelAbbrev + "_auc_plot.jpg", 'AUC_plot') 
+        self.setModelResult(self.ModelAbbrev + "_response_curves.pdf", 'ResponseCurves')
+        self.setModelResult("modelWorkspace", 'modelWorkspace')        
+        writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
+        
+    def setModelResult(self, filename, portname, arg_key=None):
+        outFileName = os.path.join(self.output_dname, filename)
+        required = not (self.argsDict.has_key(arg_key) and 
+                        self.argsDict[arg_key].lower() == 'false')
+        if required and not os.path.exists(outFileName):
+            msg = "Expected output from " + self.ModelAbbrev + " was not found."
             msg += "\nThis might indicate problems with the inputs to the R module."
             msg += "\nCheck the console output for additional R warnings "
             writetolog(msg, False, True)
             raise ModuleError(self, msg)
-        
-        if (argsDict.has_key('mbt') and argsDict['mbt'] == True) or \
-            not argsDict.has_key('mbt'):
-            outFileName = os.path.join(output_dname, ModelAbbrev + "_bin_map.tif")
-            output_file1 = utils.create_file_module(outFileName)
-            self.setResult('BinaryMap', output_file1)
-        
-        outFileName = os.path.join(output_dname, ModelAbbrev + "_output.txt")
-        output_file2 = utils.create_file_module(outFileName)
-        self.setResult('Text_Output', output_file2)
-        
-        outFileName = os.path.join(output_dname, ModelAbbrev + "_auc_plot.jpg")
-#        print "out auc: ", outFileName
-        output_file3 = utils.create_file_module(outFileName)
-        self.setResult('AUC_plot', output_file3)
-        
-        outFileName = os.path.join(output_dname, ModelAbbrev + "_response_curves.pdf")
-        output_file5 = utils.create_file_module(outFileName)
-        self.setResult('ResponseCurves', output_file5)
-        
-        outFileName = os.path.join(output_dname, "modelWorkspace")
-#        print "out auc: ", outFileName
-        output_file6 = utils.create_file_module(outFileName)
-        self.setResult('modelWorkspace', output_file6)
-        
-        writetolog("Finished " + ModelAbbrev   +  " builder\n", True, True) 
+            
+        output_file = utils.create_file_module(outFileName)
+        self.setResult(portname, output_file)
         
 class GLM(Model):
     _input_ports = list(Model._input_ports)
@@ -748,16 +684,6 @@ class MDSBuilder(Module):
 
     '''
 
-#    _input_ports = expand_ports([('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
-#                                 ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
-#                                 ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
-#                                 ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)')]
-#                                 )
-#    _input_ports = expand_ports([('RastersWithPARCInfoCSV', '(edu.utah.sci.vistrails.persistence:PersistentFile)'),
-#                                 ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
-#                                 ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
-#                                 ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)')]
-#                                 )
     _input_ports = expand_ports([('RastersWithPARCInfoCSV', '(edu.utah.sci.vistrails.basic:File)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
                                  ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
@@ -803,39 +729,137 @@ class MDSBuilder(Module):
         except:
             utils.informative_untrapped_error(self, "MDSBuilder")
 
-        output_file = utils.create_file_module(ourMDSBuilder.outputMDS)
-        
+        output_file = utils.create_file_module(ourMDSBuilder.outputMDS) 
         self.setResult('mdsFile', output_file)
 
+class FieldDataQuery(Module):
+    '''
+    columns can be specified with either a number (1 based) or the header string name.
+    The string is not case sensitive and does not need to be enclosed in quotes.
+    if the name or number of any of the columns cannot be found an error will be thrown.
+    
+    For the Query column you can either enter a single value or 
+        enter an equality statement with x used as a 
+        placeholder to represent the values in the query column.
+        
+        For example:
+            x < 2005 (would return values less than 2005)
+            x == 2000 or x == 2009 (would return 2000 or 2009)
+            The syntax is python in case you want to create an involved query.
+    '''    
+    _input_ports = expand_ports([('fieldData_file', '(gov.usgs.sahm:FieldData:DataInput)'),
+                                 ('x_column', 'basic:String', {'defaults':str('1')}),
+                                 ('y_column', 'basic:String', {'defaults':str('2')}),
+                                 ('Response_column', 'basic:String', {'defaults':str('3')}),
+                                 ('ResponseType', '(gov.usgs.sahm:ResponseType:Other)', {'defaults':str(['Presence(Absence)'])}),
+                                  ('Query_column', 'basic:String'),
+                                  ('Query', 'basic:String')])
+    _output_ports = expand_ports([('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')])
+    
+    def compute(self):
+        writetolog("\nRunning FieldDataQuery", True)
+        port_map = {'fieldData_file': ('fieldData', None, True),
+            'x_column': ('x_col', None, True),
+            'y_column': ('y_col', None, True),
+            'Response_column': ('res_col', None, True),
+            'ResponseType': ('response_type', None, True),
+            'Query_column': ('query_col', None, False),
+            'Query': ('query', None, False),}
+        
+        FDQParams = utils.map_ports(self, port_map)
+        FDQOutput = utils.mknextfile(prefix='FDQ_', suffix='.csv')
+        
+        infile = open(FDQParams['fieldData'], "rb")
+        csvReader = csv.reader(infile)
+        header = csvReader.next()
+        
+
+        outfile = open(FDQOutput, "wb")
+        csvwriter = csv.writer(outfile)
+        if FDQParams["response_type"] == 'Count':
+            responsetype = 'responseCount'
+        else:
+            responsetype = 'responseBinary'
+            
+        csvwriter.writerow(['X','Y',responsetype])
+        x_index = self.find_column(header,FDQParams['x_col'])
+        y_index = self.find_column(header,FDQParams['y_col'])
+        res_index = self.find_column(header,FDQParams['res_col'])
+        
+        use_query = False
+        if self.hasInputFromPort('Query_column'):
+            use_query = True
+
+            query_col_index = self.find_column(header,FDQParams['query_col'])
+        
+        for row in csvReader:
+            if not use_query or \
+             FDQParams['query'] == row[query_col_index] or \
+             self.check_query(row[query_col_index], FDQParams['query']):
+                csvwriter.writerow([row[x_index], row[y_index], row[res_index]])
+        
+        del infile
+        del outfile
+        
+        output_file = utils.create_file_module(FDQOutput) 
+        self.setResult('fieldData', output_file) 
+    
+    def find_column(self, header, column_name):
+        try:
+            index = int(column_name) - 1
+            if index > len(header) - 1:
+                msg = "Field data input contains fewer columns than the number specified\n"
+                msg += str(index + 1) + " is greater than " + str(len(header))
+                raise ModuleError(self, msg)
+        except:
+            try:
+                all_lowers = [item.lower() for item in header]
+                index = header.index(column_name.lower())
+            except:
+                msg = "The specified column wasn't in the input file\n"
+                msg += column_name + " not in " + str(header)
+                raise ModuleError(self, msg)
+        return index
+
+    def check_query(self, value, query):
+        #if our query doesn't contain <, > or = then we're done
+        if "<" in query or \
+            ">" in query or \
+            "=" in query:
+            toevaluate = query.replace('x', value)
+            return eval(toevaluate)
+        else:
+            return False
+            
+    
 class FieldDataAggregateAndWeight(Module):
     '''
     Documentation to be updated when module finalized.
     '''
     _input_ports = expand_ports([('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
-                                 ('aggregateRows', 'basic:Boolean'),
-                                 ('aggregateRowsByYear', 'basic:Boolean')])
+                                 ('aggregateRows', 'basic:Boolean')])
     _output_ports = expand_ports([('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')])
     
     def compute(self):
-        writetolog("\nRunning FieldDataQuery", True)
+        writetolog("\nFieldDataAggregateAndWeight", True)
         port_map = {'templateLayer': ('template', None, True),
             'fieldData': ('csv', None, True),
             'aggregateRowsByYear': ('aggRows', None, False),
             'addKDE': ('addKDE', None, False),}
         
         KDEParams = utils.map_ports(self, port_map)
-        output_fname = utils.mknextfile(prefix='FDQ_', suffix='.csv')
+        output_fname = utils.mknextfile(prefix='FDAW_', suffix='.csv')
         writetolog("    output_fname=" + output_fname, True, False)
         KDEParams['output'] = output_fname
         
-        output_fname = utils.mknextfile(prefix='FDQ_', suffix='.csv')
+        output_fname = utils.mknextfile(prefix='FDAW_', suffix='.csv')
         writetolog("    output_fname=" + output_fname, True, False)
         
-        ourFDQ = FDQ.FieldDataQuery()
-        utils.PySAHM_instance_params(ourFDQ, KDEParams)
+        ourFDAW = FDAW.FieldDataQuery()
+        utils.PySAHM_instance_params(ourFDAW, KDEParams)
             
-        ourFDQ.processCSV()
+        ourFDAW.processCSV()
         
         output_file = utils.create_file_module(output_fname)
         writetolog("Finished running FieldDataQuery", True)
@@ -897,17 +921,20 @@ class PARC(Module):
                                 ('PredictorList', '(gov.usgs.sahm:PredictorList:Other)'),
                                 ('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                 ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
+                                ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['False']), 'optional':True}),
                                 ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':True})]
 
-#    _output_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
-#    _output_ports = [('RastersWithPARCInfoCSV', '(edu.utah.sci.vistrails.persistence:PersistentFile)')]
     _output_ports = [('RastersWithPARCInfoCSV', '(edu.utah.sci.vistrails.basic:File)')]
     
     def compute(self):
         #writetolog("\nRunning PARC", True)
         
         ourPARC = parc.PARC()
-        output_dname = utils.mknextdir(prefix='PARC_')
+        template = self.forceGetInputFromPort('templateLayer').name
+        template_fname = os.path.splitext(os.path.split(template)[1])[0]
+        output_dname = os.path.join(utils.getrootdir(), 'PARC_' + template_fname)
+        if not os.path.exists(output_dname):
+            os.mkdir(output_dname)
         
         if configuration.verbose:
             ourPARC.verbose = True
@@ -916,11 +943,12 @@ class PARC(Module):
         ourPARC.out_dir = output_dname
 
         if self.hasInputFromPort("multipleCores"):
-             if self.getInputFromPort("multipleCores"):
-                ourPARC.multicores = "True"
+            ourPARC.multicores = self.getInputFromPort("multipleCores")         
 
-        workingCSV = utils.mknextfile(prefix='tmpFilesToPARC_', suffix='.csv')
-        outputCSV = utils.mknextfile(prefix='PARCOutput_', suffix='.csv')
+        if self.hasInputFromPort("ignoreNonOverlap"):
+            ourPARC.ignoreNonOverlap = self.getInputFromPort("ignoreNonOverlap")
+
+        workingCSV = os.path.join(output_dname, "tmpFilesToPARC.csv")
 
         #append additional inputs to the existing CSV if one was supplied
         #otherwise start a new CSV
@@ -947,8 +975,8 @@ class PARC(Module):
         f.close()
         del csvWriter
         ourPARC.inputs_CSV = workingCSV
-        ourPARC.template = self.forceGetInputFromPort('templateLayer').name
-        writetolog('    template layer = ' + self.forceGetInputFromPort('templateLayer').name)
+        ourPARC.template = template
+        writetolog('    template layer = ' + template)
         writetolog("    output_dname=" + output_dname, False, False)
         writetolog("    workingCSV=" + workingCSV, False, False)
         try:
@@ -967,7 +995,7 @@ class PARC(Module):
         output_file = utils.create_file_module(outputCSV)
         
         
-        writetolog("Finished running PARC", True)
+#        writetolog("Finished running PARC", True)
         self.setResult('RastersWithPARCInfoCSV', output_file)
         
 
@@ -1184,8 +1212,8 @@ class CovariateCorrelationAndSelection(Module):
         writetolog("\nOpening Select Predictors Layers widget", True)
         inputMDS = utils.dir_path_value(self.forceGetInputFromPort('inputMDS'))
         selectionName = self.forceGetInputFromPort('selectionName', 'initial')
-#        outputMDS = utils.mknextfile(prefix='SelectPredictorsLayers_' + selectionName + "_", suffix='.csv')
-#        displayJPEG = utils.mknextfile(prefix='PredictorCorrelation_' + selectionName + "_", suffix='.jpg')
+        utils.mknextfile(prefix='PredictorCorrelation_' + selectionName + "_", suffix='.jpg')
+        
         global session_dir
         outputMDS = os.path.join(session_dir, "CovariateCorrelationOutputMDS_" + selectionName + ".csv")
         displayJPEG = os.path.join(session_dir, "CovariateCorrelationDisplay.jpg")
@@ -1211,7 +1239,6 @@ class CovariateCorrelationAndSelection(Module):
         #outputPredictorList = dialog.outputList
         if retVal == 1:
             raise ModuleError(self, "Cancel or Close selected (not OK) workflow halted.")
-
 
 class ProjectionLayers(Module):
     '''
@@ -1326,7 +1353,7 @@ class ProjectionLayers(Module):
         
         if self.hasInputFromPort('directoryCrosswalkCSV'):
             crosswalkCSV = csv.reader(open(self.forceGetInputFromPort('directoryCrosswalkCSV'), 'r'))
-            header = crosswalkCSV
+            header = crosswalkCSV.next()
             for row in crosswalkCSV:
                 fromto.append(row[0], row[1])
             del crosswalkCSV    
@@ -1456,9 +1483,7 @@ class MAXENT(Module):
                         port_val = port_val.name
                     argWriter.writerow([port[0], port_val])
                 else:
-                    #print "   has no input "
                     kwargs = port[2]
-                    #print kwargs
                     try:
                         if port[1] == "(edu.utah.sci.vistrails.basic:Boolean)":
                             default = kwargs['defaults'][2:-2].lower()
@@ -1757,7 +1782,8 @@ _modules = generate_namespaces({'DataInput': [
                                               FieldData,
                                               TemplateLayer] + \
                                               build_predictor_modules(),
-                                'Tools': [FieldDataAggregateAndWeight,
+                                'Tools': [FieldDataQuery,
+                                          FieldDataAggregateAndWeight,
                                           MDSBuilder,
                                           PARC,
                                           RasterFormatConverter,
@@ -1775,6 +1801,7 @@ _modules = generate_namespaces({'DataInput': [
                                            (AggregationMethod, {'abstract': True}),
                                            (PredictorList, {'abstract': True}),
                                            (MergedDataSet, {'abstract': True}),
+                                           (ResponseType, {'abstract': True}),
                                            (RastersWithPARCInfoCSV, {'abstract': True})],
                                 'Output': [SAHMModelOutputViewerCell,
                                           SAHMSpatialOutputViewerCell,
