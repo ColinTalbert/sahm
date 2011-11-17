@@ -1,66 +1,45 @@
-AppendOut<-function(compile.out,Header,x,out,test.split,parent){
+AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent){
     Header.Length<-nrow(Header)
-    Parm.Len<-nrow(x)
-  if(file.access(compile.out,mode=0)==-1){ #if very first time through little to do
-          #A more complex than necessary way of writing a csv with several header lines
+
+  if(file.access(compile.out,mode=0)==-1){ #if very first time through little
+
           write.table(Header,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=",")
-          if(!is.null(out$dat$ma$ma.test))
-              write.table(cbind("","Train Split"),file=compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=",")
           write.table(x,file=compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=",")
-  } else { #this else (not the first time through) goes to the very end of the function
+          output<-matrix(0,0,0)
+  } else { #this else (not the first time through) read current csv first
           input<-read.table(compile.out,fill=TRUE,sep=",")
-          Orig.Header<-input[1:Header.Length,]
-
-          if(!is.null(out$dat$ma$ma.test)){ #if there is a test train split this if lasts until after plotting
-                  Train.x<-input[(Header.Length+2):(Header.Length+Parm.Len+1),]
-                  Orig.Train<-input[(Header.Length+1),]
-
-                  if(nrow(input)>15){ #if there is a test split in input (not in very first loop)
-                     Test.x<-input[(Header.Length+Parm.Len+4):nrow(input),]
-                     Orig.Test<-input[(Header.Length+Parm.Len+2):(Header.Length+Parm.Len+3),]
-                      if(test.split){ # if we're hitting this on a test and not a train
-                            Test.x[,ncol(Test.x)]<-x[,2]
-                             class(Orig.Test[,ncol(Orig.Test)])="character"
-                            Orig.Test[1,ncol(Orig.Test)]<-""
-                            Orig.Test[2,ncol(Orig.Test)]<-"Test Split"
-                      } else{
-                            Orig.Header<-cbind(Orig.Header,Header[,2])
-                            Train.x<-cbind(Train.x,x[,2])
-                            Orig.Train<-cbind(Orig.Train,"Train Split")
-                            }
-                  } else{
-                     Orig.Test=rbind(c("",""),cbind("","Test Split"))
-                     Test.x=x
-                  }
-
-                  temp<-try(write.table(Orig.Header,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=","),silent=TRUE)
-
-                  while(class(temp)=="try-error"){
+          output<-cbind(input,c(Header[,2],as.character(x[,2])))
+              temp=try(write.table(output,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=","),silent=TRUE)
+           while(class(temp)=="try-error"){
                       modalDialog("","Please Close the AppendedOutput.exe\ so that R can write to it then press ok to continue ","")
-                      temp<-try(write.table(Orig.Header,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=","),silent=TRUE)
-                  }
-                  try(write.table(Orig.Train,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=","))
-                  try(write.table(Train.x,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=","))
-                  try(write.table(Orig.Test,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=","))
-                  try(write.table(Test.x,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=","))
-                  if(ncol(Train.x)==ncol(Test.x) & ncol(Test.x)>2){
+                      temp<-try(write.table(output,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=","),silent=TRUE)
+                      }
+          }
+                    browser()
 
-                  jpeg(file=paste(parent,"AcrossModelPerformTestTrain.jpg",sep="//"),width=1000,height=1000,pointsize=13)
-                          par(mfrow=c(nrow(Train.x),1),mar=c(.2, 5, .6, 2),cex=1.1,oma=c(5, 0, 3, 0))
-                            temp<-Train.x[,2:ncol(Train.x)]
-                          temp<-matrix(data=as.numeric(as.matrix(temp,nrow=Par.Len)),nrow=Parm.Len,ncol=(ncol(Train.x)-1))
-                          temp1<-temp
-                          temp[2,]<-temp[2,]/100
-                          temp[3,]<-temp[3,]/100
-                          temp2<-Test.x[,2:ncol(Test.x)]
-                          temp2<-matrix(data=as.numeric(as.matrix(temp2,nrow=Par.Len)),nrow=Parm.Len,ncol=(ncol(Test.x)-1))
-                          temp2[2,]<-temp2[2,]/100
-                          temp2[3,]<-temp2[3,]/100
-                           ss<-seq(from=1,to=(ncol(Train.x)-1),by=1)
-                           x.labs<-sub(" ","\n",Train.x[,1])
-                           x.labs<-sub("Percent","Proportion",x.labs)
-                          colors.test=c("chocolate3","gold1","darkolivegreen2","steelblue1","brown3")
-                        colors.train=c("chocolate4","gold3","darkolivegreen4","steelblue4","brown4")
+  if(ncol(output)>2){
+                  jpeg(file=paste(parent,paste("AcrossModel",
+                       switch(out$dat$split.type,"crossValidation"="CV","test"="Test","none"=""),
+                       switch(out$input$model.family,"binomial"="Bin","bernoulli"="Bin","poisson"="Cnt"),
+                       ".jpg",sep=""),sep="\\"),width=1000,height=1000,pointsize=13)
+                  par(mfrow=c(length(Parm.Len),1),mar=c(.2, 5, .6, 2),cex=1.1,oma=c(5, 0, 3, 0))
+                      output<-output[(nrow(Header)+1):nrow(output),2:ncol(output)]
+                      train<-output[2:(length(Parm.Len)+2),]
+                      
+                      temp<-Train.x[,2:ncol(Train.x)]
+                    temp<-matrix(data=as.numeric(as.matrix(temp,nrow=Par.Len)),nrow=Parm.Len,ncol=(ncol(Train.x)-1))
+                    temp1<-temp
+                    temp[2,]<-temp[2,]/100
+                    temp[3,]<-temp[3,]/100
+                    temp2<-Test.x[,2:ncol(Test.x)]
+                    temp2<-matrix(data=as.numeric(as.matrix(temp2,nrow=Par.Len)),nrow=Parm.Len,ncol=(ncol(Test.x)-1))
+                    temp2[2,]<-temp2[2,]/100
+                    temp2[3,]<-temp2[3,]/100
+                     ss<-seq(from=1,to=(ncol(Train.x)-1),by=1)
+                     x.labs<-sub(" ","\n",Train.x[,1])
+                     x.labs<-sub("Percent","Proportion",x.labs)
+                    colors.test=c("chocolate3","gold1","darkolivegreen2","steelblue1","brown3")
+                  colors.train=c("chocolate4","gold3","darkolivegreen4","steelblue4","brown4")
                    #Plot 1.
                         plot(c(0,(ncol(Test.x)+2)),c(0,1.1),type="n",xaxt="n",
                             xlab=paste("Corresponding Column in ",ifelse(!is.null(out$dat$ma$ma.test),"AppendedOutputTestTrain.csv","AppendedOutput.csv"),sep=""),
@@ -108,8 +87,7 @@ AppendOut<-function(compile.out,Header,x,out,test.split,parent){
                           mtext(paste("Folder Name where model is found in ",
                             ifelse(!is.null(out$dat$ma$ma.test),"AppendedOutputTestTrain.csv","AppendedOutput.csv"),sep=""),side=1,outer=TRUE,line=3)
                        dev.off()
-                    }
-              }  else{
+                    } else{
 
           Orig.x<-input[(Header.Length+1):nrow(input),]
           temp<-try(write.table(cbind(Orig.Header,Header[,2]),file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=","),silent=TRUE)
@@ -165,5 +143,5 @@ AppendOut<-function(compile.out,Header,x,out,test.split,parent){
                      }
 
           try(write.table(cbind(Orig.x,x[,2]),file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=","))
-          }}
+          }
                }

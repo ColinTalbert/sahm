@@ -21,9 +21,9 @@ make.auc.plot.jpg<-function(out=out){
 
   train.mask<-seq(1:length(Stats))[names(Stats)=="train"]
 
-
+## breaking of the non-train split must be done separately because list structure is different for the test only and cv
     lst<-list()
-    if(out$dat$split.type=="test")
+    if(out$dat$split.type=="Test")
       lst$test<-Stats[[-c(train.mask)]]
     if(out$dat$split.type=="crossValidation") lst<-Stats[[-c(train.mask)]]
 
@@ -68,32 +68,36 @@ make.auc.plot.jpg<-function(out=out){
         capture.stats(lst,file.name=paste(out$dat$bname,"_output.txt",sep=""),label=out$dat$split.type,family=out$input$model.family,opt.methods=out$input$opt.methods,thresh=thresh)
     }
 
-        browser()
+        ############# determining the file name for the output csv
                        last.dir<-strsplit(out$input$output.dir,split="\\\\")
                         parent<-sub(paste("\\\\",last.dir[[1]][length(last.dir[[1]])],sep=""),"",out$input$output.dir)
-
                          compile.out<-paste(parent,
                               paste(switch(out$input$model.family,"binomial"="Binary","bernoulli"="Binary","poisson"="Count"),
                                 switch(out$dat$split.type,"test"="TestTrain","crossValidation"="CV","none"=""),
                               "AppendedOutput.csv",sep=""),sep="/")
 
-                               binom.stats<-lapply(Stats,function(lst){
-                               return(c(lst$correlation,lst$pct.dev.exp,lst$Pcc,lst$Sens,lst$Specf))})
+       ############ getting statistics along with appropriate names into a data frame for creating the appende output
 
                        if(out$input$model.family%in%c("binomial","bernoulli")){
-                           binom.stats<-lapply(Stats,function(lst){
-                               return(c(lst$correlation,lst$pct.dev.exp,lst$Pcc,lst$Sens,lst$Specf))})
-                       x=data.frame(cbind(c("Correlation Coefficient","Percent Deviance Explained","Percent Correctly Classified","Sensitivity","Specificity"),
-                            c(binom.stats[[train.mask]])))
-                       }else  x=data.frame(cbind(c("Correlation Coefficient","Percent Deviance Explained","Prediction Error"),
-                            c(as.vector(cor.test(pred,response)$estimate),pct.dev.exp,prediction.error)))
+                           csv.stats<-lapply(Stats,function(lst){
+                               return(c("","",lst$correlation,lst$pct.dev.exp,lst$Pcc,lst$Sens,lst$Specf))})
+                            stat.names<-c("Correlation Coefficient","Percent Deviance Explained","Percent Correctly Classified","Sensitivity","Specificity")
+                        } else{  csv.stats<-lapply(Stats,function(lst){
+                            return(c("","",as.vector(cor.test(pred,response)$estimate),pct.dev.exp,prediction.error))})
+                                stat.names<-c("Correlation Coefficient","Percent Deviance Explained","Prediction Error")
+                               }
+                            csv.vect<-c(csv.stats[[train.mask]],unlist(csv.stats[[-c(train.mask)]]))
+                            csv.vect[seq(from=2,by=length(csv.vect)/length(Stats),length=length(Stats))]<-c("Train",names(lst))
+                           x=data.frame(cbind(rep(c("","",stat.names),times=length(Stats)),
+                             csv.vect))
 
                         Header<-cbind(c("","Original Field Data","Field Data Template","PARC Output Folder","PARC Template","Covariate Selection Name",""),
                             c(last.dir[[1]][length(last.dir[[1]])],
-                            out$dat$ma$input$OrigFieldData,out$dat$ma$input$FieldDataTemp,out$dat$ma$input$ParcOutputFolder,
-                            out$dat$ma$input$ParcTemplate,ifelse(length(out$dat$ma$input$CovSelectName)==0,"NONE",out$dat$ma$input$CovSelectName),""))
+                            out$dat$input$OrigFieldData,out$dat$input$FieldDataTemp,out$dat$input$ParcOutputFolder,
+                            out$dat$input$ParcTemplate,ifelse(length(out$dat$ma$input$CovSelectName)==0,"NONE",out$dat$ma$input$CovSelectName),""))
 
-AppendOut(compile.out,Header,x,out,test.split,parent=parent)
+
+AppendOut(compile.out,Header,x,out,Parm.Len=stat.names,parent=parent)
 
     return(list(thresh=thresh,cmx=cmx,null.dev=null.dev,dev.fit=dev.fit,dev.exp=dev.exp,pct.dev.exp=pct.dev.exp,auc=auc.fit[1,1],auc.sd=auc.fit[1,2],
         plotname=plotname,pcc=PCC,sens=SENS,spec=SPEC,kappa=KAPPA,tss=TSS,correlation=correlation,residual.smooth.fct=residual.smooth.fct))
