@@ -399,10 +399,10 @@ def runRScript(script, args, module=None):
     
     command = program + " --vanilla -f " + scriptFile + " --args " + args
     
-    p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     writetolog("\nStarting R Processing of " + script, True)
     writetolog("    args: " + args, False, False)
     writetolog("    command: " + command, False, False)
+    p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     ret = p.communicate()
     
     if 'Error' in ret[1]:
