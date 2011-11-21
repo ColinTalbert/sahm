@@ -462,7 +462,7 @@ def applyMDS_selection(oldMDS, newMDS):
     oldHeader2 = outCSV.next()
     oldHeader3 = outCSV.next()
     
-    newHeader2 = oldHeader2[:2]
+    newHeader2 = oldHeader2[:3]
     for val in (oldHeader1[3:]):
         if oldvals.has_key(val) and \
         oldvals[val] == '0':
