@@ -245,7 +245,6 @@ class SelectListDialog(QtGui.QDialog):
         for i in range(0, len(header)):
             headerList.append([header[i], header2[i], header3[i]])
         
-        #headerList.sort()
         for item in headerList[3:]:
             child_item = QtGui.QTreeWidgetItem([item[0],])
             child_item.setFlags(QtCore.Qt.ItemIsUserCheckable |

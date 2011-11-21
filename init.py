@@ -1158,9 +1158,9 @@ class TestTrainingSplit(Module):
                 args += " m=" + str(trainingProportion) 
             except:
                 raise ModuleError(self, "The ratio of presence to absence (RatioPresAbs) must be a number greater than 0") 
-        
-        utils.runRScript("TestTrainSplit.r", args, self)
 
+        utils.runRScript("TestTrainSplit.r", args, self)
+        
         output = os.path.join(outputMDS)
         if os.path.exists(output):
             output_file = utils.create_file_module(output)
