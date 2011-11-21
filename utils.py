@@ -399,10 +399,10 @@ def runRScript(script, args, module=None):
     
     command = program + " --vanilla -f " + scriptFile + " --args " + args
     
-    p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     writetolog("\nStarting R Processing of " + script, True)
     writetolog("    args: " + args, False, False)
     writetolog("    command: " + command, False, False)
+    p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     ret = p.communicate()
     
     if 'Error' in ret[1]:
@@ -462,16 +462,16 @@ def applyMDS_selection(oldMDS, newMDS):
     oldHeader2 = outCSV.next()
     oldHeader3 = outCSV.next()
     
-    selectionline = []
-    for i in range(len(oldHeader1)):
-        if oldvals.has_key(oldHeader1[i]) and \
-        oldvals[oldHeader1[i]] == '0':
-            selectionline.append('0')
+    newHeader2 = oldHeader2[:2]
+    for val in (oldHeader1[3:]):
+        if oldvals.has_key(val) and \
+        oldvals[val] == '0':
+            newHeader2.append('0')
         else:
-            selectionline.append('1')
+            newHeader2.append('1')
             
     tmpOutCSV.writerow(oldHeader1)
-    tmpOutCSV.writerow(selectionline)    
+    tmpOutCSV.writerow(newHeader2)    
     tmpOutCSV.writerow(oldHeader3)
     for row in outCSV:
         tmpOutCSV.writerow(row)
