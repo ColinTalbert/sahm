@@ -167,9 +167,10 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
         nvar <- nrow(out$mods$summary)
         pcol <- min(ceiling(sqrt(nvar)),4)
         prow <- min(ceiling(nvar/pcol),3)
-        r.curves <- mars.plot(fit,plot.layout=c(prow,pcol),file.name=paste(bname,"_response_curves.pdf",sep=""))
 
-        } else r.curves<-mars.plot(fit,plot.it=F)
+        r.curves <- mars.plot(out$mods$final.mod,plot.layout=c(prow,pcol),file.name=paste(bname,"_response_curves.pdf",sep=""))
+
+        } else r.curves<-mars.plot(out$mods$final.mod,plot.it=F)
 
         pred.fct<-pred.mars
 

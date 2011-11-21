@@ -23,10 +23,10 @@ input.file[10]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
 input.file[11]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
 
 output.dir<-vector()
-output.dir[1]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\MarianDebugBranch\\rf"
-output.dir[2]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\MarianDebugBranch\\brt"
-output.dir[3]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\MarianDebugBranch\\mars"
-output.dir[4]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\MarianDebugBranch\\glm"
+output.dir[1]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\NewMasterBranch\\rf"
+output.dir[2]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\NewMasterBranch\\brt"
+output.dir[3]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\NewMasterBranch\\mars"
+output.dir[4]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\NewMasterBranch\\glm"
 
 for(i in 1:length(input.file)){
 set.seed(1)

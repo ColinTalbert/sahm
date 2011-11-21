@@ -28,6 +28,7 @@ input.file[11]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv
 ###########################################################################
 ############### Quick debug  ##############################################
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Split.csv"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/NoSplit.csv"
 output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
 rc="responseBinary"
 #######################################################################

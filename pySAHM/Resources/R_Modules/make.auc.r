@@ -23,10 +23,9 @@ make.auc.plot.jpg<-function(out=out){
 
 ## breaking of the non-train split must be done separately because list structure is different for the test only and cv
     lst<-list()
-    if(out$dat$split.type=="Test")
-      lst$test<-Stats[[-c(train.mask)]]
+    if(out$dat$split.type=="test")
+      lst$Test<-Stats[[-c(train.mask)]]
     if(out$dat$split.type=="crossValidation") lst<-Stats[[-c(train.mask)]]
-
 
  #AUC plot for binomial data
     if(out$input$model.family%in%c("binomial","bernoulli")){
@@ -86,7 +85,7 @@ make.auc.plot.jpg<-function(out=out){
                             return(c("","",as.vector(cor.test(pred,response)$estimate),pct.dev.exp,prediction.error))})
                                 stat.names<-c("Correlation Coefficient","Percent Deviance Explained","Prediction Error")
                                }
-                            csv.vect<-c(csv.stats[[train.mask]],unlist(csv.stats[[-c(train.mask)]]))
+                            csv.vect<-c(csv.stats[[train.mask]],if(out$dat$split.type!="none") unlist(csv.stats[[-c(train.mask)]]))
                             csv.vect[seq(from=2,by=length(csv.vect)/length(Stats),length=length(Stats))]<-c("Train",names(lst))
                            x=data.frame(cbind(rep(c("","",stat.names),times=length(Stats)),
                              csv.vect))
@@ -97,9 +96,8 @@ make.auc.plot.jpg<-function(out=out){
                             out$dat$input$ParcTemplate,ifelse(length(out$dat$ma$input$CovSelectName)==0,"NONE",out$dat$ma$input$CovSelectName),""))
 
 
-AppendOut(compile.out,Header,x,out,Parm.Len=stat.names,parent=parent)
+AppendOut(compile.out,Header,x,out,Parm.Len=length(stat.names),parent=parent,split.type=out$dat$split.type)
 
-    return(list(thresh=thresh,cmx=cmx,null.dev=null.dev,dev.fit=dev.fit,dev.exp=dev.exp,pct.dev.exp=pct.dev.exp,auc=auc.fit[1,1],auc.sd=auc.fit[1,2],
-        plotname=plotname,pcc=PCC,sens=SENS,spec=SPEC,kappa=KAPPA,tss=TSS,correlation=correlation,residual.smooth.fct=residual.smooth.fct))
+    return(list(thresh=thresh,residual.smooth.fct=residual.smooth.fct))
 }
 
