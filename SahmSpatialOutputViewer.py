@@ -21,17 +21,18 @@ def setQGIS(qgis):
 
 class SAHMSpatialOutputViewerCell(SpreadsheetCell):
     """
-    SAHMModelOutputViewerCell displays the various output from a SAHM Model run
+    SAHMModelOutputViewerCell is a VisTrails Module that
+    displays the various output from a SAHM Model run in a single cell
 
     """
     _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ('model_workspace', '(edu.utah.sci.vistrails.basic:File)')]
+    #all inputs are determined relative to the model_workspace
 
     def __init__(self):
         SpreadsheetCell.__init__(self)
 
-#        globals()["qgis"] = qgis
 
     def compute(self):
         inputs = {}
@@ -135,55 +136,269 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 
 #        self.setAnimationEnabled(True)
 
-        self.Frame = QtGui.QFrame()
-        self.ui = Ui_Frame()
-        self.ui.setupUi(self.Frame)
-
-        self.toolBarType = SAHMSpatialViewerToolBar
-        self.controlBarType = SAHMSpatialViewerToolBar
-
-        self.layout().addWidget(self.Frame)
-
-
     def updateContents(self, inputs):
         """ updateContents(inputs: dictionary) -> None
         Update the widget contents based on the input data
         """
+        
+#        for item in self.children():
+#            self.children().remove(item)
+        
+#        Cell_GUI = self.gen_viewer_frame()
 
-        self.canvas = qgis.gui.QgsMapCanvas()
-        self.canvas.show()
 
-        self.ui.legend_label.setText(QtCore.QString(inputs["model_tag"]))
+        self.toolBarType = SAHMSpatialViewerToolBar
+        self.controlBarType = SAHMSpatialViewerToolBar
 
-        self.toolPan = qgis.gui.QgsMapToolPan(self.canvas)
+#        self.legend_label.setText(QtCore.QString(inputs["model_tag"]))
 
-        self.canvas.setMapTool(self.toolPan)
-        self.canvas.setWheelAction(2)
-        self.canvas.setCanvasColor(QtCore.Qt.white)
-        self.canvas.enableAntiAliasing(True)
 
         self.all_layers = {}
-        self.add_raster(inputs["prob_map"], "prob_map")
-        self.add_raster(inputs["bin_map"], "bin_map")
-        self.add_raster(inputs["resid_map"], "resid_map")
-        self.add_raster(inputs["mess_map"], "mess_map")
-        self.add_raster(inputs["MoD_map"], "MoD_map")
+        self.legends = {}
+#        self.toadd = []
+        layers_to_add = [{"tag":"prob_map", "type":"raster", "categorical":False, "min":0, "max":1, "num_breaks":7, "displayorder":3},
+                         {"tag":"bin_map", "type":"raster", "categorical":True, "categories":[0,1], "displayorder":-1},
+                         {"tag":"resid_map", "type":"raster", "categorical":False, "min":0, "max":"pullfromdata", "num_breaks":6, "displayorder":-1},
+                         {"tag":"mess_map", "type":"raster", "categorical":True, "categories":"pullfromdata", "displayorder":-1},
+                         {"tag":"MoD_map", "type":"raster", "categorical":False, "min":0, "max":"pullfromdata", "num_breaks":6, "displayorder":-1},
+                         {"tag":"pres_points", "type":"Vector", "color":"255,0,0", "displayorder":0},
+                         {"tag":"abs_points", "type":"Vector", "color":"'0,255,0'", "displayorder":1},
+                         {"tag":"backs_points", "type":"Vector", "color":"'0,0,0'", "displayorder":-1}]
+        
+        
+        for layer_args in layers_to_add:
+            self.add_layer(inputs, layer_args)
+        
+#        self.add_raster(inputs["prob_map"], "prob_map")
+#        self.legends["prob_map"] =  self.create_continuous_legend("prob_map", None, (0, 1), 6)
+#        self.add_raster(inputs["bin_map"], "bin_map")
+#        self.legends["bin_map"] =  self.create_continuous_legend("bin_map", None, (0, 1), 1)
+#        self.add_raster(inputs["resid_map"], "resid_map")
+#        self.legends["resid_map"] =  self.create_continuous_legend("resid_map", None, (0, 1), 6)
+#        self.add_raster(inputs["mess_map"], "mess_map")
+#        self.legends["bin_map"] =  self.create_continuous_legend("bin_map", None, (0, 1), 1)
+#        self.add_raster(inputs["MoD_map"], "MoD_map")
+#        self.legends["bin_map"] =  self.create_continuous_legend("bin_map", None, (0, 1), 1)
+#
+#        self.add_vector(inputs['pres_points'], "pres_points", '255,0,0')
+#        self.add_vector(inputs['abs_points'], "abs_points", '0,255,0')
+#        self.add_vector(inputs['backs_points'], "backs_points", '0,0,0')
 
-        self.add_vector(inputs['pres_points'], "pres_points", '255,0,0')
-        self.add_vector(inputs['abs_points'], "abs_points", '0,255,0')
-        self.add_vector(inputs['backs_points'], "backs_points", '0,0,0')
+        self.map_canvas.setExtent(self.all_layers["prob_map"].layer().extent())
+#        canvas.setLayerSet([self.all_layers["pres_points"],
+#                                 self.all_layers["abs_points"],
+#                           self.all_layers["prob_map"]])
 
-        self.canvas.setExtent(self.all_layers["prob_map"].layer().extent())
-        self.canvas.setLayerSet([self.all_layers["pres_points"],
-                                 self.all_layers["abs_points"],
-                           self.all_layers["prob_map"]])
+#        self.ui.map_frame.layout().addWidget(self.map_canvas)
+#        legend = self.create_continuous_legend("prob_map", None, (0, 1), 6)
+#        self.switch_legend(self.legends["prob_map"])
+        
+#        self.update()
+        initial_layers = []
+        for i in range(10):
+            tag = [v["tag"] for v in layers_to_add if v["displayorder"] == i ]
+            if tag:
+                initial_layers.append(self.all_layers[tag[0]])
+            
+#        self.map_canvas.setLayerSet(initial_layers)
+        
+        canvas = qgis.gui.QgsMapCanvas()
+        canvas.show()
 
-        self.ui.map_frame.layout().addWidget(self.canvas)
-        legend = self.create_legend_ramp("prob_map", None, (0, 1), 6)
-
-        self.ui.legend.layout().addWidget(legend)
-        # Update the new figure canvas
+        canvas.setCanvasColor(QtCore.Qt.white)
+        canvas.enableAntiAliasing(True)
+        canvas.setExtent(self.all_layers["prob_map"].layer().extent())
+        canvas.setLayerSet(initial_layers)
+        self.layout().addWidget(canvas)
         self.update()
+
+
+    def switch_legend(self, new_legend):
+        #
+        for item in self.legend.children():
+            self.legend.children().pop()
+        self.legend.layout().addWidget(new_legend)
+
+    def gen_viewer_frame(self):
+        '''returns the frame that contains our split window
+        gui that fills the spreadsheet cell
+#        '''
+#        Frame = QtGui.QFrame(self)
+#        Frame.resize(734, 706)
+#        Frame.setFrameShape(QtGui.QFrame.StyledPanel)
+#        Frame.setFrameShadow(QtGui.QFrame.Plain)
+#        gridLayout = QtGui.QGridLayout(Frame)
+#        gridLayout.setMargin(0)
+#        gridLayout.setSpacing(0)
+#        splitter = QtGui.QSplitter(Frame)
+#        splitter.setOrientation(QtCore.Qt.Vertical)
+#        legend_frame_2 = QtGui.QFrame(splitter)
+#        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+#        sizePolicy.setHorizontalStretch(0)
+#        sizePolicy.setVerticalStretch(0)
+#        sizePolicy.setHeightForWidth(legend_frame_2.sizePolicy().hasHeightForWidth())
+#        legend_frame_2.setSizePolicy(sizePolicy)
+#        legend_frame_2.setMinimumSize(QtCore.QSize(0, 0))
+#        legend_frame_2.setBaseSize(QtCore.QSize(0, 0))
+#        legend_frame_2.setFrameShape(QtGui.QFrame.StyledPanel)
+#        legend_frame_2.setFrameShadow(QtGui.QFrame.Sunken)
+#
+#        horizontalLayout_2 = QtGui.QHBoxLayout(legend_frame_2)
+#        horizontalLayout_2.setSpacing(5)
+#        horizontalLayout_2.setContentsMargins(9, 0, 0, 0)
+#
+#        self.legend_label = QtGui.QLabel(legend_frame_2)
+#        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Minimum)
+#        sizePolicy.setHorizontalStretch(0)
+#        sizePolicy.setVerticalStretch(0)
+#        sizePolicy.setHeightForWidth(self.legend_label.sizePolicy().hasHeightForWidth())
+#        self.legend_label.setSizePolicy(sizePolicy)
+#        self.legend_label.setText(QtGui.QApplication.translate("Frame", "TextLabel", None, QtGui.QApplication.UnicodeUTF8))
+#
+#        horizontalLayout_2.addWidget(self.legend_label)
+#        self.legend = QtGui.QFrame(legend_frame_2)
+#        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+#        sizePolicy.setHorizontalStretch(0)
+#        sizePolicy.setVerticalStretch(0)
+#        sizePolicy.setHeightForWidth(self.legend.sizePolicy().hasHeightForWidth())
+#        self.legend.setSizePolicy(sizePolicy)
+#        self.legend.setFrameShape(QtGui.QFrame.NoFrame)
+#        self.legend.setFrameShadow(QtGui.QFrame.Plain)
+#        self.legend.setLineWidth(0)
+#
+#        self.legend_layout = QtGui.QHBoxLayout(self.legend)
+#        self.legend_layout.setMargin(0)
+#
+#        horizontalLayout_2.addWidget(self.legend)
+#        
+#        self.map_frame = QtGui.QFrame(splitter)
+#        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
+#        sizePolicy.setHorizontalStretch(0)
+#        sizePolicy.setVerticalStretch(1)
+#        sizePolicy.setHeightForWidth(self.map_frame.sizePolicy().hasHeightForWidth())
+#        self.map_frame.setSizePolicy(sizePolicy)
+#        self.map_frame.setFrameShape(QtGui.QFrame.StyledPanel)
+#        self.map_frame.setFrameShadow(QtGui.QFrame.Sunken)
+#
+#        horizontalLayout = QtGui.QHBoxLayout(self.map_frame)
+#        horizontalLayout.setSpacing(0)
+#        horizontalLayout.setMargin(0)
+#        
+#        self.map_canvas = qgis.gui.QgsMapCanvas(self.map_frame)
+#        self.toolPan = qgis.gui.QgsMapToolPan(self.map_canvas)
+#        self.map_canvas.setMapTool(self.toolPan)
+#        self.map_canvas.setWheelAction(2)
+#        self.map_canvas.setCanvasColor(QtCore.Qt.white)
+#        self.map_canvas.enableAntiAliasing(True)
+#        
+#        self.map_frame.layout().addWidget(self.map_canvas)
+##        
+#        gridLayout.addWidget(splitter, 0, 0, 1, 1)
+##        
+#        return Frame
+        
+
+
+
+        
+#        splitter = QtGui.QSplitter(self)
+#        splitter.setOrientation(QtCore.Qt.Vertical)
+#
+#        
+#        self.map_canvas = qgis.gui.QgsMapCanvas(splitter)
+#        legend = QtGui.QFrame(splitter)
+#        legend.layout = QtGui.QHBoxLayout(legend)
+#        legend.layout.setSpacing(5)
+#        legend.layout.setContentsMargins(9, 0, 0, 0)
+#        
+#        self.legend_label = QtGui.QLabel()
+#        legend.layout.addWidget(self.legend_label)
+#
+#        
+#        self.legend_frame = QtGui.QFrame(legend)
+#        self.legend_frame.layout = QtGui.QHBoxLayout(self.legend_frame)
+#        self.legend_frame.layout.setMargin(0)
+#        
+#        legend.layout.addWidget(self.legend_frame)
+#        
+#
+#        splitter.addWidget(legend)
+#        splitter.addWidget(self.map_canvas)
+#        return splitter
+        
+        
+        Frame = QtGui.QFrame(self)
+#        Frame.setObjectName(_fromUtf8("Frame"))
+        Frame.resize(734, 706)
+#        Frame.setWindowTitle(QtGui.QApplication.translate("Frame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
+        Frame.setFrameShape(QtGui.QFrame.StyledPanel)
+        Frame.setFrameShadow(QtGui.QFrame.Plain)
+        gridLayout = QtGui.QGridLayout(Frame)
+        gridLayout.setMargin(0)
+        gridLayout.setSpacing(0)
+#        gridLayout.setObjectName(_fromUtf8("gridLayout"))
+        splitter = QtGui.QSplitter(Frame)
+        splitter.setOrientation(QtCore.Qt.Vertical)
+#        splitter.setObjectName(_fromUtf8("splitter"))
+        legend_frame = QtGui.QFrame(splitter)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(legend_frame.sizePolicy().hasHeightForWidth())
+        legend_frame.setSizePolicy(sizePolicy)
+        legend_frame.setMinimumSize(QtCore.QSize(0, 0))
+        legend_frame.setBaseSize(QtCore.QSize(0, 0))
+        legend_frame.setFrameShape(QtGui.QFrame.StyledPanel)
+        legend_frame.setFrameShadow(QtGui.QFrame.Sunken)
+#        legend_frame_2.setObjectName(_fromUtf8("legend_frame_2"))
+        horizontalLayout = QtGui.QHBoxLayout(legend_frame)
+        horizontalLayout.setSpacing(5)
+        horizontalLayout.setContentsMargins(9, 0, 0, 0)
+#        horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.legend_label = QtGui.QLabel(legend_frame)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.legend_label.sizePolicy().hasHeightForWidth())
+        self.legend_label.setSizePolicy(sizePolicy)
+#        legend_label.setText(QtGui.QApplication.translate("Frame", "TextLabel", None, QtGui.QApplication.UnicodeUTF8))
+#        legend_label.setObjectName(_fromUtf8("legend_label"))
+        horizontalLayout.addWidget(self.legend_label)
+        self.legend = QtGui.QFrame(legend_frame)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+#        legend.setSizePolicy(sizePolicy)
+#        legend.setFrameShape(QtGui.QFrame.NoFrame)
+        self.legend.setFrameShadow(QtGui.QFrame.Plain)
+        self.legend.setLineWidth(0)
+#        self.legend.setObjectName(_fromUtf8("legend"))
+        legend_layout = QtGui.QHBoxLayout(self.legend)
+        legend_layout.setMargin(0)
+#        legend_layout.setObjectName(_fromUtf8("legend_layout"))
+        horizontalLayout.addWidget(self.legend)
+        map_frame = QtGui.QFrame(splitter)
+#        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
+#        sizePolicy.setHorizontalStretch(0)
+#        sizePolicy.setVerticalStretch(1)
+#        sizePolicy.setHeightForWidth(map_frame.sizePolicy().hasHeightForWidth())
+#        map_frame.setSizePolicy(sizePolicy)
+#        map_frame.setFrameShape(QtGui.QFrame.StyledPanel)
+#        map_frame.setFrameShadow(QtGui.QFrame.Sunken)
+#        map_frame.setObjectName(_fromUtf8("map_frame"))
+        horizontalLayout = QtGui.QHBoxLayout(map_frame)
+        horizontalLayout.setSpacing(0)
+        horizontalLayout.setMargin(0)
+#        horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        gridLayout.addWidget(splitter, 0, 0, 1, 1)
+        
+        
+        
+        
+        self.map_canvas = qgis.gui.QgsMapCanvas()
+        map_frame.layout().addWidget(self.map_canvas)
+
+        return splitter
 
     def dumpToFile(self, filename):
         pass
@@ -191,35 +406,63 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
     def saveToPDF(self, filename):
         pass
 
+    def add_layer(self, inputs, kwargs):
+        if kwargs["type"] == "raster":
+            self.add_raster(inputs[kwargs["tag"]], kwargs["tag"])
+            self.add_legend(inputs[kwargs["tag"]], kwargs)                                         
+        else:
+            self.add_vector(inputs[kwargs["tag"]], kwargs["tag"], kwargs["color"])
+
     def add_raster(self, path, tag):
         if os.path.exists(path):
             fileInfo = QtCore.QFileInfo(path)
             baseName = fileInfo.baseName()
             raster = qgis.core.QgsRasterLayer(path, baseName)
     
-            if tag=="res_map":
+            if tag=="resid_map":
                 min_max = getrasterminmax(path)
             else:
                 min_max = None
-    
-            self.set_color_ramp(tag, raster)
-            qgis.core.QgsMapLayerRegistry.instance().addMapLayer(raster)
+            self.set_color_ramp(tag, raster, min_max)
             self.all_layers[tag] = qgis.gui.QgsMapCanvasLayer(raster)
+            return True
         else:
-            print "The file " + path + " could not be found on the file system."
-            print "   tag will not be enabled"
+            return False          
+
+    def add_vector(self, path, tag, strcolor):
+        fileInfo = QtCore.QFileInfo(path)
+        baseName = fileInfo.baseName()
+        points_layer = qgis.core.QgsVectorLayer(path, baseName, "ogr")
+
+        props = {'color':strcolor, 'radius':'3' }
+        s = qgis.core.QgsMarkerSymbolV2.createSimple(props)
+
+        points_layer.setRendererV2( qgis.core.QgsSingleSymbolRendererV2( s ) )
+
+        qgis.core.QgsMapLayerRegistry.instance().addMapLayer(points_layer)
+        self.all_layers[tag] = qgis.gui.QgsMapCanvasLayer(points_layer)
+        
+    def add_legend(self, path, kwargs):
+        '''Adds a legend to our legends dict based on the raster and 
+        parameters passed
+        '''
+        if kwargs['categorical']:
+            legend = self.create_categorical_legend(kwargs)
+#            self.legends[kwargs["tag"]] =  legend
+        else:
+            self.legends[kwargs["tag"]] =  self.create_continuous_legend(kwargs["tag"], None, (0, 1), 6)
 
     def set_color_ramp(self, layer_type, raster, min_max=None):
+        '''creates and applies a qgis color ramp to correctly 
+        display the input raster layer according to the entries in the 
+        csv
+        '''
         QgsColorRampShader = qgis.core.QgsColorRampShader
 
-
         if layer_type == "MoD_map":
-            #raster.setDrawingStyle(qgis.core.QgsRasterLayer.PalettedColor)
+            MoD is categorical
             raster.setDrawingStyle(qgis.core.QgsRasterLayer.SingleBandPseudoColor)
             raster.setColorShadingAlgorithm(qgis.core.QgsRasterLayer.PseudoColorShader)
-
-            #raster.setColorShadingAlgorithm(qgis.core.QgsRasterLayer.ColorRampShader)
-#            raster.setDrawingStyle(qgis.core.QgsRasterLayer.SingleBandGray)
             return None
         else:
             raster.setDrawingStyle(qgis.core.QgsRasterLayer.SingleBandPseudoColor)
@@ -252,15 +495,17 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 
         return None
 
-    def create_legend_ramp(self, layer_type, raster, min_max, num_tags):
+    def create_continuous_legend(self, layer_type, raster, min_max, num_tags):
+        '''Generates a qframe that contains the color ramp with labels
+        that gets displayed in the legend frame
+        '''
         legend = QtGui.QFrame()
-        legend.setObjectName(QtCore.QString.fromUtf8("legend"))
         mainlayout = QtGui.QVBoxLayout(legend)
         mainlayout.setSpacing(0)
         mainlayout.setMargin(0)
 
         frame_colorbar = QtGui.QFrame(legend)
-        frame_colorbar.setObjectName(QtCore.QString.fromUtf8("frame_colorbar"))
+#        frame_colorbar.setObjectName(QtCore.QString.fromUtf8("frame_colorbar"))
         layout_colorbar = QtGui.QHBoxLayout(frame_colorbar)
         layout_colorbar.setSpacing(0)
         layout_colorbar.setContentsMargins(-1, 2, -1, 0)
@@ -268,13 +513,13 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         frame_ticks = QtGui.QFrame(legend)
         frame_ticks.setFrameShape(QtGui.QFrame.StyledPanel)
         frame_ticks.setFrameShadow(QtGui.QFrame.Raised)
-        frame_ticks.setObjectName(QtCore.QString.fromUtf8("frame_ticks"))
+#        frame_ticks.setObjectName(QtCore.QString.fromUtf8("frame_ticks"))
         layout_ticks = QtGui.QHBoxLayout(frame_ticks)
         layout_ticks.setSpacing(0)
         layout_ticks.setContentsMargins(-1, 0, -1, 0)
 
         frame_labels = QtGui.QFrame(legend)
-        frame_labels.setObjectName(QtCore.QString.fromUtf8("frame_labels"))
+#        frame_labels.setObjectName(QtCore.QString.fromUtf8("frame_labels"))
         layout_labels = QtGui.QHBoxLayout(frame_labels)
         layout_labels.setSpacing(0)
         layout_labels.setContentsMargins(4, 0, 4, 0)
@@ -303,7 +548,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
                     stylesheet += ", 255), stop:1 rgba("
                     stylesheet += cur_color
                     stylesheet += ", 255));"
-                    color_label.setStyleSheet(QtCore.QString.fromUtf8(stylesheet))
+#                    color_label.setStyleSheet(QtCore.QString.fromUtf8(stylesheet))
                     color_label.setText(QtCore.QString.fromUtf8(""))
                     layout_colorbar.addWidget(color_label)
 
@@ -352,18 +597,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         return legend
 
 
-    def add_vector(self, path, tag, strcolor):
-        fileInfo = QtCore.QFileInfo(path)
-        baseName = fileInfo.baseName()
-        points_layer = qgis.core.QgsVectorLayer(path, baseName, "ogr")
 
-        props = {'color':strcolor, 'radius':'3' }
-        s = qgis.core.QgsMarkerSymbolV2.createSimple(props)
-
-        points_layer.setRendererV2( qgis.core.QgsSingleSymbolRendererV2( s ) )
-
-        qgis.core.QgsMapLayerRegistry.instance().addMapLayer(points_layer)
-        self.all_layers[tag] = qgis.gui.QgsMapCanvasLayer(points_layer)
 
 #
 #def update_displayed_layers(cellWidget):
@@ -383,6 +617,8 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 #    cellWidget.canvas.setLayerSet(layerset)
 #    cellWidget.canvas.repaint()
 
+    def create_categorical_legend(self, kwargs):
+        pass
 
 class ViewLayerAction(QtGui.QAction):
     def __init__(self, action_dict, parent=None):
@@ -403,6 +639,8 @@ class ViewLayerAction(QtGui.QAction):
         self.displayLayer()
 
     def toggleOthers(self):
+        '''Unselect the other raster layers
+        '''
         for action in self.toolBar.actions():
             if "group" in dir(action) and \
                 action.group == self.group and \
@@ -410,6 +648,9 @@ class ViewLayerAction(QtGui.QAction):
                 action.setChecked(False)
 
     def displayLayer(self):
+        '''Display all the layers that have their
+        actions selected in the toolbar
+        '''
         cellWidget = self.toolBar.getSnappedWidget()
 
         all_layers = cellWidget.all_layers
@@ -419,9 +660,9 @@ class ViewLayerAction(QtGui.QAction):
                 layer = all_layers[action.tag]
                 layerset.append(qgis.gui.QgsMapCanvasLayer(layer))
 
-        cellWidget.canvas.setLayerSet(layerset)
-        cellWidget.canvas.repaint()
-
+        cellWidget.map_canvas.setLayerSet(layerset)
+#        cellWidget.canvas.repaint()
+        cellWidget.update()
 
 class SAHMSpatialViewerToolBar(QCellToolBar):
     """
@@ -464,6 +705,7 @@ class SAHMSpatialViewerToolBar(QCellToolBar):
 
         for action_dict in actions:
             self.appendAction(ViewLayerAction(action_dict, self))
+            
             
     def updateToolBar(self):
         QCellToolBar.updateToolBar(self)

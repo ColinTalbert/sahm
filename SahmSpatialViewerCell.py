@@ -66,6 +66,7 @@ class Ui_Frame(object):
         self.legend_layout.setMargin(0)
         self.legend_layout.setObjectName(_fromUtf8("legend_layout"))
         self.horizontalLayout_2.addWidget(self.legend)
+        
         self.map_frame = QtGui.QFrame(self.splitter)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
