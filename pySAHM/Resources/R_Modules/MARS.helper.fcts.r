@@ -606,9 +606,6 @@ function (data,                         # the input data frame
   fitted.values <- as.data.frame(fitted.values)
   names(fitted.values) <- names(ydat)
 
-  model.residuals <- as.data.frame(model.residuals)
-  names(model.residuals) <- names(ydat)
-
   deviances <- data.frame(names(ydat),null.deviances,null.dfs,residual.deviances,residual.dfs,converged)
   names(deviances) <- c("species","null.dev","null.df","resid.dev","resid.df","converged")
 

@@ -10,7 +10,7 @@ make.auc.plot.jpg<-function(out=out){
                 pred=input.list$train$pred),opt.methods=out$input$opt.methods))[2]
             }
             else thresh=NULL
-
+ browser()
 ################# Calculate all statistics on test\train or train\cv splits
   Stats<-lapply(input.list,calcStat,family=out$input$model.family,thresh=thresh)
 
@@ -43,13 +43,17 @@ make.auc.plot.jpg<-function(out=out){
     if(out$input$model.family%in%c("poisson")){
             jpeg(file=plotname)
             par(mfrow=c(2,2))
-             plot(log(Statspred[pred!=0]),(auc.data$pres.abs[pred!=0]-pred[pred!=0]),xlab="Predicted Values (log scale)",ylab="Residuals",main="Residuals vs Fitted",ylim=c(-3,3))
+             plot(log(Stats$train$auc.data$pred[Stats$train$auc.data$pred!=0]),
+                  (Stats$train$auc.data$pres.abs[Stats$train$auc.data$pred!=0]-Stats$train$auc.data$pred[Stats$train$auc.data$pred!=0]),
+                  xlab="Predicted Values (log scale)",ylab="Residuals",main="Residuals vs Fitted",ylim=c(-3,3))
               abline(h=0,lty=2)
               #this is the residual plot from glm but I don't think it will work for anything else
               qqnorm(residuals(out$mods$final.mod),ylab="Std. deviance residuals")
               qqline(residuals(out$mods$final.mod))
                yl <- as.expression(substitute(sqrt(abs(YL)), list(YL = as.name("Std. Deviance Resid"))))
-              plot(log(pred[pred!=0]),sqrt((abs(residuals(out$mods$final.mod,type="deviance")[pred!=0]))),xlab="Predicted Values (log Scale)",ylab=yl)
+              plot(log(Stats$train$auc.data$pred[Stats$train$auc.data$pred!=0]),
+                 sqrt((abs(residuals(out$mods$final.mod,type="deviance")[Stats$train$auc.data$pred!=0]))),
+                 xlab="Predicted Values (log Scale)",ylab=yl)
             graphics.off()}
 
  ##################### CAPTURING TEXT OUTPUT #######################

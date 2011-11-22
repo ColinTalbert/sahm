@@ -47,15 +47,22 @@
       if(length(r.col)==0) stop("Response column was not found")
       if(length(r.col)>1) stop("Multiple columns matched the response column")
       names(ma)[r.col]<-"response"
+      rm.list<-vector()
 
         # remove background points which aren't used here
          if(length(which(ma[,r.col]==-9999,arr.ind=TRUE))>0) ma<-ma[-c(which(ma[,r.col]==-9999,arr.ind=TRUE)),]
+        # remove evaluation points
+        if(any(!is.na(match("EvalSplit",names(ma))))){
+             EvalIndx<-match("EvalSplit",names(ma))
+             ma<-ma[-c(which(ma[,EvalIndx]=="test",arr.ind=TRUE)),]
+             rm.list<-EvalIndx
+        }
 
        # remove incomplete cases and warn user if this number is more than 10% of the data
 
       # find and save xy columns#
       xy.cols <- na.omit(c(match("x",tolower(names(ma))),match("y",tolower(names(ma)))))
-      if(length(xy.cols)>0)  rm.list<-xy.cols
+      if(length(xy.cols)>0)  rm.list<-c(rm.list,xy.cols)
 
        # remove weight column except for Random Forest
        site.weights<-match("site.weights",tolower(names(ma)))

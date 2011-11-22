@@ -1,4 +1,4 @@
- TestTrainSplit<-function(input.file,output.file,response.col="ResponseBinary",trainProp=.7,RatioPresAbs=NULL){
+ TestTrainSplit<-function(input.file,output.file,response.col="ResponseBinary",trainProp=.7,RatioPresAbs=NULL,Eval.Split=FALSE){
 
 #Description:
 #this code takes as input an mds file with the first line being the predictor or
@@ -22,7 +22,9 @@
 
 #Written by Marian Talbert 3/23/2011
 #Modified 5/10/2011 to handle count data
-
+#Modified 11/22/2011 to add the Eval.Split option so that the test/training split can be used
+          #either for model selection or evaluation if set to true then this split will be ignored until
+          #after a final model has been selected
 
 
      if(trainProp<=0 | trainProp>1) stop("Train Proportion (trainProp) must be a number between 0 and 1 excluding 0")
@@ -72,7 +74,8 @@
          #not all elements in a column are of the same type
           dat.in<-dat.in[c(1:3,rownames(dat)),] #removing rows that weren't selected for the test train split
           dat.in[4:(dim(dat.in)[1]),(dim(dat.in)[2]+1)]<-dat$TrainSplit
-          dat.in[c(1,3),(dim(dat.in)[2])]<-c("Split","")
+
+          dat.in[c(1,3),(dim(dat.in)[2])]<-c(ifelse(Eval.Split==FALSE,"Split","EvalSplit"),"")
           dat.in[2,(dim(dat.in)[2])]<-1
 
 
@@ -144,7 +147,7 @@
                
                dat.in<-dat.in[c(1:3,rownames(dat)),] #removing rows that weren't selected for the test train split
                dat.in[4:(dim(dat.in)[1]),(dim(dat.in)[2]+1)]<-dat$TrainSplit
-               dat.in[c(1,3),(dim(dat.in)[2])]<-c("Split","")
+               dat.in[c(1,3),(dim(dat.in)[2])]<-c(ifelse(Eval.Split==FALSE,"Split","EvalSplit"),"")
                dat.in[2,(dim(dat.in)[2])]<-1
 
 

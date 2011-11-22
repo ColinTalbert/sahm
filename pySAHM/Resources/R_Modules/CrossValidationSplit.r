@@ -16,11 +16,13 @@ CrossValidationSplit<-function(input.file,output.file,response.col="ResponseBina
 #Written by Marian Talbert 9/29/2011
 
      if(n.folds<=1 | n.folds%%1!=0) stop("n.folds must be an integer greater than 1")
-      browser()
 
    #Read input data and remove any columns to be excluded
           dat.in<-read.csv(input.file,header=FALSE,as.is=TRUE)
           dat<-as.data.frame(dat.in[4:dim(dat.in)[1],])
+   # if there was a test training split this should be used for Evaluation of the final model since cross validation can only be
+   # used for model selection
+          if(any(!is.na(match("Split",dat.in[1,])))) dat.in[1,match("Split",dat.in[1,])]<-"EvalSplit"
           names(dat)<-dat.in[1,]
 
         response<-dat[,match(tolower(response.col),tolower(names(dat)))]
@@ -35,11 +37,11 @@ CrossValidationSplit<-function(input.file,output.file,response.col="ResponseBina
             dat<-dat[-c(which(response==-9999,arr.ind=TRUE)),]
             dat.in<-dat.in[-c(which(response==-9999,arr.ind=TRUE)+3),]
             response<-response[-c(which(response==-9999,arr.ind=TRUE))]
-            bg.dat$TrainSplit=""
+            bg.dat$Split=""
             }
 
             #this splits the training set
-             split.mask<-dat[,match(tolower("split"),tolower(names(dat)))]=="train"
+             split.mask<-dat[,match(tolower("evalsplit"),tolower(names(dat)))]=="train"
              index<-seq(1:nrow(dat))[split.mask]
              if(stratify==TRUE){
                dat[,ncol(dat)+1]<-NA
@@ -52,11 +54,12 @@ CrossValidationSplit<-function(input.file,output.file,response.col="ResponseBina
                 index<-index[order(runif(length(index)))]
                 dat[index,ncol(dat)+1]<-c(rep(seq(1:n.folds),each=floor(length(index)/n.folds)),sample(seq(1:n.folds),size=length(index)%%n.folds,replace=FALSE))
              }
-
+             names(dat)[ncol(dat)]<-"Split"
          #inserting data must be done in 3 steps because dat.in isn't a proper dataframe in that
          #not all elements in a column are of the same type
+
           dat.in<-dat.in[c(1:3,rownames(dat)),] #removing rows that weren't selected for the test train split
-          dat.in[4:(dim(dat.in)[1]),(dim(dat.in)[2]+1)]<-dat$TrainSplit
+          dat.in[4:(dim(dat.in)[1]),(dim(dat.in)[2]+1)]<-dat$Split
           dat.in[c(1,3),(dim(dat.in)[2])]<-c("Split","")
           dat.in[2,(dim(dat.in)[2])]<-1
 
