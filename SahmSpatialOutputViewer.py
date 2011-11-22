@@ -184,7 +184,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 #        self.add_vector(inputs['abs_points'], "abs_points", '0,255,0')
 #        self.add_vector(inputs['backs_points'], "backs_points", '0,0,0')
 
-        self.map_canvas.setExtent(self.all_layers["prob_map"].layer().extent())
+        
 #        canvas.setLayerSet([self.all_layers["pres_points"],
 #                                 self.all_layers["abs_points"],
 #                           self.all_layers["prob_map"]])
@@ -195,12 +195,21 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         
 #        self.update()
         initial_layers = []
-        for i in range(10):
-            tag = [v["tag"] for v in layers_to_add if v["displayorder"] == i ]
-            if tag:
-                initial_layers.append(self.all_layers[tag[0]])
-            
+#        initial_layers.append(self.all_layers["prob_map"])
+        initial_layers.append(self.all_layers["pres_points"])
+        initial_layers.append(self.all_layers["abs_points"])
+#        for i in range(10):
+#            tag = [v["tag"] for v in layers_to_add if v["displayorder"] == i ]
+#            if tag:
+#                initial_layers.append(self.all_layers[tag[0]])
+        
+#        self.map_canvas.setExtent(self.all_layers["prob_map"].layer().extent())    
 #        self.map_canvas.setLayerSet(initial_layers)
+        
+#        raster_fname = r"K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMaxTemp\tmax1.tif"
+#        raster = qgis.core.QgsRasterLayer(raster_fname, os.path.splitext(os.path.basename(raster_fname))[0])
+#        qgis.core.QgsMapLayerRegistry.instance().addMapLayer(raster)
+        
         
         canvas = qgis.gui.QgsMapCanvas()
         canvas.show()
@@ -425,6 +434,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
                 min_max = None
             self.set_color_ramp(tag, raster, min_max)
             self.all_layers[tag] = qgis.gui.QgsMapCanvasLayer(raster)
+            qgis.core.QgsMapLayerRegistry.instance().addMapLayer(raster)
             return True
         else:
             return False          
@@ -434,10 +444,10 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         baseName = fileInfo.baseName()
         points_layer = qgis.core.QgsVectorLayer(path, baseName, "ogr")
 
-        props = {'color':strcolor, 'radius':'3' }
-        s = qgis.core.QgsMarkerSymbolV2.createSimple(props)
-
-        points_layer.setRendererV2( qgis.core.QgsSingleSymbolRendererV2( s ) )
+#        props = {'color':strcolor, 'radius':'3' }
+#        s = qgis.core.QgsMarkerSymbolV2.createSimple(props)
+#
+#        points_layer.setRendererV2( qgis.core.QgsSingleSymbolRendererV2( s ) )
 
         qgis.core.QgsMapLayerRegistry.instance().addMapLayer(points_layer)
         self.all_layers[tag] = qgis.gui.QgsMapCanvasLayer(points_layer)
