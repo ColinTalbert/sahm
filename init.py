@@ -1630,12 +1630,11 @@ def load_max_ent_params():
 
 def initialize():    
     global maxent_path, color_breaks_csv
-    global session_dir
-    utils.config = configuration
+    global session_dir 
        
     r_path = os.path.abspath(configuration.r_path)
     maxent_path = os.path.abspath(configuration.maxent_path)
-    
+    utils.r_path = r_path
     
     #I was previously setting the following environmental variables and path additions 
     #so that each user wouldn't have to do this on their individual machines.  
