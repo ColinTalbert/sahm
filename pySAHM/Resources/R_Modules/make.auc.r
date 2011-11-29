@@ -8,7 +8,7 @@ make.auc.plot.jpg<-function(out=out){
  if(out$input$model.family!="poisson"){
             input.list$train$thresh<-out$dat$ma$train$thresh<- as.numeric(optimal.thresholds(data.frame(ID=1:nrow(input.list$train$dat),pres.abs=input.list$train$dat[,1],
                 pred=input.list$train$pred),opt.methods=out$input$opt.methods))[2]
-              if(out$dat$split.type=="test")  input.list$test$dat$thresh<-out$dat$ma$test$thresh<-input.list$train$thresh
+              if(out$dat$split.type=="test")  input.list$test$thresh<-out$dat$ma$test$thresh<-input.list$train$thresh
             }
             else input.list$train$thresh=NULL
 

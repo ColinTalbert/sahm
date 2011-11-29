@@ -47,7 +47,7 @@ capture.output(cat(" applied to",label, "split:\n",sep=" "),
                                 signif(sd(unlist(lapply(Stats.lst,function(lst){lst$thresh}))),digits=5),")",sep="")
                                 },
                                 "\n\n\t Confusion Matrix: \n\n"),
-                                if(label%in%c("train","test.train")) print.table(Stats.lst[[1]]$Cmx)
+                                if(label%in%c("train","test")) print.table(Stats.lst[[1]]$Cmx)
                                 else{
                                   a<-lapply(Stats.lst,function(lst){lst$Cmx})
                                   cmx<-a[[1]]
