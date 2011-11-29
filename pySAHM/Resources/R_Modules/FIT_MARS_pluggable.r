@@ -54,22 +54,17 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
                 auc.output=NULL,
                 interactions=NULL,  # not used #
                 summary=NULL),
-      time=list(strt=unclass(Sys.time()),end=NULL),
-      error.mssg=list(NULL),
-      ec=0    # error count #
+      time=list(strt=unclass(Sys.time()),end=NULL)
       )
 
       # load libaries #
       out <- check.libs(list("PresenceAbsence","rgdal","sp","survival","mda","raster","tcltk2","foreign","ade4"),out)
-      
-      # exit program now if there are missing libraries #
-      if(!is.null(out$error.mssg[[1]])) stop("There are missing libraries")
 
      ############################# READ.MA ########################
     if(UnitTest!=FALSE) options(warn=2)
     out <- read.ma(out)
     if(UnitTest==1) return(out)
-    
+
     # check output dir #
     if(file.access(out$input$output.dir,mode=2)!=0) stop(paste("output directory",output.dir,"is not writable"))
 
@@ -81,7 +76,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
             } else bname<-paste(out$input$output.dir,"/mars",sep="")
             out$dat$bname <- bname
             
-
+    #print warnings as they occur
     options(warn=1)
 
     cat("\nbegin processing of model array:",out$input$ma.name,"\n")
@@ -99,6 +94,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     out$mods$final.mod <- mars.glm(data=out$dat$ma$train$dat, mars.x=c(2:ncol(out$dat$ma$train$dat)), mars.y=1, mars.degree=out$input$mars.degree, family=out$input$model.family,
           site.weights=out$dat$ma$train$weight, penalty=out$input$mars.penalty)
       
+    if(out$dat$split.type=="crossValidation") out<-mars.cv(out$mods$final.mod, out, sp.no = 1, prev.stratify = F)
 
   out$mods$final.mod$contributions$var<-names(out$dat$ma$train$dat)[-1]
 
@@ -113,9 +109,9 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     row.names(x) <- x[,1]
     x$df <- -1*x$df
     x <- x[,-1]
-    
+
      txt0 <- paste("\nMARS Model Results\n","\n","Data:\n",ma.name,"\n","\n\t n(pres)=",
-        out$dat$nPresAbs$train[2],"\n\t n(abs)=",out$dat$nPresAbs$train[1],"\n\t n covariates considered=",length(out$dat$ma$used.covs),
+        out$dat$nPresAbs$train[2],"\n\t n(abs)=",out$dat$nPresAbs$train[1],"\n\t n covariates considered=",length(out$dat$used.covs),
         "\n",
         "\n   total time for model fitting=",round((unclass(Sys.time())-t0)/60,2),"min\n",sep="")
 
@@ -152,7 +148,9 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
     return(x)}
     
     #getting the predictions for the test/train or cross validation splits into the object at the correct list location
-    out$dat$ma<-(lapply(X=out$dat$ma,FUN=pred.fct,model=out$mods$final.mod))
+    if(out$dat$split.type!="crossValidation") out$dat$ma<-(lapply(X=out$dat$ma,FUN=pred.fct,model=out$mods$final.mod))
+       else out$dat$ma$train$pred<-out$mods$final.mod$fitted$response #produces the same thing as pred.mars(out$mods$final.mod,out$dat$ma$train$dat[2:ncol(out$dat$ma$train$dat)])
+       
 
       out$mods$auc.output<-make.auc.plot.jpg(out=out)
 
@@ -257,6 +255,7 @@ Args <- commandArgs(trailingOnly=FALSE)
 ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
 source(paste(ScriptPath,"MARS.helper.fcts.r",sep="\\"))
+source(paste(ScriptPath,"mars.cv.r",sep="\\"))
 print(ScriptPath)
 
 make.p.tif<-as.logical(make.p.tif)

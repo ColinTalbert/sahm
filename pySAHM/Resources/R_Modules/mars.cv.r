@@ -100,7 +100,7 @@ function (mars.glm.object, out, sp.no = 1, prev.stratify = F)
 
   print("", quote = FALSE)
   print("Creating predictions for subsets...", quote = F)
-browser()
+
  selector<-out$dat$selector
   for (i in 1:nk) {
     cat(i," ")
@@ -134,9 +134,13 @@ browser()
 
     # and form predictions for them and evaluate performance
 
-    fitted.values[pred.mask] <- predict(mars.binomial,
+    fitted.values[pred.mask] <- out$dat$ma[[i]]$pred<-predict(mars.binomial,
       pred.basis.functions, type = "response")
-    out$dat$ma
+
+    # calculate the threshold seperately based on each train set
+    out$dat$ma[[i]]$thresh <- as.numeric(optimal.thresholds(data.frame(ID=1:length(species.subset),pres.abs=species.subset,
+                pred=mars.binomial$fitted.values),opt.methods=out$input$opt.methods))[2]
+
     y_i <- ydat[pred.mask]
     u_i <- fitted.values[pred.mask]
     weights.subset <- site.weights[pred.mask]
@@ -197,10 +201,12 @@ browser()
   subset.deviance.mean <- mean(subset.resid.deviance)
   subset.deviance.se <- sqrt(var(subset.resid.deviance))/sqrt(nk)
 
-  subset.deviance <- list(subset.deviances = subset.resid.deviance, subset.deviance.mean = subset.deviance.mean,
+   subset.deviance <- list(subset.deviances = subset.resid.deviance, subset.deviance.mean = subset.deviance.mean,
     subset.deviance.se = subset.deviance.se)
-
-  return(list(mars.call = mars.call, full.resid.deviance = full.resid.deviance,
+    
+  cv.list<-list(mars.call = mars.call, full.resid.deviance = full.resid.deviance,
     full.test = full.test, full.calib = full.calib, pooled.deviance = cv.resid.deviance, pooled.test = cv.test,
-    pooled.calib = cv.calib,subset.deviance = subset.deviance, subset.test = subset.test, subset.calib = subset.calib))
+    pooled.calib = cv.calib,subset.deviance = subset.deviance, subset.test = subset.test, subset.calib = subset.calib)
+   out$cv<-cv.list
+  return(out)
 }

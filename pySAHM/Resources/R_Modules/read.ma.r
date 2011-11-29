@@ -136,7 +136,8 @@
                    else{ dat.out=list(train=ma)
                      Split.type="none"
                    }
-
+                   selector<-ma$Split
+                   if(Split.type=="crossValidation") dat.out$train<-ma
                    #Removing everything in the remove list here and setting up the structure for output
                      for(i in 1:length(dat.out)){
                         dat.out[[i]]<-list(resp=dat.out[[i]][r.col],XY=dat.out[[i]][,xy.cols],dat=dat.out[[i]][,-c(rm.list)],weight=dat.out[[i]][,ncol(dat.out[[i]])])
@@ -150,9 +151,10 @@
         else out$input$model.family="binomial"
         
       if(out$input$script.name=="rf.r") out$input$model.family="bernoulli"
-      
+
       if(tolower(out$input$model.family)=="bernoulli" || tolower(out$input$model.family)=="binomial"){
-          if(!any(match(as.numeric(names(out.list$nPresAbs$train)),c(0,1))==(c(1,2))))
+           if((Split.type=="crossValidation" & any(names(apply(do.call("rbind",out.list$nPresAbs),2,sum))!=c("0","1"))) |
+          (Split.type!="crossValidation" & !any(match(as.numeric(names(out.list$nPresAbs$train)),c(0,1))==(c(1,2)))))
           stop("response column (#",r.col,") in ",ma.name," is not binary 0/1 for the training split",sep="")
           }
 
@@ -194,9 +196,12 @@
             dat.out$train.subset$weight<-dat.out$train$weight[c(pres.sample,abs.sample)]
             out.list$nPresAbs$Subset <-table(dat.out$train.subset$dat[1,])
             }
+              if(Split.type=="crossValidation") out.list$selector=selector
               out.list$split.type=Split.type
               out.list$ma<-dat.out
           out$dat <- out.list
 
       return(out)
-      }
+}
+
+      

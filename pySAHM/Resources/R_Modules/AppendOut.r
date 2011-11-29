@@ -58,12 +58,17 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
                             xlab=paste("Corresponding Column in ",ifelse(!is.null(out$dat$ma$ma.test),"AppendedOutputTestTrain.csv","AppendedOutput.csv"),sep=""),
                             ylab=x.labs[i])
                             grid(nx=10)
-                            if(split.type!="none") legend(ncol(test),y=.75,legend=c("Test","Train"),fill=c(colors.test[i],colors.train[i]))
+                            if(split.type!="none") legend(ncol(test),y=.75,legend=c(switch(out$dat$split.type, "test"="Test","crossValidation"="CV"),"Train"),fill=c(colors.test[i],colors.train[i]))
                           rect(xleft=ss-.4,ybottom=0,xright=ss,ytop=train[i,],col=colors.train[i],lwd=2)
                          #if test split
                          options(warn=-1)
                           if(length(test.lst)==1) rect(xleft=ss,ybottom=0,xright=(ss+.4),ytop=pmax(0,test.lst[[1]][i,]),col=colors.test[i],lwd=2)
-                          if(length(test.lst)>1) for(j in 1:length(test.lst)) points(x=ss,y=pmax(0,test.lst[[j]][i,]),col=colors.test[i],cex=2)
+                          if(length(test.lst)>1){ a<-vector()
+                                                  for(k in ss){
+                                                    for(j in 1:length(test.lst)) a<-c(a,as.numeric(test.lst[[j]][i,k]))
+                                                  boxplot(a,add=TRUE,at=k+.2,col=colors.test[i])
+                                                  }
+                          }
                          options(warn=0)
                           text((which(train[i,]==max(train[i,],na.rm=TRUE),arr.ind=TRUE)-.25),
                               max(train[i,],na.rm=TRUE)+.05,labels=as.character(round(max(train[i,]),digits=2)),cex=.8)
@@ -76,8 +81,8 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
                         
 
              #Outer margin labels
-
-                            for(i in 1:length(Hdr)) mtext(Hdr[i],line=-12,at=(i-1),las=2)
+                             Line<-ifelse(Parm.Len==5,-12,-18)
+                            for(i in 1:length(Hdr)) mtext(Hdr[i],line=Line,at=(i-1),las=2)
                           mtext("Evaluation Metrics Performance Across Model Runs",outer=TRUE,side=3,cex=1.3)
                           mtext(paste("sub-folder name where model is found in the folder ",parent
                             ,sep=""),side=1,outer=TRUE,line=3)
