@@ -32,7 +32,18 @@ input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/NoSplit.csv"
 output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
 rc="responseBinary"
 #######################################################################
-
+##MARS
+FitModels(ma.name=input.file,
+            tif.dir=NULL,output.dir=output.dir,
+            response.col=rc,make.p.tif=F,make.binary.tif=F,
+            mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars",opt.methods=2)
+            
+##GLM
+FitModels(ma.name=input.file,
+          tif.dir=NULL,
+          output.dir=output.dir,
+          response.col=rc,make.p.tif=T,make.binary.tif=T,
+          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=TRUE)
 ##RF
 set.seed(1)
     fit.rf.fct(ma.name=input.file,

@@ -1,5 +1,5 @@
 make.auc.plot.jpg<-function(out=out){
-
+  browser()
   plotname<-paste(out$dat$bname,"_auc_plot.jpg",sep="")
   modelname<-toupper(out$input$model)
   input.list<-out$dat$ma
