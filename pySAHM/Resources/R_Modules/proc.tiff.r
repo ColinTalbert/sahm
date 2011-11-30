@@ -1,5 +1,5 @@
 proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,pred.fct,factor.levels=NA,make.binary.tif=F,make.p.tif=T,
-    thresh=0.5,outfile.p="brt.prob.map.tif",outfile.bin="brt.bin.map.tif",tsize=2.0,NAval=-3000,fnames=NULL,logname=NULL,out){
+    thresh=0.5,outfile.p="brt.prob.map.tif",outfile.bin="brt.bin.map.tif",tsize=2.0,NAval=-3000,fnames=NULL,logname=NULL,out,Model){
 
     # vnames,fpath,myfun,make.binary.tif=F,outfile=NA,outfile.bin=NA,output.dir=NA,tsize=10.0,NAval=NA,fnames=NA
     # Written by Alan Swanson, YERC, 6-11-08
@@ -160,7 +160,7 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
                    }}
     ifelse(sum(complete.cases(temp))==0,  # does not calculate predictions if all predictors in the region are na
         preds<-matrix(data=NaN,nrow=region.dims[1],ncol=region.dims[2]),
-        preds <- t(matrix(pred.fct(model,temp),ncol=dims[2],byrow=T)))
+        preds <- t(matrix(pred.fct(model,temp,Model),ncol=dims[2],byrow=T)))
 
         min.pred<-min(na.omit(preds),min.pred)
         max.pred<-max(na.omit(preds),max.pred)

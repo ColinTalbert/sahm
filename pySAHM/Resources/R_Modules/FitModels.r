@@ -69,7 +69,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
             capture.output(cat("temp"),file=outfile) # reserve the new basename #
             } else bname<-paste(out$input$output.dir,paste("/",Model,sep=""),sep="")
             out$dat$bname <- bname
-            
+         if(!debug.mode) {sink(logname <- paste(bname,"_log.txt",sep=""));on.exit(sink)} else logname<-NULL
     #print warnings as they occur
     options(warn=1)
 
@@ -131,7 +131,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
       out$mods$auc.output<-make.auc.plot.jpg(out=out)
 
               if(!debug.mode) {sink();cat("Progress:70%\n");flush.console();sink(logname,append=T)} else cat("70%\n")
-    browser()
+
   # Response curves #
       response.curves(out,Model)
 
@@ -153,7 +153,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
                 tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=pred.fct,factor.levels=out$dat$ma$factor.levels,make.binary.tif=make.binary.tif,
                 thresh=out$mods$auc.output$thresh,make.p.tif=make.p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
                 outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50.0,NAval=-3000,
-                fnames=out$dat$tif.names,logname=logname,out=out)
+                fnames=out$dat$tif.names,logname=logname,out=out,Model=Model)
             }
 
             if(make.p.tif) out$mods$tif.output$prob <- paste(out$dat$bname,"_prob_map.tif",sep="")
@@ -174,61 +174,3 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
     if(debug.mode) assign("fit",out$mods$final.mod,envir=.GlobalEnv)
     invisible(out)
     }
-################################################################################
-###########          End fit.mars.fct       ####################################
-
-
-#set defaults
-make.p.tif=T
-make.binary.tif=T
-mars.degree=1
-mars.penalty=2
-script.name="mars"
-opt.methods=2
-save.model=TRUE
-MESS=FALSE
-
-# Interpret command line argurments #
-# Make Function Call #
-Args <- commandArgs(trailingOnly=FALSE)
-
-    for (i in 1:length(Args)){
-     if(Args[i]=="-f") ScriptPath<-Args[i+1]
-     }
-
-    print(Args)
-    for (arg in Args) {
-    	argSplit <- strsplit(arg, "=")
-    	argSplit[[1]][1]
-    	argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="c") csv <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="o") output <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="mpt") make.p.tif <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="deg") mars.degree <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="pen") mars.penalty <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="om")  opt.methods <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="savm")  save.model <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="mes")  MESS <- argSplit[[1]][2]
-    }
-	print(csv)
-	print(output)
-	print(responseCol)
-
-ScriptPath<-dirname(ScriptPath)
-source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
-source(paste(ScriptPath,"MARS.helper.fcts.r",sep="\\"))
-source(paste(ScriptPath,"mars.cv.r",sep="\\"))
-print(ScriptPath)
-
-make.p.tif<-as.logical(make.p.tif)
-make.binary.tif<-as.logical(make.binary.tif)
-save.model<-make.p.tif | make.binary.tif
-opt.methods<-as.numeric(opt.methods)
-
-fit.mars.fct(ma.name=csv,
-        tif.dir=NULL,output.dir=output,
-        response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
-            mars.degree=mars.degree,mars.penalty=mars.penalty,debug.mode=F,responseCurveForm="pdf",
-            script.name="mars",save.model=save.model,opt.methods=as.numeric(opt.methods),MESS=MESS)

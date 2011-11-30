@@ -1,5 +1,5 @@
 make.auc.plot.jpg<-function(out=out){
-  browser()
+
   plotname<-paste(out$dat$bname,"_auc_plot.jpg",sep="")
   modelname<-toupper(out$input$model)
   input.list<-out$dat$ma
@@ -17,6 +17,7 @@ make.auc.plot.jpg<-function(out=out){
 
 ########################## PLOTS ################################
   #Residual surface of input data
+
   residual.smooth.fct<-resid.image(calc.dev(input.list$train$dat$response, input.list$train$pred, input.list$train$weight, family=out$input$model.family)$dev.cont,input.list$train$pred,
           input.list$train$dat$response,input.list$train$XY$X,input.list$train$XY$Y,out$input$model.family,out$input$output.dir)
 

@@ -9,6 +9,10 @@ source("FIT_GLM_pluggable.r")
 
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
+source("GLM.helper.fcts.r")
+source("BRT.helper.fcts.r")
+source("RF.helper.fcts.r")
+
 
 options(error=expression(if(interactive()) recover() else dump.calls()))
 options(error=NULL)
@@ -35,15 +39,32 @@ rc="responseBinary"
 ##MARS
 FitModels(ma.name=input.file,
             tif.dir=NULL,output.dir=output.dir,
-            response.col=rc,make.p.tif=F,make.binary.tif=F,
-            mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars",opt.methods=2)
+            response.col=rc,make.p.tif=T,make.binary.tif=T,
+            mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars",opt.methods=2,MESS=TRUE)
             
 ##GLM
 FitModels(ma.name=input.file,
           tif.dir=NULL,
           output.dir=output.dir,
           response.col=rc,make.p.tif=T,make.binary.tif=T,
-          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=TRUE)
+          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=TRUE,opt.methods=2)
+          
+#RF
+FitModels(ma.name=input.file,
+      tif.dir=NULL,
+      output.dir=output.dir,
+      response.col=rc,make.p.tif=F,make.binary.tif=F,
+          debug.mode=T,opt.methods=2,script.name="rf")
+
+#BRT
+FitModels(ma.name=input.file,
+          tif.dir=NULL,output.dir=output.dir,
+          response.col=rc,make.p.tif=T,make.binary.tif=T,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
+      model.family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
+  tolerance = 0.001,seed=NULL,opt.methods=2,
+          simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
+          learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,seed=1,save.model=TRUE,MESS=TRUE)
+
 ##RF
 set.seed(1)
     fit.rf.fct(ma.name=input.file,

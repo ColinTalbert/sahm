@@ -119,11 +119,12 @@
 
                 if(!is.null(out.list$bad.factor.cols)) rm.list<-c(rm.list,match(out.list$bad.factor.cols,names(ma)))
           }
+
             #removing predictors with only one unique value
             if(length(which(lapply(apply(ma[,-c(rm.list)],2,unique),length)==1,arr.ind=TRUE))>0){
-                rm.list<-c(rm.list,which(lapply(apply(ma[,-c(rm.list)],2,unique),length)==1,arr.ind=TRUE))
                 warning(paste("\nThe Following Predictors will be removed because they have only 1 unique value: ",
                 names(which(lapply(apply(ma[,-c(rm.list)],2,unique),length)==1,arr.ind=TRUE)),sep=" "))
+                rm.list<-c(rm.list,which(lapply(apply(ma,2,unique),length)==1,arr.ind=TRUE))
                 }
 
                 rm.list<-rm.list[rm.list!=r.col]
@@ -186,15 +187,16 @@
                  out.list$tif.ind<-paths
 
         out.list$dims <- sum(out.list$nPresAbs$train)
-        out.list$ratio <- min(sum(out$input$model.fitting.subset)/out.list$dims[1],1)
+        out.list$Subset$ratio <- min(sum(out$input$model.fitting.subset)/out.list$dims[1],1)
         out.list$used.covs <-  names(dat.out$train$dat)[-1]
 
-      if(!is.null(out$input$model.fitting.subset)){
+      if(out$input$script.name=="brt"){
+       model.fitting.subset=c(n.pres=500,n.abs=500)
             pres.sample <- sample(c(1:nrow(dat.out$train$dat))[dat.out$train$dat[,1]>=1],min(out.list$nPresAbs$train[2],out$input$model.fitting.subset[1]))
             abs.sample <- sample(c(1:nrow(dat.out$train$dat))[dat.out$train$dat[,1]==0],min(out.list$nPresAbs$train[1],out$input$model.fitting.subset[2]))
-            dat.out$train.subset$dat <- dat.out$train$dat[c(pres.sample,abs.sample),]
-            dat.out$train.subset$weight<-dat.out$train$weight[c(pres.sample,abs.sample)]
-            out.list$nPresAbs$Subset <-table(dat.out$train.subset$dat[1,])
+            out.list$Subset$dat <- dat.out$train$dat[c(pres.sample,abs.sample),]
+            out.list$Subset$weight<-dat.out$train$weight[c(pres.sample,abs.sample)]
+            out.list$Subset$nPresAbs <-table(dat.out$train$dat[1,])
             }
               if(Split.type=="crossValidation") out.list$selector=selector
               out.list$split.type=Split.type

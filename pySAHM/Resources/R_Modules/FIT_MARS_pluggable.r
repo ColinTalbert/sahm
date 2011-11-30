@@ -53,9 +53,7 @@ fit.mars.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^res
                 tif.output=list(prob=NULL,bin=NULL),
                 auc.output=NULL,
                 interactions=NULL,  # not used #
-                summary=NULL),
-      time=list(strt=unclass(Sys.time()),end=NULL)
-      )
+                summary=NULL))
 
       # load libaries #
       out <- check.libs(list("PresenceAbsence","rgdal","sp","survival","mda","raster","tcltk2","foreign","ade4"),out)

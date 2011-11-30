@@ -38,80 +38,22 @@ fit.glm.fct <- function(ma.name,tif.dir=NULL,output.dir=NULL,response.col="^resp
     #     in either case, a set of standard output files are created in the output directory.
     # 
 
-    # Value:
-    # returns nothing but generates a number of output files in the directory
-    # "output.dir" named above.  These output files consist of:
-    #
-    # glm_output.txt:  a text file with fairly detailed results of the final model.
-
-    #   each covariate in the final model.
-    # glm_prob_map.tif:  a geotiff of the response surface
-    # glm_bin_map.tif:  a geotiff of the binary response surface.  threhold is based on the roc curve at the point where sensitivity=specificity.
-    # glm_log.txt:   a file containing text output diverted from the console when debug.mode=F
-    # glm_auc_plot.jpg:  a jpg file of a ROC plot.
-    # glm_response_curves.pdf:  an pdf file with response curves for
-    #   each covariate in the final model and perspective plots showing the effect of interactions deemed significant.
-    #   only produced when debug.mode=T
-    #  seed=NULL                                 # sets a seed for the algorithm, any inegeger is acceptable
-    #  opt.methods=2                             # sets the method used for threshold optimization used in the
-    #                                            # the evaluation statistics module
-    #  save.model=FALSE                          # whether the model will be used to later produce tifs
-    #
-    # when debug.mode is true, these filenames will include a number in them so that they will not overwrite preexisting files. eg brt_1_output.txt.
-    #
-
+    Call<-match.call()
     t0 <- unclass(Sys.time())
     #simp.method <- match.arg(simp.method)
     out <- list(
-      input=list(ma.name=ma.name,
-                 tif.dir=tif.dir,
-                 output.dir=output.dir,
-                 response.col=response.col,
-                 make.p.tif=make.p.tif,
-                 model.family=model.family,
-                 make.binary.tif=make.binary.tif,
-                 simp.method=simp.method,
-                 model.type="stepwise glm",
-                 model.source.file=script.name,
-                 model.fitting.subset=NULL,
-                 save.model=save.model,
-                 run.time=paste(c(format(Sys.time(),"%Y-%m-%d"),format(Sys.time(),"%H:%M:%S")),collapse="T"),
-                 sig.test="t-test p-value",
-                 MESS=MESS),
-      dat = list(missing.libs=NULL,
-                 output.dir=list(dname=NULL,exist=F,readable=F,writable=F),
-                 tif.dir=list(dname=NULL,exist=F,readable=F,writable=F),
-                 tiff.ind=NULL,
-                 tif.names=NULL,
-                 bname=NULL,
-                 bad.factor.covs=NULL, # factorchange
-                 ma=list( status=c(exists=F,readable=F),
-                          dims=c(NA,NA),
-                          resp.name=NULL,
-                          factor.levels=NA,
-                          used.covs=NULL,
-                          ma=NULL,
-                          train.weights=NULL,
-                          test.weights=NULL,
-                          train.xy=NULL,
-                          test.xy=NULL,
-                          ma.subset=NULL
-                          ),
-                 ma.test=NULL),
+      input=lapply(as.list(Call[2:length(Call)]),eval), #with optional args this definition might be a problem but since called from the command line it works
+      dat = list(), #just captures output from read.ma
       mods=list(final.mod=NULL,
                 r.curves=NULL,
                 tif.output=list(prob=NULL,bin=NULL),
                 auc.output=NULL,
                 interactions=NULL,  # not used #
-                summary=NULL),
-      time=list(strt=unclass(Sys.time()),end=NULL),
-      error.mssg=list(NULL),
-      ec=0    # error count #
-      )
+                summary=NULL))
+
     # load libaries #
     out <- check.libs(list("PresenceAbsence","rgdal","sp","survival","tools","raster","tcltk2","foreign","ade4"),out)
 
-          
     if(is.na(match(simp.method,c("AIC","BIC")))) stop("invalid input supplied for simp.method")
         
     # check output dir #
