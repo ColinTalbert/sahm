@@ -39,7 +39,7 @@ from packages.sahm.sahm_picklists import ResponseType, AggregationMethod, Resamp
 from utils import writetolog
 from pySAHM.utilities import TrappedError
 
-from SahmSpatialOutputViewer import setQGIS
+#from SahmSpatialOutputViewer import setQGIS
 
 identifier = 'gov.usgs.sahm' 
 
@@ -1657,14 +1657,14 @@ def initialize():
     #And finally QGIS bindings for python in the python path.
     
      
-    import qgis.core
-    import qgis.gui
-    globals()["qgis"] = qgis
-    setQGIS(qgis)
-    
-    qgis_prefix = os.path.join(configuration.qgis_path, "qgis1.7.0")
-    qgis.core.QgsApplication.setPrefixPath(qgis_prefix, True)
-    qgis.core.QgsApplication.initQgis() 
+#    import qgis.core
+#    import qgis.gui
+#    globals()["qgis"] = qgis
+#    setQGIS(qgis)
+#    
+#    qgis_prefix = os.path.join(configuration.qgis_path, "qgis1.7.0")
+#    qgis.core.QgsApplication.setPrefixPath(qgis_prefix, True)
+#    qgis.core.QgsApplication.initQgis() 
     
     
     session_dir = utils.createrootdir(configuration.output_dir)
@@ -1685,8 +1685,8 @@ def initialize():
     writetolog("   GDAL folder = " + os.path.abspath(configuration.gdal_path))
     writetolog("        Must contain subfolders proj, gdal-data, GDAL")
     writetolog("   Maxent folder = " + maxent_path)
-    writetolog("   QGIS folder = " + os.path.abspath(configuration.qgis_path))
-    writetolog("        Must contain subfolders qgis1.7.0, OSGeo4W")
+#    writetolog("   QGIS folder = " + os.path.abspath(configuration.qgis_path))
+#    writetolog("        Must contain subfolders qgis1.7.0, OSGeo4W")
     writetolog("    ")
     writetolog("*" * 79)
     
