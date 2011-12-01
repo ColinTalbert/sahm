@@ -9,6 +9,7 @@ from core.modules.vistrails_module import Module
 from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
 from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
 from packages.spreadsheet.spreadsheet_controller import spreadsheetController
+from utils import dbfreader
 
 import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -198,10 +199,10 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
     def load_layers(self):
         self.displayTL = True
         self.all_layers = {"prob_map":{"type":"raster", "title":"Probability" ,"categorical":False, "min":0, "max":1, 'cmap':matplotlib.cm.jet, "displayorder":9999, "displayed":True, "enabled":False, "file":""},
-                         "bin_map":{"type":"raster", "title":"Binary probability" , "categorical":True, "categories":[0,1], 'cmap':matplotlib.cm.Greys, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
+                         "bin_map":{"type":"raster", "title":"Binary probability" , "categorical":False, "categories":[0,1], 'cmap':matplotlib.cm.Greys, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
                          "resid_map":{"type":"raster", "title":"Residuals" , "categorical":False, "min":0, "max":"pullfromdata", 'cmap':matplotlib.cm.Accent, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
-                         "mess_map":{"type":"raster", "title":"Mess" , "categorical":True, "categories":"pullfromdata", 'cmap':matplotlib.cm.BrBG, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
-                         "MoD_map":{"type":"raster", "title":"MoD" , "categorical":False, "min":0, "max":"pullfromdata", 'cmap':matplotlib.cm.prism, "displayorder":9999, "num_breaks":7, "displayed":False, "enabled":False, "file":""},
+                         "mess_map":{"type":"raster", "title":"Mess" , "categorical":False, "categories":"pullfromdata", 'cmap':matplotlib.cm.jet, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
+                         "MoD_map":{"type":"raster", "title":"MoD" , "categorical":True, "min":0, "max":"pullfromdata", 'cmap':matplotlib.cm.prism, "displayorder":9999, "num_breaks":7, "displayed":False, "enabled":False, "file":""},
                          "pres_points":{"type":"Vector", "color":(1,0,0), "displayorder":3, "num_breaks":7, "displayed":True, "enabled":False, "file":""},
                          "abs_points":{"type":"Vector", "color":(0,1,0), "displayorder":2, "num_breaks":7, "displayed":True, "enabled":False, "file":""},
                          "backs_points":{"type":"Vector", "color":(0,0,0), "displayorder":1, "num_breaks":7, "displayed":False, "enabled":False, "file":""}}
@@ -213,7 +214,11 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
                     self.all_layers[k]["enabled"] = True
                  
         #make our specialty colormaps
-        self.all_layers["resid_map"]["cmap"] = self.make_resid_cmap(self.all_layers["resid_map"])
+        if self.all_layers["resid_map"]['enabled']:
+            self.all_layers["resid_map"]["cmap"] = self.make_resid_cmap(self.all_layers["resid_map"])
+        
+        if self.all_layers["MoD_map"]['enabled']:
+            self.all_layers["MoD_map"]["cmap"] = self.make_categorical_cmap(self.all_layers["MoD_map"])       
                  
         pointfile = self.inputs["mds"]
         points = np.genfromtxt(pointfile, delimiter=",", skip_header=3)
@@ -263,6 +268,22 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         
         return matplotlib.colors.LinearSegmentedColormap('my_colormap',cdict,256)
 
+    def make_categorical_cmap(self, kwargs):
+        vals = self.get_array_from_raster(kwargs['file'])
+        uniques = np.unique(vals)
+        vatdbf = kwargs['file'] + ".vat.dbf"
+        if os.path.exists(vatdbf):
+            #we'll pull labels from this file
+            f = open(vatdbf, 'rb')
+            db = list(dbfreader(f))
+            f.close()
+            labels = []
+            for record in db[2:]:
+                labels.append(record[1])
+
+        kwargs['cbar_ticks'] = uniques
+        kwargs['cbar_labels'] = labels
+        return matplotlib.cm.get_cmap('Accent', len(uniques))
         
     def on_draw(self):
         """ Redraws the figure
@@ -307,9 +328,20 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         raster_plot = self.axes.imshow(raster_array,interpolation="nearest", cmap=kwargs['cmap'], norm=norm, origin='upper', extent=map_extent)
         
         if self.displayTL:
-            cb = self.fig.colorbar(raster_plot, orientation='horizontal', pad=0.01, fraction=.1, shrink=.9)
+            
+            if kwargs['categorical']:
+                cb = self.fig.colorbar(raster_plot, ticks=kwargs['cbar_ticks'], orientation='vertical', pad=0.01, shrink=.9, fraction=.3, aspect=15)
+                cb.ax.set_yticklabels(kwargs['cbar_labels'])
+            else:
+                cb = self.fig.colorbar(raster_plot, orientation='horizontal', pad=0.01, fraction=.1, shrink=.9, aspect=30)
+                
             for t in cb.ax.get_xticklabels():
-                t.set_fontsize(7)
+                if kwargs['categorical']:
+                    t.set_fontsize(5)
+                    t.set_rotation(90)
+                else:
+                    t.set_fontsize(7)
+                
         
 
     def get_array_from_raster(self, raster_file):
@@ -410,11 +442,15 @@ class viewTitleLegend(QtGui.QAction):
         
     def triggeredSlot(self):
         cellWidget = self.toolBar.getSnappedWidget()
+        
+        xlim = cellWidget.axes.get_xlim()
+        ylim = cellWidget.axes.get_ylim()
         cellWidget.displayTL = self.isChecked()
         cellWidget.on_draw()
         cellWidget.fig.canvas.draw()
         cellWidget.update()
-            
+        cellWidget.axes.set_xlim(xlim)
+        cellWidget.axes.set_ylim(ylim)            
 
 class ViewLayerAction(QtGui.QAction):
     def __init__(self, action_dict, parent=None):
@@ -430,9 +466,14 @@ class ViewLayerAction(QtGui.QAction):
         self.group = action_dict["group"]
 
     def triggeredSlot(self, checked=False):
-#        cellWidget = self.toolBar.getSnappedWidget()
+        cellWidget = self.toolBar.getSnappedWidget()
+        xlim = cellWidget.axes.get_xlim()
+        ylim = cellWidget.axes.get_ylim()
         self.toggleOthers()
         self.displayLayer()
+        self.toolBar.updateToolBar()
+        cellWidget.axes.set_xlim(xlim)
+        cellWidget.axes.set_ylim(ylim)
 
     def toggleOthers(self):
         '''Unselect the other raster layers
