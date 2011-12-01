@@ -28,7 +28,7 @@ import getpass
 
 _roottempdir = ""
 _logger = None
-config = None
+r_path = None
 
 def getrasterminmax(filename):
     dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
@@ -392,8 +392,7 @@ def getModelsPath():
     return os.path.join(os.path.dirname(__file__), "pySAHM", "Resources", "R_Modules")
 
 def runRScript(script, args, module=None):
-    global config
-    r_path = config.r_path
+    global r_path
     program = os.path.join(r_path, "i386", "Rterm.exe") #-q prevents program from running
     scriptFile = os.path.join(getModelsPath(), script)
     
