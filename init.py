@@ -16,7 +16,6 @@ from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
 from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
 #from packages.persistence.init import PersistentPath, PersistentFile, PersistentDir
 
-from core.modules.basic_modules import List
 from core.modules.basic_modules import String
 
 from PyQt4 import QtCore, QtGui
@@ -493,7 +492,7 @@ class Model(Module):
                      ('ResidualsMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('MessMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('MoDMap', '(edu.utah.sci.vistrails.basic:File)'),
-                     ('AUC_plot', '(edu.utah.sci.vistrails.basic:File)'),
+                     ('modelEvalPlot', '(edu.utah.sci.vistrails.basic:File)'),
                      ('ResponseCurves', '(edu.utah.sci.vistrails.basic:File)'),
                      ('Text_Output', '(edu.utah.sci.vistrails.basic:File)')]
 
@@ -529,7 +528,7 @@ class Model(Module):
         self.setModelResult(self.ModelAbbrev + "_mess_map.tif", 'MessMap', 'mes')
         self.setModelResult(self.ModelAbbrev + "_MoD_map.tif", 'MoDMap', 'mes')
         self.setModelResult(self.ModelAbbrev + "_output.txt", 'Text_Output')
-        self.setModelResult(self.ModelAbbrev + "_auc_plot.jpg", 'AUC_plot') 
+        self.setModelResult(self.ModelAbbrev + "_modelEvalPlot.jpg", 'modelEvalPlot') 
         self.setModelResult(self.ModelAbbrev + "_response_curves.pdf", 'ResponseCurves')
         self.setModelResult("modelWorkspace", 'modelWorkspace')        
         writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
@@ -540,6 +539,7 @@ class Model(Module):
                         self.argsDict[arg_key].lower() == 'false')
         if required and not os.path.exists(outFileName):
             msg = "Expected output from " + self.ModelAbbrev + " was not found."
+            msg += "\nSpecifically " + outFileName + " was missing."
             msg += "\nThis might indicate problems with the inputs to the R module."
             msg += "\nCheck the console output for additional R warnings "
             writetolog(msg, False, True)
