@@ -1,6 +1,6 @@
 make.auc.plot.jpg<-function(out=out){
 
-  plotname<-paste(out$dat$bname,"_auc_plot.jpg",sep="")
+  plotname<-paste(out$dat$bname,"_modelEvalPlot.jpg",sep="")
   modelname<-toupper(out$input$model)
   input.list<-out$dat$ma
 

@@ -34,6 +34,7 @@ input.file[11]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Split.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/NoSplit.csv"
 output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
 rc="responseBinary"
 #######################################################################
 ##MARS
@@ -50,6 +51,7 @@ FitModels(ma.name=input.file,
           simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=TRUE,opt.methods=2)
           
 #RF
+set.seed(1)
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,
@@ -57,6 +59,7 @@ FitModels(ma.name=input.file,
           debug.mode=T,opt.methods=2,script.name="rf")
 
 #BRT
+set.seed(1)
 FitModels(ma.name=input.file,
           tif.dir=NULL,output.dir=output.dir,
           response.col=rc,make.p.tif=T,make.binary.tif=T,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,

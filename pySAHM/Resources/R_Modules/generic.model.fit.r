@@ -50,26 +50,19 @@ on.exit(detach(out$input))
             out <-est.lr(out)
             if(debug.mode) assign("out",out,envir=.GlobalEnv)
 
-            # exit program now if lr estimation fails #
-            if(!is.null(out$error.mssg[[1]])){
-                  if(!debug.mode) {sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))}
-
-                  return()}
-
             cat("\nfinished with learning rate estimation, lr=",out$mods$lr.mod$lr0,", t=",round(out$mods$lr.mod$t.elapsed,2),"sec\n")
             cat("\nfor final fit, lr=",out$mods$lr.mod$lr,"and tc=",out$mods$parms$tc.full,"\n");flush.console()
-
 
             if(out$input$simp.method=="cross-validation"){
                 # remove variables with <1% relative influence and re-fit model
 
                 t1 <- unclass(Sys.time())
                     if(length(out$mods$lr.mod$good.cols)<=1) stop("BRT must have at least two independent variables")
-
-                m0 <- gbm.step.fast(dat=out$dat$Subset$dat,gbm.x=out$mods$lr.mod  $good.cols,gbm.y=1,family=out$input$model.family,
+                    out$input$max.trees<-NULL
+                m0 <- gbm.step.fast(dat=out$dat$Subset$dat,gbm.x=out$mods$lr.mod$good.cols,gbm.y=1,family=out$input$model.family,
                       n.trees = c(300,600,800,1000,1200,1500,1800),step.size=out$input$step.size,max.trees=out$input$max.trees,
                       tolerance.method=out$input$tolerance.method,tolerance=out$input$tolerance, n.folds=out$input$n.folds,tree.complexity=out$mods$parms$tc.sub,
-                      learning.rate=out$mods$lr.mod$lr0,bag.fraction=out$input$bag.fraction,site.weights=out$dat$ma$train$dat.subset,autostop=T,debug.mode=F,silent=!debug.mode,
+                      learning.rate=out$mods$lr.mod$lr0,bag.fraction=out$input$bag.fraction,site.weights=out$dat$Subset$weight,autostop=T,debug.mode=F,silent=!debug.mode,
                       plot.main=F,superfast=F)
                       if(debug.mode) assign("m0",m0,envir=.GlobalEnv)
 
@@ -107,6 +100,24 @@ on.exit(detach(out$input))
 
     out$mods$summary <- summary(out$mods$final.mod,plotit=F)
     out$mods$n.vars.final<-length(out$mods$final.mod$contributions$var)
+     txt0 <- paste("\nBoosted Regression Tree Modeling Results\n",out$input$run.time,"\n\n",
+                  "Data:\n",ma.name,"\n",
+                  "\n\tn(pres)=",out$dat$nPresAbs$train[2],
+                  "\n\tn(abs)=",out$dat$nPresAbs$train[1],
+                  "\n\tn covariates considered=",length(out$dat$used.covs),
+        "\n\n","Settings:\n",
+                "\n\ttree complexity=",out$mods$parms$tc.full,
+                "\n\tlearning rate=",round(out$mods$lr.mod$lr,4),
+                "\n\tn(trees)=",out$mods$final.mod$target.trees,
+                "\n\tmodel simplification=",out$input$simp.method,
+                "\n\tn folds=",out$input$n.folds,
+                "\n\tn covariates in final model=",nrow(out$mods$final.mod$contributions),
+       sep="")
+    txt1 <- "\nRelative influence of predictors in final model:\n\n"
+    txt2 <- "\nImportant interactions in final model:\n\n"
+
+    capture.output(cat(txt0),cat(txt1),print(out$mods$final.mod$contributions),cat(txt2),print(out$mods$interactions,row.names=F),file=paste(out$dat$bname,"_output.txt",sep=""))
+    cat(txt0);cat(txt1);print(out$mods$final.mod$contributions);cat(txt2);print(out$mods$interactions,row.names=F)
 
  }
  
@@ -140,6 +151,23 @@ if(Model=="rf"){
             model.summary <- importance(out$mods$final.mod)
         model.summary<-model.summary[order(model.summary[,3],decreasing=T),]
         out$mods$summary <- model.summary
+        txt0 <- paste("Random Forest Modeling Results\n",out$input$run.time,"\n\n",
+          "Data:\n\t",ma.name,
+          "\n\tn(pres)=",out$dat$ma$n.pres[2],
+          "\n\tn(abs)=",out$dat$ma$n.abs[2],
+          "\n\tn covariates considered=",length(out$dat$ma$used.covs),
+        "\n\n","Settings:",
+        "\n\tn covariates considered at each split =",out$mods$parms$mtry,
+        "\n\tn trees=",out$mods$parms$n.tree,
+        "\n\ttotal time for model fitting=",round((unclass(Sys.time())-t0)/60,2),"min\n",sep="")
+    txt1 <- "\nRelative performance of predictors in final model:\n\n"
+    txt2 <- "\nDefault summary of random forest fit:\n"
+    capture.output(cat(txt0),cat(txt1),print(round(model.summary,4)),cat(txt2),print(out$mods$final.mod),file=paste(bname,"_output.txt",sep=""))
+    cat(txt0);cat(txt1);print(round(model.summary,4));cat(txt2);print(out$mods$final.mod);cat("\n\n")
+    if(!is.null(out$dat$bad.factor.cols)){
+        capture.output(cat("\nWarning: the following categorical response variables were removed from consideration\n",
+            "because they had only one level:",paste(out$dat$bad.factor.cols,collapse=","),"\n"),
+            file=paste(out$dat$bname,"_output.txt",sep=""),append=T)
       }
   return(out)
  }

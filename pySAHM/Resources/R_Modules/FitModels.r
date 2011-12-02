@@ -51,7 +51,9 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
                 interactions=NULL,  # not used #
                 summary=NULL))
 
-
+    #print warnings as they occur
+    options(warn=1)
+    
       Model=script.name
    #Load Libraries
       chk.libs(Model)
@@ -70,8 +72,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
             } else bname<-paste(out$input$output.dir,paste("/",Model,sep=""),sep="")
             out$dat$bname <- bname
          if(!debug.mode) {sink(logname <- paste(bname,"_log.txt",sep=""));on.exit(sink)} else logname<-NULL
-    #print warnings as they occur
-    options(warn=1)
+
 
           cat("\nbegin processing of model array:",out$input$ma.name,"\n")
           cat("\nfile basename set to:",out$dat$bname,"\n")
@@ -97,7 +98,8 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
             out$dat$nPresAbs$train[2],"\n\t n(abs)=",out$dat$nPresAbs$train[1],"\n\t n covariates considered=",length(out$dat$used.covs),
             "\n",
             "\n   total time for model fitting=",round((unclass(Sys.time())-t0)/60,2),"min\n",sep="")
-        capture.output(cat(txt0),file=paste(bname,"_output.txt",sep=""))
+
+        capture.output(cat(txt0),file=paste(bname,"_output.txt",sep=""),append=TRUE)
         cat("\n","Finished with", toupper(Model),"\n")
         if(!is.null(out$dat$bad.factor.cols)){
             cat("\nWarning: the following categorical response variables were removed from consideration\n",
@@ -127,6 +129,8 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
     if(out$dat$split.type!="crossValidation") out$dat$ma<-(lapply(X=out$dat$ma,FUN=pred.vals,model=out$mods$final.mod,Model=Model))
        else out$dat$ma$train$pred<-out$mods$final.mod$fitted$response #produces the same thing as pred.mars(out$mods$final.mod,out$dat$ma$train$dat[2:ncol(out$dat$ma$train$dat)])
 
+    #Just for the training set for Random Forest we have to take out of bag predictions rather than the regular predictions
+    if(Model=="rf") out$dat$ma$train$pred<-tweak.p(as.vector(predict(out$mods$final.mod,type="prob")[,2]))
     #producing auc and residual plots model summary information and accross model evaluation metric
       out$mods$auc.output<-make.auc.plot.jpg(out=out)
 

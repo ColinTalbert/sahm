@@ -4,6 +4,7 @@ est.lr <- function(out){
     # in addition, variables with >1% influence are identified by column number in
     # the original dataframe
     # written by AKS early 2009
+
     suppressMessages(require(gbm))
    attach(out$input)
    on.exit(detach(out$input))
@@ -42,6 +43,7 @@ est.lr <- function(out){
           bag.fraction = out$input$bag.fraction,
           site.weights=out$dat$Subset$weight,
           autostop=T,verbose=F,silent=T,plot.main=F)
+          print(gbm.fit$target.trees)
        lr.out$max.trees[i] <- max.trees <- gbm.fit$target.trees
        assign(paste("gbm.fit",i,sep="_"),gbm.fit)
        cat("lr =",lrs[i],"  optimal n trees =",max.trees,"\n");flush.console()
@@ -195,10 +197,9 @@ gbm.step.fast <- function(
 
   assign("x.data", x.data, env = globalenv())               #and assign them for later use
   assign("y.data", y.data, env = globalenv())
-
   offset.name <- deparse(substitute(offset))   # get the dataframe name
   offset = eval(offset)
-  #print(summary(offset))
+
 
   n.cases <- nrow(dat)
   n.preds <- length(gbm.x)
@@ -220,13 +221,11 @@ gbm.step.fast <- function(
       absence.mask <- dat[,gbm.y] == 0
       n.pres <- sum(presence.mask)
       n.abs <- sum(absence.mask)
-
 # create a vector of randomised numbers and feed into presences
       selector <- rep(0,n.cases)
       temp <- rep(seq(1, n.folds, by = 1), length = n.pres)
       temp <- temp[order(runif(n.pres, 1, 100))]
       selector[presence.mask] <- temp
-
 # and then do the same for absences
       temp <- rep(seq(1, n.folds, by = 1), length = n.abs)
       temp <- temp[order(runif(n.abs, 1, 100))]
@@ -247,7 +246,6 @@ gbm.step.fast <- function(
 # set up the storage space for results
 
   pred.values <- rep(0, n.cases)
-
   cv.loss.matrix <- matrix(0, nrow = n.folds, ncol = 1)
   training.loss.matrix <- matrix(0, nrow = n.folds, ncol = 1)
   trees.fitted <- n.trees[1]
@@ -269,14 +267,10 @@ gbm.step.fast <- function(
 # calculate the total deviance
 
   y_i <- y.data
-
   u_i <- sum(y.data * site.weights) / sum(site.weights)
   u_i <- rep(u_i,length(y_i))
-
   total.deviance <- calc.deviance(y_i, u_i, weights = site.weights, family = family, calc.mean = FALSE)
-
   mean.total.deviance <- total.deviance/n.cases
-
   tolerance.test <- tolerance
 
   if (tolerance.method == "auto") {
@@ -701,6 +695,7 @@ if(abs(target.trees-1000) >= 600 & superfast==T){         # AKS
   gbm.object$cv.loss.matrix <- cv.loss.matrix
   gbm.object$cv.roc.matrix <- cv.roc.stats
   gbm.object$target.trees <- target.trees
+
 
   if (keep.fold.models) gbm.object$fold.models <- model.list
   else gbm.object$fold.models <- NULL

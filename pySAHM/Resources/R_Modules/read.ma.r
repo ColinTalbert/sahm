@@ -187,11 +187,12 @@
                  out.list$tif.ind<-paths
 
         out.list$dims <- sum(out.list$nPresAbs$train)
-        out.list$Subset$ratio <- min(sum(out$input$model.fitting.subset)/out.list$dims[1],1)
+
         out.list$used.covs <-  names(dat.out$train$dat)[-1]
 
       if(out$input$script.name=="brt"){
        model.fitting.subset=c(n.pres=500,n.abs=500)
+        out.list$Subset$ratio <- min(sum(model.fitting.subset)/out.list$dims[1],1)
             pres.sample <- sample(c(1:nrow(dat.out$train$dat))[dat.out$train$dat[,1]>=1],min(out.list$nPresAbs$train[2],out$input$model.fitting.subset[1]))
             abs.sample <- sample(c(1:nrow(dat.out$train$dat))[dat.out$train$dat[,1]==0],min(out.list$nPresAbs$train[1],out$input$model.fitting.subset[2]))
             out.list$Subset$dat <- dat.out$train$dat[c(pres.sample,abs.sample),]
