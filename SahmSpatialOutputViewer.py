@@ -31,7 +31,8 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
     """
     _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
-                    ('model_workspace', '(edu.utah.sci.vistrails.basic:File)')]
+                    ('model_workspace', '(edu.utah.sci.vistrails.basic:File)'),
+                    ("max_cells_dimension", "(edu.utah.sci.vistrails.basic:Integer)", {'defaults':str(['5000']), 'optional':True})]
     #all inputs are determined relative to the model_workspace
 
     def __init__(self):
@@ -62,6 +63,11 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
             if not self.location:
                 self.location = CellLocation()
             self.location.col = self.getInputFromPort('column') - 1
+
+        if self.hasInputFromPort("max_cells_dimension"):
+            inputs["max_cells_dimension"] = self.getInputFromPort('max_cells_dimension')
+        else:
+            inputs["max_cells_dimension"] = [item for item in self._input_ports if item[0] == 'max_cells_dimension'][0][2]['defaults']
 
         self.displayAndWait(SAHMSpatialOutputViewerCellWidget,
                             inputs)
@@ -126,8 +132,8 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
     def create_main_frame(self):
         self.dpi = 100
         self.fig = Figure((5.0, 4.0), dpi=self.dpi)
-        self.fig.subplots_adjust(left = 0, right=1, top=1, bottom=0)
-        self.map_canvas = MyDiagram(self.fig)
+        self.fig.subplots_adjust(left = 0.01, right=0.99, top=0.99, bottom=0.001)
+        self.map_canvas = MyMapCanvas(self.fig)
         
         self.add_axis()
            
@@ -297,16 +303,27 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         '''return a numpy array with the values from the raster_file
         if there are more than 10,000 rows or cols the data will be 
         subsampled and self.map_ratio will be set.
-        All nodata values will be removed f
+        All nodata values will be removed
         '''
         ds = gdal.Open(raster_file, gdal.GA_ReadOnly)
         rasterparams = self.getRasterParams(raster_file)
-        factor = 1
-        nrows = rasterparams["height"] / factor
-        ncols = rasterparams["width"] / factor
-        ary = ds.GetRasterBand(1).ReadAsArray(buf_ysize=nrows, buf_xsize=ncols)
-        ndval = ds.GetRasterBand(1).GetNoDataValue()
-        ndval = -3.39999995214e+038
+        nrows = rasterparams["height"]
+        ncols = rasterparams["width"]
+        max_dimension = max([nrows, ncols])
+        if max_dimension > self.inputs["max_cells_dimension"]:
+            ratio = float(self.inputs["max_cells_dimension"]) / max_dimension
+            nrows = int(ratio * nrows)
+            ncols = int(ratio * ncols)
+                
+        try:
+            ary = ds.GetRasterBand(1).ReadAsArray(buf_ysize=nrows, buf_xsize=ncols)
+            ndval = ds.GetRasterBand(1).GetNoDataValue()
+        except MemoryError:
+            msgbox = QtGui.QMessageBox(self)
+            msgbox.setText("This viewer cannot handle datasets this large.\nTry setting the max_cells_dimension to a smaller value.")
+            msgbox.exec_()
+            raise MemoryError
+            
         return np.ma.masked_array(ary, mask=(ary==ndval))
         
         
@@ -365,10 +382,11 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 
 
 
-class MyDiagram(FigureCanvas):
+class MyMapCanvas(FigureCanvas):
     def __init__(self, fig):
         FigureCanvas.__init__(self, fig)
         self.mpl_connect('axes_leave_event', self.testing)
+
     def resizeEvent(self, event):
         if not event.size().height() == 0:
             FigureCanvas.resizeEvent(self, event)
@@ -406,7 +424,7 @@ class viewTitleLegend(QtGui.QAction):
                     os.path.dirname(__file__), "Images", "titlelegend.png"))
         QtGui.QAction.__init__(self,
                                QtGui.QIcon(icon),
-                               "Show Title and Legend",
+                               "Show/Hide Title and Legend",
                                parent)
         self.setCheckable(True)
         self.setChecked(True)
@@ -471,7 +489,14 @@ class ViewLayerAction(QtGui.QAction):
             except AttributeError:
                 pass #ignore buttons that don't have a tag set
         cellWidget.on_draw()
-        cellWidget.fig.canvas.draw()
+        try:
+            cellWidget.fig.canvas.draw()
+        except MemoryError:
+            msgbox = QtGui.QMessageBox(self)
+            msgbox.setText("This viewer cannot handle datasets this large.\nTry setting the max_cells_dimension to a smaller value.")
+            msgbox.exec_()
+            raise MemoryError
+            
         cellWidget.update()
 #        all_layers = cellWidget.all_layers
 #        layerset = []
