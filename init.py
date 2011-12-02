@@ -1537,6 +1537,7 @@ def load_max_ent_params():
     docs = {}
     basic_pkg = 'edu.utah.sci.vistrails.basic'
     p_type_map = {'file/directory': 'Path',
+                  'directory':'Directory',
                   'double': 'Float'}
     for row in csv_reader:
         [name, flag, p_type, default, doc, notes] = row
