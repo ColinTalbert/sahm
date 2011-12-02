@@ -814,7 +814,7 @@ class FieldDataQuery(Module):
         except:
             try:
                 all_lowers = [item.lower() for item in header]
-                index = header.index(column_name.lower())
+                index = all_lowers.index(column_name.lower())
             except:
                 msg = "The specified column wasn't in the input file\n"
                 msg += column_name + " not in " + str(header)
@@ -826,8 +826,15 @@ class FieldDataQuery(Module):
         if "<" in query or \
             ">" in query or \
             "=" in query:
-            toevaluate = query.replace('x', value)
-            return eval(toevaluate)
+            
+            try:
+                #this works with numeric queries
+                toevaluate = query.replace('x', value)
+                return eval(toevaluate)
+            except (NameError,SyntaxError):
+                #this works with string queries
+                toevaluate = query.replace('x', "'" + value + "'")
+                return eval(toevaluate)
         else:
             return False
             
