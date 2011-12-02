@@ -119,80 +119,29 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         
         self.load_layers()
         self.on_draw()
+        self.xlim = self.axes.get_xlim()
+        self.ylim = self.axes.get_ylim()
         self.update()
         
     def create_main_frame(self):
-#        self.main_frame = QtGui.QWidget(self)
-#        
-#        splitter = QtGui.QSplitter(self)
-#        splitter.setOrientation(QtCore.Qt.Vertical)
-
         self.dpi = 100
         self.fig = Figure((5.0, 4.0), dpi=self.dpi)
         self.fig.subplots_adjust(left = 0, right=1, top=1, bottom=0)
         self.map_canvas = MyDiagram(self.fig)
         
         self.add_axis()
-        
-        
-##        self.map_canvas.setParent(self)
-#        legend = QtGui.QFrame(splitter)
-#        legend.setFrameShape(QtGui.QFrame.StyledPanel)
-#        legend.layout = QtGui.QHBoxLayout(legend)
-#        legend.layout.setSpacing(5)
-#        legend.layout.setContentsMargins(9, 0, 0, 0)
-#        
-#        self.legend_label = QtGui.QLabel()
-#        legend.layout.addWidget(self.legend_label)
-#        
-##        colorbar_frame = QtGui.QFrame(legend)
-##        colorbar_frame.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum))
-##        colorbar_frame.layout(QtGui.QHBoxLayout(colorbar_frame))
-#        
-#
-#        self.legend_fig = Figure((5.0, 0.4), dpi=self.dpi)
-#        self.legend_fig.set_facecolor('w')
-#        self.legend_fig.subplots_adjust(left = 0, right=1, top=1, bottom=0)
-#        
-##        self.legend_frame = QtGui.QFrame(legend)
-##        self.legend_frame.layout = QtGui.QHBoxLayout(self.legend_frame)
-##        self.legend_frame.layout.setMargin(0)
-##        self.legend_axes = self.legend_fig.add_subplot(1, 1, 1)
-##        self.legend_axes.axes('off')
-#        self.legend_canvas = MyDiagram(self.legend_fig)
-#        self.legend_canvas.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding))
-#        self.legend_axes = self.legend_fig.add_subplot(111)
-#        self.legend_axes.spines['right'].set_color('none')
-#        self.legend_axes.spines['top'].set_color('none')
-#        self.legend_axes.spines['bottom'].set_color('none')
-#        self.legend_axes.spines['left'].set_color('none')
-#        self.legend_axes.get_xaxis().set_visible(False)
-#        self.legend_axes.get_yaxis().set_visible(False)
-#        
-##        colorbar_frame.layout.addWidget(self.legend_canvas)
-#        legend.layout.addWidget(self.legend_canvas)
-#        
-#
-#        splitter.addWidget(legend)
-#        splitter.addWidget(self.map_canvas)
-        
-        
-        
-#        # Create the mpl Figure and FigCanvas objects. 
-#        # 5x4 inches, 100 dots-per-inch
-#        #
-#        self.dpi = 100
-#        self.fig = Figure((5.0, 4.0), dpi=self.dpi)
-#        self.canvas = FigureCanvas(self.fig)
-#        self.canvas.setParent(self)
-
-        
+           
         self.mpl_toolbar = NavigationToolbar(self.map_canvas, None)
         #Strip out the unused actions
-        keep_actions = ['Home', 'Back', 'Forward', 'Pan', 'Zoom', 'Save']
+        keep_actions = ['Pan', 'Zoom', 'Save']
         for action in self.mpl_toolbar.actions():
             if not action.text() in keep_actions and action.text():
                 self.mpl_toolbar.removeAction(action)
+            if action.text() == 'Zoom':
+                icon = os.path.abspath(os.path.join(
+                    os.path.dirname(__file__), "Images", "zoom.png"))
+                action.setIcon(QtGui.QIcon(icon))
+
         
         self.layout().addWidget(self.map_canvas)    
     
@@ -231,6 +180,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
                 self.all_layers[name]["enabled"] = False
             else:
                 self.all_layers[name]["enabled"] = True
+                
                
     def add_axis(self):
         self.axes = self.fig.add_subplot(111, aspect='equal', adjustable='datalim')
@@ -308,8 +258,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
                 else:
                     self.add_raster(v)
                     title += self.all_layers[k]['title']
-                #if raster then clear and display the color ramp.
-               
+         
                
         if self.displayTL:
             self.add_title(title)
@@ -419,15 +368,37 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 class MyDiagram(FigureCanvas):
     def __init__(self, fig):
         FigureCanvas.__init__(self, fig)
-        
+        self.mpl_connect('axes_leave_event', self.testing)
     def resizeEvent(self, event):
         if not event.size().height() == 0:
             FigureCanvas.resizeEvent(self, event)
 
+    def testing(self, event):
+        pass
+
     def leaveEvent(self, event):
         FigureCanvas.leaveEvent(self, event)
-        QtGui.QApplication.restoreOverrideCursor()
+#        QtGui.QApplication.restoreOverrideCursor()
 #        self.emit(QtCore.SIGNAL('axes_leave_event'), event)
+
+class fullExtent(QtGui.QAction):
+    def __init__(self, parent=None):
+        icon = os.path.abspath(os.path.join(
+                    os.path.dirname(__file__), "Images", "world.png"))
+        QtGui.QAction.__init__(self,
+                               QtGui.QIcon(icon),
+                               "Full Extent",
+                               parent)
+        self.setCheckable(False)
+
+    def triggeredSlot(self):
+        cellWidget = self.toolBar.getSnappedWidget()
+        xlim = cellWidget.xlim
+        ylim = cellWidget.ylim
+        cellWidget.axes.set_xlim(xlim)
+        cellWidget.axes.set_ylim(ylim)
+        cellWidget.fig.canvas.draw()
+        cellWidget.update()
 
 class viewTitleLegend(QtGui.QAction):
     def __init__(self, parent=None):
@@ -563,6 +534,7 @@ class SAHMSpatialViewerToolBar(QCellToolBar):
         nav_label.setText("  Navigation:")
         self.appendWidget(nav_label)
         self.appendAction(viewTitleLegend(self))
+        self.appendAction(fullExtent(self))
 #        self.appendWidget(sw.mpl_toolbar)
         
     def updateToolBar(self):
