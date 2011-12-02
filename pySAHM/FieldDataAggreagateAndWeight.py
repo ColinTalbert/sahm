@@ -202,7 +202,16 @@ class FieldDataQuery(object):
         extraPoints = []
         pointCount = 0
         pcntDone = 0
+        line = 1
         for row in reader:
+            line += 1
+            #make sure x, and y are numbers!
+            try:
+                x = float(row[0])
+                y = float(row[1])
+            except ValueError:
+                raise Exception, "Non-numeric X, Y used.\nLine number " + str(line)
+            
             if self.pointInTemplate(row[0], row[1]):
                 pixelColumn = int(floor((float(row[0]) - self.templateParams["ulx"]) 
                                         / self.templateParams["xScale"]))
