@@ -31,7 +31,8 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
     """
     _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
-                    ('model_workspace', '(edu.utah.sci.vistrails.basic:File)')]
+                    ('model_workspace', '(edu.utah.sci.vistrails.basic:File)'),
+                    ("max_cells_dimension", "(edu.utah.sci.vistrails.basic:Integer)", {'defaults':str(['5000']), 'optional':True})]
     #all inputs are determined relative to the model_workspace
 
     def __init__(self):
@@ -62,6 +63,11 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
             if not self.location:
                 self.location = CellLocation()
             self.location.col = self.getInputFromPort('column') - 1
+
+        if self.hasInputFromPort("max_cells_dimension"):
+            inputs["max_cells_dimension"] = self.getInputFromPort('max_cells_dimension')
+        else:
+            inputs["max_cells_dimension"] = [item for item in self._input_ports if item[0] == 'max_cells_dimension'][0][2]['defaults']
 
         self.displayAndWait(SAHMSpatialOutputViewerCellWidget,
                             inputs)
@@ -119,80 +125,29 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         
         self.load_layers()
         self.on_draw()
+        self.xlim = self.axes.get_xlim()
+        self.ylim = self.axes.get_ylim()
         self.update()
         
     def create_main_frame(self):
-#        self.main_frame = QtGui.QWidget(self)
-#        
-#        splitter = QtGui.QSplitter(self)
-#        splitter.setOrientation(QtCore.Qt.Vertical)
-
         self.dpi = 100
         self.fig = Figure((5.0, 4.0), dpi=self.dpi)
-        self.fig.subplots_adjust(left = 0, right=1, top=1, bottom=0)
-        self.map_canvas = MyDiagram(self.fig)
+        self.fig.subplots_adjust(left = 0.01, right=0.99, top=0.99, bottom=0.001)
+        self.map_canvas = MyMapCanvas(self.fig)
         
         self.add_axis()
-        
-        
-##        self.map_canvas.setParent(self)
-#        legend = QtGui.QFrame(splitter)
-#        legend.setFrameShape(QtGui.QFrame.StyledPanel)
-#        legend.layout = QtGui.QHBoxLayout(legend)
-#        legend.layout.setSpacing(5)
-#        legend.layout.setContentsMargins(9, 0, 0, 0)
-#        
-#        self.legend_label = QtGui.QLabel()
-#        legend.layout.addWidget(self.legend_label)
-#        
-##        colorbar_frame = QtGui.QFrame(legend)
-##        colorbar_frame.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum))
-##        colorbar_frame.layout(QtGui.QHBoxLayout(colorbar_frame))
-#        
-#
-#        self.legend_fig = Figure((5.0, 0.4), dpi=self.dpi)
-#        self.legend_fig.set_facecolor('w')
-#        self.legend_fig.subplots_adjust(left = 0, right=1, top=1, bottom=0)
-#        
-##        self.legend_frame = QtGui.QFrame(legend)
-##        self.legend_frame.layout = QtGui.QHBoxLayout(self.legend_frame)
-##        self.legend_frame.layout.setMargin(0)
-##        self.legend_axes = self.legend_fig.add_subplot(1, 1, 1)
-##        self.legend_axes.axes('off')
-#        self.legend_canvas = MyDiagram(self.legend_fig)
-#        self.legend_canvas.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding))
-#        self.legend_axes = self.legend_fig.add_subplot(111)
-#        self.legend_axes.spines['right'].set_color('none')
-#        self.legend_axes.spines['top'].set_color('none')
-#        self.legend_axes.spines['bottom'].set_color('none')
-#        self.legend_axes.spines['left'].set_color('none')
-#        self.legend_axes.get_xaxis().set_visible(False)
-#        self.legend_axes.get_yaxis().set_visible(False)
-#        
-##        colorbar_frame.layout.addWidget(self.legend_canvas)
-#        legend.layout.addWidget(self.legend_canvas)
-#        
-#
-#        splitter.addWidget(legend)
-#        splitter.addWidget(self.map_canvas)
-        
-        
-        
-#        # Create the mpl Figure and FigCanvas objects. 
-#        # 5x4 inches, 100 dots-per-inch
-#        #
-#        self.dpi = 100
-#        self.fig = Figure((5.0, 4.0), dpi=self.dpi)
-#        self.canvas = FigureCanvas(self.fig)
-#        self.canvas.setParent(self)
-
-        
+           
         self.mpl_toolbar = NavigationToolbar(self.map_canvas, None)
         #Strip out the unused actions
-        keep_actions = ['Home', 'Back', 'Forward', 'Pan', 'Zoom', 'Save']
+        keep_actions = ['Pan', 'Zoom', 'Save']
         for action in self.mpl_toolbar.actions():
             if not action.text() in keep_actions and action.text():
                 self.mpl_toolbar.removeAction(action)
+            if action.text() == 'Zoom':
+                icon = os.path.abspath(os.path.join(
+                    os.path.dirname(__file__), "Images", "zoom.png"))
+                action.setIcon(QtGui.QIcon(icon))
+
         
         self.layout().addWidget(self.map_canvas)    
     
@@ -231,6 +186,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
                 self.all_layers[name]["enabled"] = False
             else:
                 self.all_layers[name]["enabled"] = True
+                
                
     def add_axis(self):
         self.axes = self.fig.add_subplot(111, aspect='equal', adjustable='datalim')
@@ -308,8 +264,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
                 else:
                     self.add_raster(v)
                     title += self.all_layers[k]['title']
-                #if raster then clear and display the color ramp.
-               
+         
                
         if self.displayTL:
             self.add_title(title)
@@ -348,16 +303,27 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         '''return a numpy array with the values from the raster_file
         if there are more than 10,000 rows or cols the data will be 
         subsampled and self.map_ratio will be set.
-        All nodata values will be removed f
+        All nodata values will be removed
         '''
         ds = gdal.Open(raster_file, gdal.GA_ReadOnly)
         rasterparams = self.getRasterParams(raster_file)
-        factor = 1
-        nrows = rasterparams["height"] / factor
-        ncols = rasterparams["width"] / factor
-        ary = ds.GetRasterBand(1).ReadAsArray(buf_ysize=nrows, buf_xsize=ncols)
-        ndval = ds.GetRasterBand(1).GetNoDataValue()
-        ndval = -3.39999995214e+038
+        nrows = rasterparams["height"]
+        ncols = rasterparams["width"]
+        max_dimension = max([nrows, ncols])
+        if max_dimension > self.inputs["max_cells_dimension"]:
+            ratio = float(self.inputs["max_cells_dimension"]) / max_dimension
+            nrows = int(ratio * nrows)
+            ncols = int(ratio * ncols)
+                
+        try:
+            ary = ds.GetRasterBand(1).ReadAsArray(buf_ysize=nrows, buf_xsize=ncols)
+            ndval = ds.GetRasterBand(1).GetNoDataValue()
+        except MemoryError:
+            msgbox = QtGui.QMessageBox(self)
+            msgbox.setText("This viewer cannot handle datasets this large.\nTry setting the max_cells_dimension to a smaller value.")
+            msgbox.exec_()
+            raise MemoryError
+            
         return np.ma.masked_array(ary, mask=(ary==ndval))
         
         
@@ -416,18 +382,41 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 
 
 
-class MyDiagram(FigureCanvas):
+class MyMapCanvas(FigureCanvas):
     def __init__(self, fig):
         FigureCanvas.__init__(self, fig)
-        
+        self.mpl_connect('axes_leave_event', self.testing)
+
     def resizeEvent(self, event):
         if not event.size().height() == 0:
             FigureCanvas.resizeEvent(self, event)
 
+    def testing(self, event):
+        pass
+
     def leaveEvent(self, event):
         FigureCanvas.leaveEvent(self, event)
-        QtGui.QApplication.restoreOverrideCursor()
+#        QtGui.QApplication.restoreOverrideCursor()
 #        self.emit(QtCore.SIGNAL('axes_leave_event'), event)
+
+class fullExtent(QtGui.QAction):
+    def __init__(self, parent=None):
+        icon = os.path.abspath(os.path.join(
+                    os.path.dirname(__file__), "Images", "world.png"))
+        QtGui.QAction.__init__(self,
+                               QtGui.QIcon(icon),
+                               "Full Extent",
+                               parent)
+        self.setCheckable(False)
+
+    def triggeredSlot(self):
+        cellWidget = self.toolBar.getSnappedWidget()
+        xlim = cellWidget.xlim
+        ylim = cellWidget.ylim
+        cellWidget.axes.set_xlim(xlim)
+        cellWidget.axes.set_ylim(ylim)
+        cellWidget.fig.canvas.draw()
+        cellWidget.update()
 
 class viewTitleLegend(QtGui.QAction):
     def __init__(self, parent=None):
@@ -435,7 +424,7 @@ class viewTitleLegend(QtGui.QAction):
                     os.path.dirname(__file__), "Images", "titlelegend.png"))
         QtGui.QAction.__init__(self,
                                QtGui.QIcon(icon),
-                               "Show Title and Legend",
+                               "Show/Hide Title and Legend",
                                parent)
         self.setCheckable(True)
         self.setChecked(True)
@@ -500,7 +489,14 @@ class ViewLayerAction(QtGui.QAction):
             except AttributeError:
                 pass #ignore buttons that don't have a tag set
         cellWidget.on_draw()
-        cellWidget.fig.canvas.draw()
+        try:
+            cellWidget.fig.canvas.draw()
+        except MemoryError:
+            msgbox = QtGui.QMessageBox(self)
+            msgbox.setText("This viewer cannot handle datasets this large.\nTry setting the max_cells_dimension to a smaller value.")
+            msgbox.exec_()
+            raise MemoryError
+            
         cellWidget.update()
 #        all_layers = cellWidget.all_layers
 #        layerset = []
@@ -563,6 +559,7 @@ class SAHMSpatialViewerToolBar(QCellToolBar):
         nav_label.setText("  Navigation:")
         self.appendWidget(nav_label)
         self.appendAction(viewTitleLegend(self))
+        self.appendAction(fullExtent(self))
 #        self.appendWidget(sw.mpl_toolbar)
         
     def updateToolBar(self):
