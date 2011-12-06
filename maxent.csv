@@ -1,5 +1,5 @@
 Flag ,Abbrv ,Type ,Default ,Meaning ,VisTrailsNotes
-projectionlayers ,j ,file/directory ,,"Location of an alternate set of environmental variables. Maxent models will be projected onto these variables.Can be a .csv file (in SWD format) or a directory containing one file per variable.Multiple projection files/directories can be separated by commas. ",
+projectionlayers ,j ,directory ,,"Location of an alternate set of environmental variables. Maxent models will be projected onto these variables.Can be a .csv file (in SWD format) or a directory containing one file per variable.Multiple projection files/directories can be separated by commas. ",
 randomtestpoints ,X ,integer ,0,"Percentage of presence localities to be randomly set aside as test points, used to compute AUC, omission etc. ","If the MDS input is from the test training split the will not be used, but instead this file will be generated from the input MDS Split column where it equals 'test'"
 betamultiplier ,b ,double ,1,Multiply all automatic regularization parameters by this number. A higher number gives a more spread-out distribution. ,
 maximumbackground ,MB ,integer ,10000,"If the number of background points / grid cells is larger than this number, then this number of cells is chosen randomly for background points ",
@@ -17,7 +17,7 @@ fadebyclamping ,,boolean ,false ,"Reduce prediction at each point in projections
 extrapolate ,,boolean ,true ,Predict to regions of environmental space outside the limits encountered during training ,
 autofeature ,A ,boolean ,true ,"Automatically select which feature classes to use, based on number of training samples ",
 doclamp ,,boolean ,true ,Apply clamping when projecting ,
-maximumiterations ,m ,integer ,500,Stop training after this many iterations of the optimization algorithm ,
+maximumiterations ,m ,integer ,5000,Stop training after this many iterations of the optimization algorithm ,
 convergencethreshold ,c ,double ,1.00E-05,Stop training when the drop in log loss per iteration drops below this number ,
 beta_threshold ,,double ,-1,Regularization parameter to be applied to all threshold features; negative value enables automatic setting ,
 beta_categorical ,,double ,-1,Regularization parameter to be applied to all categorical features; negative value enables automatic setting ,
@@ -30,4 +30,9 @@ responsecurves,p ,boolean ,true ,Create graphs showing how predicted relative pr
 jackknife,,boolean ,true ,Do jackknife to measure variable importance,
 writeclampgrid,,boolean ,false ,Do not create clamping grids when projecting,
 writemess,,boolean ,false ,Do not do MESS analysis when projecting,
-outputgrids,,boolean ,false ,Only create the summary grids when doing multiple iterations,
+outputgrids,X ,boolean ,true ,"Write output grids. Turning this off when doing replicate runs causes only the summary grids (average, std deviation etc.) to be written, not those for the individual runs. ",
+threads ,,integer ,1,"Number of processor threads to use. Matching this number to the number of cores on your computer speeds up some operations, especially variable jackknifing. ",
+visible ,z ,boolean ,true ,Make the Maxent user interface visible ,
+warnings ,,boolean ,true ,"Pop up windows to warn about potential problems with input data. Regardless of this setting, warnings are always printed to the log file. ",
+writeclampgrid ,,boolean ,false ,"Write a grid that shows the spatial distribution of clamping. At each point, the value is the absolute difference between prediction values with and without clamping. ",
+plots ,,boolean ,true ,Write various plots for inclusion in .html output ,

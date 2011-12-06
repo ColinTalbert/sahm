@@ -245,23 +245,24 @@ class SelectListDialog(QtGui.QDialog):
         for i in range(0, len(header)):
             headerList.append([header[i], header2[i], header3[i]])
         
-        #headerList.sort()
+        noncovariate_columns = ['Split', ]
         for item in headerList[3:]:
-            child_item = QtGui.QTreeWidgetItem([item[0],])
-            child_item.setFlags(QtCore.Qt.ItemIsUserCheckable |
-                            QtCore.Qt.ItemIsEnabled)
-            checked = True
-            if int(item[1]) == 0:
-                checked = False 
-            
-            if not checked:
-                child_item.setCheckState(0, QtCore.Qt.Unchecked)
-            else:
-                child_item.setCheckState(0, QtCore.Qt.Checked)
-            
-            self.treeview.addTopLevelItem(child_item)
-            #self.tree_items[file] = child_item
-            n += 1
+            if not item[0] in noncovariate_columns:
+                child_item = QtGui.QTreeWidgetItem([item[0],])
+                child_item.setFlags(QtCore.Qt.ItemIsUserCheckable |
+                                QtCore.Qt.ItemIsEnabled)
+                checked = True
+                if int(item[1]) == 0:
+                    checked = False 
+                
+                if not checked:
+                    child_item.setCheckState(0, QtCore.Qt.Unchecked)
+                else:
+                    child_item.setCheckState(0, QtCore.Qt.Checked)
+                
+                self.treeview.addTopLevelItem(child_item)
+                #self.tree_items[file] = child_item
+                n += 1
         csvfile.close()
         #update the tree view label to show how many covariates there are
         self.label_2.setText(_fromUtf8("Covariates   (n=" + str(n) + ")"))
@@ -276,21 +277,19 @@ class SelectListDialog(QtGui.QDialog):
         header2 = reader.next() #the 2nd line of the mds with use/don't use
         header3 = reader.next() #the 3rd line of the mds with the path
         
-        headerList = [] 
-        for i in range(0, len(header)):
-            headerList.append([header[i], header2[i], header3[i]])
-        
-        outHeader2 = header2[:2] + [self.selection_name]        
+        outHeader2 = header2
+        outHeader2[2] = self.selection_name    
                   
         treeviewIter = QtGui.QTreeWidgetItemIterator(self.treeview)
         while treeviewIter.value():
-            if treeviewIter.value().checkState(0) == QtCore.Qt.Checked:
-                outHeader2.append("1")
+            item = treeviewIter.value()
+            col_index = header.index(item.text(0))
+            if item.checkState(0) == QtCore.Qt.Checked:
+                outHeader2[col_index] = "1"
             else:
-                outHeader2.append ("0")
+                outHeader2[col_index] = "0"
             treeviewIter += 1
 
-        
         oFile = open(self.outputMDS, 'wb')
         writer = csv.writer(oFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(header)

@@ -17,7 +17,7 @@ EvaluationStats<-function(out,thresh,train,train.pred,opt.methods=opt.methods){
        modelname="BRT"
       }
       
-    auc.output<-make.auc.plot.jpg(out$dat$ma$ma.test,pred=pred,plotname=paste(out$dat$bname,"_auc_plot.jpg",sep=""),
+    auc.output<-make.auc.plot.jpg(out$dat$ma$ma.test,pred=pred,plotname=paste(out$dat$bname,"_modelEvalPlot.jpg",sep=""),
           modelname=modelname,test.split=TRUE,thresh=thresh,train=train,train.pred,opt.methods=opt.methods,weight=out$dat$ma$test.weights,out=out)
 
                 out$mods$auc.output<-auc.output

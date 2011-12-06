@@ -193,7 +193,7 @@ class MDSBuilder(object):
         del outputMDS
         
         #convert the mds csv to a shapefile
-        output_shp = self.outputMDS.replace(".csv", ".mds")
+        output_shp = self.outputMDS.replace(".csv", "_shapefiles")
         utilities.mds_to_shape(self.outputMDS, output_shp)
         
         # figure out how long the script took to run
