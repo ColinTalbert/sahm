@@ -19,7 +19,7 @@ source(paste(ScriptPath,"ResidualImage.r",sep="\\"))
 source(paste(ScriptPath,"Pred.Surface.r",sep="\\"))
 
 #New generic function source code
-source(paste(ScriptPath,"cv.fct.r",sep="\\"))
+source(paste(ScriptPath,"cv.fctNew.r",sep="\\"))
 source(paste(ScriptPath,"generic.model.fit.r",sep="\\"))
 source(paste(ScriptPath,"pred.fct.r",sep="\\"))
 source(paste(ScriptPath,"response.curves.r",sep="\\"))

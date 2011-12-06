@@ -35,12 +35,11 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,pred.fct,factor.le
     # the same directory as the input files.  Geographic information from the input images
     # is retained.
     #
-    #HELLO!!!
-    #ColinTEST
+
     # Start of function #
     library(rgdal)
     library(raster)
-
+    if(is.null(factor.levels)) factor.levels<-NA
     MESS=out$input$MESS
     if(is.null(thresh)) thresh<-.5
     nvars<-length(vnames)
@@ -56,7 +55,7 @@ if(nvars<=1) MESS=FALSE
  # get spatial reference info from existing image file
 options(warn=-1)
     gi <- GDALinfo(fullnames[1])
-options(warn=0)
+options(warn=1)
     dims <- as.vector(gi)[1:2]
     ps <- as.vector(gi)[6:7]
     ll <- as.vector(gi)[4:5]
@@ -141,11 +140,12 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
             } else {temp[,k]<- getValuesBlock(raster(fullnames[k]), row=tr$row[i], nrows=tr$nrows[i])
                     }
                   if(MESS & !k%in%FactorInd){
-                        pred.range<-out$dat$ma$ma[,c(match(sub(".tif","",basename(fullnames[k])),names(out$dat$ma$ma)))]
+                        pred.range<-out$dat$ma$train$dat[,c(match(sub(".tif","",basename(fullnames[k])),names(out$dat$ma$train$dat)))]
                         if(nvars>1) pred.rng[,k]<-mapply(CalcMESS,tiff.entry=temp[,k],MoreArgs=list(pred.vect=pred.range))
                         else pred.rng<-mapply(CalcMESS,tiff.entry=temp,MoreArgs=list(pred.vect=pred.range))
                          }
             }
+
             if(MESS & length(FactorInd)>0) pred.rng<-pred.rng[,-c(FactorInd)]
     temp[temp==NAval] <- NA # replace missing values #
     temp[is.na(temp)]<-NA #this seemingly worthless line switches NaNs to NA so they aren't predicted
@@ -158,6 +158,7 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
                 }
             }
                    }}
+
     ifelse(sum(complete.cases(temp))==0,  # does not calculate predictions if all predictors in the region are na
         preds<-matrix(data=NaN,nrow=region.dims[1],ncol=region.dims[2]),
         preds <- t(matrix(pred.fct(model,temp,Model),ncol=dims[2],byrow=T)))

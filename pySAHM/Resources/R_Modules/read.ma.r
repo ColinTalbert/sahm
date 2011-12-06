@@ -150,8 +150,6 @@
       # check that response column contains only 1's and 0's, but not all 1's or all 0's if GLMFamily==binomial
       if(out$input$response.col=="responseCount") out$input$model.family<-"poisson"
         else out$input$model.family="binomial"
-        
-      if(out$input$script.name=="rf.r") out$input$model.family="bernoulli"
 
       if(tolower(out$input$model.family)=="bernoulli" || tolower(out$input$model.family)=="binomial"){
            if((Split.type=="crossValidation" & any(names(apply(do.call("rbind",out.list$nPresAbs),2,sum))!=c("0","1"))) |
@@ -190,8 +188,11 @@
 
         out.list$used.covs <-  names(dat.out$train$dat)[-1]
 
-      if(out$input$script.name=="brt"){
-       model.fitting.subset=c(n.pres=500,n.abs=500)
+      if(out$input$script.name%in%c("brt","rf")){
+      #brt uses a subsample for quicker estimation of learning rate and model simplificaiton
+      #random forest uses a subsample only for producing response curves
+      samp.size<-ifelse(out$input$script.name=="brt",500,50)
+       model.fitting.subset=c(n.pres=samp.size,n.abs=samp.size)
         out.list$Subset$ratio <- min(sum(model.fitting.subset)/out.list$dims[1],1)
             pres.sample <- sample(c(1:nrow(dat.out$train$dat))[dat.out$train$dat[,1]>=1],min(out.list$nPresAbs$train[2],out$input$model.fitting.subset[1]))
             abs.sample <- sample(c(1:nrow(dat.out$train$dat))[dat.out$train$dat[,1]==0],min(out.list$nPresAbs$train[1],out$input$model.fitting.subset[2]))

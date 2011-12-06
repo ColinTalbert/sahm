@@ -2,10 +2,10 @@ setwd("I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm_
 ScriptPath="I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
 
 #setwd("I:\\VisTrails\\Central_VisTrailsInstall\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
-source("FIT_BRT_pluggable.r")
-source("FIT_MARS_pluggable.r")
-source("FIT_RF_pluggable.r")
-source("FIT_GLM_pluggable.r")
+#source("FIT_BRT_pluggable.r")
+#source("FIT_MARS_pluggable.r")
+#source("FIT_RF_pluggable.r")
+#source("FIT_GLM_pluggable.r")
 
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
@@ -56,7 +56,11 @@ FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,
       response.col=rc,make.p.tif=F,make.binary.tif=F,
-          debug.mode=T,opt.methods=2,script.name="rf")
+          debug.mode=T,opt.methods=2,script.name="rf",
+responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
+samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
+localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=proximity,norm.votes=TRUE,
+do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=TRUE)
 
 #BRT
 set.seed(1)
@@ -66,7 +70,7 @@ FitModels(ma.name=input.file,
       model.family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
   tolerance = 0.001,seed=NULL,opt.methods=2,
           simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
-          learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,seed=1,save.model=TRUE,MESS=TRUE)
+          learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=TRUE)
 
 ##RF
 set.seed(1)

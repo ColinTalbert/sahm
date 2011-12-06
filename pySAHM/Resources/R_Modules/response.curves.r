@@ -31,7 +31,6 @@ response.curves<-function(out,Model,bname){
 
      }
 if(Model=="rf"){
-         if(make.r.curves){
 
                 r.curves <- list(names=row.names(out$mods$summary),preds=list(),resp=list())
                 inc <- 10/length(r.curves$names)
@@ -49,18 +48,15 @@ if(Model=="rf"){
                     }
                 for(i in 1:length(r.curves$names)){
                         assign("i",i,envir=.GlobalEnv)
-
-                                x<-partialPlot(out$mods$final.mod,out$dat$ma$ma.subset,r.curves$names[i],n.pt=50,plot=T,main="",
+                                x<-partialPlot(out$mods$final.mod,out$dat$Subset$dat,r.curves$names[i],n.pt=50,plot=T,main="",
                                         xlab=r.curves$names[i])
-
                             r.curves$preds[[i]] <- x$x
                             r.curves$resp[[i]] <- x$y
-
                          if(!debug.mode) {sink();cat(paste("Progress:",round(70+i*inc,1),"%\n",sep=""));flush.console();sink(logname,append=T)} else {cat("\n");cat(paste(round(70+i*inc,1),"%\n",sep=""))}  ### print time
                         }
                 if(debug.mode) graphics.off()
                 out$mods$r.curves <- r.curves
-            }
+
     }
 if(Model=="brt"){
         if(is.null(responseCurveForm)){

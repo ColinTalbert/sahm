@@ -823,21 +823,21 @@ function (mars.glm.object,new.data)
 
   new.names <- names(new.data)
 
-  for (i in 1:length(base.names)) {
-
-    name <- base.names[i]
-
-    if (!(name %in% new.names)) {
-      print(paste("Variable ",name," missing from new data",sep=""),quote = FALSE)  #aks
-      return()
-    }
-  }
+#  for (i in 1:length(base.names)) {
+#
+#    name <- base.names[i]
+#
+#    if (!(name %in% new.names)) {
+#      print(paste("Variable ",name," missing from new data",sep=""),quote = FALSE)  #aks
+#      return()
+#    }
+#  }
 
   print("and creating temporary dataframe for new data...",quote=FALSE)
 
-  selector <- match(names(x.temp),names(new.data))
+  #selector <- na.rm(match(names(x.temp),names(new.data)))
 
-  pred.dat <- mars.new.dataframe(new.data[,selector])[[1]]
+  pred.dat <- mars.new.dataframe(new.data)[[1]]
 
   assign("pred.dat", pred.dat, pos = 1)               #and assign them for later use
 

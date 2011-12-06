@@ -1,25 +1,7 @@
-# A set of "pluggable" R functions for automated model fitting of glm models to presence/absence data #
-#
-# Modified 12-2-09 to:  remove categorical covariates from consideration if they only contain one level
-#                       ID factor variables based on "categorical" prefix and look for tifs in subdir
-#                       Give progress reports
-#                       write large output tif files in blocks to alleviate memory issues
-#                       various bug fixes
-#
-#
-# Modified 3-4-09 to use a list object for passing of arguements and data
-#
 
-
-# Libraries required to run this program #
-#   PresenceAbsence - for ROC plots
-
-#   rgdal - for geotiff i/o
-#   sp - used by rdgal library
-#   raster for geotiff o
 options(error=NULL)
 
-FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,script.name,...){
+FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,script.name,make.p.tif=TRUE,make.binary.tif=TRUE,...){
       
        Call<-match.call()
     # This function fits a stepwise GLM model to presence-absence data.
@@ -41,98 +23,81 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
     # 
     t0 <- unclass(Sys.time())
 
-    out <- list(
-      input=lapply(as.list(Call[2:length(Call)]),eval), #with optional args this definition might be a problem but since called from the command line it works
-      dat = list(), #just captures output from read.ma
-      mods=list(final.mod=NULL,
-                r.curves=NULL,
-                tif.output=list(prob=NULL,bin=NULL),
-                auc.output=NULL,
-                interactions=NULL,  # not used #
-                summary=NULL))
+    # Setting up the list that holds everything.  This is quite different for each model
+        out <- list(
+          input=lapply(as.list(Call[2:length(Call)]),eval), #with optional args this definition might be a problem but since called from the command line it works
+          dat = list(), #just captures output from read.ma
+          mods=list(final.mod=NULL,
+                    r.curves=NULL,
+                    tif.output=list(prob=NULL,bin=NULL),
+                    auc.output=NULL,
+                    interactions=NULL,  # not used #
+                    summary=NULL))
 
-    #print warnings as they occur
-    options(warn=1)
+
+if(is.null(out$input$seed)) out$input$seed<-round(runif(1,min=-((2^32)/2-1),max=((2^32)/2-1)))
+set.seed(out$input$seed)
+   #print warnings as they occur
+        options(warn=1)
     
-      Model=script.name
+        Model=script.name
    #Load Libraries
-      chk.libs(Model)
+              chk.libs(Model)
    #Read in data, perform several checks and store all of the information in the out list
-      out <- read.ma(out)
+             out <- read.ma(out)
      ############################# READ.MA ########################
 
     # check output dir #
-    if(file.access(out$input$output.dir,mode=2)!=0) stop(paste("output directory",output.dir,"is not writable"))
+              if(file.access(out$input$output.dir,mode=2)!=0) stop(paste("output directory",output.dir,"is not writable"))
 
     # generate a filename for output #
-          if(debug.mode==T){
-            outfile <- paste(bname<-paste(out$input$output.dir,paste("/",Model,"_",sep=""),n<-1,sep=""),"_output.txt",sep="")
-            while(file.access(outfile)==0) outfile<-paste(bname<-paste(out$input$output.dir,paste("/",Model,"_",sep=""),n<-n+1,sep=""),"_output.txt",sep="")
-            capture.output(cat("temp"),file=outfile) # reserve the new basename #
-            } else bname<-paste(out$input$output.dir,paste("/",Model,sep=""),sep="")
-            out$dat$bname <- bname
-         if(!debug.mode) {sink(logname <- paste(bname,"_log.txt",sep=""));on.exit(sink)} else logname<-NULL
+              if(debug.mode==T){
+                outfile <- paste(bname<-paste(out$input$output.dir,paste("/",Model,"_",sep=""),n<-1,sep=""),"_output.txt",sep="")
+                while(file.access(outfile)==0) outfile<-paste(bname<-paste(out$input$output.dir,paste("/",Model,"_",sep=""),n<-n+1,sep=""),"_output.txt",sep="")
+                capture.output(paste(toupper(Model),"Results"),file=outfile) # reserve the new basename #
+                } else bname<-paste(out$input$output.dir,paste("/",Model,sep=""),sep="")
+                out$dat$bname <- bname
+             if(!debug.mode) {sink(logname <- paste(bname,"_log.txt",sep=""));on.exit(sink)} else logname<-NULL
 
 
-          cat("\nbegin processing of model array:",out$input$ma.name,"\n")
-          cat("\nfile basename set to:",out$dat$bname,"\n")
-          assign("out",out,envir=.GlobalEnv)
-          if(!debug.mode) {sink();cat("Progress:20%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("20%\n")}  ### print time
-    ##############################################################################################################
-    #  Begin model fitting #
-    ##############################################################################################################
-          cat("\n","Fitting",toupper(Model),"model","\n")
-          flush.console()
+              cat("\nbegin processing of model array:",out$input$ma.name,"\n")
+              cat("\nfile basename set to:",out$dat$bname,"\n")
+              assign("out",out,envir=.GlobalEnv)
+              if(!debug.mode) {sink();cat("Progress:20%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("20%\n")}  ### print time
+             cat("\n","Fitting",toupper(Model),"model","\n")
+             flush.console()
           
     # Fit the desired model#
-       out<-generic.model.fit(out,Model)
+               out<-generic.model.fit(out,Model,t0)
 
-    #Run cross validation if specified might need separate cv functions for each model
-        if(out$dat$split.type=="crossValidation") out<-cv.fct(out$mods$final.mod, out, sp.no = 1, prev.stratify = F)
+    # Making Predictions
+               pred.vals<-function(x,model,Model){
+              x$pred<-pred.fct(model,x,Model)
+              return(x)}
 
-              assign("out",out,envir=.GlobalEnv)
-              t3 <- unclass(Sys.time())
+              #getting the predictions for the test/train or cross validation splits into the object at the correct list location
 
-    #Capturing a bunch of output
-         txt0 <- paste("\n", toupper(Model),"Model Results\n","\n","Data:\n",ma.name,"\n","\n\t n(pres)=",
-            out$dat$nPresAbs$train[2],"\n\t n(abs)=",out$dat$nPresAbs$train[1],"\n\t n covariates considered=",length(out$dat$used.covs),
-            "\n",
-            "\n   total time for model fitting=",round((unclass(Sys.time())-t0)/60,2),"min\n",sep="")
+              if(out$dat$split.type!="crossValidation") out$dat$ma<-(lapply(X=out$dat$ma,FUN=pred.vals,model=out$mods$final.mod,Model=Model))
+                 else out$dat$ma$train$pred<-pred.vals(out$dat$ma$train$dat[,2:ncol(out$dat$ma$train$dat)],out$mods$final.mod,Model=Model)$pred  #produces the same thing as pred.mars(out$mods$final.mod,out$dat$ma$train$dat[2:ncol(out$dat$ma$train$dat)])
 
-        capture.output(cat(txt0),file=paste(bname,"_output.txt",sep=""),append=TRUE)
-        cat("\n","Finished with", toupper(Model),"\n")
-        if(!is.null(out$dat$bad.factor.cols)){
-            cat("\nWarning: the following categorical response variables were removed from consideration\n",
-                "because they had only one level:",paste(out$dat$bad.factor.cols,collapse=","),"\n\n")
-            }
-        cat("\n","Storing output...","\n","\n")
-        capture.output(cat("\n\nSummary of Model:\n"),file=paste(bname,"_output.txt",sep=""),append=TRUE)
-        capture.output(print(out$mods$summary),file=paste(bname,"_output.txt",sep=""),append=TRUE)
-        if(!is.null(out$dat$bad.factor.cols)){
-            capture.output(cat("\nWarning: the following categorical response variables were removed from consideration\n",
-                "because they had only one level:",paste(out$dat$bad.factor.cols,collapse=","),"\n"),
-                file=paste(bname,"_output.txt",sep=""),append=T)
-            }
-        cat("40%\n")
-    
-    
-    ##############################################################################################################
-    #  Begin model output #
-    ##############################################################################################################
+              #Just for the training set for Random Forest we have to take out of bag predictions rather than the regular predictions
+              if(Model=="rf") out$dat$ma$train$pred<-tweak.p(as.vector(predict(out$mods$final.mod,type="prob")[,2]))
 
+    #Run Cross Validation if specified might need separate cv functions for each model
+            if(out$dat$split.type=="crossValidation") out<-cv.fct(out$mods$final.mod, out, sp.no = 1, prev.stratify = F,Model)
 
-    pred.vals<-function(x,model,Model){
-    x$pred<-pred.fct(model,x$dat[,-1],Model)
-    return(x)}
+                  assign("out",out,envir=.GlobalEnv)
+                  t3 <- unclass(Sys.time())
 
-    #getting the predictions for the test/train or cross validation splits into the object at the correct list location
-    if(out$dat$split.type!="crossValidation") out$dat$ma<-(lapply(X=out$dat$ma,FUN=pred.vals,model=out$mods$final.mod,Model=Model))
-       else out$dat$ma$train$pred<-out$mods$final.mod$fitted$response #produces the same thing as pred.mars(out$mods$final.mod,out$dat$ma$train$dat[2:ncol(out$dat$ma$train$dat)])
+                  if(!is.null(out$dat$bad.factor.cols)){
+                      capture.output(cat("\nWarning: the following categorical response variables were removed from consideration\n",
+                          "because they had only one level:",paste(out$dat$bad.factor.cols,collapse=","),"\n"),
+                          file=paste(bname,"_output.txt",sep=""),append=T)
+                      }
+                  cat("40%\n")
 
-    #Just for the training set for Random Forest we have to take out of bag predictions rather than the regular predictions
-    if(Model=="rf") out$dat$ma$train$pred<-tweak.p(as.vector(predict(out$mods$final.mod,type="prob")[,2]))
     #producing auc and residual plots model summary information and accross model evaluation metric
-      out$mods$auc.output<-make.auc.plot.jpg(out=out)
+          out$mods$auc.output<-make.auc.plot.jpg(out=out)
 
               if(!debug.mode) {sink();cat("Progress:70%\n");flush.console();sink(logname,append=T)} else cat("70%\n")
 
@@ -153,7 +118,8 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
             stop("Error producing geotiff output:  null model selected by stepwise procedure - pointless to make maps")
             } else {
             cat("\nproducing prediction maps...","\n","\n");flush.console()
-            proc.tiff(model=out$mods$final.mod,vnames=names(out$dat$ma$train$dat)[-1],
+
+            proc.tiff(model=out$mods$final.mod,vnames=out$mods$vnames,
                 tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=pred.fct,factor.levels=out$dat$ma$factor.levels,make.binary.tif=make.binary.tif,
                 thresh=out$mods$auc.output$thresh,make.p.tif=make.p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
                 outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50.0,NAval=-3000,
