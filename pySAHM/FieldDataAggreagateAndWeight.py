@@ -20,7 +20,7 @@ from optparse import OptionParser
 import utilities
 
 def main(argv):
-    usageStmt = "usage:  options: -t --template   -f --fieldData -a --aggPixel -y --aggYears -o --output"
+    usageStmt = "usage:  options: -t --template -f --fieldData -o --output"
     desc = "Aggregates sample points by pixel and/or year."
 
     parser = OptionParser(usage=usageStmt, description=desc)
@@ -33,16 +33,6 @@ def main(argv):
     parser.add_option("-o", "--output", 
                       dest="output", 
                       help="The output CSV file with appended frequency and numPresence")
-    parser.add_option("-p", "--aggregate", 
-                      dest="bAgg", 
-                      default=True, 
-                      action="store_true", 
-                      help="Flag to aggregate by pixel in the template")
-    parser.add_option("-y", "--aggregateYears", 
-                      dest="bAggYears", 
-                      default=False, 
-                      action="store_true", 
-                      help="Flag to aggregate by years in the template")
     parser.add_option("-v", "--verbose", 
                       dest="verbose", 
                       default=False, 
@@ -56,7 +46,6 @@ def main(argv):
     ourFDQ.csv = options.csv
     ourFDQ.output = options.output
     ourFDQ.AggByPixel = options.bAgg
-    ourFDQ.AggByYear = options.bAggYears
     ourFDQ.verbose = options.verbose
     ourFDQ.processCSV()
     
@@ -68,7 +57,6 @@ class FieldDataQuery(object):
         self.template = None
         self.output = None
         self.templateParams = {}
-        self.AggByYear = False
         self.AggByPixel = True
         self.verbose = False
         self.countdata = False

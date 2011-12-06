@@ -132,7 +132,8 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
     def create_main_frame(self):
         self.dpi = 100
         self.fig = Figure((5.0, 4.0), dpi=self.dpi)
-        self.fig.subplots_adjust(left = 0.01, right=0.99, top=0.99, bottom=0.001)
+#        self.fig.subplots_adjust(left = 0.01, right=0.99, top=0.99, bottom=0.001)
+        self.fig.subplots_adjust(left = 0, right=1, top=1, bottom=0)
         self.map_canvas = MyMapCanvas(self.fig)
         
         self.add_axis()
@@ -385,19 +386,22 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 class MyMapCanvas(FigureCanvas):
     def __init__(self, fig):
         FigureCanvas.__init__(self, fig)
-        self.mpl_connect('axes_leave_event', self.testing)
+        self._cursor = None
 
     def resizeEvent(self, event):
         if not event.size().height() == 0:
             FigureCanvas.resizeEvent(self, event)
 
-    def testing(self, event):
-        pass
+    def enterEvent(self, event):
+        if (self._cursor is not None and             
+            QtGui.QApplication.overrideCursor() is None):             
+            QtGui.QApplication.setOverrideCursor(self._cursor)         
+        FigureCanvas.enterEvent(self, event) 
 
     def leaveEvent(self, event):
+        self._cursor = QtGui.QCursor(QtGui.QApplication.overrideCursor())         
+        QtGui.QApplication.restoreOverrideCursor()         
         FigureCanvas.leaveEvent(self, event)
-#        QtGui.QApplication.restoreOverrideCursor()
-#        self.emit(QtCore.SIGNAL('axes_leave_event'), event)
 
 class fullExtent(QtGui.QAction):
     def __init__(self, parent=None):

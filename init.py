@@ -684,7 +684,7 @@ class MDSBuilder(Module):
 
     '''
 
-    _input_ports = expand_ports([('RastersWithPARCInfoCSV', '(edu.utah.sci.vistrails.basic:File)'),
+    _input_ports = expand_ports([('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
                                  ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
                                  ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)')]
@@ -844,15 +844,13 @@ class FieldDataAggregateAndWeight(Module):
     Documentation to be updated when module finalized.
     '''
     _input_ports = expand_ports([('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
-                                 ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
-                                 ('aggregateRows', 'basic:Boolean')])
+                                 ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')])
     _output_ports = expand_ports([('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')])
     
     def compute(self):
         writetolog("\nFieldDataAggregateAndWeight", True)
         port_map = {'templateLayer': ('template', None, True),
             'fieldData': ('csv', None, True),
-            'aggregateRowsByYear': ('aggRows', None, False),
             'addKDE': ('addKDE', None, False),}
         
         KDEParams = utils.map_ports(self, port_map)
@@ -931,14 +929,18 @@ class PARC(Module):
                                 ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['False']), 'optional':True}),
                                 ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':True})]
 
-    _output_ports = [('RastersWithPARCInfoCSV', '(edu.utah.sci.vistrails.basic:File)')]
+    _output_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
     
     def compute(self):
         #writetolog("\nRunning PARC", True)
         
         ourPARC = parc.PARC()
         template = self.forceGetInputFromPort('templateLayer').name
-        template_fname = os.path.splitext(os.path.split(template)[1])[0]
+        template_path, template_fname = os.path.split(template)
+        template_fname = os.path.splitext(template_fname)[0]
+        if template_fname == 'hdr':
+            template_fname = os.path.split(template_path)[1]
+        
         output_dname = os.path.join(utils.getrootdir(), 'PARC_' + template_fname)
         if not os.path.exists(output_dname):
             os.mkdir(output_dname)
@@ -1690,7 +1692,7 @@ def initialize():
     writetolog("   Layers CSV = " + layers_csv_fname)
     writetolog("   R path = " + r_path)
     writetolog("   GDAL folder = " + os.path.abspath(configuration.gdal_path))
-    writetolog("        Must contain subfolders proj, gdal-data, GDAL")
+#    writetolog("        Must contain subfolders proj, gdal-data, GDAL")
     writetolog("   Maxent folder = " + maxent_path)
 #    writetolog("   QGIS folder = " + os.path.abspath(configuration.qgis_path))
 #    writetolog("        Must contain subfolders qgis1.7.0, OSGeo4W")

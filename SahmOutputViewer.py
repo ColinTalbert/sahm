@@ -35,7 +35,7 @@ class SAHMModelOutputViewerCell(SpreadsheetCell):
 #            prob_map_path = os.path.join(model_dir_full, model_name + '_prob_map.jpeg')
 #            prob_map = window.file_pool.make_local_copy(prob_map_path)
             
-            auc_graph_path = os.path.join(model_dir_full, model_name + '_auc_plot.jpg')
+            auc_graph_path = os.path.join(model_dir_full, model_name + '_modelEvalPlot.jpg')
             auc_graph = window.file_pool.make_local_copy(auc_graph_path)
             
             text_output_path = os.path.join(model_dir_full, model_name + '_output.txt')
