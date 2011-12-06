@@ -39,13 +39,13 @@ CrossValidationSplit<-function(input.file,output.file,response.col="ResponseBina
             response<-response[-c(which(response==-9999,arr.ind=TRUE))]
             bg.dat$Split=""
             }
-
+              browser()
             #this splits the training set
              split.mask<-dat[,match(tolower("evalsplit"),tolower(names(dat)))]=="train"
              index<-seq(1:nrow(dat))[split.mask]
              if(stratify==TRUE){
                dat[,ncol(dat)+1]<-NA
-                for(i in 1:names(table(response))){
+                for(i in 1:length(names(table(response)))){
                   index.i<-index[response[split.mask]==names(table(response))[i]]
                   index.i<-index.i[order(runif(length(index.i)))]
                   dat[index.i,ncol(dat)]<-c(rep(seq(1:n.folds),each=floor(length(index.i)/n.folds)),sample(seq(1:n.folds),size=length(index.i)%%n.folds,replace=FALSE))
