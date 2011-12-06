@@ -172,6 +172,7 @@
     responseCol <- "responseBinary"
     trainProp=.7
     RatioPresAbs=NULL
+    Eval.Split=FALSE
     #replace the defaults with passed values
     for (arg in Args) {
     	argSplit <- strsplit(arg, "=")
@@ -182,11 +183,12 @@
     	if(argSplit[[1]][1]=="o") output.file <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="i") infil <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="es") Eval.Split <- argSplit[[1]][2]
     }
 
     RatioResAbs<-as.numeric(RatioPresAbs)
     trainProp<-as.numeric(trainProp)
-    
+    Eval.Split=as.logical(Eval.Split)
 	#Run the Test training split with these parameters
 	TestTrainSplit(input.file=infil,output.file=output.file,response.col=responseCol,
-  trainProp=trainProp,RatioPresAbs=RatioPresAbs)
+  trainProp=trainProp,RatioPresAbs=RatioPresAbs,Eval.Split=Eval.Split)

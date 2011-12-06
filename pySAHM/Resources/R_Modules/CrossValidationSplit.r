@@ -73,30 +73,28 @@ CrossValidationSplit<-function(input.file,output.file,response.col="ResponseBina
 
     }
 
+  #assign default values
+  responseCol="ResponseBinary"
+  n.folds=10
+  stratify=TRUE
 
  #Reading in command line arguments
  Args <- commandArgs(T)
     print(Args)
-    #assign default values
 
-    responseCol <- "responseBinary"
-    trainProp=.7
-    RatioPresAbs=NULL
     #replace the defaults with passed values
     for (arg in Args) {
     	argSplit <- strsplit(arg, "=")
     	argSplit[[1]][1]
     	argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="p") trainProp <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="m") RatioPresAbs <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="nf") n.folds <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="stra") stratify <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="o") output.file <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="i") infil <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
     }
-
-    RatioResAbs<-as.numeric(RatioPresAbs)
-    trainProp<-as.numeric(trainProp)
-
+ stratify<-as.logical(stratify)
+ n.folds<-as.numeric(n.folds)
 	#Run the Test training split with these parameters
 	CrossValidationSplit(input.file=infil,output.file=output.file,response.col=responseCol,
-  trainProp=trainProp,RatioPresAbs=RatioPresAbs)
+  n.folds=n.folds,stratify=stratify)
