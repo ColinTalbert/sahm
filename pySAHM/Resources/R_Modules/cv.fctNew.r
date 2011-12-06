@@ -53,11 +53,6 @@ if(Model=="mars"){
       u_i <- fit.object$fitted.values[,sp.no]
   }
 
-  ################     Marian Doodles        ###################
-  fct.call<-switch(Model,
-      "mars"=fit.object$Model.Call,
-      "glm"=fit.object$call,
-      "rf"=fit.object$call)
 data<-out$dat$ma$train
 n.cases<-nrow(out$dat$ma$train$dat)
 xdat<-out$dat$ma$train$dat[,2:ncol(out$dat$ma$train$dat)]
@@ -76,7 +71,7 @@ target.sp<-names(ydat)
 
   y_i <- ydat
 
-  if (family == "binomial") {
+  if (family == "binomial" | family=="bernoulli") {
     full.resid.deviance <- calc.deviance(y_i,u_i, weights = site.weights, family="binomial")
     full.test <- roc(y_i, u_i)
     full.calib <- calibration(y_i, u_i)
@@ -143,37 +138,44 @@ if(Model=="glm"){
                 pred=mymodel.glm.step$fitted.values),opt.methods=out$input$opt.methods))[2]
           }
 if(Model=="brt"){
- out.cv <-est.lr(out)
             if(debug.mode) assign("out",out,envir=.GlobalEnv)
 
             cat("\nfinished with learning rate estimation, lr=",out$mods$lr.mod$lr0,", t=",round(out$mods$lr.mod$t.elapsed,2),"sec\n")
             cat("\nfor final fit, lr=",out$mods$lr.mod$lr,"and tc=",out$mods$parms$tc.full,"\n");flush.console()
 
-            if(out$input$simp.method=="cross-validation"){
                 # remove variables with <1% relative influence and re-fit model
 
                 t1 <- unclass(Sys.time())
                     if(length(out$mods$lr.mod$good.cols)<=1) stop("BRT must have at least two independent variables")
                     out$input$max.trees<-NULL
-                m0 <- gbm.step.fast(dat=out$dat$Subset$dat,gbm.x=out$mods$lr.mod$good.cols,gbm.y=1,family=out$input$model.family,
+                m0 <- gbm.step.fast(dat=cbind(species.subset,predictor.subset),gbm.x=out$mods$lr.mod$good.cols,gbm.y=1,family=out$input$model.family,
                       n.trees = c(300,600,800,1000,1200,1500,1800),step.size=out$input$step.size,max.trees=out$input$max.trees,
                       tolerance.method=out$input$tolerance.method,tolerance=out$input$tolerance, n.folds=out$input$n.folds,tree.complexity=out$mods$parms$tc.sub,
-                      learning.rate=out$mods$lr.mod$lr0,bag.fraction=out$input$bag.fraction,site.weights=out$dat$Subset$weight,autostop=T,debug.mode=F,silent=!debug.mode,
+                      learning.rate=out$mods$lr.mod$lr0,bag.fraction=out$input$bag.fraction,site.weights=site.weights[model.mask],autostop=T,debug.mode=F,silent=!debug.mode,
                       plot.main=F,superfast=F)
                       if(debug.mode) assign("m0",m0,envir=.GlobalEnv)
 
                       t1b <- unclass(Sys.time())
 
-                out$mods$simp.mod <- gbm.simplify(m0,n.folds=out$input$n.folds,plot=F,verbose=F,alpha=out$input$alpha) # this step is very slow #
+                simp.mod<- gbm.simplify(m0,n.folds=out$input$n.folds,plot=F,verbose=F,alpha=out$input$alpha) # this step is very slow #
                       if(debug.mode) assign("out",out,envir=.GlobalEnv)
 
-                      out$mods$simp.mod$good.cols <- out$mods$simp.mod$pred.list[[length(out$mods$simp.mod$pred.list)]]
-                      out$mods$simp.mod$good.vars <- names(out$dat$ma$ma)[out$mods$simp.mod$good.cols]
-                      cat("\nfinished with model simplification, t=",round((unclass(Sys.time())-t1b)/60,2),"min\n");flush.console()
-                     {cat("\n");cat("50%\n")}
-                      }
+                 cv.final.mod <- gbm.step.fast(dat=cbind(species.subset,predictor.subset),gbm.x=simp.mod$pred.list[[length(simp.mod$pred.list)]],gbm.y = 1,family=out$input$model.family,
+                  n.trees = c(300,600,700,800,900,1000,1200,1500,1800,2200,2600,3000,3500,4000,4500,5000),n.folds=out$input$n.folds,
+                  tree.complexity=out$mods$parms$tc.full,learning.rate=out$mods$lr.mod$lr,bag.fraction=out$input$bag.fraction,site.weights=site.weights[model.mask],
+                  autostop=T,debug.mode=F,silent=!debug.mode,plot.main=F,superfast=F)
+                     {cat("\n");cat(paste("50",".",i,"%\n",sep=""))}
 
-}
+
+          #predict the fitted values
+          pred=predict.gbm(cv.final.mod,cbind(species.subset,predictor.subset),
+                        cv.final.mod$target.trees,type="response")
+          fitted.values[pred.mask]<-out$dat$ma[[i]]$pred<-predict.gbm(cv.final.mod, cbind(ydat[pred.mask],xdat[pred.mask, ]),
+                    cv.final.mod$target.trees,type="response")
+          
+           out$dat$ma[[i]]$thresh <-as.numeric(optimal.thresholds(data.frame(ID=1:length(species.subset),pres.abs=species.subset,
+                  pred=pred),opt.methods=out$input$opt.methods))[2]
+            }
 
 if(Model=="rf"){
 
@@ -201,7 +203,7 @@ if(Model=="rf"){
     u_i <- fitted.values[pred.mask]
     weights.subset <- site.weights[pred.mask]
 
-    if (family == "binomial") {
+    if (family == "binomial" | family=="bernoulli") {
       subset.resid.deviance[i] <- calc.deviance(y_i,u_i,weights = weights.subset, family="binomial")
       subset.test[i] <- roc(y_i,u_i)
       subset.calib[i,] <- calibration(y_i, u_i)
@@ -230,7 +232,7 @@ if(Model=="rf"){
   y_i <- ydat
   u_i <- fitted.values
 
-  if (family=="binomial") {
+  if (family=="binomial" | family=="bernoulli") {
     cv.resid.deviance <- calc.deviance(y_i,u_i,weights = site.weights, family="binomial")
     cv.test <- roc(y_i, u_i)
     cv.calib <- calibration(y_i, u_i)

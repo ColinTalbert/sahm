@@ -166,7 +166,7 @@ if(Model=="rf"){
                   replace=FALSE, doBest=F, plot=F)
                     mtry <- mtry[mtry[,2]==min(mtry[,2]),1][1]
                     t2 <- unclass(Sys.time())
-                    if(!debug.mode) {sink();cat("Progress:30%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("30%\n")}
+                    {cat("\n");cat("30%\n")}
                   }
 
               cat("\nnow fitting full random forest model using mtry=",mtry,"\n")

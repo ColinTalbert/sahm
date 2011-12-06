@@ -17,7 +17,9 @@ source(paste(ScriptPath,"EvalStatsHelperFcts.r",sep="\\"))
 source(paste(ScriptPath,"AppendOut.r",sep="\\"))
 source(paste(ScriptPath,"ResidualImage.r",sep="\\"))
 source(paste(ScriptPath,"Pred.Surface.r",sep="\\"))
-
+source(paste(ScriptPath,"calc.deviance.r",sep="\\"))
+source(paste(ScriptPath,"calibration.r",sep="\\"))
+source(paste(ScriptPath,"roc.r",sep="\\"))
 #New generic function source code
 source(paste(ScriptPath,"cv.fctNew.r",sep="\\"))
 source(paste(ScriptPath,"generic.model.fit.r",sep="\\"))

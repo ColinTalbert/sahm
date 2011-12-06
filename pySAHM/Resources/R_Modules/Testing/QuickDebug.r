@@ -52,10 +52,11 @@ FitModels(ma.name=input.file,
           
 #RF
 set.seed(1)
+proximity=NULL
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,
-      response.col=rc,make.p.tif=F,make.binary.tif=F,
+      response.col=rc,make.p.tif=T,make.binary.tif=T,
           debug.mode=T,opt.methods=2,script.name="rf",
 responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
 samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
@@ -67,7 +68,7 @@ set.seed(1)
 FitModels(ma.name=input.file,
           tif.dir=NULL,output.dir=output.dir,
           response.col=rc,make.p.tif=T,make.binary.tif=T,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
-      model.family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
+      family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
   tolerance = 0.001,seed=NULL,opt.methods=2,
           simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
           learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=TRUE)
@@ -95,7 +96,7 @@ set.seed(1)
 ##MARS
     fit.mars.fct(ma.name=input.file,
             tif.dir=NULL,output.dir=output.dir,
-            response.col=rc,make.p.tif=F,make.binary.tif=F,
+            response.col=rc,make.p.tif=T,make.binary.tif=T,
             mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars.r",opt.methods=2)
 
     PredictModel(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir="C:\\VisTrails")
@@ -114,4 +115,4 @@ set.seed(1)
 C:\R-2.12.1\bin\i386\Rterm.exe --vanilla -f I:\VisTrails\Central_VisTrailsInstall_debug\vistrails\packages\sahm_MarianDev\pySAHM\Resources\R_Modules\FIT_BRT_pluggable.r --args c=C:\VisTrails\mtalbert_20110504T132851\readMaTests\Split.csv o=C:\temp\SAHMDebugJunk\BRTOut1 rc=responseBinary
 C:\R-2.12.1\bin\i386\Rterm.exe --vanilla -f I:\VisTrails\Central_VisTrailsInstall\vistrails\packages\sahm\pySAHM\Resources\R_Modules\FIT_GLM_pluggable.r --args c==I:\VisTrails\Yellowstone_example\workspace_for_paper\CovariateCorrelationOutputMDS_Both.csv o=C:\temp\SAHMDebugJunk\BRTOut1 rc=responseBinary
 
-I:\VisTrails\Central_VisTrailsInstall\Central_R\R-2.12.1\bin\i386\Rterm.exe --vanilla -f I:\VisTrails\Central_VisTrailsInstall\vistrails\packages\sahm\pySAHM\Resources\R_Modules\FIT_BRT_pluggable.r --args  mbt=TRUE mpt=TRUE c="I:\VisTrails\WorkingFiles\workspace\morisettej_20111027T131301\CovariateCorrelationOutputMDS_Both.csv" mes=TRUE o="C:\temp\SAHMDebugJunk\BRTOut1" rc=responseBinary
+I:\VisTrails\Central_VisTrailsInstall\Central_R\R-2.12.1\bin\i386\Rterm.exe --vanilla -f I:\VisTrails\Central_VisTrailsInstall_debug\vistrails\packages\sahm_MarianDev\pySAHM\Resources\R_Modules\FIT_MARS_pluggable.r --args  mbt=TRUE mpt=TRUE c="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv" mes=TRUE o="C:\temp\SAHMDebugJunk\BRTOut1" rc=responseBinary

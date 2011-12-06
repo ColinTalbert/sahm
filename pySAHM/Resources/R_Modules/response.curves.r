@@ -52,7 +52,7 @@ if(Model=="rf"){
                                         xlab=r.curves$names[i])
                             r.curves$preds[[i]] <- x$x
                             r.curves$resp[[i]] <- x$y
-                         if(!debug.mode) {sink();cat(paste("Progress:",round(70+i*inc,1),"%\n",sep=""));flush.console();sink(logname,append=T)} else {cat("\n");cat(paste(round(70+i*inc,1),"%\n",sep=""))}  ### print time
+                        cat(paste("Progress:",round(70+i*inc,1),"%\n",sep=""));flush.console()  ### print time
                         }
                 if(debug.mode) graphics.off()
                 out$mods$r.curves <- r.curves
