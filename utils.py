@@ -13,6 +13,10 @@ import time
 import tempfile
 import subprocess
 
+import struct, datetime, decimal, itertools
+
+
+
 from PyQt4 import QtCore, QtGui
 
 from core.modules.basic_modules import File, Path, Directory, new_constant, Constant
@@ -28,7 +32,7 @@ import getpass
 
 _roottempdir = ""
 _logger = None
-config = None
+r_path = None
 
 def getrasterminmax(filename):
     dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
@@ -92,6 +96,10 @@ def setrootdir(session_dir):
     global _roottempdir
     _roottempdir = session_dir
 
+def getrootdir():
+    global _roottempdir
+    return _roottempdir
+
 def createrootdir(rootWorkspace):
     '''Creates a session Directory which will
     contain all of the output produced in a single
@@ -115,9 +123,14 @@ def map_ports(module, port_map):
                 raise ModuleError(module, 'Multiple items found from Port ' + 
                     port + '.  Only single entry handled.  Please remove extraneous items.')
             elif len(value)  == 0:
-                raise ModuleError(module, 'Multiple items found from Port ' + 
-                    port + '.  Only single entry handled.  Please remove extraneous items.')
-            value = module.forceGetInputFromPort(port)
+                try:
+                    value = [item for item in module._input_ports if item[0] == port][0][2]['defaults']
+                except:
+                    raise ModuleError(module, 'No items found from Port ' + 
+                        port + '.  Input is required.')
+            else:
+                value = module.forceGetInputFromPort(port)
+                
             if access is not None:
                 value = access(value)
             if isinstance(value, File) or \
@@ -158,7 +171,7 @@ def dir_path_value(value):
     val = value.name
     sep = os.path.sep
     return val.replace("/", sep)
-    
+
 def create_file_module(fname, f=None):
     if f is None:
         f = File()
@@ -383,17 +396,16 @@ def getModelsPath():
     return os.path.join(os.path.dirname(__file__), "pySAHM", "Resources", "R_Modules")
 
 def runRScript(script, args, module=None):
-    global config
-    r_path = config.r_path
+    global r_path
     program = os.path.join(r_path, "i386", "Rterm.exe") #-q prevents program from running
     scriptFile = os.path.join(getModelsPath(), script)
     
     command = program + " --vanilla -f " + scriptFile + " --args " + args
     
-    p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     writetolog("\nStarting R Processing of " + script, True)
     writetolog("    args: " + args, False, False)
     writetolog("    command: " + command, False, False)
+    p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     ret = p.communicate()
     
     if 'Error' in ret[1]:
@@ -453,16 +465,16 @@ def applyMDS_selection(oldMDS, newMDS):
     oldHeader2 = outCSV.next()
     oldHeader3 = outCSV.next()
     
-    selectionline = []
-    for i in range(len(oldHeader1)):
-        if oldvals.has_key(oldHeader1[i]) and \
-        oldvals[oldHeader1[i]] == '0':
-            selectionline.append('0')
+    newHeader2 = oldHeader2[:3]
+    for val in (oldHeader1[3:]):
+        if oldvals.has_key(val) and \
+        oldvals[val] == '0':
+            newHeader2.append('0')
         else:
-            selectionline.append('1')
+            newHeader2.append('1')
             
     tmpOutCSV.writerow(oldHeader1)
-    tmpOutCSV.writerow(selectionline)    
+    tmpOutCSV.writerow(newHeader2)    
     tmpOutCSV.writerow(oldHeader3)
     for row in outCSV:
         tmpOutCSV.writerow(row)
@@ -474,8 +486,65 @@ def applyMDS_selection(oldMDS, newMDS):
     
 
 
-    
-    
+#taken from http://code.activestate.com/recipes/362715-dbf-reader-and-writer/
+def dbfreader(f):
+    """Returns an iterator over records in a Xbase DBF file.
+
+    The first row returned contains the field names.
+    The second row contains field specs: (type, size, decimal places).
+    Subsequent rows contain the data records.
+    If a record is marked as deleted, it is skipped.
+
+    File should be opened for binary reads.
+
+    """
+    # See DBF format spec at:
+    #     http://www.pgts.com.au/download/public/xbase.htm#DBF_STRUCT
+
+    numrec, lenheader = struct.unpack('<xxxxLH22x', f.read(32))    
+    numfields = (lenheader - 33) // 32
+
+    fields = []
+    for fieldno in xrange(numfields):
+        name, typ, size, deci = struct.unpack('<11sc4xBB14x', f.read(32))
+        name = name.replace('\0', '')       # eliminate NULs from string   
+        fields.append((name, typ, size, deci))
+    yield [field[0] for field in fields]
+    yield [tuple(field[1:]) for field in fields]
+
+    terminator = f.read(1)
+    assert terminator == '\r'
+
+    fields.insert(0, ('DeletionFlag', 'C', 1, 0))
+    fmt = ''.join(['%ds' % fieldinfo[2] for fieldinfo in fields])
+    fmtsiz = struct.calcsize(fmt)
+    for i in xrange(numrec):
+        record = struct.unpack(fmt, f.read(fmtsiz))
+        if record[0] != ' ':
+            continue                        # deleted record
+        result = []
+        for (name, typ, size, deci), value in itertools.izip(fields, record):
+            if name == 'DeletionFlag':
+                continue
+            if typ == "N":
+                value = value.replace('\0', '').lstrip()
+                if value == '':
+                    value = 0
+                elif deci:
+                    value = decimal.Decimal(value)
+                else:
+                    value = int(value)
+            elif typ == 'D':
+                y, m, d = int(value[:4]), int(value[4:6]), int(value[6:8])
+                value = datetime.date(y, m, d)
+            elif typ == 'L':
+                value = (value in 'YyTt' and 'T') or (value in 'NnFf' and 'F') or '?'
+            elif typ == 'F':
+                value = float(value)
+            result.append(value)
+        yield result
+
+
     
 
     

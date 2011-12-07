@@ -29,9 +29,9 @@ class EnumWidget(QtGui.QComboBox, ConstantWidgetMixin):
     def contents(self):
         curIdx = self.currentIndex()
         if curIdx == -1:
-            print '*** ""'
+#            print '*** ""'
             return ''
-        print '*** "%s"' % str(self.itemText(curIdx))
+#        print '*** "%s"' % str(self.itemText(curIdx))
         return str(self.itemText(curIdx))
 
     def setContents(self, strValue, silent=True):

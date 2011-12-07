@@ -1,66 +1,56 @@
 ################################################################################
 # ImageViewer widgets/toolbar implementation
 ################################################################################
+import os
+import csv
+
 from PyQt4 import QtCore, QtGui, QAxContainer
 from core.modules.vistrails_module import Module
 from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
 from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
 from packages.spreadsheet.spreadsheet_controller import spreadsheetController
-from SahmSpatialViewerCell import Ui_Frame
-#import imageviewer_rc
-import os
+from utils import dbfreader
 
-import csv
+import matplotlib
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+from matplotlib.figure import Figure
+from matplotlib.offsetbox import AnchoredOffsetbox, TextArea
+import matplotlib.colors as colors
 
-from packages.sahm.pySAHM.utilities import mds_to_shape
-from utils import getrasterminmax
-################################################################################
+import numpy as np
 
-def setQGIS(qgis):
-    globals()["qgis"] = qgis
+from osgeo import gdal, gdalconst
+
 
 class SAHMSpatialOutputViewerCell(SpreadsheetCell):
     """
-    SAHMModelOutputViewerCell displays the various output from a SAHM Model run
+    SAHMModelOutputViewerCell is a VisTrails Module that
+    displays the various output from a SAHM Model run in a single cell
 
     """
     _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
-                    ('model_workspace', '(edu.utah.sci.vistrails.basic:File)')]
+                    ('model_workspace', '(edu.utah.sci.vistrails.basic:File)'),
+                    ("max_cells_dimension", "(edu.utah.sci.vistrails.basic:Integer)", {'defaults':str(['5000']), 'optional':True})]
+    #all inputs are determined relative to the model_workspace
 
     def __init__(self):
         SpreadsheetCell.__init__(self)
 
-#        globals()["qgis"] = qgis
-
     def compute(self):
         inputs = {}
         inputs["model_workspace"] = self.forceGetInputFromPort('model_workspace').name
-        inputs["model_dir"] = os.path.split(inputs["model_workspace"])[0]
+        inputs["model_dir"] = os.path.split(os.path.normcase(inputs["model_workspace"]))[0]
 
-        inputs["prob_map"] = os.path.join(inputs["model_dir"],
-                                self.find_file(inputs["model_dir"], "_prob_map.tif"))
-        inputs["bin_map"] = os.path.join(inputs["model_dir"],
-                               self.find_file(inputs["model_dir"], "_bin_map.tif"))
-        inputs["res_map"] = os.path.join(inputs["model_dir"],
-                               self.find_file(inputs["model_dir"], "_resid_map.tif"))
-        try:
-            inputs["mes_map"] = os.path.join(inputs["model_dir"],
-                                   self.find_file(inputs["model_dir"], "_mess_map.tif"))
-        except:
-            inputs["mes_map"] = ""
-        
-        try:
-            inputs["mod_map"] = os.path.join(inputs["model_dir"],
-                               self.find_file(inputs["model_dir"], "_MoD_map.tif"))
-        except:
-            inputs["mod_map"] = ""
-
-        mds = self.find_mds(inputs["model_dir"])
-        shaperoot = self.gen_points_shp(mds)
-        inputs["pres_points"] = shaperoot + "_pres.shp"
-        inputs["abs_points"] = shaperoot + "_abs.shp"
-        inputs["backs_points"] = shaperoot + "_backs.shp"
+        for model_output in ['prob', 'bin', 'resid', 'mess', 'MoD']:
+            try:
+                inputs[model_output +"_map"] = os.path.join(inputs["model_dir"],
+                                self.find_file(inputs["model_dir"], "_" + model_output + "_map.tif"))
+            except:
+                inputs[model_output + "_map"] = ""
+            
+        inputs["mds"] = self.find_mds(inputs["model_dir"])
 
         inputs["model_tag"] = os.path.split(inputs["model_dir"])[1]
 
@@ -74,13 +64,21 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
                 self.location = CellLocation()
             self.location.col = self.getInputFromPort('column') - 1
 
+        if self.hasInputFromPort("max_cells_dimension"):
+            inputs["max_cells_dimension"] = self.getInputFromPort('max_cells_dimension')
+        else:
+            inputs["max_cells_dimension"] = [item for item in self._input_ports if item[0] == 'max_cells_dimension'][0][2]['defaults']
+
         self.displayAndWait(SAHMSpatialOutputViewerCellWidget,
                             inputs)
 
-
     def find_file(self, model_dir, suffix):
-        return [file_name for file_name in os.listdir(model_dir)
-                                    if file_name.endswith(suffix)][0]
+        try:
+            return [file_name for file_name in os.listdir(model_dir)
+                                     if file_name.endswith(suffix)][0]
+        except IndexError:
+            raise RuntimeError('The expected model output ' 
+                               + suffix + ' was not found in the model output directory')
 
     def find_mds(self, model_dir):
         model_text = os.path.join(model_dir,
@@ -98,32 +96,6 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
         else:
             raise RuntimeError('Valid input MDS file not found in Model text output.')
 
-    def gen_points_shp(self, mds):
-        """I couldn't figure out how to use a render on a shapefile
-        instead I split the shapefile into three separate files for each
-        class.
-        This split only occurs once per mds though.
-        """
-        parentfolder, filename = os.path.split(mds)
-        filenoext = os.path.splitext(filename)[0]
-        shpfolder = os.path.join(parentfolder, "PointShapefiles")
-
-        if not os.path.exists(shpfolder):
-            os.mkdir(shpfolder)
-        fileroot = os.path.join(shpfolder, filenoext)
-
-        pregenerated = True
-        for type in ["_pres", "_abs", "_backs"]:
-            shape_file = fileroot +  type + ".shp"
-            if not os.path.exists(shape_file):
-                pregenerated = False
-
-        if not pregenerated:
-            mds_to_shape(mds, shpfolder)
-
-        return fileroot
-
-
 class SAHMSpatialOutputViewerCellWidget(QCellWidget):
     """
 
@@ -139,257 +111,339 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         self.setLayout(centralLayout)
         centralLayout.setMargin(0)
         centralLayout.setSpacing(0)
-
-#        self.setAnimationEnabled(True)
-
-        self.Frame = QtGui.QFrame()
-        self.ui = Ui_Frame()
-        self.ui.setupUi(self.Frame)
-
-        self.toolBarType = SAHMSpatialViewerToolBar
-        self.controlBarType = SAHMSpatialViewerToolBar
-
-        self.layout().addWidget(self.Frame)
-
+        self.create_main_frame()
+        
+        self.setAnimationEnabled(True)
 
     def updateContents(self, inputs):
         """ updateContents(inputs: dictionary) -> None
         Update the widget contents based on the input data
         """
-
-        self.canvas = qgis.gui.QgsMapCanvas()
-        self.canvas.show()
-
-        self.ui.legend_label.setText(QtCore.QString(inputs["model_tag"]))
-
-        self.toolPan = qgis.gui.QgsMapToolPan(self.canvas)
-
-        self.canvas.setMapTool(self.toolPan)
-        self.canvas.setWheelAction(2)
-        self.canvas.setCanvasColor(QtCore.Qt.white)
-        self.canvas.enableAntiAliasing(True)
-
-        self.all_layers = {}
-        self.add_raster(inputs["prob_map"], "prob_map")
-        self.add_raster(inputs["bin_map"], "bin_map")
-        self.add_raster(inputs["res_map"], "res_map")
-        self.add_raster(inputs["mes_map"], "mes_map")
-        self.add_raster(inputs["mod_map"], "mod_map")
-
-        self.add_vector(inputs['pres_points'], "pres_points", '255,0,0')
-        self.add_vector(inputs['abs_points'], "abs_points", '0,255,0')
-        self.add_vector(inputs['backs_points'], "backs_points", '0,0,0')
-
-        self.canvas.setExtent(self.all_layers["prob_map"].layer().extent())
-        self.canvas.setLayerSet([self.all_layers["pres_points"],
-                                 self.all_layers["abs_points"],
-                           self.all_layers["prob_map"]])
-
-        self.ui.map_frame.layout().addWidget(self.canvas)
-        legend = self.create_legend_ramp("prob_map", None, (0, 1), 6)
-
-        self.ui.legend.layout().addWidget(legend)
-        # Update the new figure canvas
+        self.toolBarType = SAHMSpatialViewerToolBar
+        self.controlBarType = SAHMSpatialViewerToolBar
+        self.inputs = inputs
+        
+        self.load_layers()
+        self.on_draw()
+        self.xlim = self.axes.get_xlim()
+        self.ylim = self.axes.get_ylim()
         self.update()
+        
+    def create_main_frame(self):
+        self.dpi = 100
+        self.fig = Figure((5.0, 4.0), dpi=self.dpi)
+#        self.fig.subplots_adjust(left = 0.01, right=0.99, top=0.99, bottom=0.001)
+        self.fig.subplots_adjust(left = 0, right=1, top=1, bottom=0)
+        self.map_canvas = MyMapCanvas(self.fig)
+        
+        self.add_axis()
+           
+        self.mpl_toolbar = NavigationToolbar(self.map_canvas, None)
+        #Strip out the unused actions
+        keep_actions = ['Pan', 'Zoom', 'Save']
+        for action in self.mpl_toolbar.actions():
+            if not action.text() in keep_actions and action.text():
+                self.mpl_toolbar.removeAction(action)
+            if action.text() == 'Zoom':
+                icon = os.path.abspath(os.path.join(
+                    os.path.dirname(__file__), "Images", "zoom.png"))
+                action.setIcon(QtGui.QIcon(icon))
 
+        
+        self.layout().addWidget(self.map_canvas)    
+    
+    def load_layers(self):
+        self.displayTL = True
+        self.all_layers = {"prob_map":{"type":"raster", "title":"Probability" ,"categorical":False, "min":0, "max":1, 'cmap':matplotlib.cm.jet, "displayorder":9999, "displayed":True, "enabled":False, "file":""},
+                         "bin_map":{"type":"raster", "title":"Binary probability" , "categorical":False, "categories":[0,1], 'cmap':matplotlib.cm.Greys, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
+                         "resid_map":{"type":"raster", "title":"Residuals" , "categorical":False, "min":0, "max":"pullfromdata", 'cmap':matplotlib.cm.Accent, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
+                         "mess_map":{"type":"raster", "title":"Mess" , "categorical":False, "categories":"pullfromdata", 'cmap':matplotlib.cm.jet, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
+                         "MoD_map":{"type":"raster", "title":"MoD" , "categorical":True, "min":0, "max":"pullfromdata", 'cmap':matplotlib.cm.prism, "displayorder":9999, "num_breaks":7, "displayed":False, "enabled":False, "file":""},
+                         "pres_points":{"type":"Vector", "color":(1,0,0), "displayorder":3, "num_breaks":7, "displayed":True, "enabled":False, "file":""},
+                         "abs_points":{"type":"Vector", "color":(0,1,0), "displayorder":2, "num_breaks":7, "displayed":True, "enabled":False, "file":""},
+                         "backs_points":{"type":"Vector", "color":(0,0,0), "displayorder":1, "num_breaks":7, "displayed":False, "enabled":False, "file":""}}
+        
+        for k,v in self.all_layers.items():
+            if k in self.inputs.keys():
+                if os.path.exists(self.inputs[k]):
+                    self.all_layers[k]["file"] = self.inputs[k]
+                    self.all_layers[k]["enabled"] = True
+                 
+        #make our specialty colormaps
+        if self.all_layers["resid_map"]['enabled']:
+            self.all_layers["resid_map"]["cmap"] = self.make_resid_cmap(self.all_layers["resid_map"])
+        
+        if self.all_layers["MoD_map"]['enabled']:
+            self.all_layers["MoD_map"]["cmap"] = self.make_categorical_cmap(self.all_layers["MoD_map"])       
+                 
+        pointfile = self.inputs["mds"]
+        points = np.genfromtxt(pointfile, delimiter=",", skip_header=3)
+                    
+        for name, val in {"abs_points":0, "pres_points":1, "backs_points":-9999}.items():
+            #parse out the x, y s for the points in each of our categoreis
+            self.all_layers[name]['x'] = np.delete(points, np.argwhere(points[:,2]<>val), 0)[:,0]
+            self.all_layers[name]['y'] = np.delete(points, np.argwhere(points[:,2]<>val), 0)[:,1]
+            if len(self.all_layers[name]['x']) == 0:
+                self.all_layers[name]["enabled"] = False
+            else:
+                self.all_layers[name]["enabled"] = True
+                
+               
+    def add_axis(self):
+        self.axes = self.fig.add_subplot(111, aspect='equal', adjustable='datalim')
+        self.axes.spines['right'].set_color('none')
+        self.axes.spines['top'].set_color('none')
+        self.axes.spines['bottom'].set_color('none')
+        self.axes.spines['left'].set_color('none')
+        self.axes.get_xaxis().set_visible(False)
+        self.axes.get_yaxis().set_visible(False)
+        
+    def add_title(self, title):
+        at = AnchoredText(title,
+                          loc=2, frameon=True, pad=.05, borderpad=0.2)
+        at.patch.set_boxstyle("round,rounding_size=0.2")
+        at.set_alpha(0.1)
+        self.axes.add_artist(at)
+
+    def make_resid_cmap(self, kwargs):
+
+        vals = self.get_array_from_raster(kwargs['file'])
+        vals_min = np.amin(vals)
+        vals_max = np.amax(vals)
+        diff = vals_max - vals_min
+        zero_ratio = abs(vals_min) / diff
+
+        cdict = {'red': ((0.0, 1.0, 0.0),
+                         (zero_ratio, 0.53, 1.0),
+                         (1.0, 1.0, 1.0)),
+                 'green': ((0.0, 1.0, 0.0),
+                           (zero_ratio, 1, 1.0),
+                           (1.0, 0.0, 1.0)),
+                 'blue': ((0.0, 0.0, 1.0),
+                          (zero_ratio, 1, 0.0),
+                          (1.0, 0.0, 1.0))}
+        
+        return matplotlib.colors.LinearSegmentedColormap('my_colormap',cdict,256)
+
+    def make_categorical_cmap(self, kwargs):
+        vals = self.get_array_from_raster(kwargs['file'])
+        uniques = np.unique(vals)
+        vatdbf = kwargs['file'] + ".vat.dbf"
+        if os.path.exists(vatdbf):
+            #we'll pull labels from this file
+            f = open(vatdbf, 'rb')
+            db = list(dbfreader(f))
+            f.close()
+            labels = []
+            for record in db[2:]:
+                labels.append(record[1])
+
+        kwargs['cbar_ticks'] = uniques
+        kwargs['cbar_labels'] = labels
+        return matplotlib.cm.get_cmap('Accent', len(uniques))
+        
+    def on_draw(self):
+        """ Redraws the figure
+        """
+        #clear map plot
+        self.fig.clear()
+        self.add_axis()
+#        self.axes.cla()
+#        self.legend_axes.cla()
+#        self.legend_fig.clear()
+        
+        displayed_keys = [key for key in self.all_layers.keys() if self.all_layers[key]['displayed']]
+        displayed_keys = sorted(displayed_keys, key=lambda disp_key: self.all_layers[disp_key]['displayorder'])
+        #loop through all_layers and display the enabled layers
+        #only displayed layers sorted by display order
+        title = self.inputs["model_tag"] + "\n"
+        for k in displayed_keys:
+            v = self.all_layers[k]
+            if v['enabled']:
+                if v['type'] == 'Vector':
+                    self.add_vector(v)
+                else:
+                    self.add_raster(v)
+                    title += self.all_layers[k]['title']
+         
+               
+        if self.displayTL:
+            self.add_title(title)
+         
+    def add_vector(self, kwargs):
+        self.axes.scatter(kwargs['x'], kwargs['y'], s=10, c=kwargs['color'], linewidth=0.5, antialiased=True)
+    
+    def add_raster(self, kwargs):
+        rasterfile = kwargs['file']
+        raster_array = self.get_array_from_raster(rasterfile)
+        rasterparams = self.getRasterParams(rasterfile)
+        rmin = np.amin(raster_array)
+        rmax = np.amax(raster_array)
+        norm = colors.normalize(rmin, rmax)
+        map_extent = [rasterparams["ulx"],rasterparams["lrx"],rasterparams["lry"],rasterparams["uly"]]
+        raster_plot = self.axes.imshow(raster_array,interpolation="nearest", cmap=kwargs['cmap'], norm=norm, origin='upper', extent=map_extent)
+        
+        if self.displayTL:
+            
+            if kwargs['categorical']:
+                cb = self.fig.colorbar(raster_plot, ticks=kwargs['cbar_ticks'], orientation='vertical', pad=0.01, shrink=.9, fraction=.3, aspect=15)
+                cb.ax.set_yticklabels(kwargs['cbar_labels'])
+            else:
+                cb = self.fig.colorbar(raster_plot, orientation='horizontal', pad=0.01, fraction=.1, shrink=.9, aspect=30)
+                
+            for t in cb.ax.get_xticklabels():
+                if kwargs['categorical']:
+                    t.set_fontsize(5)
+                    t.set_rotation(90)
+                else:
+                    t.set_fontsize(7)
+                
+        
+
+    def get_array_from_raster(self, raster_file):
+        '''return a numpy array with the values from the raster_file
+        if there are more than 10,000 rows or cols the data will be 
+        subsampled and self.map_ratio will be set.
+        All nodata values will be removed
+        '''
+        ds = gdal.Open(raster_file, gdal.GA_ReadOnly)
+        rasterparams = self.getRasterParams(raster_file)
+        nrows = rasterparams["height"]
+        ncols = rasterparams["width"]
+        max_dimension = max([nrows, ncols])
+        if max_dimension > self.inputs["max_cells_dimension"]:
+            ratio = float(self.inputs["max_cells_dimension"]) / max_dimension
+            nrows = int(ratio * nrows)
+            ncols = int(ratio * ncols)
+                
+        try:
+            ary = ds.GetRasterBand(1).ReadAsArray(buf_ysize=nrows, buf_xsize=ncols)
+            ndval = ds.GetRasterBand(1).GetNoDataValue()
+        except MemoryError:
+            msgbox = QtGui.QMessageBox(self)
+            msgbox.setText("This viewer cannot handle datasets this large.\nTry setting the max_cells_dimension to a smaller value.")
+            msgbox.exec_()
+            raise MemoryError
+            
+        return np.ma.masked_array(ary, mask=(ary==ndval))
+        
+        
+    def getRasterParams(self, rasterFile):
+        """
+        Extracts a series of bits of information from a passed raster
+        All values are stored in a dictionary which is returned.
+        If errors are encountered along the way the error messages will
+        be returned as a list in the Error element.
+        """
+        try:
+            #initialize our params dictionary to have None for all parma
+            params = {}
+            allRasterParams = ["Error", "xScale", "yScale", "width", "height",
+                            "ulx", "uly", "lrx", "lry", "Wkt", 
+                            "tUlx", "tUly", "tLrx", "tLry", 
+                            "srs", "gt", "prj", "NoData", "PixelType"]
+            
+            for param in allRasterParams:
+                params[param] = None
+            params["Error"] = []
+            
+            # Get the PARC parameters from the rasterFile.
+            dataset = gdal.Open(rasterFile, gdalconst.GA_ReadOnly)
+            if dataset is None:
+                params["Error"].append("Unable to open file")
+                #print "Unable to open " + rasterFile
+                #raise Exception, "Unable to open specifed file " + rasterFile
+                
+            
+            xform  = dataset.GetGeoTransform()
+            params["xScale"] = xform[1]
+            params["yScale"] = xform[5]
+    
+            params["width"]  = dataset.RasterXSize
+            params["height"] = dataset.RasterYSize
+    
+            params["ulx"] = xform[0]
+            params["uly"] = xform[3]
+            params["lrx"] = params["ulx"] + params["width"]  * params["xScale"]
+            params["lry"] = params["uly"] + params["height"] * params["yScale"]
+                
+            
+        except:
+            #print "We ran into problems extracting raster parameters from " + rasterFile
+            params["Error"].append("Some untrapped error was encountered")
+        finally:
+            del dataset
+            return params
+        
     def dumpToFile(self, filename):
         pass
 
     def saveToPDF(self, filename):
         pass
 
-    def add_raster(self, path, tag):
-        if os.path.exists(path):
-            fileInfo = QtCore.QFileInfo(path)
-            baseName = fileInfo.baseName()
-            raster = qgis.core.QgsRasterLayer(path, baseName)
-    
-            if tag=="res_map":
-                min_max = getrasterminmax(path)
-            else:
-                min_max = None
-    
-            self.set_color_ramp(tag, raster)
-            qgis.core.QgsMapLayerRegistry.instance().addMapLayer(raster)
-            self.all_layers[tag] = qgis.gui.QgsMapCanvasLayer(raster)
-        else:
-            print "The file " + path + " could not be found on the file system."
-            print "   tag will not be enabled"
-
-    def set_color_ramp(self, layer_type, raster, min_max=None):
-        QgsColorRampShader = qgis.core.QgsColorRampShader
 
 
-        if layer_type == "mod_map":
-            #raster.setDrawingStyle(qgis.core.QgsRasterLayer.PalettedColor)
-            raster.setDrawingStyle(qgis.core.QgsRasterLayer.SingleBandPseudoColor)
-            raster.setColorShadingAlgorithm(qgis.core.QgsRasterLayer.PseudoColorShader)
+class MyMapCanvas(FigureCanvas):
+    def __init__(self, fig):
+        FigureCanvas.__init__(self, fig)
+        self._cursor = None
 
-            #raster.setColorShadingAlgorithm(qgis.core.QgsRasterLayer.ColorRampShader)
-#            raster.setDrawingStyle(qgis.core.QgsRasterLayer.SingleBandGray)
-            return None
-        else:
-            raster.setDrawingStyle(qgis.core.QgsRasterLayer.SingleBandPseudoColor)
+    def resizeEvent(self, event):
+        if not event.size().height() == 0:
+            FigureCanvas.resizeEvent(self, event)
 
-        csv_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "ColorBreaks.csv"))
-        csvfile = open(csv_file, "r")
-        reader = csv.reader(csvfile)
-        header = reader.next() #skip the header
+    def enterEvent(self, event):
+        if (self._cursor is not None and             
+            QtGui.QApplication.overrideCursor() is None):             
+            QtGui.QApplication.setOverrideCursor(self._cursor)         
+        FigureCanvas.enterEvent(self, event) 
 
-        color_ramp_items = []
-        for row in reader:
-            if row[0] == layer_type:
-                r, g, b = [int(val) for val in row[2:5]]
-                cur_color = QtGui.QColor(r, g, b)
-                cur_val = float(row[1])
-                color_item = QgsColorRampShader.ColorRampItem(cur_val, cur_color)
-                color_ramp_items.append(color_item)
+    def leaveEvent(self, event):
+        self._cursor = QtGui.QCursor(QtGui.QApplication.overrideCursor())         
+        QtGui.QApplication.restoreOverrideCursor()         
+        FigureCanvas.leaveEvent(self, event)
 
-        raster.setColorShadingAlgorithm(qgis.core.QgsRasterLayer.ColorRampShader)
-        fcn = raster.rasterShader().rasterShaderFunction()
-        fcn.setColorRampType(QgsColorRampShader.INTERPOLATED)
-        fcn.setColorRampItemList(color_ramp_items)
+class fullExtent(QtGui.QAction):
+    def __init__(self, parent=None):
+        icon = os.path.abspath(os.path.join(
+                    os.path.dirname(__file__), "Images", "world.png"))
+        QtGui.QAction.__init__(self,
+                               QtGui.QIcon(icon),
+                               "Full Extent",
+                               parent)
+        self.setCheckable(False)
 
-        if hasattr(raster, "setCacheImage"): raster.setCacheImage(None)
-        raster.triggerRepaint()
+    def triggeredSlot(self):
+        cellWidget = self.toolBar.getSnappedWidget()
+        xlim = cellWidget.xlim
+        ylim = cellWidget.ylim
+        cellWidget.axes.set_xlim(xlim)
+        cellWidget.axes.set_ylim(ylim)
+        cellWidget.fig.canvas.draw()
+        cellWidget.update()
 
-        qgis.core.QgsMapLayerRegistry.instance().addMapLayer(raster)
-
-        csvfile.close()
-
-        return None
-
-    def create_legend_ramp(self, layer_type, raster, min_max, num_tags):
-        legend = QtGui.QFrame()
-        legend.setObjectName(QtCore.QString.fromUtf8("legend"))
-        mainlayout = QtGui.QVBoxLayout(legend)
-        mainlayout.setSpacing(0)
-        mainlayout.setMargin(0)
-
-        frame_colorbar = QtGui.QFrame(legend)
-        frame_colorbar.setObjectName(QtCore.QString.fromUtf8("frame_colorbar"))
-        layout_colorbar = QtGui.QHBoxLayout(frame_colorbar)
-        layout_colorbar.setSpacing(0)
-        layout_colorbar.setContentsMargins(-1, 2, -1, 0)
-
-        frame_ticks = QtGui.QFrame(legend)
-        frame_ticks.setFrameShape(QtGui.QFrame.StyledPanel)
-        frame_ticks.setFrameShadow(QtGui.QFrame.Raised)
-        frame_ticks.setObjectName(QtCore.QString.fromUtf8("frame_ticks"))
-        layout_ticks = QtGui.QHBoxLayout(frame_ticks)
-        layout_ticks.setSpacing(0)
-        layout_ticks.setContentsMargins(-1, 0, -1, 0)
-
-        frame_labels = QtGui.QFrame(legend)
-        frame_labels.setObjectName(QtCore.QString.fromUtf8("frame_labels"))
-        layout_labels = QtGui.QHBoxLayout(frame_labels)
-        layout_labels.setSpacing(0)
-        layout_labels.setContentsMargins(4, 0, 4, 0)
-
-        csv_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "ColorBreaks.csv"))
-        csvfile = open(csv_file, "r")
-        reader = csv.reader(csvfile)
-        header = reader.next() #skip the header
-
-        color_ramp_items = []
-        prev_color = None
-        for row in reader:
-            if row[0] == layer_type:
-                cur_color = ", ".join(row[2:5])
-
-                if prev_color:
-                    color_label = QtGui.QLabel(frame_colorbar)
-                    sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.MinimumExpanding)
-                    sizePolicy.setHorizontalStretch(0)
-                    sizePolicy.setVerticalStretch(0)
-                    sizePolicy.setHeightForWidth(color_label.sizePolicy().hasHeightForWidth())
-                    color_label.setSizePolicy(sizePolicy)
-                    color_label.setMinimumSize(QtCore.QSize(0, 4))
-                    stylesheet = "background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba("
-                    stylesheet += prev_color
-                    stylesheet += ", 255), stop:1 rgba("
-                    stylesheet += cur_color
-                    stylesheet += ", 255));"
-                    color_label.setStyleSheet(QtCore.QString.fromUtf8(stylesheet))
-                    color_label.setText(QtCore.QString.fromUtf8(""))
-                    layout_colorbar.addWidget(color_label)
-
-                prev_color = cur_color
-
-        min = min_max[0]
-        max = min_max[1]
-        step = float(max - min) / num_tags
-        curStep = min
-
-        while curStep <= max:
-            line = QtGui.QFrame(frame_ticks)
-            sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
-            sizePolicy.setHorizontalStretch(0)
-            sizePolicy.setVerticalStretch(0)
-            sizePolicy.setHeightForWidth(line.sizePolicy().hasHeightForWidth())
-            line.setSizePolicy(sizePolicy)
-            line.setMinimumSize(QtCore.QSize(0, 4))
-            line.setSizeIncrement(QtCore.QSize(0, 0))
-            line.setFrameShadow(QtGui.QFrame.Plain)
-            line.setFrameShape(QtGui.QFrame.VLine)
-            line.setFrameShadow(QtGui.QFrame.Sunken)
-            line.setObjectName(QtCore.QString.fromUtf8("line"))
-            layout_ticks.addWidget(line)
-            spacerItem = QtGui.QSpacerItem(133, 2, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-            layout_ticks.addItem(spacerItem)
-
-            lbl = QtGui.QLabel(frame_labels)
-            lbl.setMinimumSize(QtCore.QSize(0, 10))
-            txt = "%.1f" %curStep
-            lbl.setText(QtCore.QString.fromUtf8(txt))
-            lbl.setAlignment(QtCore.Qt.AlignCenter)
-            #lbl.setObjectName(QtCore.QString.fromUtf8("lbl"))
-            layout_labels.addWidget(lbl)
-            spacerItem2 = QtGui.QSpacerItem(5, 5, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-            layout_labels.addItem(spacerItem2)
-
-            curStep += step
-
-        layout_ticks.removeItem(spacerItem)
-        layout_labels.removeItem(spacerItem2)
-
-        mainlayout.addWidget(frame_colorbar)
-        mainlayout.addWidget(frame_ticks)
-        mainlayout.addWidget(frame_labels)
-        return legend
-
-
-    def add_vector(self, path, tag, strcolor):
-        fileInfo = QtCore.QFileInfo(path)
-        baseName = fileInfo.baseName()
-        points_layer = qgis.core.QgsVectorLayer(path, baseName, "ogr")
-
-        props = {'color':strcolor, 'radius':'3' }
-        s = qgis.core.QgsMarkerSymbolV2.createSimple(props)
-
-        points_layer.setRendererV2( qgis.core.QgsSingleSymbolRendererV2( s ) )
-
-        qgis.core.QgsMapLayerRegistry.instance().addMapLayer(points_layer)
-        self.all_layers[tag] = qgis.gui.QgsMapCanvasLayer(points_layer)
-
-#
-#def update_displayed_layers(cellWidget):
-#    pass
-#
-#
-##        [qgis.gui.QgsMapCanvasLayer(layer) for layer in layers]
-
-#    layer = cellWidget.cur_layers[layer]
-#    layers = cellWidget.canvas.layers()
-#
-#    if visible:
-#        layers.insert(0, layer.layer())
-#    else:
-#        layers.remove(layer.layer())
-#
-#    cellWidget.canvas.setLayerSet(layerset)
-#    cellWidget.canvas.repaint()
-
+class viewTitleLegend(QtGui.QAction):
+    def __init__(self, parent=None):
+        icon = os.path.abspath(os.path.join(
+                    os.path.dirname(__file__), "Images", "titlelegend.png"))
+        QtGui.QAction.__init__(self,
+                               QtGui.QIcon(icon),
+                               "Show/Hide Title and Legend",
+                               parent)
+        self.setCheckable(True)
+        self.setChecked(True)
+        
+    def triggeredSlot(self):
+        cellWidget = self.toolBar.getSnappedWidget()
+        
+        xlim = cellWidget.axes.get_xlim()
+        ylim = cellWidget.axes.get_ylim()
+        cellWidget.displayTL = self.isChecked()
+        cellWidget.on_draw()
+        cellWidget.fig.canvas.draw()
+        cellWidget.update()
+        cellWidget.axes.set_xlim(xlim)
+        cellWidget.axes.set_ylim(ylim)            
 
 class ViewLayerAction(QtGui.QAction):
     def __init__(self, action_dict, parent=None):
@@ -405,11 +459,18 @@ class ViewLayerAction(QtGui.QAction):
         self.group = action_dict["group"]
 
     def triggeredSlot(self, checked=False):
-#        cellWidget = self.toolBar.getSnappedWidget()
+        cellWidget = self.toolBar.getSnappedWidget()
+        xlim = cellWidget.axes.get_xlim()
+        ylim = cellWidget.axes.get_ylim()
         self.toggleOthers()
         self.displayLayer()
+        self.toolBar.updateToolBar()
+        cellWidget.axes.set_xlim(xlim)
+        cellWidget.axes.set_ylim(ylim)
 
     def toggleOthers(self):
+        '''Unselect the other raster layers
+        '''
         for action in self.toolBar.actions():
             if "group" in dir(action) and \
                 action.group == self.group and \
@@ -417,18 +478,40 @@ class ViewLayerAction(QtGui.QAction):
                 action.setChecked(False)
 
     def displayLayer(self):
+        '''Display all the layers that have their
+        actions selected in the toolbar
+        '''
         cellWidget = self.toolBar.getSnappedWidget()
-
-        all_layers = cellWidget.all_layers
-        layerset = []
+        #set all to not displayed
+        for k, v in cellWidget.all_layers.items():
+            v['displayed'] = False
+        #turn on the selected layers
         for action in self.toolBar.actions():
-            if action.isChecked() and all_layers.has_key(action.tag):
-                layer = all_layers[action.tag]
-                layerset.append(qgis.gui.QgsMapCanvasLayer(layer))
-
-        cellWidget.canvas.setLayerSet(layerset)
-        cellWidget.canvas.repaint()
-
+            try:
+                if action.isChecked() and cellWidget.all_layers.has_key(action.tag):
+                    cellWidget.all_layers[action.tag]['displayed'] = True
+            except AttributeError:
+                pass #ignore buttons that don't have a tag set
+        cellWidget.on_draw()
+        try:
+            cellWidget.fig.canvas.draw()
+        except MemoryError:
+            msgbox = QtGui.QMessageBox(self)
+            msgbox.setText("This viewer cannot handle datasets this large.\nTry setting the max_cells_dimension to a smaller value.")
+            msgbox.exec_()
+            raise MemoryError
+            
+        cellWidget.update()
+#        all_layers = cellWidget.all_layers
+#        layerset = []
+#        for action in self.toolBar.actions():
+#            if action.isChecked() and all_layers.has_key(action.tag):
+#                layer = all_layers[action.tag]
+#                layerset.append(qgis.gui.QgsMapCanvasLayer(layer))
+#
+#        cellWidget.map_canvas.setLayerSet(layerset)
+##        cellWidget.canvas.repaint()
+#        cellWidget.update()
 
 class SAHMSpatialViewerToolBar(QCellToolBar):
     """
@@ -438,9 +521,10 @@ class SAHMSpatialViewerToolBar(QCellToolBar):
     """
     def createToolBar(self):
         """ createToolBar() -> None
-        This will get call initiallly to add customizable widgets
+        This will get call initially to add customizable widgets
 
         """
+        QCellToolBar.updateToolBar(self)
         sw = self.getSnappedWidget()
         
         actions = [{"tag":"pres_points", "icon":"RedPoints.png",
@@ -458,26 +542,55 @@ class SAHMSpatialViewerToolBar(QCellToolBar):
                    {"tag":"bin_map", "icon":"BinMap.png",
                      "checked":False, "label":"Display binary map",
                      "group":"Grids"},
-                   {"tag":"res_map", "icon":"ResMap.png",
+                   {"tag":"resid_map", "icon":"ResMap.png",
                      "checked":False, "label":"Display residuals map",
                      "group":"Grids"},
-                   {"tag":"mes_map", "icon":"MesMap.png",
+                   {"tag":"mess_map", "icon":"MesMap.png",
                      "checked":False, "label":"Display Multivariate Environmental Similarity Surface (Mess) map",
                      "group":"Grids"},
-                    {"tag":"mod_map", "icon":"ModMap.png",
+                    {"tag":"MoD_map", "icon":"ModMap.png",
                      "checked":False, "label":"Display Most Dissimilar Variable (MoD) map",
                      "group":"Grids"}]
-
+        
+        lyrs_label = QtGui.QLabel()
+        lyrs_label.setText("Layers:")
+        self.appendWidget(lyrs_label)
 
         for action_dict in actions:
             self.appendAction(ViewLayerAction(action_dict, self))
-            
+        
+        nav_label = QtGui.QLabel()
+        nav_label.setText("  Navigation:")
+        self.appendWidget(nav_label)
+        self.appendAction(viewTitleLegend(self))
+        self.appendAction(fullExtent(self))
+#        self.appendWidget(sw.mpl_toolbar)
+        
     def updateToolBar(self):
         QCellToolBar.updateToolBar(self)
         sw = self.getSnappedWidget()
+                
         for action in self.actions():
             if type(action) == ViewLayerAction:
                 #disenable all action refering to data we don't have
-                action.setEnabled(action.tag in sw.all_layers)
-
+                action.setEnabled(sw.all_layers[action.tag]['enabled'])
         
+        self.appendWidget(sw.mpl_toolbar)
+        
+#        for action in self.actions():
+#            if type(action) == ViewLayerAction:
+#                #disenable all action refering to data we don't have
+#                action.setEnabled(action.tag in sw.all_layers)
+
+class AnchoredText(AnchoredOffsetbox):
+    def __init__(self, s, loc, pad=0.4, borderpad=0.5, prop=None, frameon=True):
+
+        self.txt = TextArea(s,
+                            minimumdescent=False)
+
+
+        super(AnchoredText, self).__init__(loc, pad=pad, borderpad=borderpad,
+                                           child=self.txt,
+                                           prop=prop,
+                                           frameon=frameon)
+
