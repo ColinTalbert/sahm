@@ -64,7 +64,7 @@ opt.methods<-as.numeric(opt.methods)
 MESS<-as.logical(MESS)
 print(getwd())
 print(ScriptPath)
-    fit.brt.fct(ma.name=csv,
+    FitModels(ma.name=csv,
 		tif.dir=NULL,
 		output.dir=output,
 		response.col=responseCol,
