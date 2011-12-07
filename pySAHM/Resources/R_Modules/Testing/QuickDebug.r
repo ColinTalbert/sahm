@@ -33,9 +33,14 @@ input.file[11]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv
 ############### Quick debug  ##############################################
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Split.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/NoSplit.csv"
-output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
+
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
+
+
 rc="responseBinary"
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation\\modelSelection_split_1.csv"
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation\\modelSelection_cv_1.csv"
+output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
 #######################################################################
 ##MARS
 FitModels(ma.name=input.file,
@@ -115,4 +120,4 @@ set.seed(1)
 C:\R-2.12.1\bin\i386\Rterm.exe --vanilla -f I:\VisTrails\Central_VisTrailsInstall_debug\vistrails\packages\sahm_MarianDev\pySAHM\Resources\R_Modules\FIT_BRT_pluggable.r --args c=C:\VisTrails\mtalbert_20110504T132851\readMaTests\Split.csv o=C:\temp\SAHMDebugJunk\BRTOut1 rc=responseBinary
 C:\R-2.12.1\bin\i386\Rterm.exe --vanilla -f I:\VisTrails\Central_VisTrailsInstall\vistrails\packages\sahm\pySAHM\Resources\R_Modules\FIT_GLM_pluggable.r --args c==I:\VisTrails\Yellowstone_example\workspace_for_paper\CovariateCorrelationOutputMDS_Both.csv o=C:\temp\SAHMDebugJunk\BRTOut1 rc=responseBinary
 
-I:\VisTrails\Central_VisTrailsInstall\Central_R\R-2.12.1\bin\i386\Rterm.exe --vanilla -f I:\VisTrails\Central_VisTrailsInstall_debug\vistrails\packages\sahm_MarianDev\pySAHM\Resources\R_Modules\FIT_MARS_pluggable.r --args  mbt=TRUE mpt=TRUE c="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv" mes=TRUE o="C:\temp\SAHMDebugJunk\BRTOut1" rc=responseBinary
+I:\VisTrails\Central_VisTrailsInstall\Central_R\R-2.12.1\bin\i386\Rterm.exe --vanilla -f I:\VisTrails\Central_VisTrailsInstall_debug\vistrails\packages\sahm_MarianDev\pySAHM\Resources\R_Modules\FIT_MARS_pluggable.r --args  mbt=TRUE mpt=TRUE c="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv" o="C:\temp\SAHMDebugJunk\BRTOut1" rc=responseBinary mes=TRUE

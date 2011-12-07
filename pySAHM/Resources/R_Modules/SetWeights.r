@@ -1,33 +1,22 @@
-CrossValidationSplit<-function(input.file,output.file,response.col="ResponseBinary",n.folds=10,stratify=FALSE){
+SetWeights<-function(input.file,output.file,response.col="ResponseBinary",method="KDE"){
 
 #Description:
-#this code takes as input an mds file with the first line being the predictor or
-#response name, the second line an indicator of predictors to include and the
-#third line being paths where tif files can be found.   An output file and a
-#response column must also be specified.  Given a number of folds, a new
-#column is created indicating which fold each observation will be assigned to
-#if a Split Column is also found (test/train split) then only the train portion
-#will be assigned a fold.  Optional stratification by response is also available
-#Background points are ignored
-#by this module (they are read in, written out, but not assigned to cv folds.
-#Output is written to a csv that can be used by the
-#SAHM R modules.
+#This function sets weights as a potential remedial measure when autocorrelation is found in the residuals of
+#the model fit based on the number of points in an area or weights can be set so that the total weight of absence points
+#is equal to the weight of presence.  The KDE options should never be used on presence only data with randomly selected
+#background points
 
-#Written by Marian Talbert 9/29/2011
+#Written by Marian Talbert 12/7/2011
 
-     if(n.folds<=1 | n.folds%%1!=0) stop("n.folds must be an integer greater than 1")
+
 
    #Read input data and remove any columns to be excluded
           dat.in<-read.csv(input.file,header=FALSE,as.is=TRUE)
           dat<-as.data.frame(dat.in[4:dim(dat.in)[1],])
-   # if there was a test training split this should be used for Evaluation of the final model since cross validation can only be
-   # used for model selection
-          if(any(!is.na(match("Split",dat.in[1,])))) dat.in[1,match("Split",dat.in[1,])]<-"EvalSplit"
-          names(dat)<-dat.in[1,]
+
 
         response<-dat[,match(tolower(response.col),tolower(names(dat)))]
-
-          if(sum(as.numeric(response)==0)==0 && !is.null(stratify)) stop("The ratio of presence to absence cannot be set with only presence data")
+        if(method="KDE") x
 
       #Ignoring background data that might be present in the mds
 
@@ -39,6 +28,9 @@ CrossValidationSplit<-function(input.file,output.file,response.col="ResponseBina
             response<-response[-c(which(response==-9999,arr.ind=TRUE))]
             bg.dat$Split=""
             }
+            
+            if(method="EquPresAbs"){
+               }
             #this splits the training set
              split.mask<-dat[,match(tolower("evalsplit"),tolower(names(dat)))]=="train"
              index<-seq(1:nrow(dat))[split.mask]

@@ -11,7 +11,6 @@ pred.fct<-function(model,x,Model){
      }
 
   if(Model=="mars"){
-
         # retrieve key items from the global environment #
         # make predictionss.
         y <- rep(NA,nrow(x))

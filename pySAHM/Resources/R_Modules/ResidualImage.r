@@ -1,4 +1,5 @@
 resid.image<-function(dev.contrib,pred,raw.dat,x,y,model.type,file.name){
+
    z<-sign(pred-raw.dat)*dev.contrib
      MinCol<-min(z)
      MaxCol<-max(z)

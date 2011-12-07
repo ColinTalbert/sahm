@@ -108,7 +108,9 @@ target.sp<-names(ydat)
 
     # fit new mars model
 
-if(Model=="mars"){    mars.object <- mars(y = species.subset, x = predictor.subset,
+if(Model=="mars"){
+
+                   mars.object <- mars(y = species.subset, x = predictor.subset,
                       degree = mars.degree, penalty = mars.penalty)
                       n.bfs <- length(mars.object$selected.terms)
                     bf.data <- as.data.frame(mars.object$x)
@@ -120,6 +122,9 @@ if(Model=="mars"){    mars.object <- mars(y = species.subset, x = predictor.subs
                       xdat[pred.mask, ]))
                     #now name the bfs to match the approach used in mars.binomial
                     names(pred.basis.functions) <- paste("bf",1:n.bfs,sep="")
+                    #browser()
+                    #checking if the following two lines produce the same thing
+                    #a<-predict(mars.binomial,xdat[pred.mask, ])
                     fitted.values[pred.mask] <- out$dat$ma[[i]]$pred<-predict(mars.binomial,
                pred.basis.functions, type = "response")
        out$dat$ma[[i]]$thresh <- as.numeric(optimal.thresholds(data.frame(ID=1:length(species.subset),pres.abs=species.subset,

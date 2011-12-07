@@ -72,13 +72,13 @@ set.seed(out$input$seed)
 
     # Making Predictions
                pred.vals<-function(x,model,Model){
-              x$pred<-pred.fct(model,x,Model)
+              x$pred<-pred.fct(model,x$dat[,2:ncol(x$dat)],Model)
               return(x)}
 
               #getting the predictions for the test/train or cross validation splits into the object at the correct list location
 
               if(out$dat$split.type!="crossValidation") out$dat$ma<-(lapply(X=out$dat$ma,FUN=pred.vals,model=out$mods$final.mod,Model=Model))
-                 else out$dat$ma$train$pred<-pred.vals(out$dat$ma$train$dat[,2:ncol(out$dat$ma$train$dat)],out$mods$final.mod,Model=Model)$pred  #produces the same thing as pred.mars(out$mods$final.mod,out$dat$ma$train$dat[2:ncol(out$dat$ma$train$dat)])
+                 else out$dat$ma$train$pred<-pred.vals(out$dat$ma$train,out$mods$final.mod,Model=Model)$pred  #produces the same thing as pred.mars(out$mods$final.mod,out$dat$ma$train$dat[2:ncol(out$dat$ma$train$dat)])
 
               #Just for the training set for Random Forest we have to take out of bag predictions rather than the regular predictions
               if(Model=="rf") out$dat$ma$train$pred<-tweak.p(as.vector(predict(out$mods$final.mod,type="prob")[,2]))

@@ -27,14 +27,16 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
 
           tif.info<-readLines(input.file,3)
           tif.info<-strsplit(tif.info,',')
+          options(warn=-1)
           include<-(as.numeric(tif.info[[2]]))
-
+          options(warn=1)
   #Remove coordinates, response column, site.weights
   #before exploring predictor relationship
     rm.cols <- as.vector(na.omit(c(match("x",tolower(names(dat))),match("y",tolower(names(dat))),
-    match("site.weights",tolower(names(dat))),match(tolower(response.col),tolower(names(dat))),match("Split",names(dat)))))
+    match("site.weights",tolower(names(dat))),match(tolower(response.col),tolower(names(dat))),match("Split",names(dat)),match("EvalSplit",names(dat)))))
 
      #remove testing split
+     if(!is.na(match("EvalSplit",names(dat)))) dat<-dat[-c(which(dat$EvalSplit=="test"),arr.ind=TRUE),]
     if(!is.na(match("Split",names(dat)))) dat<-dat[-c(which(dat$Split=="test"),arr.ind=TRUE),]
 
     include[is.na(include)]<-0
@@ -184,7 +186,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
  options(warn=-1)
  if(Debug==FALSE) jpeg(output.file,width=1000,height=1000,pointsize=13)
     MyPairs(cbind(TrueResponse,HighToPlot),cor.range=cor.range,my.labels=(as.vector(High.cor)[1:num.plots]),
-    lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,bg = c("green","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red")
+    lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,bg = c("steelblue","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red")
 
  if(Debug==FALSE) graphics.off()
  options(warn=0)
