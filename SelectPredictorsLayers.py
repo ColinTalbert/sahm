@@ -245,7 +245,7 @@ class SelectListDialog(QtGui.QDialog):
         for i in range(0, len(header)):
             headerList.append([header[i], header2[i], header3[i]])
         
-        noncovariate_columns = ['Split', ]
+        noncovariate_columns = ['Split', 'EvalSplit']
         for item in headerList[3:]:
             if not item[0] in noncovariate_columns:
                 child_item = QtGui.QTreeWidgetItem([item[0],])

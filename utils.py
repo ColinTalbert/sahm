@@ -171,7 +171,7 @@ def dir_path_value(value):
     val = value.name
     sep = os.path.sep
     return val.replace("/", sep)
-    
+
 def create_file_module(fname, f=None):
     if f is None:
         f = File()
