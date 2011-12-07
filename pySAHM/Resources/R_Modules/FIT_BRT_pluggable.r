@@ -53,7 +53,7 @@ Args <- commandArgs(trailingOnly=FALSE)
 
 ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
-
+source(paste(ScriptPath,"BRT.helper.fcts.r",sep="\\"))
 
 alpha<-as.numeric(alpha)
 make.p.tif<-as.logical(make.p.tif)
