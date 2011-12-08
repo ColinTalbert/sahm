@@ -1210,32 +1210,42 @@ class CovariateCorrelationAndSelection(Module):
     the "OK" button is selected and processing will resume in the VisTrails workflow.
 
     '''
-    kwargs = {}
-    kwargs['defaults'] = str(['initial'])
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
-                    ('selectionName', '(edu.utah.sci.vistrails.basic:String)', kwargs),
-                    ('ShowGUI', '(edu.utah.sci.vistrails.basic:Boolean)')]
+                    ('selectionName', '(edu.utah.sci.vistrails.basic:String)', {'defaults':str(['initial'])}),
+                    ('ShowGUI', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True'])})]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
 
     def compute(self):
         writetolog("\nOpening Select Predictors Layers widget", True)
-        inputMDS = utils.dir_path_value(self.forceGetInputFromPort('inputMDS'))
-        selectionName = self.forceGetInputFromPort('selectionName', 'initial')
-        utils.mknextfile(prefix='PredictorCorrelation_' + selectionName + "_", suffix='.jpg')
         
+        port_map = {'inputMDS': ('inputMDS', None, True),
+                    'selectionName': ('selectionName', None, True),
+                    'ShowGUI': ('ShowGUI', None, True),}
+        
+        params = utils.map_ports(self, port_map)
+
         global session_dir
-        outputMDS = os.path.join(session_dir, "CovariateCorrelationOutputMDS_" + selectionName + ".csv")
+        outputMDS = os.path.join(session_dir, "CovariateCorrelationOutputMDS_" + params['selectionName'] + ".csv")
         displayJPEG = os.path.join(session_dir, "CovariateCorrelationDisplay.jpg")
-        writetolog("    inputMDS = " + inputMDS, False, False)
+        writetolog("    inputMDS = " + params['inputMDS'], False, False)
         writetolog("    displayJPEG = " + displayJPEG, False, False)
         writetolog("    outputMDS = " + outputMDS, False, False)
         
-        if os.path.exists(outputMDS):
-            utils.applyMDS_selection(outputMDS, inputMDS)
+        if os.path.exists(outputMDS) and params['ShowGUI']:
+            utils.applyMDS_selection(outputMDS, params['inputMDS'])
             os.remove(outputMDS)
+            self.callDisplayMDS(params['inputMDS'], outputMDS, displayJPEG)
+        elif os.path.exists(outputMDS) and not params['ShowGUI']:
+            utils.applyMDS_selection(outputMDS, params['inputMDS'])
+            os.remove(outputMDS)
+            shutil.copy2(params['inputMDS'], outputMDS)
+            writetolog("    Applying previous selection but not showing GUI", False, True)
+        elif not os.path.exists(outputMDS) and not params['ShowGUI']:
+            raise ModuleError(self, "Show GUI deselected but no previous output detected.\n\nCan not continue!")
+        else:
+            self.callDisplayMDS(params['inputMDS'], outputMDS, displayJPEG)
+                    
         
-        self.callDisplayMDS(inputMDS, outputMDS, displayJPEG)
-
         output_file = utils.create_file_module(outputMDS)
         writetolog("Finished Select Predictors Layers widget", True)
         self.setResult("outputMDS", output_file)

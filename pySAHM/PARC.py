@@ -676,7 +676,11 @@ class PARC:
             else:
                 inputs.append(input_just_file)
                 
-            sourceParams = self.getRasterParams(inputFile)
+            if os.path.exists(inputFile):   
+                sourceParams = self.getRasterParams(inputFile)
+            else:
+                sourceParams["Error"] += "\nThe input file (" + inputFile + ") does not exist on the file system."
+                
             if len(sourceParams["Error"]) > 0:
                 strInputFileErrors += ("  " + os.path.split(inputFile)[1] + " had the following errors:\n" + 
                                     "    " + "\n    ".join(sourceParams["Error"])) + "\n"
