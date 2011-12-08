@@ -22,6 +22,7 @@ from PyQt4 import QtCore, QtGui
 from widgets import get_predictor_widget, get_predictor_config
 
 from SelectPredictorsLayers import SelectListDialog
+from SelectAndTestFinalModel import SelectAndTestFinalModel
 
 import utils
 #import our python SAHM Processing files
@@ -61,7 +62,15 @@ def menu_items():
     
     def select_test_final_model():
         global session_dir
-        
+        csv_file = r"I:\VisTrails\WorkingFiles\workspace\Test_CrossValidation2\BinaryCVAppendedOutput.csv"
+        displayJPEG = r"I:\VisTrails\WorkingFiles\workspace\Test_CrossValidation2\CovariateCorrelationDisplay.jpg"
+        STFM  = SelectAndTestFinalModel(csv_file, displayJPEG, configuration.r_path)
+        #dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
+#        print " ... finished with dialog "  
+        retVal = STFM.exec_()
+        #outputPredictorList = dialog.outputList
+        if retVal == 1:
+            raise ModuleError(self, "Cancel or Close selected (not OK) workflow halted.")
     
     lst = []
     lst.append(("Change session folder", change_session_folder))
@@ -1474,7 +1483,7 @@ class ProjectionLayers(Module):
         workingCSV = utils.mknextfile(prefix='tmpFilesToPARC_', suffix='.csv')
         tmpCSV = csv.writer(open(workingCSV, 'wb'))
         tmpCSV.writerow(["FilePath", "Categorical", "Resampling", "Aggregation"])
-        outHeader1 = ['x', 'y', 'response']
+        outHeader1 = ['X', 'Y', 'response']
         outHeader2 = ['', '', '']
         outHeader3 = ['', '', '']
         

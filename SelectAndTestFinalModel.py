@@ -1,5 +1,5 @@
 '''
-Created on Sep 17, 2010
+Created on December 7, 2011
 
 @author: talbertc
 '''
@@ -18,23 +18,16 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class SelectListDialog(QtGui.QDialog):
+class SelectAndTestFinalModel(QtGui.QDialog):
 
-    def __init__(self, inputMDS, outputMDS, displayJPEG, rPath, parent=None):
-        #print inputMDS, outputMDS, rPath, modelsPath
+    def __init__(self, inputCSV, displayJPEG, rPath, parent=None):
         self.rPath = rPath
-        
-        self.selection_name = os.path.split(outputMDS)[1]
-        self.selection_name = os.path.splitext(self.selection_name)[0]
-        self.selection_name = self.selection_name.split('_')[-1]
         
         self.displayJPEG = displayJPEG
         
         QtGui.QDialog.__init__(self, parent)
         
-        self.inputMDS = inputMDS
-        self.outputMDS = outputMDS
-        self.outputDir = os.path.split(outputMDS)[0]
+        self.inputMDS = inputCSV
         
         layout = QtGui.QVBoxLayout()
         self.setWindowFlags(QtCore.Qt.Window)
@@ -95,14 +88,14 @@ class SelectListDialog(QtGui.QDialog):
         self.horizontalLayout_3.addWidget(self.btnRunR)
         spacerItem = QtGui.QSpacerItem(10, 0, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem)
-        self.label = QtGui.QLabel(self.widget)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
-        self.label.setSizePolicy(sizePolicy)
-        self.label.setObjectName(_fromUtf8("label"))
-        self.horizontalLayout_3.addWidget(self.label)
+#        self.label = QtGui.QLabel(self.widget)
+#        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
+#        sizePolicy.setHorizontalStretch(0)
+#        sizePolicy.setVerticalStretch(0)
+#        sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
+#        self.label.setSizePolicy(sizePolicy)
+#        self.label.setObjectName(_fromUtf8("label"))
+#        self.horizontalLayout_3.addWidget(self.label)
         self.lineEdit = QtGui.QLineEdit(self.widget)
         self.lineEdit.setText(_fromUtf8("0.7"))
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
@@ -114,21 +107,21 @@ class SelectListDialog(QtGui.QDialog):
         self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
         self.horizontalLayout_3.addWidget(self.lineEdit)
         
-        self.chkPresence = QtGui.QCheckBox(self.widget)
-        self.chkPresence.setChecked(True)
-        self.chkPresence.setText(_fromUtf8("Include presence/count points"))
-        self.chkPresence.setObjectName(_fromUtf8("chkPresence"))
-        self.verticalLayout.addWidget(self.chkPresence)
-        self.chkAbsence = QtGui.QCheckBox(self.widget)
-        self.chkAbsence.setChecked(True)
-        self.chkAbsence.setText(_fromUtf8("Include absence points"))
-        self.chkAbsence.setObjectName(_fromUtf8("chkAbsence"))
-        self.verticalLayout.addWidget(self.chkAbsence)
-        self.chkBackground = QtGui.QCheckBox(self.widget)
-        self.chkBackground.setChecked(True)
-        self.chkBackground.setText(_fromUtf8("Include background points"))
-        self.chkBackground.setObjectName(_fromUtf8("chkBackground"))
-        self.verticalLayout.addWidget(self.chkBackground)
+#        self.chkPresence = QtGui.QCheckBox(self.widget)
+#        self.chkPresence.setChecked(True)
+#        self.chkPresence.setText(_fromUtf8("Include presence/count points"))
+#        self.chkPresence.setObjectName(_fromUtf8("chkPresence"))
+#        self.verticalLayout.addWidget(self.chkPresence)
+#        self.chkAbsence = QtGui.QCheckBox(self.widget)
+#        self.chkAbsence.setChecked(True)
+#        self.chkAbsence.setText(_fromUtf8("Include absence points"))
+#        self.chkAbsence.setObjectName(_fromUtf8("chkAbsence"))
+#        self.verticalLayout.addWidget(self.chkAbsence)
+#        self.chkBackground = QtGui.QCheckBox(self.widget)
+#        self.chkBackground.setChecked(True)
+#        self.chkBackground.setText(_fromUtf8("Include background points"))
+#        self.chkBackground.setObjectName(_fromUtf8("chkBackground"))
+#        self.verticalLayout.addWidget(self.chkBackground)
         
         self.verticalLayout.addLayout(self.horizontalLayout_3)
         
@@ -173,10 +166,10 @@ class SelectListDialog(QtGui.QDialog):
         self.verticalLayout_3.addLayout(self.horizontalLayout)
         self.horizontalLayout_4.addLayout(self.verticalLayout_3)
 
-        self.setWindowTitle(_fromUtf8("Covariate Coorelation viewer"))
-        self.label_2.setText(_fromUtf8("Covariates"))
-        self.btnRunR.setText(_fromUtf8("Update"))
-        self.label.setText(_fromUtf8("Threshold"))
+        self.setWindowTitle(_fromUtf8("Final Model Selection and Test"))
+        self.label_2.setText(_fromUtf8("Models"))
+        self.btnRunR.setText(_fromUtf8("Run Test"))
+#        self.label.setText(_fromUtf8("Threshold"))
         self.btnOK.setText(_fromUtf8("OK"))
         self.btnCancel.setText(_fromUtf8("Cancel"))
         self.resize(1100, 800)
@@ -186,13 +179,13 @@ class SelectListDialog(QtGui.QDialog):
         
         layout.addLayout(self.horizontalLayout_4)
         
-        self.btnCancel.setShortcut('Esc')
-        self.connect(self.btnOK, QtCore.SIGNAL('clicked(bool)'),
-                     self.okTriggered)
-        self.connect(self.btnCancel, QtCore.SIGNAL('clicked(bool)'),
-                     self.cancel)
-        self.connect(self.btnRunR, QtCore.SIGNAL('clicked(bool)'),
-                     self.updateROutput)
+#        self.btnCancel.setShortcut('Esc')
+#        self.connect(self.btnOK, QtCore.SIGNAL('clicked(bool)'),
+#                     self.okTriggered)
+#        self.connect(self.btnCancel, QtCore.SIGNAL('clicked(bool)'),
+#                     self.cancel)
+#        self.connect(self.btnRunR, QtCore.SIGNAL('clicked(bool)'),
+#                     self.updateROutput)
 #        self.connect(self.view, QtCore.SIGNAL('resize()'),
 #                     self.resize)
         
@@ -220,52 +213,70 @@ class SelectListDialog(QtGui.QDialog):
         
     
     def PopulateTreeview(self):
-        ''' Reads in the input MDS and populates the treeview widget
-        with the items in covariate columns.  
-        Sets the check state to be the same as the 0/1 include flag.
-        '''
-        writetolog("    PopulateTreeview inputMDS = " + self.inputMDS, False, False)
-        self.treeview.setColumnCount(1)
-        #If an outputMDS already exists then the user has run this module before.
-        #We need to pull and apply their previous selections from that output file
-
-
+        which_type = QtGui.QDialog()
+        which_type.setWindowTitle("Multiple model types found in this Session Folder")
+        widget_layout = QtGui.QVBoxLayout()
+        for model_type in ["binaryCV", "countCV", "binaryNoTest"]:
+            button = QtGui.QPushButton()
+            button.setText(model_type)
+            button.connect(button, QtCore.SIGNAL('clicked(bool)'), self.button_push)
+            widget_layout.addWidget(button)
             
-        csvfile = open(self.inputMDS, "r")
-        #print "MDS", self.inputMDS
-        reader = csv.reader(csvfile)
-        header = reader.next() #store the header
-        header2 = reader.next() #the 2nd line of the mds with use/don't use
-        header3 = reader.next() #the 3rd line of the mds with the path
+        which_type.setLayout(widget_layout)
+        which_type.exec_()
         
-        self.responseCol = header[2]
         
-        headerList = []
-        n = 0
-        for i in range(0, len(header)):
-            headerList.append([header[i], header2[i], header3[i]])
+    def button_push(self, event):
+        pass
+
+
         
-        noncovariate_columns = ['Split', 'EvalSplit']
-        for item in headerList[3:]:
-            if not item[0] in noncovariate_columns:
-                child_item = QtGui.QTreeWidgetItem([item[0],])
-                child_item.setFlags(QtCore.Qt.ItemIsUserCheckable |
-                                QtCore.Qt.ItemIsEnabled)
-                checked = True
-                if int(item[1]) == 0:
-                    checked = False 
-                
-                if not checked:
-                    child_item.setCheckState(0, QtCore.Qt.Unchecked)
-                else:
-                    child_item.setCheckState(0, QtCore.Qt.Checked)
-                
-                self.treeview.addTopLevelItem(child_item)
-                #self.tree_items[file] = child_item
-                n += 1
-        csvfile.close()
-        #update the tree view label to show how many covariates there are
-        self.label_2.setText(_fromUtf8("Covariates   (n=" + str(n) + ")"))
+#        ''' Reads in the input MDS and populates the treeview widget
+#        with the items in covariate columns.  
+#        Sets the check state to be the same as the 0/1 include flag.
+#        '''
+#        writetolog("    PopulateTreeview inputMDS = " + self.inputMDS, False, False)
+#        self.treeview.setColumnCount(1)
+#        #If an outputMDS already exists then the user has run this module before.
+#        #We need to pull and apply their previous selections from that output file
+#
+#
+#            
+#        csvfile = open(self.inputMDS, "r")
+#        #print "MDS", self.inputMDS
+#        reader = csv.reader(csvfile)
+#        header = reader.next() #store the header
+#        header2 = reader.next() #the 2nd line of the mds with use/don't use
+#        header3 = reader.next() #the 3rd line of the mds with the path
+#        
+#        self.responseCol = header[2]
+#        
+#        headerList = []
+#        n = 0
+#        for i in range(0, len(header)):
+#            headerList.append([header[i], header2[i], header3[i]])
+#        
+#        noncovariate_columns = ['Split', 'EvalSplit']
+#        for item in headerList[3:]:
+#            if not item[0] in noncovariate_columns:
+#                child_item = QtGui.QTreeWidgetItem([item[0],])
+#                child_item.setFlags(QtCore.Qt.ItemIsUserCheckable |
+#                                QtCore.Qt.ItemIsEnabled)
+#                checked = True
+#                if int(item[1]) == 0:
+#                    checked = False 
+#                
+#                if not checked:
+#                    child_item.setCheckState(0, QtCore.Qt.Unchecked)
+#                else:
+#                    child_item.setCheckState(0, QtCore.Qt.Checked)
+#                
+#                self.treeview.addTopLevelItem(child_item)
+#                #self.tree_items[file] = child_item
+#                n += 1
+#        csvfile.close()
+#        #update the tree view label to show how many covariates there are
+#        self.label_2.setText(_fromUtf8("Covariates   (n=" + str(n) + ")"))
         
     def SaveMDSFromTreeview(self):
         #updates the second header line on the input MDS file 
@@ -308,29 +319,29 @@ class SelectListDialog(QtGui.QDialog):
 #        
 #        program = os.path.join(self.rPath, "i386", "Rterm.exe") 
 #        script = os.path.join(utils.getModelsPath(), "PairsExplore.r")
-
-        args = "i=" + '"' + MDSfile + '"' + " o=" + '"' + self.displayJPEG + '"' + " m=" + str(self.lineEdit.text())
-        args += " rc=" + self.responseCol
-        
-        if self.chkPresence.checkState() == QtCore.Qt.Checked:
-            args += " pres=TRUE"
-        else:
-            args += " pres=FALSE"
-        if self.chkAbsence.checkState() == QtCore.Qt.Checked:
-            args += " absn=TRUE"
-        else:
-            args += " absn=FALSE"
-        if self.chkBackground.checkState() == QtCore.Qt.Checked:
-            args += " bgd=TRUE"
-        else:
-            args += " bgd=FALSE"
+        pass
+#        args = "i=" + '"' + MDSfile + '"' + " o=" + '"' + self.displayJPEG + '"' + " m=" + str(self.lineEdit.text())
+#        args += " rc=" + self.responseCol
+#        
+#        if self.chkPresence.checkState() == QtCore.Qt.Checked:
+#            args += " pres=TRUE"
+#        else:
+#            args += " pres=FALSE"
+#        if self.chkAbsence.checkState() == QtCore.Qt.Checked:
+#            args += " absn=TRUE"
+#        else:
+#            args += " absn=FALSE"
+#        if self.chkBackground.checkState() == QtCore.Qt.Checked:
+#            args += " bgd=TRUE"
+#        else:
+#            args += " bgd=FALSE"
 
 #        command = program + " --vanilla -f " + script + " --args " + args
 #        writetolog("    " + command, False, False)
-        if os.path.exists(os.path.join(self.outputDir, "Predictor_Correlation.jpg")):
-            os.remove(os.path.join(self.outputDir, "Predictor_Correlation.jpg"))
-            
-        utils.runRScript('PairsExplore.r', args)
+#        if os.path.exists(os.path.join(self.outputDir, "Predictor_Correlation.jpg")):
+#            os.remove(os.path.join(self.outputDir, "Predictor_Correlation.jpg"))
+#            
+#        utils.runRScript('PairsExplore.r', args)
 
 #        p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 #
@@ -345,12 +356,12 @@ class SelectListDialog(QtGui.QDialog):
 #        else:
 #            writetolog("   Finished in R. ")
 #        del(ret)
-        
-        if os.path.exists(os.path.join(self.displayJPEG)):
-            return os.path.join(self.displayJPEG)
-        else:
-            writetolog("Missing output from R processing: " + self.displayJPEG)
-            raise Exception, "Missing output from R processing"
+#        
+#        if os.path.exists(os.path.join(self.displayJPEG)):
+#            return os.path.join(self.displayJPEG)
+#        else:
+#            writetolog("Missing output from R processing: " + self.displayJPEG)
+#            raise Exception, "Missing output from R processing"
 
     def load_picture(self, strPicture):
         self.l_pix = QtGui.QPixmap(strPicture)
@@ -395,4 +406,3 @@ class SelectListDialog(QtGui.QDialog):
         
     def resizeEvent(self, event):
         self.load_picture(self.displayJPEG)
-
