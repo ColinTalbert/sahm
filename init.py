@@ -1785,21 +1785,39 @@ def build_predictor_modules():
                        '_input_ports': \
                            [('value',
                              '(gov.usgs.sahm:%s:DataInput)' % class_name, True)]})
-        
-        modules.append((module, {'configureWidgetType': config_class}))
+        modules.append((module, {'configureWidgetType': config_class, 
+                                 'moduleColor':input_color,
+                                 'moduleFringe':input_fringe}))
         for module in modules:
             module[0]._output_ports.append(('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True))
             
     return modules
 
 
- 
+input_color = (0.76, 0.76, 0.8)
+input_fringe = [(0.0, 0.0),
+                    (0.25, 0.0),
+                    (0.0, 1.0)]
+  
+model_color = (0.76, 0.8, 0.76)
+model_fringe = [(0.0, 0.0),
+                    (0.25, 0.5),
+                    (0.0, 1.0)] 
+
+output_color = (0.8, 0.8, 0.76)
+output_fringe = [(0.0, 0.0),
+                    (0.25, 0.0),
+                    (0.0, 1.0)]
 
 _modules = generate_namespaces({'DataInput': [
-                                              Predictor,
-                                              PredictorListFile,
-                                              FieldData,
-                                              TemplateLayer] + \
+                                              (Predictor, {'moduleColor':input_color,
+                                                           'moduleFringe':input_fringe}),
+                                              (PredictorListFile, {'moduleColor':input_color,
+                                                           'moduleFringe':input_fringe}),
+                                              (FieldData, {'moduleColor':input_color,
+                                                           'moduleFringe':input_fringe}),
+                                              (TemplateLayer, {'moduleColor':input_color,
+                                                           'moduleFringe':input_fringe}),] + \
                                               build_predictor_modules(),
                                 'Tools': [FieldDataQuery,
                                           FieldDataAggregateAndWeight,
@@ -1810,11 +1828,16 @@ _modules = generate_namespaces({'DataInput': [
                                           TestTrainingSplit,
                                           CovariateCorrelationAndSelection,
                                           ApplyModel],                                          
-                                'Models': [GLM,
-                                           RandomForest,
-                                           MARS,
-                                           MAXENT,
-                                           BoostedRegressionTree],
+                                'Models': [(GLM, {'moduleColor':model_color,
+                                                           'moduleFringe':model_fringe}),
+                                           (RandomForest, {'moduleColor':model_color,
+                                                           'moduleFringe':model_fringe}),
+                                           (MARS, {'moduleColor':model_color,
+                                                           'moduleFringe':model_fringe}),
+                                           (MAXENT, {'moduleColor':model_color,
+                                                           'moduleFringe':model_fringe}),
+                                           (BoostedRegressionTree, {'moduleColor':model_color,
+                                                           'moduleFringe':model_fringe}),],
                                 'Other':  [(Model, {'abstract': True}),
                                            (ResampleMethod, {'abstract': True}),
                                            (AggregationMethod, {'abstract': True}),
@@ -1822,8 +1845,10 @@ _modules = generate_namespaces({'DataInput': [
                                            (MergedDataSet, {'abstract': True}),
                                            (ResponseType, {'abstract': True}),
                                            (RastersWithPARCInfoCSV, {'abstract': True})],
-                                'Output': [SAHMModelOutputViewerCell,
-                                          SAHMSpatialOutputViewerCell,
+                                'Output': [(SAHMModelOutputViewerCell, {'moduleColor':output_color,
+                                                           'moduleFringe':output_fringe}),
+                                          (SAHMSpatialOutputViewerCell, {'moduleColor':output_color,
+                                                           'moduleFringe':output_fringe})
                                           ]
 #                                           ClimateModel,
 #                                           ClimateScenario,
