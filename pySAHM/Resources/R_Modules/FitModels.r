@@ -48,17 +48,18 @@ set.seed(out$input$seed)
                 while(file.access(outfile)==0) outfile<-paste(bname<-paste(out$input$output.dir,paste("/",Model,"_",sep=""),n<-n+1,sep=""),"_output.txt",sep="")
                 capture.output(paste(toupper(Model),"Results"),file=outfile) # reserve the new basename #
                 } else bname<-paste(out$input$output.dir,paste("/",Model,sep=""),sep="")
-                out$dat$bname <- bname
+
+
              if(!debug.mode) {logname <- file(paste(bname,"_log.txt",sep=""), open="wt")
                              sink(logname)
                              sink(logname, type="message")
              } else logname<-NULL
-             
+
    #Load Libraries
               chk.libs(Model)
    #Read in data, perform several checks and store all of the information in the out list
              out <- read.ma(out)
-
+              out$dat$bname <- bname
    #writing out the header info to the CSV so in case of a break we know what broke
              out<-place.save(out)
      ############################# READ.MA ########################
