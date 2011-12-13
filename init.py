@@ -1318,32 +1318,42 @@ class CovariateCorrelationAndSelection(Module):
     the "OK" button is selected and processing will resume in the VisTrails workflow.
 
     '''
-    kwargs = {}
-    kwargs['defaults'] = str(['initial'])
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
-                    ('selectionName', '(edu.utah.sci.vistrails.basic:String)', kwargs),
-                    ('ShowGUI', '(edu.utah.sci.vistrails.basic:Boolean)')]
+                    ('selectionName', '(edu.utah.sci.vistrails.basic:String)', {'defaults':str(['initial'])}),
+                    ('ShowGUI', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True'])})]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
 
     def compute(self):
         writetolog("\nOpening Select Predictors Layers widget", True)
-        inputMDS = utils.dir_path_value(self.forceGetInputFromPort('inputMDS'))
-        selectionName = self.forceGetInputFromPort('selectionName', 'initial')
-        utils.mknextfile(prefix='PredictorCorrelation_' + selectionName + "_", suffix='.jpg')
         
+        port_map = {'inputMDS': ('inputMDS', None, True),
+                    'selectionName': ('selectionName', None, True),
+                    'ShowGUI': ('ShowGUI', None, True),}
+        
+        params = utils.map_ports(self, port_map)
+
         global session_dir
-        outputMDS = os.path.join(session_dir, "CovariateCorrelationOutputMDS_" + selectionName + ".csv")
+        outputMDS = os.path.join(session_dir, "CovariateCorrelationOutputMDS_" + params['selectionName'] + ".csv")
         displayJPEG = os.path.join(session_dir, "CovariateCorrelationDisplay.jpg")
-        writetolog("    inputMDS = " + inputMDS, False, False)
+        writetolog("    inputMDS = " + params['inputMDS'], False, False)
         writetolog("    displayJPEG = " + displayJPEG, False, False)
         writetolog("    outputMDS = " + outputMDS, False, False)
         
-        if os.path.exists(outputMDS):
-            utils.applyMDS_selection(outputMDS, inputMDS)
+        if os.path.exists(outputMDS) and params['ShowGUI']:
+            utils.applyMDS_selection(outputMDS, params['inputMDS'])
             os.remove(outputMDS)
+            self.callDisplayMDS(params['inputMDS'], outputMDS, displayJPEG)
+        elif os.path.exists(outputMDS) and not params['ShowGUI']:
+            utils.applyMDS_selection(outputMDS, params['inputMDS'])
+            os.remove(outputMDS)
+            shutil.copy2(params['inputMDS'], outputMDS)
+            writetolog("    Applying previous selection but not showing GUI", False, True)
+        elif not os.path.exists(outputMDS) and not params['ShowGUI']:
+            raise ModuleError(self, "Show GUI deselected but no previous output detected.\n\nCan not continue!")
+        else:
+            self.callDisplayMDS(params['inputMDS'], outputMDS, displayJPEG)
+                    
         
-        self.callDisplayMDS(inputMDS, outputMDS, displayJPEG)
-
         output_file = utils.create_file_module(outputMDS)
         writetolog("Finished Select Predictors Layers widget", True)
         self.setResult("outputMDS", output_file)
@@ -1825,21 +1835,39 @@ def build_predictor_modules():
                        '_input_ports': \
                            [('value',
                              '(gov.usgs.sahm:%s:DataInput)' % class_name, True)]})
-        
-        modules.append((module, {'configureWidgetType': config_class}))
+        modules.append((module, {'configureWidgetType': config_class, 
+                                 'moduleColor':input_color,
+                                 'moduleFringe':input_fringe}))
         for module in modules:
             module[0]._output_ports.append(('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True))
             
     return modules
 
 
- 
+input_color = (0.76, 0.76, 0.8)
+input_fringe = [(0.0, 0.0),
+                    (0.25, 0.0),
+                    (0.0, 1.0)]
+  
+model_color = (0.76, 0.8, 0.76)
+model_fringe = [(0.0, 0.0),
+                    (0.25, 0.5),
+                    (0.0, 1.0)] 
+
+output_color = (0.8, 0.8, 0.76)
+output_fringe = [(0.0, 0.0),
+                    (0.25, 0.0),
+                    (0.0, 1.0)]
 
 _modules = generate_namespaces({'DataInput': [
-                                              Predictor,
-                                              PredictorListFile,
-                                              FieldData,
-                                              TemplateLayer] + \
+                                              (Predictor, {'moduleColor':input_color,
+                                                           'moduleFringe':input_fringe}),
+                                              (PredictorListFile, {'moduleColor':input_color,
+                                                           'moduleFringe':input_fringe}),
+                                              (FieldData, {'moduleColor':input_color,
+                                                           'moduleFringe':input_fringe}),
+                                              (TemplateLayer, {'moduleColor':input_color,
+                                                           'moduleFringe':input_fringe}),] + \
                                               build_predictor_modules(),
                                 'Tools': [FieldDataQuery,
                                           FieldDataAggregateAndWeight,
@@ -1852,11 +1880,16 @@ _modules = generate_namespaces({'DataInput': [
                                           ModelSelectionCrossValidation,
                                           CovariateCorrelationAndSelection,
                                           ApplyModel],                                          
-                                'Models': [GLM,
-                                           RandomForest,
-                                           MARS,
-                                           MAXENT,
-                                           BoostedRegressionTree],
+                                'Models': [(GLM, {'moduleColor':model_color,
+                                                           'moduleFringe':model_fringe}),
+                                           (RandomForest, {'moduleColor':model_color,
+                                                           'moduleFringe':model_fringe}),
+                                           (MARS, {'moduleColor':model_color,
+                                                           'moduleFringe':model_fringe}),
+                                           (MAXENT, {'moduleColor':model_color,
+                                                           'moduleFringe':model_fringe}),
+                                           (BoostedRegressionTree, {'moduleColor':model_color,
+                                                           'moduleFringe':model_fringe}),],
                                 'Other':  [(Model, {'abstract': True}),
                                            (ResampleMethod, {'abstract': True}),
                                            (AggregationMethod, {'abstract': True}),
@@ -1864,8 +1897,10 @@ _modules = generate_namespaces({'DataInput': [
                                            (MergedDataSet, {'abstract': True}),
                                            (ResponseType, {'abstract': True}),
                                            (RastersWithPARCInfoCSV, {'abstract': True})],
-                                'Output': [SAHMModelOutputViewerCell,
-                                          SAHMSpatialOutputViewerCell,
+                                'Output': [(SAHMModelOutputViewerCell, {'moduleColor':output_color,
+                                                           'moduleFringe':output_fringe}),
+                                          (SAHMSpatialOutputViewerCell, {'moduleColor':output_color,
+                                                           'moduleFringe':output_fringe})
                                           ]
 #                                           ClimateModel,
 #                                           ClimateScenario,

@@ -407,9 +407,14 @@ class PARC:
             
             for param in allRasterParams:
                 params[param] = None
+                
             params["Error"] = []
+            
+            
             params["file_name"] = rasterFile
-
+            if not os.path.exists(rasterFile):
+                params["Error"].append("The input file (" + rasterFile + ") does not exist on the file system.")
+                return params
             
             # Get the PARC parameters from the rasterFile.
             dataset = gdal.Open(rasterFile, gdalconst.GA_ReadOnly)
@@ -502,7 +507,10 @@ class PARC:
             #print "We ran into problems extracting raster parameters from " + rasterFile
             params["Error"].append("Some untrapped error was encountered")
         finally:
-            del dataset
+            try:
+                del dataset
+            except NameError:
+                pass
             return params
 
     def transformPoint(self, x, y, from_srs, to_srs):
@@ -676,7 +684,9 @@ class PARC:
             else:
                 inputs.append(input_just_file)
                 
-            sourceParams = self.getRasterParams(inputFile)
+                
+            sourceParams = self.getRasterParams(inputFile)                
+                
             if len(sourceParams["Error"]) > 0:
                 strInputFileErrors += ("  " + os.path.split(inputFile)[1] + " had the following errors:\n" + 
                                     "    " + "\n    ".join(sourceParams["Error"])) + "\n"

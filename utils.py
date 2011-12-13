@@ -84,9 +84,13 @@ def mknextdir(prefix, directory=""):
     for f in files:
         if (f.startswith(prefix) and
             not os.path.isfile(f)):
-            f_seq = int(f.replace(prefix, ''))
-            if f_seq > seq:
-                seq = f_seq
+            try:
+                f_seq = int(f.replace(prefix, ''))
+                if f_seq > seq:
+                    seq = f_seq
+            except ValueError:
+                #someone has renamed a folder to a non-numeric string
+                pass
     seq += 1
     dirname = prefix + str(seq)
     os.mkdir(os.path.join(directory, dirname))
