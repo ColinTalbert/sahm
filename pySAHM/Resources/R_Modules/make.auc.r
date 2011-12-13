@@ -19,7 +19,7 @@ make.auc.plot.jpg<-function(out=out){
   #Residual surface of input data
 
   residual.smooth.fct<-resid.image(calc.dev(input.list$train$dat$response, input.list$train$pred, input.list$train$weight, family=out$input$model.family)$dev.cont,input.list$train$pred,
-          input.list$train$dat$response,input.list$train$XY$X,input.list$train$XY$Y,out$input$model.family,out$input$output.dir)
+          input.list$train$dat$response,input.list$train$XY$X,input.list$train$XY$Y,out$input$model.family,out$input$output.dir,out)
 
   train.mask<-seq(1:length(Stats))[names(Stats)=="train"]
 
@@ -50,14 +50,15 @@ make.auc.plot.jpg<-function(out=out){
               abline(h=0,lty=2)
               panel.smooth(log(Stats$train$auc.data$pred[Stats$train$auc.data$pred!=0]),
               (Stats$train$auc.data$pres.abs[Stats$train$auc.data$pred!=0]-Stats$train$auc.data$pred[Stats$train$auc.data$pred!=0]))
-
-              #this is the residual plot from glm but I don't think it will work for anything else
-              qqnorm(residuals(out$mods$final.mod),ylab="Std. deviance residuals")
-              qqline(residuals(out$mods$final.mod))
-               yl <- as.expression(substitute(sqrt(abs(YL)), list(YL = as.name("Std. Deviance Resid"))))
-              plot(log(Stats$train$auc.data$pred[Stats$train$auc.data$pred!=0]),
-                 sqrt((abs(residuals(out$mods$final.mod,type="deviance")[Stats$train$auc.data$pred!=0]))),
-                 xlab="Predicted Values (log Scale)",ylab=yl)
+               if(out$input$script.name!="rf"){
+                    #this is the residual plot from glm but I don't think it will work for anything else
+                    qqnorm(residuals(out$mods$final.mod),ylab="Std. deviance residuals")
+                    qqline(residuals(out$mods$final.mod))
+                     yl <- as.expression(substitute(sqrt(abs(YL)), list(YL = as.name("Std. Deviance Resid"))))
+                    plot(log(Stats$train$auc.data$pred[Stats$train$auc.data$pred!=0]),
+                       sqrt((abs(residuals(out$mods$final.mod,type="deviance")[Stats$train$auc.data$pred!=0]))),
+                       xlab="Predicted Values (log Scale)",ylab=yl)
+              }
             graphics.off()}
 
  ##################### CAPTURING TEXT OUTPUT #######################
@@ -75,16 +76,10 @@ make.auc.plot.jpg<-function(out=out){
         capture.stats(lst,file.name=paste(out$dat$bname,"_output.txt",sep=""),label=out$dat$split.type,family=out$input$model.family,opt.methods=out$input$opt.methods,out)
     }
 
-        ############# determining the file name for the output csv
-                       last.dir<-strsplit(out$input$output.dir,split="\\\\")
-                        parent<-sub(paste("\\\\",last.dir[[1]][length(last.dir[[1]])],sep=""),"",out$input$output.dir)
-                         compile.out<-paste(parent,
-                              paste(switch(out$input$model.family,"binomial"="Binary","bernoulli"="Binary","poisson"="Count"),
-                                switch(out$dat$split.type,"test"="TestTrain","crossValidation"="CV","none"=""),
-                              "AppendedOutput.csv",sep=""),sep="/")
-
        ############ getting statistics along with appropriate names into a data frame for creating the appende output
-
+                        last.dir<-strsplit(out$input$output.dir,split="\\\\")
+                        parent<-sub(paste("\\\\",last.dir[[1]][length(last.dir[[1]])],sep=""),"",out$input$output.dir)
+                        
                        if(out$input$model.family%in%c("binomial","bernoulli")){
                            csv.stats<-lapply(Stats,function(lst){
                                return(c("","",lst$correlation,lst$pct.dev.exp,lst$Pcc,lst$Sens,lst$Specf))})
@@ -102,10 +97,10 @@ make.auc.plot.jpg<-function(out=out){
                         Header<-cbind(c("","Original Field Data","Field Data Template","PARC Output Folder","PARC Template","Covariate Selection Name",""),
                             c(last.dir[[1]][length(last.dir[[1]])],
                             out$dat$input$OrigFieldData,out$dat$input$FieldDataTemp,out$dat$input$ParcOutputFolder,
-                            out$dat$input$ParcTemplate,ifelse(length(out$dat$ma$input$CovSelectName)==0,"NONE",out$dat$ma$input$CovSelectName),""))
+                            out$dat$input$ParcTemplate,ifelse(length(out$dat$input$CovSelectName)==0,"NONE",out$dat$input$CovSelectName),""))
 
 
-AppendOut(compile.out,Header,x,out,Parm.Len=length(stat.names),parent=parent,split.type=out$dat$split.type)
+AppendOut(compile.out=out$input$Append.Dir,Header,x,out,Parm.Len=length(stat.names),parent=parent,split.type=out$dat$split.type)
 
     return(list(thresh=train.stats$train$thresh,residual.smooth.fct=residual.smooth.fct))
 }

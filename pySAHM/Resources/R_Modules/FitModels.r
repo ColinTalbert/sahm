@@ -41,29 +41,38 @@ set.seed(out$input$seed)
         options(warn=1)
     
         Model=script.name
-   #Load Libraries
-              chk.libs(Model)
-   #Read in data, perform several checks and store all of the information in the out list
-             out <- read.ma(out)
-     ############################# READ.MA ########################
 
-    # check output dir #
-              if(file.access(out$input$output.dir,mode=2)!=0) stop(paste("output directory",output.dir,"is not writable"))
-
-    # generate a filename for output #
+         # generate a filename for output #
               if(debug.mode==T){
                 outfile <- paste(bname<-paste(out$input$output.dir,paste("/",Model,"_",sep=""),n<-1,sep=""),"_output.txt",sep="")
                 while(file.access(outfile)==0) outfile<-paste(bname<-paste(out$input$output.dir,paste("/",Model,"_",sep=""),n<-n+1,sep=""),"_output.txt",sep="")
                 capture.output(paste(toupper(Model),"Results"),file=outfile) # reserve the new basename #
                 } else bname<-paste(out$input$output.dir,paste("/",Model,sep=""),sep="")
                 out$dat$bname <- bname
-             if(!debug.mode) {sink(logname <- paste(bname,"_log.txt",sep=""));on.exit(sink)} else logname<-NULL
+             if(!debug.mode) {logname <- file(paste(bname,"_log.txt",sep=""), open="wt")
+                             sink(logname)
+                             sink(logname, type="message")
+             } else logname<-NULL
+             
+   #Load Libraries
+              chk.libs(Model)
+   #Read in data, perform several checks and store all of the information in the out list
+             out <- read.ma(out)
+
+   #writing out the header info to the CSV so in case of a break we know what broke
+             out<-place.save(out)
+     ############################# READ.MA ########################
+
+    # check output dir #
+              if(file.access(out$input$output.dir,mode=2)!=0) stop(paste("output directory",output.dir,"is not writable"))
+
+
 
 
               cat("\nbegin processing of model array:",out$input$ma.name,"\n")
               cat("\nfile basename set to:",out$dat$bname,"\n")
               assign("out",out,envir=.GlobalEnv)
-              if(!debug.mode) {sink();cat("Progress:20%\n");flush.console();sink(logname,append=T)} else {cat("\n");cat("20%\n")}  ### print time
+              cat("Progress:20%\n");flush.console();
              cat("\n","Fitting",toupper(Model),"model","\n")
              flush.console()
           
@@ -99,7 +108,7 @@ set.seed(out$input$seed)
     #producing auc and residual plots model summary information and accross model evaluation metric
           out$mods$auc.output<-make.auc.plot.jpg(out=out)
 
-              if(!debug.mode) {sink();cat("Progress:70%\n");flush.console();sink(logname,append=T)} else cat("70%\n")
+              cat("Progress:70%\n");flush.console()
 
   # Response curves #
       response.curves(out,Model)
@@ -110,7 +119,7 @@ set.seed(out$input$seed)
    save.image(paste(output.dir,"modelWorkspace",sep="\\"))
           t4 <- unclass(Sys.time())
           cat("\nfinished with final model summarization, t=",round(t4-t3,2),"sec\n");flush.console()
-          if(!debug.mode) {sink();cat("Progress:80%\n");flush.console();sink(logname,append=T)} else cat("70%\n")
+         cat("Progress:80%\n");flush.console()
 
     # Make .tif of predictions #
     if(out$input$make.p.tif==T | out$input$make.binary.tif==T){
@@ -123,7 +132,7 @@ set.seed(out$input$seed)
                 tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=pred.fct,factor.levels=out$dat$ma$factor.levels,make.binary.tif=make.binary.tif,
                 thresh=out$mods$auc.output$thresh,make.p.tif=make.p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
                 outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50.0,NAval=-3000,
-                fnames=out$dat$tif.names,logname=logname,out=out,Model=Model)
+                fnames=out$dat$tif.names,out=out,Model=Model)
             }
 
             if(make.p.tif) out$mods$tif.output$prob <- paste(out$dat$bname,"_prob_map.tif",sep="")

@@ -1,6 +1,7 @@
 pred.fct<-function(model,x,Model){
 
   if(Model=="glm"){
+
           y <- as.vector(predict(model,x,type="response"))
 
           # encode missing values as -1.

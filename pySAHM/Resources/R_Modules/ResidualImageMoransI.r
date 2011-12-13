@@ -1,3 +1,9 @@
+#the following works but it seems the whole idea might not be worth pursuing see bivands posts
+  resid.dists <- as.matrix(dist(cbind(x,y)))
+     resid.dists.inv <- 1/resid.dists
+     diag(resid.dists.inv) <- 0
+     m<-Moran.I(z, resid.dists.inv)
+
 resid.image<-function(dev.contrib,pred,raw.dat,x,y,model.type,file.name,out){
    z<-sign(pred-raw.dat)*dev.contrib
               browser()

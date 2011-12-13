@@ -53,7 +53,7 @@ Args <- commandArgs(trailingOnly=FALSE)
 
 ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
-
+source(paste(ScriptPath,"BRT.helper.fcts.r",sep="\\"))
 
 alpha<-as.numeric(alpha)
 make.p.tif<-as.logical(make.p.tif)
@@ -62,16 +62,21 @@ prev.stratify<-as.logical(prev.stratify)
 save.model<-make.p.tif | make.binary.tif
 opt.methods<-as.numeric(opt.methods)
 MESS<-as.logical(MESS)
+tolerance=as.numeric(tolerance)
+bag.fraction<-as.numeric(bag.fraction)
+max.trees<-as.numeric(max.trees)
+n.folds<-as.numeric(n.folds)
+
 print(getwd())
 print(ScriptPath)
-    fit.brt.fct(ma.name=csv,
+    FitModels(ma.name=csv,
 		tif.dir=NULL,
 		output.dir=output,
 		response.col=responseCol,
 		make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
 		simp.method="cross-validation",debug.mode=F,responseCurveForm="pdf",tc=tc,n.folds=n.folds,alpha=alpha,script.name="brt",
 		learning.rate =learning.rate, bag.fraction = bag.fraction,prev.stratify = prev.stratify,max.trees = max.trees,seed=seed,
-    save.model=save.model,opt.methods=opt.methods,MESS=MESS)
+    save.model=save.model,opt.methods=opt.methods,MESS=MESS,tolerance.method = tolerance.method,tolerance=tolerance)
 
 
 
