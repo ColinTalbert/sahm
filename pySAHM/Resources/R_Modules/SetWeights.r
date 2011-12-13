@@ -1,10 +1,10 @@
-SetWeights<-function(input.file,output.file,response.col="ResponseBinary",method="KDE"){
+SetWeights<-function(input.file,output.file,response.col="ResponseBinary",method="Density"){
 
 #Description:
 #This function sets weights as a potential remedial measure when autocorrelation is found in the residuals of
 #the model fit based on the number of points in an area or weights can be set so that the total weight of absence points
-#is equal to the weight of presence.  The KDE options should never be used on presence only data with randomly selected
-#background points.  The problem with this functions is that there is no way that I can think of to optimize weights based on the KDE
+#is equal to the weight of presence.  The Density options should never be used on presence only data with randomly selected
+#background points.  The problem with this functions is that there is no way that I can think of to optimize weights based on the Density
 #I don't know how much near by points should be downweighted or how close constitutes near by as this would seem to depend on the species being
 #modeled and it's environment
 
@@ -25,8 +25,8 @@ SetWeights<-function(input.file,output.file,response.col="ResponseBinary",method
             response<-response[-c(which(response==-9999,arr.ind=TRUE))]
             bg.dat$site.weight=""
             }
-             browser()
-        if(method=="KDE") {
+
+        if(method=="Density") {
             if(is.na(match("spatstat",installed.packages()[,1]))) {
              install.packages("spatstat",repos="http://lib.stat.cmu.edu/R/CRAN")
             }
@@ -75,7 +75,7 @@ SetWeights<-function(input.file,output.file,response.col="ResponseBinary",method
 
   #assign default values
   responseCol="ResponseBinary"
-  method="KDE"
+  method="Density"
 
 
  #Reading in command line arguments

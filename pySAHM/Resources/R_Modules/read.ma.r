@@ -66,10 +66,13 @@
 
        # remove weight column except for Random Forest
        site.weights<-match("site.weights",tolower(names(ma)))
-        if(!is.na(site.weights)) rm.list<-c(rm.list,site.weights)
+        if(!is.na(site.weights)) {rm.list<-c(rm.list,site.weights)
+            if(Model=="rf") ma[,site.weights]<-rep(1,times=dim(ma)[1])
+        }
         else{ ma$weight=rep(1,times=dim(ma)[1])
           rm.list<-c(rm.list,ncol(ma))
         }
+
         # and index as well
        split.indx<-match("split",tolower(names(ma)))
         if(length(na.omit(split.indx))>0) rm.list<-c(rm.list,split.indx)
