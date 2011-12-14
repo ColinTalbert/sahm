@@ -34,7 +34,7 @@ import packages.sahm.pySAHM.MaxentRunner as MaxentRunner
 from packages.sahm.SahmOutputViewer import SAHMModelOutputViewerCell
 from packages.sahm.SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
 from packages.sahm.sahm_picklists import ResponseType, AggregationMethod, \
-        ResampleMethod
+        ResampleMethod, PointAggregationMethod
 
 from utils import writetolog
 from pySAHM.utilities import TrappedError
@@ -851,33 +851,45 @@ class FieldDataQuery(Module):
         else:
             return False
             
-    
+     
 class FieldDataAggregateAndWeight(Module):
     '''
     Documentation to be updated when module finalized.
     '''
     _input_ports = expand_ports([('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
-                                 ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')])
+                                 ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
+                                 ('PointAggregationOrWeightMethod', '(gov.usgs.sahm:PointAggregationMethod:Other)', {'defaults':str(['Collapse In Pixel'])})
+                                 ])
     _output_ports = expand_ports([('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')])
     
     def compute(self):
         writetolog("\nFieldDataAggregateAndWeight", True)
         port_map = {'templateLayer': ('template', None, True),
             'fieldData': ('csv', None, True),
-            'addKDE': ('addKDE', None, False),}
+            'PointAggregationOrWeightMethod': ('aggMethod', None, False),}
         
-        KDEParams = utils.map_ports(self, port_map)
+        FDAWParams = utils.map_ports(self, port_map)
         output_fname = utils.mknextfile(prefix='FDAW_', suffix='.csv')
         writetolog("    output_fname=" + output_fname, True, False)
-        KDEParams['output'] = output_fname
+        FDAWParams['output'] = output_fname
         
         output_fname = utils.mknextfile(prefix='FDAW_', suffix='.csv')
         writetolog("    output_fname=" + output_fname, True, False)
         
-        ourFDAW = FDAW.FieldDataQuery()
-        utils.PySAHM_instance_params(ourFDAW, KDEParams)
-            
-        ourFDAW.processCSV()
+        if FDAWParams['PointAggregationOrWeightMethod'] == 'Inverse Density' or \
+            FDAWParams['PointAggregationMethod'] == 'Total Presence=Total Absence':
+            args = "o=" + FDAWParams['output']
+            args += " i=" + FDAWParams['csv']
+            args += "rc=" + utils.MDSresponseCol(FDAWParams['csv'])
+            if FDAWParams['PointAggregatioOrWeightnMethod'] == 'Inverse Density':
+                args += "met=Density"
+            else:
+                args += "met=PresAbs"
+            utils.runRScript("SetWeights.r", args, self)
+        else:
+            ourFDAW = FDAW.FieldDataQuery()
+            utils.PySAHM_instance_params(ourFDAW, KDEParams) 
+            ourFDAW.processCSV()
         
         output_file = utils.create_file_module(output_fname)
         writetolog("Finished running FieldDataQuery", True)
@@ -1896,7 +1908,8 @@ _modules = generate_namespaces({'DataInput': [
                                            (PredictorList, {'abstract': True}),
                                            (MergedDataSet, {'abstract': True}),
                                            (ResponseType, {'abstract': True}),
-                                           (RastersWithPARCInfoCSV, {'abstract': True})],
+                                           (RastersWithPARCInfoCSV, {'abstract': True}),
+                                           (PointAggregationMethod, {'abstract': True}),],
                                 'Output': [(SAHMModelOutputViewerCell, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe}),
                                           (SAHMSpatialOutputViewerCell, {'moduleColor':output_color,
