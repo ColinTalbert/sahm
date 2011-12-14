@@ -1,6 +1,7 @@
 resid.image<-function(dev.contrib,pred,raw.dat,x,y,model.type,file.name,out){
- browser()
-   z<-sign(pred-raw.dat)*dev.contrib
+
+          #for some reason dev.contrib is negative for binomial and bernoulli and positive for poisson
+   z<-sign(pred-raw.dat)*abs(dev.contrib)
      MinCol<-min(z)
      MaxCol<-max(z)
 
@@ -12,7 +13,7 @@ resid.image<-function(dev.contrib,pred,raw.dat,x,y,model.type,file.name,out){
               x.lim<-seq(from=min(x),to=max(x),length=100)
               y.lim<-seq(from=min(y),to=max(y),length=100)
                  z<-matrix(data=z,ncol=100,nrow=100,byrow=TRUE)
-                  
+
                   
                  ########### Plot residual smooth with signed and sized residuals on top
               jpeg(file=paste(out$dat$bname,"resid.plot.jpg",sep="."))
