@@ -127,16 +127,18 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
   for (i in 1:tr$n) {
     strt <- c((i-1)*nrows,0)
      region.dims <- c(min(dims[1]-strt[1],nrows),dims[2])
+
         if (i==tr$n) if(is.null(dim(temp))) { temp <- temp[1:(tr$nrows[i]*dims[2])]
                                               if(MESS) pred.rng<-pred.rng[1:(tr$nrows[i]*dims[2])]
-        } else {temp <- temp[1:(tr$nrows[i]*dims[2]),]
+        } else {temp <- as.data.frame(temp[1:(tr$nrows[i]*dims[2]),])
                       if(MESS) pred.rng<-pred.rng[1:(tr$nrows[i]*dims[2]),]
                 }
-
+            if(i==tr$n) browser()
          # for the last tile...
       for(k in 1:nvars) { # fill temp data frame
             if(is.null(dim(temp))){
               temp<- getValuesBlock(raster(fullnames[k]), row=tr$row[i], nrows=tr$nrows[i])
+               temp<-as.data.frame(as.matrix(x=temp,nrow=(tr$nrows[i]*dims[2]),ncol=1))
             } else {temp[,k]<- getValuesBlock(raster(fullnames[k]), row=tr$row[i], nrows=tr$nrows[i])
                     }
                   if(MESS & !k%in%FactorInd){
@@ -145,7 +147,7 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
                         else pred.rng<-mapply(CalcMESS,tiff.entry=temp,MoreArgs=list(pred.vect=pred.range))
                          }
             }
-
+                if(length(vnames)==1) names(temp)=vnames
             if(MESS & length(FactorInd)>0) pred.rng<-pred.rng[,-c(FactorInd)]
     temp[temp==NAval] <- NA # replace missing values #
     temp[is.na(temp)]<-NA #this seemingly worthless line switches NaNs to NA so they aren't predicted
