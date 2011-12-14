@@ -67,9 +67,6 @@ set.seed(out$input$seed)
     # check output dir #
               if(file.access(out$input$output.dir,mode=2)!=0) stop(paste("output directory",output.dir,"is not writable"))
 
-
-
-
               cat("\nbegin processing of model array:",out$input$ma.name,"\n")
               cat("\nfile basename set to:",out$dat$bname,"\n")
               assign("out",out,envir=.GlobalEnv)

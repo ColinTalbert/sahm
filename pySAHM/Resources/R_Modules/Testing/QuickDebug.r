@@ -42,6 +42,7 @@ input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation\\modelS
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation\\modelSelection_cv_1.csv"
 input.file="I:/VisTrails/WorkingFiles/workspace/Test_CrossValidation2/CovariateCorrelationOutputMDS_no categorical2.csv"
 output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation3\\modelSelection_cv_1.csv"
 #######################################################################
 ##MARS
 FitModels(ma.name=input.file,
@@ -78,6 +79,8 @@ FitModels(ma.name=input.file,
   tolerance = 0.001,seed=NULL,opt.methods=2,
           simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
           learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=TRUE)
+
+#Now evaluating new data
 
 ##RF
 set.seed(1)
