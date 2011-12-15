@@ -12,7 +12,7 @@ source("MARS.helper.fcts.r")
 source("GLM.helper.fcts.r")
 source("BRT.helper.fcts.r")
 source("RF.helper.fcts.r")
-
+output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
 
 options(error=expression(if(interactive()) recover() else dump.calls()))
 options(error=NULL)
@@ -20,7 +20,7 @@ trace(proc.tiff,browser)
 
 list.files()
 #Testing Compile Output on data with no test train and with a test train
-output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
+
 rc="responseCount"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
 
@@ -43,13 +43,16 @@ input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation\\modelS
 input.file="I:/VisTrails/WorkingFiles/workspace/Test_CrossValidation2/CovariateCorrelationOutputMDS_no categorical2.csv"
 output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation3\\modelSelection_cv_1.csv"
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation4\\modelSelection_cv_1.csv"
 #######################################################################
 ##MARS
 FitModels(ma.name=input.file,
             tif.dir=NULL,output.dir=output.dir,
             response.col=rc,make.p.tif=T,make.binary.tif=T,
-            mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars",opt.methods=2,MESS=TRUE)
-            
+            mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars",opt.methods=2,MESS=T)
+
+EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,make.binary.tif=TRUE,make.p.tif=TRUE,MESS=TRUE)
+
 ##GLM
 FitModels(ma.name=input.file,
           tif.dir=NULL,
@@ -81,7 +84,12 @@ FitModels(ma.name=input.file,
           learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=TRUE)
 
 #Now evaluating new data
+EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,make.binary.tif=TRUE,make.p.tif=TRUE,MESS=TRUE)
+  logname<-NULL
+  sink(logname)
+  sink(logname, type="message")
 
+ PredictModel(workspace=,out.dir=output.dir)
 ##RF
 set.seed(1)
     fit.rf.fct(ma.name=input.file,

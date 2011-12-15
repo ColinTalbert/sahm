@@ -1,4 +1,4 @@
- read.ma <- function(out){
+ read.ma <- function(out,include=NULL,hl=NULL){
 
           ma.name <- out$input$ma.name
 
@@ -6,15 +6,17 @@
       if(file.access(ma.name,mode=0)!=0) stop(paste("input file supplied", ma.name, "does not exist",sep=" "))
 
           try(ma<-read.csv(ma.name,skip=2))
+          if(is.null(hl)){
           hl<-readLines(ma.name,1)
           hl=strsplit(hl,',')
+          }
           colnames(ma) = hl[[1]]
 
           tif.info<-readLines(ma.name,3)
           tif.info<-strsplit(tif.info,',')
           temp<-tif.info[[2]]
           temp[1:3]<-0
-          include<-as.numeric(temp)
+          if(is.null(include)) include<-as.numeric(temp)
 
           paths<-as.character(tif.info[[3]])
 

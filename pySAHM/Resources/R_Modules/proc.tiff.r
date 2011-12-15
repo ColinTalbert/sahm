@@ -133,7 +133,7 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
         } else {temp <- as.data.frame(temp[1:(tr$nrows[i]*dims[2]),])
                       if(MESS) pred.rng<-pred.rng[1:(tr$nrows[i]*dims[2]),]
                 }
-           browser()
+
          # for the last tile...
       for(k in 1:nvars) { # fill temp data frame
             if(is.null(dim(temp))){

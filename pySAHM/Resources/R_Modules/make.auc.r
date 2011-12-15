@@ -8,7 +8,7 @@ make.auc.plot.jpg<-function(out=out){
  if(out$input$model.family!="poisson"){
             input.list$train$thresh<-out$dat$ma$train$thresh<- as.numeric(optimal.thresholds(data.frame(ID=1:nrow(input.list$train$dat),pres.abs=input.list$train$dat[,1],
                 pred=input.list$train$pred),opt.methods=out$input$opt.methods))[2]
-              if(out$dat$split.type=="test")  input.list$test$thresh<-out$dat$ma$test$thresh<-input.list$train$thresh
+              if(out$dat$split.type%in%c("test","eval"))  input.list$test$thresh<-out$dat$ma$test$thresh<-input.list$train$thresh
             }
             else input.list$train$thresh=NULL
 
@@ -18,14 +18,19 @@ make.auc.plot.jpg<-function(out=out){
 ########################## PLOTS ################################
   #Residual surface of input data
 
+  if(out$dat$split.type!="eval"){
   residual.smooth.fct<-resid.image(calc.dev(input.list$train$dat$response, input.list$train$pred, input.list$train$weight, family=out$input$model.family)$dev.cont,input.list$train$pred,
-          input.list$train$dat$response,input.list$train$XY$X,input.list$train$XY$Y,out$input$model.family,out$input$output.dir,out)
-
+          input.list$train$dat$response,input.list$train$XY$X,input.list$train$XY$Y,out$input$model.family,out$input$output.dir,label=out$dat$split.type,out)
+      }
+  else{
+       residual.smooth.fct<-resid.image(calc.dev(input.list$test$dat$response, input.list$test$pred, input.list$test$weight, family=out$input$model.family)$dev.cont,input.list$test$pred,
+          input.list$test$dat$response,input.list$test$XY$X,input.list$test$XY$Y,out$input$model.family,out$input$output.dir,label=out$dat$split.type,out)
+       }
   train.mask<-seq(1:length(Stats))[names(Stats)=="train"]
 
 ## breaking of the non-train split must be done separately because list structure is different for the test only and cv
     lst<-list()
-    if(out$dat$split.type=="test")
+    if(out$dat$split.type%in%c("test","eval"))
       lst$Test<-Stats[[-c(train.mask)]]
     if(out$dat$split.type=="crossValidation") lst<-Stats[-c(train.mask)]
 
@@ -76,7 +81,8 @@ make.auc.plot.jpg<-function(out=out){
         capture.stats(lst,file.name=paste(out$dat$bname,"_output.txt",sep=""),label=out$dat$split.type,family=out$input$model.family,opt.methods=out$input$opt.methods,out)
     }
 
-       ############ getting statistics along with appropriate names into a data frame for creating the appende output
+   if(out$dat$split.type!="eval"){
+        ############ getting statistics along with appropriate names into a data frame for creating the appended output
                         last.dir<-strsplit(out$input$output.dir,split="\\\\")
                         parent<-sub(paste("\\\\",last.dir[[1]][length(last.dir[[1]])],sep=""),"",out$input$output.dir)
                         
@@ -99,9 +105,8 @@ make.auc.plot.jpg<-function(out=out){
                             out$dat$input$OrigFieldData,out$dat$input$FieldDataTemp,out$dat$input$ParcOutputFolder,
                             out$dat$input$ParcTemplate,ifelse(length(out$dat$input$CovSelectName)==0,"NONE",out$dat$input$CovSelectName),""))
 
-
-AppendOut(compile.out=out$input$Append.Dir,Header,x,out,Parm.Len=length(stat.names),parent=parent,split.type=out$dat$split.type)
-
+                      AppendOut(compile.out=out$input$Append.Dir,Header,x,out,Parm.Len=length(stat.names),parent=parent,split.type=out$dat$split.type)
+               }
     return(list(thresh=train.stats$train$thresh,residual.smooth.fct=residual.smooth.fct))
 }
 

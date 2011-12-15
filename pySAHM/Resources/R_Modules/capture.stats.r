@@ -1,4 +1,5 @@
 capture.stats<-function(Stats.lst,file.name,label,family,opt.methods,out){
+if(label=="eval") label="Final evaluation"
 
 capture.output(cat(" applied to",label, "split:\n",sep=" "),
                         file=file.name,append=TRUE)
@@ -47,7 +48,7 @@ capture.output(cat(" applied to",label, "split:\n",sep=" "),
                                 signif(sd(unlist(lapply(Stats.lst,function(lst){lst$thresh}))),digits=5),")",sep="")
                                 },
                                 "\n\n\t Confusion Matrix: \n\n"),
-                                if(label%in%c("train","test")) print.table(Stats.lst[[1]]$Cmx)
+                                if(label%in%c("train","test","Final evaluation")) print.table(Stats.lst[[1]]$Cmx)
                                 else{
                                   a<-lapply(Stats.lst,function(lst){lst$Cmx})
                                   cmx<-a[[1]]
