@@ -1,4 +1,4 @@
-SetWeights<-function(input.file,output.file,response.col="ResponseBinary",method="Density"){
+SetWeights<-function(input.file,output.file,response.col="ResponseBinary",method="Density",sigma.sd=NULL){
 
 #Description:
 #This function sets weights as a potential remedial measure when autocorrelation is found in the residuals of
@@ -10,6 +10,9 @@ SetWeights<-function(input.file,output.file,response.col="ResponseBinary",method
 
 #Written by Marian Talbert 12/7/2011
 
+         #strip the directory out of the output file and replace with the weights.map (name of the map produced)
+       last.dir<-strsplit(output.file,split="\\\\")
+       plot.name<-paste(sub(paste("\\\\",last.dir[[1]][length(last.dir[[1]])],sep=""),"",output.file),"weights.map.jpg",sep="\\")
    #Read input data and remove any columns to be excluded
           dat.in<-read.csv(input.file,header=FALSE,as.is=TRUE)
           dat<-as.data.frame(dat.in[4:dim(dat.in)[1],])
@@ -23,7 +26,7 @@ SetWeights<-function(input.file,output.file,response.col="ResponseBinary",method
             dat<-dat[-c(which(response==-9999,arr.ind=TRUE)),]
             dat.in<-dat.in[-c(which(response==-9999,arr.ind=TRUE)+3),]
             response<-response[-c(which(response==-9999,arr.ind=TRUE))]
-            bg.dat$site.weight=""
+            bg.dat$Weights=""
             }
 
         if(method=="Density") {
@@ -37,9 +40,15 @@ SetWeights<-function(input.file,output.file,response.col="ResponseBinary",method
 
               # using just density causes problems for points in low density areas
               # I've taken the completely arbitrary step of setting weights equal to 1/sqrt(den+1)
-              den<-density.ppp(study.area,at="points",leaveoneout=FALSE)
+              den<-density.ppp(study.area,at="points",leaveoneout=TRUE,sigma=sigma.sd)
+                    im.dens<-density.ppp(study.area,leaveoneout=TRUE,sigma=sigma.sd)
+                    im.dens<-eval.im(1/sqrt(im.dens+1))
 
-            dat$site.weight<-1/sqrt(den+1)
+               jpeg(file=plot.name,width=1500,height=1500,pointsize=20)
+                    plot(im.dens,main=paste("Spatial weights with sigma = ",ifelse(is.null(sigma.sd),round(attr(den,"sigma")),sigma.sd)))
+                    points(study.area,cex=.8,pch=19)
+               dev.off()
+            dat$Weights<-1/sqrt(den+1)
 
                      }
 
@@ -47,11 +56,13 @@ SetWeights<-function(input.file,output.file,response.col="ResponseBinary",method
             response<-as.numeric(response)
                     PresAbsTab<-table(response)
                     if(length(PresAbsTab)!=2) stop("PresAbs option is only available for binary data")
+                    if(PresAbsTab[1]<PresAbsTab[2]) stop("PresAbs option is only available for oversampled absences")
                      #sum of presence weights equals sum of absence weights and total sum of weights is the same
                      #as if weights were equal to 1
-                     weight<-.5*sum(PresAbsTab)/PresAbsTab
-                      match(response,names(weight))
-                      dat$site.weight<-as.vector(weight[match(response,names(weight))])
+
+                     weight<-rep(1,times=length(response))
+                     weight[response==0]<-PresAbsTab[2]/PresAbsTab[1]
+                      dat$Weights<-weight
             }
 
 
@@ -59,8 +70,8 @@ SetWeights<-function(input.file,output.file,response.col="ResponseBinary",method
          #not all elements in a column are of the same type
 
            dat.in[,(dim(dat.in)[2]+1)]<-NA
-          dat.in[4:(dim(dat.in)[1]),(dim(dat.in)[2])]<-dat$site.weight
-          dat.in[c(1,3),(dim(dat.in)[2])]<-c("site.weight","")
+          dat.in[4:(dim(dat.in)[1]),(dim(dat.in)[2])]<-dat$Weights
+          dat.in[c(1,3),(dim(dat.in)[2])]<-c("Weights","")
           dat.in[2,(dim(dat.in)[2])]<-1
 
               if(dim(bg.dat)[1]!=0) {
@@ -76,7 +87,7 @@ SetWeights<-function(input.file,output.file,response.col="ResponseBinary",method
   #assign default values
   responseCol="ResponseBinary"
   method="Density"
-
+  sigma.sd=NULL
 
  #Reading in command line arguments
  Args <- commandArgs(T)
@@ -91,8 +102,10 @@ SetWeights<-function(input.file,output.file,response.col="ResponseBinary",method
     	if(argSplit[[1]][1]=="o") output.file <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="i") infil <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="sig") sigma.sd <- argSplit[[1]][2]
     }
+    if(!is.null(sigma.sd)) sigma.sd<-as.numeric(sigma.sd)
 
-	#Run SetWeights with these parameters
-	SetWeights(input.file=infil,output.file,response.col=responseCol,method=method)
+  #Run SetWeights with these parameters
+	SetWeights(input.file=infil,output.file,response.col=responseCol,method=method,sigma.sd=sigma.sd)
 
