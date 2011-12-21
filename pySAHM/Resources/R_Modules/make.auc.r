@@ -1,6 +1,7 @@
 make.auc.plot.jpg<-function(out=out){
 
   plotname<-paste(out$dat$bname,"_modelEvalPlot.jpg",sep="")
+  calib.plot<-paste(out$dat$bname,"_CalibrationPlot.jpg",sep="")
   modelname<-toupper(out$input$model)
   input.list<-out$dat$ma
 
@@ -34,17 +35,46 @@ make.auc.plot.jpg<-function(out=out){
       lst$Test<-Stats[[-c(train.mask)]]
     if(out$dat$split.type=="crossValidation") lst<-Stats[-c(train.mask)]
 
- #AUC plot for binomial data
+ #AUC and Calibration plot for binomial data
     if(out$input$model.family%in%c("binomial","bernoulli")){
-            jpeg(file=plotname)
+            jpeg(file=plotname,height=1000,width=1000,pointsize=20,quality=100)
             TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=input.list$train$thresh,add.legend=(length(Stats)==1),lwd=2)
             if(out$dat$split.type!="none") {
             #so here we have to extract a sublist and apply a function to the sublist but if it has length 2 the structure of the list changes when the sublist is extracted
-            TestTrainRocPlot(do.call("rbind",lapply(lst,function(lst){lst$auc.data})),add.roc=TRUE,line.type=2,color="red",add.legend=FALSE)
+           if(out$dat$split.type=="test"){ TestTrainRocPlot(do.call("rbind",lapply(lst,function(lst){lst$auc.data})),add.roc=TRUE,line.type=2,color="red",add.legend=FALSE)
                 legend(x=.5,y=.2,c("Training Split","Testing Split","Cross Validation Sets")[c(1,2*(length(Stats)==2),3*(length(Stats)>2))],lty=2,col=c("black","red"),lwd=2)
                 }
-            graphics.off()}
-
+             if(out$dat$split.type=="crossValidation"){
+                temp<-lapply(lst,function(lst){roc.plot.calculate(lst$auc.data)})
+                sens<-unlist(lapply(temp,function(temp){temp$sensitivity}))
+                specif<-1-unlist(lapply(temp,function(temp){temp$specificity}))
+                unique.spec<-sort(unique(specif))
+                for(i in 2:length(unique.spec)){
+                 segments(seq(from=unique.spec[i-1],to=unique.spec[i],length=100), rep(min(sens[specif>=unique.spec[i]]),times=100),
+                      x1 = seq(from=unique.spec[i-1],to=unique.spec[i],length=100), y1 = rep(max(sens[specif<=unique.spec[i]]),times=100),col="blue")
+                  TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=input.list$train$thresh,add.legend=(length(Stats)==1),lwd=2,add.roc=TRUE,line.type=1,col="red")
+                }
+              TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=input.list$train$thresh,add.legend=(length(Stats)==1),lwd=2,add.roc=TRUE,line.type=1,col="red")
+              points(1-Stats$train$Specf,Stats$train$Sens,pch=19,cex=2.5)
+              points(1-Stats$train$Specf,Stats$train$Sens,pch=19,cex=2,col="red")
+              text(x=(1.05-Stats$train$Specf),y=Stats$train$Sens-.03,label=round(Stats$train$thresh,digits=2),col="red")
+                legend(x=.5,y=.25,c("Training Split","Cross Validation Range"),lty=c(2,1),col=c("red","blue"),lwd=2)
+                }}
+                graphics.off()
+            #I'm pretty sure calibration plots should work for count data as well but I'm not quite ready to make a plot
+            jpeg(file=calib.plot,height=1000,width=1000,pointsize=20,quality=100)
+            a<-do.call("rbind",lapply(lst,function(lst){lst$auc.data}))
+            calibration.plot(a,main="Calibration Plot")
+            preds<-a$pred
+            obs<-a$pres.abs
+            pred <- preds + 1e-005
+            pred[pred >= 1] <- 0.99999
+            mod <- glm(obs ~ log((pred)/(1 - (pred))), family = binomial)
+             predseq<-data.frame("pred"=seq(from=0,to=1,length=100))
+             lines(predseq$pred,sort(predict(mod,newdata=predseq,type="response")))
+            rug(pred)
+            dev.off()
+            }
     #Some residual plots for poisson data
     if(out$input$model.family%in%c("poisson")){
             jpeg(file=plotname)
