@@ -2,11 +2,12 @@ SetWeights<-function(input.file,output.file,response.col="ResponseBinary",method
 
 #Description:
 #This function sets weights as a potential remedial measure when autocorrelation is found in the residuals of
-#the model fit based on the number of points in an area or weights can be set so that the total weight of absence points
+#the model fit based on the number of points in an area using a leave one out algorithm wiht a gaussian isotrophic kernel and optional argument
+#sigma (standard deviation of the kernel) or weights can be set so that the total weight of absence points
 #is equal to the weight of presence.  The Density options should never be used on presence only data with randomly selected
 #background points.  The problem with this functions is that there is no way that I can think of to optimize weights based on the Density
-#I don't know how much near by points should be downweighted or how close constitutes near by as this would seem to depend on the species being
-#modeled and it's environment
+#I don't know how much near by points should be downweighted or how close constitutes near as this would seem to depend on the species being
+#modeled and it's environment.  If the density method is selected, a map of the spatial weights is produced
 
 #Written by Marian Talbert 12/7/2011
 
@@ -46,9 +47,13 @@ SetWeights<-function(input.file,output.file,response.col="ResponseBinary",method
 
                jpeg(file=plot.name,width=1500,height=1500,pointsize=20)
                     plot(im.dens,main=paste("Spatial weights with sigma = ",ifelse(is.null(sigma.sd),round(attr(den,"sigma")),sigma.sd)))
-                    points(study.area,cex=.8,pch=19)
+                    colfun <- spatstat.options("image.colfun")
+                    color.list<-list(col = colfun(255))
+               dat$Weights<-1/sqrt(den+1)
+                    points(study.area,cex=1.5,col="gray17",pch=19)
+                    s1<-seq(from=0,to=1,length=255)
+                    points(study.area$x,study.area$y,col=color.list[[1]][apply(outer(dat$Weights,s1,">"),1,sum)],pch=19,cex=1.2)
                dev.off()
-            dat$Weights<-1/sqrt(den+1)
 
                      }
 
