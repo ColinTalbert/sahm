@@ -678,6 +678,12 @@ class PARC:
         for row in inputsCSV:
             inputFile = row[0]
             input_just_file = os.path.splitext(os.path.split(inputFile)[1])[0]
+            
+            if input_just_file == "hdr":
+                inputFile = os.path.split(inputFile)[0]
+                row[0] = inputFile
+                input_just_file = os.path.split(inputFile)[1]
+                
             if input_just_file in inputs:
                 strInputFileErrors += "\n  PARC not currently set up to handle identically named inputs."
                 strInputFileErrors += "\n\t" + input_just_file + " used multiple times"
@@ -693,7 +699,7 @@ class PARC:
             else:
                 pass
                 if not self.ignoreNonOverlap and not self.ImageCoversTemplate(sourceParams):
-                    strInputFileErrors += ("\n  Some part of the template image falls outside of " + os.path.split(inputFile)[1])
+                    strInputFileErrors += "\n  Some part of the template image falls outside of " + input_just_file
                     strInputFileErrors += "\n        template upper left  = (" + str(self.template_params["gWest"]) + ", " + str(self.template_params["gNorth"]) + ")"
                     strInputFileErrors += "\n        template lower right = (" + str(self.template_params["gEast"]) + ", " + str(self.template_params["gSouth"]) + ")"
                     strInputFileErrors += "\n        image    upper left  = (" + str(sourceParams["gWest"]) + ", " + str(sourceParams["gNorth"]) + ")"
