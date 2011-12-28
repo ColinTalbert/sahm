@@ -248,12 +248,12 @@ class PARC:
                         sourceParams, self.template_params,
                         source[3], numSourcePerTarget)
             
+            self.writetolog("   Finished Aggregating: " + shortName)
             try:
                 os.remove(tmpOutput2)
             except WindowsError:
                 pass
             
-    
     def getTemplateSRSCellSize(self, sourceParams):
         """
         Calculate what size our source image pixels would be in the template SRS
@@ -299,6 +299,8 @@ class PARC:
         
         
     def Aggregate(self, inFile, outFile, sourceParams, templateParams, method=None, numSourcePerTarget=10):
+       
+        
         sourceDs = gdal.Open(inFile, gdalconst.GA_ReadOnly)
         sourceBand  = sourceDs.GetRasterBand(1)
         
@@ -316,6 +318,7 @@ class PARC:
         pcntDone = 0.0
         if self.verbose:
             print "    % Done:    0.0",
+            
             
         while row < templateParams["width"]:
             while col < templateParams["height"]:
@@ -374,6 +377,7 @@ class PARC:
                         print str(pcntDone),
                     else:
                         print ".",
+        
         if self.verbose:
             print "Done"
 #        if self.verbose:
@@ -387,7 +391,8 @@ class PARC:
 #            print "    Finished Saving ", self.shortName
         
         dst_ds = None
-        tmpOutDataset=None
+        tmpOutDataset = None
+        
         
     def getRasterParams(self, rasterFile):
         """

@@ -50,6 +50,11 @@ def main(argv):
     ourFDQ.processCSV()
     
 class FieldDataQuery(object):
+#['Collapse In Pixel', 
+#                                       'Weight Per Pixel', 
+#                                       'Inverse Density', 
+#                                       'Total Presence = Total Absence']
+
 
     def __init__(self):
         #instance level variables
@@ -57,7 +62,7 @@ class FieldDataQuery(object):
         self.template = None
         self.output = None
         self.templateParams = {}
-        self.AggByPixel = True
+        self.aggMethod = 'Collapse In Pixel'
         self.verbose = False
         self.countdata = False
         self.logger = None
@@ -174,10 +179,14 @@ class FieldDataQuery(object):
         #Commented this out because it is causing an error
         #to be thrown by the java, uncomment out when the 
         #java has been replaced
-        header.append("frequency")
-        header.append("numPresence")
-        header.append("pixelColumn")
-        header.append("pixelRow")
+        if self.aggMethod == 'Collapse In Pixel':
+            header.append("frequency")
+            header.append("numPresence")
+            header.append("pixelColumn")
+            header.append("pixelRow")
+        else:
+            header.append("site.weight")
+            
         header.append(os.path.abspath(self.template))
         header.append(os.path.abspath(self.csv))
     

@@ -62,8 +62,10 @@ def menu_items():
     
     def select_test_final_model():
         global session_dir
+        
         csv_file = r"I:\VisTrails\WorkingFiles\workspace\Test_CrossValidation2\BinaryCVAppendedOutput.csv"
-        displayJPEG = r"I:\VisTrails\WorkingFiles\workspace\Test_CrossValidation2\CovariateCorrelationDisplay.jpg"
+        displayJPEG = os.path.join(sessioni_dir, "BinaryCVAppendedOutput.csv")
+        r"I:\VisTrails\WorkingFiles\workspace\Test_CrossValidation2\CovariateCorrelationDisplay.jpg"
         STFM  = SelectAndTestFinalModel(csv_file, displayJPEG, configuration.r_path)
         #dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
 #        print " ... finished with dialog "  
@@ -866,7 +868,7 @@ class FieldDataAggregateAndWeight(Module):
         writetolog("\nFieldDataAggregateAndWeight", True)
         port_map = {'templateLayer': ('template', None, True),
             'fieldData': ('csv', None, True),
-            'PointAggregationOrWeightMethod': ('aggMethod', None, False),}
+            'PointAggregationOrWeightMethod': ('aggMethod', None, True),}
         
         FDAWParams = utils.map_ports(self, port_map)
         output_fname = utils.mknextfile(prefix='FDAW_', suffix='.csv')
@@ -876,19 +878,19 @@ class FieldDataAggregateAndWeight(Module):
         output_fname = utils.mknextfile(prefix='FDAW_', suffix='.csv')
         writetolog("    output_fname=" + output_fname, True, False)
         
-        if FDAWParams['PointAggregationOrWeightMethod'] == 'Inverse Density' or \
-            FDAWParams['PointAggregationMethod'] == 'Total Presence=Total Absence':
+        if FDAWParams['aggMethod'] == 'Inverse Density' or \
+            FDAWParams['aggMethod'] == 'Total Presence=Total Absence':
             args = "o=" + FDAWParams['output']
             args += " i=" + FDAWParams['csv']
-            args += "rc=" + utils.MDSresponseCol(FDAWParams['csv'])
-            if FDAWParams['PointAggregatioOrWeightnMethod'] == 'Inverse Density':
-                args += "met=Density"
+            args += " rc=" + utils.MDSresponseCol(FDAWParams['csv'])
+            if FDAWParams['aggMethod'] == 'Inverse Density':
+                args += " met=Density"
             else:
-                args += "met=PresAbs"
+                args += " met=PresAbs"
             utils.runRScript("SetWeights.r", args, self)
         else:
             ourFDAW = FDAW.FieldDataQuery()
-            utils.PySAHM_instance_params(ourFDAW, KDEParams) 
+            utils.PySAHM_instance_params(ourFDAW, FDAWParams) 
             ourFDAW.processCSV()
         
         output_file = utils.create_file_module(output_fname)
