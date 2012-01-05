@@ -85,12 +85,11 @@ def main(args_in):
         ourPARC.template_params['width'] = int(options.width)
     
     ourPARC.parcFile([options.source, options.categorical, options.resampling, options.aggregation], options.dest)
+
     
 if __name__ == "__main__":
+
     main(sys.argv[1:])
-#    try:
-##        PARC().testing()
-#        sys.exit(PARC().main(sys.argv[1:]))
-#    except Exception as e:
-#        print e
-#        sys.exit(1)
+
+    
+

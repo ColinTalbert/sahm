@@ -22,6 +22,7 @@ from PyQt4 import QtCore, QtGui
 from widgets import get_predictor_widget, get_predictor_config
 
 from SelectPredictorsLayers import SelectListDialog
+from SelectAndTestFinalModel import SelectAndTestFinalModel
 
 import utils
 #import our python SAHM Processing files
@@ -33,7 +34,7 @@ import packages.sahm.pySAHM.MaxentRunner as MaxentRunner
 from packages.sahm.SahmOutputViewer import SAHMModelOutputViewerCell
 from packages.sahm.SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
 from packages.sahm.sahm_picklists import ResponseType, AggregationMethod, \
-        ResampleMethod
+        ResampleMethod, PointAggregationMethod
 
 from utils import writetolog
 from pySAHM.utilities import TrappedError
@@ -62,6 +63,16 @@ def menu_items():
     def select_test_final_model():
         global session_dir
         
+        csv_file = r"I:\VisTrails\WorkingFiles\workspace\Test_CrossValidation2\BinaryCVAppendedOutput.csv"
+        displayJPEG = os.path.join(session_dir, "BinaryCVAppendedOutput.csv")
+        r"I:\VisTrails\WorkingFiles\workspace\Test_CrossValidation2\CovariateCorrelationDisplay.jpg"
+        STFM  = SelectAndTestFinalModel(csv_file, displayJPEG, configuration.r_path)
+        #dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
+#        print " ... finished with dialog "  
+        retVal = STFM.exec_()
+        #outputPredictorList = dialog.outputList
+        if retVal == 1:
+            raise ModuleError(self, "Cancel or Close selected (not OK) workflow halted.")
     
     lst = []
     lst.append(("Change session folder", change_session_folder))
@@ -842,33 +853,45 @@ class FieldDataQuery(Module):
         else:
             return False
             
-    
+     
 class FieldDataAggregateAndWeight(Module):
     '''
     Documentation to be updated when module finalized.
     '''
     _input_ports = expand_ports([('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
-                                 ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')])
+                                 ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
+                                 ('PointAggregationOrWeightMethod', '(gov.usgs.sahm:PointAggregationMethod:Other)', {'defaults':str(['Collapse In Pixel'])})
+                                 ])
     _output_ports = expand_ports([('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')])
     
     def compute(self):
         writetolog("\nFieldDataAggregateAndWeight", True)
         port_map = {'templateLayer': ('template', None, True),
             'fieldData': ('csv', None, True),
-            'addKDE': ('addKDE', None, False),}
+            'PointAggregationOrWeightMethod': ('aggMethod', None, True),}
         
-        KDEParams = utils.map_ports(self, port_map)
+        FDAWParams = utils.map_ports(self, port_map)
         output_fname = utils.mknextfile(prefix='FDAW_', suffix='.csv')
         writetolog("    output_fname=" + output_fname, True, False)
-        KDEParams['output'] = output_fname
+        FDAWParams['output'] = output_fname
         
         output_fname = utils.mknextfile(prefix='FDAW_', suffix='.csv')
         writetolog("    output_fname=" + output_fname, True, False)
         
-        ourFDAW = FDAW.FieldDataQuery()
-        utils.PySAHM_instance_params(ourFDAW, KDEParams)
-            
-        ourFDAW.processCSV()
+        if FDAWParams['aggMethod'] == 'Inverse Density' or \
+            FDAWParams['aggMethod'] == 'Total Presence=Total Absence':
+            args = "o=" + FDAWParams['output']
+            args += " i=" + FDAWParams['csv']
+            args += " rc=" + utils.MDSresponseCol(FDAWParams['csv'])
+            if FDAWParams['aggMethod'] == 'Inverse Density':
+                args += " met=Density"
+            else:
+                args += " met=PresAbs"
+            utils.runRScript("SetWeights.r", args, self)
+        else:
+            ourFDAW = FDAW.FieldDataQuery()
+            utils.PySAHM_instance_params(ourFDAW, FDAWParams) 
+            ourFDAW.processCSV()
         
         output_file = utils.create_file_module(output_fname)
         writetolog("Finished running FieldDataQuery", True)
@@ -1309,32 +1332,42 @@ class CovariateCorrelationAndSelection(Module):
     the "OK" button is selected and processing will resume in the VisTrails workflow.
 
     '''
-    kwargs = {}
-    kwargs['defaults'] = str(['initial'])
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
-                    ('selectionName', '(edu.utah.sci.vistrails.basic:String)', kwargs),
-                    ('ShowGUI', '(edu.utah.sci.vistrails.basic:Boolean)')]
+                    ('selectionName', '(edu.utah.sci.vistrails.basic:String)', {'defaults':str(['initial'])}),
+                    ('ShowGUI', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True'])})]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
 
     def compute(self):
         writetolog("\nOpening Select Predictors Layers widget", True)
-        inputMDS = utils.dir_path_value(self.forceGetInputFromPort('inputMDS'))
-        selectionName = self.forceGetInputFromPort('selectionName', 'initial')
-        utils.mknextfile(prefix='PredictorCorrelation_' + selectionName + "_", suffix='.jpg')
         
+        port_map = {'inputMDS': ('inputMDS', None, True),
+                    'selectionName': ('selectionName', None, True),
+                    'ShowGUI': ('ShowGUI', None, True),}
+        
+        params = utils.map_ports(self, port_map)
+
         global session_dir
-        outputMDS = os.path.join(session_dir, "CovariateCorrelationOutputMDS_" + selectionName + ".csv")
+        outputMDS = os.path.join(session_dir, "CovariateCorrelationOutputMDS_" + params['selectionName'] + ".csv")
         displayJPEG = os.path.join(session_dir, "CovariateCorrelationDisplay.jpg")
-        writetolog("    inputMDS = " + inputMDS, False, False)
+        writetolog("    inputMDS = " + params['inputMDS'], False, False)
         writetolog("    displayJPEG = " + displayJPEG, False, False)
         writetolog("    outputMDS = " + outputMDS, False, False)
         
-        if os.path.exists(outputMDS):
-            utils.applyMDS_selection(outputMDS, inputMDS)
+        if os.path.exists(outputMDS) and params['ShowGUI']:
+            utils.applyMDS_selection(outputMDS, params['inputMDS'])
             os.remove(outputMDS)
+            self.callDisplayMDS(params['inputMDS'], outputMDS, displayJPEG)
+        elif os.path.exists(outputMDS) and not params['ShowGUI']:
+            utils.applyMDS_selection(outputMDS, params['inputMDS'])
+            os.remove(outputMDS)
+            shutil.copy2(params['inputMDS'], outputMDS)
+            writetolog("    Applying previous selection but not showing GUI", False, True)
+        elif not os.path.exists(outputMDS) and not params['ShowGUI']:
+            raise ModuleError(self, "Show GUI deselected but no previous output detected.\n\nCan not continue!")
+        else:
+            self.callDisplayMDS(params['inputMDS'], outputMDS, displayJPEG)
+                    
         
-        self.callDisplayMDS(inputMDS, outputMDS, displayJPEG)
-
         output_file = utils.create_file_module(outputMDS)
         writetolog("Finished Select Predictors Layers widget", True)
         self.setResult("outputMDS", output_file)
@@ -1474,7 +1507,7 @@ class ProjectionLayers(Module):
         workingCSV = utils.mknextfile(prefix='tmpFilesToPARC_', suffix='.csv')
         tmpCSV = csv.writer(open(workingCSV, 'wb'))
         tmpCSV.writerow(["FilePath", "Categorical", "Resampling", "Aggregation"])
-        outHeader1 = ['x', 'y', 'response']
+        outHeader1 = ['X', 'Y', 'response']
         outHeader2 = ['', '', '']
         outHeader3 = ['', '', '']
         
@@ -1816,21 +1849,39 @@ def build_predictor_modules():
                        '_input_ports': \
                            [('value',
                              '(gov.usgs.sahm:%s:DataInput)' % class_name, True)]})
-        
-        modules.append((module, {'configureWidgetType': config_class}))
+        modules.append((module, {'configureWidgetType': config_class, 
+                                 'moduleColor':input_color,
+                                 'moduleFringe':input_fringe}))
         for module in modules:
             module[0]._output_ports.append(('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True))
             
     return modules
 
 
- 
+input_color = (0.76, 0.76, 0.8)
+input_fringe = [(0.0, 0.0),
+                    (0.25, 0.0),
+                    (0.0, 1.0)]
+  
+model_color = (0.76, 0.8, 0.76)
+model_fringe = [(0.0, 0.0),
+                    (0.25, 0.5),
+                    (0.0, 1.0)] 
+
+output_color = (0.8, 0.8, 0.76)
+output_fringe = [(0.0, 0.0),
+                    (0.25, 0.0),
+                    (0.0, 1.0)]
 
 _modules = generate_namespaces({'DataInput': [
-                                              Predictor,
-                                              PredictorListFile,
-                                              FieldData,
-                                              TemplateLayer] + \
+                                              (Predictor, {'moduleColor':input_color,
+                                                           'moduleFringe':input_fringe}),
+                                              (PredictorListFile, {'moduleColor':input_color,
+                                                           'moduleFringe':input_fringe}),
+                                              (FieldData, {'moduleColor':input_color,
+                                                           'moduleFringe':input_fringe}),
+                                              (TemplateLayer, {'moduleColor':input_color,
+                                                           'moduleFringe':input_fringe}),] + \
                                               build_predictor_modules(),
                                 'Tools': [FieldDataQuery,
                                           FieldDataAggregateAndWeight,
@@ -1843,20 +1894,28 @@ _modules = generate_namespaces({'DataInput': [
                                           ModelSelectionCrossValidation,
                                           CovariateCorrelationAndSelection,
                                           ApplyModel],                                          
-                                'Models': [GLM,
-                                           RandomForest,
-                                           MARS,
-                                           MAXENT,
-                                           BoostedRegressionTree],
+                                'Models': [(GLM, {'moduleColor':model_color,
+                                                           'moduleFringe':model_fringe}),
+                                           (RandomForest, {'moduleColor':model_color,
+                                                           'moduleFringe':model_fringe}),
+                                           (MARS, {'moduleColor':model_color,
+                                                           'moduleFringe':model_fringe}),
+                                           (MAXENT, {'moduleColor':model_color,
+                                                           'moduleFringe':model_fringe}),
+                                           (BoostedRegressionTree, {'moduleColor':model_color,
+                                                           'moduleFringe':model_fringe}),],
                                 'Other':  [(Model, {'abstract': True}),
                                            (ResampleMethod, {'abstract': True}),
                                            (AggregationMethod, {'abstract': True}),
                                            (PredictorList, {'abstract': True}),
                                            (MergedDataSet, {'abstract': True}),
                                            (ResponseType, {'abstract': True}),
-                                           (RastersWithPARCInfoCSV, {'abstract': True})],
-                                'Output': [SAHMModelOutputViewerCell,
-                                          SAHMSpatialOutputViewerCell,
+                                           (RastersWithPARCInfoCSV, {'abstract': True}),
+                                           (PointAggregationMethod, {'abstract': True}),],
+                                'Output': [(SAHMModelOutputViewerCell, {'moduleColor':output_color,
+                                                           'moduleFringe':output_fringe}),
+                                          (SAHMSpatialOutputViewerCell, {'moduleColor':output_color,
+                                                           'moduleFringe':output_fringe})
                                           ]
 #                                           ClimateModel,
 #                                           ClimateScenario,

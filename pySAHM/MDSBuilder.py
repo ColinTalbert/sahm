@@ -133,6 +133,7 @@ class MDSBuilder(object):
             for row in outputRows:
                 x = float(row[0])
                 y = float(row[1])
+#                if 
                 # compute pixel offset
                 xOffset = int((x - xOrigin) / pixelWidth)
                 yOffset = int((y - yOrigin) / pixelHeight)
@@ -152,6 +153,9 @@ class MDSBuilder(object):
                     except:
                         badpoints.append(row[:3])
                         row.append(str(self.NDFlag))
+                        
+                if self.hasWeight:
+                    row.append(row)
                 
                 if self.verbose:
                     if i/float(len(outputRows)) > float(pcntDone)/100:
@@ -217,13 +221,20 @@ class MDSBuilder(object):
         
         field_data_CSV = csv.reader(open(self.fieldData, "r"))
         orig_header = field_data_CSV.next()
-        full_header = ["x", "y"]
+        full_header = ["X", "Y"]
         if orig_header[2].lower not in ["responsebinary", "responsecount"]:
             #inputs not conforming to our expected format will be assumed
             #to be binary data
             full_header.append("responseBinary")
         else:
             full_header.append(orig_header[2])
+        
+        if "weight" in orig_header:
+            full_header.append("weight")
+            self.hasWeight = True
+            self.weightCol = full_header.index("weight")
+        else:
+            self.hasWeight = False
         
         inputs_CSV = csv.reader(open(self.inputsCSV, "r"))
         inputs_header = inputs_CSV.next()
@@ -289,8 +300,15 @@ class MDSBuilder(object):
         fieldDataCSV = csv.reader(open(self.fieldData, "r"))
         origHeader = fieldDataCSV.next()
         points = []
+#        tmpRow = 
         for row in fieldDataCSV:
-            points.append(row[:3])
+            tmpRow = row[:3]
+            if self.hasWeight:
+                tmpRow.append(row[self.weightCol])
+            points.append(tmpRow)
+        
+       
+            
             
         del fieldDataCSV
         return points

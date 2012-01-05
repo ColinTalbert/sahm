@@ -248,12 +248,12 @@ class PARC:
                         sourceParams, self.template_params,
                         source[3], numSourcePerTarget)
             
+            self.writetolog("   Finished Aggregating: " + shortName)
             try:
                 os.remove(tmpOutput2)
             except WindowsError:
                 pass
             
-    
     def getTemplateSRSCellSize(self, sourceParams):
         """
         Calculate what size our source image pixels would be in the template SRS
@@ -299,6 +299,8 @@ class PARC:
         
         
     def Aggregate(self, inFile, outFile, sourceParams, templateParams, method=None, numSourcePerTarget=10):
+       
+        
         sourceDs = gdal.Open(inFile, gdalconst.GA_ReadOnly)
         sourceBand  = sourceDs.GetRasterBand(1)
         
@@ -316,6 +318,7 @@ class PARC:
         pcntDone = 0.0
         if self.verbose:
             print "    % Done:    0.0",
+            
             
         while row < templateParams["width"]:
             while col < templateParams["height"]:
@@ -374,6 +377,7 @@ class PARC:
                         print str(pcntDone),
                     else:
                         print ".",
+        
         if self.verbose:
             print "Done"
 #        if self.verbose:
@@ -387,7 +391,8 @@ class PARC:
 #            print "    Finished Saving ", self.shortName
         
         dst_ds = None
-        tmpOutDataset=None
+        tmpOutDataset = None
+        
         
     def getRasterParams(self, rasterFile):
         """
@@ -407,9 +412,14 @@ class PARC:
             
             for param in allRasterParams:
                 params[param] = None
+                
             params["Error"] = []
+            
+            
             params["file_name"] = rasterFile
-
+            if not os.path.exists(rasterFile):
+                params["Error"].append("The input file (" + rasterFile + ") does not exist on the file system.")
+                return params
             
             # Get the PARC parameters from the rasterFile.
             dataset = gdal.Open(rasterFile, gdalconst.GA_ReadOnly)
@@ -502,7 +512,10 @@ class PARC:
             #print "We ran into problems extracting raster parameters from " + rasterFile
             params["Error"].append("Some untrapped error was encountered")
         finally:
-            del dataset
+            try:
+                del dataset
+            except NameError:
+                pass
             return params
 
     def transformPoint(self, x, y, from_srs, to_srs):
@@ -670,20 +683,28 @@ class PARC:
         for row in inputsCSV:
             inputFile = row[0]
             input_just_file = os.path.splitext(os.path.split(inputFile)[1])[0]
+            
+            if input_just_file == "hdr":
+                inputFile = os.path.split(inputFile)[0]
+                row[0] = inputFile
+                input_just_file = os.path.split(inputFile)[1]
+                
             if input_just_file in inputs:
                 strInputFileErrors += "\n  PARC not currently set up to handle identically named inputs."
                 strInputFileErrors += "\n\t" + input_just_file + " used multiple times"
             else:
                 inputs.append(input_just_file)
                 
-            sourceParams = self.getRasterParams(inputFile)
+                
+            sourceParams = self.getRasterParams(inputFile)                
+                
             if len(sourceParams["Error"]) > 0:
                 strInputFileErrors += ("  " + os.path.split(inputFile)[1] + " had the following errors:\n" + 
                                     "    " + "\n    ".join(sourceParams["Error"])) + "\n"
             else:
                 pass
                 if not self.ignoreNonOverlap and not self.ImageCoversTemplate(sourceParams):
-                    strInputFileErrors += ("\n  Some part of the template image falls outside of " + os.path.split(inputFile)[1])
+                    strInputFileErrors += "\n  Some part of the template image falls outside of " + input_just_file
                     strInputFileErrors += "\n        template upper left  = (" + str(self.template_params["gWest"]) + ", " + str(self.template_params["gNorth"]) + ")"
                     strInputFileErrors += "\n        template lower right = (" + str(self.template_params["gEast"]) + ", " + str(self.template_params["gSouth"]) + ")"
                     strInputFileErrors += "\n        image    upper left  = (" + str(sourceParams["gWest"]) + ", " + str(sourceParams["gNorth"]) + ")"

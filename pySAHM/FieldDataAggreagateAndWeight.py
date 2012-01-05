@@ -50,6 +50,11 @@ def main(argv):
     ourFDQ.processCSV()
     
 class FieldDataQuery(object):
+#['Collapse In Pixel', 
+#                                       'Weight Per Pixel', 
+#                                       'Inverse Density', 
+#                                       'Total Presence = Total Absence']
+
 
     def __init__(self):
         #instance level variables
@@ -57,7 +62,7 @@ class FieldDataQuery(object):
         self.template = None
         self.output = None
         self.templateParams = {}
-        self.AggByPixel = True
+        self.aggMethod = 'Collapse In Pixel'
         self.verbose = False
         self.countdata = False
         self.logger = None
@@ -174,10 +179,14 @@ class FieldDataQuery(object):
         #Commented this out because it is causing an error
         #to be thrown by the java, uncomment out when the 
         #java has been replaced
-        header.append("frequency")
-        header.append("numPresence")
-        header.append("pixelColumn")
-        header.append("pixelRow")
+        if self.aggMethod == 'Collapse In Pixel':
+            header.append("frequency")
+            header.append("numPresence")
+            header.append("pixelColumn")
+            header.append("pixelRow")
+        else:
+            header.append("Weights")
+            
         header.append(os.path.abspath(self.template))
         header.append(os.path.abspath(self.csv))
     
@@ -229,54 +238,57 @@ class FieldDataQuery(object):
         fOut.writerow(header)
     
         #Add each used pixel to the output file
-        for k in usedPixels:
-            v = usedPixels[k]
-            outputLine = v[0]
-    
-            pixelColumn = int(k.rsplit(':')[1])
-            pixelRow = int(k.rsplit(':')[3])
-            outPixelX = (self.templateParams["ulx"] + (self.templateParams["xScale"] * pixelColumn) + 
-                                    self.templateParams["xScale"]/2)
-            outPixelY = (self.templateParams["uly"] + (self.templateParams["yScale"] * pixelRow) + 
-                                    self.templateParams["yScale"]/2)
-            frequency = len(v)
-    
-            #loop though the 'points' in each pixel
-            #for count data the value is the sum of the 'points'
-            #    if there were any 'hits' not equal to 0
-            #    otherwise if there were any absences the value is 0
-            #    what's left is background points
-            #for presense/absense data
-            #    The value is 1 if there were any 1s in our points
-            #    Or 0 if there were any zeros (absenses)
-            #    Otherwise it's a background pixel.
-            total = 0
-            numAbsense = 0
-            for i in range (frequency):
-                if int(float(v[i][2])) > 0:
-                    total += int(float(v[i][2]))
-                if int(float(v[i][2])) == 0:
-                    numAbsense += 1
-            
-            outputLine[0] = outPixelX
-            outputLine[1] = outPixelY
-            
-            if self.countdata and total > 0:
-                outputLine[2] = total
-            elif total > 0:
-                outputLine[2] = 1
-            elif numAbsense > 0:
-                outputLine[2] = 0
-            else:
-                outputLine[2] = -9999
+        for k, v in usedPixels.iteritems():
+            if self.aggMethod == 'Collapse In Pixel':
+                outputLine = v[0]
+                pixelColumn = int(k.rsplit(':')[1])
+                pixelRow = int(k.rsplit(':')[3])
+                outPixelX = (self.templateParams["ulx"] + (self.templateParams["xScale"] * pixelColumn) + 
+                                        self.templateParams["xScale"]/2)
+                outPixelY = (self.templateParams["uly"] + (self.templateParams["yScale"] * pixelRow) + 
+                                        self.templateParams["yScale"]/2)
+                frequency = len(v)
+        
+                #loop though the 'points' in each pixel
+                #for count data the value is the sum of the 'points'
+                #    if there were any 'hits' not equal to 0
+                #    otherwise if there were any absences the value is 0
+                #    what's left is background points
+                #for presense/absense data
+                #    The value is 1 if there were any 1s in our points
+                #    Or 0 if there were any zeros (absenses)
+                #    Otherwise it's a background pixel.
+                total = 0
+                numAbsense = 0
+                for i in range (frequency):
+                    if int(float(v[i][2])) > 0:
+                        total += int(float(v[i][2]))
+                    if int(float(v[i][2])) == 0:
+                        numAbsense += 1
                 
-            outputLine.append(frequency)
-            outputLine.append(total)
-            outputLine.append(pixelColumn)
-            outputLine.append(pixelRow)
-            
+                outputLine[0] = outPixelX
+                outputLine[1] = outPixelY
+                
+                if self.countdata and total > 0:
+                    outputLine[2] = total
+                elif total > 0:
+                    outputLine[2] = 1
+                elif numAbsense > 0:
+                    outputLine[2] = 0
+                else:
+                    outputLine[2] = -9999
+                
+                outputLine.append(frequency)
+                outputLine.append(total)
+                outputLine.append(pixelColumn)
+                outputLine.append(pixelRow)
+                fOut.writerow(outputLine)          
+            else:
+                for point in v:
+                    outputLine = point
+                    outputLine.append(str(1.0/len(v)))
+                    fOut.writerow(outputLine)  
     
-            fOut.writerow(outputLine)
         oFile.close
         if self.verbose:
             self.writetolog("Done\nFinished creating field data query output.\n")

@@ -81,16 +81,27 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
                                + suffix + ' was not found in the model output directory')
 
     def find_mds(self, model_dir):
+        """returns the path to the mds that was used to generate this
+        model output.  While the text file that the R model produces
+        has an absolute path to the data this function assumes that
+        the mds file is in the session folder that this model output
+        folder is in.  That is it looks for an mds with the same 
+        file name in the parent folder of the model folder.
+        """
         model_text = os.path.join(model_dir,
                             self.find_file(model_dir, "_output.txt"))
+        #assumed to be one level up from model folder.
+        session_folder = os.path.split(model_dir)[0]
 
         f = open(model_text, 'rb')
         lines = f.read().splitlines()
 
         # grab the line after "Data:"
-        result = [lines[i + 1] for i in range(len(lines))
+        originalMDS = [lines[i + 1] for i in range(len(lines))
                   if lines[i].startswith("Data:")][0].strip()
 
+        fname = os.path.split(originalMDS)[1]
+        result = os.path.join(session_folder, fname)
         if os.path.exists(result):
             return result
         else:
