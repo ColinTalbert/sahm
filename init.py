@@ -64,7 +64,7 @@ def menu_items():
         global session_dir
         
         csv_file = r"I:\VisTrails\WorkingFiles\workspace\Test_CrossValidation2\BinaryCVAppendedOutput.csv"
-        displayJPEG = os.path.join(sessioni_dir, "BinaryCVAppendedOutput.csv")
+        displayJPEG = os.path.join(session_dir, "BinaryCVAppendedOutput.csv")
         r"I:\VisTrails\WorkingFiles\workspace\Test_CrossValidation2\CovariateCorrelationDisplay.jpg"
         STFM  = SelectAndTestFinalModel(csv_file, displayJPEG, configuration.r_path)
         #dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
