@@ -67,8 +67,8 @@
       if(length(xy.cols)>0)  rm.list<-c(rm.list,xy.cols)
 
        # remove weight column except for Random Forest
-       site.weights<-match("weights",tolower(names(ma)))
-        if(!is.na(site.weights)) {rm.list<-c(rm.list,site.weights)
+       site.weights<-c(match("weights",tolower(names(ma))),c(match("site.weights",tolower(names(ma)))))
+        if(any(!is.na(site.weights))) {rm.list<-c(rm.list,na.omit(site.weights))
             if(out$input$script.name=="rf") ma[,site.weights]<-rep(1,times=dim(ma)[1])
         }
         else{ ma$weight=rep(1,times=dim(ma)[1])
@@ -210,7 +210,5 @@
               out.list$ma<-dat.out
           out$dat <- out.list
 
-      return(out)
+return(out)
 }
-
-      
