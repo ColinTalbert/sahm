@@ -36,7 +36,7 @@ input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/NoSplit.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Spat.Weights.csv"
-
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Split.csv"
 rc="responseBinary"
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation\\modelSelection_split_1.csv"
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation\\modelSelection_cv_1.csv"
@@ -45,6 +45,7 @@ output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation3\\modelSelection_cv_1.csv"
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation4\\modelSelection_cv_1.csv"
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation4\\modelSelection_marianTest.csv"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Split.csv"
 #######################################################################
 ##MARS
 FitModels(ma.name=input.file,
