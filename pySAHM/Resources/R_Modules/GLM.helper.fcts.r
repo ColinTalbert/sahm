@@ -3,7 +3,7 @@ my.termplot <- function (model, data = NULL, envir = environment(formula(model))
     xlabs = NULL, ylabs = NULL, main = NULL, col.term = 2, lwd.term = 1.5,
     col.se = "orange", lty.se = 2, lwd.se = 1, col.res = "gray",
     cex = 1, pch = 1, col.smth = "darkred", lty.smth = 2,
-    span.smth = 2/3, ask = dev.interactive() && nb.fig < n.tms,
+    span.smth = 2/3, ask = FALSE,
     use.factor.levels = TRUE, smooth = NULL, ylim = "common",plot.it=F,
     ...)
 {   # this function is borrowed from the stats library #

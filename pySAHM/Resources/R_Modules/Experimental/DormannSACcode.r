@@ -24,7 +24,23 @@ install.packages("ncf",contriburl="http://asi23.ent.psu.edu/onb1/R/windows")
 #install.packages("ncf",contriburl="http://asi23.ent.psu.edu/onb1/R/src")
 require(ncf)
 ?correlog
-model <- ols1 # or binom1 or pois1
+model <- out$mods$final.mod # or binom1 or pois1
+X<-out$dat$ma$train$XY$X
+Y<-out$dat$ma$train$XY$Y
+d<-dist(cbind(X,Y))
+incr<-quantile(d, probs = .025)
+correlog1.1 <- correlog(X, Y, residuals(model),
+na.rm=T, increment=incr, resamp=0)
+ plot(correlog1.1$correlation, type="b", pch=16, cex=1.5, lwd=1.5,
+xlab="distance", ylab="Moran's I", cex.lab=2, cex.axis=1.5); abline(h=0)
+glob.cutoff<-quantile(d, probs = .3)
+my.nb <- dnearneigh(as.matrix(cbind(X,Y)), 0, glob.cutoff) #give lower and
+weight.list <- nb2listw(my.nb) #turns neighbourhood object into a
+GlobMT1.1<- moran.test(residuals(model), listw=weight.list)
+#weighted list
+
+#this next step takes often several minutes to run:
+GlobMT1.1<- moran.test(residuals(model), listw=snouter.listw)
 correlog1.1 <- correlog(snouter.df$X, snouter.df$Y, residuals(model),
 na.rm=T, increment=1, resamp=0)
 # now plot only the first 20 distance classes:

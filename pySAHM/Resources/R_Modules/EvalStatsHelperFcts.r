@@ -90,7 +90,7 @@
 
 }
 
-beachcolours<-function (heightrange, sealevel = 0, monochrome = FALSE, ncolours = if (monochrome) 16 else 64)
+beachcolours<-function (heightrange, sealevel = 0, monochrome = FALSE, s=1,ncolours = if (monochrome) 16 else 64)
 {
 #this function was robbed from the spatstat library internals
     if (monochrome)
@@ -112,11 +112,11 @@ beachcolours<-function (heightrange, sealevel = 0, monochrome = FALSE, ncolours 
     nland <- countbetween(hightide, peaks, dv)
     colours <- character(0)
     if (nsea > 0)
-        colours <- rev(rainbow(nsea, start = 3/6, end = 4/6))
+        colours <- rev(rainbow(nsea, start = 3/6, end = 4/6,s=s))
     if (nbeach > 0)
         colours <- c(colours, rev(rainbow(nbeach, start = 3/12,
-            end = 5/12)))
+            end = 5/12,s=s)))
     if (nland > 0)
-        colours <- c(colours, rev(rainbow(nland, start = 0, end = 1/6)))
+        colours <- c(colours, rev(rainbow(nland, start = 0, end = 1/6,s=s)))
     return(colours)
 }

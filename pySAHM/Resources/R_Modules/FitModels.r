@@ -28,7 +28,6 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
           input=lapply(as.list(Call[2:length(Call)]),eval), #with optional args this definition might be a problem but since called from the command line it works
           dat = list(), #just captures output from read.ma
           mods=list(final.mod=NULL,
-                    r.curves=NULL,
                     tif.output=list(prob=NULL,bin=NULL),
                     auc.output=NULL,
                     interactions=NULL,  # not used #
@@ -62,7 +61,6 @@ set.seed(out$input$seed)
               out$dat$bname <- bname
    #writing out the header info to the CSV so in case of a break we know what broke
              out<-place.save(out)
-     ############################# READ.MA ########################
 
     # check output dir #
               if(file.access(out$input$output.dir,mode=2)!=0) stop(paste("output directory",output.dir,"is not writable"))
@@ -125,7 +123,12 @@ set.seed(out$input$seed)
             stop("Error producing geotiff output:  null model selected by stepwise procedure - pointless to make maps")
             } else {
             cat("\nproducing prediction maps...","\n","\n");flush.console()
-
+      #                        proc.tiff(model=out$mods$final.mod,vnames=names(out$dat$ma$train$dat)[-1],
+       #         tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=pred.fct,factor.levels=out$dat$ma$factor.levels,make.binary.tif=make.binary.tif,
+        #        thresh=out$mods$auc.output$thresh,make.p.tif=make.p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
+         #       outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50.0,NAval=-3000,
+          #      fnames=out$dat$tif.names,out=out,Model=Model)
+                                         #vnames=names(out$dat$ma$ma)[-1] from production
             proc.tiff(model=out$mods$final.mod,vnames=out$mods$vnames,
                 tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=pred.fct,factor.levels=out$dat$ma$factor.levels,make.binary.tif=make.binary.tif,
                 thresh=out$mods$auc.output$thresh,make.p.tif=make.p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
