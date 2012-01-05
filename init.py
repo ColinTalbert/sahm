@@ -39,8 +39,6 @@ from packages.sahm.sahm_picklists import ResponseType, AggregationMethod, \
 from utils import writetolog
 from pySAHM.utilities import TrappedError
 
-#from SahmSpatialOutputViewer import setQGIS
-
 identifier = 'gov.usgs.sahm' 
 
 def menu_items():
@@ -860,7 +858,8 @@ class FieldDataAggregateAndWeight(Module):
     '''
     _input_ports = expand_ports([('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
-                                 ('PointAggregationOrWeightMethod', '(gov.usgs.sahm:PointAggregationMethod:Other)', {'defaults':str(['Collapse In Pixel'])})
+                                 ('PointAggregationOrWeightMethod', '(gov.usgs.sahm:PointAggregationMethod:Other)', {'defaults':str(['Collapse In Pixel'])}),
+                                 ('SDofGaussianKernel', '(edu.utah.sci.vistrails.basic:Float)')
                                  ])
     _output_ports = expand_ports([('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')])
     
@@ -868,7 +867,8 @@ class FieldDataAggregateAndWeight(Module):
         writetolog("\nFieldDataAggregateAndWeight", True)
         port_map = {'templateLayer': ('template', None, True),
             'fieldData': ('csv', None, True),
-            'PointAggregationOrWeightMethod': ('aggMethod', None, True),}
+            'PointAggregationOrWeightMethod': ('aggMethod', None, True),
+            'SDofGaussianKernel': ('sd', None, False),}
         
         FDAWParams = utils.map_ports(self, port_map)
         output_fname = utils.mknextfile(prefix='FDAW_', suffix='.csv')
@@ -883,10 +883,20 @@ class FieldDataAggregateAndWeight(Module):
             args = "o=" + FDAWParams['output']
             args += " i=" + FDAWParams['csv']
             args += " rc=" + utils.MDSresponseCol(FDAWParams['csv'])
+            
             if FDAWParams['aggMethod'] == 'Inverse Density':
                 args += " met=Density"
+                if FDAWParams.has_key('sd'):
+                    #uste the supplied SD of Gausian Kernel
+                    args += " sig=" + str(FDAWParams['sd'])
+                else:
+                    #default to 1/2 the pixel width
+                    args += " sig=" + str(float(utils.getpixelsize(FDAWParams['template']))/2)
             else:
                 args += " met=PresAbs"
+                
+                
+            
             utils.runRScript("SetWeights.r", args, self)
         else:
             ourFDAW = FDAW.FieldDataQuery()
