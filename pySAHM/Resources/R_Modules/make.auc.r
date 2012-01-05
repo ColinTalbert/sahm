@@ -16,9 +16,15 @@ make.auc.plot.jpg<-function(out=out){
 ################# Calculate all statistics on test\train or train\cv splits
   Stats<-lapply(input.list,calcStat,family=out$input$model.family)
 
+ #################################################
+ ############### Confusion Matrix ##############
+
+     jpeg(file=paste(out$dat$bname,"confusion.matrix.jpg",sep="."),width=1000,height=1000,pointsize=13)
+     barplot3d(c(Stats$train$Cmx[2,1],Stats$train$Cmx[1,1],Stats$train$Cmx[2,2],Stats$train$Cmx[1,2]),transp="f9", rows=2, theta = 40, phi = 25, expand=.5, bar.size=15,bar.space=6,
+    col.lab=c("Absence","Presence"), row.lab=c("Absence","Presence"), z.lab="Confusion Matrix")
+    graphics.off()
 ########################## PLOTS ################################
   #Residual surface of input data
-
   if(out$dat$split.type!="eval"){
   residual.smooth.fct<-resid.image(calc.dev(input.list$train$dat$response, input.list$train$pred, input.list$train$weight, family=out$input$model.family)$dev.cont,input.list$train$pred,
           input.list$train$dat$response,input.list$train$XY$X,input.list$train$XY$Y,out$input$model.family,out$input$output.dir,label=out$dat$split.type,out)

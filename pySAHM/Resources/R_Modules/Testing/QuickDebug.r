@@ -1,5 +1,5 @@
-setwd("I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
-ScriptPath="I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
+setwd("I:\\VisTrails\\Central_VisTrails_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\Central_VisTrails_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
 
 #setwd("I:\\VisTrails\\Central_VisTrailsInstall\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
 #source("FIT_BRT_pluggable.r")
@@ -35,7 +35,7 @@ input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitWeights.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/NoSplit.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
-
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Spat.Weights.csv"
 
 rc="responseBinary"
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation\\modelSelection_split_1.csv"
@@ -44,10 +44,11 @@ input.file="I:/VisTrails/WorkingFiles/workspace/Test_CrossValidation2/CovariateC
 output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation3\\modelSelection_cv_1.csv"
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation4\\modelSelection_cv_1.csv"
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation4\\modelSelection_marianTest.csv"
 #######################################################################
 ##MARS
 FitModels(ma.name=input.file,
-            tif.dir=NULL,output.dir=output.dir,
+            output.dir=output.dir,
             response.col=rc,make.p.tif=T,make.binary.tif=T,
             mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars",opt.methods=2,MESS=T)
 
