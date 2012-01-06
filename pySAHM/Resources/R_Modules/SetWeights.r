@@ -41,10 +41,12 @@ SetWeights<-function(input.file,output.file,response.col="ResponseBinary",method
 
               # using just density causes problems for points in low density areas
               # I've taken the completely arbitrary step of setting weights equal to 1/sqrt(den+1)
-
-              den<-density.ppp(study.area,at="points",leaveoneout=TRUE,sigma=sigma.sd)*sigma.sd^2
+              # adjusting for the density of the normal distribution (1/sqrt(2*pi*sigma^2))
+              # by sqrt(2*pi*sigma.sd^2) makes sence but doesn't downweight cluster enough so I've used
+              # 2*pi*sigma.sd^2
+              den<-density.ppp(study.area,at="points",leaveoneout=TRUE,sigma=sigma.sd)*2*pi*sigma.sd^2
                     im.dens<-density.ppp(study.area,leaveoneout=TRUE,sigma=sigma.sd)
-                    im.dens<-eval.im(im.dens*sigma.sd^2)
+                    im.dens<-eval.im(im.dens*2*pi*sigma.sd^2)
                     im.dens<-eval.im(1/sqrt(im.dens+1))
 
                jpeg(file=plot.name,width=1500,height=1500,pointsize=20)
