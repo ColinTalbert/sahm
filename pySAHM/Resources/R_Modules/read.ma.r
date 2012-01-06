@@ -60,7 +60,7 @@
              rm.list<-EvalIndx
         }
 
-       # remove incomplete cases and warn user if this number is more than 10% of the data
+
 
       # find and save xy columns#
       xy.cols <- na.omit(c(match("x",tolower(names(ma))),match("y",tolower(names(ma)))))
@@ -87,6 +87,7 @@
       ######################### REMOVING INCOMPLETE CASES ###############
         #remove incomplete cases but only for include variables
        all.cases<-nrow(ma)
+          ma[ma==-9999]<-NA
           ma<-ma[complete.cases(ma[,-c(rm.list)]),]
           comp.cases<-nrow(ma)
           if(comp.cases/all.cases<.9) warning(paste(round((1-comp.cases/all.cases)*100,digits=2),"% of cases were removed because of missing values",sep=""))
@@ -145,8 +146,10 @@
                    selector<-ma$Split
                    if(Split.type=="crossValidation") dat.out$train<-ma
                    #Removing everything in the remove list here and setting up the structure for output
+
                      for(i in 1:length(dat.out)){
                         dat.out[[i]]<-list(resp=dat.out[[i]][r.col],XY=dat.out[[i]][,xy.cols],dat=dat.out[[i]][,-c(rm.list)],weight=dat.out[[i]][,ncol(dat.out[[i]])])
+                        names(dat.out[[i]]$XY)<-toupper(names(dat.out[[i]]$XY))
                      }
 
                    temp.fct<-function(l){table(l$resp)}
