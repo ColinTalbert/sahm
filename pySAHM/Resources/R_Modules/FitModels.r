@@ -123,17 +123,13 @@ set.seed(out$input$seed)
             stop("Error producing geotiff output:  null model selected by stepwise procedure - pointless to make maps")
             } else {
             cat("\nproducing prediction maps...","\n","\n");flush.console()
-      #                        proc.tiff(model=out$mods$final.mod,vnames=names(out$dat$ma$train$dat)[-1],
-       #         tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=pred.fct,factor.levels=out$dat$ma$factor.levels,make.binary.tif=make.binary.tif,
-        #        thresh=out$mods$auc.output$thresh,make.p.tif=make.p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
-         #       outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50.0,NAval=-3000,
-          #      fnames=out$dat$tif.names,out=out,Model=Model)
-                                         #vnames=names(out$dat$ma$ma)[-1] from production
-            proc.tiff(model=out$mods$final.mod,vnames=out$mods$vnames,
+
+                              proc.tiff(model=out$mods$final.mod,vnames=names(out$dat$ma$train$dat)[-1],
                 tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=pred.fct,factor.levels=out$dat$ma$factor.levels,make.binary.tif=make.binary.tif,
                 thresh=out$mods$auc.output$thresh,make.p.tif=make.p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
                 outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50.0,NAval=-3000,
                 fnames=out$dat$tif.names,out=out,Model=Model)
+
             }
 
             if(make.p.tif) out$mods$tif.output$prob <- paste(out$dat$bname,"_prob_map.tif",sep="")

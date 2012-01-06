@@ -1,4 +1,4 @@
-barplot3d <- function(heights, rows, transp="f0", theta=25, phi=25, bar.size=3, bar.space=3,
+barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, bar.space=3,
     col.lab=NULL, row.lab=NULL, z.lab=NULL, col.bar=c("#44ff58","#5844ff","#ff5844"), grid="white", ...) {
  #I rescued this gem from the R graphics gallery.  I'm not sure who originally wrote it but I have altered it
  #so that it is fit to join my minion army 1/3/2012 Marian K. Talbert
@@ -9,7 +9,7 @@ barplot3d <- function(heights, rows, transp="f0", theta=25, phi=25, bar.size=3, 
     slupki  = matrix(heights, nrow=cols, ncol=rows)
     zakres  = pretty(0:ceiling(max(heights, na.rm=T)*1.1))
     odstep  = bar.space/2 + bar.size/2
-    colors=c(rgb(red=.8,blue=.2,green=.2,alpha=.9),rgb(red=1,blue=.3,green=.3,alpha=.8))
+    colors=c(rgb(red=.8,blue=.2,green=.2,alpha=.7),rgb(red=1,blue=.3,green=.3,alpha=.8))
     #colors  = paste(col.bar, transp, sep="")
     shcols  = colors
     for (i1 in 1:length(colors)) shcols[i1] = paste("#",

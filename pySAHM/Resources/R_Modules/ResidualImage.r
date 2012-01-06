@@ -1,5 +1,13 @@
 resid.image<-function(dev.contrib,pred,raw.dat,x,y,model.type,file.name,out,label){
 
+       if(length(pred)>2000){
+           samp<-seq(1:length(pred))[order(runif(length(pred)))][1:2000]
+           dev.contrib<-dev.contrib[samp]
+           pred<-pred[samp]
+           raw.dat<-raw.dat[samp]
+           x<-x[samp]
+           y<-y[samp]
+           }
           #for some reason dev.contrib is negative for binomial and bernoulli and positive for poisson
    if(label!="eval") z<-sign(pred-raw.dat)*abs(dev.contrib)
       else z<-pred-raw.dat

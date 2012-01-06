@@ -41,18 +41,24 @@ SetWeights<-function(input.file,output.file,response.col="ResponseBinary",method
 
               # using just density causes problems for points in low density areas
               # I've taken the completely arbitrary step of setting weights equal to 1/sqrt(den+1)
-              den<-density.ppp(study.area,at="points",leaveoneout=TRUE,sigma=sigma.sd)
+              # adjusting for the density of the normal distribution (1/sqrt(2*pi*sigma^2))
+              # by sqrt(2*pi*sigma.sd^2) makes sence but doesn't downweight cluster enough so I've used
+              # 2*pi*sigma.sd^2
+              den<-density.ppp(study.area,at="points",leaveoneout=TRUE,sigma=sigma.sd)*2*pi*sigma.sd^2
                     im.dens<-density.ppp(study.area,leaveoneout=TRUE,sigma=sigma.sd)
+                    im.dens<-eval.im(im.dens*2*pi*sigma.sd^2)
                     im.dens<-eval.im(1/sqrt(im.dens+1))
 
                jpeg(file=plot.name,width=1500,height=1500,pointsize=20)
-                    plot(im.dens,main=paste("Spatial weights with sigma = ",ifelse(is.null(sigma.sd),round(attr(den,"sigma")),sigma.sd)))
-                    colfun <- spatstat.options("image.colfun")
+                     colfun <- spatstat.options("image.colfun")
                     color.list<-list(col = colfun(255))
+                    plot(im.dens,main=paste("Spatial weights with sigma = ",ifelse(is.null(sigma.sd),round(attr(den,"sigma")),sigma.sd)))
+
                dat$Weights<-1/sqrt(den+1)
-                    points(study.area,cex=1.5,col="gray17",pch=19)
-                    s1<-seq(from=0,to=1,length=255)
-                    points(study.area$x,study.area$y,col=color.list[[1]][apply(outer(dat$Weights,s1,">"),1,sum)],pch=19,cex=1.2)
+                  #  points(study.area,cex=1.5,col="gray17",pch=19)
+                    s1<-seq(from=min(im.dens),to=max(im.dens),length=255)
+                    points(study.area$x,study.area$y,bg=color.list[[1]][apply(outer(dat$Weights,s1,">"),1,sum)],pch=21,cex=1.2)
+
                dev.off()
 
                      }

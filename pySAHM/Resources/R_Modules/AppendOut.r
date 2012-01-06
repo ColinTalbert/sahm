@@ -2,7 +2,7 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
     Header.Length<-nrow(Header)
 
 ################ Writing to the csv  ############################
-  browser()
+
  input<-read.table(compile.out,fill=TRUE,sep=",")
   if(ncol(input)<=2){ #if very first time through little
 
@@ -23,8 +23,8 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
   if(ncol(output)>2){
 
                   jpeg(file=paste(parent,paste("AcrossModel",
-                       switch(out$dat$split.type,"crossValidation"="CV","test"="Test","none"=""),
-                       switch(out$input$model.family,"binomial"="Bin","bernoulli"="Bin","poisson"="Cnt"),
+                       switch(out$dat$split.type,"crossValidation"="CrossVal","test"="TestTrain","none"="NoSplit"),
+                       switch(out$input$model.family,"binomial"="Binom","bernoulli"="Binom","poisson"="Count"),
                        ".jpg",sep=""),sep="\\"),width=(1000+30*ncol(output)),height=1000,pointsize=13,quality=100)
                   par(mfrow=c(Parm.Len,1),mar=c(.2, 5, .6, 2),cex=1.1,oma=c(5, 0, 3, 0))
                #Getting rid of the header
