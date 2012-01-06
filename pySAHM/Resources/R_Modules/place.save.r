@@ -3,9 +3,9 @@ place.save<-function(out){
 last.dir<-strsplit(out$input$output.dir,split="\\\\")
                         parent<-sub(paste("\\\\",last.dir[[1]][length(last.dir[[1]])],sep=""),"",out$input$output.dir)
                          compile.out<-paste(parent,
-                              paste(switch(out$input$model.family,"binomial"="Binary","bernoulli"="Binary","poisson"="Count"),
-                                switch(out$dat$split.type,"test"="TestTrain","crossValidation"="CV","none"=""),
-                              "AppendedOutput.csv",sep=""),sep="/")
+                              paste("AcrossModel",switch(out$dat$split.type,"test"="Test","crossValidation"="CV","none"=""),
+                              switch(out$input$model.family,"binomial"="Bin","bernoulli"="Bin","poisson"="Cnt"),".csv"
+                              ,sep=""),sep="/")
                               
  Header<-cbind(c("","Original Field Data","Field Data Template","PARC Output Folder","PARC Template","Covariate Selection Name",""),
                             c(last.dir[[1]][length(last.dir[[1]])],
