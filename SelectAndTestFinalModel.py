@@ -18,6 +18,7 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
+
 class SelectAndTestFinalModel(QtGui.QDialog):
 
     def __init__(self, inputCSV, displayJPEG, rPath, parent=None):

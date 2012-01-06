@@ -6,8 +6,9 @@ from core.modules.vistrails_module import Module
 from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
 from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
 from packages.spreadsheet.spreadsheet_controller import spreadsheetController
-from SahmViewerCell import Ui_Frame
-#import imageviewer_rc
+
+from packages.sahm.sahm_picklists import ModelOutputType
+
 import os
 ################################################################################
 
@@ -18,7 +19,9 @@ class SAHMModelOutputViewerCell(SpreadsheetCell):
     """
     _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
-                    ('ModelWorkspace', '(edu.utah.sci.vistrails.basic:File)')]
+                    ('ModelWorkspace', '(edu.utah.sci.vistrails.basic:File)'),
+                    ('InitialModelOutputDisplay', '(gov.usgs.sahm:ModelOutputType:Other)', {'defaults':str(['AUC'])})
+                    ]
      
     def compute(self):
         """ compute() -> None
@@ -32,8 +35,6 @@ class SAHMModelOutputViewerCell(SpreadsheetCell):
             model_dir = os.path.split(model_dir_full)[1]
             model_name = model_dir[:model_dir.index('output')]
             
-#            prob_map_path = os.path.join(model_dir_full, model_name + '_prob_map.jpeg')
-#            prob_map = window.file_pool.make_local_copy(prob_map_path)
             
             auc_graph_path = os.path.join(model_dir_full, model_name + '_modelEvalPlot.jpg')
             auc_graph = window.file_pool.make_local_copy(auc_graph_path)
@@ -43,6 +44,15 @@ class SAHMModelOutputViewerCell(SpreadsheetCell):
             
             response_path = os.path.join(model_dir_full, model_name + '_response_curves.pdf')
             response_curves = window.file_pool.make_local_copy(response_path)
+            
+            calibration_graph_path = os.path.join(model_dir_full, model_name + '_CalibrationPlot.jpg')
+            calibration_graph = window.file_pool.make_local_copy(calibration_graph_path)
+            
+            confusion_graph_path = os.path.join(model_dir_full, model_name + '.confusion.matrix.jpg')
+            confusion_graph = window.file_pool.make_local_copy(confusion_graph_path)
+            
+            residuals_graph_path = os.path.join(model_dir_full, model_name + '.resid.plot.jpg')
+            residuals_graph = window.file_pool.make_local_copy(residuals_graph_path)
             
             model_label = model_dir.capitalize().replace('output', 'Output')
             
@@ -56,13 +66,24 @@ class SAHMModelOutputViewerCell(SpreadsheetCell):
                 if not self.location:
                     self.location = CellLocation()
                 self.location.col = self.getInputFromPort('column') - 1
+                
+            if self.hasInputFromPort('InitialModelOutputDisplay'):
+                initial_display = self.getInputFromPort('InitialModelOutputDisplay')
+            else:
+                initial_display = 'AUC'
             
         else:
             fileValue = None
+            
+            
         self.cellWidget = self.displayAndWait(SAHMOutputViewerCellWidget, (auc_graph, 
                                                                       text_output,
                                                                       response_curves,
-                                                                      model_label))
+                                                                      calibration_graph,
+                                                                      confusion_graph,
+                                                                      residuals_graph,
+                                                                      model_label,
+                                                                      initial_display))
 
 class SAHMOutputViewerCellWidget(QCellWidget):
     """
@@ -93,6 +114,18 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         self.ui.gv_auc.setScene(self.gs_auc_graph)
         self.gs_auc_graph.wheelEvent = self.wheel_event_auc
         
+        self.gs_calibration_graph = QtGui.QGraphicsScene()
+        self.ui.gv_calibration.setScene(self.gs_calibration_graph)
+        self.gs_calibration_graph.wheelEvent = self.wheel_event_calibration
+        
+        self.gs_confusion_graph = QtGui.QGraphicsScene()
+        self.ui.gv_confusion.setScene(self.gs_confusion_graph)
+        self.gs_confusion_graph.wheelEvent = self.wheel_event_confusion
+        
+        self.gs_residuals_graph = QtGui.QGraphicsScene()
+        self.ui.gv_residuals.setScene(self.gs_residuals_graph)
+        self.gs_residuals_graph.wheelEvent = self.wheel_event_residuals
+        
         #add in ie browsers for the text and response
         self.text_browser = QAxContainer.QAxWidget(self)
         self.text_browser.setFocusPolicy(QtCore.Qt.StrongFocus)
@@ -114,7 +147,8 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         Update the widget contents based on the input data
         
         """
-        (auc_graph, text_output, response_curves, model_label) = inputPorts
+        (auc_graph, text_output, response_curves, calibration_graph, confusion_graph, 
+         residuals_graph, model_label, inital_display) = inputPorts
         
         self.images = {}
 #        if prob_map:
@@ -144,6 +178,43 @@ class SAHMOutputViewerCellWidget(QCellWidget):
                                        self.ui.gv_auc,
                                        max_size]
         
+        if calibration_graph:
+            pixmap_cal = QtGui.QPixmap(calibration_graph.name)
+            max_size = self.getMaxSize(self.ui.gv_calibration)
+            scaled_pixmap_cal = pixmap_cal.scaled(max_size, max_size, 
+                                            QtCore.Qt.KeepAspectRatio, 
+                                            QtCore.Qt.SmoothTransformation)
+            
+            self.images['calibration_graph'] = [pixmap_cal,
+                                       scaled_pixmap_cal,
+                                       self.gs_calibration_graph,
+                                       self.ui.gv_calibration,
+                                       max_size]
+        if confusion_graph:
+            pixmap_con = QtGui.QPixmap(confusion_graph.name)
+            max_size = self.getMaxSize(self.ui.gv_confusion)
+            scaled_pixmap_con = pixmap_con.scaled(max_size, max_size, 
+                                            QtCore.Qt.KeepAspectRatio, 
+                                            QtCore.Qt.SmoothTransformation)
+            
+            self.images['confusion_graph'] = [pixmap_con,
+                                       scaled_pixmap_con,
+                                       self.gs_confusion_graph,
+                                       self.ui.gv_confusion,
+                                       max_size]
+            
+        if residuals_graph:
+            pixmap_res = QtGui.QPixmap(residuals_graph.name)
+            max_size = self.getMaxSize(self.ui.gv_residuals)
+            scaled_pixmap_res = pixmap_res.scaled(max_size, max_size, 
+                                            QtCore.Qt.KeepAspectRatio, 
+                                            QtCore.Qt.SmoothTransformation)
+            
+            self.images['residuals_graph'] = [pixmap_res,
+                                       scaled_pixmap_res,
+                                       self.gs_residuals_graph,
+                                       self.ui.gv_residuals,
+                                       max_size]
         
 
         self.text_urlSrc = QtCore.QUrl.fromLocalFile(text_output.name)
@@ -157,6 +228,10 @@ class SAHMOutputViewerCellWidget(QCellWidget):
             self.response_browser.dynamicCall('Navigate(const QString&)', self.response_urlSrc.toString())
         else:
             self.response_browser.dynamicCall('Navigate(const QString&)', QtCore.QString('about:blank'))
+        
+        choices = ['Text', 'Response Curves', 'AUC', 'Calibration', 'Confusion', 'Residuals']
+        selected_index = choices.index(inital_display)
+        self.ui.tabWidget.setCurrentIndex(selected_index)
 
         self.view_current()
 
@@ -184,6 +259,15 @@ class SAHMOutputViewerCellWidget(QCellWidget):
     def wheel_event_auc(self, event):
         self.wheel_event(event, 'auc_graph', QtCore.Qt.SmoothTransformation)
 
+    def wheel_event_calibration(self, event):
+        self.wheel_event(event, 'calibration_graph', QtCore.Qt.SmoothTransformation)
+    
+    def wheel_event_confusion(self, event):
+        self.wheel_event(event, 'confusion_graph', QtCore.Qt.SmoothTransformation)
+        
+    def wheel_event_residuals(self, event):
+        self.wheel_event(event, 'residuals_graph', QtCore.Qt.SmoothTransformation)
+       
     def wheel_event (self, event, id, transform):
         numDegrees = event.delta() / 8 
         numSteps = numDegrees / 15.0 
@@ -317,178 +401,114 @@ class ImageViewerSaveAction(QtGui.QAction):
         elif fn.endsWith(QtCore.QString("pdf"), QtCore.Qt.CaseInsensitive):
             cellWidget.saveToPDF(str(fn))
 
-#class testButton(QtGui.QAction):
-#     def __init__(self, parent=None):
-#        """ ImageViewerRotateAction(parent: QWidget)
-#                                       -> ImageViewerRotateAction
-#        Setup the image, status tip, etc. of the action
-#        
-#        """
-#        QtGui.QAction.__init__(self,
-#                               QtGui.QIcon(":/images/grass_split_line.png"),
-#                               "&Do Something...",
-#                               parent)
-#        self.setStatusTip("We'll do something with this soon")
-#        self.rotationMatrix = QtGui.QMatrix(0,1,-1,0,0,0)
-#
-#class ModelLabel(QtGui.QLabel):
-#    def __init__(self, parent=None):
-#        """A lable to indicate which model the output pertains to
-#        """
-#        self.text = QtCore.QString("testing")
-#        
-#class ImageViewerZoomSlider(QtGui.QSlider):
-#    """
-#    ImageViewerZoomSlider is a slider that allows user to zoom in and
-#    out by dragging it
-#    """
-#    def __init__(self, parent=None):
-#        """ ImageViewerZoomSlider(parent: QWidget) -> ImageViewerZoomSlider
-#        Setup the ranges, status tip, etc. of the slider
-#        
-#        """
-#        QtGui.QSlider.__init__(self, QtCore.Qt.Horizontal, parent)
-#        self.setRange(100, 600)
-#        self.setValue(100)
-#        self.setTracking(True)
-#        self.setStatusTip("Zoom in the image")
-#        self.connect(self, QtCore.SIGNAL("valueChanged(int)"), self.updateZoom)
-#        self.connect(self, QtCore.SIGNAL("needUpdateStatus"), self.updateStatus)
-#        self.setSizePolicy(QtGui.QSizePolicy.Preferred,
-#                           QtGui.QSizePolicy.Expanding)
-#        
-#    def updateZoom(self, value):
-#        """ updateZoom(value: int) -> None
-#        Update the image when the slider value changed
-#        
-#        """
-#        if self.toolBar:
-#            cellWidget = self.toolBar.getSnappedWidget()
-#            if not cellWidget.label.hasScaledContents():
-#                newWidth = cellWidget.originalPix.width()*value/100
-#                pixmap = cellWidget.originalPix.scaledToWidth(newWidth)
-#                cellWidget.label.setPixmap(pixmap)
-#
-#    def updateStatus(self, info):
-#        """ updateStatus(info: tuple) -> None
-#        Updates the status of the button based on the input info
-#        
-#        """
-#        (sheet, row, col, cellWidget) = info
-#        if cellWidget:
-#            if (not cellWidget.label.hasScaledContents() and
-#                not cellWidget._playing):
-#                self.setEnabled(True)
-#                originalWidth = cellWidget.originalPix.width()
-#                self.setValue(cellWidget.label.pixmap().width()*100/originalWidth)
-#            else:
-#                self.setEnabled(False)
-#                self.setValue(100)
-#                
-#class ImageViewerZoomLabel(QtGui.QLabel):
-#    """
-#    ImageViewerZoomLabel is the label sitting next to the ImageViewerZoomSlider
-#    
-#    """
-#    def __init__(self, parent=None):
-#        """ ImageViewerZoomSlider(parent: QWidget) -> None
-#        Setup the label with a status tip
-#        
-#        """
-#        QtGui.QLabel.__init__(self, "100%", parent)
-#        self.setStatusTip("Zoom in the image")
-#        
-#    def updateValue(self, value):
-#        """ updateValue(value: int)
-#        Updates the label with the new percentage value
-#        """
-#        self.setText(str(value)+"%")
-#                
-#class ImageViewerRotateAction(QtGui.QAction):
-#    """
-#    ImageViewerRotateAction is the action to rotate the image
-#    
-#    """
-#    def __init__(self, parent=None):
-#        """ ImageViewerRotateAction(parent: QWidget)
-#                                       -> ImageViewerRotateAction
-#        Setup the image, status tip, etc. of the action
-#        
-#        """
-#        QtGui.QAction.__init__(self,
-#                               QtGui.QIcon(":/images/rotate.png"),
-#                               "&Rotate CW...",
-#                               parent)
-#        self.setStatusTip("Rotate 90 degrees CW")
-#        self.rotationMatrix = QtGui.QMatrix(0,1,-1,0,0,0)
-#        
-#    def triggeredSlot(self, checked=False):
-#        """ toggledSlot(checked: boolean) -> None
-#        Execute the action when the button is clicked
-#        
-#        """
-#        cellWidget = self.toolBar.getSnappedWidget()
-#        if not cellWidget.label.pixmap() or cellWidget.label.pixmap().isNull():
-#            return
-#        cellWidget.originalPix = cellWidget.originalPix.transformed(
-#            self.rotationMatrix)
-#        cellWidget.label.setPixmap(cellWidget.label.pixmap().transformed(
-#            self.rotationMatrix))
-#
-#class ImageViewerFlipAction(QtGui.QAction):
-#    """
-#    ImageViewerFlipAction is the action to flip the image
-#    
-#    """
-#    def __init__(self, parent=None):
-#        """ ImageViewerFlipAction(parent: QWidget) -> ImageViewerFlipAction
-#        Setup the image, status tip, etc. of the action
-#        
-#        """
-#        QtGui.QAction.__init__(self,
-#                               QtGui.QIcon(":/images/flip.png"),
-#                               "&Flip Horizontal...",
-#                               parent)
-#        self.setStatusTip("Flip the image horizontally")
-#        self.flipMatrix = QtGui.QMatrix(-1,0,0,1,0,0)
-#        
-#    def triggeredSlot(self, checked=False):
-#        """ toggledSlot(checked: boolean) -> None
-#        Execute the action when the button is clicked
-#        
-#        """
-#        cellWidget = self.toolBar.getSnappedWidget()
-#        label = cellWidget.label
-#        if not label.pixmap() or label.pixmap().isNull():
-#            return
-#        cellWidget.originalPix = cellWidget.originalPix.transformed(
-#            self.flipMatrix)
-#        label.setPixmap(label.pixmap().transformed(self.flipMatrix))
-#
-#class ImageViewerToolBar(QCellToolBar):
-#    """
-#    ImageViewerToolBar derives from CellToolBar to give the ImageViewerCellWidget
-#    a customizable toolbar
-#    
-#    """
-#    def createToolBar(self):
-#        """ createToolBar() -> None
-#        This will get call initiallly to add customizable widgets
-#        
-#        """
-#        global SAHMModelOutputViewerCell
-#        
-##        self.appendAction(QtCore.QString(SAHMModelOutputViewerCell.model_label))
-#        self.appendAction(testButton(self))
-#        self.appendAction(ImageViewerFitToCellAction(self))
-#        self.appendAction(ImageViewerSaveAction(self))
-#        self.appendAction(ImageViewerRotateAction(self))
-#        self.appendAction(ImageViewerFlipAction(self))
-#        self.slider = ImageViewerZoomSlider(self)
-#        label = ImageViewerZoomLabel(self)
-#        self.connect(self.slider,
-#                     QtCore.SIGNAL("valueChanged(int)"),
-#                     label.updateValue)
-#        self.appendWidget(self.slider)
-#        self.appendWidget(label)
-#        self.addAnimationButtons()
+try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    _fromUtf8 = lambda s: s
+
+class Ui_Frame(object):
+    def setupUi(self, Frame):
+        Frame.setObjectName(_fromUtf8("Frame"))
+        Frame.resize(546, 402)
+        Frame.setWindowTitle(QtGui.QApplication.translate("Frame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
+        Frame.setFrameShape(QtGui.QFrame.StyledPanel)
+        Frame.setFrameShadow(QtGui.QFrame.Raised)
+        self.horizontalLayout = QtGui.QHBoxLayout(Frame)
+        self.horizontalLayout.setSpacing(0)
+        self.horizontalLayout.setMargin(0)
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.tabWidget = QtGui.QTabWidget(Frame)
+        self.tabWidget.setEnabled(True)
+        self.tabWidget.setTabPosition(QtGui.QTabWidget.North)
+        self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
+        
+        self.text_output = QtGui.QWidget()
+        self.text_output.setObjectName(_fromUtf8("text_output"))
+        self.text_output_layout = QtGui.QHBoxLayout(self.text_output)
+        self.text_output_layout.setSpacing(0)
+        self.text_output_layout.setMargin(0)
+        self.text_output_layout.setObjectName(_fromUtf8("text_output_layout"))
+        self.tabWidget.addTab(self.text_output, _fromUtf8(""))
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.text_output), QtGui.QApplication.translate("Frame", "Textual model output ", None, QtGui.QApplication.UnicodeUTF8))
+        
+        self.response_curves = QtGui.QWidget()
+        self.response_curves.setObjectName(_fromUtf8("response_curves"))
+        self.response_curves_layout = QtGui.QHBoxLayout(self.response_curves)
+        self.response_curves_layout.setSpacing(0)
+        self.response_curves_layout.setMargin(0)
+        self.response_curves_layout.setObjectName(_fromUtf8("response_curves_layout"))
+        self.tabWidget.addTab(self.response_curves, _fromUtf8(""))
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.response_curves), QtGui.QApplication.translate("Frame", "Response curves", None, QtGui.QApplication.UnicodeUTF8))
+        
+        self.auc = QtGui.QWidget()
+        self.auc.setObjectName(_fromUtf8("auc"))
+        self.horizontalLayout_4 = QtGui.QHBoxLayout(self.auc)
+        self.horizontalLayout_4.setSpacing(0)
+        self.horizontalLayout_4.setMargin(0)
+        self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
+        self.gv_auc = QtGui.QGraphicsView(self.auc)
+        self.gv_auc.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
+        self.gv_auc.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        self.gv_auc.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        self.gv_auc.setObjectName(_fromUtf8("gv_auc"))
+        self.horizontalLayout_4.addWidget(self.gv_auc)
+        self.tabWidget.addTab(self.auc, _fromUtf8(""))
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.auc), QtGui.QApplication.translate("Frame", "Area under the curve (AUC)", None, QtGui.QApplication.UnicodeUTF8))
+        
+        self.calibration = QtGui.QWidget()
+        self.calibration.setObjectName(_fromUtf8("calibration"))
+        self.horizontalLayout_5 = QtGui.QHBoxLayout(self.calibration)
+        self.horizontalLayout_5.setSpacing(0)
+        self.horizontalLayout_5.setMargin(0)
+        self.horizontalLayout_5.setObjectName(_fromUtf8("horizontalLayout_5"))
+        self.gv_calibration = QtGui.QGraphicsView(self.calibration)
+        self.gv_calibration.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
+        self.gv_calibration.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        self.gv_calibration.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        self.gv_calibration.setObjectName(_fromUtf8("gv_calibration"))
+        self.horizontalLayout_5.addWidget(self.gv_calibration)
+        self.tabWidget.addTab(self.calibration, _fromUtf8(""))
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.calibration), QtGui.QApplication.translate("Frame", "Calibration plot", None, QtGui.QApplication.UnicodeUTF8))
+        
+        self.confusion = QtGui.QWidget()
+        self.confusion.setObjectName(_fromUtf8("confusion"))
+        self.horizontalLayout_6 = QtGui.QHBoxLayout(self.confusion)
+        self.horizontalLayout_6.setSpacing(0)
+        self.horizontalLayout_6.setMargin(0)
+        self.horizontalLayout_6.setObjectName(_fromUtf8("horizontalLayout_6"))
+        self.gv_confusion = QtGui.QGraphicsView(self.confusion)
+        self.gv_confusion.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
+        self.gv_confusion.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        self.gv_confusion.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        self.gv_confusion.setObjectName(_fromUtf8("gv_confusion"))
+        self.horizontalLayout_6.addWidget(self.gv_confusion)
+        self.tabWidget.addTab(self.confusion, _fromUtf8(""))
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.confusion), QtGui.QApplication.translate("Frame", "Confusion matrix", None, QtGui.QApplication.UnicodeUTF8))
+        
+        self.residuals = QtGui.QWidget()
+        self.residuals.setObjectName(_fromUtf8("residuals"))
+        self.horizontalLayout_7 = QtGui.QHBoxLayout(self.residuals)
+        self.horizontalLayout_7.setSpacing(0)
+        self.horizontalLayout_7.setMargin(0)
+        self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
+        self.gv_residuals = QtGui.QGraphicsView(self.residuals)
+        self.gv_residuals.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
+        self.gv_residuals.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        self.gv_residuals.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        self.gv_residuals.setObjectName(_fromUtf8("gv_residuals"))
+        self.horizontalLayout_7.addWidget(self.gv_residuals)
+        self.tabWidget.addTab(self.residuals, _fromUtf8(""))
+        self.tabWidget
+        
+        self.horizontalLayout.addWidget(self.tabWidget)
+        self.retranslateUi(Frame)
+        self.tabWidget.setCurrentIndex(2)
+        QtCore.QMetaObject.connectSlotsByName(Frame)
+
+    def retranslateUi(self, Frame):
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.text_output), QtGui.QApplication.translate("Frame", "Text Results", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.response_curves), QtGui.QApplication.translate("Frame", "Response", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.auc), QtGui.QApplication.translate("Frame", "AUC", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.calibration), QtGui.QApplication.translate("Frame", "Calibration", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.confusion), QtGui.QApplication.translate("Frame", "Confusion", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.residuals), QtGui.QApplication.translate("Frame", "Residuals", None, QtGui.QApplication.UnicodeUTF8))

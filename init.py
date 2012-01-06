@@ -34,7 +34,7 @@ import packages.sahm.pySAHM.MaxentRunner as MaxentRunner
 from packages.sahm.SahmOutputViewer import SAHMModelOutputViewerCell
 from packages.sahm.SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
 from packages.sahm.sahm_picklists import ResponseType, AggregationMethod, \
-        ResampleMethod, PointAggregationMethod
+        ResampleMethod, PointAggregationMethod, ModelOutputType
 
 from utils import writetolog
 from pySAHM.utilities import TrappedError
@@ -61,14 +61,37 @@ def menu_items():
     def select_test_final_model():
         global session_dir
         
-        csv_file = r"I:\VisTrails\WorkingFiles\workspace\Test_CrossValidation2\BinaryCVAppendedOutput.csv"
-        displayJPEG = os.path.join(session_dir, "BinaryCVAppendedOutput.csv")
-        r"I:\VisTrails\WorkingFiles\workspace\Test_CrossValidation2\CovariateCorrelationDisplay.jpg"
+        #check if multiple model types have been run
+        #options are one of ('Binary' or 'Count') 
+        #and one of    ('TestTrain' or '' or 'CV')
+        globPattern = os.path.join(session_dir, "*AppendedOutput.csv")
+        csvOutputs = glob.glob(globPattern)
+        
+        if len(csvOutputs) > 1:
+            which_type = QtGui.QDialog()
+            which_type.setWindowTitle("Multiple model types found in this Session Folder")
+            lbl = QtGui.QLabel(which_type)
+            widget_layout = QtGui.QVBoxLayout()
+            lbl.setText("Multiple model types found in this Session Folder\n\nPlease select the model type you wish to select from and test.")
+            for model_type in csvOutputs:
+                button = QtGui.QPushButton()
+                buttonText = os.path.split(model_type)[1].replace('.csv', '')
+                button.setText(buttonText)
+                button.connect(button, QtCore.SIGNAL('clicked(bool)'), button_push)
+                widget_layout.addWidget(button)
+            
+            which_type.setLayout(widget_layout)
+            ans = which_type.exec_()
+            
+        else:
+            csv_file = csvOutputs[0]
+        
+        displayJPEG = csv_file.replace(".csv", ".jpg")
+        
         STFM  = SelectAndTestFinalModel(csv_file, displayJPEG, configuration.r_path)
         #dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
 #        print " ... finished with dialog "  
         retVal = STFM.exec_()
-        #outputPredictorList = dialog.outputList
         if retVal == 1:
             raise ModuleError(self, "Cancel or Close selected (not OK) workflow halted.")
     
@@ -1573,36 +1596,6 @@ class ProjectionLayers(Module):
         self.setResult("MDS", output_file)
         writetolog("Finished Select Projection Layers widget", True)
 
-#class ClimateModel(String):
-#    _input_ports = [('value', '(gov.usgs.sahm:ClimateModel:Other)')]
-#    _output_ports = [('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
-#    _widget_class = build_enum_widget('ClimateModel', 
-#                                      ['CCCMA', 'CSIRO', 'hadcm3'])
-#
-#    @staticmethod
-#    def get_widget_class():
-#        return ClimateModel._widget_class
-#
-#class ClimateScenario(String):
-#    _input_ports = [('value', '(gov.usgs.sahm:ClimateScenario:Other)')]
-#    _output_ports = [('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
-#    _widget_class = build_enum_widget('ClimateScenario', 
-#                                      ['A2a', 'B2b'])
-#
-#    @staticmethod
-#    def get_widget_class():
-#        return ClimateScenario._widget_class
-#
-#class ClimateYear(String):
-#    _input_ports = [('value', '(gov.usgs.sahm:ClimateYear:Other)')]
-#    _output_ports = [('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
-#    _widget_class = build_enum_widget('ClimateYear', 
-#                                      ['2020', '2050', '2080'])
-#
-#    @staticmethod
-#    def get_widget_class():
-#        return ClimateYear._widget_class
-
 class MAXENT(Module):
 
     _output_ports = [("lambdas", "(edu.utah.sci.vistrails.basic:File)"),
@@ -1728,37 +1721,7 @@ def initialize():
        
     r_path = os.path.abspath(configuration.r_path)
     maxent_path = os.path.abspath(configuration.maxent_path)
-    utils.r_path = r_path
-    
-    #I was previously setting the following environmental variables and path additions 
-    #so that each user wouldn't have to do this on their individual machines.  
-    #I was running into problems with imports occuring before this initialize routine so 
-    #I moved the setting of these to an external .net application that sets these before 
-    #starting up VisTrails.py.
-    
-    #This should also make this package easier to port to other systems as this stuff would
-    #only work on a windows instance.
-    #the current dependencies are:
-    #an installation of GDAL and Proj.4
-    # this includes the GDAL_DATA and PROJ_LIB directories as environmental variables
-    #GDAL bindings for python in the python path.
-    #QGIS built for the version of Python, QT, PyQt, and SIP used by VisTrails.
-    #  This one was a painful bear on Windows.
-    #All of the DLLs required by the above QGIS build must be on the path.
-    #In my case these were in a folder in the OSGeoW installation that QGIS was built 
-    #off of.
-    #And finally QGIS bindings for python in the python path.
-    
-     
-#    import qgis.core
-#    import qgis.gui
-#    globals()["qgis"] = qgis
-#    setQGIS(qgis)
-#    
-#    qgis_prefix = os.path.join(configuration.qgis_path, "qgis1.7.0")
-#    qgis.core.QgsApplication.setPrefixPath(qgis_prefix, True)
-#    qgis.core.QgsApplication.initQgis() 
-    
+    utils.r_path = r_path    
     
     session_dir = utils.createrootdir(configuration.output_dir)
     utils.createLogger(session_dir, configuration.verbose)
@@ -1921,14 +1884,12 @@ _modules = generate_namespaces({'DataInput': [
                                            (MergedDataSet, {'abstract': True}),
                                            (ResponseType, {'abstract': True}),
                                            (RastersWithPARCInfoCSV, {'abstract': True}),
-                                           (PointAggregationMethod, {'abstract': True}),],
+                                           (PointAggregationMethod, {'abstract': True}),
+                                           (ModelOutputType, {'abstract': True}),
+                                           ],
                                 'Output': [(SAHMModelOutputViewerCell, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe}),
                                           (SAHMSpatialOutputViewerCell, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe})
                                           ]
-#                                           ClimateModel,
-#                                           ClimateScenario,
-#                                           ClimateYear
-
                                 })

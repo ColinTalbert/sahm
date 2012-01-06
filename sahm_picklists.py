@@ -54,7 +54,7 @@ class PointAggregationMethod(String):
     SAHM package. It is not intended for direct use or incorporation into
     the VisTrails workflow by the user.
     '''
-    _input_ports = [('value', '(gov.usgs.sahm:ResampleMethod:Other)')]
+    _input_ports = [('value', '(gov.usgs.sahm:PointAggregationMethod:Other)')]
     _output_ports = [('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
     _widget_class = build_enum_widget('PointAggregationMethod', 
                                       ['Collapse In Pixel', 
@@ -65,3 +65,23 @@ class PointAggregationMethod(String):
     @staticmethod
     def get_widget_class():
         return PointAggregationMethod._widget_class
+
+class ModelOutputType(String):
+    '''
+    This module is a required class for other modules and scripts within the
+    SAHM package. It is not intended for direct use or incorporation into
+    the VisTrails workflow by the user.
+    '''
+    _input_ports = [('value', '(gov.usgs.sahm:ModelOutputType:Other)')]
+    _output_ports = [('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
+    _widget_class = build_enum_widget('ModelOutputType', 
+                                      ['Text',
+                                       'Response Curves', 
+                                       'AUC', 
+                                       'Calibration', 
+                                       'Confusion',
+                                       'Residuals'])
+
+    @staticmethod
+    def get_widget_class():
+        return ModelOutputType._widget_class
