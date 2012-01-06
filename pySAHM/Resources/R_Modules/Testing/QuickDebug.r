@@ -1,12 +1,6 @@
 setwd("I:\\VisTrails\\Central_VisTrails_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
 ScriptPath="I:\\VisTrails\\Central_VisTrails_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
 
-#setwd("I:\\VisTrails\\Central_VisTrailsInstall\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
-#source("FIT_BRT_pluggable.r")
-#source("FIT_MARS_pluggable.r")
-#source("FIT_RF_pluggable.r")
-#source("FIT_GLM_pluggable.r")
-
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
 source("GLM.helper.fcts.r")
@@ -56,6 +50,10 @@ FitModels(ma.name=input.file,
 EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,make.binary.tif=TRUE,make.p.tif=TRUE,MESS=TRUE)
 
 ##GLM
+input.file="C:\\VisTrails\\mtalbert_20110504T132851\\readMaTests\\SecondSeasonWeights.csv"
+input.file="I://VisTrails//WorkingFiles//secondseason//secondseason_workfile_2012_12_23//TestTrainingSplit_8.csv"
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\MarsError\\CovariateCorrelationOutputMDS_NoClimate.csv"
+input.file="I:\\VisTrails\\WorkingFiles\\tutorial\\tutorial_2011_12_28\\CovariateCorrelationOutputMDS_NoRS.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,
           output.dir=output.dir,

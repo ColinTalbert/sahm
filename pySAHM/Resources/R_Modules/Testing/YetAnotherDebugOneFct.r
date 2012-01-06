@@ -1,5 +1,5 @@
-setwd("I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
-ScriptPath="I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
+setwd("I:\\VisTrails\\Central_VisTrails_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\Central_VisTrails_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
 
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
@@ -24,10 +24,10 @@ input.file[11]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
 input.file[12]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
 
 output.dir<-vector()
-output.dir[1]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction12.7\\rf"
-output.dir[2]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction12.7\\brt"
-output.dir[3]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction12.7\\mars"
-output.dir[4]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction12.7\\glm"
+output.dir[1]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction1.6\\rf"
+output.dir[2]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction1.6\\brt"
+output.dir[3]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction1.6\\mars"
+output.dir[4]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction1.6\\glm"
 
 
 
