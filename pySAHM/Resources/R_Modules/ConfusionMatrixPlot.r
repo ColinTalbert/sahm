@@ -1,4 +1,4 @@
-barplot3d <- function(heights, rows, transp="f0", theta=25, phi=25, bar.size=3, bar.space=3,
+barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, bar.space=3,
     col.lab=NULL, row.lab=NULL, z.lab=NULL, col.bar=c("#44ff58","#5844ff","#ff5844"), grid="white", ...) {
  #I rescued this gem from the R graphics gallery.  I'm not sure who originally wrote it but I have altered it
  #so that it is fit to join my minion army 1/3/2012 Marian K. Talbert
