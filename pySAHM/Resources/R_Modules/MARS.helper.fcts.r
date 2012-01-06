@@ -438,9 +438,9 @@ function (mars.glm.object,  #the input mars object
   factor.filter <- rep(FALSE,ncol(xdat))
   for (i in 1:ncol(xdat)) factor.filter[i] <- is.vector(xdat[,i])
 
-  if(sum(factor.filter>1)) {
+  if(sum(factor.filter==FALSE)>0) {
   xrange[,factor.filter] <- sapply(xdat[,factor.filter], range)
-  } else  xrange[,factor.filter]<-apply(xdat,2,range)
+  } else  xrange<-apply(xdat,2,range)
 
   for (i in wanted.species) {
     n.pages <- 1
@@ -484,11 +484,8 @@ function (mars.glm.object,  #the input mars object
               }
             }
           }
-          #if (nplots == 0) { #AKS
-#            if (use.windows) windows(width = 11, height = 8)
-#              par(mfrow = plot.layout)
-#            }
-             browser()
+
+
             if (factor.filter[varno]) {
               if(plot.it) plot(Xi, bf, type = "l", xlab = names(xdat)[varno], ylab = "response") #aks
               if (plot.rug & plot.it) rug(quantile(xdat[,varno], probs = seq(0, 1, 0.1), na.rm = FALSE))
