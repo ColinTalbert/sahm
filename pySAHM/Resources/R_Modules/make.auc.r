@@ -20,8 +20,9 @@ make.auc.plot.jpg<-function(out=out){
  ############### Confusion Matrix ##############
 
      jpeg(file=paste(out$dat$bname,"confusion.matrix.jpg",sep="."),width=1000,height=1000,pointsize=13)
-     barplot3d(c(Stats$train$Cmx[2,1],Stats$train$Cmx[1,1],Stats$train$Cmx[2,2],Stats$train$Cmx[1,2]),transp="f9", rows=2, theta = 40, phi = 25, expand=.5, bar.size=15,bar.space=6,
-    col.lab=c("Absence","Presence"), row.lab=c("Absence","Presence"), z.lab="Confusion Matrix")
+     barplot3d(c(Stats$train$Cmx[2,1],Stats$train$Cmx[1,1],Stats$train$Cmx[2,2],Stats$train$Cmx[1,2]),transp="f9", rows=2, theta = 40, phi = 25, expand=.5,
+       bar.size=15*max(Stats$train$Cmx)/100,bar.space=6*max(Stats$train$Cmx)/100,
+    col.lab=c("Absence","Presence"), row.lab=c("Presence","Absence"), z.lab="Confusion Matrix")
     graphics.off()
 ########################## PLOTS ################################
   #Residual surface of input data
@@ -40,7 +41,7 @@ make.auc.plot.jpg<-function(out=out){
     if(out$dat$split.type%in%c("test","eval"))
       lst$Test<-Stats[[-c(train.mask)]]
     if(out$dat$split.type=="crossValidation") lst<-Stats[-c(train.mask)]
-
+    if(out$dat$split.type%in%c("none")) lst<-Stats
  #AUC and Calibration plot for binomial data
     if(out$input$model.family%in%c("binomial","bernoulli")){
             jpeg(file=plotname,height=1000,width=1000,pointsize=20,quality=100)
@@ -69,6 +70,7 @@ make.auc.plot.jpg<-function(out=out){
                 graphics.off()
             #I'm pretty sure calibration plots should work for count data as well but I'm not quite ready to make a plot
             jpeg(file=calib.plot,height=1000,width=1000,pointsize=20,quality=100)
+
             a<-do.call("rbind",lapply(lst,function(lst){lst$auc.data}))
             calibration.plot(a,main="Calibration Plot")
             preds<-a$pred
