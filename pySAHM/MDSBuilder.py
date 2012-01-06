@@ -46,7 +46,7 @@ class MDSBuilder(object):
         self.outputMDS  = ''
         self.probsurf = ''
         self.pointcount = 0
-        self.NDFlag = -9999
+        self.NDFlag = 'NA'
         self.deleteTmp = False
         self.logger = None
     
@@ -168,7 +168,7 @@ class MDSBuilder(object):
                 msg =  "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
                 msg += "\n!!!!!!!!!!!!!!!!!!!!!WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
                 msg += str(len(badpoints)) + " point fell outside the Covariate coverage."
-                msg += "\nThese points were assigned the NoData value of -9999 for all covariates and will"
+                msg += "\nThese points were assigned the NoData value of 'NA' for all covariates and will"
                 msg += "not be included in subsequent models.\n     These points are:"
                 for badpoint in badpoints:
                     msg += "     x:" + str(row[0]) + " Y: " + str(row[1]) + " response: " + str(row[2]) 
@@ -269,10 +269,12 @@ class MDSBuilder(object):
         #Format and write out our three header lines
         #    the original template, fieldData, and parc folder are 
         #    stored in spots 1,2,3 in the second header line
-        if len(orig_header) > 7 and os.path.exists(orig_header[7]):
+        if len(orig_header) > 3 and \
+            (orig_header[3] == 'Weights' or
+             orig_header[3] == 'frequency'):
             #The input is an output from Field data query
-            original_field_data = orig_header[7]
-            field_data_template = orig_header[8]
+            original_field_data = orig_header[-1]
+            field_data_template = orig_header[-2]
         else:
             #The input is a raw field data file
             original_field_data = self.fieldData
@@ -362,7 +364,7 @@ class MDSBuilder(object):
             x = random.randint(0, cols - 1) 
             y = random.randint(0, rows - 1)
             #print x, y
-            tmpPixel = [x, y, -9999] # a random pixel in the entire image
+            tmpPixel = [x, y, 'NA'] # a random pixel in the entire image
             if useProbSurf:
                 # if they supplied a probability surface ignore the random pixel
                 # if a random number between 1 and 100 is > the probability surface value

@@ -794,7 +794,7 @@ class FieldDataQuery(Module):
         else:
             responsetype = 'responseBinary'
             
-        csvwriter.writerow(['X','Y',responsetype])
+        csvwriter.writerow(['X','Y',responsetype,"input=" + infile.name])
         x_index = self.find_column(header,FDQParams['x_col'])
         y_index = self.find_column(header,FDQParams['y_col'])
         res_index = self.find_column(header,FDQParams['res_col'])

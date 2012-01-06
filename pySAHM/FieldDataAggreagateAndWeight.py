@@ -176,6 +176,14 @@ class FieldDataQuery(object):
         if header[2].lower() == 'responsecount':
             self.countdata = True
         
+        if header[-1].startswith('input='):
+            #this file was produced with FDQ
+            origCSV = header[-1].replace('input=','')
+            header = header[:-1]
+        else:
+            origCSV = self.csv   
+           
+            
         #Commented this out because it is causing an error
         #to be thrown by the java, uncomment out when the 
         #java has been replaced
@@ -186,9 +194,9 @@ class FieldDataQuery(object):
             header.append("pixelRow")
         else:
             header.append("Weights")
-            
-        header.append(os.path.abspath(self.template))
-        header.append(os.path.abspath(self.csv))
+
+        header.append(os.path.abspath(utilities.getRasterName(self.template)))
+        header.append(os.path.abspath(origCSV))
     
         #loop through each row (observation) and 
         #if that particular pixel hasn't been encountered before

@@ -216,7 +216,10 @@ def mds_to_shape(MDSFile, outputfolder):
             if field == "Split":
                 feature.SetField(short_field, row[header_num])
             else:
-                feature.SetField(short_field, float(row[header_num]))
+                if row[header_num] == 'NA':
+                    feature.SetField(short_field, float(-9999))
+                else:
+                    feature.SetField(short_field, float(row[header_num]))
             header_num += 1
         
         response = float(row[2])
@@ -256,6 +259,13 @@ if __name__ == "__main__":
     
     mds_to_shape(r"I:\VisTrails\WorkingFiles\workspace\talbertc_20110901T175958\CovariateCorrelationOutputMDS_anothertry2.csv", r"I:\VisTrails\WorkingFiles\workspace\talbertc_20110901T175958\CovariateCorrelationOutputMDS_anothertry2.shp")
     print "done"
+    
+def getRasterName(fullPathName):
+    if fullPathName.endswith('hdr.adf'):
+        rastername = os.path.split(fullPathName)[0]
+    else:
+        rastername = fullPathName
+    return rastername
 
 
 
