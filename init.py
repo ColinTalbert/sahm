@@ -540,7 +540,7 @@ class Model(Module):
                        "FIT_MARS_pluggable.r":"mars"}
         self.ModelAbbrev = ModelOutput[self.name]
         
-        self.output_dname = utils.mknextdir(prefix=self.ModelAbbrev + 'output_')
+        self.output_dname = utils.mknextdir(prefix=self.ModelAbbrev + '_')
         self.argsDict = utils.map_ports(self, self.port_map)
 
         mdsFile = self.forceGetInputFromPort('mdsFile').name
