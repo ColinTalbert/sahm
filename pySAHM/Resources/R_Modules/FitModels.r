@@ -57,7 +57,9 @@ set.seed(out$input$seed)
    #Load Libraries
               chk.libs(Model)
    #Read in data, perform several checks and store all of the information in the out list
+
              out <- read.ma(out)
+
               out$dat$bname <- bname
    #writing out the header info to the CSV so in case of a break we know what broke
              out<-place.save(out)
@@ -89,7 +91,7 @@ set.seed(out$input$seed)
               if(Model=="rf") out$dat$ma$train$pred<-tweak.p(as.vector(predict(out$mods$final.mod,type="prob")[,2]))
 
     #Run Cross Validation if specified might need separate cv functions for each model
-            if(out$dat$split.type=="crossValidation") out<-cv.fct(out$mods$final.mod, out, sp.no = 1, prev.stratify = F,Model)
+            if(out$dat$split.type=="crossValidation") out<-cv.fct(out$mods$final.mod, out=out, sp.no = 1, prev.stratify = F,Model=Model)
 
                   assign("out",out,envir=.GlobalEnv)
                   t3 <- unclass(Sys.time())
