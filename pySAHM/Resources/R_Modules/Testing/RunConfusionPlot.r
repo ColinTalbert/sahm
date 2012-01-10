@@ -1,4 +1,12 @@
 par(mfrow=c(2,2))
+ barplot3d(100*c(8,7,
+                 6,5,
+                 4,3,
+                 2,1),transp="f9", rows=4, theta = 45, phi = 25, expand=.5,
+       bar.size=150,bar.space=60,
+    col.lab=c("Absence","Presence"), row.lab=c("Presence Train","Presence Test","Absence Train","Absence Test"), z.lab="Confusion Matrix")
+
+
 barplot3d(c(Stats$train$Cmx[2,1],Stats$train$Cmx[1,1],Stats$train$Cmx[2,2],Stats$train$Cmx[1,2]),transp="f9", rows=2, theta = 40, phi = 25, expand=.5, bar.size=15,bar.space=6,
     col.lab=c("Absence","Presence"), row.lab=c("Absence","Presence"), z.lab="Confusion Matrix")
     
