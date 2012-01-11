@@ -18,8 +18,9 @@ make.auc.plot.jpg<-function(out=out){
 
  #################################################
  ############### Confusion Matrix ##############
-  browser()
+
   if(out$input$model.family!="poisson"){
+
      jpeg(file=paste(out$dat$bname,"confusion.matrix.jpg",sep="."),width=1000,height=1000,pointsize=13)
       if(out$dat$split.type=="none"){
       barplot3d(100*c(Stats$train$Cmx[2,1]/sum(Stats$train$Cmx),Stats$train$Cmx[1,1]/sum(Stats$train$Cmx),Stats$train$Cmx[2,2]/sum(Stats$train$Cmx),Stats$train$Cmx[1,2]/sum(Stats$train$Cmx)),transp="f9", rows=2, theta = 40, phi = 25, expand=.5,
@@ -30,7 +31,7 @@ make.auc.plot.jpg<-function(out=out){
                  Stats$train$Cmx[1,1]/sum(Stats$train$Cmx),Stats$test$Cmx[1,1]/sum(Stats$test$Cmx),
                  Stats$train$Cmx[2,2]/sum(Stats$train$Cmx),Stats$test$Cmx[2,2]/sum(Stats$test$Cmx),
                  Stats$train$Cmx[1,2]/sum(Stats$train$Cmx),Stats$test$Cmx[1,2]/sum(Stats$test$Cmx)),transp="f9", rows=2, theta = 40, phi = 25, expand=.5,
-       bar.size=15*max(Stats$train$Cmx)/100,bar.space=6*max(Stats$train$Cmx)/100,
+       bar.size=20*max(Stats$train$Cmx)/(sum(Stats$train$Cmx)),bar.space=4*max(Stats$train$Cmx)/(sum(Stats$train$Cmx)),
     col.lab=c("Absence","Presence"), row.lab=c("Presence","Absence"), z.lab="Confusion Matrix")
     }
     graphics.off()

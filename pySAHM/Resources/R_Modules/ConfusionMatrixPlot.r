@@ -109,7 +109,7 @@ barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, 
             row.lab[i1+1], adj=0, cex=0.9)
         }
 
-     text(trans3d(max(x)*1.22,y[6],0,rys),
+     text(trans3d(max(x)*1.18,y[6],0,rys),
                 "Observed", adj=.7, cex=1.6,srt=(phi+25))
                 
     # Plot the bars!
