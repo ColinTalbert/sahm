@@ -589,49 +589,132 @@ class PARC:
         an individual source layer if the layer has a smaller extent
         This results in the intersection of the grids being used.
         '''
-        gt = list(self.template_params["gt"])
-        
-        #The four corners of the sourceGrid
-        nw = self.transformPoint(sourceParams['west'], sourceParams['north'], 
-                    sourceParams["srs"], self.template_params["srs"])
-        ne = self.transformPoint(sourceParams['east'], sourceParams['north'], 
-                    sourceParams["srs"], self.template_params["srs"])
-        sw = self.transformPoint(sourceParams['west'], sourceParams['south'], 
-                    sourceParams["srs"], self.template_params["srs"])
-        se = self.transformPoint(sourceParams['east'], sourceParams['south'], 
-                    sourceParams["srs"], self.template_params["srs"])
-        #because the translation of a rectangle between crs's results 
-        #in a paralellogram (or worse) I'm taking the four corner points in 
-        #source projection and transforming these to template crs and then 
-        #using the maximum/minimum for each extent.
-        largest_north = max(nw[1], ne[1])
-        smallest_south = min(sw[1], se[1])
-        largest_east = max(ne[0], se[0])
-        smallest_west =min(nw[0], sw[0])
-        
-        #Now for each direction step through the pixels until we have one smaller
-        #or larger than our min/max source extent.
-        while self.template_params['tNorth'] > largest_north:
-            #yScale is negative
-            self.template_params['tNorth'] += self.template_params['yScale']
-            self.template_params['height'] -= 1
+        if self.ImageCoversTemplate(sourceParams):
+            #the template is already smaller than the image in question
+            #Do nothing
+            return False
+        else:
+            gt = list(self.template_params["gt"])
             
-        while self.template_params['tSouth'] < smallest_south:
-            self.template_params['tSouth'] -= self.template_params['yScale']
-            self.template_params['height'] -= 1
-        gt[3] = self.template_params['tNorth']
-        
-        while self.template_params['tWest'] < smallest_west:
-            #yScale is negative
-            self.template_params['tWest'] += self.template_params['xScale']
-            self.template_params['width'] -= 1
+            #because the translation of a rectangle between crs's results 
+            #in a paralellogram (or worse) I'm taking the four corner points in 
+            #source projection and transforming these to template crs and then 
+            #using the maximum/minimum for each extent.          
+            largest_north = self.maxNorth(sourceParams)
+            smallest_south = self.minSouth(sourceParams)
+            largest_east = self.maxEast(sourceParams)
+            smallest_west = self.minWest(sourceParams)
             
-        while self.template_params['tEast'] > largest_east:
-            self.template_params['tEast'] -= self.template_params['xScale']
-            self.template_params['width'] -= 1
-        gt[0] = self.template_params['tWest']
-        #set the template geotransform to be our modified one.
-        self.template_params["gt"] = tuple(gt)
+            #Now for each direction step through the pixels until we have one smaller
+            #or larger than our min/max source extent.
+            orig_tNorth = self.template_params['tNorth']
+            shrinkN = 0
+            while self.template_params['tNorth'] > largest_north:
+                #yScale is negative
+                self.template_params['tNorth'] += self.template_params['yScale']
+                self.template_params['height'] -= 1
+                shrinkN += 1
+            if orig_tNorth <> self.template_params['tNorth']:
+                msg = "Northern edge of template reduced " + str(shrinkN) + " pixels due to, "
+                msg += "the extent of " + sourceParams["file_name"]
+                self.writetolog(msg) 
+            
+            orig_tSouth = self.template_params['tSouth']
+            shrinkN = 0    
+            while self.template_params['tSouth'] < smallest_south:
+                self.template_params['tSouth'] -= self.template_params['yScale']
+                self.template_params['height'] -= 1
+                shrinkN += 1
+            if orig_tSouth <> self.template_params['tSouth']:
+                msg = "NSouthern edge of template reduced " + str(shrinkN) + " pixels due to, "
+                msg += "the extent of " + sourceParams["file_name"] 
+                self.writetolog(msg)
+            
+            gt[3] = self.template_params['tNorth']
+            
+            
+            orig_tWest = self.template_params['tWest']
+            shrinkN = 0
+            while self.template_params['tWest'] < smallest_west:
+                #yScale is negative
+                self.template_params['tWest'] += self.template_params['xScale']
+                self.template_params['width'] -= 1
+                shrinkN += 1
+            if orig_tWest <> self.template_params['tWest']:
+                msg = "Western edge of template reduced " + str(shrinkN) + " pixels due to, "
+                msg += "the extent of " + sourceParams["file_name"]   
+                self.writetolog(msg)
+            
+            orig_tEast = self.template_params['tEast']
+            shrinkN = 0
+            while self.template_params['tEast'] > largest_east:
+                self.template_params['tEast'] -= self.template_params['xScale']
+                self.template_params['width'] -= 1
+                shrinkN += 1
+            gt[0] = self.template_params['tWest']
+            if orig_tEast <> self.template_params['tEast']:
+                msg = "Eastern edge of template reduced " + str(shrinkN) + " pixels due to, "
+                msg += "the extent of " + sourceParams["file_name"]
+                self.writetolog(msg)
+            
+            #set the template geotransform to be our modified one.
+            self.template_params["gt"] = tuple(gt)
+
+    def maxNorth(self, sourceParams):
+        northWidth = sourceParams['east'] - sourceParams['west']
+        curW = sourceParams['west']
+        steps = 10
+        maxNorth = -999999
+        for step in range(steps + 1):
+            curWest = sourceParams['west'] + step*(northWidth/steps)
+            transPoint = self.transformPoint(curWest, sourceParams['north'], 
+                        sourceParams["srs"], self.template_params["srs"])
+#            print curWest, sourceParams['north'], " = ", transPoint
+            if transPoint[1] > maxNorth:
+                maxNorth = transPoint[1]
+        return maxNorth
+    
+    def minSouth(self, sourceParams):
+        southWidth = sourceParams['east'] - sourceParams['west']
+        curW = sourceParams['west']
+        steps = 10
+        minSouth = 999999
+        for step in range(steps + 1):
+            curWest = sourceParams['west'] + step*(southWidth/steps)
+            transPoint = self.transformPoint(curWest, sourceParams['south'], 
+                        sourceParams["srs"], self.template_params["srs"])
+#            print curWest, sourceParams['south'], " = ", transPoint
+            if transPoint[1] < minSouth:
+                minSouth = transPoint[1]
+        return minSouth
+    
+    def maxEast(self, sourceParams):
+        eastHeight = sourceParams['north'] - sourceParams['south']
+        curN = sourceParams['north']
+        steps = 10
+        maxEast = -999999
+        for step in range(steps + 1):
+            curNorth = sourceParams['south'] + step*(eastHeight/steps)
+            transPoint = self.transformPoint(sourceParams["east"], curNorth,
+                        sourceParams["srs"], self.template_params["srs"])
+#            print curWest, sourceParams['south'], " = ", transPoint
+            if transPoint[0] > maxEast:
+                maxEast = transPoint[0]
+        return maxEast
+    
+    def minWest(self, sourceParams):
+        westHeight = sourceParams['north'] - sourceParams['south']
+        curN = sourceParams['north']
+        steps = 10
+        minWest = 999999
+        for step in range(steps + 1):
+            curNorth = sourceParams['south'] + step*(westHeight/steps)
+            transPoint = self.transformPoint(sourceParams["west"], curNorth,
+                        sourceParams["srs"], self.template_params["srs"])
+#            print curWest, sourceParams['south'], " = ", transPoint
+            if transPoint[0] < minWest:
+                minWest = transPoint[0]
+        return minWest
 
     def validateArgs(self):
         """
