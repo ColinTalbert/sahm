@@ -319,8 +319,31 @@ def runRScript(script, args, module=None):
         msg += ret[1]
         writetolog(msg)
 
+    if 'Error' in ret[1] or 'Warning' in ret[1]:
+        writeRErrorsToLog(args, ret)
+
     del(ret)
     writetolog("\nFinished R Processing of " + script, True)
+
+def writeRErrorsToLog(args, ret):
+    #first check that this is a model run, or has a o= in the args.
+    #If so write the output log file in the directory
+    argsSplit = args.split()
+    output = [val.split("=")[1] for val in argsSplit if val.startswith("o=")]
+    if os.path.isdir(output):
+        pass
+    elif os.path.isdir(os.path.split(output)[0]):
+        output = os.path.split(output)[0]
+    else:
+        return False
+    
+    outFileN = os.path.join(output, "errorLogFile.txt")
+    outFile = open(outFileN, "w")
+    outFile.write("standard out:\n\n")
+    outFile.write(ret[0] + "\n\n\n")
+    outFile.write("standard error:\n\n")
+    outFile.write(ret[0])
+    outFile.close()
 
 def merge_inputs_csvs(inputCSVs_list, outputFile):
     oFile = open(outputFile, "wb")
