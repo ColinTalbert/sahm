@@ -130,7 +130,7 @@ make.auc.plot.jpg<-function(out=out){
         capture.stats(lst,file.name=paste(out$dat$bname,"_output.txt",sep=""),label=out$dat$split.type,family=out$input$model.family,opt.methods=out$input$opt.methods,out)
     }
 
-   if(out$dat$split.type!="eval"){
+
         ############ getting statistics along with appropriate names into a data frame for creating the appended output
                         last.dir<-strsplit(out$input$output.dir,split="\\\\")
                         parent<-sub(paste("\\\\",last.dir[[1]][length(last.dir[[1]])],sep=""),"",out$input$output.dir)
@@ -155,7 +155,7 @@ make.auc.plot.jpg<-function(out=out){
                             out$dat$input$ParcTemplate,ifelse(length(out$dat$input$CovSelectName)==0,"NONE",out$dat$input$CovSelectName),""))
 
                       AppendOut(compile.out=out$input$Append.Dir,Header,x,out,Parm.Len=length(stat.names),parent=parent,split.type=out$dat$split.type)
-               }
+
     return(list(thresh=train.stats$train$thresh,residual.smooth.fct=residual.smooth.fct))
 }
 
