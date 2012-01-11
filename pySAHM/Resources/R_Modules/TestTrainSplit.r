@@ -52,6 +52,13 @@
             bg.dat$TrainSplit=""
             }
 
+             if(length(response<100) stop("A test training split is not advisable for less than 100 observations.  Consider cross validation as an alternative.")
+             if(length(response<200) warning(paste("There are less than 200 observations.  Cross validation might be preferable to a test:,
+             "training split \n weigh the decision while keeping in mind the number of predictors being considered: " ncol(dat)-3,sep=""))
+
+             if(tolower(response.col)=="responsebinary" & any(table(response)<10))
+             stop("Use of a test training split is not recommended when the dataset contains less than 10 presence or absence points")
+
          temp<-if(!is.null(RatioPresAbs))(sum(response>=1)/sum(response==0)==RatioPresAbs)
          if(is.null(temp)) temp<-FALSE
        if(is.null(RatioPresAbs)| temp){

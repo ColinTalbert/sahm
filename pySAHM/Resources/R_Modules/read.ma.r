@@ -151,6 +151,7 @@
                         dat.out[[i]]<-list(resp=dat.out[[i]][r.col],XY=dat.out[[i]][,xy.cols],dat=dat.out[[i]][,-c(rm.list)],weight=dat.out[[i]][,ncol(dat.out[[i]])])
                         names(dat.out[[i]]$XY)<-toupper(names(dat.out[[i]]$XY))
                      }
+                     if(nrow(dat.out$train$dat)/(ncol(dat.out$train$dat)-1)<3) stop("You have less than 3 observations for every predictor\n consider reducing the number of predictors before continuing")
 
                    temp.fct<-function(l){table(l$resp)}
                 out.list$nPresAbs<-lapply(dat.out,temp.fct)

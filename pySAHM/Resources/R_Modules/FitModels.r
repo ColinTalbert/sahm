@@ -101,6 +101,12 @@ set.seed(out$input$seed)
                           "because they had only one level:",paste(out$dat$bad.factor.cols,collapse=","),"\n"),
                           file=paste(bname,"_output.txt",sep=""),append=T)
                       }
+
+                    if(nrow(out$dat$ma$train$dat)/(ncol(out$dat$ma$train$dat)-1)<10){
+                    capture.output(cat(paste("You have approximately ", round(nrow(out$dat$ma$train$dat)/(ncol(out$dat$ma$train$dat)-1),digits=1),
+                    "observations for every predictor\n consider reducing the number of predictors before continuing\n",sep="")),
+                          file=paste(bname,"_output.txt",sep=""),append=T)
+                    }
                   cat("40%\n")
 
     #producing auc and residual plots model summary information and accross model evaluation metric

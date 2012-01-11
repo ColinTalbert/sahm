@@ -37,11 +37,7 @@ on.exit(detach(out$input))
                   #flush.console()
                   capture.output(cat("\n\nSummary of Model:\n"),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
                   capture.output(print(out$mods$summary),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
-                  if(!is.null(out$dat$bad.factor.cols)){
-                      capture.output(cat("\nWarning: the following categorical response variables were removed from consideration\n",
-                          "because they had only one level:",paste(out$dat$bad.factor.cols,collapse=","),"\n"),
-                          file=paste(out$dat$bname,"_output.txt",sep=""),append=T)
-        }
+
           }
 
   if(Model=="glm") {
@@ -198,11 +194,7 @@ if(Model=="rf"){
           txt2 <- "\nDefault summary of random forest fit:\n"
           capture.output(cat(txt0),cat(txt1),print(round(model.summary,4)),cat(txt2),print(out$mods$final.mod),file=paste(out$dat$bname,"_output.txt",sep=""))
           cat(txt0);cat(txt1);print(round(model.summary,4));cat(txt2);print(out$mods$final.mod);cat("\n\n")
-          if(!is.null(out$dat$bad.factor.cols)){
-              capture.output(cat("\nWarning: the following categorical response variables were removed from consideration\n",
-                  "because they had only one level:",paste(out$dat$bad.factor.cols,collapse=","),"\n"),
-                  file=paste(out$dat$bname,"_output.txt",sep=""),append=T)
-            }
+
          #storing number of variables in final model
               out$mods$n.vars.final<-length(out$dat$used.covs) #random forest doesn't drop variables
               out$mods$vnames<-out$dat$used.covs
