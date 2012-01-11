@@ -8,7 +8,7 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
       on.exit(detach(out$input))
       bname<-out$dat$bname
   }
-
+ if(out$dat$split.type%in%c("test","eval"))
  if(Model=="mars"){
         if(is.null(responseCurveForm)){
            responseCurveForm<-0}
@@ -45,8 +45,8 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
                            }
 
 
-                      plot(r.curves$pred[1][[1]], r.curves$resp[1][[1]])
-                          points(out$cv$resp.curves$"1"$pred[1][[1]][1],out$cv$resp.curves$"1"$resp[1][[1]][1])
+                     # plot(r.curves$pred[1][[1]], r.curves$resp[1][[1]])
+                    #      points(out$cv$resp.curves$"1"$pred[1][[1]][1],out$cv$resp.curves$"1"$resp[1][[1]][1])
 
            #############################
             par(mfrow=c(1,1))

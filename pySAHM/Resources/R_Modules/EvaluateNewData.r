@@ -10,9 +10,9 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,make.binary.tif=NULL,make.
 #workspace=paste("C:\\VisTrails\\mtalbert_20110504T132851","modelWorkspace",sep="\\")
 #new.tifs<-out$input$ma.name
 #end delete
-       print(ls())
+
     load(workspace)
-       print(ls())
+
        out1<-out
        rm(out,envir=.GlobalEnv)
        rm(out)
@@ -87,8 +87,10 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,make.binary.tif=NULL,make.
 
 
 
+make.p.tif=T
+make.binary.tif=T
+MESS=FALSE
 
-new.tifs=NULL
 # Interpret command line argurments #
 # Make Function Call #
 Args <- commandArgs(trailingOnly=FALSE)
@@ -102,11 +104,17 @@ Args <- commandArgs(trailingOnly=FALSE)
     	argSplit[[1]][1]
     	argSplit[[1]][2]
     	if(argSplit[[1]][1]=="ws") ws <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="new.tifs") new.tifs <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="o") out.dir <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="mes")  MESS <- argSplit[[1]][2]
+   		if(argSplit[[1]][1]=="mpt") make.p.tif <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- argSplit[[1]][2]
     }
 
+make.p.tif=as.logical(make.p.tif)
+make.binary.tif=as.logical(make.binary.tif)
+MESS=as.logical(MESS)
 
-EvaluateNewData(workspace=ws,out.dir=out.dir)
+EvaluateNewData(workspace=ws,out.dir=out.dir,make.binary.tif=make.binary.tif,make.p.tif=make.p.tif,MESS=MESS)
+
 
 

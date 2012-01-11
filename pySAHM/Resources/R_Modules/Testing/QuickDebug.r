@@ -18,7 +18,7 @@ list.files()
 rc="responseCount"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
 
-input.file[11]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
 
 #fit.model(ma.name=input.file,output.dir=output.dir,response.col=rc,make.p.tif=T,make.binary.tif=T,script.name="glm.r",
 #opt.methods=2,save.model=TRUE,UnitTest=FALSE,MESS=FALSE,aic.form=TRUE,parm2=4)
@@ -42,10 +42,11 @@ input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation4\\model
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Split.csv"
 #######################################################################
 ##MARS
+output.dir="C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction1.6\\mars"
 FitModels(ma.name=input.file,
             output.dir=output.dir,
-            response.col=rc,make.p.tif=T,make.binary.tif=T,
-            mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars",opt.methods=2,MESS=T)
+            response.col=rc,make.p.tif=F,make.binary.tif=F,
+            mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars",opt.methods=2,MESS=F)
 
 EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,make.binary.tif=TRUE,make.p.tif=TRUE,MESS=TRUE)
 
@@ -79,9 +80,9 @@ FitModels(ma.name=input.file,
           tif.dir=NULL,output.dir=output.dir,
           response.col=rc,make.p.tif=T,make.binary.tif=T,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
       family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
-  tolerance = 0.001,seed=NULL,opt.methods=2,
+  tolerance = 0.001,opt.methods=2,
           simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
-          learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=TRUE)
+          learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=TRUE,seed=1)
 
 #Now evaluating new data
 EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,make.binary.tif=TRUE,make.p.tif=TRUE,MESS=TRUE)

@@ -57,7 +57,9 @@ set.seed(out$input$seed)
    #Load Libraries
               chk.libs(Model)
    #Read in data, perform several checks and store all of the information in the out list
+
              out <- read.ma(out)
+
               out$dat$bname <- bname
    #writing out the header info to the CSV so in case of a break we know what broke
              out<-place.save(out)
@@ -89,7 +91,7 @@ set.seed(out$input$seed)
               if(Model=="rf") out$dat$ma$train$pred<-tweak.p(as.vector(predict(out$mods$final.mod,type="prob")[,2]))
 
     #Run Cross Validation if specified might need separate cv functions for each model
-            if(out$dat$split.type=="crossValidation") out<-cv.fct(out$mods$final.mod, out, sp.no = 1, prev.stratify = F,Model)
+            if(out$dat$split.type=="crossValidation") out<-cv.fct(out$mods$final.mod, out=out, sp.no = 1, prev.stratify = F,Model=Model)
 
                   assign("out",out,envir=.GlobalEnv)
                   t3 <- unclass(Sys.time())
@@ -99,6 +101,12 @@ set.seed(out$input$seed)
                           "because they had only one level:",paste(out$dat$bad.factor.cols,collapse=","),"\n"),
                           file=paste(bname,"_output.txt",sep=""),append=T)
                       }
+
+                    if(nrow(out$dat$ma$train$dat)/(ncol(out$dat$ma$train$dat)-1)<10){
+                    capture.output(cat(paste("You have approximately ", round(nrow(out$dat$ma$train$dat)/(ncol(out$dat$ma$train$dat)-1),digits=1),
+                    "observations for every predictor\n consider reducing the number of predictors before continuing\n",sep="")),
+                          file=paste(bname,"_output.txt",sep=""),append=T)
+                    }
                   cat("40%\n")
 
     #producing auc and residual plots model summary information and accross model evaluation metric

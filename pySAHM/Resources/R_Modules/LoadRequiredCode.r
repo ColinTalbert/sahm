@@ -21,7 +21,7 @@ source(paste(ScriptPath,"calc.deviance.r",sep="\\"))
 source(paste(ScriptPath,"calibration.r",sep="\\"))
 source(paste(ScriptPath,"roc.r",sep="\\"))
 #New generic function source code
-source(paste(ScriptPath,"cv.fctNew.r",sep="\\"))
+source(paste(ScriptPath,"cv.fct.r",sep="\\"))
 source(paste(ScriptPath,"generic.model.fit.r",sep="\\"))
 source(paste(ScriptPath,"pred.fct.r",sep="\\"))
 source(paste(ScriptPath,"response.curves.r",sep="\\"))

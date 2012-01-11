@@ -18,12 +18,23 @@ make.auc.plot.jpg<-function(out=out){
 
  #################################################
  ############### Confusion Matrix ##############
-
+  browser()
+  if(out$input$model.family!="poisson"){
      jpeg(file=paste(out$dat$bname,"confusion.matrix.jpg",sep="."),width=1000,height=1000,pointsize=13)
-     barplot3d(c(Stats$train$Cmx[2,1],Stats$train$Cmx[1,1],Stats$train$Cmx[2,2],Stats$train$Cmx[1,2]),transp="f9", rows=2, theta = 40, phi = 25, expand=.5,
+      if(out$dat$split.type=="none"){
+      barplot3d(100*c(Stats$train$Cmx[2,1]/sum(Stats$train$Cmx),Stats$train$Cmx[1,1]/sum(Stats$train$Cmx),Stats$train$Cmx[2,2]/sum(Stats$train$Cmx),Stats$train$Cmx[1,2]/sum(Stats$train$Cmx)),transp="f9", rows=2, theta = 40, phi = 25, expand=.5,
        bar.size=15*max(Stats$train$Cmx)/100,bar.space=6*max(Stats$train$Cmx)/100,
     col.lab=c("Absence","Presence"), row.lab=c("Presence","Absence"), z.lab="Confusion Matrix")
+         } else {
+     barplot3d(100*c(Stats$train$Cmx[2,1]/sum(Stats$train$Cmx),Stats$test$Cmx[2,1]/sum(Stats$test$Cmx),
+                 Stats$train$Cmx[1,1]/sum(Stats$train$Cmx),Stats$test$Cmx[1,1]/sum(Stats$test$Cmx),
+                 Stats$train$Cmx[2,2]/sum(Stats$train$Cmx),Stats$test$Cmx[2,2]/sum(Stats$test$Cmx),
+                 Stats$train$Cmx[1,2]/sum(Stats$train$Cmx),Stats$test$Cmx[1,2]/sum(Stats$test$Cmx)),transp="f9", rows=2, theta = 40, phi = 25, expand=.5,
+       bar.size=15*max(Stats$train$Cmx)/100,bar.space=6*max(Stats$train$Cmx)/100,
+    col.lab=c("Absence","Presence"), row.lab=c("Presence","Absence"), z.lab="Confusion Matrix")
+    }
     graphics.off()
+   }
 ########################## PLOTS ################################
   #Residual surface of input data
   if(out$dat$split.type!="eval"){
@@ -133,8 +144,8 @@ make.auc.plot.jpg<-function(out=out){
                             return(c("","",lst$correlation,lst$pct.dev.exp,lst$prediction.error/100))})
                                 stat.names<-c("Correlation Coefficient","Percent Deviance Explained","Prediction Error")
                                }
-                            csv.vect<-c( t(t(as.vector(unlist(csv.stats[train.mask])))),if(out$dat$split.type!="none") unlist(csv.stats[-c(train.mask)]))
-                            csv.vect[seq(from=2,by=length(csv.vect)/length(Stats),length=length(Stats))]<-c("Train",names(lst))
+                            csv.vect<-c(t(t(as.vector(unlist(csv.stats[train.mask])))),if(out$dat$split.type!="none") unlist(csv.stats[-c(train.mask)]))
+                            csv.vect[seq(from=2,by=length(csv.vect)/length(Stats),length=length(Stats))]<-ifelse(out$dat$split.type=="none","Train",c("Train",names(lst)))
                            x=data.frame(cbind(rep(c("","",stat.names),times=length(Stats)),
                              csv.vect))
 

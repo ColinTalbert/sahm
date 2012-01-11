@@ -10,7 +10,10 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
           write.table(x,file=compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=",")
           output<-matrix(0,0,0)
   } else { #this else (not the first time through) read current csv first
-
+          if(nrow(input)+nrow(x)==length(c(Header[,2],as.character(x[,2])))){
+            #if the first model run threw an error no subsequent output will be written without some special help
+             input<-rbind(input,matrix(c(as.character(x[,1]),rep("",times=length(x[,1])*(ncol(input)-1))),nrow=length(x[,1])))
+                }
           output<-cbind(input[,(1:(ncol(input)-1))],c(Header[,2],as.character(x[,2])))
               temp=try(write.table(output,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=","),silent=TRUE)
            while(class(temp)=="try-error"){
@@ -55,7 +58,7 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
                   colors.train=c("chocolate4","gold3","darkolivegreen4","steelblue4","brown4")
         #producing plots
                    for(i in 1:Parm.Len){
-                            plot(c(.6,(ncol(train)+2)),c(0,1.1),type="n",xaxt="n",
+                            plot(c(.6,(ncol(train)+2)),c(0,max(1.1,max(train[i,],na.rm=TRUE)+.1)),type="n",xaxt="n",
                                 xlab=paste("Corresponding Column in ",ifelse(!is.null(out$dat$ma$ma.test),"AppendedOutputTestTrain.csv","AppendedOutput.csv"),sep=""),
                                 ylab=x.labs[i])
                                 grid(nx=10)
@@ -64,7 +67,8 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
                               if(split.type=="crossValidation") points(ss-.1,train[i,],col=colors.train[i],cex=4,pch=19)
                              #if test split
                              options(warn=-1)
-                              if(length(test.lst)==1) rect(xleft=ss,ybottom=0,xright=(ss+.4),ytop=pmax(0,test.lst[[1]][i,]),col=colors.test[i],lwd=2)
+                             if(length(test.lst)==1) rect(xleft=ss,ybottom=0,xright=(ss+.4),ytop=as.vector(pmax(0,test.lst[[1]][i,])),col=c(colors.test[i],"white")[(test.lst[[1]][i,]==0)+1],
+                                                     border=c("black","white")[(test.lst[[1]][i,]==0)+1],lwd=2)
                               if(length(test.lst)>1){
                                                       for(k in ss){
                                                       a<-vector()
@@ -73,10 +77,15 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
                                                       }
                               }
                              options(warn=0)
-                              text((which(train[i,]==max(train[i,],na.rm=TRUE),arr.ind=TRUE)-.25),
-                                  max(train[i,],na.rm=TRUE)+.05,labels=as.character(round(max(train[i,]),digits=2)),cex=.8)
-                              if(length(test.lst)==1) text((which(test.lst[[1]][i,]==max(test.lst[[1]][i,],na.rm=TRUE),arr.ind=TRUE)+.25),
-                                  max(test.lst[[1]][i,],na.rm=TRUE)+.05,labels=as.character(round(max(test.lst[[1]][i,]),digits=2)),cex=.8)
+                             #have to label the maximum for everything except prediction error
+                             if(x.labs[i]!="Prediction\nError") text((which(train[i,]==max(train[i,],na.rm=TRUE),arr.ind=TRUE)-.25),
+                                  max(train[i,],na.rm=TRUE)+.07,labels=as.character(round(max(train[i,],na.rm=TRUE),digits=2)),cex=.8)
+                             if(x.labs[i]=="Prediction\nError") text((which(train[i,]==min(train[i,],na.rm=TRUE),arr.ind=TRUE)-.25),
+                                  min(train[i,],na.rm=TRUE)+.07,labels=as.character(round(min(train[i,],na.rm=TRUE),digits=2)),cex=.8)
+                             if(x.labs[i]!="Prediction\nError") if(length(test.lst)==1) text((which(test.lst[[1]][i,]==max(test.lst[[1]][i,],na.rm=TRUE),arr.ind=TRUE)[2]+.25),
+                                  max(test.lst[[1]][i,],na.rm=TRUE)+.07,labels=as.character(round(max(test.lst[[1]][i,],na.rm=TRUE),digits=2)),cex=.8)
+                              if(x.labs[i]=="Prediction\nError") if(length(test.lst)==1) text((which(test.lst[[1]][i,]==max(test.lst[[1]][i,],na.rm=TRUE),arr.ind=TRUE)[2]+.25),
+                                  max(test.lst[[1]][i,],na.rm=TRUE)+.07,labels=as.character(round(max(test.lst[[1]][i,],na.rm=TRUE),digits=2)),cex=.8)
                             if (i==1) par(mar=c(.2, 5, .6, 2))
                             if(i!=1 & i!=(Parm.Len-1)) par(mar=c(.3, 5, .4, 2))
                             if(i==(Parm.Len-1)) par(mar=c(2, 5, .4, 2))
