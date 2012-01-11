@@ -61,36 +61,7 @@ def menu_items():
     def select_test_final_model():
         global session_dir
         
-        #check if multiple model types have been run
-        #options are one of ('Binary' or 'Count') 
-        #and one of    ('TestTrain' or '' or 'CV')
-        globPattern = os.path.join(session_dir, "*AppendedOutput.csv")
-        csvOutputs = glob.glob(globPattern)
-        
-        if len(csvOutputs) > 1:
-            which_type = QtGui.QDialog()
-            which_type.setWindowTitle("Multiple model types found in this Session Folder")
-            lbl = QtGui.QLabel(which_type)
-            widget_layout = QtGui.QVBoxLayout()
-            lbl.setText("Multiple model types found in this Session Folder\n\nPlease select the model type you wish to select from and test.")
-            for model_type in csvOutputs:
-                button = QtGui.QPushButton()
-                buttonText = os.path.split(model_type)[1].replace('.csv', '')
-                button.setText(buttonText)
-                button.connect(button, QtCore.SIGNAL('clicked(bool)'), button_push)
-                widget_layout.addWidget(button)
-            
-            which_type.setLayout(widget_layout)
-            ans = which_type.exec_()
-            
-        else:
-            csv_file = csvOutputs[0]
-        
-        displayJPEG = csv_file.replace(".csv", ".jpg")
-        
-        STFM  = SelectAndTestFinalModel(csv_file, displayJPEG, configuration.r_path)
-        #dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
-#        print " ... finished with dialog "  
+        STFM  = SelectAndTestFinalModel(session_dir, configuration.r_path) 
         retVal = STFM.exec_()
         if retVal == 1:
             raise ModuleError(self, "Cancel or Close selected (not OK) workflow halted.")
@@ -99,6 +70,7 @@ def menu_items():
     lst.append(("Change session folder", change_session_folder))
     lst.append(("Select and test the Final Model", select_test_final_model))
     return(lst)
+
 
 
 def expand_ports(port_list):

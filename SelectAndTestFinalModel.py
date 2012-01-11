@@ -12,6 +12,8 @@ import shutil
 import os
 from core.system import execute_cmdline
 import subprocess
+import glob
+
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -21,14 +23,15 @@ except AttributeError:
 
 class SelectAndTestFinalModel(QtGui.QDialog):
 
-    def __init__(self, inputCSV, displayJPEG, rPath, parent=None):
+    def __init__(self, session_folder, rPath, parent=None):
         self.rPath = rPath
         
-        self.displayJPEG = displayJPEG
+        findModel = FindModelType(session_folder, parent)
         
-        QtGui.QDialog.__init__(self, parent)
+        self.csv_file = findModel.csv_file
+        self.display_jpeg = findModel.jpeg_file
         
-        self.inputMDS = inputCSV
+        QtGui.QDialog.__init__(self, parent)      
         
         layout = QtGui.QVBoxLayout()
         self.setWindowFlags(QtCore.Qt.Window)
@@ -97,16 +100,16 @@ class SelectAndTestFinalModel(QtGui.QDialog):
 #        self.label.setSizePolicy(sizePolicy)
 #        self.label.setObjectName(_fromUtf8("label"))
 #        self.horizontalLayout_3.addWidget(self.label)
-        self.lineEdit = QtGui.QLineEdit(self.widget)
-        self.lineEdit.setText(_fromUtf8("0.7"))
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.lineEdit.sizePolicy().hasHeightForWidth())
-        self.lineEdit.setSizePolicy(sizePolicy)
-        self.lineEdit.setMaximumSize(QtCore.QSize(75, 16777215))
-        self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
-        self.horizontalLayout_3.addWidget(self.lineEdit)
+#        self.lineEdit = QtGui.QLineEdit(self.widget)
+#        self.lineEdit.setText(_fromUtf8("0.7"))
+#        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+#        sizePolicy.setHorizontalStretch(0)
+#        sizePolicy.setVerticalStretch(0)
+#        sizePolicy.setHeightForWidth(self.lineEdit.sizePolicy().hasHeightForWidth())
+#        self.lineEdit.setSizePolicy(sizePolicy)
+#        self.lineEdit.setMaximumSize(QtCore.QSize(75, 16777215))
+#        self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
+#        self.horizontalLayout_3.addWidget(self.lineEdit)
         
 #        self.chkPresence = QtGui.QCheckBox(self.widget)
 #        self.chkPresence.setChecked(True)
@@ -169,7 +172,7 @@ class SelectAndTestFinalModel(QtGui.QDialog):
 
         self.setWindowTitle(_fromUtf8("Final Model Selection and Test"))
         self.label_2.setText(_fromUtf8("Models"))
-        self.btnRunR.setText(_fromUtf8("Run Test"))
+        self.btnRunR.setText(_fromUtf8("Run Final Test"))
 #        self.label.setText(_fromUtf8("Threshold"))
         self.btnOK.setText(_fromUtf8("OK"))
         self.btnCancel.setText(_fromUtf8("Cancel"))
@@ -180,15 +183,15 @@ class SelectAndTestFinalModel(QtGui.QDialog):
         
         layout.addLayout(self.horizontalLayout_4)
         
-#        self.btnCancel.setShortcut('Esc')
-#        self.connect(self.btnOK, QtCore.SIGNAL('clicked(bool)'),
-#                     self.okTriggered)
-#        self.connect(self.btnCancel, QtCore.SIGNAL('clicked(bool)'),
-#                     self.cancel)
-#        self.connect(self.btnRunR, QtCore.SIGNAL('clicked(bool)'),
-#                     self.updateROutput)
-#        self.connect(self.view, QtCore.SIGNAL('resize()'),
-#                     self.resize)
+        self.btnCancel.setShortcut('Esc')
+        self.connect(self.btnOK, QtCore.SIGNAL('clicked(bool)'),
+                     self.okTriggered)
+        self.connect(self.btnCancel, QtCore.SIGNAL('clicked(bool)'),
+                     self.cancel)
+        self.connect(self.btnRunR, QtCore.SIGNAL('clicked(bool)'),
+                     self.updateROutput)
+        self.connect(self.view, QtCore.SIGNAL('resize()'),
+                     self.resize)
         
         self.scene.wheelEvent = self.wheel_event
 #        self.resizeEvent = self.resize_event
@@ -199,9 +202,9 @@ class SelectAndTestFinalModel(QtGui.QDialog):
         self.repaint()
         #utils.breakpoint()
         #code to add in pictureviewer stuff
-        outputPic = self.runR(self.inputMDS)
+#        outputPic = self.display_jpeg
 #        self.setup_view()
-        self.load_picture(outputPic)
+        self.load_picture(self.display_jpeg)
         
     def okTriggered(self):
         self.SaveMDSFromTreeview()
@@ -212,23 +215,42 @@ class SelectAndTestFinalModel(QtGui.QDialog):
         #raise Exception
 #        shutil.copyfile(self.inputMDS, self.outputMDS)
         
-    
     def PopulateTreeview(self):
-        which_type = QtGui.QDialog()
-        which_type.setWindowTitle("Multiple model types found in this Session Folder")
-        widget_layout = QtGui.QVBoxLayout()
-        for model_type in ["binaryCV", "countCV", "binaryNoTest"]:
-            button = QtGui.QPushButton()
-            button.setText(model_type)
-            button.connect(button, QtCore.SIGNAL('clicked(bool)'), self.button_push)
-            widget_layout.addWidget(button)
+        self.treeview.setColumnCount(1)
+
+        csvfile = open(self.csv_file, "r")
+        #print "MDS", self.inputMDS
+        reader = csv.reader(csvfile)
+        header = reader.next() #store the header
+        header2 = reader.next()
+        header3 = reader.next()
+        header4 = reader.next()
+        header5 = reader.next()
+        header6 = reader.next()
+        
+        i = 1
+        for item in header[1:]:
+            tooltiptext = header2[0] + ":\t" + header2[i] + "\n"
+            tooltiptext += header3[0] + ":\t" + header3[i] + "\n"
+            tooltiptext += header4[0] + ":\t" + header4[i] + "\n"
+            tooltiptext += header5[0] + ":\t" + header5[i] + "\n"
+            tooltiptext += header6[0] + ":\t" + header6[i]
             
-        which_type.setLayout(widget_layout)
-        which_type.exec_()
+            child_item = QtGui.QTreeWidgetItem([item,])
+            child_item.setToolTip(0, _fromUtf8(tooltiptext))
+            child_item.setFlags(QtCore.Qt.ItemIsUserCheckable |
+                                QtCore.Qt.ItemIsEnabled)
+            child_item.setCheckState(0, QtCore.Qt.Unchecked)
+            self.treeview.addTopLevelItem(child_item)
+            i += 1
+            
+        csvfile.close()
+        self.label_2.setText(_fromUtf8("Models previously run:"))
         
         
-    def button_push(self, event):
-        pass
+        
+#    def button_push(self, event):
+#        pass
 
 
         
@@ -279,48 +301,56 @@ class SelectAndTestFinalModel(QtGui.QDialog):
 #        #update the tree view label to show how many covariates there are
 #        self.label_2.setText(_fromUtf8("Covariates   (n=" + str(n) + ")"))
         
-    def SaveMDSFromTreeview(self):
-        #updates the second header line on the input MDS file 
-        #to reflect the checked items in the tree view 
-        #and saves the results to the output MDS.
-        
-        reader = csv.reader(open(self.inputMDS, "r"))
-        header = reader.next() #store the header
-        header2 = reader.next() #the 2nd line of the mds with use/don't use
-        header3 = reader.next() #the 3rd line of the mds with the path
-        
-        outHeader2 = header2
-        outHeader2[2] = self.selection_name    
-                  
-        treeviewIter = QtGui.QTreeWidgetItemIterator(self.treeview)
-        while treeviewIter.value():
-            item = treeviewIter.value()
-            col_index = header.index(item.text(0))
-            if item.checkState(0) == QtCore.Qt.Checked:
-                outHeader2[col_index] = "1"
-            else:
-                outHeader2[col_index] = "0"
-            treeviewIter += 1
-
-        oFile = open(self.outputMDS, 'wb')
-        writer = csv.writer(oFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(header)
-        writer.writerow(outHeader2)
-        writer.writerow(header3)
-        for row in reader:
-            writer.writerow(row)
-        oFile.close
+#    def SaveMDSFromTreeview(self):
+#        #updates the second header line on the input MDS file 
+#        #to reflect the checked items in the tree view 
+#        #and saves the results to the output MDS.
+#        
+#        reader = csv.reader(open(self.inputMDS, "r"))
+#        header = reader.next() #store the header
+#        header2 = reader.next() #the 2nd line of the mds with use/don't use
+#        header3 = reader.next() #the 3rd line of the mds with the path
+#        
+#        outHeader2 = header2
+#        outHeader2[2] = self.selection_name    
+#                  
+#        treeviewIter = QtGui.QTreeWidgetItemIterator(self.treeview)
+#        while treeviewIter.value():
+#            item = treeviewIter.value()
+#            col_index = header.index(item.text(0))
+#            if item.checkState(0) == QtCore.Qt.Checked:
+#                outHeader2[col_index] = "1"
+#            else:
+#                outHeader2[col_index] = "0"
+#            treeviewIter += 1
+#
+#        oFile = open(self.outputMDS, 'wb')
+#        writer = csv.writer(oFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+#        writer.writerow(header)
+#        writer.writerow(outHeader2)
+#        writer.writerow(header3)
+#        for row in reader:
+#            writer.writerow(row)
+#        oFile.close
 
     def updateROutput(self):
-        self.SaveMDSFromTreeview()
+        treeviewIter = QtGui.QTreeWidgetItemIterator(self.treeview)
+        selected_models = []
+        while treeviewIter.value():
+            item = treeviewIter.value()
+#            col_index = header.index(item.text(0))
+            if item.checkState(0) == QtCore.Qt.Checked:
+                selected_models.append(str(item.text(0)))
+#            else:
+#                outHeader2[col_index] = "0"
+            treeviewIter += 1
         outputPic = self.runR(self.outputMDS)
         self.load_picture(outputPic)
         
     def runR(self, MDSfile):
 #        
-#        program = os.path.join(self.rPath, "i386", "Rterm.exe") 
-#        script = os.path.join(utils.getModelsPath(), "PairsExplore.r")
-        pass
+        program = os.path.join(self.rPath, "i386", "Rterm.exe") 
+        script = os.path.join(utils.getModelsPath(), "PairsExplore.r")
 #        args = "i=" + '"' + MDSfile + '"' + " o=" + '"' + self.displayJPEG + '"' + " m=" + str(self.lineEdit.text())
 #        args += " rc=" + self.responseCol
 #        
@@ -384,7 +414,6 @@ class SelectAndTestFinalModel(QtGui.QDialog):
         self.scene.addPixmap(self.c_view) 
         QtCore.QCoreApplication.processEvents() 
         
-
     def wheel_event (self, event):
         numDegrees = event.delta() / 8 
         numSteps = numDegrees / 15.0 
@@ -406,4 +435,46 @@ class SelectAndTestFinalModel(QtGui.QDialog):
         self.cancel()
         
     def resizeEvent(self, event):
-        self.load_picture(self.displayJPEG)
+        self.load_picture(self.display_jpeg)
+
+class FindModelType():
+    
+    def __init__(self, session_dir, parent=None):
+        self.session_dir = session_dir
+        
+        #check if multiple model types have been run
+        #options are one of ('Binary' or 'Count') 
+        #and one of    ('TestTrain' or '' or 'CV')
+        globPattern = os.path.join(self.session_dir, "*AppendedOutput.csv")
+        csvOutputs = glob.glob(globPattern)
+        
+        if len(csvOutputs) > 1:
+            self.which_type = QtGui.QDialog()
+            self.which_type.setWindowTitle("Multiple model types found in this Session Folder")
+            lbl = QtGui.QLabel(self.which_type)
+            widget_layout = QtGui.QVBoxLayout()
+            lbl.setText("Multiple model types found in this Session Folder\n\nPlease select the model type you wish to select from and test:\n\n")
+            widget_layout.addWidget(lbl)
+            
+            second_layout = QtGui.QVBoxLayout(parent)
+            for model_type in csvOutputs:
+                button = QtGui.QPushButton()
+                buttonText = os.path.split(model_type)[1].replace('.csv', '')
+                button.setText(buttonText)
+                button.clicked.connect(lambda: self.button_push(model_type))
+#                button.connect(button, QtCore.SIGNAL('clicked(' + model_type + ')'), button_push)
+                
+                second_layout.addWidget(button)
+            
+            widget_layout.addLayout(second_layout)
+            self.which_type.setLayout(widget_layout)
+            self.which_type.exec_()
+            
+        else:
+            self.csv_file = csvOutputs[0]
+        
+        self.jpeg_file = self.csv_file.replace(".csv", ".jpg")
+        
+    def button_push(self, model_event):
+        self.csv_file = model_event
+        self.which_type.accept()
