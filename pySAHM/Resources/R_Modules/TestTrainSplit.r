@@ -1,4 +1,4 @@
- TestTrainSplit<-function(input.file,output.file,response.col="ResponseBinary",trainProp=.7,RatioPresAbs=NULL){
+ TestTrainSplit<-function(input.file,output.file,response.col="ResponseBinary",trainProp=.7,RatioPresAbs=NULL,Eval.Split=FALSE){
 
 #Description:
 #this code takes as input an mds file with the first line being the predictor or
@@ -22,7 +22,9 @@
 
 #Written by Marian Talbert 3/23/2011
 #Modified 5/10/2011 to handle count data
-
+#Modified 11/22/2011 to add the Eval.Split option so that the test/training split can be used
+          #either for model selection or evaluation if set to true then this split will be ignored until
+          #after a final model has been selected
 
 
      if(trainProp<=0 | trainProp>1) stop("Train Proportion (trainProp) must be a number between 0 and 1 excluding 0")
@@ -30,7 +32,7 @@
     if(RatioPresAbs<=0) stop("The ratio of presence to absence (RatioPresAbs) must be a \ngreater than 0")}
 
    #Read input data and remove any columns to be excluded
-          browser()
+
           dat.in<-read.csv(input.file,header=FALSE,as.is=TRUE)
           dat<-as.data.frame(dat.in[4:dim(dat.in)[1],])
           names(dat)<-dat.in[1,]
@@ -49,6 +51,13 @@
             response<-response[-c(which(response==-9999,arr.ind=TRUE))]
             bg.dat$TrainSplit=""
             }
+
+             if(length(response<100) stop("A test training split is not advisable for less than 100 observations.  Consider cross validation as an alternative.")
+             if(length(response<200) warning(paste("There are less than 200 observations.  Cross validation might be preferable to a test:,
+             "training split \n weigh the decision while keeping in mind the number of predictors being considered: " ncol(dat)-3,sep=""))
+
+             if(tolower(response.col)=="responsebinary" & any(table(response)<10))
+             stop("Use of a test training split is not recommended when the dataset contains less than 10 presence or absence points")
 
          temp<-if(!is.null(RatioPresAbs))(sum(response>=1)/sum(response==0)==RatioPresAbs)
          if(is.null(temp)) temp<-FALSE
@@ -72,7 +81,8 @@
          #not all elements in a column are of the same type
           dat.in<-dat.in[c(1:3,rownames(dat)),] #removing rows that weren't selected for the test train split
           dat.in[4:(dim(dat.in)[1]),(dim(dat.in)[2]+1)]<-dat$TrainSplit
-          dat.in[c(1,3),(dim(dat.in)[2])]<-c("Split","")
+
+          dat.in[c(1,3),(dim(dat.in)[2])]<-c(ifelse(Eval.Split==FALSE,"Split","EvalSplit"),"")
           dat.in[2,(dim(dat.in)[2])]<-1
 
 
@@ -144,7 +154,7 @@
                
                dat.in<-dat.in[c(1:3,rownames(dat)),] #removing rows that weren't selected for the test train split
                dat.in[4:(dim(dat.in)[1]),(dim(dat.in)[2]+1)]<-dat$TrainSplit
-               dat.in[c(1,3),(dim(dat.in)[2])]<-c("Split","")
+               dat.in[c(1,3),(dim(dat.in)[2])]<-c(ifelse(Eval.Split==FALSE,"Split","EvalSplit"),"")
                dat.in[2,(dim(dat.in)[2])]<-1
 
 
@@ -169,6 +179,7 @@
     responseCol <- "responseBinary"
     trainProp=.7
     RatioPresAbs=NULL
+    Eval.Split=FALSE
     #replace the defaults with passed values
     for (arg in Args) {
     	argSplit <- strsplit(arg, "=")
@@ -179,11 +190,12 @@
     	if(argSplit[[1]][1]=="o") output.file <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="i") infil <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="es") Eval.Split <- argSplit[[1]][2]
     }
 
     RatioResAbs<-as.numeric(RatioPresAbs)
     trainProp<-as.numeric(trainProp)
-    
+    Eval.Split=as.logical(Eval.Split)
 	#Run the Test training split with these parameters
 	TestTrainSplit(input.file=infil,output.file=output.file,response.col=responseCol,
-  trainProp=trainProp,RatioPresAbs=RatioPresAbs)
+  trainProp=trainProp,RatioPresAbs=RatioPresAbs,Eval.Split=Eval.Split)

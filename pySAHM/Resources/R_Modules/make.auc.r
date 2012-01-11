@@ -1,138 +1,161 @@
-make.auc.plot.jpg<-function(ma.reduced,pred,plotname,modelname,test.split=FALSE,thresh=NULL,train=NULL,train.pred=NULL,opt.methods=2,weight,out){
+make.auc.plot.jpg<-function(out=out){
 
-      if(is.null(weight)) weight=rep(1,times=dim(ma.reduced)[1])
-    auc.data <- data.frame(ID=1:nrow(ma.reduced),pres.abs=ma.reduced[,1],pred=pred)
-    p.bar <- sum(auc.data$pres.abs * weight) / sum(weight)
-    n.pres <- sum(auc.data$pres.abs>=1)
-    n.abs <- nrow(auc.data)-n.pres
+  plotname<-paste(out$dat$bname,"_modelEvalPlot.jpg",sep="")
+  calib.plot<-paste(out$dat$bname,"_CalibrationPlot.jpg",sep="")
+  modelname<-toupper(out$input$model)
+  input.list<-out$dat$ma
 
-    null.dev<-calc.dev(auc.data$pres.abs, rep(p.bar,times=length(auc.data$pres.abs)), weight, family=out$input$model.family)$deviance*nrow(ma.reduced)
-    dev.fit<-calc.dev(auc.data$pres.abs, pred, weight, family=out$input$model.family)$deviance*nrow(ma.reduced)
-    dev.exp <- null.dev - dev.fit
-    pct.dev.exp <- dev.exp/null.dev*100
-   correlation<-cor(auc.data$pres.abs,pred)
-    residual.smooth.fct<-NULL
+######################### Calc threshold on train split #################
+ if(out$input$model.family!="poisson"){
+            input.list$train$thresh<-out$dat$ma$train$thresh<- as.numeric(optimal.thresholds(data.frame(ID=1:nrow(input.list$train$dat),pres.abs=input.list$train$dat[,1],
+                pred=input.list$train$pred),opt.methods=out$input$opt.methods))[2]
+              if(out$dat$split.type%in%c("test","eval"))  input.list$test$thresh<-out$dat$ma$test$thresh<-input.list$train$thresh
+            }
+            else input.list$train$thresh=NULL
 
-     if(test.split==FALSE) residual.smooth.fct<-resid.image(calc.dev(auc.data$pres.abs, pred, weight, family=out$input$model.family)$dev.cont,pred,
-          auc.data$pres.abs,out$dat$ma$train.xy[,1],out$dat$ma$train.xy[,2],out$input$model.family,out$input$output.dir,out)
+################# Calculate all statistics on test\train or train\cv splits
+  Stats<-lapply(input.list,calcStat,family=out$input$model.family)
 
-    if(is.null(thresh) & out$input$model.family!="poisson"){
-      thresh <- as.numeric(optimal.thresholds(auc.data,opt.methods=opt.methods))[2]
+ #################################################
+ ############### Confusion Matrix ##############
+  browser()
+  if(out$input$model.family!="poisson"){
+     jpeg(file=paste(out$dat$bname,"confusion.matrix.jpg",sep="."),width=1000,height=1000,pointsize=13)
+      if(out$dat$split.type=="none"){
+      barplot3d(100*c(Stats$train$Cmx[2,1]/sum(Stats$train$Cmx),Stats$train$Cmx[1,1]/sum(Stats$train$Cmx),Stats$train$Cmx[2,2]/sum(Stats$train$Cmx),Stats$train$Cmx[1,2]/sum(Stats$train$Cmx)),transp="f9", rows=2, theta = 40, phi = 25, expand=.5,
+       bar.size=15*max(Stats$train$Cmx)/100,bar.space=6*max(Stats$train$Cmx)/100,
+    col.lab=c("Absence","Presence"), row.lab=c("Presence","Absence"), z.lab="Confusion Matrix")
+         } else {
+     barplot3d(100*c(Stats$train$Cmx[2,1]/sum(Stats$train$Cmx),Stats$test$Cmx[2,1]/sum(Stats$test$Cmx),
+                 Stats$train$Cmx[1,1]/sum(Stats$train$Cmx),Stats$test$Cmx[1,1]/sum(Stats$test$Cmx),
+                 Stats$train$Cmx[2,2]/sum(Stats$train$Cmx),Stats$test$Cmx[2,2]/sum(Stats$test$Cmx),
+                 Stats$train$Cmx[1,2]/sum(Stats$train$Cmx),Stats$test$Cmx[1,2]/sum(Stats$test$Cmx)),transp="f9", rows=2, theta = 40, phi = 25, expand=.5,
+       bar.size=15*max(Stats$train$Cmx)/100,bar.space=6*max(Stats$train$Cmx)/100,
+    col.lab=c("Absence","Presence"), row.lab=c("Presence","Absence"), z.lab="Confusion Matrix")
     }
+    graphics.off()
+   }
+########################## PLOTS ################################
+  #Residual surface of input data
+  if(out$dat$split.type!="eval"){
+  residual.smooth.fct<-resid.image(calc.dev(input.list$train$dat$response, input.list$train$pred, input.list$train$weight, family=out$input$model.family)$dev.cont,input.list$train$pred,
+          input.list$train$dat$response,input.list$train$XY$X,input.list$train$XY$Y,out$input$model.family,out$input$output.dir,label=out$dat$split.type,out)
+      }
+  else{
+       residual.smooth.fct<-resid.image(calc.dev(input.list$test$dat$response, input.list$test$pred, input.list$test$weight, family=out$input$model.family)$dev.cont,input.list$test$pred,
+          input.list$test$dat$response,input.list$test$XY$X,input.list$test$XY$Y,out$input$model.family,out$input$output.dir,label=out$dat$split.type,out)
+       }
+  train.mask<-seq(1:length(Stats))[names(Stats)=="train"]
 
+## breaking of the non-train split must be done separately because list structure is different for the test only and cv
+    lst<-list()
+    if(out$dat$split.type%in%c("test","eval"))
+      lst$Test<-Stats[[-c(train.mask)]]
+    if(out$dat$split.type=="crossValidation") lst<-Stats[-c(train.mask)]
+    if(out$dat$split.type%in%c("none")) lst<-Stats
+ #AUC and Calibration plot for binomial data
     if(out$input$model.family%in%c("binomial","bernoulli")){
-      auc.fit <- auc(auc.data,st.dev=T)
-          if(test.split==TRUE){
-            jpeg(file=plotname)
-            d<-data.frame(ID=1:nrow(train),pres.abs=train[,1],pred=train.pred)
-            thresh<- as.numeric(optimal.thresholds(d,opt.methods=opt.methods))[2]
-            TestTrainRocPlot(DATA=d,opt.thresholds=thresh,add.legend=FALSE,lwd=2)
-            TestTrainRocPlot(auc.data,model.names=modelname,opt.thresholds=thresh,add.roc=TRUE,line.type=2,color="red",add.legend=FALSE)
-            legend(x=.66,y=.2,c("Training Split","Testing Split"),lty=2,col=c("black","red"),lwd=2)
-            graphics.off()}
-          else {
-            jpeg(file=plotname)
-            TestTrainRocPlot(auc.data,model.names=modelname,opt.thresholds=thresh)
-            graphics.off()
-          }
-        cmx <- cmx(auc.data,threshold=thresh)
-        PCC <- pcc(cmx,st.dev=F)*100
-        SENS <- sensitivity(cmx,st.dev=F)
-        SPEC <- specificity(cmx,st.dev=F)
-        KAPPA <- Kappa(cmx,st.dev=F)
-        TSS <- SENS+SPEC-1
-    }
+            jpeg(file=plotname,height=1000,width=1000,pointsize=20,quality=100)
+            TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=input.list$train$thresh,add.legend=(length(Stats)==1),lwd=2)
+            if(out$dat$split.type!="none") {
+            #so here we have to extract a sublist and apply a function to the sublist but if it has length 2 the structure of the list changes when the sublist is extracted
+           if(out$dat$split.type=="test"){ TestTrainRocPlot(do.call("rbind",lapply(lst,function(lst){lst$auc.data})),add.roc=TRUE,line.type=2,color="red",add.legend=FALSE)
+                legend(x=.5,y=.2,c("Training Split","Testing Split","Cross Validation Sets")[c(1,2*(length(Stats)==2),3*(length(Stats)>2))],lty=2,col=c("black","red"),lwd=2)
+                }
+             if(out$dat$split.type=="crossValidation"){
+                temp<-lapply(lst,function(lst){roc.plot.calculate(lst$auc.data)})
+                sens<-unlist(lapply(temp,function(temp){temp$sensitivity}))
+                specif<-1-unlist(lapply(temp,function(temp){temp$specificity}))
+                unique.spec<-sort(unique(specif))
+                for(i in 2:length(unique.spec)){
+                 segments(seq(from=unique.spec[i-1],to=unique.spec[i],length=100), rep(min(sens[specif>=unique.spec[i]]),times=100),
+                      x1 = seq(from=unique.spec[i-1],to=unique.spec[i],length=100), y1 = rep(max(sens[specif<=unique.spec[i]]),times=100),col="blue")
+                  TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=input.list$train$thresh,add.legend=(length(Stats)==1),lwd=2,add.roc=TRUE,line.type=1,col="red")
+                }
+              TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=input.list$train$thresh,add.legend=(length(Stats)==1),lwd=2,add.roc=TRUE,line.type=1,col="red")
+              points(1-Stats$train$Specf,Stats$train$Sens,pch=19,cex=2.5)
+              points(1-Stats$train$Specf,Stats$train$Sens,pch=19,cex=2,col="red")
+              text(x=(1.05-Stats$train$Specf),y=Stats$train$Sens-.03,label=round(Stats$train$thresh,digits=2),col="red")
+                legend(x=.5,y=.25,c("Training Split","Cross Validation Range"),lty=c(2,1),col=c("red","blue"),lwd=2)
+                }}
+                graphics.off()
+            #I'm pretty sure calibration plots should work for count data as well but I'm not quite ready to make a plot
+            jpeg(file=calib.plot,height=1000,width=1000,pointsize=20,quality=100)
 
+            a<-do.call("rbind",lapply(lst,function(lst){lst$auc.data}))
+            calibration.plot(a,main="Calibration Plot")
+            preds<-a$pred
+            obs<-a$pres.abs
+            pred <- preds + 1e-005
+            pred[pred >= 1] <- 0.99999
+            mod <- glm(obs ~ log((pred)/(1 - (pred))), family = binomial)
+             predseq<-data.frame("pred"=seq(from=0,to=1,length=100))
+             lines(predseq$pred,sort(predict(mod,newdata=predseq,type="response")))
+            rug(pred)
+            dev.off()
+            }
+    #Some residual plots for poisson data
     if(out$input$model.family%in%c("poisson")){
-      auc.fit <- auc(auc.data,st.dev=T)
-          if(test.split==FALSE){
             jpeg(file=plotname)
             par(mfrow=c(2,2))
-            #plot(out$mods$final.mod)
-             plot(log(pred[pred!=0]),(auc.data$pres.abs[pred!=0]-pred[pred!=0]),xlab="Predicted Values (log scale)",ylab="Residuals",main="Residuals vs Fitted",ylim=c(-3,3))
+             plot(log(Stats$train$auc.data$pred[Stats$train$auc.data$pred!=0]),
+                  (Stats$train$auc.data$pres.abs[Stats$train$auc.data$pred!=0]-Stats$train$auc.data$pred[Stats$train$auc.data$pred!=0]),
+                  xlab="Predicted Values (log scale)",ylab="Residuals",main="Residuals vs Fitted",ylim=c(-3,3))
               abline(h=0,lty=2)
-              #this is the residual plot from glm but I don't think it will work for anything else
-
-              qqnorm(residuals(out$mods$final.mod),ylab="Std. deviance residuals")
-              qqline(residuals(out$mods$final.mod))
-               yl <- as.expression(substitute(sqrt(abs(YL)), list(YL = as.name("Std. Deviance Resid"))))
-              plot(log(pred[pred!=0]),sqrt((abs(residuals(out$mods$final.mod,type="deviance")[pred!=0]))),xlab="Predicted Values (log Scale)",ylab=yl)
+              panel.smooth(log(Stats$train$auc.data$pred[Stats$train$auc.data$pred!=0]),
+              (Stats$train$auc.data$pres.abs[Stats$train$auc.data$pred!=0]-Stats$train$auc.data$pred[Stats$train$auc.data$pred!=0]))
+               if(out$input$script.name!="rf"){
+                    #this is the residual plot from glm but I don't think it will work for anything else
+                    qqnorm(residuals(out$mods$final.mod),ylab="Std. deviance residuals")
+                    qqline(residuals(out$mods$final.mod))
+                     yl <- as.expression(substitute(sqrt(abs(YL)), list(YL = as.name("Std. Deviance Resid"))))
+                    plot(log(Stats$train$auc.data$pred[Stats$train$auc.data$pred!=0]),
+                       sqrt((abs(residuals(out$mods$final.mod,type="deviance")[Stats$train$auc.data$pred!=0]))),
+                       xlab="Predicted Values (log Scale)",ylab=yl)
+              }
             graphics.off()}
-       prediction.error<-sum((auc.data$pres.abs-pred)^2)
-       cmx=PCC=SENS=SPEC=KAPPA=TSS<-NA
-    }
 
-      calibration.stats<-calibration(auc.data$pres.abs, pred, family =out$input$model.family)
-      response<-ma.reduced$response
-
+ ##################### CAPTURING TEXT OUTPUT #######################
     capture.output(cat("\n\n============================================================",
                         "\n\nEvaluation Statistics"),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
-          if(!is.null(out$dat$ma$ma.test))
-                        capture.output(cat(" applied to",ifelse(!test.split,"train","test"), "split:\n",sep=" "),
-                        file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
-                      capture.output(cat( "\n",
-                       "\n\t Correlation Coefficient      : ",cor.test(pred,response)$estimate,
-                       "\n\t NULL Deviance                : ",null.dev,
-                       "\n\t Fit Deviance                 : ",dev.fit,
-                       "\n\t Explained Deviance           : ",dev.exp,
-                       "\n\t Percent Deviance Explained   : ",pct.dev.exp,
-                       file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE))
+      #this is kind of a pain but I have to keep everything in the same list format
+      train.stats=list()
+     if(out$dat$split.type=="none") train.stats<-Stats
+      else train.stats$train=Stats[[train.mask]]
 
-                        if(out$input$model.family%in%c("binomial","bernoulli")){
-                               capture.output(cat(
-                                 "\n\n  Threshold Methods based on", switch(opt.methods,
-                                "1"=".5 threshold",
-                                "2"="Sens=Spec",
-                                "3"="maximize (sensitivity+specificity)/2",
-                                "4"="maximize Kappa",
-                                "5"="maximize percent correctly classified",
-                                "6"="predicted prevalence=observed prevalence",
-                                "7"="threshold=observed prevalence",
-                                "8"="mean predicted probability",
-                                "9"="minimize distance between ROC plot and (0,1)",
-                                ),
-                                "\n\t Threshold                    : ",
-                                thresh,
-                                "\n\n\t Confusion Matrix: \n\n"),
-                                print.table(cmx),
-                           cat("\n\t AUC                          : ",auc.fit[1,1],
-                           "\n\t Percent Correctly Classified : ",PCC,
-                           "\n\t Sensitivity                  : ",SENS,
-                           "\n\t Specificity                  : ",SPEC,
-                           "\n\t Kappa                        : ",KAPPA,
-                           "\n\t True Skill Statistic         : ",TSS,"\n"),
-                           file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
-                       }
+    capture.stats(train.stats,file.name=paste(out$dat$bname,"_output.txt",sep=""),label="train",family=out$input$model.family,opt.methods=out$input$opt.methods,out)
+    if(out$dat$split.type!="none"){
+    capture.output(cat("\n\n============================================================",
+                        "\n\nEvaluation Statistics"),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
+        capture.stats(lst,file.name=paste(out$dat$bname,"_output.txt",sep=""),label=out$dat$split.type,family=out$input$model.family,opt.methods=out$input$opt.methods,out)
+    }
 
-                         capture.output(cat( "\n\n   Calibration Statistics",
-                          "\n\t Intercept (general calibration)                            : ",calibration.stats[1],
-                          "\n\t Slope   (direction and variation in fit)                   : ",calibration.stats[2],
-                          "\n\t Testa0b1 (overall reliability of predictors)               : ",calibration.stats[3],
-                          "\n\t Testa0|b1(incorrect calibration given correct refinement)  : ",calibration.stats[4],
-                          "\n\t Testb1|a (refinement given correct calibration)            : ",calibration.stats[5],"\n",
-                       file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE))
-                       
-                       last.dir<-strsplit(out$input$output.dir,split="\\\\")
+   if(out$dat$split.type!="eval"){
+        ############ getting statistics along with appropriate names into a data frame for creating the appended output
+                        last.dir<-strsplit(out$input$output.dir,split="\\\\")
                         parent<-sub(paste("\\\\",last.dir[[1]][length(last.dir[[1]])],sep=""),"",out$input$output.dir)
-
-                         compile.out<-paste(parent,
-                              paste(switch(out$input$model.family,"binomial"="Binary","bernoulli"="Binary","poisson"="Count"),ifelse(!is.null(out$dat$ma$ma.test),"TestTrain",""),
-                              "AppendedOutput.csv",sep=""),sep="/")
-
+                        
                        if(out$input$model.family%in%c("binomial","bernoulli")){
-                       x=data.frame(cbind(c("Correlation Coefficient","Percent Deviance Explained","Percent Correctly Classified","Sensitivity","Specificity"),
-                            c(as.vector(cor.test(pred,response)$estimate),pct.dev.exp,PCC,SENS,SPEC)))
-                       }else  x=data.frame(cbind(c("Correlation Coefficient","Percent Deviance Explained","Prediction Error"),
-                            c(as.vector(cor.test(pred,response)$estimate),pct.dev.exp,prediction.error)))
+                           csv.stats<-lapply(Stats,function(lst){
+                               return(c("","",lst$correlation,lst$pct.dev.exp,lst$Pcc,lst$Sens,lst$Specf))})
+                            stat.names<-c("Correlation Coefficient","Percent Deviance Explained","Percent Correctly Classified","Sensitivity","Specificity")
+                        } else{
+                        csv.stats<-lapply(Stats,function(lst){
+                            return(c("","",lst$correlation,lst$pct.dev.exp,lst$prediction.error/100))})
+                                stat.names<-c("Correlation Coefficient","Percent Deviance Explained","Prediction Error")
+                               }
+                            csv.vect<-c(t(t(as.vector(unlist(csv.stats[train.mask])))),if(out$dat$split.type!="none") unlist(csv.stats[-c(train.mask)]))
+                            csv.vect[seq(from=2,by=length(csv.vect)/length(Stats),length=length(Stats))]<-ifelse(out$dat$split.type=="none","Train",c("Train",names(lst)))
+                           x=data.frame(cbind(rep(c("","",stat.names),times=length(Stats)),
+                             csv.vect))
 
                         Header<-cbind(c("","Original Field Data","Field Data Template","PARC Output Folder","PARC Template","Covariate Selection Name",""),
                             c(last.dir[[1]][length(last.dir[[1]])],
-                            out$dat$ma$input$OrigFieldData,out$dat$ma$input$FieldDataTemp,out$dat$ma$input$ParcOutputFolder,
-                            out$dat$ma$input$ParcTemplate,ifelse(length(out$dat$ma$input$CovSelectName)==0,"NONE",out$dat$ma$input$CovSelectName),""))
+                            out$dat$input$OrigFieldData,out$dat$input$FieldDataTemp,out$dat$input$ParcOutputFolder,
+                            out$dat$input$ParcTemplate,ifelse(length(out$dat$input$CovSelectName)==0,"NONE",out$dat$input$CovSelectName),""))
 
-AppendOut(compile.out,Header,x,out,test.split,parent=parent)
-
-    return(list(thresh=thresh,cmx=cmx,null.dev=null.dev,dev.fit=dev.fit,dev.exp=dev.exp,pct.dev.exp=pct.dev.exp,auc=auc.fit[1,1],auc.sd=auc.fit[1,2],
-        plotname=plotname,pcc=PCC,sens=SENS,spec=SPEC,kappa=KAPPA,tss=TSS,correlation=correlation,residual.smooth.fct=residual.smooth.fct))
+                      AppendOut(compile.out=out$input$Append.Dir,Header,x,out,Parm.Len=length(stat.names),parent=parent,split.type=out$dat$split.type)
+               }
+    return(list(thresh=train.stats$train$thresh,residual.smooth.fct=residual.smooth.fct))
 }
 

@@ -1,169 +1,102 @@
-AppendOut<-function(compile.out,Header,x,out,test.split,parent){
+AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
     Header.Length<-nrow(Header)
-    Parm.Len<-nrow(x)
-  if(file.access(compile.out,mode=0)==-1){ #if very first time through little to do
-          #A more complex than necessary way of writing a csv with several header lines
+
+################ Writing to the csv  ############################
+
+ input<-read.table(compile.out,fill=TRUE,sep=",")
+  if(ncol(input)<=2){ #if very first time through little
+
           write.table(Header,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=",")
-          if(!is.null(out$dat$ma$ma.test))
-              write.table(cbind("","Train Split"),file=compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=",")
           write.table(x,file=compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=",")
-  } else { #this else (not the first time through) goes to the very end of the function
-          input<-read.table(compile.out,fill=TRUE,sep=",")
-          Orig.Header<-input[1:Header.Length,]
-
-          if(!is.null(out$dat$ma$ma.test)){ #if there is a test train split this if lasts until after plotting
-                  Train.x<-input[(Header.Length+2):(Header.Length+Parm.Len+1),]
-                  Orig.Train<-input[(Header.Length+1),]
-
-                  if(nrow(input)>15){ #if there is a test split in input (not in very first loop)
-                     Test.x<-input[(Header.Length+Parm.Len+4):nrow(input),]
-                     Orig.Test<-input[(Header.Length+Parm.Len+2):(Header.Length+Parm.Len+3),]
-                      if(test.split){ # if we're hitting this on a test and not a train
-                            Test.x[,ncol(Test.x)]<-x[,2]
-                             class(Orig.Test[,ncol(Orig.Test)])="character"
-                            Orig.Test[1,ncol(Orig.Test)]<-""
-                            Orig.Test[2,ncol(Orig.Test)]<-"Test Split"
-                      } else{
-                            Orig.Header<-cbind(Orig.Header,Header[,2])
-                            Train.x<-cbind(Train.x,x[,2])
-                            Orig.Train<-cbind(Orig.Train,"Train Split")
-                            }
-                  } else{
-                     Orig.Test=rbind(c("",""),cbind("","Test Split"))
-                     Test.x=x
-                  }
-
-                  temp<-try(write.table(Orig.Header,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=","),silent=TRUE)
-
-                  while(class(temp)=="try-error"){
-                      modalDialog("","Please Close the AppendedOutput.exe\ so that R can write to it then press ok to continue ","")
-                      temp<-try(write.table(Orig.Header,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=","),silent=TRUE)
-                  }
-                  try(write.table(Orig.Train,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=","))
-                  try(write.table(Train.x,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=","))
-                  try(write.table(Orig.Test,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=","))
-                  try(write.table(Test.x,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=","))
-                  if(ncol(Train.x)==ncol(Test.x) & ncol(Test.x)>2){
-
-                  jpeg(file=paste(parent,"AcrossModelPerformTestTrain.jpg",sep="//"),width=1000,height=1000,pointsize=13)
-                          par(mfrow=c(nrow(Train.x),1),mar=c(.2, 5, .6, 2),cex=1.1,oma=c(5, 0, 3, 0))
-                            temp<-Train.x[,2:ncol(Train.x)]
-                          temp<-matrix(data=as.numeric(as.matrix(temp,nrow=Par.Len)),nrow=Parm.Len,ncol=(ncol(Train.x)-1))
-                          temp1<-temp
-                          temp[2,]<-temp[2,]/100
-                          temp[3,]<-temp[3,]/100
-                          temp2<-Test.x[,2:ncol(Test.x)]
-                          temp2<-matrix(data=as.numeric(as.matrix(temp2,nrow=Par.Len)),nrow=Parm.Len,ncol=(ncol(Test.x)-1))
-                          temp2[2,]<-temp2[2,]/100
-                          temp2[3,]<-temp2[3,]/100
-                           ss<-seq(from=1,to=(ncol(Train.x)-1),by=1)
-                           x.labs<-sub(" ","\n",Train.x[,1])
-                           x.labs<-sub("Percent","Proportion",x.labs)
-                          colors.test=c("chocolate3","gold1","darkolivegreen2","steelblue1","brown3")
-                        colors.train=c("chocolate4","gold3","darkolivegreen4","steelblue4","brown4")
-                   #Plot 1.
-                        plot(c(0,(ncol(Test.x)+2)),c(0,1.1),type="n",xaxt="n",
-                            xlab=paste("Corresponding Column in ",ifelse(!is.null(out$dat$ma$ma.test),"AppendedOutputTestTrain.csv","AppendedOutput.csv"),sep=""),
-                            ylab=x.labs[1])
-                            grid(nx=10)
-                            legend(ncol(Test.x),y=.75,legend=c("Test","Train"),fill=c(colors.test[1],colors.train[1]))
-                          rect(xleft=ss-.4,ybottom=0,xright=ss,ytop=temp[1,],col=colors.train[1],lwd=2)
-                          rect(xleft=ss,ybottom=0,xright=(ss+.4),ytop=pmax(0,temp2[1,]),col=colors.test[1],lwd=2)
-                          text((which(temp1[1,]==max(temp1[1,],na.rm=TRUE),arr.ind=TRUE)-.25),
-                              max(temp1[1,],na.rm=TRUE)+.05,labels=as.character(round(max(temp1[1,]),digits=2)),cex=.8)
-                          text((which(temp2[1,]==max(temp2[1,],na.rm=TRUE),arr.ind=TRUE)+.25),
-                              max(temp2[1,],na.rm=TRUE)+.05,labels=as.character(round(max(temp2[1,]),digits=2)),cex=.8)
-                        par(mar=c(.2, 5, .6, 2))
-                 #Middle Plots.
-                        for(i in 2:(nrow(Train.x)-1)){
-                            plot(c(0,(ncol(Test.x)+2)),c(0,1.1),type="n",xaxt="n",
-                            ylab=x.labs[i])
-                            grid(nx=10)
-                          rect(xleft=ss-.4,ybottom=0,xright=ss,ytop=temp[i,],col=colors.train[i],lwd=2)
-                          rect(xleft=ss,ybottom=0,xright=(ss+.4),ytop=pmax(0,temp2[i,]),col=colors.test[i],lwd=2)
-                          legend(ncol(Test.x),y=.75,legend=c("Test","Train"),fill=c(colors.test[i],colors.train[i]))
-                          text((which(temp[i,]==max(temp[i,],na.rm=TRUE),arr.ind=TRUE)-.25),
-                              max(temp[i,],na.rm=TRUE)+.05,labels=as.character(round(max(temp[i,]),digits=2)),cex=.8)
-                          text((which(temp2[i,]==max(temp2[i,],na.rm=TRUE),arr.ind=TRUE)+.25),
-                              max(temp2[i,],na.rm=TRUE)+.05,labels=as.character(round(max(temp2[i,]),digits=2)),cex=.8)
-                          par(mar=c(.3, 5, .4, 2))
-                          }
-                          par(mar=c(2, 5, .4, 2))
-                #Last Plot.
-                       i=nrow(Train.x)
-                      plot(c(0,(ncol(Test.x)+2)),c(0,1.1),type="n",xaxt="n",
-                            xlab="n",
-                            ylab=x.labs[i])
-                            grid(nx=10)
-                          rect(xleft=ss-.4,ybottom=0,xright=ss,ytop=temp[i,],col=colors.train[i],lwd=2)
-                          rect(xleft=ss,ybottom=0,xright=(ss+.4),ytop=pmax(0,temp2[i,]),col=colors.test[i],lwd=2)
-                          legend(ncol(Test.x),y=.75,legend=c("Test","Train"),fill=c(colors.test[i],colors.train[i]))
-                          text((which(temp1[i,]==max(temp1[i,],na.rm=TRUE),arr.ind=TRUE)-.25),
-                              max(temp1[i,],na.rm=TRUE)+.05,labels=as.character(round(max(temp1[i,]),digits=2)),cex=.8)
-                          text((which(temp2[i,]==max(temp2[i,],na.rm=TRUE),arr.ind=TRUE)+.25),
-                              max(temp2[i,],na.rm=TRUE)+.05,labels=as.character(round(max(temp2[i,]),digits=2)),cex=.8)
-             #Outer margin labels
-                            for(i in 2:ncol(Orig.Header)) mtext(Orig.Header[1,i],line=-12,at=(i-1),las=2)
-                          mtext("Evaluation Metrics Performance Across Model Runs",outer=TRUE,side=3,cex=1.3)
-                          mtext(paste("Folder Name where model is found in ",
-                            ifelse(!is.null(out$dat$ma$ma.test),"AppendedOutputTestTrain.csv","AppendedOutput.csv"),sep=""),side=1,outer=TRUE,line=3)
-                       dev.off()
-                    }
-              }  else{
-
-          Orig.x<-input[(Header.Length+1):nrow(input),]
-          temp<-try(write.table(cbind(Orig.Header,Header[,2]),file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=","),silent=TRUE)
+          output<-matrix(0,0,0)
+  } else { #this else (not the first time through) read current csv first
+          if(nrow(input)+nrow(x)==length(c(Header[,2],as.character(x[,2])))){
+            #if the first model run threw an error no subsequent output will be written without some special help
+             input<-rbind(input,matrix(c(as.character(x[,1]),rep("",times=length(x[,1])*(ncol(input)-1))),nrow=length(x[,1])))
+                }
+          output<-cbind(input[,(1:(ncol(input)-1))],c(Header[,2],as.character(x[,2])))
+              temp=try(write.table(output,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=","),silent=TRUE)
            while(class(temp)=="try-error"){
                       modalDialog("","Please Close the AppendedOutput.exe\ so that R can write to it then press ok to continue ","")
-                      temp<-try(write.table(cbind(Orig.Header,Header[,2]),file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=","),silent=TRUE)
-                  }
-           if(ncol(Orig.x)>2){
+                      temp<-try(write.table(output,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=","),silent=TRUE)
+                      }
+          }
 
-        jpeg(file=paste(parent,"AcrossModelPerform.jpg",sep="//"),width=1000,height=1000,pointsize=13)
-                          par(mfrow=c(5,1),mar=c(.2, 5, .6, 2),cex=1.1,oma=c(5, 0, 3, 0))
-                            temp<-Orig.x[,2:ncol(Orig.x)]
-                          temp<-matrix(data=as.numeric(as.matrix(temp,nrow=Par.Len)),nrow=Parm.Len,ncol=(ncol(Orig.x)-1))
-                          temp1<-temp
-                          temp[2,]<-temp[2,]/100
-                          temp[3,]<-temp[3,]/100
-                           ss<-seq(from=1,to=(ncol(Orig.x)-1),by=1)
-                           x.labs<-sub(" ","\n",Orig.x[,1])
-                           x.labs<-sub("Percent","Proportion",x.labs)
-                        colors.train=c("chocolate4","gold3","darkolivegreen4","steelblue4","brown4")
-                   #Plot 1.
-                        plot(c(0,(ncol(Orig.x))),c(0,1.1),type="n",xaxt="n",ylab=x.labs[1])
-                            grid(nx=10)
-                          rect(xleft=ss-.3,ybottom=0,xright=ss+.3,ytop=temp[1,],col=colors.train[1],lwd=2)
-                          text((which(temp1[1,]==max(temp1[1,],na.rm=TRUE),arr.ind=TRUE)),
-                              max(temp1[1,],na.rm=TRUE)+.06,labels=as.character(round(max(temp1[1,]),digits=2)),cex=.8)
-                        par(mar=c(.2, 5, .6, 2))
-                 #Plot 2-4.
-                        for(i in 2:(nrow(x)-1)){
-                            plot(c(0,(ncol(Orig.x))),c(0,1.1),type="n",xaxt="n",
-                            ylab=x.labs[i])
-                            grid(nx=10)
-                          rect(xleft=ss-.3,ybottom=0,xright=ss+.3,ytop=temp[i,],col=colors.train[i],lwd=2)
-                          text((which(temp[i,]==max(temp[i,],na.rm=TRUE),arr.ind=TRUE)),
-                              max(temp[i,],na.rm=TRUE)+.06,labels=as.character(round(max(temp[i,]),digits=2)),cex=.8)
-                          par(mar=c(.3, 5, .4, 2))
-                          }
-                          par(mar=c(2, 5, .4, 2))
-                #Plot 5.
-                       i=nrow(x)
-                       plot(c(0,(ncol(Orig.x))),c(0,1.1),type="n",xaxt="n",
-                            ylab=x.labs[i])
-                            grid(nx=10)
-                          rect(xleft=ss-.3,ybottom=0,xright=ss+.3,ytop=temp[i,],col=colors.train[i],lwd=2)
-                          text((which(temp[i,]==max(temp[i,],na.rm=TRUE),arr.ind=TRUE)),
-                              max(temp[i,],na.rm=TRUE)+.06,labels=as.character(round(max(temp[i,]),digits=2)),cex=.8)
-             #Outer margin labels
-                            for(i in 2:ncol(Orig.Header)) mtext(Orig.Header[1,i],line=-12,at=(i-1),las=2)
+  ###################### Making the jpg image ###################
+  if(ncol(output)>2){
+
+                  jpeg(file=paste(parent,paste("AcrossModel",
+                       switch(out$dat$split.type,"crossValidation"="CrossVal","test"="TestTrain","none"="NoSplit"),
+                       switch(out$input$model.family,"binomial"="Binom","bernoulli"="Binom","poisson"="Count"),
+                       ".jpg",sep=""),sep="\\"),width=(1000+30*ncol(output)),height=1000,pointsize=13,quality=100)
+                  par(mfrow=c(Parm.Len,1),mar=c(.2, 5, .6, 2),cex=1.1,oma=c(5, 0, 3, 0))
+               #Getting rid of the header
+                            row.nms<-as.character(output[(nrow(Header)+3):((nrow(Header)+2)+Parm.Len),1])
+                      Hdr<-unlist(strsplit(readLines(compile.out,1),split=","))
+                      output<-output[(nrow(Header)+1):nrow(output),2:ncol(output)]
+               #Setting up train as numeric
+                      train<-output[3:(Parm.Len+2),]
+                      train<-matrix(data=as.numeric(as.character(as.matrix(train))),nrow=nrow(train),ncol=ncol(train))
+                       row.names(train)<-row.nms
+                       train[grep("Percent",rownames(train),ignore.case=TRUE),]<-train[grep("Percent",rownames(train),ignore.case=TRUE),]/100
+                #Setting up test as numeric
+                 if(split.type!="none"){
+                      test<-output[(Parm.Len+3):nrow(output),]
+                      test<-test[-c(seq(from=1,to=nrow(test),by=Parm.Len+2),seq(from=2,to=nrow(test),by=Parm.Len+2)),]
+                      test<-as.data.frame(matrix(data=as.numeric(as.character(as.matrix(test))),nrow=nrow(test),ncol=ncol(test)))
+                          test[is.na(test)]<-0 #Switching NAs to 0 so that the plot will come up
+                      test$split.inx<-rep(seq(from=1,to=nrow(test)/Parm.Len),each=Parm.Len)
+                      test.lst<-split(test[,-c(ncol(test))],f=test$split.inx)
+                         for(i in 1:length(test.lst)) {row.names(test.lst[[i]])<-row.nms
+                          test.lst[[i]][grep("Percent",rownames(test.lst[[i]]),ignore.case=TRUE),]<-test.lst[[i]][grep("Percent",rownames(test.lst[[i]]),ignore.case=TRUE),]/100
+                                }
+                          } else test.lst<-list()
+                     ss<-seq(from=1,to=ncol(train),by=1)
+                     x.labs<-sub(" ","\n",rownames(train))
+                     x.labs<-sub("Percent","Proportion",x.labs)
+                    colors.test=c("chocolate3","gold1","darkolivegreen2","steelblue1","brown3")
+                  colors.train=c("chocolate4","gold3","darkolivegreen4","steelblue4","brown4")
+        #producing plots
+                   for(i in 1:Parm.Len){
+                            plot(c(.6,(ncol(train)+2)),c(0,max(1.1,max(train[i,],na.rm=TRUE)+.1)),type="n",xaxt="n",
+                                xlab=paste("Corresponding Column in ",ifelse(!is.null(out$dat$ma$ma.test),"AppendedOutputTestTrain.csv","AppendedOutput.csv"),sep=""),
+                                ylab=x.labs[i])
+                                grid(nx=10)
+                                if(split.type!="none") legend(ncol(test),y=.75,legend=c(switch(out$dat$split.type, "test"="Test","crossValidation"="CV"),"Train"),fill=c(colors.test[i],colors.train[i]))
+                              if(split.type!="crossValidation") rect(xleft=ss-.4,ybottom=0,xright=ss,ytop=train[i,],col=colors.train[i],lwd=2)
+                              if(split.type=="crossValidation") points(ss-.1,train[i,],col=colors.train[i],cex=4,pch=19)
+                             #if test split
+                             options(warn=-1)
+                             if(length(test.lst)==1) rect(xleft=ss,ybottom=0,xright=(ss+.4),ytop=as.vector(pmax(0,test.lst[[1]][i,])),col=c(colors.test[i],"white")[(test.lst[[1]][i,]==0)+1],
+                                                     border=c("black","white")[(test.lst[[1]][i,]==0)+1],lwd=2)
+                              if(length(test.lst)>1){
+                                                      for(k in ss){
+                                                      a<-vector()
+                                                        for(j in 1:length(test.lst)) a<-c(a,as.numeric(test.lst[[j]][i,k]))
+                                                        if(sum(a!=0)!=0) boxplot(a,add=TRUE,at=k+.2,col=colors.test[i])
+                                                      }
+                              }
+                             options(warn=0)
+                             #have to label the maximum for everything except prediction error
+                             if(x.labs[i]!="Prediction\nError") text((which(train[i,]==max(train[i,],na.rm=TRUE),arr.ind=TRUE)-.25),
+                                  max(train[i,],na.rm=TRUE)+.07,labels=as.character(round(max(train[i,],na.rm=TRUE),digits=2)),cex=.8)
+                             if(x.labs[i]=="Prediction\nError") text((which(train[i,]==min(train[i,],na.rm=TRUE),arr.ind=TRUE)-.25),
+                                  min(train[i,],na.rm=TRUE)+.07,labels=as.character(round(min(train[i,],na.rm=TRUE),digits=2)),cex=.8)
+                             if(x.labs[i]!="Prediction\nError") if(length(test.lst)==1) text((which(test.lst[[1]][i,]==max(test.lst[[1]][i,],na.rm=TRUE),arr.ind=TRUE)[2]+.25),
+                                  max(test.lst[[1]][i,],na.rm=TRUE)+.07,labels=as.character(round(max(test.lst[[1]][i,],na.rm=TRUE),digits=2)),cex=.8)
+                              if(x.labs[i]=="Prediction\nError") if(length(test.lst)==1) text((which(test.lst[[1]][i,]==max(test.lst[[1]][i,],na.rm=TRUE),arr.ind=TRUE)[2]+.25),
+                                  max(test.lst[[1]][i,],na.rm=TRUE)+.07,labels=as.character(round(max(test.lst[[1]][i,],na.rm=TRUE),digits=2)),cex=.8)
+                            if (i==1) par(mar=c(.2, 5, .6, 2))
+                            if(i!=1 & i!=(Parm.Len-1)) par(mar=c(.3, 5, .4, 2))
+                            if(i==(Parm.Len-1)) par(mar=c(2, 5, .4, 2))
+                        }
+                        #Outer margin labels
+                             Line<-ifelse(Parm.Len==5,-13,-19)
+                            for(i in 1:length(Hdr)) mtext(Hdr[i],line=Line,at=(i-1),las=2)
                           mtext("Evaluation Metrics Performance Across Model Runs",outer=TRUE,side=3,cex=1.3)
-                          mtext(paste("Folder Name where model is found in ",
-                            ifelse(!is.null(out$dat$ma$ma.test),"AppendedOutputTestTrain.csv","AppendedOutput.csv"),sep=""),side=1,outer=TRUE,line=3)
+                          mtext(paste("sub-folder name where model is found in the folder ",parent
+                            ,sep=""),side=1,outer=TRUE,line=4)
                        dev.off()
-                     }
 
-          try(write.table(cbind(Orig.x,x[,2]),file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=","))
-          }}
+                    }
                }

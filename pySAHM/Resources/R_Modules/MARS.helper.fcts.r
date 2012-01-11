@@ -1,99 +1,6 @@
 ###########################################################################################
 #  The following functions are from Elith et al.
 ###########################################################################################
-
-"calc.deviance" <-
-function(obs.values, fitted.values, weights = rep(1,length(obs.values)), family=family, calc.mean = TRUE)
-{
-# j. leathwick/j. elith
-#
-# version 2.1 - 5th Sept 2005
-#
-# function to calculate deviance given two vectors of raw and fitted values
-# requires a family argument which is set to binomial by default
-#
-#
-
-if (length(obs.values) != length(fitted.values))
-   stop("observations and predictions must be of equal length")
-
-y_i <- obs.values
-
-u_i <- fitted.values
-
-if (family == "binomial" | family == "bernoulli") {
-
-   deviance.contribs <- (y_i * log(u_i)) + ((1-y_i) * log(1 - u_i))
-   deviance <- -2 * sum(deviance.contribs * weights)
-
-}
-
-if (family == "poisson" | family == "Poisson") {
-
-    deviance.contribs <- ifelse(y_i == 0, 0, (y_i * log(y_i/u_i))) - (y_i - u_i)
-    deviance <- 2 * sum(deviance.contribs * weights)
-
-}
-
-if (family == "laplace") {
-    deviance <- sum(abs(y_i - u_i))
-    }
-
-if (family == "gaussian") {
-    deviance <- sum((y_i - u_i) * (y_i - u_i))
-    }
-
-
-
-if (calc.mean) deviance <- deviance/length(obs.values)
-
-return(deviance)
-
-}
-
-"calibration" <-
-function(obs, preds, family = family)
-{
-#
-# j elith/j leathwick 17th March 2005
-# calculates calibration statistics for either binomial or count data
-# but the family argument must be specified for the latter
-# a conditional test for the latter will catch most failures to specify
-# the family
-#
-
-if (family == "bernoulli") family <- "binomial"
-pred.range <- max(preds) - min(preds)
-if(pred.range > 1.2 & family == "binomial") {
-print(paste("range of response variable is ", round(pred.range, 2)), sep = "", quote = F)
-print("check family specification", quote = F)
-return()
-}
-if(family == "binomial") {
-pred <- preds + 1e-005
-pred[pred >= 1] <- 0.99999
-mod <- glm(obs ~ log((pred)/(1 - (pred))), family = binomial)
-lp <- log((pred)/(1 - (pred)))
-a0b1 <- glm(obs ~ offset(lp) - 1, family = binomial)
-miller1 <- 1 - pchisq(a0b1$deviance - mod$deviance, 2)
-ab1 <- glm(obs ~ offset(lp), family = binomial)
-miller2 <- 1 - pchisq(a0b1$deviance - ab1$deviance, 1)
-miller3 <- 1 - pchisq(ab1$deviance - mod$deviance, 1)
-}
-if(family == "poisson") {
-mod <- glm(obs ~ log(preds), family = poisson)
-lp <- log(preds)
-a0b1 <- glm(obs ~ offset(lp) - 1, family = poisson)
-miller1 <- 1 - pchisq(a0b1$deviance - mod$deviance, 2)
-ab1 <- glm(obs ~ offset(lp), family = poisson)
-miller2 <- 1 - pchisq(a0b1$deviance - ab1$deviance, 1)
-miller3 <- 1 - pchisq(ab1$deviance - mod$deviance, 1)
-}
-calibration.result <- c(mod$coef, miller1, miller2, miller3)
-names(calibration.result) <- c("intercept", "slope", "testa0b1", "testa0|b1", "testb1|a")
-return(calibration.result)
-}
-
 "mars.contribs" <-
 function (mars.glm.object,sp.no = 1, verbose = TRUE)
 {
@@ -180,235 +87,6 @@ function (mars.glm.object,sp.no = 1, verbose = TRUE)
   return(list(mars.call=mars.detail,deviance.table=deviance.table))
 }
 
-"mars.cv" <-
-function (mars.glm.object, nk = 10, sp.no = 1, prev.stratify = F)
-{
-#
-# j. leathwick/j. elith - August 2006
-#
-# version 3.1 - developed in R 2.3.1 using mda 0.3-1
-#
-# function to perform k-fold cross validation
-# with full model perturbation for each subset
-#
-# requires mda library from Cran
-# requires functions mw and calibration
-#
-# takes a mars/glm object produced by mars.glm
-# and first assesses the full model, and then
-# randomly subsets the dataset into nk folds and drops
-# each subset in turn, fitting on remaining data
-# and predicting for withheld data
-#
-# caters for both single species and community models via the argument sp.no
-# for the first, sp.no can be left on its default of 1
-# for community models, sp.no can be varied from 1 to n.spp
-#
-# modified 29/9/04 to
-#   1. return mars analysis details for audit trail
-#   2. calculate roc and calibration on subsets as well as full data
-#      returning the mean and se of the ROC scores
-#      and the mean calibration statistics
-#
-# modified 8/10/04 to add prevalence stratification
-# modified 7th January to test for binomial family and return if not
-#
-# updated 15th March to cater for both binomial and poisson families
-#
-# updated 16th June 2005 to calculate residual deviance
-#
-
-  data <- mars.glm.object$mars.call$dataframe    #get the dataframe name
-  dataframe.name <- deparse(substitute(data))
-
-  data <- as.data.frame(eval(parse(text=data)))   #and now the data
-  n.cases <- nrow(data)
-
-  mars.call <- mars.glm.object$mars.call          #and the mars call details
-  mars.x <- mars.call$mars.x
-  mars.y <- mars.call$mars.y
-  mars.degree <- mars.call$degree
-  mars.penalty <- mars.call$penalty
-  family <- mars.call$family
-  site.weights <- eval(mars.glm.object$weights$site.weights)
-
-  n.spp <- length(mars.y)
-
-  if (sp.no > n.spp) {
-    print(paste("the value specified for sp.no of",sp.no),quote=F)
-    print(paste("exceeds the total number of species, which is ",n.spp),quote=F)
-    return()
-  }
-
-  xdat <- as.data.frame(data[,mars.x])
-  xdat <- mars.new.dataframe(xdat)[[1]]
-  ydat <- mars.glm.object$y.values[,sp.no]
-  target.sp <- names(data)[mars.y[sp.no]]
-
-  if (prev.stratify) {
-    presence.mask <- ydat == 1
-    absence.mask <- ydat == 0
-    n.pres <- sum(presence.mask)
-    n.abs <- sum(absence.mask)
-  }
-
-  print(paste("Calculating ROC and calibration from full model for",target.sp),quote=F)
-
-  u_i <- mars.glm.object$fitted.values[,sp.no]
-  y_i <- ydat
-
-  if (family == "binomial") {
-    full.resid.deviance <- calc.deviance(y_i,u_i, weights = site.weights, family="binomial")
-    full.test <- roc(y_i, u_i)
-    full.calib <- calibration(y_i, u_i)
-  }
-
-  if (family=="poisson") {
-    full.resid.deviance <- calc.deviance(y_i,u_i, weights = site.weights, family="poisson")
-    full.test <- cor(y_i, u_i)
-    full.calib <- calibration(y_i, u_i, family = "poisson")
-  }
-
-# set up for results storage
-
-  subset.test <- rep(0,nk)
-  subset.calib <- as.data.frame(matrix(0,ncol=5,nrow=nk))
-  names(subset.calib) <- c("intercept","slope","test1","test2","test3")
-  subset.resid.deviance <- rep(0,nk)
-
-# now setup for withholding random subsets
-
-  pred.values <- rep(0, n.cases)
-  fitted.values <- rep(0, n.cases)
-
-  if (prev.stratify) {
-
-    selector <- rep(0,n.cases)
-
-#create a vector of randomised numbers and feed into presences
-
-    temp <- rep(seq(1, nk, by = 1), length = n.pres)
-    temp <- temp[order(runif(n.pres, 1, 100))]
-    selector[presence.mask] <- temp
-
-# and then do the same for absences
-
-    temp <- rep(seq(1, nk, by = 1), length = n.abs)
-    temp <- temp[order(runif(n.abs, 1, 100))]
-    selector[absence.mask] <- temp
-
-  }
-  else {  #otherwise make them random with respect to presence/absence
-
-    selector <- rep(seq(1, nk, by = 1), length = n.cases)
-    selector <- selector[order(runif(n.cases, 1, 100))]
-  }
-
-  print("", quote = FALSE)
-  print("Creating predictions for subsets...", quote = F)
-
-  for (i in 1:nk) {
-    cat(i," ")
-    model.mask <- selector != i  #used to fit model on majority of data
-    pred.mask <- selector == i   #used to identify the with-held subset
-    assign("species.subset", ydat[model.mask], pos = 1)
-    assign("predictor.subset", xdat[model.mask, ], pos = 1)
-
-    # fit new mars model
-
-    mars.object <- mars(y = species.subset, x = predictor.subset,
-      degree = mars.degree, penalty = mars.penalty)
-
-    # and extract basis functions
-
-    n.bfs <- length(mars.object$selected.terms)
-    bf.data <- as.data.frame(mars.object$x)
-    names(bf.data) <- paste("bf",1:n.bfs,sep="")
-    assign("bf.data", bf.data, pos=1)
-
-    # then fit a binomial model to them
-
-    mars.binomial <- glm(species.subset ~ .,data=bf.data[,-1], family= family, maxit = 100)
-
-    pred.basis.functions <- as.data.frame(mda:::model.matrix.mars(mars.object,
-      xdat[pred.mask, ]))
-
-    #now name the bfs to match the approach used in mars.binomial
-
-    names(pred.basis.functions) <- paste("bf",1:n.bfs,sep="")
-
-    # and form predictions for them and evaluate performance
-
-    fitted.values[pred.mask] <- predict(mars.binomial,
-      pred.basis.functions, type = "response")
-
-    y_i <- ydat[pred.mask]
-    u_i <- fitted.values[pred.mask]
-    weights.subset <- site.weights[pred.mask]
-
-    if (family == "binomial") {
-      subset.resid.deviance[i] <- calc.deviance(y_i,u_i,weights = weights.subset, family="binomial")
-      subset.test[i] <- roc(y_i,u_i)
-      subset.calib[i,] <- calibration(y_i, u_i)
-    }
-
-    if (family=="poisson"){
-      subset.resid.deviance[i] <- calc.deviance(y_i,u_i,weights = weights.subset, family="poisson")
-      subset.test[i] <- cor(y_i, u_i)
-      subset.calib[i,] <- calibration(y_i, u_i, family = family)
-    }
-  }
-
-  cat("","\n")
-
-# tidy up temporary files
-
-  rm(species.subset,predictor.subset,bf.data,pos=1)
-
-# and assemble results for return
-
-#  mars.detail <- list(dataframe = dataframe.name,
-#    x = mars.x, x.names = names(xdat),
-#    y = mars.y, y.names = names(data)[mars.y],
-#    target.sp = target.sp, degree=mars.degree, penalty = mars.penalty, family = family)
-
-  y_i <- ydat
-  u_i <- fitted.values
-
-  if (family=="binomial") {
-    cv.resid.deviance <- calc.deviance(y_i,u_i,weights = site.weights, family="binomial")
-    cv.test <- roc(y_i, u_i)
-    cv.calib <- calibration(y_i, u_i)
-  }
-
-  if (family=="poisson"){
-    cv.resid.deviance <- calc.deviance(y_i,u_i,weights = site.weights, family="poisson")
-    cv.test <- cor(y_i, u_i)
-    cv.calib <- calibration(y_i, u_i, family = "poisson")
-  }
-
-  subset.test.mean <- mean(subset.test)
-  subset.test.se <- sqrt(var(subset.test))/sqrt(nk)
-
-  subset.test <- list(test.scores = subset.test, subset.test.mean = subset.test.mean,
-    subset.test.se = subset.test.se)
-
-  subset.calib.mean <- apply(subset.calib[,c(1:2)],2,mean)
-  names(subset.calib.mean) <- names(subset.calib)[c(1:2)] #mean only of parameters
-
-  subset.calib <- list(subset.calib = subset.calib,
-    subset.calib.mean = subset.calib.mean)
-
-  subset.deviance.mean <- mean(subset.resid.deviance)
-  subset.deviance.se <- sqrt(var(subset.resid.deviance))/sqrt(nk)
-
-  subset.deviance <- list(subset.deviances = subset.resid.deviance, subset.deviance.mean = subset.deviance.mean,
-    subset.deviance.se = subset.deviance.se)
-
-  return(list(mars.call = mars.call, full.resid.deviance = full.resid.deviance,
-    full.test = full.test, full.calib = full.calib, pooled.deviance = cv.resid.deviance, pooled.test = cv.test,
-    pooled.calib = cv.calib,subset.deviance = subset.deviance, subset.test = subset.test, subset.calib = subset.calib))
-}
 
 "mars.export" <-
 function (object,lineage)
@@ -606,9 +284,6 @@ function (data,                         # the input data frame
   fitted.values <- as.data.frame(fitted.values)
   names(fitted.values) <- names(ydat)
 
-  model.residuals <- as.data.frame(model.residuals)
-  names(model.residuals) <- names(ydat)
-
   deviances <- data.frame(names(ydat),null.deviances,null.dfs,residual.deviances,residual.dfs,converged)
   names(deviances) <- c("species","null.dev","null.df","resid.dev","resid.df","converged")
 
@@ -763,9 +438,9 @@ function (mars.glm.object,  #the input mars object
   factor.filter <- rep(FALSE,ncol(xdat))
   for (i in 1:ncol(xdat)) factor.filter[i] <- is.vector(xdat[,i])
 
-  if(sum(factor.filter>1)) {
+  if(sum(factor.filter==FALSE)>0) {
   xrange[,factor.filter] <- sapply(xdat[,factor.filter], range)
-  } else  xrange[,factor.filter]<-range(xdat[,factor.filter])
+  } else  xrange<-apply(xdat,2,range)
 
   for (i in wanted.species) {
     n.pages <- 1
@@ -809,10 +484,8 @@ function (mars.glm.object,  #the input mars object
               }
             }
           }
-          #if (nplots == 0) { #AKS
-#            if (use.windows) windows(width = 11, height = 8)
-#              par(mfrow = plot.layout)
-#            }
+
+
             if (factor.filter[varno]) {
               if(plot.it) plot(Xi, bf, type = "l", xlab = names(xdat)[varno], ylab = "response") #aks
               if (plot.rug & plot.it) rug(quantile(xdat[,varno], probs = seq(0, 1, 0.1), na.rm = FALSE))
@@ -1055,21 +728,21 @@ function (mars.glm.object,new.data)
 
   new.names <- names(new.data)
 
-  for (i in 1:length(base.names)) {
-
-    name <- base.names[i]
-
-    if (!(name %in% new.names)) {
-      print(paste("Variable ",name," missing from new data",sep=""),quote = FALSE)  #aks
-      return()
-    }
-  }
+#  for (i in 1:length(base.names)) {
+#
+#    name <- base.names[i]
+#
+#    if (!(name %in% new.names)) {
+#      print(paste("Variable ",name," missing from new data",sep=""),quote = FALSE)  #aks
+#      return()
+#    }
+#  }
 
   print("and creating temporary dataframe for new data...",quote=FALSE)
 
-  selector <- match(names(x.temp),names(new.data))
+  #selector <- na.rm(match(names(x.temp),names(new.data)))
 
-  pred.dat <- mars.new.dataframe(new.data[,selector])[[1]]
+  pred.dat <- mars.new.dataframe(new.data)[[1]]
 
   assign("pred.dat", pred.dat, pos = 1)               #and assign them for later use
 
@@ -1116,33 +789,7 @@ function (mars.glm.object,new.data)
   return(list("prediction"=prediction,"ses"=standard.errors))
 }
 
-"roc" <-
-function (obsdat, preddat)
-{
-# code adapted from Ferrier, Pearce and Watson's code, by J.Elith
-#
-# see:
-# Hanley, J.A. & McNeil, B.J. (1982) The meaning and use of the area
-# under a Receiver Operating Characteristic (ROC) curve.
-# Radiology, 143, 29-36
-#
-# Pearce, J. & Ferrier, S. (2000) Evaluating the predictive performance
-# of habitat models developed using logistic regression.
-# Ecological Modelling, 133, 225-245.
-# this is the non-parametric calculation for area under the ROC curve,
-# using the fact that a MannWhitney U statistic is closely related to
-# the area
-#
-    if (length(obsdat) != length(preddat))
-        stop("obs and preds must be equal lengths")
-    n.x <- length(obsdat[obsdat == 0])
-    n.y <- length(obsdat[obsdat == 1])
-    xy <- c(preddat[obsdat == 0], preddat[obsdat == 1])
-    rnk <- rank(xy)
-    wilc <- ((n.x * n.y) + ((n.x * (n.x + 1))/2) - sum(rnk[1:n.x]))/(n.x *
-        n.y)
-    return(round(wilc, 4))
-}
+
 
 pred.mars <- function(model,x) {
     # retrieve key items from the global environment #
@@ -1158,7 +805,7 @@ pred.mars <- function(model,x) {
     return(y)
     }
 
-logit <- function(x) 1/(1+exp(-x))
+
 
 file_path_as_absolute <- function (x){
     if (!file.exists(epath <- path.expand(x)))

@@ -1,5 +1,5 @@
 proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,pred.fct,factor.levels=NA,make.binary.tif=F,make.p.tif=T,
-    thresh=0.5,outfile.p="brt.prob.map.tif",outfile.bin="brt.bin.map.tif",tsize=2.0,NAval=-3000,fnames=NULL,logname=NULL,out){
+    thresh=0.5,outfile.p="brt.prob.map.tif",outfile.bin="brt.bin.map.tif",tsize=2.0,NAval=-3000,fnames=NULL,out,Model){
 
     # vnames,fpath,myfun,make.binary.tif=F,outfile=NA,outfile.bin=NA,output.dir=NA,tsize=10.0,NAval=NA,fnames=NA
     # Written by Alan Swanson, YERC, 6-11-08
@@ -35,28 +35,28 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,pred.fct,factor.le
     # the same directory as the input files.  Geographic information from the input images
     # is retained.
     #
-    #HELLO!!!
-    #ColinTEST
+
     # Start of function #
     library(rgdal)
     library(raster)
-
+    if(is.null(factor.levels)) factor.levels<-NA
     MESS=out$input$MESS
     if(is.null(thresh)) thresh<-.5
     nvars<-length(vnames)
-
+    vnames.final.mod<-out$mods$vnames
+    nvars.final<-length(vnames.final.mod)
 # settup up output raster to match input raster
 
           fullnames <- as.character(filenames[match(vnames,basename(sub(".tif","",filenames)))])
           goodfiles <- file.access(fullnames)==0
           if(!all(goodfiles)) stop(paste("ERROR: the following image files are missing:",paste(fullnames[!goodfiles],collapse=", ")))
 
-if(nvars<=1) MESS=FALSE
+if(nvars.final<=1) MESS=FALSE
  ######################################
  # get spatial reference info from existing image file
 options(warn=-1)
     gi <- GDALinfo(fullnames[1])
-options(warn=0)
+options(warn=1)
     dims <- as.vector(gi)[1:2]
     ps <- as.vector(gi)[6:7]
     ll <- as.vector(gi)[4:5]
@@ -109,7 +109,7 @@ names(temp) <- vnames
 FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
   if((nvars-length(FactorInd))==0) MESS<-FALSE #turn this off if only one factor column was selected
     if(MESS) {
-      pred.rng<-temp
+      pred.rng<-temp[,names(temp)%in%out$mods$vnames]
         CalcMESS<-function(tiff.entry,pred.vect){
               f<-sum(pred.vect<tiff.entry)/length(pred.vect)*100
               if(is.na(f)) return(NA)
@@ -128,9 +128,10 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
   for (i in 1:tr$n) {
     strt <- c((i-1)*nrows,0)
      region.dims <- c(min(dims[1]-strt[1],nrows),dims[2])
+
         if (i==tr$n) if(is.null(dim(temp))) { temp <- temp[1:(tr$nrows[i]*dims[2])]
                                               if(MESS) pred.rng<-pred.rng[1:(tr$nrows[i]*dims[2])]
-        } else {temp <- temp[1:(tr$nrows[i]*dims[2]),]
+        } else {temp <- as.data.frame(temp[1:(tr$nrows[i]*dims[2]),])
                       if(MESS) pred.rng<-pred.rng[1:(tr$nrows[i]*dims[2]),]
                 }
 
@@ -138,15 +139,24 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
       for(k in 1:nvars) { # fill temp data frame
             if(is.null(dim(temp))){
               temp<- getValuesBlock(raster(fullnames[k]), row=tr$row[i], nrows=tr$nrows[i])
+               temp<-as.data.frame(as.matrix(x=temp,nrow=(tr$nrows[i]*dims[2]),ncol=1))
             } else {temp[,k]<- getValuesBlock(raster(fullnames[k]), row=tr$row[i], nrows=tr$nrows[i])
                     }
-                  if(MESS & !k%in%FactorInd){
-                        pred.range<-out$dat$ma$ma[,c(match(sub(".tif","",basename(fullnames[k])),names(out$dat$ma$ma)))]
-                        if(nvars>1) pred.rng[,k]<-mapply(CalcMESS,tiff.entry=temp[,k],MoreArgs=list(pred.vect=pred.range))
+
+            }
+
+             if(MESS){
+             for(k in 1:nvars.final){
+                   if(!out$mods$vnames[k]%in%names(factor.levels)){
+                        pred.range<-out$dat$ma$train$dat[,match(out$mods$vnames[k],names(out$dat$ma$train$dat))]
+                        if(nvars.final>1) pred.rng[,k]<-mapply(CalcMESS,tiff.entry=temp[,match(out$mods$vnames[k],names(temp))],MoreArgs=list(pred.vect=pred.range))
                         else pred.rng<-mapply(CalcMESS,tiff.entry=temp,MoreArgs=list(pred.vect=pred.range))
                          }
-            }
-            if(MESS & length(FactorInd)>0) pred.rng<-pred.rng[,-c(FactorInd)]
+                         }
+                      if(any(names(pred.rng)%in%names(factor.levels))) pred.rng<-pred.rng[,-c(names(pred.rng)%in%names(factor.levels))]
+                      }
+                if(length(vnames)==1) names(temp)=vnames
+
     temp[temp==NAval] <- NA # replace missing values #
     temp[is.na(temp)]<-NA #this seemingly worthless line switches NaNs to NA so they aren't predicted
         if(sum(!is.na(factor.levels))){
@@ -158,9 +168,10 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
                 }
             }
                    }}
+
     ifelse(sum(complete.cases(temp))==0,  # does not calculate predictions if all predictors in the region are na
         preds<-matrix(data=NaN,nrow=region.dims[1],ncol=region.dims[2]),
-        preds <- t(matrix(pred.fct(model,temp),ncol=dims[2],byrow=T)))
+        preds <- t(matrix(pred.fct(model,temp,Model),ncol=dims[2],byrow=T)))
 
         min.pred<-min(na.omit(preds),min.pred)
         max.pred<-max(na.omit(preds),max.pred)

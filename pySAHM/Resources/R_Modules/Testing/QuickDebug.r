@@ -1,24 +1,12 @@
-setwd("I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
-ScriptPath="I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
+setwd("I:\\VisTrails\\Central_VisTrails_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\Central_VisTrails_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
 
-#setwd("I:\\VisTrails\\Central_VisTrailsInstall\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
-source("FIT_BRT_pluggable.r")
-source("FIT_MARS_pluggable.r")
-source("FIT_RF_pluggable.r")
-source("FIT_GLM_pluggable.r")
-#source("EvaluationStats.r")
-source("EvalStats.r")
-source("make.auc.r")
-source("EvalStatsHelperFcts.r")
-source("AppendOut.r")
-source("ResidualImage.r")
-source("TestTrainRocPlot.r")
-source("read.ma.r")
-source("proc.tiff.r")
-source("PredictModel.r")
-source("modalDialog.R")
-source("check.libs.r")
-source("Pred.Surface.r")
+source("LoadRequiredCode.r")
+source("MARS.helper.fcts.r")
+source("GLM.helper.fcts.r")
+source("BRT.helper.fcts.r")
+source("RF.helper.fcts.r")
+output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
 
 options(error=expression(if(interactive()) recover() else dump.calls()))
 options(error=NULL)
@@ -26,22 +14,83 @@ trace(proc.tiff,browser)
 
 list.files()
 #Testing Compile Output on data with no test train and with a test train
-output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
+
 rc="responseCount"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
 
-input.file[11]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
 
 #fit.model(ma.name=input.file,output.dir=output.dir,response.col=rc,make.p.tif=T,make.binary.tif=T,script.name="glm.r",
 #opt.methods=2,save.model=TRUE,UnitTest=FALSE,MESS=FALSE,aic.form=TRUE,parm2=4)
 
 ###########################################################################
 ############### Quick debug  ##############################################
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\morisettej_20111027T131301\\CovariateCorrelationOutputMDS_Both.csv"
-output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitWeights.csv"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/NoSplit.csv"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Spat.Weights.csv"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Split.csv"
 rc="responseBinary"
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation\\modelSelection_split_1.csv"
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation\\modelSelection_cv_1.csv"
+input.file="I:/VisTrails/WorkingFiles/workspace/Test_CrossValidation2/CovariateCorrelationOutputMDS_no categorical2.csv"
+output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation3\\modelSelection_cv_1.csv"
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation4\\modelSelection_cv_1.csv"
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation4\\modelSelection_marianTest.csv"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Split.csv"
 #######################################################################
+##MARS
+output.dir="C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction1.6\\mars"
+FitModels(ma.name=input.file,
+            output.dir=output.dir,
+            response.col=rc,make.p.tif=F,make.binary.tif=F,
+            mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars",opt.methods=2,MESS=F)
 
+EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,make.binary.tif=TRUE,make.p.tif=TRUE,MESS=TRUE)
+
+##GLM
+input.file="C:\\VisTrails\\mtalbert_20110504T132851\\readMaTests\\SecondSeasonWeights.csv"
+input.file="I://VisTrails//WorkingFiles//secondseason//secondseason_workfile_2012_12_23//TestTrainingSplit_8.csv"
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\MarsError\\CovariateCorrelationOutputMDS_NoClimate.csv"
+input.file="I:\\VisTrails\\WorkingFiles\\tutorial\\tutorial_2011_12_28\\CovariateCorrelationOutputMDS_NoRS.csv"
+FitModels(ma.name=input.file,
+          tif.dir=NULL,
+          output.dir=output.dir,
+          response.col=rc,make.p.tif=T,make.binary.tif=T,
+          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=TRUE,opt.methods=2)
+          
+#RF
+set.seed(1)
+proximity=NULL
+FitModels(ma.name=input.file,
+      tif.dir=NULL,
+      output.dir=output.dir,
+      response.col=rc,make.p.tif=T,make.binary.tif=T,
+          debug.mode=T,opt.methods=2,script.name="rf",
+responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
+samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
+localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=proximity,norm.votes=TRUE,
+do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=TRUE)
+
+#BRT
+set.seed(1)
+FitModels(ma.name=input.file,
+          tif.dir=NULL,output.dir=output.dir,
+          response.col=rc,make.p.tif=T,make.binary.tif=T,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
+      family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
+  tolerance = 0.001,opt.methods=2,
+          simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
+          learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=TRUE,seed=1)
+
+#Now evaluating new data
+EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,make.binary.tif=TRUE,make.p.tif=TRUE,MESS=TRUE)
+  logname<-NULL
+  sink(logname)
+  sink(logname, type="message")
+
+ PredictModel(workspace=,out.dir=output.dir)
 ##RF
 set.seed(1)
     fit.rf.fct(ma.name=input.file,
@@ -65,7 +114,7 @@ set.seed(1)
 ##MARS
     fit.mars.fct(ma.name=input.file,
             tif.dir=NULL,output.dir=output.dir,
-            response.col=rc,make.p.tif=F,make.binary.tif=F,
+            response.col=rc,make.p.tif=T,make.binary.tif=T,
             mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars.r",opt.methods=2)
 
     PredictModel(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir="C:\\VisTrails")
@@ -84,4 +133,4 @@ set.seed(1)
 C:\R-2.12.1\bin\i386\Rterm.exe --vanilla -f I:\VisTrails\Central_VisTrailsInstall_debug\vistrails\packages\sahm_MarianDev\pySAHM\Resources\R_Modules\FIT_BRT_pluggable.r --args c=C:\VisTrails\mtalbert_20110504T132851\readMaTests\Split.csv o=C:\temp\SAHMDebugJunk\BRTOut1 rc=responseBinary
 C:\R-2.12.1\bin\i386\Rterm.exe --vanilla -f I:\VisTrails\Central_VisTrailsInstall\vistrails\packages\sahm\pySAHM\Resources\R_Modules\FIT_GLM_pluggable.r --args c==I:\VisTrails\Yellowstone_example\workspace_for_paper\CovariateCorrelationOutputMDS_Both.csv o=C:\temp\SAHMDebugJunk\BRTOut1 rc=responseBinary
 
-I:\VisTrails\Central_VisTrailsInstall\Central_R\R-2.12.1\bin\i386\Rterm.exe --vanilla -f I:\VisTrails\Central_VisTrailsInstall\vistrails\packages\sahm\pySAHM\Resources\R_Modules\FIT_BRT_pluggable.r --args  mbt=TRUE mpt=TRUE c="I:\VisTrails\WorkingFiles\workspace\morisettej_20111027T131301\CovariateCorrelationOutputMDS_Both.csv" mes=TRUE o="C:\temp\SAHMDebugJunk\BRTOut1" rc=responseBinary
+I:\VisTrails\Central_VisTrailsInstall\Central_R\R-2.12.1\bin\i386\Rterm.exe --vanilla -f I:\VisTrails\Central_VisTrailsInstall_debug\vistrails\packages\sahm_MarianDev\pySAHM\Resources\R_Modules\FIT_BRT_pluggable.r --args  mbt=TRUE mpt=TRUE c="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv" o="C:\temp\SAHMDebugJunk\BRTOut1" rc=responseBinary mes=TRUE

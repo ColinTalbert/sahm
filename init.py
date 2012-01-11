@@ -14,9 +14,7 @@ from core.modules.vistrails_module import Module, ModuleError, ModuleConnector
 from core.modules.basic_modules import File, Directory, Path, new_constant, Constant
 from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
 from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
-#from packages.persistence.init import PersistentPath, PersistentFile, PersistentDir
 
-from core.modules.basic_modules import List
 from core.modules.basic_modules import String
 
 from PyQt4 import QtCore, QtGui
@@ -34,17 +32,19 @@ import packages.sahm.pySAHM.RasterFormatConverter as RFC
 import packages.sahm.pySAHM.MaxentRunner as MaxentRunner
 from packages.sahm.SahmOutputViewer import SAHMModelOutputViewerCell
 from packages.sahm.SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
-from packages.sahm.sahm_picklists import ResponseType, AggregationMethod, ResampleMethod
+from packages.sahm.sahm_picklists import ResponseType, AggregationMethod, \
+        ResampleMethod
 
 from utils import writetolog
 from pySAHM.utilities import TrappedError
 
-from SahmSpatialOutputViewer import setQGIS
+#from SahmSpatialOutputViewer import setQGIS
 
 identifier = 'gov.usgs.sahm' 
 
 def menu_items():
     """ Add a menu item which allows users to specify their session directory
+    and select and test the final model
     """
     def change_session_folder():
         global session_dir
@@ -59,8 +59,13 @@ def menu_items():
         writetolog(" output directory:   " + session_dir)
         writetolog("*" * 79 + "\n" + "*" * 79)
     
+    def select_test_final_model():
+        global session_dir
+        
+    
     lst = []
     lst.append(("Change session folder", change_session_folder))
+    lst.append(("Select and test the Final Model", select_test_final_model))
     return(lst)
 
 
@@ -135,8 +140,6 @@ class FieldData(Path):
     _output_ports = [('value', '(gov.usgs.sahm:FieldData:DataInput)'),
                      ('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
     
-
-
 class Predictor(Constant):
     '''
     Predictor
@@ -493,7 +496,7 @@ class Model(Module):
                      ('ResidualsMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('MessMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('MoDMap', '(edu.utah.sci.vistrails.basic:File)'),
-                     ('AUC_plot', '(edu.utah.sci.vistrails.basic:File)'),
+                     ('modelEvalPlot', '(edu.utah.sci.vistrails.basic:File)'),
                      ('ResponseCurves', '(edu.utah.sci.vistrails.basic:File)'),
                      ('Text_Output', '(edu.utah.sci.vistrails.basic:File)')]
 
@@ -529,7 +532,7 @@ class Model(Module):
         self.setModelResult(self.ModelAbbrev + "_mess_map.tif", 'MessMap', 'mes')
         self.setModelResult(self.ModelAbbrev + "_MoD_map.tif", 'MoDMap', 'mes')
         self.setModelResult(self.ModelAbbrev + "_output.txt", 'Text_Output')
-        self.setModelResult(self.ModelAbbrev + "_auc_plot.jpg", 'AUC_plot') 
+        self.setModelResult(self.ModelAbbrev + "_modelEvalPlot.jpg", 'modelEvalPlot') 
         self.setModelResult(self.ModelAbbrev + "_response_curves.pdf", 'ResponseCurves')
         self.setModelResult("modelWorkspace", 'modelWorkspace')        
         writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
@@ -540,6 +543,7 @@ class Model(Module):
                         self.argsDict[arg_key].lower() == 'false')
         if required and not os.path.exists(outFileName):
             msg = "Expected output from " + self.ModelAbbrev + " was not found."
+            msg += "\nSpecifically " + outFileName + " was missing."
             msg += "\nThis might indicate problems with the inputs to the R module."
             msg += "\nCheck the console output for additional R warnings "
             writetolog(msg, False, True)
@@ -684,7 +688,7 @@ class MDSBuilder(Module):
 
     '''
 
-    _input_ports = expand_ports([('RastersWithPARCInfoCSV', '(edu.utah.sci.vistrails.basic:File)'),
+    _input_ports = expand_ports([('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
                                  ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
                                  ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)')]
@@ -814,7 +818,7 @@ class FieldDataQuery(Module):
         except:
             try:
                 all_lowers = [item.lower() for item in header]
-                index = header.index(column_name.lower())
+                index = all_lowers.index(column_name.lower())
             except:
                 msg = "The specified column wasn't in the input file\n"
                 msg += column_name + " not in " + str(header)
@@ -826,8 +830,15 @@ class FieldDataQuery(Module):
         if "<" in query or \
             ">" in query or \
             "=" in query:
-            toevaluate = query.replace('x', value)
-            return eval(toevaluate)
+            
+            try:
+                #this works with numeric queries
+                toevaluate = query.replace('x', value)
+                return eval(toevaluate)
+            except (NameError,SyntaxError):
+                #this works with string queries
+                toevaluate = query.replace('x', "'" + value + "'")
+                return eval(toevaluate)
         else:
             return False
             
@@ -837,15 +848,13 @@ class FieldDataAggregateAndWeight(Module):
     Documentation to be updated when module finalized.
     '''
     _input_ports = expand_ports([('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
-                                 ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
-                                 ('aggregateRows', 'basic:Boolean')])
+                                 ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')])
     _output_ports = expand_ports([('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')])
     
     def compute(self):
         writetolog("\nFieldDataAggregateAndWeight", True)
         port_map = {'templateLayer': ('template', None, True),
             'fieldData': ('csv', None, True),
-            'aggregateRowsByYear': ('aggRows', None, False),
             'addKDE': ('addKDE', None, False),}
         
         KDEParams = utils.map_ports(self, port_map)
@@ -924,14 +933,18 @@ class PARC(Module):
                                 ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['False']), 'optional':True}),
                                 ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':True})]
 
-    _output_ports = [('RastersWithPARCInfoCSV', '(edu.utah.sci.vistrails.basic:File)')]
+    _output_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
     
     def compute(self):
         #writetolog("\nRunning PARC", True)
         
         ourPARC = parc.PARC()
         template = self.forceGetInputFromPort('templateLayer').name
-        template_fname = os.path.splitext(os.path.split(template)[1])[0]
+        template_path, template_fname = os.path.split(template)
+        template_fname = os.path.splitext(template_fname)[0]
+        if template_fname == 'hdr':
+            template_fname = os.path.split(template_path)[1]
+        
         output_dname = os.path.join(utils.getrootdir(), 'PARC_' + template_fname)
         if not os.path.exists(output_dname):
             os.mkdir(output_dname)
@@ -1082,11 +1095,11 @@ class RasterFormatConverter(Module):
         self.setResult('outputDir', outputDir)
         writetolog("\nFinished running TiffConverter", True)
         
-class TestTrainingSplit(Module):
+class ModelEvaluationSplit(Module):
     '''
-    Test Training Split
+    Model Evaluation Split
 
-    The TestTrainingSplit module provides the opportunity to establish specific settings
+    The ModelEvaluationSplit module provides the opportunity to establish specific settings
     for how field data will be used in the modeling process. Three parameters can be set
     by the user:
 
@@ -1132,11 +1145,9 @@ class TestTrainingSplit(Module):
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
     
     def compute(self):
-        if self.hasInputFromPort('trainingProportion'):
-            print 'real input'
-        writetolog("\nGenerating Test Training split ", True)
+        writetolog("\nGenerating Model Evaluation split ", True)
         inputMDS = utils.dir_path_value(self.forceGetInputFromPort('inputMDS', []))
-        outputMDS = utils.mknextfile(prefix='TestTrainingSplit_', suffix='.csv')
+        outputMDS = utils.mknextfile(prefix='ModelEvaluation_Split_', suffix='.csv')
 
         global models_path
         
@@ -1158,19 +1169,116 @@ class TestTrainingSplit(Module):
                 args += " m=" + str(trainingProportion) 
             except:
                 raise ModuleError(self, "The ratio of presence to absence (RatioPresAbs) must be a number greater than 0") 
-        
-        utils.runRScript("TestTrainSplit.r", args, self)
 
+        args += " es=TRUE"
+
+        utils.runRScript("TestTrainSplit.r", args, self)
+        
         output = os.path.join(outputMDS)
         if os.path.exists(output):
             output_file = utils.create_file_module(output)
-            writetolog("Finished Test Training split ", True)
+            writetolog("Finished Model Evaluation split ", True)
         else:
-            msg = "Problem encountered generating Test Training split.  Expected output file not found."
+            msg = "Problem encountered generating Model Evaluation split.  Expected output file not found."
             writetolog(msg, False)
             raise ModuleError(self, msg)
         self.setResult("outputMDS", output_file)
         
+class ModelSelectionSplit(Module):
+    '''
+    ToDo: Marian to write
+    '''        
+
+    _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
+                    ('trainingProportion', '(edu.utah.sci.vistrails.basic:Float)', 
+                        {'defaults':str(['0.7'])}),
+                    ('RatioPresAbs', '(edu.utah.sci.vistrails.basic:Float)')]
+    _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
+    
+    def compute(self):
+        writetolog("\nGenerating Model Selection split ", True)
+        inputMDS = utils.dir_path_value(self.forceGetInputFromPort('inputMDS', []))
+        outputMDS = utils.mknextfile(prefix='modelSelection_split_', suffix='.csv')
+
+        global models_path
+        
+        args = "i=" + '"' + inputMDS + '"' + " o=" + '"' + outputMDS + '"'
+        args += " rc=" + utils.MDSresponseCol(inputMDS) 
+        if (self.hasInputFromPort("trainingProportion")):
+            try:
+                trainingProportion = float(self.getInputFromPort("trainingProportion"))
+                if trainingProportion <= 0 or trainingProportion > 1:
+                    raise ModuleError(self, "Train Proportion (trainProp) must be a number between 0 and 1 excluding 0")
+                args += " p=" + str(trainingProportion)
+            except:
+                raise ModuleError(self, "Train Proportion (trainProp) must be a number between 0 and 1 excluding 0")
+        if (self.hasInputFromPort("RatioPresAbs")):
+            try:
+                RatioPresAbs = float(self.getInputFromPort("RatioPresAbs"))
+                if RatioPresAbs <= 0:
+                    raise ModuleError(self, "The ratio of presence to absence (RatioPresAbs) must be a number greater than 0") 
+                args += " m=" + str(trainingProportion) 
+            except:
+                raise ModuleError(self, "The ratio of presence to absence (RatioPresAbs) must be a number greater than 0") 
+
+        args += " es=FALSE"
+
+        utils.runRScript("TestTrainSplit.r", args, self)
+        
+        output = os.path.join(outputMDS)
+        if os.path.exists(output):
+            output_file = utils.create_file_module(output)
+            writetolog("Finished Model Selection split ", True)
+        else:
+            msg = "Problem encountered generating Model Selection split.  Expected output file not found."
+            writetolog(msg, False)
+            raise ModuleError(self, msg)
+        self.setResult("outputMDS", output_file)
+
+class ModelSelectionCrossValidation(Module):
+    '''
+    ToDo: Marian to write
+    '''        
+
+    _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
+                    ('nFolds', '(edu.utah.sci.vistrails.basic:Integer)', 
+                        {'defaults':str('10')}),
+                    ('Stratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':True}),]
+    _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
+    
+    def compute(self):
+        writetolog("\nGenerating Cross Validation split ", True)
+        port_map = {'inputMDS':('i', utils.dir_path_value, True),
+                    'nFolds':('nf', None, True),
+                    'Stratify':('stra', utils.R_boolean, True)}
+        
+        argsDict = utils.map_ports(self, port_map)
+
+        outputMDS = utils.mknextfile(prefix='modelSelection_cv_', suffix='.csv')
+
+        args = "i=" + '"' + argsDict["i"] + '"'
+        args += " o=" + '"' + outputMDS + '"'
+        args += " rc=" + utils.MDSresponseCol(argsDict["i"]) 
+
+        if argsDict["nf"] <= 0:
+            raise ModuleError(self, "Number of Folds must be greater than 0")
+        args += " nf=" + str(argsDict["nf"])
+
+        args += " stra=" + argsDict["stra"]
+
+        utils.runRScript("CrossValidationSplit.r", args, self)
+        
+        output = os.path.join(outputMDS)
+        if os.path.exists(output):
+            output_file = utils.create_file_module(output)
+            writetolog("Finished Cross Validation split ", True)
+        else:
+            msg = "Problem encountered generating Cross Validation split.  Expected output file not found."
+            writetolog(msg, False)
+            raise ModuleError(self, msg)
+        self.setResult("outputMDS", output_file)
+
+
 class CovariateCorrelationAndSelection(Module):
     '''
     Covariate Correlation And Selection
@@ -1537,6 +1645,7 @@ def load_max_ent_params():
     docs = {}
     basic_pkg = 'edu.utah.sci.vistrails.basic'
     p_type_map = {'file/directory': 'Path',
+                  'directory':'Directory',
                   'double': 'Float'}
     for row in csv_reader:
         [name, flag, p_type, default, doc, notes] = row
@@ -1570,72 +1679,13 @@ def load_max_ent_params():
         classmethod(provide_input_port_documentation)
 
 
-#class ModelOutputCell(SpreadsheetCell):
-#    _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
-#                    ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
-#                    ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)')]
-#    
-#    def __init__(self):
-#        SpreadsheetCell.__init__(self)
-#        self.cellWidget = None
-#
-#    def compute(self):
-#        renderView = self.forceGetInputFromPort('SetRenderView')
-#        if renderView==None:
-#            raise ModuleError(self, 'A vtkRenderView input is required.')
-#        self.cellWidget = self.displayAndWait(QVTKViewWidget, (renderView,))
-
-#class SAHMViewWidget(QCellWidget):
-#    def __init__(self, parent=None, f=QtCore.Qt.WindowFlags()):
-#        QCellWidget.__init__(self, parent, f | QtCore.Qt.MSWindowsOwnDC)
-#        
-
-#class RasterLayer(Module):
-#    _input_ports = [('file', '(edu.utah.sci.vistrails.basic:File)'), 
-#                    ('name', '(edu.utah.sci.vistrails.basic:String)')]
-#    _output_ports = [('self', '(gov.usgs.sahm:RasterLayer:DataInput)')]
-#
-#    def __init__(self):
-#        Module.__init__(self)
-#        self.qgis_obj = None
-#
-#    def compute(self):
-#        fname = self.getInputFromPort('file').name
-#        if self.hasInputFromPort('name'):
-#            name = self.getInputFromPort('name')
-#        else:
-#            name = os.path.splitext(os.path.basename(fname))[0]
-#        self.qgis_obj = qgis.core.QgsRasterLayer(fname, name)
-#        self.setResult('self', self)
-#
-#class VectorLayer(Module):
-#    _input_ports = [('file', '(edu.utah.sci.vistrails.basic:File)'), 
-#                    ('name', '(edu.utah.sci.vistrails.basic:String)')]
-#    _output_ports = [('self', '(gov.usgs.sahm:VectorLayer:DataInput)')]
-#
-#    def __init__(self):
-#        Module.__init__(self)
-#        self.qgis_obj = None
-#
-#    def compute(self):
-#        fname = self.getInputFromPort('file').name
-#        if self.hasInputFromPort('name'):
-#            name = self.getInputFromPort('name')
-#        else:
-#            name = os.path.splitext(os.path.basename(fname))[0]
-#        self.qgis_obj = qgis.core.QgsVectorLayer(fname, name, "ogr")
-#        self.setResult('self', self)
-
-
-
 def initialize():    
     global maxent_path, color_breaks_csv
-    global session_dir
-    utils.config = configuration
+    global session_dir 
        
     r_path = os.path.abspath(configuration.r_path)
     maxent_path = os.path.abspath(configuration.maxent_path)
-    
+    utils.r_path = r_path
     
     #I was previously setting the following environmental variables and path additions 
     #so that each user wouldn't have to do this on their individual machines.  
@@ -1657,14 +1707,14 @@ def initialize():
     #And finally QGIS bindings for python in the python path.
     
      
-    import qgis.core
-    import qgis.gui
-    globals()["qgis"] = qgis
-    setQGIS(qgis)
-    
-    qgis_prefix = os.path.join(configuration.qgis_path, "qgis1.7.0")
-    qgis.core.QgsApplication.setPrefixPath(qgis_prefix, True)
-    qgis.core.QgsApplication.initQgis() 
+#    import qgis.core
+#    import qgis.gui
+#    globals()["qgis"] = qgis
+#    setQGIS(qgis)
+#    
+#    qgis_prefix = os.path.join(configuration.qgis_path, "qgis1.7.0")
+#    qgis.core.QgsApplication.setPrefixPath(qgis_prefix, True)
+#    qgis.core.QgsApplication.initQgis() 
     
     
     session_dir = utils.createrootdir(configuration.output_dir)
@@ -1683,10 +1733,10 @@ def initialize():
     writetolog("   Layers CSV = " + layers_csv_fname)
     writetolog("   R path = " + r_path)
     writetolog("   GDAL folder = " + os.path.abspath(configuration.gdal_path))
-    writetolog("        Must contain subfolders proj, gdal-data, GDAL")
+#    writetolog("        Must contain subfolders proj, gdal-data, GDAL")
     writetolog("   Maxent folder = " + maxent_path)
-    writetolog("   QGIS folder = " + os.path.abspath(configuration.qgis_path))
-    writetolog("        Must contain subfolders qgis1.7.0, OSGeo4W")
+#    writetolog("   QGIS folder = " + os.path.abspath(configuration.qgis_path))
+#    writetolog("        Must contain subfolders qgis1.7.0, OSGeo4W")
     writetolog("    ")
     writetolog("*" * 79)
     
@@ -1788,7 +1838,9 @@ _modules = generate_namespaces({'DataInput': [
                                           PARC,
                                           RasterFormatConverter,
                                           ProjectionLayers,
-                                          TestTrainingSplit,
+                                          ModelEvaluationSplit,
+                                          ModelSelectionSplit,
+                                          ModelSelectionCrossValidation,
                                           CovariateCorrelationAndSelection,
                                           ApplyModel],                                          
                                 'Models': [GLM,

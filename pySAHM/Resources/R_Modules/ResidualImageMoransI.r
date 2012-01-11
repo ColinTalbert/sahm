@@ -1,3 +1,9 @@
+#the following works but it seems the whole idea might not be worth pursuing see bivands posts
+  resid.dists <- as.matrix(dist(cbind(x,y)))
+     resid.dists.inv <- 1/resid.dists
+     diag(resid.dists.inv) <- 0
+     m<-Moran.I(z, resid.dists.inv)
+
 resid.image<-function(dev.contrib,pred,raw.dat,x,y,model.type,file.name,out){
    z<-sign(pred-raw.dat)*dev.contrib
               browser()
@@ -14,7 +20,7 @@ resid.image<-function(dev.contrib,pred,raw.dat,x,y,model.type,file.name,out){
               library(spdep)
               library(ncf)
                z<-dev.contrib
-              correlog1.1 <- correlog(z, y, z,na.rm=T, increment=40, resamp=100)
+              correlog1.1 <- correlog(z, y, z,na.rm=T, increment=100, resamp=100)
               par(mar=c(5,5,0.1, 0.1))
               plot(correlog1.1)
               plot(correlog1.1$correlation, type="l", pch=16, cex=1.5, lwd=1.5,
