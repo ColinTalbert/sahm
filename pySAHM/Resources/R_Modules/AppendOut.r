@@ -10,7 +10,10 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
           write.table(x,file=compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,append=TRUE,sep=",")
           output<-matrix(0,0,0)
   } else { #this else (not the first time through) read current csv first
-
+          if(nrow(input)+nrow(x)==length(c(Header[,2],as.character(x[,2])))){
+            #if the first model run threw an error no subsequent output will be written without some special help
+             input<-rbind(input,matrix(c(as.character(x[,1]),rep("",times=length(x[,1])*(ncol(input)-1))),nrow=length(x[,1])))
+                }
           output<-cbind(input[,(1:(ncol(input)-1))],c(Header[,2],as.character(x[,2])))
               temp=try(write.table(output,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=","),silent=TRUE)
            while(class(temp)=="try-error"){
