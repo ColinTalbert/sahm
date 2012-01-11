@@ -309,10 +309,10 @@ def runRScript(script, args, module=None):
         msg += "\n     The R error message is below: \n"
         msg += ret[1]
         writetolog(msg)
-        if module:
-            raise ModuleError(module, msg)
-        else:
-            raise RuntimeError , msg
+#        if module:
+#            raise ModuleError(module, msg)
+#        else:
+#            raise RuntimeError , msg
 
     if 'Warning' in ret[1]:
         msg = "The R scipt returned the following warning(s).  The R warning message is below - \n"
@@ -329,7 +329,7 @@ def writeRErrorsToLog(args, ret):
     #first check that this is a model run, or has a o= in the args.
     #If so write the output log file in the directory
     argsSplit = args.split()
-    output = [val.split("=")[1] for val in argsSplit if val.startswith("o=")]
+    output = [val.split("=")[1] for val in argsSplit if val.startswith("o=")][0][1:-1]
     if os.path.isdir(output):
         pass
     elif os.path.isdir(os.path.split(output)[0]):
@@ -342,7 +342,7 @@ def writeRErrorsToLog(args, ret):
     outFile.write("standard out:\n\n")
     outFile.write(ret[0] + "\n\n\n")
     outFile.write("standard error:\n\n")
-    outFile.write(ret[0])
+    outFile.write(ret[1])
     outFile.close()
 
 def merge_inputs_csvs(inputCSVs_list, outputFile):
