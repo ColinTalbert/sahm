@@ -49,10 +49,10 @@ set.seed(out$input$seed)
                 } else bname<-paste(out$input$output.dir,paste("/",Model,sep=""),sep="")
 
 
-             if(!debug.mode) {logname <- file(paste(bname,"_log.txt",sep=""), open="wt")
-                             sink(logname)
-                             sink(logname, type="message")
-             } else logname<-NULL
+           #  if(!debug.mode) {logname <- file(paste(bname,"_log.txt",sep=""), open="wt")
+           #                  sink(logname)
+            #                 sink(logname, type="message")
+            # } else logname<-NULL
 
    #Load Libraries
               chk.libs(Model)
