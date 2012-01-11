@@ -1066,6 +1066,7 @@ miller2 <- 1 - pchisq(a0b1$deviance - ab1$deviance, 1)
 miller3 <- 1 - pchisq(ab1$deviance - mod$deviance, 1)
 }
 if(family == "poisson") {
+if(any(preds==0)) preds[preds==0] <- preds[preds==0] + 1e-006 #a little fix so this still works whit predictions equal to zero
 mod <- glm(obs ~ log(preds), family = poisson)
 lp <- log(preds)
 a0b1 <- glm(obs ~ offset(lp) - 1, family = poisson)
