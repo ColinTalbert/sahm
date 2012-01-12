@@ -33,7 +33,7 @@ class SAHMModelOutputViewerCell(SpreadsheetCell):
             model_workspace = self.getInputFromPort("ModelWorkspace").name
             model_dir_full = os.path.normcase(os.path.split(model_workspace)[0])
             model_dir = os.path.split(model_dir_full)[1]
-            model_name = model_dir[:model_dir.index('output')]
+            model_name = model_dir[:model_dir.index('_')]
             
             
             auc_graph_path = os.path.join(model_dir_full, model_name + '_modelEvalPlot.jpg')
