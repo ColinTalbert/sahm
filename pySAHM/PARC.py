@@ -123,16 +123,16 @@ class PARC:
                     pass
                 
             else:    
-                if os.path.abspath(self.template) != os.path.abspath(image[0]):
-                    if self.multicores:
-                        self.gen_singlePARC_thread(image, outFile, results)
-                        process_count += 1
-                    else:
-                        self.parcFile(image, outFile)
-                elif os.path.abspath(self.template) == os.path.abspath(image[0]): 
-                    msg = shortname + " is the same as our template. \tOnly copying this file."
-                    self.logger.writetolog(msg, True, True)
-                    shutil.copyfile(self.template, outFile)
+#                if os.path.abspath(self.template) != os.path.abspath(image[0]):
+                if self.multicores:
+                    self.gen_singlePARC_thread(image, outFile, results)
+                    process_count += 1
+                else:
+                    self.parcFile(image, outFile)
+#                elif os.path.abspath(self.template) == os.path.abspath(image[0]): 
+#                    msg = shortname + " is the same as our template. \tOnly copying this file."
+#                    self.logger.writetolog(msg, True, True)
+#                    shutil.copyfile(self.template, outFile)
                     
         if self.multicores:
             self.manage_singlePARC_threads(results, process_count)

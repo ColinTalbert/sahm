@@ -167,8 +167,18 @@ class Predictor(Constant):
     
     4. File Path: The location of the raster predictor file, which a user can specify by navigating to the
     file's location on their file system. When a user is selecting an ESRI grid raster, the user should navigate
-    to the 'hdr.adf' file contained within the grid folder.
-
+    to the 'hdr.adf' file contained within the grid folder. 
+    
+    Accepted formats include:
+        ESRI Grid ('.bil', or the folder, or 'hdr.adf' file in the folder, see above)
+        GeoTiffs('.tif')
+        Imagine('.img')
+        ASCII('.asc')
+        Bitmap('.bmp')
+        Jpeg('.jpg')
+        For additional formats see: the Compiled by default options at
+                                    http://www.gdal.org/formats_list.html
+        
     '''
     _input_ports = [('categorical', '(edu.utah.sci.vistrails.basic:Boolean)'),
                     ('ResampleMethod', '(gov.usgs.sahm:ResampleMethod:Other)', {'defaults':str(['Bilinear'])}),
