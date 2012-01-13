@@ -77,7 +77,8 @@ class MAXENTRunner(object):
         if ' ' in self.args['species_name']:
             self.args['species_name'] = self.args['species_name'].replace(' ', '_')
         
-        strargs = ['='.join((str(k),str(v))) for k,v in self.args.iteritems() if k <> "species_name"]
+        strargs = ['='.join((str(k),str(v))) for k,v in self.args.iteritems() 
+                    if (k <> "species_name" and k <> "inputMDS")]
         for categorical in self.categoricals:
             strargs += ['togglelayertype=' + categorical.replace('_categorical', '')]
         #strargs = ' '.join(strargs)

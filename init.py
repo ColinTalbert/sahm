@@ -1584,7 +1584,8 @@ class MAXENT(Module):
         
         ourMaxent.maxentpath = maxent_path
         
-        MaxentArgsCSV = utils.mknextfile(prefix='MaxentArgs', suffix='.csv')
+        MaxentArgsCSV = os.path.join(ourMaxent.outputDir, "MaxentArgs.csv")
+        
         argWriter = csv.writer(open(MaxentArgsCSV, 'wb'))
         argWriter.writerow(['parameter','value'])
         for port in self._input_ports:
@@ -1614,6 +1615,7 @@ class MAXENT(Module):
             projlayers = ','.join([path.name for path in value])
             argWriter.writerow(['projectionlayers', projlayers])
             
+        argWriter.writerow(['inputMDS', ourMaxent.inputMDS])
         del argWriter
         ourMaxent.argsCSV = MaxentArgsCSV
         ourMaxent.logger = utils.getLogger()
