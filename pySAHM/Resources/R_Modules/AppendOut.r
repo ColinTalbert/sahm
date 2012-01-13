@@ -25,7 +25,7 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
   ###################### Making the jpg image ###################
   if(ncol(output)>2){
 
-                  jpeg(file=paste(parent,paste("AcrossModel",
+                  jpeg(file=paste(parent,paste(ifelse(is.null(out$input$final.model),"AcrossModel","FinalEvaluation"),
                        switch(out$dat$split.type,"crossValidation"="CrossVal","test"="TestTrain","none"="NoSplit"),
                        switch(out$input$model.family,"binomial"="Binom","bernoulli"="Binom","poisson"="Count"),
                        ".jpg",sep=""),sep="\\"),width=(1000+30*ncol(output)),height=1000,pointsize=13,quality=100)

@@ -154,7 +154,7 @@ make.auc.plot.jpg<-function(out=out){
                             c(last.dir[[1]][length(last.dir[[1]])],
                             out$dat$input$OrigFieldData,out$dat$input$FieldDataTemp,out$dat$input$ParcOutputFolder,
                             out$dat$input$ParcTemplate,ifelse(length(out$dat$input$CovSelectName)==0,"NONE",out$dat$input$CovSelectName),""))
-
+                        assign("Evaluation.Metrics.List",list(x=x,Header=Header,Parm.Len=length(stat.names),parent=parent),envir=.GlobalEnv)
                       AppendOut(compile.out=out$input$Append.Dir,Header,x,out,Parm.Len=length(stat.names),parent=parent,split.type=out$dat$split.type)
 
     return(list(thresh=train.stats$train$thresh,residual.smooth.fct=residual.smooth.fct))
