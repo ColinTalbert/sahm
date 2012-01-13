@@ -191,6 +191,7 @@ class MAXENTRunner(object):
         #loop through the rows sending each row to the appropriate file
         hasBackground = False
         for row in MDSreader:
+            self.convertNA(row)
             if row[2] == '-9999':
                 hasBackground = True
                 vals = self.usedValues(row, covariateIndexes)
@@ -236,11 +237,19 @@ class MAXENTRunner(object):
             pass
         else:
             self.args['outputgrids'] = 'false'
+    
+    def convertNA(self, vals):
+        """Switches the NA value used in our R models
+        to the value expected by Maxent
+        """
+        for index, item in enumerate(vals):     
+            if (item == "NA"):         
+                vals[index] = "-9999"
 
     def usedIndexes(self, header1, header2):
         covariateIndexes = []
         for i in range(len(header1)):
-            if header2[i] == '1' and header1[i] <> 'Split':
+            if header2[i] == '1' and header1[i] not in ['Weights', 'Split', 'EvalSplit']:
                 covariateIndexes.append(i)
         return covariateIndexes
       

@@ -82,7 +82,7 @@ class FormatConverter(object):
         
         usedTifs = []
         for i in range(3, len(header1)):
-            if header2[i] == '1' and  header1[i] <> 'Split':
+            if header2[i] == '1' and  header1[i] not in ['Weights', 'Split', 'EvalSplit']:
                 usedTifs.append(header3[i])
         return usedTifs
     

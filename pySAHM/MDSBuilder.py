@@ -24,6 +24,7 @@ import os
 import time
 import random
 import shutil
+import numpy
 
 from osgeo import gdalconst
 from osgeo import gdal
@@ -131,6 +132,7 @@ class MDSBuilder(object):
             i = 1
             badpoints = []
             for row in outputRows:
+                'loop through each of our points'
                 x = float(row[0])
                 y = float(row[1])
 #                if 
@@ -146,22 +148,21 @@ class MDSBuilder(object):
                     try:
                         data = band.ReadAsArray(xOffset, yOffset, 1, 1)
                         value = data[0,0]
-                        if value <> inputND:
+                        if value <> inputND and not numpy.isnan(value):
                             row.append(value)
                         else:
                             row.append(str(self.NDFlag))
                     except:
                         badpoints.append(row[:3])
                         row.append(str(self.NDFlag))
-                        
-                if self.hasWeight:
-                    row.append(row)
                 
                 if self.verbose:
                     if i/float(len(outputRows)) > float(pcntDone)/100:
                         pcntDone += 10
                         print str(pcntDone) + "...",
                 i += 1
+                
+            
             if self.verbose:
                 self.writetolog("    Done")
         if len(badpoints) > 0:
@@ -179,7 +180,13 @@ class MDSBuilder(object):
         thrownOut = 0
         kept = 0
         for row in outputRows:
-            #remove this if when Marian handles the ND   
+            #remove this if when Marian handles the ND
+            if self.hasWeight:
+                #move the weight value to the end of our list
+                weight = row[3]
+                del row[3]
+                row.append(weight)
+                
             if not str(self.NDFlag) in row[3:]:
                 outputMDS.writerow(row)
                 kept += 1
@@ -229,12 +236,7 @@ class MDSBuilder(object):
         else:
             full_header.append(orig_header[2])
         
-        if "weight" in orig_header:
-            full_header.append("weight")
-            self.hasWeight = True
-            self.weightCol = full_header.index("weight")
-        else:
-            self.hasWeight = False
+
         
         inputs_CSV = csv.reader(open(self.inputsCSV, "r"))
         inputs_header = inputs_CSV.next()
@@ -287,8 +289,19 @@ class MDSBuilder(object):
             parc_template = "Unknown"
             parc_workspace = "Unknown"
         
+
         secondRow = [original_field_data, field_data_template, ""] + ["1" for elem in self.inputs]
         thirdRow = [parc_template, parc_workspace, ""] + self.inputs
+        
+        if "Weights" in orig_header:
+            full_header.append("Weights")
+            secondRow.append("0")
+            thirdRow.append("0")
+            self.hasWeight = True
+            self.weightCol = orig_header.index("Weights")
+        else:
+            self.hasWeight = False
+        
         fOut.writerow(full_header)
         fOut.writerow(secondRow)
         fOut.writerow(thirdRow)
@@ -308,10 +321,7 @@ class MDSBuilder(object):
             if self.hasWeight:
                 tmpRow.append(row[self.weightCol])
             points.append(tmpRow)
-        
-       
-            
-            
+
         del fieldDataCSV
         return points
     
