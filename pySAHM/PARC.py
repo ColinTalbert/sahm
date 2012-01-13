@@ -359,7 +359,7 @@ class PARC:
                     ans = ans + 255
                 
                 ansArray = empty([1, 1])
-                if type(ans) == ma.core.MaskedArray:
+                if isinstance(ans, ma.core.MaskedArray):
                     ansArray[0, 0] = sourceParams["NoData"]
                 else:
                     ansArray[0, 0] = ans

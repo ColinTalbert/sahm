@@ -300,7 +300,12 @@ class FieldDataQuery(object):
         oFile.close
         if self.verbose:
             self.writetolog("Done\nFinished creating field data query output.\n")
-            if len(extraPoints) > 0:
+            if len(extraPoints) == pointCount:
+                msg = "All " + str(pointCount) + " points were outside of the template extent\n"
+                msg += "This might indicate a mismatch between the template and field data projection.\n"
+                msg += "\nProcessing cannot continue"
+                raise Exception, "All points were outside of the template extent"       
+            elif len(extraPoints) > 0:
                 self.writetolog ("  WARNING: " + str(len(extraPoints)) + " points" +
                     " out of " + str(pointCount) + " total points in the " +
                     "original CSV were outside the template extent and WERE NOT " +
