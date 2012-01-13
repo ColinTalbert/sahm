@@ -8,12 +8,13 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
       on.exit(detach(out$input))
       bname<-out$dat$bname
   }
- if(out$dat$split.type%in%c("test","eval"))
+
  if(Model=="mars"){
         if(is.null(responseCurveForm)){
            responseCurveForm<-0}
 
           if(debug.mode | responseCurveForm=="pdf"){
+
             nvar <- nrow(out$mods$summary)
             pcol <- min(ceiling(sqrt(nvar)),4)
             prow <- min(ceiling(nvar/pcol),3)
