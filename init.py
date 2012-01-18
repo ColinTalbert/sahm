@@ -680,7 +680,7 @@ class MDSBuilder(Module):
     Maxent modeling package. The dialogue box provides the option of specifying a number of background points
     to be randomly scattered throughout the study area (the extent of the template layer) to capture a more
     complete sample of the range of values present for each predictor layer. These points will be added to
-    the field data .csv file with a value of "-999" denoting them as background points.
+    the field data .csv file with a value of "-9999" denoting them as background points.
     
     3. Background Probability Surface: This is an optional parameter that applies only to workflows that
     employ the Maxent modeling package. In some analyses, it may be appropriate to spatially limit background

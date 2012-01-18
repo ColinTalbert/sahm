@@ -319,7 +319,10 @@ class MDSBuilder(object):
         for row in fieldDataCSV:
             tmpRow = row[:3]
             if self.hasWeight:
-                tmpRow.append(row[self.weightCol])
+                try:
+                    tmpRow.append(row[self.weightCol])
+                except IndexError:
+                    tmpRow.append("1")
             points.append(tmpRow)
 
         del fieldDataCSV
@@ -338,6 +341,7 @@ class MDSBuilder(object):
         
         if self.probsurf <> '':
             rasterDS = gdal.Open(self.probsurf, gdalconst.GA_ReadOnly)
+            probND = self.getND(self.probsurf)
             useProbSurf = True
         else:
             print self.inputs[0]
@@ -374,11 +378,15 @@ class MDSBuilder(object):
             x = random.randint(0, cols - 1) 
             y = random.randint(0, rows - 1)
             #print x, y
-            tmpPixel = [x, y, 'NA'] # a random pixel in the entire image
+            tmpPixel = [x, y, '-9999'] # a random pixel in the entire image
             if useProbSurf:
                 # if they supplied a probability surface ignore the random pixel
                 # if a random number between 1 and 100 is > the probability surface value
                 pixelProb = int(band.ReadAsArray(tmpPixel[0], tmpPixel[1], 1, 1)[0,0])
+                if self.equal_float(pixelProb, probND) or numpy.isnan(pixelProb):
+                    continue
+                    #don't record this pixel it was ND in the Prob Surface
+                
                 #pixelProb is the extracted probability from the probability surface
                 rand = random.randint(1,100)
                 #rand is a uniform random integer between 1 and 100 inclusive
@@ -400,6 +408,11 @@ class MDSBuilder(object):
         print "Done!\n"
         oFile.close()
         del fOut
+    
+    def equal_float(self, a, b):
+        #equality comparison between two floating point values
+        epsilon = 0.000000000001 
+        return (abs(a - b)) <= epsilon
     
     def getRasters(self, directory):
         #the list of rasters in the given directory
