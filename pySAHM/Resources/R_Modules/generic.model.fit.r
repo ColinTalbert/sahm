@@ -72,6 +72,8 @@ on.exit(detach(out$input))
  if(Model=="brt"){
 
           if(out$input$model.family=="binomial")  out$input$model.family="bernoulli"
+            if(!is.null(out$input$tc)) out$mods$parms$tc.full<-out$mods$parms$tc.sub<-tc
+            
             out <-est.lr(out)
             if(debug.mode) assign("out",out,envir=.GlobalEnv)
 
@@ -86,8 +88,9 @@ on.exit(detach(out$input))
                     out$input$max.trees<-NULL
                 m0 <- gbm.step.fast(dat=out$dat$Subset$dat,gbm.x=out$mods$lr.mod$good.cols,gbm.y=1,family=out$input$model.family,
                       n.trees = c(300,600,800,1000,1200,1500,1800),step.size=out$input$step.size,max.trees=out$input$max.trees,
-                      tolerance.method=out$input$tolerance.method,tolerance=out$input$tolerance, n.folds=out$input$n.folds,tree.complexity=out$mods$parms$tc.sub,
-                      learning.rate=out$mods$lr.mod$lr0,bag.fraction=out$input$bag.fraction,site.weights=out$dat$Subset$weight,autostop=T,debug.mode=F,silent=!debug.mode,
+                      tolerance.method=out$input$tolerance.method,tolerance=out$input$tolerance, n.folds=out$input$n.folds,prev.stratify=out$input$prev.stratify,
+                      tree.complexity=out$mods$parms$tc.sub,learning.rate=out$mods$lr.mod$lr0,bag.fraction=out$input$bag.fraction,site.weights=out$dat$Subset$weight,
+                      autostop=T,debug.mode=F,silent=!debug.mode,
                       plot.main=F,superfast=F)
                       if(debug.mode) assign("m0",m0,envir=.GlobalEnv)
 
@@ -107,7 +110,7 @@ on.exit(detach(out$input))
 
            if(out$mods$lr.mod$lr==0) out$mods$lr.mod$lr<-out$mods$lr.mod$lr0
           out$mods$final.mod <- gbm.step.fast(dat=out$dat$ma$train$dat,gbm.x=out$mods$simp.mod$good.cols,gbm.y = 1,family=out$input$model.family,
-                          n.trees = c(300,600,700,800,900,1000,1200,1500,1800,2200,2600,3000,3500,4000,4500,5000),n.folds=out$input$n.folds,
+                          n.trees = c(300,600,700,800,900,1000,1200,1500,1800,2200,2600,3000,3500,4000,4500,5000),n.folds=out$input$n.folds,out$input$max.trees,
                           tree.complexity=out$mods$parms$tc.full,learning.rate=out$mods$lr.mod$lr,bag.fraction=out$input$bag.fraction,site.weights=out$dat$ma$train$weight,
                           autostop=T,debug.mode=F,silent=!debug.mode,plot.main=F,superfast=F)
 
