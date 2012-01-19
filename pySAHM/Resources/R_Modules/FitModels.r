@@ -55,7 +55,7 @@ set.seed(out$input$seed)
              out$dat$bname <- bname
    #writing out the header info to the CSV so in case of a break we know what broke
              out<-place.save(out)
-
+              out$dat$split.label<-out$dat$split.type
     # check output dir #
               if(file.access(out$input$output.dir,mode=2)!=0) stop(paste("output directory",output.dir,"is not writable"))
 

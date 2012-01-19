@@ -31,11 +31,14 @@ EvaluateNewData<-function(workspace=NULL,outDir=NULL,binary.tif=NULL,p.tif=NULL,
     #Determine if we will be evaluating a holdout set if so rename it to the split portion so evaluation metrics will be caluclated and reported
     hl=readLines(out$input$ma.name,1)
      hl=strsplit(hl,',')
+     if(!is.na(Eval.split<-match("evalsplit",tolower(unlist(hl))))) out$dat$split.type="eval"
      assign("out",out,envir=.GlobalEnv)
+       out$dat$split.label=out$dat$split.type
+
      out<-place.save(out,Final.Model=out1$input$final.model)
      ##################################################################################
      ###################### Producing Evalutaiton Metrics for the hold out data
-           if(!is.na(Eval.split<-match("evalsplit",tolower(unlist(hl))))){
+           if(out$dat$split.type=="eval"){
                        tif.info<-readLines(out$input$ma.name,3)
                         tif.info<-strsplit(tif.info,',')
                         temp<-tif.info[[2]]
@@ -47,14 +50,19 @@ EvaluateNewData<-function(workspace=NULL,outDir=NULL,binary.tif=NULL,p.tif=NULL,
                        hl[[1]][Eval.split]<-"Split"
 
                        out <- read.ma(out,hl=hl,include=include)
-
+                              out$dat$split.type="test"
+                              out$dat$split.label="eval"
                          out$dat$bname<-bname
-                         out$dat$split.type="eval"
-            # Making Predictions
-                     pred.vals<-function(x,model,Model){
-                    x$pred<-pred.fct(model,x$dat[,2:ncol(x$dat)],Model)
-                    return(x)}
-                       print("line 57 browser")
+                        }
+                        
+                           pred.vals<-function(x,model,Model){
+              x$pred<-pred.fct(model,x$dat[,2:ncol(x$dat)],Model)
+              return(x)}
+
+              #getting the predictions for the test/train or cross validation splits into the object at the correct list location
+
+              if(out$dat$split.type!="crossValidation") out$dat$ma<-(lapply(X=out$dat$ma,FUN=pred.vals,model=out$mods$final.mod,Model=Model))
+                 else out$dat$ma$train$pred<-pred.vals(out$dat$ma$train,out$mods$final.mod,Model=Model)$pred  #produces the same thing as pred.mars(out$mods$final.mod,out$dat$ma$train$dat[2:ncol(out$dat$ma$train$dat)])
 
                    assign("out",out,envir=.GlobalEnv)
                     #getting the predictions for the test/train split
@@ -63,13 +71,7 @@ EvaluateNewData<-function(workspace=NULL,outDir=NULL,binary.tif=NULL,p.tif=NULL,
                     if(Model=="rf") out$dat$ma$train$pred<-tweak.p(as.vector(predict(out$mods$final.mod,type="prob")[,2]))
 
              out$mods$auc.output<-make.auc.plot.jpg(out=out)
-       } else{ #don't reproduce all the plots just the final model evaluation
 
-        out<-place.save(out,Final.Model=out1$input$final.model)
-
-             AppendOut(compile.out=out$input$Append.Dir,Header=Evaluation.Metrics.List$Header,x=Evaluation.Metrics.List$x,out,
-             Parm.Len=Evaluation.Metrics.List$Parm.Len,parent=Evaluation.Metrics.List$parent,split.type=out$dat$split.type)
-        }
       assign("out",out,envir=.GlobalEnv)
       
            #producing auc and residual plots model summary information and across model evaluation metric
