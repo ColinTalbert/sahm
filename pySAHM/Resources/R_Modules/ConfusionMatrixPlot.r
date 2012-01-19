@@ -70,6 +70,7 @@ barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, 
          }
 
     # Prepare area for plotting
+    par(mar=c(6,6,3,2))
     rys = persp(x, y, matrix(nrow=length(x), ncol=length(y)), col=fill, scale=F, theta=theta,
         phi=phi, zlim = range(zakres), lphi=44, ltheta=-10, axes=F, ...,main=z.lab,xlab="Predicted",ylab="Observed")
     # Add grid lines & numbers
@@ -110,7 +111,7 @@ barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, 
             row.lab[i1+1], adj=0, cex=0.9)
         }
 
-     text(trans3d(max(x)*1.18,y[6],0,rys),
+     text(trans3d(max(x)*1.2,y[6],0,rys),
                 "Observed", adj=.7, cex=1.6,srt=(phi+25))
                 
     # Plot the bars!
