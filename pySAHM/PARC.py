@@ -39,8 +39,8 @@ def main(args_in):
     parser.add_option("-v", dest="verbose", default=False, action="store_true", help="the verbose flag causes diagnostic output to print")
     parser.add_option("-t", dest="templateRaster", help="The template raster used for projection, origin, cell size and extent")
     parser.add_option("-i", dest="inputs_CSV", help="The CSV containing the list of files to process.  Format is 'FilePath, Categorical, Resampling, Aggreagtion")
-    parser.add_option("-m", dest="multicore", default=True, action="store_true", help="Flag indicating to use multiple cores")
-    parser.add_option("-i", dest="ignoreNonOverlap", default=False, action="store_true", help="Flag indicating to use ignore non-overlapping area")
+    parser.add_option("-m", dest="multicore", default=False, action="store_true", help="Flag indicating to use multiple cores")
+    parser.add_option("-n", dest="ignoreNonOverlap", default=False, action="store_true", help="Flag indicating to use ignore non-overlapping area")
     
     (options, args) = parser.parse_args(args_in)
     
@@ -51,6 +51,7 @@ def main(args_in):
     ourPARC.inputs_CSV = options.inputs_CSV
     ourPARC.multicores = options.multicore
     ourPARC.ignoreNonOverlap = options.ignoreNonOverlap
+    ourPARC.logger = utilities.logger(os.path.join(ourPARC.out_dir, "logfile.txt"), True)
     ourPARC.parcFiles()
 
 class PARC:
