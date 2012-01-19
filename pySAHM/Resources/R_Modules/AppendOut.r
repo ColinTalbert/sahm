@@ -59,7 +59,7 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
         #producing plots
                    for(i in 1:Parm.Len){
                             plot(c(.6,(ncol(train)+2)),c(0,max(1.1,max(train[i,],na.rm=TRUE)+.1)),type="n",xaxt="n",
-                                xlab=paste("Corresponding Column in ",ifelse(!is.null(out$dat$ma$ma.test),"AppendedOutputTestTrain.csv","AppendedOutput.csv"),sep=""),
+                                xlab=paste("Corresponding Column in the corresponding .csv",sep=""),
                                 ylab=x.labs[i])
                                 grid(nx=10)
                                 if(split.type!="none") legend(ncol(test),y=.75,legend=c(switch(out$dat$split.type, "test"="Test","crossValidation"="CV"),"Train"),fill=c(colors.test[i],colors.train[i]))
@@ -97,6 +97,5 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
                           mtext(paste("sub-folder name where model is found in the folder ",parent
                             ,sep=""),side=1,outer=TRUE,line=4)
                        dev.off()
-
                     }
                }
