@@ -25,10 +25,7 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
   ###################### Making the jpg image ###################
   if(ncol(output)>2){
 
-                  jpeg(file=paste(parent,paste("AcrossModel",
-                       switch(out$dat$split.type,"crossValidation"="CrossVal","test"="TestTrain","none"="NoSplit"),
-                       switch(out$input$model.family,"binomial"="Binom","bernoulli"="Binom","poisson"="Count"),
-                       ".jpg",sep=""),sep="\\"),width=(1000+30*ncol(output)),height=1000,pointsize=13,quality=100)
+                  jpeg(file=gsub("csv","jpg",compile.out),width=(1000+30*ncol(output)),height=1000,pointsize=13,quality=100)
                   par(mfrow=c(Parm.Len,1),mar=c(.2, 5, .6, 2),cex=1.1,oma=c(5, 0, 3, 0))
                #Getting rid of the header
                             row.nms<-as.character(output[(nrow(Header)+3):((nrow(Header)+2)+Parm.Len),1])
@@ -59,7 +56,7 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
         #producing plots
                    for(i in 1:Parm.Len){
                             plot(c(.6,(ncol(train)+2)),c(0,max(1.1,max(train[i,],na.rm=TRUE)+.1)),type="n",xaxt="n",
-                                xlab=paste("Corresponding Column in ",ifelse(!is.null(out$dat$ma$ma.test),"AppendedOutputTestTrain.csv","AppendedOutput.csv"),sep=""),
+                                xlab=paste("Corresponding Column in the corresponding .csv",sep=""),
                                 ylab=x.labs[i])
                                 grid(nx=10)
                                 if(split.type!="none") legend(ncol(test),y=.75,legend=c(switch(out$dat$split.type, "test"="Test","crossValidation"="CV"),"Train"),fill=c(colors.test[i],colors.train[i]))
@@ -97,6 +94,5 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
                           mtext(paste("sub-folder name where model is found in the folder ",parent
                             ,sep=""),side=1,outer=TRUE,line=4)
                        dev.off()
-
                     }
                }

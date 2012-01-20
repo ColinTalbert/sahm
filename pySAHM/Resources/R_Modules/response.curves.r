@@ -8,12 +8,13 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
       on.exit(detach(out$input))
       bname<-out$dat$bname
   }
- if(out$dat$split.type%in%c("test","eval"))
+
  if(Model=="mars"){
         if(is.null(responseCurveForm)){
            responseCurveForm<-0}
 
           if(debug.mode | responseCurveForm=="pdf"){
+
             nvar <- nrow(out$mods$summary)
             pcol <- min(ceiling(sqrt(nvar)),4)
             prow <- min(ceiling(nvar/pcol),3)
@@ -34,15 +35,15 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
             mtext(paste("GLM response curves for",basename(ma.name)),outer=T,side=3,cex=1.3)
            ################### New work
            #starting by just looking at one element of the list later use an lapply
-            if(!is.null(out$cv$resp.curves))
-                    for(i in 1:length(r.curves$names)){
-                          plot(r.curves$pred[[i]],r.curves$resp[[i]],type="l")
-                          for(j in 1:length(out$cv$resp)){
-                           indx<-na.omit(match(r.curves$names[i],names(out$cv$resp[[i]]$pred)))
-                           lines(out$cv$resp.curves[[j]]$pred[indx][[1]],out$cv$resp.curves[[j]]$resp[indx][[1]],col="grey",lty="dotdash")
-                           }
-                         lines(r.curves$pred[[i]],r.curves$resp[[i]],type="l",col="red",lwd=2)
-                           }
+           # if(!is.null(out$cv$resp.curves))
+            #        for(i in 1:length(r.curves$names)){
+            #              plot(r.curves$pred[[i]],r.curves$resp[[i]],type="l")
+             #             for(j in 1:length(out$cv$resp)){
+              #             indx<-na.omit(match(r.curves$names[i],names(out$cv$resp[[i]]$pred)))
+              #             lines(out$cv$resp.curves[[j]]$pred[indx][[1]],out$cv$resp.curves[[j]]$resp[indx][[1]],col="grey",lty="dotdash")
+               #            }
+               #          lines(r.curves$pred[[i]],r.curves$resp[[i]],type="l",col="red",lwd=2)
+                #           }
 
 
                      # plot(r.curves$pred[1][[1]], r.curves$resp[1][[1]])

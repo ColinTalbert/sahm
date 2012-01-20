@@ -4,7 +4,7 @@
     #response.col= "ResponseBinary"
     #min.cor<-.7
     #num.plots<-10
-source("I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\PairsExplore.r")
+source("I:\\VisTrails\\Central_VisTrails_x32_debug\\Vistrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\PairsExplore.r")
 
 
 
@@ -18,7 +18,7 @@ num.plots <- 10
     #infile="I:\\VisTrails\\WorkingFiles\\workspace\\talbertc_20110510T100421\\TestTrainingSplit_1.csv"
     infil="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
     output.file="H:\\Desktop\\SAHM\\Output\\PairsPlot\\pairPres.jpg"
-    Pairs.Explore(num.plots=num.plots,
+    Pairs.Explore(num.plots=6,
     min.cor=min.cor,
     input.file=infil,
 		output.file=output.file,
@@ -26,7 +26,7 @@ num.plots <- 10
 		pres=TRUE,
 		absn=TRUE,
 		bgd=TRUE,
-    Debug=TRUE)
+    Debug=FALSE)
 
 #binary
 input.file="C:\\VisTrails\\EAMEBinTT.csv"

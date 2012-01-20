@@ -230,10 +230,9 @@ for (i in 1:nk) {
     }
       #save values for creating response curves
 
-        browser()
-      out.cv$mods$final.mod<-cv.final.mod
-      resp.curves[[i]]<-response.curves(out.cv,Model=Model,pred.dat=xdat,cv=TRUE)
-       names(resp.curves[[i]]$pred)<-names(resp.curves[[i]]$resp)<-resp.curves[[i]]$names
+     # out.cv$mods$final.mod<-cv.final.mod
+      #resp.curves[[i]]<-response.curves(out.cv,Model=Model,pred.dat=xdat,cv=TRUE)
+      # names(resp.curves[[i]]$pred)<-names(resp.curves[[i]]$resp)<-resp.curves[[i]]$names
 
   } #end of Cross Validation Fold Loop
   #################################################
