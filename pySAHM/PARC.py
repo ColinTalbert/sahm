@@ -342,7 +342,7 @@ class PARC:
 #                    ndMask = ndMask.flatten()
                     uniques = np.unique(ndMask)
                     curMajority = -3.40282346639e+038
-                    ans = sourceParams["NoData"]
+                    ans = sourceParams["NoData"] # our default
                     for val in uniques:
                         numOccurances = (array(ndMask)==val).sum()
                         if numOccurances > curMajority:
