@@ -309,18 +309,23 @@ def runRScript(script, args, module=None):
         msg += "\n     The R error message is below: \n"
         msg += ret[1]
         writetolog(msg)
-#        if module:
-#            raise ModuleError(module, msg)
-#        else:
-#            raise RuntimeError , msg
 
     if 'Warning' in ret[1]:
         msg = "The R scipt returned the following warning(s).  The R warning message is below - \n"
         msg += ret[1]
         writetolog(msg)
 
-    if 'Error' in ret[1] or 'Warning' in ret[1]:
+    if 'Error' in ret[1]:
+        #also write the errors to a model specific log file in the model output dir
+        #then raise an error
         writeRErrorsToLog(args, ret)
+        if module:
+            raise ModuleError(module, msg)
+        else:
+            raise RuntimeError , msg
+    elif 'Warning' in ret[1]:
+        writeRErrorsToLog(args, ret)
+        
 
     del(ret)
     writetolog("\nFinished R Processing of " + script, True)
