@@ -27,24 +27,32 @@ make.auc.plot.jpg<-function(out=out){
        bar.size=15*max(Stats$train$Cmx)/100,bar.space=6*max(Stats$train$Cmx)/100,
     col.lab=c("Absence","Presence"), row.lab=c("Presence","Absence"), z.lab="Confusion Matrix")
          } else {
-     barplot3d(100*c(Stats$train$Cmx[2,1]/sum(Stats$train$Cmx),Stats$test$Cmx[2,1]/sum(Stats$test$Cmx),
-                 Stats$train$Cmx[1,1]/sum(Stats$train$Cmx),Stats$test$Cmx[1,1]/sum(Stats$test$Cmx),
-                 Stats$train$Cmx[2,2]/sum(Stats$train$Cmx),Stats$test$Cmx[2,2]/sum(Stats$test$Cmx),
-                 Stats$train$Cmx[1,2]/sum(Stats$train$Cmx),Stats$test$Cmx[1,2]/sum(Stats$test$Cmx)),transp="f9", rows=2, theta = 40, phi = 25, expand=.5,
+       if(out$dat$split.type=="crossValidation"){
+                                 a<-lapply(Stats[names(Stats)!="train"],function(lst){lst$Cmx})
+                                  cmx<-a[[1]]
+                                  for(i in 2:length(a)) cmx<-cmx+a[[i]]
+         }  else  cmx<-Stats$test$Cmx
+                                  
+
+     barplot3d(100*c(Stats$train$Cmx[2,1]/sum(Stats$train$Cmx),cmx[2,1]/sum(cmx),
+                 Stats$train$Cmx[1,1]/sum(Stats$train$Cmx),cmx[1,1]/sum(cmx),
+                 Stats$train$Cmx[2,2]/sum(Stats$train$Cmx),cmx[2,2]/sum(cmx),
+                 Stats$train$Cmx[1,2]/sum(Stats$train$Cmx),cmx[1,2]/sum(cmx)),transp="f9", rows=2, theta = 40, phi = 25, expand=.5,
        bar.size=20*max(Stats$train$Cmx)/(sum(Stats$train$Cmx)),bar.space=4*max(Stats$train$Cmx)/(sum(Stats$train$Cmx)),
     col.lab=c("Absence","Presence"), row.lab=c("Presence","Absence"), z.lab="Confusion Matrix")
     }
     graphics.off()
    }
 ########################## PLOTS ################################
+
   #Residual surface of input data
-  if(out$dat$split.type!="eval"){
+  if(out$dat$split.label!="eval"){
   residual.smooth.fct<-resid.image(calc.dev(input.list$train$dat$response, input.list$train$pred, input.list$train$weight, family=out$input$model.family)$dev.cont,input.list$train$pred,
-          input.list$train$dat$response,input.list$train$XY$X,input.list$train$XY$Y,out$input$model.family,out$input$output.dir,label=out$dat$split.type,out)
+          input.list$train$dat$response,input.list$train$XY$X,input.list$train$XY$Y,out$input$model.family,out$input$output.dir,label=out$dat$split.label,out)
       }
   else{
        residual.smooth.fct<-resid.image(calc.dev(input.list$test$dat$response, input.list$test$pred, input.list$test$weight, family=out$input$model.family)$dev.cont,input.list$test$pred,
-          input.list$test$dat$response,input.list$test$XY$X,input.list$test$XY$Y,out$input$model.family,out$input$output.dir,label=out$dat$split.type,out)
+          input.list$test$dat$response,input.list$test$XY$X,input.list$test$XY$Y,out$input$model.family,out$input$output.dir,label=out$dat$split.label,out)
        }
   train.mask<-seq(1:length(Stats))[names(Stats)=="train"]
 
@@ -55,6 +63,7 @@ make.auc.plot.jpg<-function(out=out){
     if(out$dat$split.type=="crossValidation") lst<-Stats[-c(train.mask)]
     if(out$dat$split.type%in%c("none")) lst<-Stats
  #AUC and Calibration plot for binomial data
+
     if(out$input$model.family%in%c("binomial","bernoulli")){
             jpeg(file=plotname,height=1000,width=1000,pointsize=20,quality=100)
             TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=input.list$train$thresh,add.legend=(length(Stats)==1),lwd=2)
@@ -128,9 +137,8 @@ make.auc.plot.jpg<-function(out=out){
     if(out$dat$split.type!="none"){
     capture.output(cat("\n\n============================================================",
                         "\n\nEvaluation Statistics"),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
-        capture.stats(lst,file.name=paste(out$dat$bname,"_output.txt",sep=""),label=out$dat$split.type,family=out$input$model.family,opt.methods=out$input$opt.methods,out)
+        capture.stats(lst,file.name=paste(out$dat$bname,"_output.txt",sep=""),label=out$dat$split.label,family=out$input$model.family,opt.methods=out$input$opt.methods,out)
     }
-
 
         ############ getting statistics along with appropriate names into a data frame for creating the appended output
                         last.dir<-strsplit(out$input$output.dir,split="\\\\")
@@ -146,15 +154,15 @@ make.auc.plot.jpg<-function(out=out){
                                 stat.names<-c("Correlation Coefficient","Percent Deviance Explained","Prediction Error")
                                }
                             csv.vect<-c(t(t(as.vector(unlist(csv.stats[train.mask])))),if(out$dat$split.type!="none") unlist(csv.stats[-c(train.mask)]))
-                            csv.vect[seq(from=2,by=length(csv.vect)/length(Stats),length=length(Stats))]<-ifelse(out$dat$split.type=="none","Train",c("Train",names(lst)))
+                            csv.vect[seq(from=2,by=length(csv.vect)/length(Stats),length=length(Stats))]<-if(out$dat$split.type=="none"){"Train"}else{c("Train",names(lst))}
                            x=data.frame(cbind(rep(c("","",stat.names),times=length(Stats)),
-                             csv.vect))
+                             csv.vect),row.names=NULL)
 
                         Header<-cbind(c("","Original Field Data","Field Data Template","PARC Output Folder","PARC Template","Covariate Selection Name",""),
                             c(last.dir[[1]][length(last.dir[[1]])],
                             out$dat$input$OrigFieldData,out$dat$input$FieldDataTemp,out$dat$input$ParcOutputFolder,
                             out$dat$input$ParcTemplate,ifelse(length(out$dat$input$CovSelectName)==0,"NONE",out$dat$input$CovSelectName),""))
-
+                        assign("Evaluation.Metrics.List",list(x=x,Header=Header,Parm.Len=length(stat.names),parent=parent),envir=.GlobalEnv)
                       AppendOut(compile.out=out$input$Append.Dir,Header,x,out,Parm.Len=length(stat.names),parent=parent,split.type=out$dat$split.type)
 
     return(list(thresh=train.stats$train$thresh,residual.smooth.fct=residual.smooth.fct))

@@ -1,9 +1,9 @@
-place.save<-function(out){
+place.save<-function(out,Final.Model){
 
 last.dir<-strsplit(out$input$output.dir,split="\\\\")
                         parent<-sub(paste("\\\\",last.dir[[1]][length(last.dir[[1]])],sep=""),"",out$input$output.dir)
                          compile.out<-paste(parent,
-                              paste("AcrossModel",
+                              paste(ifelse(missing(Final.Model),"AcrossModel","FinalEvaluation"),
                                switch(out$dat$split.type,"crossValidation"="CrossVal","test"="TestTrain","none"="NoSplit"),
                                switch(out$input$model.family,"binomial"="Binom","bernoulli"="Binom","poisson"="Count"),".csv"
                               ,sep=""),sep="/")

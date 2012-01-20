@@ -6,8 +6,6 @@ source(paste(ScriptPath,"check.libs.r",sep="\\"))
 source(paste(ScriptPath,"modalDialog.r",sep="\\"))
 #replace EvaluationStats with
 source(paste(ScriptPath,"make.auc.r",sep="\\"))
-#source(paste(ScriptPath,"make.poisson.plot.r",sep="\\"))
-#source(paste(ScriptPath,"make.auc.plot.r",sep="\\"))
 source(paste(ScriptPath,"EvalStats.r",sep="\\"))
 
 #only used in new code

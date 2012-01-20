@@ -70,6 +70,7 @@ barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, 
          }
 
     # Prepare area for plotting
+    par(mar=c(6,6,3,2))
     rys = persp(x, y, matrix(nrow=length(x), ncol=length(y)), col=fill, scale=F, theta=theta,
         phi=phi, zlim = range(zakres), lphi=44, ltheta=-10, axes=F, ...,main=z.lab,xlab="Predicted",ylab="Observed")
     # Add grid lines & numbers
@@ -79,6 +80,7 @@ barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, 
         lines(rbind(trans3d(0,max(y),i1,rys), trans3d(max(x), max(y),i1,rys)), lwd=1, col=grid,lty=3)
         text(trans3d(-(calkdl*cols)*0.04,0,i1,rys), labels=i1, adj=1, cex=0.9)
         }
+
     # Add ticks & text
     if(length(heights)>4){
             lines(rbind(trans3d(mean(x[8],x[9]),0,0,rys), trans3d(mean(x[8],x[9]),-(calkdl*rows)*0.06,
@@ -99,7 +101,7 @@ barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, 
             if (!is.null(col.lab)) text(trans3d((odstep+calkdl*i1),-(calkdl*rows)*0.1,0,rys),
                 col.lab[i1+1], adj=1, cex=0.9)
             }
-             text(trans3d(mean(x[11:13]),-(calkdl*rows)*.3,0,rys),
+             text(trans3d(mean(x[6:7]),-(calkdl*rows)*.3,0,rys),
                 "Predicted", adj=.8, cex=1.6,srt=(phi+10))
      }
     for (i1 in (1:rows)-1) {
@@ -109,7 +111,7 @@ barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, 
             row.lab[i1+1], adj=0, cex=0.9)
         }
 
-     text(trans3d(max(x)*1.18,y[6],0,rys),
+     text(trans3d(max(x)*1.2,y[6],0,rys),
                 "Observed", adj=.7, cex=1.6,srt=(phi+25))
                 
     # Plot the bars!

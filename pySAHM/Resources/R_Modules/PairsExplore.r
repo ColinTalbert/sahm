@@ -186,7 +186,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
  options(warn=-1)
  if(Debug==FALSE) jpeg(output.file,width=1000,height=1000,pointsize=13)
     MyPairs(cbind(TrueResponse,HighToPlot),cor.range=cor.range,my.labels=(as.vector(High.cor)[1:num.plots]),
-    lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,bg = c("steelblue","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red")
+    lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,bg = c("forestgreen","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red")
 
  if(Debug==FALSE) graphics.off()
  options(warn=0)
