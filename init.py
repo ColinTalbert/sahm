@@ -1348,7 +1348,10 @@ class CovariateCorrelationAndSelection(Module):
     '''
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('selectionName', '(edu.utah.sci.vistrails.basic:String)', {'defaults':str(['initial'])}),
-                    ('ShowGUI', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True'])})]
+                    ('ShowGUI', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True'])}),
+                    ('numPlots', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['8']), 'optional':True}),
+                    ('minCor', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':str(['0.7']), 'optional':True}),
+                    ('corsWithHighest', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['False']), 'optional':True})]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
 
     def compute(self):
@@ -1356,38 +1359,42 @@ class CovariateCorrelationAndSelection(Module):
         
         port_map = {'inputMDS': ('inputMDS', None, True),
                     'selectionName': ('selectionName', None, True),
-                    'ShowGUI': ('ShowGUI', None, True),}
+                    'ShowGUI': ('ShowGUI', None, True),
+                    'numPlots': ('numPlots', None, False),
+                    'minCor': ('minCor', None, False),
+                    'corsWithHighest': ('corsWithHighest', utils.R_boolean, False),}
         
         params = utils.map_ports(self, port_map)
 
         global session_dir
-        outputMDS = os.path.join(session_dir, "CovariateCorrelationOutputMDS_" + params['selectionName'] + ".csv")
-        displayJPEG = os.path.join(session_dir, "CovariateCorrelationDisplay.jpg")
+        params['outputMDS'] = os.path.join(session_dir, "CovariateCorrelationOutputMDS_" + params['selectionName'] + ".csv")
+        params['displayJPEG'] = os.path.join(session_dir, "CovariateCorrelationDisplay.jpg")
+        params['r_path'] = configuration.r_path
         writetolog("    inputMDS = " + params['inputMDS'], False, False)
-        writetolog("    displayJPEG = " + displayJPEG, False, False)
-        writetolog("    outputMDS = " + outputMDS, False, False)
+        writetolog("    displayJPEG = " + params['displayJPEG'], False, False)
+        writetolog("    outputMDS = " + params['outputMDS'], False, False)
         
-        if os.path.exists(outputMDS) and params['ShowGUI']:
-            utils.applyMDS_selection(outputMDS, params['inputMDS'])
-            os.remove(outputMDS)
-            self.callDisplayMDS(params['inputMDS'], outputMDS, displayJPEG)
-        elif os.path.exists(outputMDS) and not params['ShowGUI']:
-            utils.applyMDS_selection(outputMDS, params['inputMDS'])
-            os.remove(outputMDS)
-            shutil.copy2(params['inputMDS'], outputMDS)
+        if os.path.exists(params['outputMDS']) and params['ShowGUI']:
+            utils.applyMDS_selection(params['outputMDS'], params['inputMDS'])
+            os.remove(params['outputMDS'])
+            self.callDisplayMDS(params)
+        elif os.path.exists(params['outputMDS']) and not params['ShowGUI']:
+            utils.applyMDS_selection(params['outputMDS'], params['inputMDS'])
+            os.remove(params['outputMDS'])
+            shutil.copy2(params['inputMDS'], params['outputMDS'])
             writetolog("    Applying previous selection but not showing GUI", False, True)
-        elif not os.path.exists(outputMDS) and not params['ShowGUI']:
+        elif not os.path.exists(params['outputMDS']) and not params['ShowGUI']:
             raise ModuleError(self, "Show GUI deselected but no previous output detected.\n\nCan not continue!")
         else:
-            self.callDisplayMDS(params['inputMDS'], outputMDS, displayJPEG)
+            self.callDisplayMDS(params)
                     
         
-        output_file = utils.create_file_module(outputMDS)
+        output_file = utils.create_file_module(params['outputMDS'])
         writetolog("Finished Select Predictors Layers widget", True)
         self.setResult("outputMDS", output_file)
 
-    def callDisplayMDS(self, inputMDS, outputMDS, displayJPEG):
-        dialog = SelectListDialog(inputMDS, outputMDS, displayJPEG, configuration.r_path)
+    def callDisplayMDS(self, kwargs):
+        dialog = SelectListDialog(kwargs)
         #dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
 #        print " ... finished with dialog "  
         retVal = dialog.exec_()
