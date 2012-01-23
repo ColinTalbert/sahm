@@ -26,6 +26,8 @@ class SelectListDialog(QtGui.QDialog):
         self.kwargs = kwargs
         if not self.kwargs.has_key('numPlots'):
             self.kwargs['numPlots'] = 8
+        if not self.kwargs.has_key('minCor'):
+            self.kwargs['minCor'] = "0.7"
         
         self.selection_name = os.path.split(kwargs['outputMDS'])[1]
         self.selection_name = os.path.splitext(self.selection_name)[0]
@@ -103,8 +105,9 @@ class SelectListDialog(QtGui.QDialog):
         self.label.setSizePolicy(sizePolicy)
         self.label.setObjectName(_fromUtf8("label"))
         self.horizontalLayout_3.addWidget(self.label)
-        self.lineEdit = QtGui.QLineEdit(self.widget)
-        self.lineEdit.setText(_fromUtf8("0.7"))
+        self.lineEdit = QtGui.QLineEdit(self.widget)        
+            
+        self.lineEdit.setText(_fromUtf8(str(self.kwargs['minCor'])))
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -245,7 +248,7 @@ class SelectListDialog(QtGui.QDialog):
         
     def thresholdEdit(self):
         try:
-            self.kwargs['corsWithHighest'] = float(str(self.lineEdit.text()))
+            self.kwargs['minCor'] = float(str(self.lineEdit.text()))
         except ValueError:
             pass
      
