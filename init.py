@@ -144,6 +144,16 @@ class FieldData(Path):
     _output_ports = [('value', '(gov.usgs.sahm:FieldData:DataInput)'),
                      ('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
     
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        global port_docs
+        return utils.construct_port_def(port_docs[cls.__name__ + port_name])
+    
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+        global port_docs
+        return utils.construct_port_def(port_docs[cls.__name__ + port_name]) 
+    
 class Predictor(Constant):
     '''
     Predictor
@@ -186,6 +196,16 @@ class Predictor(Constant):
                     ('file', '(edu.utah.sci.vistrails.basic:Path)')]
     _output_ports = [('value', '(gov.usgs.sahm:Predictor:DataInput)'),
                      ('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
+
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        global port_docs
+        return utils.construct_port_def(port_docs[cls.__name__ + port_name])
+    
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+        global port_docs
+        return utils.construct_port_def(port_docs[cls.__name__ + port_name]) 
 
     def compute(self):
         if (self.hasInputFromPort("ResampleMethod")):
@@ -753,13 +773,19 @@ class MDSBuilder(Module):
 
 class FieldDataQuery(Module):
     '''
+    FieldDataQuery
+        
+    This module provides convienence functions for selecting the pertinent columns in a
+    raw field data file.  Also provided are functions for selecting the rows in the file
+    to include based on the values in another column.
+    
     columns can be specified with either a number (1 based) or the header string name.
     The string is not case sensitive and does not need to be enclosed in quotes.
     if the name or number of any of the columns cannot be found an error will be thrown.
     
-    For the Query column you can either enter a single value or 
-        enter an equality statement with x used as a 
-        placeholder to represent the values in the query column.
+    For the Query column you can either enter an equality statement with x used as a 
+        placeholder to represent the values in the query column or you can construct 
+        more involved queries using Python syntax.
         
         For example:
             x < 2005 (would return values less than 2005)
@@ -774,6 +800,16 @@ class FieldDataQuery(Module):
                                   ('Query_column', 'basic:String'),
                                   ('Query', 'basic:String')])
     _output_ports = expand_ports([('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')])
+    
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        global port_docs
+        return utils.construct_port_def(port_docs[cls.__name__ + port_name])
+    
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+        global port_docs
+        return utils.construct_port_def(port_docs[cls.__name__ + port_name]) 
     
     def compute(self):
         writetolog("\nRunning FieldDataQuery", True)
@@ -1702,7 +1738,9 @@ def load_max_ent_params():
 def initialize():    
     global maxent_path, color_breaks_csv
     global session_dir 
-       
+    
+    load_port_docs()   
+    
     r_path = os.path.abspath(configuration.r_path)
     maxent_path = os.path.abspath(configuration.maxent_path)
     utils.r_path = r_path    
@@ -1817,6 +1855,14 @@ def build_predictor_modules():
             
     return modules
 
+def load_port_docs():
+    csv_file = os.path.abspath(os.path.join(os.path.dirname(__file__),  "PortDocs.csv"))
+    csvReader = csv.DictReader(open(csv_file, "r"))
+    global port_docs
+    port_docs = {}
+    for row in csvReader:
+        k = row['Module'] + row['Port']
+        port_docs[k] = row
 
 input_color = (0.76, 0.76, 0.8)
 input_fringe = [(0.0, 0.0),

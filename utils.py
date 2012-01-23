@@ -468,6 +468,18 @@ def dbfreader(f):
         yield result
 
 
-    
-
+def construct_port_def(kwargs):
+    msg = "Definition:\n    " + kwargs['Definition'].replace('\\n', '\n').replace('\\t', '\t') 
+    if kwargs['Mandatory'] == "TRUE":
+        msg += "\n\nThis port is Mandatory"
+    else:
+        msg += "\n\nThis port is Optional"
+        
+    if kwargs["Default"] != "NA":
+        msg += "\n\nDefault value = " + kwargs["Default"].replace('\\n', '\n').replace('\\t', '\t')
+        
+    if kwargs['Options'] != "NA":
+        msg += "\n\nOptions are:\n    " + kwargs['Options'].replace('\\n', '\n').replace('\\t', '\t') 
+    msg += "\n\nCommon port connections:\n    " + kwargs['ConnectsTo'].replace('\\n', '\n').replace('\\t', '\t') 
+    return msg
     

@@ -1,0 +1,35 @@
+Module,Port,Mandatory,Default,Options,ConnectsTo,Definition
+Predictor,categorical,TRUE,TRUE,NA,Does not generally Connect to any other Module.,"Checking this box indicates that the data contained in the raster layer is categorical (e.g., landcover categories). Leaving this box unchecked indicates that the data contained in the raster is continuous (e.g., a DEM layer). This distinction is important in determining an appropriate resampling method."
+Predictor,ResampleMethod,TRUE,Bilinear,"    near:  nearest neighbour resampling (default, fastest algorithm, worst interpolation quality). 
+
+    bilinear:  bilinear resampling. 
+
+    cubic:   cubic resampling. 
+
+    cubicspline:  cubic spline resampling. 
+
+    lanczos:  Lanczos windowed sinc resampling. 
+
+see: http://www.gdal.org/gdalwarp.html for context",Does not generally Connect to any other Module.,The resample method employed to interpolate new cell values when transforming the raster layer to the coordinate space or cell size of the template layer. 
+Predictor,AggregationMethod,TRUE,Mean,"    Mean:  Average value of all constituent pixels used.
+    Max:   Maximum value of all constituent pixels used.
+    Min:   Minimum value of all constituent pixels used.
+    Majority:   The value occuring most frequently in constituent pixels used.
+    None:   No Aggregation used.",Does not generally Connect to any other Module.,"The aggregation method to be used in the event that the raster layer must be up-scaled to match the template layer (e.g., generalizing a 10 m input layer to a 100 m output layer). Care should be taken to ensure that the aggregation method that best preserves the integrity of the data is used."
+Predictor,file,TRUE,NA,NA,Does not generally Connect to any other Module.,"The location of the raster file. A user can navigate to the location on their file system. When a user is selecting an ESRI grid raster, the user should navigate to the ‘hdr.adf’ file contained within the grid folder"
+Predictor,value,TRUE,NA,NA,The output from this port only connects to the PARC input port 'predictor'.,
+FieldData,value,TRUE,NA,NA,"  The output from this port generally connnects to one of three modules/ports\n    1) FieldDataQuery FieldData_file  - For reformating the file and manipulating either the rows or columns to include\n    2) FieldDataAggregateAndWeight FieldData - For collapsing or weighting points relative to the template pixels\n    3) MDS_builder -For clean field data files in an 'X, Y, Response' format. ","The file containing field data.  Can be in X, Y, ResponseBinary/ResponseCount format or in numerous other formats if using the FieldDataQueryModule."
+FieldDataQuery,x_column,TRUE,1 (First Column in CSV),NA,Does not generally Connect to any other Module.,"The column that contains the 'X' coordinates.  These values must be in the same coordinates, projection, and units as those defined in the template layer. "
+FieldDataQuery,y_column,TRUE,2 (Second Column in CSV),NA,Does not generally Connect to any other Module.,"The column that contains the 'Y' coordinates.  These values must be in the same coordinates, projection, and units as those defined in the template layer."
+FieldDataQuery,Response_column,TRUE,3 (Third Column in CSV),NA,Does not generally Connect to any other Module.,The column that contains the response of interest
+FieldDataQuery,ResponseType,TRUE, 'Presense(Absence)',"Presence(Absence)' = 1 for Presense, optionally also 0 for Absence and -9999 for background points.\n    'Count' = 0, 1, 2, 3 etc. observed count data.  Optionally also -9999 for background points",Does not generally Connect to any other Module.,The type of response recorded in the response column
+FieldDataQuery,Query_column,FALSE,NA,NA,Does not generally Connect to any other Module.,The column which contains values you would like to use to determine which rows to include in the output field data file.
+FieldDataQuery,Query,FALSE,NA,"    For the Query column you can either enter an equality statement with x used as a 
+        placeholder to represent the values in the query column or you can construct 
+        more involved queries using Python syntax.
+        
+        For example:
+            x < 2005 (would return values less than 2005)
+            x == 2000 or x == 2009 (would return 2000 or 2009)
+            The syntax is python in case you want to create an involved query.",Does not generally Connect to any other Module.,The syntax used to test the values of Query_column to determine whether to include the row.
+FieldDataQuery,FieldData,TRUE,NA,NA, The output from this port generally connnects to one of two modules/ports\n    1) FieldDataAggregateAndWeight FieldData - For collapsing or weighting points relative to the template pixels\n    2) MDS_builder - fieldData - for modeling without using the FieldDataAggregateAndWeight functionality.,"The file containing field data.  This output file will be in X, Y, ResponseBinary/ResponseCount format."
