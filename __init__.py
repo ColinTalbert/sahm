@@ -2,7 +2,7 @@ from core.configuration import ConfigurationObject
 
 name = "SAHM"
 identifier = "gov.usgs.sahm"
-version = '1.0.0.rc1'
+version = '1.0.0'
 
 configuration = \
     ConfigurationObject(output_dir= r'C:\temp\SAHM_workspace',
