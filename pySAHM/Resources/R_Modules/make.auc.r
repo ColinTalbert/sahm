@@ -5,6 +5,7 @@ make.auc.plot.jpg<-function(out=out){
   modelname<-toupper(out$input$model)
   input.list<-out$dat$ma
 
+########################################################################
 ######################### Calc threshold on train split #################
  if(out$input$model.family!="poisson"){
             input.list$train$thresh<-out$dat$ma$train$thresh<- as.numeric(optimal.thresholds(data.frame(ID=1:nrow(input.list$train$dat),pres.abs=input.list$train$dat[,1],
@@ -17,7 +18,7 @@ make.auc.plot.jpg<-function(out=out){
   Stats<-lapply(input.list,calcStat,family=out$input$model.family)
 
  #################################################
- ############### Confusion Matrix ##############
+ ############### Confusion Matrix Plot ###########
 
   if(out$input$model.family!="poisson"){
 
@@ -45,7 +46,7 @@ make.auc.plot.jpg<-function(out=out){
    }
 ########################## PLOTS ################################
 
-  #Residual surface of input data
+#########  Residual surface of input data  ##########
   if(out$dat$split.label!="eval"){
   residual.smooth.fct<-resid.image(calc.dev(input.list$train$dat$response, input.list$train$pred, input.list$train$weight, family=out$input$model.family)$dev.cont,input.list$train$pred,
           input.list$train$dat$response,input.list$train$XY$X,input.list$train$XY$Y,out$input$model.family,out$input$output.dir,label=out$dat$split.label,out)
@@ -56,13 +57,14 @@ make.auc.plot.jpg<-function(out=out){
        }
   train.mask<-seq(1:length(Stats))[names(Stats)=="train"]
 
-## breaking of the non-train split must be done separately because list structure is different for the test only and cv
+      ## breaking of the non-train split must be done separately because list structure is different for the test only and cv
     lst<-list()
     if(out$dat$split.type%in%c("test","eval"))
       lst$Test<-Stats[[-c(train.mask)]]
     if(out$dat$split.type=="crossValidation") lst<-Stats[-c(train.mask)]
     if(out$dat$split.type%in%c("none")) lst<-Stats
- #AUC and Calibration plot for binomial data
+
+########## AUC and Calibration plot for binomial data #######################
 
     if(out$input$model.family%in%c("binomial","bernoulli")){
             jpeg(file=plotname,height=1000,width=1000,pointsize=20,quality=100)
@@ -78,6 +80,7 @@ make.auc.plot.jpg<-function(out=out){
                 sens<-unlist(lapply(temp,function(temp){temp$sensitivity}))
                 specif<-1-unlist(lapply(temp,function(temp){temp$specificity}))
                 unique.spec<-sort(unique(specif))
+## ROC AUC plots
                 for(i in 2:length(unique.spec)){
                  segments(seq(from=unique.spec[i-1],to=unique.spec[i],length=100), rep(min(sens[specif>=unique.spec[i]]),times=100),
                       x1 = seq(from=unique.spec[i-1],to=unique.spec[i],length=100), y1 = rep(max(sens[specif<=unique.spec[i]]),times=100),col="blue")
@@ -98,9 +101,9 @@ make.auc.plot.jpg<-function(out=out){
                             none = Stats$train$calibration.stats,
                              test = Stats$test$calibration.stats,
                                 crossValidation = Stats$test$calibration.stats)
-
+## Calibration plot
             a<-do.call("rbind",lapply(lst,function(lst){lst$auc.data}))
-            calibration.plot(a,main="Calibration Plot")
+            calibration.plot(a,main=paste("Calibration Plot for ",switch(out$dat$split.type,none="Training Data",test="Test Split",crossValidation="Cross Validation Split"),sep=""))
             preds<-a$pred
             obs<-a$pres.abs
             pred <- preds + 1e-005
@@ -117,7 +120,7 @@ make.auc.plot.jpg<-function(out=out){
              as.expression(substitute(P(beta==1~a~alpha==0)==Prob,list(Prob=signif(cal.results[5],digits=3),a="|")))),bg="white")
             dev.off()
             }
-    #Some residual plots for poisson data
+#Some residual plots for poisson data
     if(out$input$model.family%in%c("poisson")){
             jpeg(file=plotname)
             par(mfrow=c(2,2))
