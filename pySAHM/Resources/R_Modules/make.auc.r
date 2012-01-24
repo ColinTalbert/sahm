@@ -68,8 +68,9 @@ make.auc.plot.jpg<-function(out=out){
 
     if(out$input$model.family%in%c("binomial","bernoulli")){
             jpeg(file=plotname,height=1000,width=1000,pointsize=20,quality=100)
-            TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=input.list$train$thresh,add.legend=(length(Stats)==1),lwd=2)
-                 if(out$dat$split.type=="none") legend(x=.7,y=.2,paste("AUC=",round(Stats$train$auc.fit,digits=3), ")",sep=""))
+## ROC AUC plots
+            TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=input.list$train$thresh,add.legend=FALSE,lwd=2)
+                 if(out$dat$split.type=="none") legend(x=.8,y=.15,paste("AUC=",round(Stats$train$auc.fit,digits=3),sep=""))
             if(out$dat$split.type!="none") {
             #so here we have to extract a sublist and apply a function to the sublist but if it has length 2 the structure of the list changes when the sublist is extracted
            if(out$dat$split.type=="test"){ TestTrainRocPlot(do.call("rbind",lapply(lst,function(lst){lst$auc.data})),add.roc=TRUE,line.type=2,color="red",add.legend=FALSE)
@@ -80,13 +81,12 @@ make.auc.plot.jpg<-function(out=out){
                 sens<-unlist(lapply(temp,function(temp){temp$sensitivity}))
                 specif<-1-unlist(lapply(temp,function(temp){temp$specificity}))
                 unique.spec<-sort(unique(specif))
-## ROC AUC plots
                 for(i in 2:length(unique.spec)){
                  segments(seq(from=unique.spec[i-1],to=unique.spec[i],length=100), rep(min(sens[specif>=unique.spec[i]]),times=100),
                       x1 = seq(from=unique.spec[i-1],to=unique.spec[i],length=100), y1 = rep(max(sens[specif<=unique.spec[i]]),times=100),col="blue")
-                  TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=input.list$train$thresh,add.legend=(length(Stats)==1),lwd=2,add.roc=TRUE,line.type=1,col="red")
+                  TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=input.list$train$thresh,add.legend=FALSE,lwd=2,add.roc=TRUE,line.type=1,col="red")
                 }
-              TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=input.list$train$thresh,add.legend=(length(Stats)==1),lwd=2,add.roc=TRUE,line.type=1,col="red")
+              TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=input.list$train$thresh,add.legend=FALSE,lwd=2,add.roc=TRUE,line.type=1,col="red")
               points(1-Stats$train$Specf,Stats$train$Sens,pch=19,cex=2.5)
               points(1-Stats$train$Specf,Stats$train$Sens,pch=19,cex=2,col="red")
               text(x=(1.05-Stats$train$Specf),y=Stats$train$Sens-.03,label=round(Stats$train$thresh,digits=2),col="red")
