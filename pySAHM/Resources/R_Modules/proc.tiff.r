@@ -1,5 +1,5 @@
 proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,pred.fct,factor.levels=NA,make.binary.tif=F,make.p.tif=T,
-    thresh=0.5,outfile.p="brt.prob.map.tif",outfile.bin="brt.bin.map.tif",tsize=2.0,NAval=-3000,fnames=NULL,out,Model){
+   thresh=0.5,outfile.p="brt.prob.map.tif",outfile.bin="brt.bin.map.tif",tsize=2.0,NAval=-3000,fnames=NULL,out,Model){
 
     # vnames,fpath,myfun,make.binary.tif=F,outfile=NA,outfile.bin=NA,output.dir=NA,tsize=10.0,NAval=NA,fnames=NA
     # Written by Alan Swanson, YERC, 6-11-08
@@ -21,7 +21,7 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,pred.fct,factor.le
     # NAval: this is the NAvalue used in the input files.
     # fnames: if the filenames of input files are different from the variable names used in the
     #   prediction model.
-    #
+   #
     # Modification history:
     # Fixed problem with NA values causing crash 10/2010
     # Included code to produce MESS map and Mod map  8/2011
@@ -44,6 +44,7 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,pred.fct,factor.le
     if(is.null(thresh)) thresh<-.5
     nvars<-length(vnames)
     vnames.final.mod<-out$mods$vnames
+    if(any(out$mods$vnames%in%names(factor.levels))) vnames.final.mod<-vnames.final.mod[!out$mods$vnames%in%names(factor.levels)]
     nvars.final<-length(vnames.final.mod)
 # settup up output raster to match input raster
 
@@ -54,7 +55,7 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,pred.fct,factor.le
 if(nvars.final<=1) MESS=FALSE
  ######################################
  # get spatial reference info from existing image file
-options(warn=-1)
+ options(warn=-1)
     gi <- GDALinfo(fullnames[1])
 options(warn=1)
     dims <- as.vector(gi)[1:2]
@@ -109,7 +110,7 @@ names(temp) <- vnames
 FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
   if((nvars-length(FactorInd))==0) MESS<-FALSE #turn this off if only one factor column was selected
     if(MESS) {
-      pred.rng<-temp[,names(temp)%in%out$mods$vnames]
+      pred.rng<-temp[,names(temp)%in%vnames.final.mod]
         CalcMESS<-function(tiff.entry,pred.vect){
               f<-sum(pred.vect<tiff.entry)/length(pred.vect)*100
               if(is.na(f)) return(NA)
@@ -147,13 +148,10 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
 
              if(MESS){
              for(k in 1:nvars.final){
-                   if(!out$mods$vnames[k]%in%names(factor.levels)){
-                        pred.range<-out$dat$ma$train$dat[,match(out$mods$vnames[k],names(out$dat$ma$train$dat))]
-                        if(nvars.final>1) pred.rng[,k]<-mapply(CalcMESS,tiff.entry=temp[,match(out$mods$vnames[k],names(temp))],MoreArgs=list(pred.vect=pred.range))
+                        pred.range<-out$dat$ma$train$dat[,match(vnames.final.mod[k],names(out$dat$ma$train$dat))]
+                        if(nvars.final>1) pred.rng[,k]<-mapply(CalcMESS,tiff.entry=temp[,match(vnames.final.mod[k],names(temp))],MoreArgs=list(pred.vect=pred.range))
                         else pred.rng<-mapply(CalcMESS,tiff.entry=temp,MoreArgs=list(pred.vect=pred.range))
                          }
-                         }
-                      if(any(names(pred.rng)%in%names(factor.levels))) pred.rng<-pred.rng[,-c(names(pred.rng)%in%names(factor.levels))]
                       }
                 if(length(vnames)==1) names(temp)=vnames
 
@@ -182,7 +180,7 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
      a<-which(x==min(x),arr.ind=TRUE)
      if(length(a>1)) a<-sample(a,size=1)
      return(a)
-     }
+    }
     if(MESS) {
     MessRaster<-writeValues(MessRaster,apply(pred.rng,1,min), tr$row[i])
     if(!is.null(dim(pred.rng)[2])) a<-apply(as.matrix(pred.rng),1,f)

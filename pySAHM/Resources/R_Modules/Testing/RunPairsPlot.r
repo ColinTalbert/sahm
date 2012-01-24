@@ -8,7 +8,7 @@ source("I:\\VisTrails\\Central_VisTrails_x32_debug\\Vistrails\\vistrails\\packag
 
 
 
-num.plots <- 10
+    num.plots <- 10
     min.cor <- .7
     responseCol <- "responseBinary"
     cors.w.highest <- FALSE
@@ -16,17 +16,18 @@ num.plots <- 10
     absn=TRUE
     bgd=TRUE
     #infile="I:\\VisTrails\\WorkingFiles\\workspace\\talbertc_20110510T100421\\TestTrainingSplit_1.csv"
-    infil="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
+    infil="C:\\temp\\SAHM_workspace\\mtalbert_20120123T110745\\modelSelection_split_2.csv"
     output.file="H:\\Desktop\\SAHM\\Output\\PairsPlot\\pairPres.jpg"
-    Pairs.Explore(num.plots=6,
+Pairs.Explore(num.plots=8,
     min.cor=min.cor,
     input.file=infil,
 		output.file=output.file,
 		response.col=responseCol,
 		pres=TRUE,
 		absn=TRUE,
-		bgd=TRUE,
+		bgd=FALSE,
     Debug=FALSE)
+
 
 #binary
 input.file="C:\\VisTrails\\EAMEBinTT.csv"

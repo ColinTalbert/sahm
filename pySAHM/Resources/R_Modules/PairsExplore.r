@@ -93,7 +93,6 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
     }
     
     cmat=pmax(abs(cmat),abs(smat),abs(kmat),na.rm=TRUE)
-    
     High.cor<-sort(apply(abs(cmat)>min.cor,2,sum)-1,decreasing=TRUE)
 
   #take the top num.plots to put in the pairs plot or if the looking at a single
@@ -347,7 +346,6 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
                     font = font.labels)
                 }
             }
-
             else if (i < j)
                   if(length(unique(x[,i])>2)){
                   localLowerPanel(as.vector(x[, j]), as.vector(x[,
@@ -356,7 +354,7 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
                     }
                   
             else localUpperPanel(as.vector(x[, j]), as.vector(x[,
-                i]), ...)
+                i]),cex=1.5, ...)
             if (any(par("mfg") != mfg))
                 stop("the 'panel' function made a new plot")
         }
@@ -379,7 +377,7 @@ my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),
     cex = 1, col.smooth = "red", span = 2/3, iter = 3, weights=rep(1,times=length(y)), ...)
 {
     o<-order(x)
-    points(x, y, pch = pch, col = col, bg = bg, cex = cex)
+    points(x, y, pch = pch, col = col, bg = bg, cex = cex*1.5)
     ok <- is.finite(x) & is.finite(y)
     if (any(ok) && length(unique(x))>3)
     lines(lowess(x[o],y[o],iter=0),col="red")
