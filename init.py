@@ -146,13 +146,10 @@ class FieldData(Path):
     
     @classmethod
     def provide_input_port_documentation(cls, port_name):
-        global port_docs
-        return utils.construct_port_def(port_docs[cls.__name__ + port_name])
-    
+        return utils.construct_port_msg(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-        global port_docs
-        return utils.construct_port_def(port_docs[cls.__name__ + port_name]) 
+         return utils.construct_port_msg(cls, port_name, 'out') 
     
 class Predictor(Constant):
     '''
@@ -199,13 +196,10 @@ class Predictor(Constant):
 
     @classmethod
     def provide_input_port_documentation(cls, port_name):
-        global port_docs
-        return utils.construct_port_def(port_docs[cls.__name__ + port_name])
-    
+        return utils.construct_port_msg(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-        global port_docs
-        return utils.construct_port_def(port_docs[cls.__name__ + port_name]) 
+         return utils.construct_port_msg(cls, port_name, 'out') 
 
     def compute(self):
         if (self.hasInputFromPort("ResampleMethod")):
@@ -315,6 +309,13 @@ class PredictorListFile(Module):
     #copies the input predictor list csv to our working directory
     #and appends any additionally added predictors
 
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return utils.construct_port_msg(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+         return utils.construct_port_msg(cls, port_name, 'out') 
+
     @staticmethod
     def translate_to_string(v):
         return str(v)
@@ -379,6 +380,14 @@ class TemplateLayer(Path):
 #    _input_ports = [('FilePath', '(edu.utah.sci.vistrails.basic:File)')]
     _output_ports = [('value', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                      ('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
+    
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return utils.construct_port_msg(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+         return utils.construct_port_msg(cls, port_name, 'out') 
+    
 #    def compute(self):
 #        output_file = create_file_module(self.forceGetInputFromPort('FilePath', []))
 #        self.setResult('value', output_file)
@@ -535,6 +544,13 @@ class Model(Module):
                      ('ResponseCurves', '(edu.utah.sci.vistrails.basic:File)'),
                      ('Text_Output', '(edu.utah.sci.vistrails.basic:File)')]
 
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return utils.construct_port_msg(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+         return utils.construct_port_msg(cls, port_name, 'out') 
+
     def compute(self):
         
         ModelOutput = {"FIT_BRT_pluggable.r":"brt",
@@ -607,7 +623,19 @@ class GLM(Model):
 
 class RandomForest(Model):
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('MTRY', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['1']), 'optional':True}),
+    _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', True),
+                         ('mTry', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['1']), 'optional':True}),
+                         ('nTrees', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
+                         ('nodesize', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
+                         ('replace', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
+                         ('maxnodes', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
+                         ('importance', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
+                         ('localImp', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
+                         ('proximity', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
+                         ('oobPorx', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
+                         ('normVotes', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
+                         ('doTrace', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
+                         ('keepForest', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
                          ]) 
     def __init__(self):
         global models_path
@@ -618,7 +646,18 @@ class RandomForest(Model):
                          'makeBinMap':('mbt', utils.R_boolean, False),
                          'makeMESMap':('mes', utils.R_boolean, False), 
                          'ThresholdOptimizationMethod':('om', None, False),
-                         'MTRY': ('mtry', None, False) #This is a Random Forest specific port
+                         'Seed':('seed', None, False), #This is a BRT specific port
+                         'mTry': ('mtry', None, False), #This is a Random Forest specific port
+                         'nodesize': ('nodeS', None, False), #This is a Random Forest specific port
+                         'replace': ('sampR', utils.R_boolean, False), #This is a Random Forest specific port
+                         'maxnodes': ('maxN', None, False), #This is a Random Forest specific port
+                         'importance': ('impt', utils.R_boolean, False), #This is a Random Forest specific port
+                         'localImp': ('locImp', utils.R_boolean, False), #This is a Random Forest specific port
+                         'proximity': ('prox', utils.R_boolean, False), #This is a Random Forest specific port
+                         'oobPorx': ('oopp', utils.R_boolean, False), #This is a Random Forest specific port
+                         'normVotes': ('nVot', utils.R_boolean, False), #This is a Random Forest specific port
+                         'doTrace': ('Trce', utils.R_boolean, False), #This is a Random Forest specific port
+                         'keepForest': ('kf', utils.R_boolean, False), #This is a Random Forest specific port
                          }
 
 class MARS(Model):
@@ -643,13 +682,14 @@ class BoostedRegressionTree(Model):
     _input_ports = list(Model._input_ports)
     _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', True),
                               ('TreeComplexity', '(edu.utah.sci.vistrails.basic:Integer)', True),
-                              ('NumberOfTrees', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['10000']), 'optional':True}),
                               ('BagFraction', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':str(['0.5']), 'optional':True}),
                               ('NumberOfFolds', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['3']), 'optional':True}),
                               ('Alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':str(['1']), 'optional':True}),
                               ('PrevalenceStratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':True}),
                               ('ToleranceMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':str(['auto']), 'optional':True}),
-                              ('Tolerance', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':str(['0.001']), 'optional':True})
+                              ('Tolerance', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':str(['0.001']), 'optional':True}),
+                              ('LearningRate', '(edu.utah.sci.vistrails.basic:Float)', {'optional':True}),
+                              ('MaximumTrees', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ])
     def __init__(self):
         global models_path
@@ -662,13 +702,14 @@ class BoostedRegressionTree(Model):
                          'ThresholdOptimizationMethod':('om', None, False),
                          'Seed':('seed', None, False), #This is a BRT specific port
                          'TreeComplexity':('tc', None, False), #This is a BRT specific port
-                         'NumberOfTrees':('nf', None, False), #This is a BRT specific port
                          'BagFraction':('bf', None, False), #This is a BRT specific port
                          'NumberOfFolds':('nf', None, False), #This is a BRT specific port
                          'Alpha':('alp', None, False), #This is a BRT specific port
                          'PrevalenceStratify':('ps', None, False), #This is a BRT specific port
                          'ToleranceMethod':('tolm', None, False), #This is a BRT specific port
-                         'Tolerance':('tol', None, False) #This is a BRT specific port
+                         'Tolerance':('tol', None, False), #This is a BRT specific port
+                         'LearningRate':('lr', None, False), #This is a BRT specific port
+                         'MaximumTrees':('mt', None, False), #This is a BRT specific port
                          }
    
 class MDSBuilder(Module):
@@ -803,13 +844,10 @@ class FieldDataQuery(Module):
     
     @classmethod
     def provide_input_port_documentation(cls, port_name):
-        global port_docs
-        return utils.construct_port_def(port_docs[cls.__name__ + port_name])
-    
+        return utils.construct_port_msg(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-        global port_docs
-        return utils.construct_port_def(port_docs[cls.__name__ + port_name]) 
+         return utils.construct_port_msg(cls, port_name, 'out') 
     
     def compute(self):
         writetolog("\nRunning FieldDataQuery", True)
@@ -902,6 +940,13 @@ class FieldDataAggregateAndWeight(Module):
                                  ('SDofGaussianKernel', '(edu.utah.sci.vistrails.basic:Float)')
                                  ])
     _output_ports = expand_ports([('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')])
+    
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return utils.construct_port_msg(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+         return utils.construct_port_msg(cls, port_name, 'out')  
     
     def compute(self):
         writetolog("\nFieldDataAggregateAndWeight", True)
@@ -1865,11 +1910,12 @@ def build_predictor_modules():
 def load_port_docs():
     csv_file = os.path.abspath(os.path.join(os.path.dirname(__file__),  "PortDocs.csv"))
     csvReader = csv.DictReader(open(csv_file, "r"))
-    global port_docs
     port_docs = {}
     for row in csvReader:
-        k = row['Module'] + row['Port']
+        k = row['Module'] + row['Port'] + row['Direction']
         port_docs[k] = row
+        
+    utils.port_docs = port_docs
 
 input_color = (0.76, 0.76, 0.8)
 input_fringe = [(0.0, 0.0),
