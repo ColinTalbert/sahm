@@ -8,7 +8,7 @@ source("FIT_RF_pluggable.r")
 source("FIT_GLM_pluggable.r")
 source("LoadRequiredCode.r")
 
-rc=c(rep("responseBinary",times=10),rep("responseCount",times=2))
+rc=c(rep("responseBinary",times=11),rep("responseCount",times=2))
 input.file<-vector()
 input.file[1]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/BadPath.csv"
 input.file[2]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/LargeSplit.csv"
@@ -20,14 +20,15 @@ input.file[7]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitFactor2.cs
 input.file[8]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitWeights.csv"
 input.file[9]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
 input.file[10]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/NoSplit.csv"
-input.file[11]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
-input.file[12]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
+input.file[11]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
+input.file[12]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
+input.file[13]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
 
 output.dir<-vector()
-output.dir[1]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\NewMasterBranch1.9\\rf"
-output.dir[2]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\NewMasterBranch1.9\\brt"
-output.dir[3]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\NewMasterBranch1.9\\mars"
-output.dir[4]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\NewMasterBranch1.9\\glm"
+output.dir[1]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\NewMasterBranch1.23\\rf"
+output.dir[2]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\NewMasterBranch1.23\\brt"
+output.dir[3]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\NewMasterBranch1.23\\mars"
+output.dir[4]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\NewMasterBranch1.23\\glm"
 
 for(i in 1:length(input.file)){
 set.seed(1)
