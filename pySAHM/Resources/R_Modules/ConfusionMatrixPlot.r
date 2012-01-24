@@ -1,5 +1,5 @@
 barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, bar.space=3,
-    col.lab=NULL, row.lab=NULL, z.lab=NULL, col.bar=c("#44ff58","#5844ff","#ff5844"), grid="white", ...) {
+    col.lab=NULL, row.lab=NULL, z.lab=NULL, col.bar=c("#44ff58","#5844ff","#ff5844"), grid="white",Stats,split.type, ...) {
  #I rescued this gem from the R graphics gallery.  I'm not sure who originally wrote it but I have altered it
  #so that it is fit to join my minion army 1/3/2012 Marian K. Talbert
 
@@ -70,7 +70,7 @@ barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, 
          }
 
     # Prepare area for plotting
-    par(mar=c(6,6,3,2))
+    par(mar=c(6,8,8,2))
     rys = persp(x, y, matrix(nrow=length(x), ncol=length(y)), col=fill, scale=F, theta=theta,
         phi=phi, zlim = range(zakres), lphi=44, ltheta=-10, axes=F, ...,main=z.lab,xlab="Predicted",ylab="Observed")
     # Add grid lines & numbers
@@ -93,7 +93,6 @@ barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, 
                 "Train Pres.\n\nTest Pres.", adj=.8, cex=1.1,srt=(phi+15))
               text(trans3d(mean(x[11:13]),-(calkdl*rows)*.3,0,rys),
                 "Predicted", adj=.8, cex=1.6,srt=(phi+10))
-
             } else{
           for (i1 in (1:cols)-1) {
             lines(rbind(trans3d((odstep+calkdl*i1),0,0,rys), trans3d((odstep+calkdl*i1),
@@ -104,6 +103,7 @@ barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, 
              text(trans3d(mean(x[6:7]),-(calkdl*rows)*.3,0,rys),
                 "Predicted", adj=.8, cex=1.6,srt=(phi+10))
      }
+
     for (i1 in (1:rows)-1) {
         lines(rbind(trans3d(max(x),(odstep+calkdl*i1),0,rys), trans3d(max(x)+(calkdl*cols)*0.03,
             (odstep+calkdl*i1),0,rys)))
@@ -118,7 +118,28 @@ barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, 
     par(new=T)
     persp(x, y, z, col=fill, scale=F, theta=theta, phi=phi, zlim = range(zakres),
         lphi=44, ltheta=-10, shade=0.4, axes=F, ...)
+       results<-switch(split.type,
+                            none = Stats$train,
+                             test = Stats$test,
+                                crossValidation = Stats$test)
+        sub.lab<-""
+      if(split.type!="none") sub.lab<-paste("Evaluation metrics for the ",switch(split.type,test="test split\n",crossValidation="cross validation split\n"),sep="")
+      mtext(paste(sub.lab,"Percent Correctly Classified: ",signif(results$Pcc,digits=3),"                 Sensitivity: ",signif(results$Sens,digits=3),"\n                       Specificity:   ",signif(results$Specf,digits=3),"         Cohen's Kappa: ",signif(results$Kappa,digits=3),sep=""))
+             if(split.type=="none")  {x.means<-c(mean(c(x[4],x[3])),mean(c(x[8],x[9])))
+                                     rep.times=2
+            }else{ x.means<-colMeans(rbind(x[seq(from=3,to=18,by=5)],x[seq(from=4,to=19,by=5)]))
+                      rep.times=4}
+    y.means<-c(mean(c(y[4],y[3])),mean(c(y[8],y[9])))
+     text(trans3d(x.means+1,rep(y.means,each=rep.times)-1.5,heights+2,rys),paste(signif(heights,digits=2),"%",sep=""),cex=2.2,srt=phi+10,col="yellow")
 
+      # fill2<-col2rgb(fill,alpha=TRUE)
+      # fill2[4,]<-pmin(20,fill2[4,])
+      # temp.fct<-function(a){return(rgb(red=a[1],green=a[2],blue=a[3],alpha=a[4]))}
+      # fill2<-matrix(data=apply(fill2/255,2,temp.fct),nrow=nrow(fill),ncol=ncol(fill))
+
+      # par(new=T)
+      # persp(x, y, z, col=fill2, scale=F, theta=theta, phi=phi, zlim = range(zakres),
+      #  lphi=44, ltheta=-10, shade=0.4, axes=F, ...)
     invisible(rys)
 }
 

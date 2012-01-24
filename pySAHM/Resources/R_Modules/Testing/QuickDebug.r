@@ -1,5 +1,11 @@
-setwd("I:\\VisTrails\\Central_VisTrails_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
-ScriptPath="I:\\VisTrails\\Central_VisTrails_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
+setwd("H:\\Desktop\\BrokenGIT\\R_Modules")
+ScriptPath="H:\\Desktop\\BrokenGIT\\R_Modules"
+
+#setwd("I:\\VisTrails\\Central_VisTrailsInstall\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
+#source("FIT_BRT_pluggable.r")
+#source("FIT_MARS_pluggable.r")
+#source("FIT_RF_pluggable.r")
+#source("FIT_GLM_pluggable.r")
 
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
@@ -18,7 +24,7 @@ list.files()
 rc="responseCount"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
 
-input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
+input.file[11]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
 
 #fit.model(ma.name=input.file,output.dir=output.dir,response.col=rc,make.p.tif=T,make.binary.tif=T,script.name="glm.r",
 #opt.methods=2,save.model=TRUE,UnitTest=FALSE,MESS=FALSE,aic.form=TRUE,parm2=4)
@@ -30,7 +36,7 @@ input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/NoSplit.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Spat.Weights.csv"
-input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Split.csv"
+
 rc="responseBinary"
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation\\modelSelection_split_1.csv"
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation\\modelSelection_cv_1.csv"
@@ -39,22 +45,16 @@ output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation3\\modelSelection_cv_1.csv"
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation4\\modelSelection_cv_1.csv"
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation4\\modelSelection_marianTest.csv"
-input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Split.csv"
 #######################################################################
 ##MARS
-output.dir="C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction1.6\\mars"
 FitModels(ma.name=input.file,
             output.dir=output.dir,
-            response.col=rc,make.p.tif=F,make.binary.tif=F,
-            mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars",opt.methods=2,MESS=F)
+            response.col=rc,make.p.tif=T,make.binary.tif=T,
+            mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars",opt.methods=2,MESS=T)
 
 EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,make.binary.tif=TRUE,make.p.tif=TRUE,MESS=TRUE)
 
 ##GLM
-input.file="C:\\VisTrails\\mtalbert_20110504T132851\\readMaTests\\SecondSeasonWeights.csv"
-input.file="I://VisTrails//WorkingFiles//secondseason//secondseason_workfile_2012_12_23//TestTrainingSplit_8.csv"
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\MarsError\\CovariateCorrelationOutputMDS_NoClimate.csv"
-input.file="I:\\VisTrails\\WorkingFiles\\tutorial\\tutorial_2011_12_28\\CovariateCorrelationOutputMDS_NoRS.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,
           output.dir=output.dir,
@@ -80,9 +80,9 @@ FitModels(ma.name=input.file,
           tif.dir=NULL,output.dir=output.dir,
           response.col=rc,make.p.tif=T,make.binary.tif=T,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
       family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
-  tolerance = 0.001,opt.methods=2,
+  tolerance = 0.001,seed=NULL,opt.methods=2,
           simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
-          learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=TRUE,seed=1)
+          learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=TRUE)
 
 #Now evaluating new data
 EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,make.binary.tif=TRUE,make.p.tif=TRUE,MESS=TRUE)

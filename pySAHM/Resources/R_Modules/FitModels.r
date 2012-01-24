@@ -35,7 +35,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
 
 
 if(is.null(out$input$seed)) out$input$seed<-round(runif(1,min=-((2^32)/2-1),max=((2^32)/2-1)))
-set.seed(out$input$seed)
+set.seed(as.numeric(out$input$seed))
    #print warnings as they occur
         options(warn=1)
     
@@ -125,7 +125,7 @@ set.seed(out$input$seed)
             cat("\nproducing prediction maps...","\n","\n");flush.console()
 
                               proc.tiff(model=out$mods$final.mod,vnames=names(out$dat$ma$train$dat)[-1],
-                tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=pred.fct,factor.levels=out$dat$ma$factor.levels,make.binary.tif=make.binary.tif,
+                tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=pred.fct,factor.levels=out$dat$factor.levels,make.binary.tif=make.binary.tif,
                 thresh=out$mods$auc.output$thresh,make.p.tif=make.p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
                 outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50.0,NAval=-3000,
                 fnames=out$dat$tif.names,out=out,Model=Model)

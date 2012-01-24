@@ -84,7 +84,7 @@ n.trees<-as.numeric(n.trees)
 opt.methods<-as.numeric(opt.methods)
 ScriptPath<-dirname(ScriptPath)
 MESS<-as.logical(MESS)
-seed<-as.numeric(seed)
+
 
 source(paste(ScriptPath,"RF.helper.fcts.r",sep="\\"))
 source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
