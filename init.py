@@ -1470,7 +1470,7 @@ class CovariateCorrelationAndSelection(Module):
 
     '''
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
-                    ('selectionName', '(edu.utah.sci.vistrails.basic:String)', {'defaults':str(['initial'])}),
+                    ('selectionName', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'initial'}),
                     ('ShowGUI', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True'])}),
                     ('numPlots', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['8']), 'optional':True}),
                     ('minCor', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':str(['0.7']), 'optional':True}),
