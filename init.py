@@ -189,8 +189,8 @@ class Predictor(Constant):
         
     '''
     _input_ports = [('categorical', '(edu.utah.sci.vistrails.basic:Boolean)'),
-                    ('ResampleMethod', '(gov.usgs.sahm:ResampleMethod:Other)', {'defaults':str(['Bilinear'])}),
-                    ('AggregationMethod', '(gov.usgs.sahm:AggregationMethod:Other)', {'defaults':str(['Mean'])}),
+                    ('ResampleMethod', '(gov.usgs.sahm:ResampleMethod:Other)', {'defaults':'Bilinear'}),
+                    ('AggregationMethod', '(gov.usgs.sahm:AggregationMethod:Other)', {'defaults':'Mean'}),
                     ('file', '(edu.utah.sci.vistrails.basic:Path)')]
     _output_ports = [('value', '(gov.usgs.sahm:Predictor:DataInput)'),
                      ('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
@@ -530,10 +530,10 @@ class Model(Module):
     the VisTrails workflow by the user.
     '''
     _input_ports = [('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)'),
-                    ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':False}),
-                    ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':False}),
-                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['False']), 'optional':False}),
-                    ('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['2']), 'optional':False})
+                    ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':False}),
+                    ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':False}),
+                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False}),
+                    ('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'2', 'optional':False})
                     ]
     _output_ports = [('modelWorkspace', '(edu.utah.sci.vistrails.basic:File)'), 
                      ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
@@ -570,8 +570,8 @@ class Model(Module):
             self.ModelAbbrev == 'rf':
             if not "seed" in self.argsDict.keys():
                 self.argsDict['seed'] = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
-            writetolog("    seed used for " + self.ModelAbbrev + " = " + str(seed))
-            args += " seed=" + str(seed)
+            writetolog("    seed used for " + self.ModelAbbrev + " = " + str(self.argsDict['seed']))
+            args += " seed=" + str(str(self.argsDict['seed']))
         
         for k, v in self.argsDict.iteritems():
             if k == 'c':
@@ -613,7 +613,7 @@ class Model(Module):
         
 class GLM(Model):
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('SimplificationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':str(['AIC']), 'optional':True}),
+    _input_ports.extend([('SimplificationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'AIC', 'optional':True}),
                          ]) 
     def __init__(self):
         global models_path
@@ -630,7 +630,7 @@ class GLM(Model):
 class RandomForest(Model):
     _input_ports = list(Model._input_ports)
     _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
-                         ('mTry', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['1']), 'optional':True}),
+                         ('mTry', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'1', 'optional':True}),
                          ('nTrees', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                          ('nodesize', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                          ('replace', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
@@ -668,8 +668,8 @@ class RandomForest(Model):
 
 class MARS(Model):
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('MarsDegree', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['1']), 'optional':True}),
-                          ('MarsPenalty', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['2']), 'optional':True}),
+    _input_ports.extend([('MarsDegree', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'1', 'optional':True}),
+                          ('MarsPenalty', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'2', 'optional':True}),
                           ])
     def __init__(self):
         global models_path        
@@ -688,12 +688,12 @@ class BoostedRegressionTree(Model):
     _input_ports = list(Model._input_ports)
     _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ('TreeComplexity', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
-                              ('BagFraction', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':str(['0.5']), 'optional':True}),
-                              ('NumberOfFolds', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['3']), 'optional':True}),
-                              ('Alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':str(['1']), 'optional':True}),
-                              ('PrevalenceStratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':True}),
-                              ('ToleranceMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':str(['auto']), 'optional':True}),
-                              ('Tolerance', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':str(['0.001']), 'optional':True}),
+                              ('BagFraction', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'0.5', 'optional':True}),
+                              ('NumberOfFolds', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'3', 'optional':True}),
+                              ('Alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'1', 'optional':True}),
+                              ('PrevalenceStratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':True}),
+                              ('ToleranceMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'auto', 'optional':True}),
+                              ('Tolerance', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'0.001', 'optional':True}),
                               ('LearningRate', '(edu.utah.sci.vistrails.basic:Float)', {'optional':True}),
                               ('MaximumTrees', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ])
@@ -842,10 +842,10 @@ class FieldDataQuery(Module):
             The syntax is python in case you want to create an involved query.
     '''    
     _input_ports = [('fieldData_file', '(gov.usgs.sahm:FieldData:DataInput)'),
-                                 ('x_column', '(edu.utah.sci.vistrails.basic:String)', {'defaults':str('1')}),
-                                 ('y_column', '(edu.utah.sci.vistrails.basic:String)', {'defaults':str('2')}),
-                                 ('Response_column', '(edu.utah.sci.vistrails.basic:String)', {'defaults':str('3')}),
-                                 ('ResponseType', '(gov.usgs.sahm:ResponseType:Other)', {'defaults':str(['Presence(Absence)'])}),
+                                 ('x_column', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'1'}),
+                                 ('y_column', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'2'}),
+                                 ('Response_column', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'3'}),
+                                 ('ResponseType', '(gov.usgs.sahm:ResponseType:Other)', {'defaults':'Presence(Absence)'}),
                                   ('Query_column', '(edu.utah.sci.vistrails.basic:String)'),
                                   ('Query', '(edu.utah.sci.vistrails.basic:String)')]
     _output_ports = [('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),]
@@ -944,7 +944,7 @@ class FieldDataAggregateAndWeight(Module):
     '''
     _input_ports = [('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
-                                 ('PointAggregationOrWeightMethod', '(gov.usgs.sahm:PointAggregationMethod:Other)', {'defaults':str(['Collapse In Pixel'])}),
+                                 ('PointAggregationOrWeightMethod', '(gov.usgs.sahm:PointAggregationMethod:Other)', {'defaults':'Collapse In Pixel'}),
                                  ('SDofGaussianKernel', '(edu.utah.sci.vistrails.basic:Float)')
                                  ]
     _output_ports = [('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')]
@@ -1056,8 +1056,8 @@ class PARC(Module):
                                 ('PredictorList', '(gov.usgs.sahm:PredictorList:Other)'),
                                 ('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                 ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
-                                ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['False']), 'optional':True}),
-                                ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':True})]
+                                ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':True}),
+                                ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':True})]
 
     _output_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
     
@@ -1181,7 +1181,7 @@ class RasterFormatConverter(Module):
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('inputDir', '(edu.utah.sci.vistrails.basic:Directory)'),
                     ('format', '(edu.utah.sci.vistrails.basic:String)'),
-                    ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':True})]
+                    ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':True})]
 
     _output_ports = [('outputDir', '(edu.utah.sci.vistrails.basic:Directory)')]
 
@@ -1266,7 +1266,7 @@ class ModelEvaluationSplit(Module):
 
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('trainingProportion', '(edu.utah.sci.vistrails.basic:Float)', 
-                        {'defaults':str(['0.7'])}),
+                        {'defaults':'0.7'}),
                     ('RatioPresAbs', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
@@ -1325,7 +1325,7 @@ class ModelSelectionSplit(Module):
 
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('trainingProportion', '(edu.utah.sci.vistrails.basic:Float)', 
-                        {'defaults':str(['0.7'])}),
+                        {'defaults':'0.7'}),
                     ('RatioPresAbs', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
@@ -1384,8 +1384,8 @@ class ModelSelectionCrossValidation(Module):
 
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('nFolds', '(edu.utah.sci.vistrails.basic:Integer)', 
-                        {'defaults':str('10')}),
-                    ('Stratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':True}),
+                        {'defaults':'10'}),
+                    ('Stratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':True}),
                     ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
     
@@ -1463,10 +1463,10 @@ class CovariateCorrelationAndSelection(Module):
     '''
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('selectionName', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'initial'}),
-                    ('ShowGUI', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True'])}),
-                    ('numPlots', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['8']), 'optional':True}),
-                    ('minCor', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':str(['0.7']), 'optional':True}),
-                    ('corsWithHighest', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['False']), 'optional':True})]
+                    ('ShowGUI', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True'}),
+                    ('numPlots', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'8', 'optional':True}),
+                    ('minCor', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'0.7', 'optional':True}),
+                    ('corsWithHighest', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':True})]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
 
     def compute(self):
