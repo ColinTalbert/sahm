@@ -48,6 +48,7 @@ class MDSBuilder(object):
         self.probsurf = ''
         self.pointcount = 0
         self.NDFlag = 'NA'
+        self.seed = None
         self.deleteTmp = False
         self.logger = None
     
@@ -334,6 +335,12 @@ class MDSBuilder(object):
         follow this otherwise it will be uniform within the extent of the first of our inputs.
         No more than one per pixel is used.
         '''
+        #initialize the random seed in case one was passed
+        if not self.seed:
+            self.seed = random.randint(0, sys.maxint)
+        random.seed(self.seed)
+        self.writetolog("    seed used for background point generation = " + str(self.seed))
+        
         #First we'll create a temp copy of the Field Data to work with.
         shutil.copy(self.fieldData, self.fieldData + ".tmp.csv")
         self.fieldData = self.fieldData + ".tmp.csv"

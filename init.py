@@ -9,6 +9,7 @@ import shutil
 import sys
 import subprocess
 import traceback
+import random
 
 from core.modules.vistrails_module import Module, ModuleError, ModuleConnector
 from core.modules.basic_modules import File, Directory, Path, new_constant, Constant
@@ -564,7 +565,21 @@ class Model(Module):
 
         mdsFile = self.forceGetInputFromPort('mdsFile').name
         
+        if self.ModelAbbrev == 'brt' or \
+            self.ModelAbbrev == 'rf':
+            if not "seed" in self.argsDict.keys():
+                self.argsDict['seed'] = random.randint(0, sys.maxint)
+            self.writetolog("    seed used for " + self.ModelAbbrev + " = " + str(seed))
+        
         args = ''
+        
+        if self.hasInputFromPort("Seed"):
+            seed = str(self.getInputFromPort("Seed"))
+        else:
+            seed = random.randint(0, sys.maxint)
+        self.writetolog("    seed used for Split = " + str(seed))
+        args += " seed=" + str(seed)
+        
         for k, v in self.argsDict.iteritems():
             if k == 'c':
                 args += ' ' + '='.join([str(k),'"' + str(v) + '"'])
@@ -680,8 +695,8 @@ class MARS(Model):
 
 class BoostedRegressionTree(Model):
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', True),
-                              ('TreeComplexity', '(edu.utah.sci.vistrails.basic:Integer)', True),
+    _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
+                              ('TreeComplexity', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ('BagFraction', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':str(['0.5']), 'optional':True}),
                               ('NumberOfFolds', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['3']), 'optional':True}),
                               ('Alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':str(['1']), 'optional':True}),
@@ -775,7 +790,8 @@ class MDSBuilder(Module):
     def compute(self):
         port_map = {'fieldData': ('fieldData', None, True),
                     'backgroundPointCount': ('pointcount', None, False),
-                    'backgroundProbSurf': ('probsurf', None, False),}
+                    'backgroundProbSurf': ('probsurf', None, False),
+                    'Seed': ('seed', None, False)}
         
         MDSParams = utils.map_ports(self, port_map)            
         MDSParams['outputMDS'] = utils.mknextfile(prefix='MergedDataset_', suffix='.csv')
@@ -1259,7 +1275,8 @@ class ModelEvaluationSplit(Module):
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('trainingProportion', '(edu.utah.sci.vistrails.basic:Float)', 
                         {'defaults':str(['0.7'])}),
-                    ('RatioPresAbs', '(edu.utah.sci.vistrails.basic:Float)')]
+                    ('RatioPresAbs', '(edu.utah.sci.vistrails.basic:Float)'),
+                    ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
     
     def compute(self):
@@ -1290,6 +1307,13 @@ class ModelEvaluationSplit(Module):
 
         args += " es=TRUE"
 
+        if self.hasInputFromPort("Seed"):
+            seed = str(self.getInputFromPort("Seed"))
+        else:
+            seed = random.randint(0, sys.maxint)
+        writetolog("    seed used for Split = " + str(seed))
+        args += " seed=" + str(seed)
+
         utils.runRScript("TestTrainSplit.r", args, self)
         
         output = os.path.join(outputMDS)
@@ -1310,7 +1334,8 @@ class ModelSelectionSplit(Module):
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('trainingProportion', '(edu.utah.sci.vistrails.basic:Float)', 
                         {'defaults':str(['0.7'])}),
-                    ('RatioPresAbs', '(edu.utah.sci.vistrails.basic:Float)')]
+                    ('RatioPresAbs', '(edu.utah.sci.vistrails.basic:Float)'),
+                    ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
     
     def compute(self):
@@ -1341,6 +1366,13 @@ class ModelSelectionSplit(Module):
 
         args += " es=FALSE"
 
+        if self.hasInputFromPort("Seed"):
+            seed = str(self.getInputFromPort("Seed"))
+        else:
+            seed = random.randint(0, sys.maxint)
+        writetolog("    seed used for Split = " + str(seed))
+        args += " seed=" + str(seed)
+
         utils.runRScript("TestTrainSplit.r", args, self)
         
         output = os.path.join(outputMDS)
@@ -1361,7 +1393,8 @@ class ModelSelectionCrossValidation(Module):
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('nFolds', '(edu.utah.sci.vistrails.basic:Integer)', 
                         {'defaults':str('10')}),
-                    ('Stratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':True}),]
+                    ('Stratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':True}),
+                    ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
     
     def compute(self):
@@ -1383,6 +1416,15 @@ class ModelSelectionCrossValidation(Module):
         args += " nf=" + str(argsDict["nf"])
 
         args += " stra=" + argsDict["stra"]
+        
+        args += " es=TRUE"
+
+        if self.hasInputFromPort("Seed"):
+            seed = str(self.getInputFromPort("Seed"))
+        else:
+            seed = random.randint(0, sys.maxint)
+        writetolog("    seed used for Split = " + str(seed))
+        args += " seed=" + str(seed)
 
         utils.runRScript("CrossValidationSplit.r", args, self)
         
