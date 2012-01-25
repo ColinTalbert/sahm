@@ -1,4 +1,4 @@
- TestTrainSplit<-function(input.file,output.file,response.col="ResponseBinary",trainProp=.7,RatioPresAbs=NULL,Eval.Split=FALSE){
+ TestTrainSplit<-function(input.file,output.file,response.col="ResponseBinary",trainProp=.7,RatioPresAbs=NULL,Eval.Split=FALSE,seed){
 
 #Description:
 #this code takes as input an mds file with the first line being the predictor or
@@ -25,7 +25,8 @@
 #Modified 11/22/2011 to add the Eval.Split option so that the test/training split can be used
           #either for model selection or evaluation if set to true then this split will be ignored until
           #after a final model has been selected
-
+if(is.null(seed)) seed<-round(runif(1,min=-((2^32)/2-1),max=((2^32)/2-1)))
+set.seed(as.numeric(seed))
 
      if(trainProp<=0 | trainProp>1) stop("Train Proportion (trainProp) must be a number between 0 and 1 excluding 0")
     if(!is.null(RatioPresAbs)) {
@@ -180,6 +181,7 @@
     trainProp=.7
     RatioPresAbs=NULL
     Eval.Split=FALSE
+    seed=NULL
     #replace the defaults with passed values
     for (arg in Args) {
     	argSplit <- strsplit(arg, "=")
@@ -191,6 +193,7 @@
     	if(argSplit[[1]][1]=="i") infil <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="es") Eval.Split <- argSplit[[1]][2]
+   		if(argSplit[[1]][1]=="seed")  seed <- argSplit[[1]][2]
     }
 
     RatioResAbs<-as.numeric(RatioPresAbs)

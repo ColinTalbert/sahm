@@ -20,7 +20,7 @@ input.file<-"C:\\temp\\SAHM_workspace\\mtalbert_20111121T094519\\MergedDataset_1
 
 output.file<-"C:\\temp\\maxent.debug2.csv"
 ## Running the code
-TestTrainSplit(input.file,output.file,response.col=response.col,trainProp=.7)  #tried also with .8, and no RatioPresAb
+TestTrainSplit(input.file,output.file,response.col=response.col,trainProp=.7,seed=NULL)  #tried also with .8, and no RatioPresAb
 
 ## Running some tests on the output
 input.file<-output.file
@@ -58,7 +58,7 @@ sum(ta[2,2:dim(ta)[2]])/ta[2,1]
 #### testing looking at an mds with counts case 1. appears to be working###########
 input.file<-"H:\\Desktop\\SAHM\\Data\\ChangeFamilyData\\MergedDataSet_1.csv"
 output.file<-"H:\\Desktop\\SAHM\\Output\\TestTrainSplit\\testtrain.mds"
-TestTrainSplit(input.file,output.file,response.col="ResponseCount",trainProp=.7,RatioPresAbs=.9)
+TestTrainSplit(input.file,output.file,response.col="ResponseCount",trainProp=.7,RatioPresAbs=.9,seed=NULL)
 
 input.file<-output.file
 dat<-read.csv(input.file,skip=3,header=FALSE)
@@ -97,7 +97,7 @@ sum(ta[2,2:dim(ta)[2]])/ta[2,1]
 #### testing looking at an mds with counts case 2. Looks like this is working too###########
 input.file<-"H:\\Desktop\\SAHM\\Data\\ChangeFamilyData\\MergedDataSet_1.csv"
 output.file<-"H:\\Desktop\\SAHM\\Output\\TestTrainSplit\\testtrain.mds"
-TestTrainSplit(input.file,output.file,response.col="ResponseCount",trainProp=.7,RatioPresAbs=.4)
+TestTrainSplit(input.file,output.file,response.col="ResponseCount",trainProp=.7,RatioPresAbs=.4,seed=NULL)
 
 input.file<-output.file
 dat<-read.csv(input.file,skip=3,header=FALSE)
@@ -137,7 +137,7 @@ sum(ta[2,2:dim(ta)[2]])/ta[2,1]
 #### testing looking at an mds with counts case 3. Without a RatioPresAbs###########
 input.file<-"H:\\Desktop\\SAHM\\Data\\ChangeFamilyData\\MergedDataSet_1.csv"
 output.file<-"H:\\Desktop\\SAHM\\Output\\TestTrainSplit\\testtrain.mds"
-TestTrainSplit(input.file,output.file,response.col="ResponseCount",trainProp=.7)
+TestTrainSplit(input.file,output.file,response.col="ResponseCount",trainProp=.7,seed=NULL)
 
 input.file<-output.file
 dat<-read.csv(input.file,skip=3,header=FALSE)
