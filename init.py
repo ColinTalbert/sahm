@@ -73,48 +73,48 @@ def menu_items():
     return(lst)
 
 
-
-def expand_ports(port_list):
-    new_port_list = []
-    for port in port_list:
-        port_spec = port[1]
-        if type(port_spec) == str: # or unicode...
-            if port_spec.startswith('('):
-                port_spec = port_spec[1:]
-            if port_spec.endswith(')'):
-                port_spec = port_spec[:-1]
-            new_spec_list = []
-            for spec in port_spec.split(','):
-                spec = spec.strip()
-                parts = spec.split(':', 1)
-#                print 'parts:', parts
-                namespace = None
-                if len(parts) > 1:
-                    mod_parts = parts[1].rsplit('|', 1)
-                    if len(mod_parts) > 1:
-                        namespace, module_name = mod_parts
-                    else:
-                        module_name = parts[1]
-                    if len(parts[0].split('.')) == 1:
-                        id_str = 'edu.utah.sci.vistrails.' + parts[0]
-                    else:
-                        id_str = parts[0]
-                else:
-                    mod_parts = spec.rsplit('|', 1)
-                    if len(mod_parts) > 1:
-                        namespace, module_name = mod_parts
-                    else:
-                        module_name = spec
-                    id_str = identifier
-                if namespace:
-                    new_spec_list.append(id_str + ':' + module_name + ':' + \
-                                             namespace)
-                else:
-                    new_spec_list.append(id_str + ':' + module_name)
-            port_spec = '(' + ','.join(new_spec_list) + ')'
-        new_port_list.append((port[0], port_spec) + port[2:])
-#    print new_port_list
-    return new_port_list
+#
+#def expand_ports(port_list):
+#    new_port_list = []
+#    for port in port_list:
+#        port_spec = port[1]
+#        if type(port_spec) == str: # or unicode...
+#            if port_spec.startswith('('):
+#                port_spec = port_spec[1:]
+#            if port_spec.endswith(')'):
+#                port_spec = port_spec[:-1]
+#            new_spec_list = []
+#            for spec in port_spec.split(','):
+#                spec = spec.strip()
+#                parts = spec.split(':', 1)
+##                print 'parts:', parts
+#                namespace = None
+#                if len(parts) > 1:
+#                    mod_parts = parts[1].rsplit('|', 1)
+#                    if len(mod_parts) > 1:
+#                        namespace, module_name = mod_parts
+#                    else:
+#                        module_name = parts[1]
+#                    if len(parts[0].split('.')) == 1:
+#                        id_str = 'edu.utah.sci.vistrails.' + parts[0]
+#                    else:
+#                        id_str = parts[0]
+#                else:
+#                    mod_parts = spec.rsplit('|', 1)
+#                    if len(mod_parts) > 1:
+#                        namespace, module_name = mod_parts
+#                    else:
+#                        module_name = spec
+#                    id_str = identifier
+#                if namespace:
+#                    new_spec_list.append(id_str + ':' + module_name + ':' + \
+#                                             namespace)
+#                else:
+#                    new_spec_list.append(id_str + ':' + module_name)
+#            port_spec = '(' + ','.join(new_spec_list) + ')'
+#        new_port_list.append((port[0], port_spec) + port[2:])
+##    print new_port_list
+#    return new_port_list
 
 class FieldData(Path): 
     '''
@@ -238,9 +238,9 @@ class PredictorList(Constant):
     SAHM package. It is not intended for direct use or incorporation into
     the VisTrails workflow by the user.
     '''
-    _input_ports = expand_ports([('value', 'Other|PredictorList'),
-                                 ('addPredictor', 'DataInput|Predictor')])
-    _output_ports = expand_ports([('value', 'Other|PredictorList')])
+    _input_ports = [('value', '(gov.usgs.sahm:PredictorList:Other)'),
+                                 ('addPredictor', '(gov.usgs.sahm:Predictor:DataInput)')]
+    _output_ports = [('value', '(gov.usgs.sahm:PredictorList:Other)')]
     
     @staticmethod
     def translate_to_string(v):
@@ -303,9 +303,9 @@ class PredictorListFile(Module):
     and will ignore the first row in the .csv file.
 
     '''
-    _input_ports = expand_ports([('csvFileList', '(edu.utah.sci.vistrails.basic:File)'),
-                                 ('addPredictor', 'DataInput|Predictor')])
-    _output_ports = expand_ports([('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')])
+    _input_ports = [('csvFileList', '(edu.utah.sci.vistrails.basic:File)'),
+                                 ('predictor', "(gov.usgs.sahm:Predictor:DataInput)")]
+    _output_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
 
     #copies the input predictor list csv to our working directory
     #and appends any additionally added predictors
@@ -405,8 +405,8 @@ class MergedDataSet(File):
     SAHM package. It is not intended for direct use or incorporation into
     the VisTrails workflow by the user.
     '''
-    _input_ports = expand_ports([('mdsFile', '(edu.utah.sci.vistrails.basic:File)')])
-    _output_ports = expand_ports([('value', '(gov.usgs.sahm:MergedDataSet:Other)')])
+    _input_ports = [('mdsFile', '(edu.utah.sci.vistrails.basic:File)'),]
+    _output_ports = [('value', '(gov.usgs.sahm:MergedDataSet:Other)'),]
     
     pass
     
@@ -416,8 +416,8 @@ class RastersWithPARCInfoCSV(File):
     SAHM package. It is not intended for direct use or incorporation into
     the VisTrails workflow by the user.
     '''
-    _input_ports = expand_ports([('mdsFile', '(edu.utah.sci.vistrails.basic:File)')])
-    _output_ports = expand_ports([('value', '(gov.usgs.sahm:MergedDataSet:Other)')])
+    _input_ports = [('mdsFile', '(edu.utah.sci.vistrails.basic:File)'),]
+    _output_ports = [('value', '(gov.usgs.sahm:MergedDataSet:Other)'),]
     
     pass
 #    def compute(self, is_input=None):
@@ -638,7 +638,7 @@ class GLM(Model):
 
 class RandomForest(Model):
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', True),
+    _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                          ('mTry', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['1']), 'optional':True}),
                          ('nTrees', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                          ('nodesize', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
@@ -779,13 +779,14 @@ class MDSBuilder(Module):
 
     '''
 
-    _input_ports = expand_ports([('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
+    _input_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
                                  ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
-                                 ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)')]
-                                 )
+                                 ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)'),
+                                 ('Seed', '(edu.utah.sci.vistrails.basic:Integer)')]
+                            
     
-    _output_ports = expand_ports([('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)')])
+    _output_ports = [('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)')]
 
     def compute(self):
         port_map = {'fieldData': ('fieldData', None, True),
@@ -849,14 +850,14 @@ class FieldDataQuery(Module):
             x == 2000 or x == 2009 (would return 2000 or 2009)
             The syntax is python in case you want to create an involved query.
     '''    
-    _input_ports = expand_ports([('fieldData_file', '(gov.usgs.sahm:FieldData:DataInput)'),
-                                 ('x_column', 'basic:String', {'defaults':str('1')}),
-                                 ('y_column', 'basic:String', {'defaults':str('2')}),
-                                 ('Response_column', 'basic:String', {'defaults':str('3')}),
+    _input_ports = [('fieldData_file', '(gov.usgs.sahm:FieldData:DataInput)'),
+                                 ('x_column', '(edu.utah.sci.vistrails.basic:String)', {'defaults':str('1')}),
+                                 ('y_column', '(edu.utah.sci.vistrails.basic:String)', {'defaults':str('2')}),
+                                 ('Response_column', '(edu.utah.sci.vistrails.basic:String)', {'defaults':str('3')}),
                                  ('ResponseType', '(gov.usgs.sahm:ResponseType:Other)', {'defaults':str(['Presence(Absence)'])}),
-                                  ('Query_column', 'basic:String'),
-                                  ('Query', 'basic:String')])
-    _output_ports = expand_ports([('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')])
+                                  ('Query_column', '(edu.utah.sci.vistrails.basic:String)'),
+                                  ('Query', '(edu.utah.sci.vistrails.basic:String)')]
+    _output_ports = [('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),]
     
     @classmethod
     def provide_input_port_documentation(cls, port_name):
@@ -950,12 +951,12 @@ class FieldDataAggregateAndWeight(Module):
     '''
     Documentation to be updated when module finalized.
     '''
-    _input_ports = expand_ports([('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
+    _input_ports = [('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
                                  ('PointAggregationOrWeightMethod', '(gov.usgs.sahm:PointAggregationMethod:Other)', {'defaults':str(['Collapse In Pixel'])}),
                                  ('SDofGaussianKernel', '(edu.utah.sci.vistrails.basic:Float)')
-                                 ])
-    _output_ports = expand_ports([('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')])
+                                 ]
+    _output_ports = [('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')]
     
     @classmethod
     def provide_input_port_documentation(cls, port_name):
