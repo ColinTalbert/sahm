@@ -565,20 +565,13 @@ class Model(Module):
 
         mdsFile = self.forceGetInputFromPort('mdsFile').name
         
+        args = ''
         if self.ModelAbbrev == 'brt' or \
             self.ModelAbbrev == 'rf':
             if not "seed" in self.argsDict.keys():
-                self.argsDict['seed'] = random.randint(0, sys.maxint)
-            self.writetolog("    seed used for " + self.ModelAbbrev + " = " + str(seed))
-        
-        args = ''
-        
-        if self.hasInputFromPort("Seed"):
-            seed = str(self.getInputFromPort("Seed"))
-        else:
-            seed = random.randint(0, sys.maxint)
-        self.writetolog("    seed used for Split = " + str(seed))
-        args += " seed=" + str(seed)
+                self.argsDict['seed'] = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
+            writetolog("    seed used for " + self.ModelAbbrev + " = " + str(seed))
+            args += " seed=" + str(seed)
         
         for k, v in self.argsDict.iteritems():
             if k == 'c':
@@ -620,8 +613,7 @@ class Model(Module):
         
 class GLM(Model):
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('ModelFamily', '(edu.utah.sci.vistrails.basic:String)', {'defaults':str(['binomial']), 'optional':True}),
-                         ('SimplificationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':str(['AIC']), 'optional':True}),
+    _input_ports.extend([('SimplificationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':str(['AIC']), 'optional':True}),
                          ]) 
     def __init__(self):
         global models_path
@@ -632,7 +624,6 @@ class GLM(Model):
                          'makeBinMap':('mbt', utils.R_boolean, False),
                          'makeMESMap':('mes', utils.R_boolean, False),
                          'ThresholdOptimizationMethod':('om', None, False),
-                         'ModelFamily':('mf', None, False), #This is a GLM specific port
                          'SimplificationMethod':('sm', None, False) #This is a GLM specific port
                          }
 
@@ -647,7 +638,7 @@ class RandomForest(Model):
                          ('importance', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
                          ('localImp', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
                          ('proximity', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
-                         ('oobPorx', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
+                         ('oobProx', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
                          ('normVotes', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
                          ('doTrace', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
                          ('keepForest', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
@@ -1311,7 +1302,7 @@ class ModelEvaluationSplit(Module):
         if self.hasInputFromPort("Seed"):
             seed = str(self.getInputFromPort("Seed"))
         else:
-            seed = random.randint(0, sys.maxint)
+            seed = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
         writetolog("    seed used for Split = " + str(seed))
         args += " seed=" + str(seed)
 
@@ -1370,7 +1361,7 @@ class ModelSelectionSplit(Module):
         if self.hasInputFromPort("Seed"):
             seed = str(self.getInputFromPort("Seed"))
         else:
-            seed = random.randint(0, sys.maxint)
+            seed = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
         writetolog("    seed used for Split = " + str(seed))
         args += " seed=" + str(seed)
 
@@ -1423,7 +1414,7 @@ class ModelSelectionCrossValidation(Module):
         if self.hasInputFromPort("Seed"):
             seed = str(self.getInputFromPort("Seed"))
         else:
-            seed = random.randint(0, sys.maxint)
+            seed = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
         writetolog("    seed used for Split = " + str(seed))
         args += " seed=" + str(seed)
 
