@@ -1,5 +1,5 @@
-setwd("I:\\VisTrails\\Central_VisTrailsInstall\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
-ScriptPath="I:\\VisTrails\\Central_VisTrailsInstall\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
+setwd("I:\\VisTrails\\Central_VisTrails_x32_debug\\VisTrails\\vistrails\\packages\\sahm_test\\pySAHM\\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\Central_VisTrails_x32_debug\\VisTrails\\vistrails\\packages\\sahm_test\\pySAHM\\Resources\\R_Modules"
 
 #The idea here is to run this code then change above directories then rerun with the new code and compare (using append output and possible comparing maps)
 source("FIT_BRT_pluggable.r")
