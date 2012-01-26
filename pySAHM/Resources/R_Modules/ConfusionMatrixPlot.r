@@ -1,5 +1,5 @@
 barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, bar.space=3,
-    col.lab=NULL, row.lab=NULL, z.lab=NULL, col.bar=c("#44ff58","#5844ff","#ff5844"), grid="white", ...) {
+    col.lab=NULL, row.lab=NULL, z.lab=NULL, col.bar=c("#44ff58","#5844ff","#ff5844"), grid="white",Stats,split.type, ...) {
  #I rescued this gem from the R graphics gallery.  I'm not sure who originally wrote it but I have altered it
  #so that it is fit to join my minion army 1/3/2012 Marian K. Talbert
 
@@ -70,6 +70,7 @@ barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, 
          }
 
     # Prepare area for plotting
+    par(mar=c(6,8,8,2))
     rys = persp(x, y, matrix(nrow=length(x), ncol=length(y)), col=fill, scale=F, theta=theta,
         phi=phi, zlim = range(zakres), lphi=44, ltheta=-10, axes=F, ...,main=z.lab,xlab="Predicted",ylab="Observed")
     # Add grid lines & numbers
@@ -79,6 +80,7 @@ barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, 
         lines(rbind(trans3d(0,max(y),i1,rys), trans3d(max(x), max(y),i1,rys)), lwd=1, col=grid,lty=3)
         text(trans3d(-(calkdl*cols)*0.04,0,i1,rys), labels=i1, adj=1, cex=0.9)
         }
+
     # Add ticks & text
     if(length(heights)>4){
             lines(rbind(trans3d(mean(x[8],x[9]),0,0,rys), trans3d(mean(x[8],x[9]),-(calkdl*rows)*0.06,
@@ -91,7 +93,6 @@ barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, 
                 "Train Pres.\n\nTest Pres.", adj=.8, cex=1.1,srt=(phi+15))
               text(trans3d(mean(x[11:13]),-(calkdl*rows)*.3,0,rys),
                 "Predicted", adj=.8, cex=1.6,srt=(phi+10))
-
             } else{
           for (i1 in (1:cols)-1) {
             lines(rbind(trans3d((odstep+calkdl*i1),0,0,rys), trans3d((odstep+calkdl*i1),
@@ -99,9 +100,10 @@ barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, 
             if (!is.null(col.lab)) text(trans3d((odstep+calkdl*i1),-(calkdl*rows)*0.1,0,rys),
                 col.lab[i1+1], adj=1, cex=0.9)
             }
-             text(trans3d(mean(x[11:13]),-(calkdl*rows)*.3,0,rys),
+             text(trans3d(mean(x[6:7]),-(calkdl*rows)*.3,0,rys),
                 "Predicted", adj=.8, cex=1.6,srt=(phi+10))
      }
+
     for (i1 in (1:rows)-1) {
         lines(rbind(trans3d(max(x),(odstep+calkdl*i1),0,rys), trans3d(max(x)+(calkdl*cols)*0.03,
             (odstep+calkdl*i1),0,rys)))
@@ -109,14 +111,44 @@ barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, 
             row.lab[i1+1], adj=0, cex=0.9)
         }
 
-     text(trans3d(max(x)*1.22,y[6],0,rys),
+     text(trans3d(max(x)*1.2,y[6],0,rys),
                 "Observed", adj=.7, cex=1.6,srt=(phi+25))
                 
     # Plot the bars!
     par(new=T)
     persp(x, y, z, col=fill, scale=F, theta=theta, phi=phi, zlim = range(zakres),
         lphi=44, ltheta=-10, shade=0.4, axes=F, ...)
+        browser()
+       if(split.type=="test") results=Stats$test
+       if(split.type=="none") results=Stats$train
+       if(split.type=="crossValidation") results<-list(Pcc=mean(unlist(lapply(Stats,function(lst){lst$Pcc}))),Sens=mean(unlist(lapply(Stats,function(lst){lst$Sens}))),
+                                         Specf=mean(unlist(lapply(Stats,function(lst){lst$Specf}))),Kappa=mean(unlist(lapply(Stats,function(lst){lst$Kappa}))))
 
+        sub.lab<-""
+      if(split.type!="none") sub.lab<-paste("Evaluation metrics for the ",switch(split.type,test="test split\n",crossValidation="cross validation split\n"),sep="")
+      mtext(paste(sub.lab,"Percent Correctly Classified: ",signif(results$Pcc,digits=3),"                 Sensitivity: ",signif(results$Sens,digits=3),"\n                       Specificity:   ",signif(results$Specf,digits=3),"         Cohen's Kappa: ",signif(results$Kappa,digits=3),sep=""))
+             if(split.type=="none")  {x.means<-c(mean(c(x[4],x[3])),mean(c(x[8],x[9])))
+                                     rep.times=2
+            }else{ x.means<-colMeans(rbind(x[seq(from=3,to=18,by=5)],x[seq(from=4,to=19,by=5)]))
+                      rep.times=4}
+    y.means<-c(mean(c(y[4],y[3])),mean(c(y[8],y[9])))
+     text(trans3d(x.means+1,rep(y.means,each=rep.times)-1.5,heights+2,rys),paste(signif(heights,digits=2),"%",sep=""),cex=2.2,srt=phi+10,col="yellow")
+
+      # fill2<-col2rgb(fill,alpha=TRUE)
+       #fill2[4,]<-pmin(20,fill2[4,])
+       #temp.fct<-function(a){return(rgb(red=a[1],green=a[2],blue=a[3],alpha=a[4]))}
+       #fill2<-matrix(data=apply(fill2/255,2,temp.fct),nrow=nrow(fill),ncol=ncol(fill))
+       #  fill2<-col2rgb(fill,alpha=TRUE)
+       #fill2[4,]<-0
+       #indx.for.shade<-rbind(cbind(17:20,6:7),cbind(7:10,6:7),c(17,8),c(7,8),cbind(7:10,1:2),cbind(17:20,2),c(17,3),c(7,3))
+       #indx.for.shade[,2]<-(indx.for.shade[,2]-1)*20
+       #fill2[4,apply(indx.for.shade,1,sum)]<-80
+       #temp.fct<-function(a){return(rgb(red=a[1],green=a[2],blue=a[3],alpha=a[4]))}
+       #fill2<-matrix(data=apply(fill2/255,2,temp.fct),nrow=nrow(fill),ncol=ncol(fill))
+       
+       #par(new=T)
+       #persp(x, y, z, col=fill2, scale=F, theta=theta, phi=phi, zlim = range(zakres),
+       # lphi=44, ltheta=-10, shade=0.4, axes=F,border = NA, ...)
     invisible(rys)
 }
 
