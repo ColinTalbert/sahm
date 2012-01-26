@@ -201,4 +201,4 @@ set.seed(as.numeric(seed))
     Eval.Split=as.logical(Eval.Split)
 	#Run the Test training split with these parameters
 	TestTrainSplit(input.file=infil,output.file=output.file,response.col=responseCol,
-  trainProp=trainProp,RatioPresAbs=RatioPresAbs,Eval.Split=Eval.Split)
+  trainProp=trainProp,RatioPresAbs=RatioPresAbs,Eval.Split=Eval.Split,seed=seed)
