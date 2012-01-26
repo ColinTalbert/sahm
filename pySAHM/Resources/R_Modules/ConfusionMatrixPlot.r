@@ -118,11 +118,12 @@ barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, 
     par(new=T)
     persp(x, y, z, col=fill, scale=F, theta=theta, phi=phi, zlim = range(zakres),
         lphi=44, ltheta=-10, shade=0.4, axes=F, ...)
-        browser()
-       if(split.type=="test") results=Stats$test
+
+       if(split.type=="test") results=Stats$Test
        if(split.type=="none") results=Stats$train
        if(split.type=="crossValidation") results<-list(Pcc=mean(unlist(lapply(Stats,function(lst){lst$Pcc}))),Sens=mean(unlist(lapply(Stats,function(lst){lst$Sens}))),
                                          Specf=mean(unlist(lapply(Stats,function(lst){lst$Specf}))),Kappa=mean(unlist(lapply(Stats,function(lst){lst$Kappa}))))
+
 
         sub.lab<-""
       if(split.type!="none") sub.lab<-paste("Evaluation metrics for the ",switch(split.type,test="test split\n",crossValidation="cross validation split\n"),sep="")

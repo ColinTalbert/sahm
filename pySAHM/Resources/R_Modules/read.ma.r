@@ -69,7 +69,7 @@
        # remove weight column except for Random Forest
        site.weights<-c(match("weights",tolower(names(ma))),c(match("site.weights",tolower(names(ma)))))
         if(any(!is.na(site.weights))) {rm.list<-c(rm.list,na.omit(site.weights))
-            if(out$input$script.name=="rf") ma[,site.weights]<-rep(1,times=dim(ma)[1])
+            if(out$input$script.name=="rf") ma[,na.omit(site.weights)]<-rep(1,times=dim(ma)[1])
             site.weights=na.omit(site.weights)
         }
         else{ ma$weights=rep(1,times=dim(ma)[1])
