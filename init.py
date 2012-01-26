@@ -9,6 +9,7 @@ import shutil
 import sys
 import subprocess
 import traceback
+import random
 
 from core.modules.vistrails_module import Module, ModuleError, ModuleConnector
 from core.modules.basic_modules import File, Directory, Path, new_constant, Constant
@@ -72,48 +73,48 @@ def menu_items():
     return(lst)
 
 
-
-def expand_ports(port_list):
-    new_port_list = []
-    for port in port_list:
-        port_spec = port[1]
-        if type(port_spec) == str: # or unicode...
-            if port_spec.startswith('('):
-                port_spec = port_spec[1:]
-            if port_spec.endswith(')'):
-                port_spec = port_spec[:-1]
-            new_spec_list = []
-            for spec in port_spec.split(','):
-                spec = spec.strip()
-                parts = spec.split(':', 1)
-#                print 'parts:', parts
-                namespace = None
-                if len(parts) > 1:
-                    mod_parts = parts[1].rsplit('|', 1)
-                    if len(mod_parts) > 1:
-                        namespace, module_name = mod_parts
-                    else:
-                        module_name = parts[1]
-                    if len(parts[0].split('.')) == 1:
-                        id_str = 'edu.utah.sci.vistrails.' + parts[0]
-                    else:
-                        id_str = parts[0]
-                else:
-                    mod_parts = spec.rsplit('|', 1)
-                    if len(mod_parts) > 1:
-                        namespace, module_name = mod_parts
-                    else:
-                        module_name = spec
-                    id_str = identifier
-                if namespace:
-                    new_spec_list.append(id_str + ':' + module_name + ':' + \
-                                             namespace)
-                else:
-                    new_spec_list.append(id_str + ':' + module_name)
-            port_spec = '(' + ','.join(new_spec_list) + ')'
-        new_port_list.append((port[0], port_spec) + port[2:])
-#    print new_port_list
-    return new_port_list
+#
+#def expand_ports(port_list):
+#    new_port_list = []
+#    for port in port_list:
+#        port_spec = port[1]
+#        if type(port_spec) == str: # or unicode...
+#            if port_spec.startswith('('):
+#                port_spec = port_spec[1:]
+#            if port_spec.endswith(')'):
+#                port_spec = port_spec[:-1]
+#            new_spec_list = []
+#            for spec in port_spec.split(','):
+#                spec = spec.strip()
+#                parts = spec.split(':', 1)
+##                print 'parts:', parts
+#                namespace = None
+#                if len(parts) > 1:
+#                    mod_parts = parts[1].rsplit('|', 1)
+#                    if len(mod_parts) > 1:
+#                        namespace, module_name = mod_parts
+#                    else:
+#                        module_name = parts[1]
+#                    if len(parts[0].split('.')) == 1:
+#                        id_str = 'edu.utah.sci.vistrails.' + parts[0]
+#                    else:
+#                        id_str = parts[0]
+#                else:
+#                    mod_parts = spec.rsplit('|', 1)
+#                    if len(mod_parts) > 1:
+#                        namespace, module_name = mod_parts
+#                    else:
+#                        module_name = spec
+#                    id_str = identifier
+#                if namespace:
+#                    new_spec_list.append(id_str + ':' + module_name + ':' + \
+#                                             namespace)
+#                else:
+#                    new_spec_list.append(id_str + ':' + module_name)
+#            port_spec = '(' + ','.join(new_spec_list) + ')'
+#        new_port_list.append((port[0], port_spec) + port[2:])
+##    print new_port_list
+#    return new_port_list
 
 class FieldData(Path): 
     '''
@@ -146,13 +147,10 @@ class FieldData(Path):
     
     @classmethod
     def provide_input_port_documentation(cls, port_name):
-        global port_docs
-        return utils.construct_port_def(port_docs[cls.__name__ + port_name])
-    
+        return utils.construct_port_msg(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-        global port_docs
-        return utils.construct_port_def(port_docs[cls.__name__ + port_name]) 
+         return utils.construct_port_msg(cls, port_name, 'out') 
     
 class Predictor(Constant):
     '''
@@ -191,21 +189,18 @@ class Predictor(Constant):
         
     '''
     _input_ports = [('categorical', '(edu.utah.sci.vistrails.basic:Boolean)'),
-                    ('ResampleMethod', '(gov.usgs.sahm:ResampleMethod:Other)', {'defaults':str(['Bilinear'])}),
-                    ('AggregationMethod', '(gov.usgs.sahm:AggregationMethod:Other)', {'defaults':str(['Mean'])}),
+                    ('ResampleMethod', '(gov.usgs.sahm:ResampleMethod:Other)', {'defaults':'Bilinear'}),
+                    ('AggregationMethod', '(gov.usgs.sahm:AggregationMethod:Other)', {'defaults':'Mean'}),
                     ('file', '(edu.utah.sci.vistrails.basic:Path)')]
     _output_ports = [('value', '(gov.usgs.sahm:Predictor:DataInput)'),
                      ('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
 
     @classmethod
     def provide_input_port_documentation(cls, port_name):
-        global port_docs
-        return utils.construct_port_def(port_docs[cls.__name__ + port_name])
-    
+        return utils.construct_port_msg(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-        global port_docs
-        return utils.construct_port_def(port_docs[cls.__name__ + port_name]) 
+         return utils.construct_port_msg(cls, port_name, 'out') 
 
     def compute(self):
         if (self.hasInputFromPort("ResampleMethod")):
@@ -243,9 +238,9 @@ class PredictorList(Constant):
     SAHM package. It is not intended for direct use or incorporation into
     the VisTrails workflow by the user.
     '''
-    _input_ports = expand_ports([('value', 'Other|PredictorList'),
-                                 ('addPredictor', 'DataInput|Predictor')])
-    _output_ports = expand_ports([('value', 'Other|PredictorList')])
+    _input_ports = [('value', '(gov.usgs.sahm:PredictorList:Other)'),
+                                 ('addPredictor', '(gov.usgs.sahm:Predictor:DataInput)')]
+    _output_ports = [('value', '(gov.usgs.sahm:PredictorList:Other)')]
     
     @staticmethod
     def translate_to_string(v):
@@ -308,12 +303,19 @@ class PredictorListFile(Module):
     and will ignore the first row in the .csv file.
 
     '''
-    _input_ports = expand_ports([('csvFileList', '(edu.utah.sci.vistrails.basic:File)'),
-                                 ('addPredictor', 'DataInput|Predictor')])
-    _output_ports = expand_ports([('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')])
+    _input_ports = [('csvFileList', '(edu.utah.sci.vistrails.basic:File)'),
+                                 ('predictor', "(gov.usgs.sahm:Predictor:DataInput)")]
+    _output_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
 
     #copies the input predictor list csv to our working directory
     #and appends any additionally added predictors
+
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return utils.construct_port_msg(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+         return utils.construct_port_msg(cls, port_name, 'out') 
 
     @staticmethod
     def translate_to_string(v):
@@ -379,6 +381,14 @@ class TemplateLayer(Path):
 #    _input_ports = [('FilePath', '(edu.utah.sci.vistrails.basic:File)')]
     _output_ports = [('value', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                      ('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
+    
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return utils.construct_port_msg(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+         return utils.construct_port_msg(cls, port_name, 'out') 
+    
 #    def compute(self):
 #        output_file = create_file_module(self.forceGetInputFromPort('FilePath', []))
 #        self.setResult('value', output_file)
@@ -395,8 +405,8 @@ class MergedDataSet(File):
     SAHM package. It is not intended for direct use or incorporation into
     the VisTrails workflow by the user.
     '''
-    _input_ports = expand_ports([('mdsFile', '(edu.utah.sci.vistrails.basic:File)')])
-    _output_ports = expand_ports([('value', '(gov.usgs.sahm:MergedDataSet:Other)')])
+    _input_ports = [('mdsFile', '(edu.utah.sci.vistrails.basic:File)'),]
+    _output_ports = [('value', '(gov.usgs.sahm:MergedDataSet:Other)'),]
     
     pass
     
@@ -406,8 +416,8 @@ class RastersWithPARCInfoCSV(File):
     SAHM package. It is not intended for direct use or incorporation into
     the VisTrails workflow by the user.
     '''
-    _input_ports = expand_ports([('mdsFile', '(edu.utah.sci.vistrails.basic:File)')])
-    _output_ports = expand_ports([('value', '(gov.usgs.sahm:MergedDataSet:Other)')])
+    _input_ports = [('mdsFile', '(edu.utah.sci.vistrails.basic:File)'),]
+    _output_ports = [('value', '(gov.usgs.sahm:MergedDataSet:Other)'),]
     
     pass
 #    def compute(self, is_input=None):
@@ -520,10 +530,10 @@ class Model(Module):
     the VisTrails workflow by the user.
     '''
     _input_ports = [('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)'),
-                    ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':False}),
-                    ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':False}),
-                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['False']), 'optional':False}),
-                    ('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['2']), 'optional':False})
+                    ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':False}),
+                    ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':False}),
+                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False}),
+                    ('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'2', 'optional':False})
                     ]
     _output_ports = [('modelWorkspace', '(edu.utah.sci.vistrails.basic:File)'), 
                      ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
@@ -534,6 +544,13 @@ class Model(Module):
                      ('modelEvalPlot', '(edu.utah.sci.vistrails.basic:File)'),
                      ('ResponseCurves', '(edu.utah.sci.vistrails.basic:File)'),
                      ('Text_Output', '(edu.utah.sci.vistrails.basic:File)')]
+
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return utils.construct_port_msg(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+         return utils.construct_port_msg(cls, port_name, 'out') 
 
     def compute(self):
         
@@ -549,6 +566,13 @@ class Model(Module):
         mdsFile = self.forceGetInputFromPort('mdsFile').name
         
         args = ''
+        if self.ModelAbbrev == 'brt' or \
+            self.ModelAbbrev == 'rf':
+            if not "seed" in self.argsDict.keys():
+                self.argsDict['seed'] = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
+            writetolog("    seed used for " + self.ModelAbbrev + " = " + str(self.argsDict['seed']))
+            args += " seed=" + str(str(self.argsDict['seed']))
+        
         for k, v in self.argsDict.iteritems():
             if k == 'c':
                 args += ' ' + '='.join([str(k),'"' + str(v) + '"'])
@@ -589,8 +613,7 @@ class Model(Module):
         
 class GLM(Model):
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('ModelFamily', '(edu.utah.sci.vistrails.basic:String)', {'defaults':str(['binomial']), 'optional':True}),
-                         ('SimplificationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':str(['AIC']), 'optional':True}),
+    _input_ports.extend([('SimplificationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'AIC', 'optional':True}),
                          ]) 
     def __init__(self):
         global models_path
@@ -601,13 +624,24 @@ class GLM(Model):
                          'makeBinMap':('mbt', utils.R_boolean, False),
                          'makeMESMap':('mes', utils.R_boolean, False),
                          'ThresholdOptimizationMethod':('om', None, False),
-                         'ModelFamily':('mf', None, False), #This is a GLM specific port
                          'SimplificationMethod':('sm', None, False) #This is a GLM specific port
                          }
 
 class RandomForest(Model):
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('MTRY', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['1']), 'optional':True}),
+    _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
+                         ('mTry', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'1', 'optional':True}),
+                         ('nTrees', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
+                         ('nodesize', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
+                         ('replace', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
+                         ('maxnodes', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
+                         ('importance', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
+                         ('localImp', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
+                         ('proximity', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
+                         ('oobProx', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
+                         ('normVotes', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
+                         ('doTrace', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
+                         ('keepForest', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
                          ]) 
     def __init__(self):
         global models_path
@@ -618,13 +652,24 @@ class RandomForest(Model):
                          'makeBinMap':('mbt', utils.R_boolean, False),
                          'makeMESMap':('mes', utils.R_boolean, False), 
                          'ThresholdOptimizationMethod':('om', None, False),
-                         'MTRY': ('mtry', None, False) #This is a Random Forest specific port
+                         'Seed':('seed', None, False), #This is a BRT specific port
+                         'mTry': ('mtry', None, False), #This is a Random Forest specific port
+                         'nodesize': ('nodeS', None, False), #This is a Random Forest specific port
+                         'replace': ('sampR', utils.R_boolean, False), #This is a Random Forest specific port
+                         'maxnodes': ('maxN', None, False), #This is a Random Forest specific port
+                         'importance': ('impt', utils.R_boolean, False), #This is a Random Forest specific port
+                         'localImp': ('locImp', utils.R_boolean, False), #This is a Random Forest specific port
+                         'proximity': ('prox', utils.R_boolean, False), #This is a Random Forest specific port
+                         'oobPorx': ('oopp', utils.R_boolean, False), #This is a Random Forest specific port
+                         'normVotes': ('nVot', utils.R_boolean, False), #This is a Random Forest specific port
+                         'doTrace': ('Trce', utils.R_boolean, False), #This is a Random Forest specific port
+                         'keepForest': ('kf', utils.R_boolean, False), #This is a Random Forest specific port
                          }
 
 class MARS(Model):
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('MarsDegree', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['1']), 'optional':True}),
-                          ('MarsPenalty', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['2']), 'optional':True}),
+    _input_ports.extend([('MarsDegree', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'1', 'optional':True}),
+                          ('MarsPenalty', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'2', 'optional':True}),
                           ])
     def __init__(self):
         global models_path        
@@ -641,15 +686,16 @@ class MARS(Model):
 
 class BoostedRegressionTree(Model):
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', True),
-                              ('TreeComplexity', '(edu.utah.sci.vistrails.basic:Integer)', True),
-                              ('NumberOfTrees', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['10000']), 'optional':True}),
-                              ('BagFraction', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':str(['0.5']), 'optional':True}),
-                              ('NumberOfFolds', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['3']), 'optional':True}),
-                              ('Alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':str(['1']), 'optional':True}),
-                              ('PrevalenceStratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':True}),
-                              ('ToleranceMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':str(['auto']), 'optional':True}),
-                              ('Tolerance', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':str(['0.001']), 'optional':True})
+    _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
+                              ('TreeComplexity', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
+                              ('BagFraction', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'0.5', 'optional':True}),
+                              ('NumberOfFolds', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'3', 'optional':True}),
+                              ('Alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'1', 'optional':True}),
+                              ('PrevalenceStratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':True}),
+                              ('ToleranceMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'auto', 'optional':True}),
+                              ('Tolerance', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'0.001', 'optional':True}),
+                              ('LearningRate', '(edu.utah.sci.vistrails.basic:Float)', {'optional':True}),
+                              ('MaximumTrees', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ])
     def __init__(self):
         global models_path
@@ -662,13 +708,14 @@ class BoostedRegressionTree(Model):
                          'ThresholdOptimizationMethod':('om', None, False),
                          'Seed':('seed', None, False), #This is a BRT specific port
                          'TreeComplexity':('tc', None, False), #This is a BRT specific port
-                         'NumberOfTrees':('nf', None, False), #This is a BRT specific port
                          'BagFraction':('bf', None, False), #This is a BRT specific port
                          'NumberOfFolds':('nf', None, False), #This is a BRT specific port
                          'Alpha':('alp', None, False), #This is a BRT specific port
                          'PrevalenceStratify':('ps', None, False), #This is a BRT specific port
                          'ToleranceMethod':('tolm', None, False), #This is a BRT specific port
-                         'Tolerance':('tol', None, False) #This is a BRT specific port
+                         'Tolerance':('tol', None, False), #This is a BRT specific port
+                         'LearningRate':('lr', None, False), #This is a BRT specific port
+                         'MaximumTrees':('mt', None, False), #This is a BRT specific port
                          }
    
 class MDSBuilder(Module):
@@ -723,18 +770,20 @@ class MDSBuilder(Module):
 
     '''
 
-    _input_ports = expand_ports([('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
+    _input_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
                                  ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
-                                 ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)')]
-                                 )
+                                 ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)'),
+                                 ('Seed', '(edu.utah.sci.vistrails.basic:Integer)')]
+                            
     
-    _output_ports = expand_ports([('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)')])
+    _output_ports = [('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)')]
 
     def compute(self):
         port_map = {'fieldData': ('fieldData', None, True),
                     'backgroundPointCount': ('pointcount', None, False),
-                    'backgroundProbSurf': ('probsurf', None, False),}
+                    'backgroundProbSurf': ('probsurf', None, False),
+                    'Seed': ('seed', None, False)}
         
         MDSParams = utils.map_ports(self, port_map)            
         MDSParams['outputMDS'] = utils.mknextfile(prefix='MergedDataset_', suffix='.csv')
@@ -792,24 +841,21 @@ class FieldDataQuery(Module):
             x == 2000 or x == 2009 (would return 2000 or 2009)
             The syntax is python in case you want to create an involved query.
     '''    
-    _input_ports = expand_ports([('fieldData_file', '(gov.usgs.sahm:FieldData:DataInput)'),
-                                 ('x_column', 'basic:String', {'defaults':str('1')}),
-                                 ('y_column', 'basic:String', {'defaults':str('2')}),
-                                 ('Response_column', 'basic:String', {'defaults':str('3')}),
-                                 ('ResponseType', '(gov.usgs.sahm:ResponseType:Other)', {'defaults':str(['Presence(Absence)'])}),
-                                  ('Query_column', 'basic:String'),
-                                  ('Query', 'basic:String')])
-    _output_ports = expand_ports([('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')])
+    _input_ports = [('fieldData_file', '(gov.usgs.sahm:FieldData:DataInput)'),
+                                 ('x_column', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'1'}),
+                                 ('y_column', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'2'}),
+                                 ('Response_column', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'3'}),
+                                 ('ResponseType', '(gov.usgs.sahm:ResponseType:Other)', {'defaults':'Presence(Absence)'}),
+                                  ('Query_column', '(edu.utah.sci.vistrails.basic:String)'),
+                                  ('Query', '(edu.utah.sci.vistrails.basic:String)')]
+    _output_ports = [('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),]
     
     @classmethod
     def provide_input_port_documentation(cls, port_name):
-        global port_docs
-        return utils.construct_port_def(port_docs[cls.__name__ + port_name])
-    
+        return utils.construct_port_msg(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-        global port_docs
-        return utils.construct_port_def(port_docs[cls.__name__ + port_name]) 
+         return utils.construct_port_msg(cls, port_name, 'out') 
     
     def compute(self):
         writetolog("\nRunning FieldDataQuery", True)
@@ -896,12 +942,19 @@ class FieldDataAggregateAndWeight(Module):
     '''
     Documentation to be updated when module finalized.
     '''
-    _input_ports = expand_ports([('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
+    _input_ports = [('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
-                                 ('PointAggregationOrWeightMethod', '(gov.usgs.sahm:PointAggregationMethod:Other)', {'defaults':str(['Collapse In Pixel'])}),
+                                 ('PointAggregationOrWeightMethod', '(gov.usgs.sahm:PointAggregationMethod:Other)', {'defaults':'Collapse In Pixel'}),
                                  ('SDofGaussianKernel', '(edu.utah.sci.vistrails.basic:Float)')
-                                 ])
-    _output_ports = expand_ports([('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')])
+                                 ]
+    _output_ports = [('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')]
+    
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return utils.construct_port_msg(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+         return utils.construct_port_msg(cls, port_name, 'out')  
     
     def compute(self):
         writetolog("\nFieldDataAggregateAndWeight", True)
@@ -1003,8 +1056,8 @@ class PARC(Module):
                                 ('PredictorList', '(gov.usgs.sahm:PredictorList:Other)'),
                                 ('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                 ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
-                                ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['False']), 'optional':True}),
-                                ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':True})]
+                                ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':True}),
+                                ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':True})]
 
     _output_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
     
@@ -1128,7 +1181,7 @@ class RasterFormatConverter(Module):
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('inputDir', '(edu.utah.sci.vistrails.basic:Directory)'),
                     ('format', '(edu.utah.sci.vistrails.basic:String)'),
-                    ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':True})]
+                    ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':True})]
 
     _output_ports = [('outputDir', '(edu.utah.sci.vistrails.basic:Directory)')]
 
@@ -1213,8 +1266,9 @@ class ModelEvaluationSplit(Module):
 
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('trainingProportion', '(edu.utah.sci.vistrails.basic:Float)', 
-                        {'defaults':str(['0.7'])}),
-                    ('RatioPresAbs', '(edu.utah.sci.vistrails.basic:Float)')]
+                        {'defaults':'0.7'}),
+                    ('RatioPresAbs', '(edu.utah.sci.vistrails.basic:Float)'),
+                    ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
     
     def compute(self):
@@ -1245,6 +1299,13 @@ class ModelEvaluationSplit(Module):
 
         args += " es=TRUE"
 
+        if self.hasInputFromPort("Seed"):
+            seed = str(self.getInputFromPort("Seed"))
+        else:
+            seed = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
+        writetolog("    seed used for Split = " + str(seed))
+        args += " seed=" + str(seed)
+
         utils.runRScript("TestTrainSplit.r", args, self)
         
         output = os.path.join(outputMDS)
@@ -1264,8 +1325,9 @@ class ModelSelectionSplit(Module):
 
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('trainingProportion', '(edu.utah.sci.vistrails.basic:Float)', 
-                        {'defaults':str(['0.7'])}),
-                    ('RatioPresAbs', '(edu.utah.sci.vistrails.basic:Float)')]
+                        {'defaults':'0.7'}),
+                    ('RatioPresAbs', '(edu.utah.sci.vistrails.basic:Float)'),
+                    ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
     
     def compute(self):
@@ -1296,6 +1358,13 @@ class ModelSelectionSplit(Module):
 
         args += " es=FALSE"
 
+        if self.hasInputFromPort("Seed"):
+            seed = str(self.getInputFromPort("Seed"))
+        else:
+            seed = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
+        writetolog("    seed used for Split = " + str(seed))
+        args += " seed=" + str(seed)
+
         utils.runRScript("TestTrainSplit.r", args, self)
         
         output = os.path.join(outputMDS)
@@ -1315,8 +1384,9 @@ class ModelSelectionCrossValidation(Module):
 
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('nFolds', '(edu.utah.sci.vistrails.basic:Integer)', 
-                        {'defaults':str('10')}),
-                    ('Stratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True']), 'optional':True}),]
+                        {'defaults':'10'}),
+                    ('Stratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':True}),
+                    ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
     
     def compute(self):
@@ -1338,6 +1408,15 @@ class ModelSelectionCrossValidation(Module):
         args += " nf=" + str(argsDict["nf"])
 
         args += " stra=" + argsDict["stra"]
+        
+        args += " es=TRUE"
+
+        if self.hasInputFromPort("Seed"):
+            seed = str(self.getInputFromPort("Seed"))
+        else:
+            seed = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
+        writetolog("    seed used for Split = " + str(seed))
+        args += " seed=" + str(seed)
 
         utils.runRScript("CrossValidationSplit.r", args, self)
         
@@ -1383,11 +1462,11 @@ class CovariateCorrelationAndSelection(Module):
 
     '''
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
-                    ('selectionName', '(edu.utah.sci.vistrails.basic:String)', {'defaults':str(['initial'])}),
-                    ('ShowGUI', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['True'])}),
-                    ('numPlots', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':str(['8']), 'optional':True}),
-                    ('minCor', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':str(['0.7']), 'optional':True}),
-                    ('corsWithHighest', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':str(['False']), 'optional':True})]
+                    ('selectionName', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'initial'}),
+                    ('ShowGUI', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True'}),
+                    ('numPlots', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'8', 'optional':True}),
+                    ('minCor', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'0.7', 'optional':True}),
+                    ('corsWithHighest', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':True})]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
 
     def compute(self):
@@ -1865,11 +1944,12 @@ def build_predictor_modules():
 def load_port_docs():
     csv_file = os.path.abspath(os.path.join(os.path.dirname(__file__),  "PortDocs.csv"))
     csvReader = csv.DictReader(open(csv_file, "r"))
-    global port_docs
     port_docs = {}
     for row in csvReader:
-        k = row['Module'] + row['Port']
+        k = row['Module'] + row['Port'] + row['Direction']
         port_docs[k] = row
+        
+    utils.port_docs = port_docs
 
 input_color = (0.76, 0.76, 0.8)
 input_fringe = [(0.0, 0.0),

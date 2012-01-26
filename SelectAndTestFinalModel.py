@@ -445,7 +445,7 @@ class FindModelType():
         #check if multiple model types have been run
         #options are one of ('Binary' or 'Count') 
         #and one of    ('TestTrain' or '' or 'CV')
-        globPattern = os.path.join(self.session_dir, "*AppendedOutput.csv")
+        globPattern = os.path.join(self.session_dir, "AcrossModel*.csv")
         csvOutputs = glob.glob(globPattern)
         
         if len(csvOutputs) > 1:

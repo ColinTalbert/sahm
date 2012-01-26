@@ -466,9 +466,16 @@ def dbfreader(f):
                 value = float(value)
             result.append(value)
         yield result
+    
 
-
-def construct_port_def(kwargs):
+def construct_port_msg(cls, port_name, direction):
+    global port_docs
+    key = cls.__name__ + port_name + direction
+    kwargs = port_docs.get(key, False)
+    
+    if kwargs == False:
+        return "Not used and/or defined by SAHM package."
+    
     msg = "Definition:\n    " + kwargs['Definition'].replace('\\n', '\n').replace('\\t', '\t') 
     if kwargs['Mandatory'] == "TRUE":
         msg += "\n\nThis port is Mandatory"
