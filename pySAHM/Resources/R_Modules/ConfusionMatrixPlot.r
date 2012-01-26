@@ -118,10 +118,12 @@ barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, 
     par(new=T)
     persp(x, y, z, col=fill, scale=F, theta=theta, phi=phi, zlim = range(zakres),
         lphi=44, ltheta=-10, shade=0.4, axes=F, ...)
-       results<-switch(split.type,
-                            none = Stats$train,
-                             test = Stats$test,
-                                crossValidation = Stats$test)
+        browser()
+       if(split.type=="test") results=Stats$test
+       if(split.type=="none") results=Stats$train
+       if(split.type=="crossValidation") results<-list(Pcc=mean(unlist(lapply(Stats,function(lst){lst$Pcc}))),Sens=mean(unlist(lapply(Stats,function(lst){lst$Sens}))),
+                                         Specf=mean(unlist(lapply(Stats,function(lst){lst$Specf}))),Kappa=mean(unlist(lapply(Stats,function(lst){lst$Kappa}))))
+
         sub.lab<-""
       if(split.type!="none") sub.lab<-paste("Evaluation metrics for the ",switch(split.type,test="test split\n",crossValidation="cross validation split\n"),sep="")
       mtext(paste(sub.lab,"Percent Correctly Classified: ",signif(results$Pcc,digits=3),"                 Sensitivity: ",signif(results$Sens,digits=3),"\n                       Specificity:   ",signif(results$Specf,digits=3),"         Cohen's Kappa: ",signif(results$Kappa,digits=3),sep=""))
@@ -133,13 +135,20 @@ barplot3d <- function(heights, rows, transp="f0", theta=55, phi=25, bar.size=3, 
      text(trans3d(x.means+1,rep(y.means,each=rep.times)-1.5,heights+2,rys),paste(signif(heights,digits=2),"%",sep=""),cex=2.2,srt=phi+10,col="yellow")
 
       # fill2<-col2rgb(fill,alpha=TRUE)
-      # fill2[4,]<-pmin(20,fill2[4,])
-      # temp.fct<-function(a){return(rgb(red=a[1],green=a[2],blue=a[3],alpha=a[4]))}
-      # fill2<-matrix(data=apply(fill2/255,2,temp.fct),nrow=nrow(fill),ncol=ncol(fill))
-
-      # par(new=T)
-      # persp(x, y, z, col=fill2, scale=F, theta=theta, phi=phi, zlim = range(zakres),
-      #  lphi=44, ltheta=-10, shade=0.4, axes=F, ...)
+       #fill2[4,]<-pmin(20,fill2[4,])
+       #temp.fct<-function(a){return(rgb(red=a[1],green=a[2],blue=a[3],alpha=a[4]))}
+       #fill2<-matrix(data=apply(fill2/255,2,temp.fct),nrow=nrow(fill),ncol=ncol(fill))
+       #  fill2<-col2rgb(fill,alpha=TRUE)
+       #fill2[4,]<-0
+       #indx.for.shade<-rbind(cbind(17:20,6:7),cbind(7:10,6:7),c(17,8),c(7,8),cbind(7:10,1:2),cbind(17:20,2),c(17,3),c(7,3))
+       #indx.for.shade[,2]<-(indx.for.shade[,2]-1)*20
+       #fill2[4,apply(indx.for.shade,1,sum)]<-80
+       #temp.fct<-function(a){return(rgb(red=a[1],green=a[2],blue=a[3],alpha=a[4]))}
+       #fill2<-matrix(data=apply(fill2/255,2,temp.fct),nrow=nrow(fill),ncol=ncol(fill))
+       
+       #par(new=T)
+       #persp(x, y, z, col=fill2, scale=F, theta=theta, phi=phi, zlim = range(zakres),
+       # lphi=44, ltheta=-10, shade=0.4, axes=F,border = NA, ...)
     invisible(rys)
 }
 

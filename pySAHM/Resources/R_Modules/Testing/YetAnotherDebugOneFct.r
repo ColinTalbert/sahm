@@ -8,7 +8,7 @@ source("BRT.helper.fcts.r")
 source("RF.helper.fcts.r")
 
 
-rc=c(rep("responseBinary",times=10),rep("responseCount",times=2))
+rc=c(rep("responseBinary",times=11),rep("responseCount",times=2))
 input.file<-vector()
 input.file[1]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/BadPath.csv"
 input.file[2]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/LargeSplit.csv"
@@ -20,8 +20,9 @@ input.file[7]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitFactor2.cs
 input.file[8]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitWeights.csv"
 input.file[9]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
 input.file[10]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/NoSplit.csv"
-input.file[11]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
-input.file[12]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
+input.file[11]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
+input.file[12]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
+input.file[13]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
 
 output.dir<-vector()
 output.dir[1]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction1.23\\rf"
@@ -31,20 +32,6 @@ output.dir[4]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction1.
 
 
 
-### Random Forest
-for(i in 1:length(input.file)){
-proximity=NULL
-try(FitModels(ma.name=input.file[i],
-      tif.dir=NULL,
-      output.dir=output.dir[1],
-      response.col=rc[i],make.p.tif=T,make.binary.tif=T,
-          debug.mode=T,opt.methods=2,script.name="rf",
-responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
-samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
-localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=proximity,norm.votes=TRUE,
-do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=TRUE,seed=1))
-         }
-   # PredictModel(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir)
 
 ##BRT
  for(i in 1:length(input.file)){
@@ -76,3 +63,17 @@ for(i in 1:length(input.file)){
           simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=TRUE,opt.methods=2))
           }
 
+### Random Forest
+for(i in 1:length(input.file)){
+proximity=NULL
+try(FitModels(ma.name=input.file[i],
+      tif.dir=NULL,
+      output.dir=output.dir[1],
+      response.col=rc[i],make.p.tif=T,make.binary.tif=T,
+          debug.mode=T,opt.methods=2,script.name="rf",
+responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
+samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
+localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=proximity,norm.votes=TRUE,
+do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=TRUE,seed=1))
+         }
+   # PredictModel(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir)
