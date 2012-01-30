@@ -61,7 +61,6 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
                        colors.test<-apply(color.box/255,2,temp.fct)
                         }
         #producing plots
-
                    for(i in 1:Parm.Len){
                             plot(c(.6,(ncol(train)+2)),c(0,max(1.1,max(train[i,],na.rm=TRUE)+.1)),type="n",xaxt="n",
                                 xlab=paste("Corresponding Column in the corresponding .csv",sep=""),
@@ -70,8 +69,11 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
                                    if(x.labs[i]!="Prediction\nError") temp.fct<-function(a){max(a,na.rm=TRUE)}
                                     else temp.fct<-function(a){min(a,na.rm=TRUE)}
                                 grid(nx=10)
-                                if(split.type!="none") legend(ncol(test),y=.75,legend=c(switch(out$dat$split.type, "test"="Test","crossValidation"="CV"),"Train"),fill=c(colors.test[i],colors.train[i]))
-                              if(split.type!="crossValidation") rect(xleft=ss-.4,ybottom=0,xright=ss,ytop=train[i,],col=colors.train[i],lwd=2)
+                                if(split.type=="test") legend(ncol(test),y=.75,legend=c("Test","Train"),fill=c(colors.test[i],colors.train[i]))
+                                if(split.type=="crossValidation") legend(ncol(test),y=.75,legend=c("CV","Train"),pch=c(22,8),pt.cex=c(2,1.5),pt.lwd=c(1,2),pt.bg=c(colors.test[i],colors.train[i]),col=c("black",colors.train[i]))
+                              if(split.type!="crossValidation"){
+                               rect(xleft=ss-.4,ybottom=0,xright=ss,ytop=train[i,],col=colors.train[i],lwd=2)
+                               }
                              #if test split
                              options(warn=-1)
                              if(length(test.lst)==1) rect(xleft=ss,ybottom=0,xright=(ss+.4),ytop=as.vector(pmax(0,test.lst[[1]][i,])),col=c(colors.test[i],"white")[(test.lst[[1]][i,]==0)+1],
