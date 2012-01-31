@@ -155,12 +155,12 @@ Attached to each cell is a toolbar that allows changing of the displayed layer a
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
-          <Connection>This can be connected to the output mdsFile port on any of the following modules: MDSBuilder, ModelEvaluationSplit, ModelSelectionSplit, ModelCrossValidationSplit, or CovariateCorrelationAndSelection.</Connection>
+          <Connection>This can be connected to the output 'mdsFile' port on any of the following modules: MDSBuilder, ModelEvaluationSplit, ModelSelectionSplit, ModelCrossValidationSplit, or CovariateCorrelationAndSelection.</Connection>
         </Connections>
       </Port>
       <Port>
         <PortName>inputDir</PortName>
-        <Definition>An derectory can be used to specify which files to process.  All of the rasters (of any format) will be converted to the output format specified.</Definition>
+        <Definition>An directory can be used to specify which files to process.  All of the rasters (of any format) will be converted to the output format specified.</Definition>
         <Manditory>False</Manditory>
         <Default>NA</Default>
         <Options>NA</Options>
@@ -172,27 +172,37 @@ Attached to each cell is a toolbar that allows changing of the displayed layer a
         <PortName>format</PortName>
         <Definition>The format to convert all the input grids into.  For Maxent this will be ASCII.</Definition>
         <Manditory>False</Manditory>
-        <Default>NA</Default>
+        <Default>Geotif</Default>
         <Options>
           <Option>Geotif</Option>
+          <Option>Arc/Info Grid</Option>
+          <Option>ASCII Grid</Option>
+          <Option>ESRI Bil</Option>
+          <Option>ERDAS Imagine</Option>
+          <Option>JPEG</Option>
+          <Option>BMP</Option>
+          <Option>Additional uncommon file types are supported by GDAL.  For the complete list see the 'compiled by default' options at http://www.gdal.org/formats_list.html for a complete list of the accepted file types.</Option>
         </Options>
         <Connections>NA</Connections>
       </Port>
       <Port>
         <PortName>multipleCores</PortName>
-        <Definition>NA</Definition>
+        <Definition>Option of running processing on multiple threads/cores.</Definition>
         <Manditory>False</Manditory>
         <Default>NA</Default>
-        <Options>NA</Options>
+        <Options>
+          <Option>True (checked) = Individual layers will be run consectively on separate threads. </Option>
+          <Option>False (Unchecked) = All processing will occur on the same thread as the main program.</Option>
+        </Options>
         <Connections>NA</Connections>
       </Port>
     </InputPorts>
     <OutputPorts>
       <Port>
         <PortName>outputDir</PortName>
-        <Definition>ToDo</Definition>
+        <Definition>The directory where all output files will be saved to.</Definition>
         <Manditory>False</Manditory>
-        <Default>NA</Default>
+        <Default>This directory</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
       </Port>
