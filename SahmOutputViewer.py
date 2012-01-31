@@ -14,14 +14,52 @@ import os
 
 class SAHMModelOutputViewerCell(SpreadsheetCell):
     """
-    SAHMModelOutputViewerCell displays the various non-spatial
-    outputs from a SAHM Model run
+SAHMModelOutputViewerCell
+
+Description:
+        The SAHM Spatial Output Viewer Cell provides a convenient means for viewing the numerous
+    spatial outputs produced by individual model runs as well as the input presence and absence
+    points and background points if applicable.  The spatial viewer displays the outputs in an
+    interactive Matplotlib chart which functions much like a full GIS.
+
+        Attached to each cell is a toolbar that allows changing of the displayed layer and the
+    overlaid points
+
+Input Ports:
+    row:  (optional)
+        The spread sheet row that the output will be placed in. Counts start from 1 not 0.
+        Default value = VisTrails will default to the next availible cell on the spreadsheet.
+
+    column:  (optional)
+        The spread sheet column that the output will be placed in. Counts start from 1 not 0.
+        Default value = VisTrails will default to the next availible cell on the spreadsheet.
+
+    ModelWorkspace:  (mandatory)
+        The ModelWorkspace is a file titled modelWorkspace (no extension) that is saved in each
+        model output folder.  All the individual outputs will be identified relative to the location
+        of this file.
+
+    InitialModelOutputDisplay:  (optional)
+        The display tab to show initially.
+        Options are:
+            Text
+            Response Curves
+            AUC Curves
+            Calibration
+            Confusion
+            Residuals
     """
     _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ('ModelWorkspace', '(edu.utah.sci.vistrails.basic:File)'),
                     ('InitialModelOutputDisplay', '(gov.usgs.sahm:ModelOutputType:Other)', {'defaults':str(['AUC'])})
                     ]
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return utils.construct_port_msg(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+         return utils.construct_port_msg(cls, port_name, 'out') 
      
     def compute(self):
         """ compute() -> None

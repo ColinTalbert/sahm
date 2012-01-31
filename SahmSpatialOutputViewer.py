@@ -124,7 +124,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         centralLayout.setSpacing(0)
         self.create_main_frame()
         
-        self.setAnimationEnabled(True)
+        self.setAnimationEnabled(False)
 
     def updateContents(self, inputs):
         """ updateContents(inputs: dictionary) -> None
@@ -143,10 +143,11 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
     def create_main_frame(self):
         self.dpi = 100
         self.fig = Figure((5.0, 4.0), dpi=self.dpi)
+        
 #        self.fig.subplots_adjust(left = 0.01, right=0.99, top=0.99, bottom=0.001)
         self.fig.subplots_adjust(left = 0, right=1, top=1, bottom=0)
         self.map_canvas = MyMapCanvas(self.fig)
-        
+        self.map_canvas.mpl_connect('scroll_event', self.wheel_zoom)
         self.add_axis()
            
         self.mpl_toolbar = NavigationToolbar(self.map_canvas, None)
@@ -161,7 +162,42 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
                 action.setIcon(QtGui.QIcon(icon))
 
         
-        self.layout().addWidget(self.map_canvas)    
+        self.layout().addWidget(self.map_canvas)
+        
+          
+    def wheel_zoom(self, event):
+        #zoom in or out centered on the current cursor position
+
+        inv = self.axes.transData.inverted()
+        curX, curY = inv.transform((event.x, event.y))
+
+        curL, curR = self.axes.get_xlim()
+        curB, curT = self.axes.get_ylim()
+        width = curR - curL
+        height = curT - curB
+        steps = -1 * event.step / 0.25
+        factor = steps / 35
+        #sanity check
+        if factor > 0.5:
+            factor = 0.5
+        if factor < -0.5:
+            factor = -0.5
+
+        newWidth = width * (1.0 - factor)
+        newHeight = height * (1.0 - factor)
+        dWidth = width - newWidth
+        dHeight = height -newHeight
+        
+        pcntLofX =  1 - (width - (curX - curL)) / width
+        pcntUnderTop = (height - (curT - curY)) / height
+        
+        newL = curL + (dWidth * pcntLofX)
+        newR = curR - (dWidth*(1-pcntLofX))
+        newB = curB + (dHeight * pcntUnderTop)
+        newT = curT - (dWidth * (1 - pcntUnderTop))
+        self.axes.set_xlim((newL, newR))
+        self.axes.set_ylim((newB, newT))
+        self.map_canvas.draw()
     
     def load_layers(self):
         self.displayTL = True
@@ -413,6 +449,20 @@ class MyMapCanvas(FigureCanvas):
         self._cursor = QtGui.QCursor(QtGui.QApplication.overrideCursor())         
         QtGui.QApplication.restoreOverrideCursor()         
         FigureCanvas.leaveEvent(self, event)
+        
+#    def scrollEvent(self, event):
+#        print event
+#        
+#    def scroll_event(self, x, y, steps):
+#        print steps
+#
+#    def wheelEvent(self, event):
+#        x, y = event.x(), event.y()
+#        
+#        print event.x()
+#        print "y", event.y()
+#        print "delta", event.delta()
+#        self.set
 
 class fullExtent(QtGui.QAction):
     def __init__(self, parent=None):
