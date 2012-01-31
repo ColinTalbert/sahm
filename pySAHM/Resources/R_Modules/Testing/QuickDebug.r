@@ -1,11 +1,5 @@
-setwd("H:\\Desktop\\BrokenGIT\\R_Modules")
-ScriptPath="H:\\Desktop\\BrokenGIT\\R_Modules"
-
-#setwd("I:\\VisTrails\\Central_VisTrailsInstall\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
-#source("FIT_BRT_pluggable.r")
-#source("FIT_MARS_pluggable.r")
-#source("FIT_RF_pluggable.r")
-#source("FIT_GLM_pluggable.r")
+setwd("I:\\VisTrails\\Central_VisTrails_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\Central_VisTrails_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
 
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
