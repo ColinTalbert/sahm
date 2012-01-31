@@ -20,6 +20,7 @@ from osgeo import osr
 
 from numpy import *
 import numpy as np
+import scipy.stats.stats as stats
 
 import utilities
 
@@ -309,92 +310,158 @@ class PARC:
         tmpOutDataset = self.generateOutputDS(sourceParams, templateParams, tmpOutput)
         outBand = tmpOutDataset.GetRasterBand(1)
         
-        rows = int(sourceParams["height"])
-        cols = int(sourceParams["width"])
-
-        row = 0
-        col = 0
+        tmpParams = self.getRasterParams(inFile)
         
-        
-        pcntDone = 0.0
-        if self.verbose:
-            print "    % Done:    0.0",
-            
-            
-        while row < templateParams["width"]:
-            while col < templateParams["height"]:
-                sourceRow = row * numSourcePerTarget
-                sourceCol = col * numSourcePerTarget
+        rows = int(tmpParams["height"])
+        cols = int(tmpParams["width"])
 
-                #kernel = self.getKernel(sourceRow, sourceCol, numSourcePerTarget, sourceDs)
-                kernel = sourceDs.GetRasterBand(1).ReadAsArray(int(sourceRow), 
-                                                    int(sourceCol), 
-                                                    int(numSourcePerTarget),
-                                                    int(numSourcePerTarget))
-                #convert kernel values of our nodata to nan
-                ndMask = ma.masked_array(kernel, mask=(kernel==sourceParams["NoData"]))
-                #print kernel
-                if method == "Min":
-                    ans = ndMask.min()
-                elif method == "Max":
-                    ans = ndMask.max()
-                elif method == "Majority":
-#                    ndMask = ndMask.flatten()
-                    uniques = np.unique(ndMask)
-                    curMajority = -3.40282346639e+038
-                    ans = sourceParams["NoData"] # our default
-                    for val in uniques:
-                        numOccurances = (array(ndMask)==val).sum()
-                        if numOccurances > curMajority:
-                            ans = val
-                            curMajority = numOccurances
-                            
-#                    histogram = np.histogram(ndMask, uniques)
-#                    ans = histogram[1][histogram[0].argmax()]
-                else:
-                    ans = ndMask.mean()
-                
-#                print ndMask
-#                print ans
-                #special case real ugly
-                if ans < 0 and sourceParams["signedByte"]:
-                    ans = ans + 255
-                
-                ansArray = empty([1, 1])
-                if isinstance(ans, ma.core.MaskedArray):
-                    ansArray[0, 0] = sourceParams["NoData"]
-                else:
-                    ansArray[0, 0] = ans
-
-                outBand.WriteArray(ansArray, row, col)
-                
-                col += 1
-                
-            row += 1
-            col  = 0
-            if self.verbose:
-                if float(row)/templateParams["width"] > float(pcntDone)/100:
-                    pcntDone += 2.5
-                    if int(pcntDone) % 10 == 0:
-                        print str(pcntDone),
-                    else:
-                        print ".",
-        
-        if self.verbose:
-            print "Done"
-#        if self.verbose:
-#            print "Done\nSaving to ASCII format"
-#                            
-#        driver = gdal.GetDriverByName("AAIGrid")
-#        driver.Register()
+#        row = 0
+#        col = 0
 #        
-#        dst_ds = driver.CreateCopy(outFile, tmpOutDataset, 0)
+#        
+#        pcntDone = 0.0
 #        if self.verbose:
-#            print "    Finished Saving ", self.shortName
+#            print "    % Done:    0.0",
+#            
+#            
+#        while row < templateParams["width"]:
+#            while col < templateParams["height"]:
+#                sourceRow = row * numSourcePerTarget
+#                sourceCol = col * numSourcePerTarget
+#
+#                #kernel = self.getKernel(sourceRow, sourceCol, numSourcePerTarget, sourceDs)
+#                kernel = sourceDs.GetRasterBand(1).ReadAsArray(int(sourceRow), 
+#                                                    int(sourceCol), 
+#                                                    int(numSourcePerTarget),
+#                                                    int(numSourcePerTarget))
+#                #convert kernel values of our nodata to nan
+#                ndMask = ma.masked_array(kernel, mask=(kernel==sourceParams["NoData"]))
+#                #print kernel
+#                if method == "Min":
+#                    ans = ndMask.min()
+#                elif method == "Max":
+#                    ans = ndMask.max()
+#                elif method == "Majority":
+##                    ndMask = ndMask.flatten()
+#                    uniques = np.unique(ndMask)
+#                    curMajority = -3.40282346639e+038
+#                    ans = sourceParams["NoData"] # our default
+#                    for val in uniques:
+#                        numOccurances = (array(ndMask)==val).sum()
+#                        if numOccurances > curMajority:
+#                            ans = val
+#                            curMajority = numOccurances
+#                            
+##                    histogram = np.histogram(ndMask, uniques)
+##                    ans = histogram[1][histogram[0].argmax()]
+#                else:
+#                    ans = ndMask.mean()
+#                
+##                print ndMask
+##                print ans
+#                #special case real ugly
+#                if ans < 0 and sourceParams["signedByte"]:
+#                    ans = ans + 255
+#                
+#                ansArray = empty([1, 1])
+#                if isinstance(ans, ma.core.MaskedArray):
+#                    ansArray[0, 0] = sourceParams["NoData"]
+#                else:
+#                    ansArray[0, 0] = ans
+#
+#                outBand.WriteArray(ansArray, row, col)
+#                
+#                col += 1
+#                
+#            row += 1
+#            col  = 0
+#            if self.verbose:
+#                if float(row)/templateParams["width"] > float(pcntDone)/100:
+#                    pcntDone += 2.5
+#                    if int(pcntDone) % 10 == 0:
+#                        print str(pcntDone),
+#                    else:
+#                        print ".",
+#        
+#        if self.verbose:
+#            print "Done"
+
+
+        #the above algorithm is terribly inefficient.
+        #todo replace the cell by cell analysis with a
+        #loop of 'blocks' of data maybe.  
+        bSize = 1024 #source pixels
+        #convert this to the nearest whole number of target pixels
+        bSize = int(round(bSize / numSourcePerTarget) * numSourcePerTarget)
+        if bSize == 0:
+            bSize = int(numSourcePerTarget)
+            
+
+        for i in range(0, rows, bSize):
+            if i + bSize  < rows:
+                numRows = bSize
+            else:
+                numRows = rows - i
+                
+            for j in range(0, cols, bSize):
+                if j + bSize < cols:
+                    numCols = bSize
+                else:
+                    numCols = cols - j
+                    
+            data = sourceDs.GetRasterBand(1).ReadAsArray(j, i, numCols, numRows)
+            ndMask = ma.masked_array(data, mask=(data==sourceParams["NoData"]))
+            if method == None:
+                method = "Mean"
+            if method in ["Mean", "Max", "Min"]:
+                ans = self.rebin(ndMask, (numRows/numSourcePerTarget, numCols/numSourcePerTarget), method)
+            else:
+                X, Y = ndMask.shape
+                x = X // numSourcePerTarget
+                y = Y // numSourcePerTarget
+                ndMask = ndMask.reshape( (x, numSourcePerTarget, y, numSourcePerTarget) )
+                ndMask = ndMask.transpose( [0, 2, 1, 3] )
+                ndMask = ndMask.reshape( (x*y, numSourcePerTarget*numSourcePerTarget) )
+                ans =  np.array(stats.mode(ndMask, 1)[0]).reshape(x, y)
+            
+            
+            outBand.WriteArray(ans, int(j / numSourcePerTarget), int(i / numSourcePerTarget))
+            
+                
+#                    ans = ndMask.min()
+#                elif method == "Max":
+#                    ans = ndMask.max()
+#                elif method == "Majority":
+##                    ndMask = ndMask.flatten()
+#                    uniques = np.unique(ndMask)
+#                    curMajority = -3.40282346639e+038
+#                    ans = sourceParams["NoData"] # our default
+#                    for val in uniques:
+#                        numOccurances = (array(ndMask)==val).sum()
+#                        if numOccurances > curMajority:
+#                            ans = val
+#                            curMajority = numOccurances
+#                            
+##                    histogram = np.histogram(ndMask, uniques)
+##                    ans = histogram[1][histogram[0].argmax()]
+#                else:
+#                    ans = ndMask.mean()
+            
+            
+        
+        
         
         dst_ds = None
         tmpOutDataset = None
         
+    def rebin(self, a, shape, method): 
+        sh = shape[0],a.shape[0]//shape[0],shape[1],a.shape[1]//shape[1] 
+        if method =="Mean":
+            return a.reshape(sh).mean(-1).mean(1)
+        elif method == "Min":
+            return a.reshape(sh).min(-1).min(1)
+        elif method == "Max":
+            return a.reshape(sh).max(-1).max(1)
         
     def getRasterParams(self, rasterFile):
         """
