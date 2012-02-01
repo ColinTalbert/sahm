@@ -69,12 +69,13 @@
        # remove weight column except for Random Forest
        site.weights<-c(match("weights",tolower(names(ma))),c(match("site.weights",tolower(names(ma)))))
         if(any(!is.na(site.weights))) {rm.list<-c(rm.list,na.omit(site.weights))
-            if(out$input$script.name=="rf") ma[,site.weights]<-rep(1,times=dim(ma)[1])
+            if(out$input$script.name=="rf") ma[,na.omit(site.weights)]<-rep(1,times=dim(ma)[1])
+            site.weights=na.omit(site.weights)
         }
-        else{ ma$weight=rep(1,times=dim(ma)[1])
+        else{ ma$weights=rep(1,times=dim(ma)[1])
           rm.list<-c(rm.list,ncol(ma))
+           site.weights=ncol(ma)
         }
-
         # and index as well
        split.indx<-match("split",tolower(names(ma)))
         if(length(na.omit(split.indx))>0) rm.list<-c(rm.list,split.indx)
@@ -146,9 +147,8 @@
                    selector<-ma$Split
                    if(Split.type=="crossValidation") dat.out$train<-ma
                    #Removing everything in the remove list here and setting up the structure for output
-
                      for(i in 1:length(dat.out)){
-                        dat.out[[i]]<-list(resp=dat.out[[i]][r.col],XY=dat.out[[i]][,xy.cols],dat=dat.out[[i]][,-c(rm.list)],weight=dat.out[[i]][,ncol(dat.out[[i]])])
+                        dat.out[[i]]<-list(resp=dat.out[[i]][r.col],XY=dat.out[[i]][,xy.cols],dat=dat.out[[i]][,-c(rm.list)],weight=dat.out[[i]][,site.weights])
                         names(dat.out[[i]]$XY)<-toupper(names(dat.out[[i]]$XY))
                      }
                      if(nrow(dat.out$train$dat)/(ncol(dat.out$train$dat)-1)<3) stop("You have less than 3 observations for every predictor\n consider reducing the number of predictors before continuing")

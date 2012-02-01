@@ -17,6 +17,16 @@ make.auc.plot.jpg<-function(out=out){
 ################# Calculate all statistics on test\train or train\cv splits
   Stats<-lapply(input.list,calcStat,family=out$input$model.family)
 
+ ##### lst doesn't contain the training portion of the data
+   train.mask<-seq(1:length(Stats))[names(Stats)=="train"]
+
+      ## breaking of the non-train split must be done separately because list structure is different for the test only and cv
+    lst<-list()
+    if(out$dat$split.type%in%c("test","eval"))
+      lst$Test<-Stats[[-c(train.mask)]]
+    if(out$dat$split.type=="crossValidation") lst<-Stats[-c(train.mask)]
+    if(out$dat$split.type%in%c("none")) lst<-Stats
+
  #################################################
  ############### Confusion Matrix Plot ###########
 
@@ -40,7 +50,7 @@ make.auc.plot.jpg<-function(out=out){
                  Stats$train$Cmx[2,2]/sum(Stats$train$Cmx),cmx[2,2]/sum(cmx),
                  Stats$train$Cmx[1,2]/sum(Stats$train$Cmx),cmx[1,2]/sum(cmx)),transp="f9", rows=2, theta = 40, phi = 25, expand=.5,
        bar.size=20*max(Stats$train$Cmx)/(sum(Stats$train$Cmx)),bar.space=4*max(Stats$train$Cmx)/(sum(Stats$train$Cmx)),
-    col.lab=c("Absence","Presence"), row.lab=c("Presence","Absence"), z.lab="Confusion Matrix",Stats=Stats,split.type=out$dat$split.type)
+    col.lab=c("Absence","Presence"), row.lab=c("Presence","Absence"), z.lab="Confusion Matrix",Stats=lst,split.type=out$dat$split.type)
     }
     graphics.off()
    }
@@ -55,20 +65,13 @@ make.auc.plot.jpg<-function(out=out){
        residual.smooth.fct<-resid.image(calc.dev(input.list$test$dat$response, input.list$test$pred, input.list$test$weight, family=out$input$model.family)$dev.cont,input.list$test$pred,
           input.list$test$dat$response,input.list$test$XY$X,input.list$test$XY$Y,out$input$model.family,out$input$output.dir,label=out$dat$split.label,out)
        }
-  train.mask<-seq(1:length(Stats))[names(Stats)=="train"]
-
-      ## breaking of the non-train split must be done separately because list structure is different for the test only and cv
-    lst<-list()
-    if(out$dat$split.type%in%c("test","eval"))
-      lst$Test<-Stats[[-c(train.mask)]]
-    if(out$dat$split.type=="crossValidation") lst<-Stats[-c(train.mask)]
-    if(out$dat$split.type%in%c("none")) lst<-Stats
 
 ########## AUC and Calibration plot for binomial data #######################
 
     if(out$input$model.family%in%c("binomial","bernoulli")){
             jpeg(file=plotname,height=1000,width=1000,pointsize=20,quality=100)
 ## ROC AUC plots
+
             TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=input.list$train$thresh,add.legend=FALSE,lwd=2)
                  if(out$dat$split.type=="none") legend(x=.8,y=.15,paste("AUC=",round(Stats$train$auc.fit,digits=3),sep=""))
             if(out$dat$split.type!="none") {
@@ -77,21 +80,17 @@ make.auc.plot.jpg<-function(out=out){
                 legend(x=.55,y=.2,c(paste("Training Split (AUC=",round(Stats$train$auc.fit,digits=3), ")",sep=""),paste("Testing Split  (AUC=",round(Stats$test$auc.fit,digits=3), ")",sep="")),lty=2,col=c("black","red"),lwd=2)
                 }
              if(out$dat$split.type=="crossValidation"){
-                temp<-lapply(lst,function(lst){roc.plot.calculate(lst$auc.data)})
-                sens<-unlist(lapply(temp,function(temp){temp$sensitivity}))
-                specif<-1-unlist(lapply(temp,function(temp){temp$specificity}))
-                unique.spec<-sort(unique(specif))
-                for(i in 2:length(unique.spec)){
-                 segments(seq(from=unique.spec[i-1],to=unique.spec[i],length=100), rep(min(sens[specif>=unique.spec[i]]),times=100),
-                      x1 = seq(from=unique.spec[i-1],to=unique.spec[i],length=100), y1 = rep(max(sens[specif<=unique.spec[i]]),times=100),col="blue")
-                  TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=input.list$train$thresh,add.legend=FALSE,lwd=2,add.roc=TRUE,line.type=1,col="red")
-                }
-              TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=input.list$train$thresh,add.legend=FALSE,lwd=2,add.roc=TRUE,line.type=1,col="red")
-              points(1-Stats$train$Specf,Stats$train$Sens,pch=19,cex=2.5)
-              points(1-Stats$train$Specf,Stats$train$Sens,pch=19,cex=2,col="red")
-              text(x=(1.05-Stats$train$Specf),y=Stats$train$Sens-.03,label=round(Stats$train$thresh,digits=2),col="red")
-                legend(x=.5,y=.25,c(paste("Training Split (AUC=",round(Stats$train$auc.fit,digits=3), ")",sep=""),
-                     paste("Cross Validation Range \n (AUC=",round(lapply(lst,function(lst){mean(lst$auc.fit)}),digits=3), ")",sep="")),lty=c(2,1),col=c("red","blue"),lwd=2)
+             ROC.list<-list(predictions=lapply(lst,function(lst){lst$auc.data$pred}),labels=lapply(lst,function(lst){lst$auc.data$pres.abs}))
+              pred <- prediction(ROC.list$predictions, ROC.list$labels)
+              perf <- performance(pred,"tpr","fpr")
+              plot(perf,col="grey82",lty=3,xlab="1-Specificity (False Positive)",ylab="Sensitivity (True Positive)",main="ROC Plot for Cross-Validation")
+              plot(perf,lwd=1,avg="vertical",spread.estimate="boxplot",add=TRUE)
+              TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=input.list$train$thresh,add.legend=FALSE,lwd=1.5,add.roc=TRUE,line.type=1,col="red")
+              points(1-Stats$train$Specf,Stats$train$Sens,pch=21,cex=2.5,bg="red")
+               segments(x0=0,y0=0,x1=1,y1=1,col="blue")
+              text(x=(.96-Stats$train$Specf),y=Stats$train$Sens+.03,label=round(Stats$train$thresh,digits=2))
+                legend(x=.6,y=.2,c(paste("Training Split (AUC=",round(Stats$train$auc.fit,digits=3), ")",sep=""),
+                     paste("Cross Validation Mean \n (AUC=",round(mean(unlist(lapply(lst,function(lst){lst$auc.fit}))),digits=3), ")",sep="")),lty=c(1,1),col=c("red","black"))
                 }}
                 graphics.off()
 
@@ -100,7 +99,7 @@ make.auc.plot.jpg<-function(out=out){
                 cal.results<-switch(out$dat$split.type,
                             none = Stats$train$calibration.stats,
                              test = Stats$test$calibration.stats,
-                                crossValidation = Stats$test$calibration.stats)
+                                crossValidation =  apply(do.call("rbind",lapply(lst,function(lst){lst$calibration.stats})),2,mean))
 ## Calibration plot
             a<-do.call("rbind",lapply(lst,function(lst){lst$auc.data}))
             calibration.plot(a,main=paste("Calibration Plot for ",switch(out$dat$split.type,none="Training Data",test="Test Split",crossValidation="Cross Validation Split"),sep=""))

@@ -696,7 +696,6 @@ function (mars.glm.object,new.data)
 # first recreate both the original mars model and the glm model
 
 # setup input data and create original temporary data
-
   dataframe.name <- mars.glm.object$mars.call$dataframe  # get the dataframe name
   mars.x <- mars.glm.object$mars.call$mars.x
   mars.y <- mars.glm.object$mars.call$mars.y
@@ -708,8 +707,7 @@ function (mars.glm.object,new.data)
   spp.weights <- mars.glm.object$weights[[2]]
 
   print("creating original data frame...",quote=FALSE)
-
-  base.data <- as.data.frame(eval.parent(parse(text = dataframe.name))) #aks
+  base.data <- as.data.frame(eval(parse(text = dataframe.name),envir=parent.frame()))
 
   x.temp <- eval(base.data[, mars.x])                 #form the temporary datasets
   base.names <- names(x.temp)
@@ -727,16 +725,6 @@ function (mars.glm.object,new.data)
   print("checking variable matching with new data",quote = FALSE)
 
   new.names <- names(new.data)
-
-#  for (i in 1:length(base.names)) {
-#
-#    name <- base.names[i]
-#
-#    if (!(name %in% new.names)) {
-#      print(paste("Variable ",name," missing from new data",sep=""),quote = FALSE)  #aks
-#      return()
-#    }
-#  }
 
   print("and creating temporary dataframe for new data...",quote=FALSE)
 

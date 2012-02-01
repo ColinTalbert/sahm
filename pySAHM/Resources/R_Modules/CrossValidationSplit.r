@@ -1,4 +1,4 @@
-CrossValidationSplit<-function(input.file,output.file,response.col="ResponseBinary",n.folds=10,stratify=FALSE){
+CrossValidationSplit<-function(input.file,output.file,response.col="ResponseBinary",n.folds=10,stratify=FALSE,seed){
 
 #Description:
 #this code takes as input an mds file with the first line being the predictor or
@@ -14,6 +14,8 @@ CrossValidationSplit<-function(input.file,output.file,response.col="ResponseBina
 #SAHM R modules.
 
 #Written by Marian Talbert 9/29/2011
+ if(is.null(seed)) seed<-round(runif(1,min=-((2^32)/2-1),max=((2^32)/2-1)))
+set.seed(as.numeric(seed))
 
      if(n.folds<=1 | n.folds%%1!=0) stop("n.folds must be an integer greater than 1")
 
@@ -76,7 +78,7 @@ CrossValidationSplit<-function(input.file,output.file,response.col="ResponseBina
   responseCol="ResponseBinary"
   n.folds=10
   stratify=TRUE
-
+  seed=NULL
  #Reading in command line arguments
  Args <- commandArgs(T)
     print(Args)
@@ -91,9 +93,10 @@ CrossValidationSplit<-function(input.file,output.file,response.col="ResponseBina
     	if(argSplit[[1]][1]=="o") output.file <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="i") infil <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
+   		if(argSplit[[1]][1]=="seed")  seed <- argSplit[[1]][2]
     }
  stratify<-as.logical(stratify)
  n.folds<-as.numeric(n.folds)
 	#Run the Test training split with these parameters
 	CrossValidationSplit(input.file=infil,output.file=output.file,response.col=responseCol,
-  n.folds=n.folds,stratify=stratify)
+  n.folds=n.folds,stratify=stratify,seed=seed)

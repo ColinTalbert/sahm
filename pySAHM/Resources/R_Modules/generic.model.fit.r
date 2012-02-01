@@ -1,7 +1,8 @@
 generic.model.fit<-function(out,Model,t0){
 attach(out$input)
 on.exit(detach(out$input))
-  if(Model=="mars"){ out$mods$final.mod<-mars.glm(data=out$dat$ma$train$dat, mars.x=c(2:ncol(out$dat$ma$train$dat)), mars.y=1, mars.degree=out$input$mars.degree, family=out$input$model.family,
+  if(Model=="mars"){
+  out$mods$final.mod<-mars.glm(data=out$dat$ma$train$dat, mars.x=c(2:ncol(out$dat$ma$train$dat)), mars.y=1, mars.degree=out$input$mars.degree, family=out$input$model.family,
           site.weights=out$dat$ma$train$weight, penalty=out$input$mars.penalty)
           fit_contribs <- mars.contribs(out$mods$final.mod)
 
