@@ -202,9 +202,9 @@ Attached to each cell is a toolbar that allows changing of the displayed layer a
         <PortName>outputDir</PortName>
         <Definition>The directory where all output files will be saved to.</Definition>
         <Manditory>False</Manditory>
-        <Default>This directory</Default>
+        <Default>This directory name is created by the module and it will be located in the session folder.</Default>
         <Options>NA</Options>
-        <Connections>NA</Connections>
+        <Connections>This port will connect to the maxent input port 'projectionlayers'.<Connection /></Connections>
       </Port>
     </OutputPorts>
     <References>
@@ -429,10 +429,7 @@ The value calculated for the train portion of the data will be applied to the te
   </Module>
   <Module>
     <Title>PredictorList</Title>
-    <Description>
-    This module is a required class for other modules and scripts within the
-    SAHM package. It is not intended for direct use or incorporation into
-    the VisTrails workflow by the user.
+    <Description>This module is a required class for other modules and scripts within the SAHM package. It is not intended for direct use or incorporation into the VisTrails workflow by the user.
     </Description>
     <InputPorts>
       <Port>
@@ -772,69 +769,22 @@ must be used.
   </Module>
   <Module>
     <Title>MDSBuilder</Title>
-    <Description>
-    MDS Builder
-
-    The Merged Data Set (MDS) Builder module is a utility that extracts the values of each predictor
-    layer to the point locations included in the field data set. The module produces a .csv file that
-    contains the x and y locations of the sample points and a column indicating whether each point
-    represents a presence recording, an absence recording, a presence count, or a background point.
-    Following these first three columns, each environmental predictor layer is appended as a column
-    with row entries representing the value present in the raster layer at each field sample point.
-    There are a total of three header rows in the output .csv of the MDSBuilder. The first row contains
-    the columns "x," "y," "ResponseBinary" or "ResponseCount," and the names of each of the raster
-    predictor files that were passed to the MDS Builder. The second row contains a binary value
-    indicating whether the column should be included when the model is finally applied; these values
-    are later modified during the Covariate Correlation and Selection process that takes place downstream
-    in the workflow. The final header row contains the full path on the file system to each of the raster
-    predictor files.
-
-    The MDSBuilder accepts four inputs from the user:
-
-    1. Rasters with PARC Info .csv File: The raster layers listed in this file will have their values
-    extracted to the points in the field data .csv file. This parameter should be supplied by connecting
-    the output of a PARC module within the workflow to the MDSBuilder module. (In order to properly
-    extract the values of each predictor layer to the field data points, all the layers must have matching
-    coordinate systems and cell sizes; outputs from the PARC module will have had the prerequisite processing).
-    
-    2. Background Point Count: This is an optional value that applies only to workflows that employ the
-    Maxent modeling package. The dialogue box provides the option of specifying a number of background points
-    to be randomly scattered throughout the study area (the extent of the template layer) to capture a more
-    complete sample of the range of values present for each predictor layer. These points will be added to
-    the field data .csv file with a value of "-9999" denoting them as background points.
-    
-    3. Background Probability Surface: This is an optional parameter that applies only to workflows that
-    employ the Maxent modeling package. In some analyses, it may be appropriate to spatially limit background
-    points to a particular subset of the study area (e.g., islands within a study area polygon, particular
-    regions within a study area polygon, or a region determined by the known bias present in the field data).
-    Specifying a background probability surface raster allows a user to control where random points will be
-    scattered within the extent of the study area. The raster layer specified by a user should have the same
-    projection and extent as the template layer and contain values ranging from 0 to 100. These values represent
-    the probability that a randomly generated point will be retained should it fall within a particular cell.
-    That is, randomly generated points will not be generated in any part of the probability grid with a value
-    of "0" while all points falling in an area with a value of "100" will be retained. A point falling in an
-    area with a value of "50" will be kept as a background point 50% of the time.
-    
-    4. Field Data: The field data input corresponds to a .csv file containing presence/absence points or count
-    data recorded across a landscape for the phenomenon being modeled (e.g., plant sightings, evidence of
-    animal presence, etc.). This input file must be in a particular format, and in most cases, a user should
-    populate this field by connecting a FieldData element to the MDSBuilder in the visual display within VisTrails.
-    Please see the documention for the FieldData module for more details.
-
-    </Description>
+    <Description>The Merged Data Set (MDS) Builder module is a utility that extracts the values of each predictor layer to the point locations included in the field data set. The module produces a .csv file that contains the x and y locations of the sample points and a column indicating whether each point represents a presence recording, an absence recording, a presence count, or a background point.  Following these first three columns, each environmental predictor layer is appended as a column with row entries representing the value present in the raster layer at each field sample point.  There are a total of three header rows in the output .csv of the MDSBuilder. The first row contains the columns "x," "y," "ResponseBinary" or "ResponseCount," and the names of each of the raster predictor files that were passed to the MDS Builder. The second row contains a binary value indicating whether the column should be included when the model is finally applied; these values are later modified during the Covariate Correlation and Selection process that takes place downstream in the workflow. The final header row contains the full path on the file system to each of the raster predictor files.</Description>
     <InputPorts>
       <Port>
         <PortName>RastersWithPARCInfoCSV</PortName>
         <Definition>NA</Definition>
-        <Manditory>False</Manditory>
+        <Manditory>True</Manditory>
         <Default>NA</Default>
         <Options>NA</Options>
-        <Connections>NA</Connections>
+        <Connections>
+          <Connection>This port will connect with the ouput from the PARC module.</Connection>
+        </Connections>
       </Port>
       <Port>
         <PortName>fieldData</PortName>
-        <Definition>NA</Definition>
-        <Manditory>False</Manditory>
+        <Definition>The field data input corresponds to a .csv file containing presence/absence points or count data recorded across a landscape for the phenomenon being modeled (e.g., plant sightings, evidence of animal presence, etc.).</Definition>
+        <Manditory>True</Manditory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
