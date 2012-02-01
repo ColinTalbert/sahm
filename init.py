@@ -1942,14 +1942,15 @@ def build_predictor_modules():
     return modules
 
 def load_port_docs():
-    csv_file = os.path.abspath(os.path.join(os.path.dirname(__file__),  "PortDocs.csv"))
-    csvReader = csv.DictReader(open(csv_file, "r"))
-    port_docs = {}
-    for row in csvReader:
-        k = row['Module'] + row['Port'] + row['Direction']
-        port_docs[k] = row
-        
-    utils.port_docs = port_docs
+    pass
+#    csv_file = os.path.abspath(os.path.join(os.path.dirname(__file__),  "PortDocs.csv"))
+#    csvReader = csv.DictReader(open(csv_file, "r"))
+#    port_docs = {}
+#    for row in csvReader:
+#        k = row['Module'] + row['Port'] + row['Direction']
+#        port_docs[k] = row
+#        
+#    utils.port_docs = port_docs
 
 input_color = (0.76, 0.76, 0.8)
 input_fringe = [(0.0, 0.0),
