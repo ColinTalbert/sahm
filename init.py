@@ -944,8 +944,7 @@ class FieldDataAggregateAndWeight(Module):
     '''
     _input_ports = [('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
-                                 ('PointAggregationOrWeightMethod', '(gov.usgs.sahm:PointAggregationMethod:Other)', {'defaults':'Collapse In Pixel'}),
-                                 ('SDofGaussianKernel', '(edu.utah.sci.vistrails.basic:Float)')
+                                 ('PointAggregationOrWeightMethod', '(gov.usgs.sahm:PointAggregationMethod:Other)', {'defaults':'Collapse In Pixel'})
                                  ]
     _output_ports = [('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')]
     
@@ -971,30 +970,9 @@ class FieldDataAggregateAndWeight(Module):
         output_fname = utils.mknextfile(prefix='FDAW_', suffix='.csv')
         writetolog("    output_fname=" + output_fname, True, False)
         
-        if FDAWParams['aggMethod'] == 'Inverse Density' or \
-            FDAWParams['aggMethod'] == 'Total Presence=Total Absence':
-            args = "o=" + FDAWParams['output']
-            args += " i=" + FDAWParams['csv']
-            args += " rc=" + utils.MDSresponseCol(FDAWParams['csv'])
-            
-            if FDAWParams['aggMethod'] == 'Inverse Density':
-                args += " met=Density"
-                if FDAWParams.has_key('sd'):
-                    #uste the supplied SD of Gausian Kernel
-                    args += " sig=" + str(FDAWParams['sd'])
-                else:
-                    #default to 1/2 the pixel width
-                    args += " sig=" + str(float(utils.getpixelsize(FDAWParams['template']))/2)
-            else:
-                args += " met=PresAbs"
-                
-                
-            
-            utils.runRScript("SetWeights.r", args, self)
-        else:
-            ourFDAW = FDAW.FieldDataQuery()
-            utils.PySAHM_instance_params(ourFDAW, FDAWParams) 
-            ourFDAW.processCSV()
+        ourFDAW = FDAW.FieldDataQuery()
+        utils.PySAHM_instance_params(ourFDAW, FDAWParams) 
+        ourFDAW.processCSV()
         
         output_file = utils.create_file_module(output_fname)
         writetolog("Finished running FieldDataQuery", True)

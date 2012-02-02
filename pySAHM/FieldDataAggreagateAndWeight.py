@@ -267,10 +267,12 @@ class FieldDataQuery(object):
                 #    Or 0 if there were any zeros (absenses)
                 #    Otherwise it's a background pixel.
                 total = 0
+                count = 0
                 numAbsense = 0
                 for i in range (frequency):
                     if int(float(v[i][2])) > 0:
                         total += int(float(v[i][2]))
+                        count += 1
                     if int(float(v[i][2])) == 0:
                         numAbsense += 1
                 
@@ -278,7 +280,7 @@ class FieldDataQuery(object):
                 outputLine[1] = outPixelY
                 
                 if self.countdata and total > 0:
-                    outputLine[2] = total
+                    outputLine[2] = total / float(count)
                 elif total > 0:
                     outputLine[2] = 1
                 elif numAbsense > 0:
@@ -294,7 +296,8 @@ class FieldDataQuery(object):
             else:
                 for point in v:
                     outputLine = point
-                    outputLine.append(str(1.0/len(v)))
+                    outputLine[2] = str(1.0/len(v))
+                    outputLine.append(len(v))
                     fOut.writerow(outputLine)  
     
         oFile.close
