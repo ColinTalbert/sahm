@@ -1,5 +1,5 @@
-'''
-'''
+# -*- coding: latin-1 -*-
+
 import csv
 from datetime import datetime
 import glob
@@ -224,7 +224,7 @@ Input Ports:
 
     file:  (mandatory)
         The location of the raster file. A user can navigate to the location on their file system.
-        When a user is selecting an ESRI grid raster, the user should navigate to the ‘hdr.adf' file
+        When a user is selecting an ESRI grid raster, the user should navigate to the 'hdr.adf' file
         contained within the grid folder
 
 Output Ports:
@@ -2435,8 +2435,9 @@ def build_available_trees():
         print (("!" * 30) + " WARNING " + ("!" * 30) + "\n")*3
         layers_csv_fname = os.path.join(os.path.dirname(__file__), 'layers.exampledata.csv')
     
-#    #####Only for testing tutorial data
-#    layers_csv_fname = os.path.join(os.path.dirname(__file__), 'layers.exampledata.csv')
+    #####Only for testing tutorial data
+    print "For tutorial tesing uing the layers.exampledata.csv"
+    layers_csv_fname = os.path.join(os.path.dirname(__file__), 'layers.exampledata.csv')
     
     csv_reader = csv.reader(open(layers_csv_fname, 'rU'))
     # pass on header
@@ -2544,4 +2545,4 @@ _modules = generate_namespaces({'DataInput': [
                                           (SAHMSpatialOutputViewerCell, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe})
                                           ]
-                                }
+                                })
