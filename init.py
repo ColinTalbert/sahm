@@ -118,28 +118,50 @@ def menu_items():
 
 class FieldData(Path): 
     '''
-    Field Data
+    FieldData
 
-    The FieldData module allows a user to add presence/absence points or count data recorded across a
-    landscape for the phenomenon being modeled (e.g., plant sightings, evidence of animal presence, etc.).
-    The input data for this module must be in the form of a .csv file that follows one of two formats: 
+Description:
+        The FieldData module allows a user to add presence/absence points or count data recorded
+    across a landscape for the phenomenon being modeled (e.g., plant sightings, evidence of animal
+    presence, etc.).  The input data for this module must be in the form of a .csv file that follows
+    one of two formats:
 
-    Format 1
-    A .csv file with the following column headings, in order: "X," "Y," and "responseBinary".
+        Format 1:
+        A .csv file with the following column headings, in order: "X," "Y," and "responseBinary".
     In this case, the "X" field should be populated with the horizontal (longitudinal) positional
     data for a sample point. The "Y" field should be populated with the vertical (latitudinal) data
     for a sample point. These values must be in the same coordinate system/units as the template
     layer used in the workflow. The column "responseBinary" should be populated with either a '0'
     (indicating absence at the point) or a '1' (indicating presence at the point).
 
-    Format 2
-    A .csv file with the following column headings, in order: "X," "Y," and "responseCount".
-    In this case, the "X" field should be populated with the horizontal (longitudinal) positional
-    data for a sample point. The "Y" field should be populated with the vertical (latitudinal) data
-    for a sample point. These values must be in the same coordinate system/units as the template
-    layer used in the workflow. The column "responseCount" should be populated with either a '-9999'
-    (indicating that the point is a background point) or a numerical value (either '0' or a positive integer)
-    indicating the number of incidences of the phenomenon recorded at that point.
+        Format 2:
+        A .csv file with the following column headings, in order: "X," "Y," and "responseCount".  In
+    this case, the "X" field should be populated with the horizontal (longitudinal) positional data
+    for a sample point. The "Y" field should be populated with the vertical (latitudinal) data for a
+    sample point. These values must be in the same coordinate system/units as the template layer
+    used in the workflow. The column "responseCount" should be populated with either a '-9999'
+    (indicating that the point is a background point) or a numerical value (either '0' or a positive
+    integer) indicating the number of incidences of the phenomenon recorded at that point.
+
+Input Ports:
+    None
+
+Output Ports:
+    value:  (mandatory)
+        This is the actual file object that is being passed to other modules in the workflow.
+        Common connections:
+            The 'fieldData_file' input port of the FieldDataQuery Module if the field data needs
+                    subsetting or aggregation.
+            The 'fieldData' input port of the FieldDataAggregateAndWeight Module if the field data
+                    needs to be aggregated or weighted to match the spatial resolution of the
+                    template layer.
+            The 'fieldData' input port of the MDS builder Module if the field data needs no further
+                    pre-processing prior to modeling.
+
+    value_as_string:  (optional)
+        This is a VisTrails port that is not used in general SAHM workflows.
+        Common connections:
+            This does not commonly connect to other SAHM modules.
     '''   
 #    _input_ports = [('csvFile', '(edu.utah.sci.vistrails.basic:File)')]
     _output_ports = [('value', '(gov.usgs.sahm:FieldData:DataInput)'),
@@ -154,39 +176,69 @@ class FieldData(Path):
     
 class Predictor(Constant):
     '''
-    Predictor
-    
-    The Predictor module allows a user to select a single raster layer for consideration in the
-    modeled analysis. Four parameters must be specified by the user:
-    
-    1. Aggregation Method: The aggregation method to be used in the event that the raster layer
-    must be up-scaled to match the template layer (e.g., generalizing a 10 m input layer to a
-    100 m output layer). Care should be taken to ensure that the aggregation method that
-    best preserves the integrity of the data is used.
-    
-    2. Resample Method: The resample method employed to interpolate new cell values when
-    transforming the raster layer to the coordinate space or cell size of the template layer,
-    if necessary. 
-    
-    3. Categorical (Boolean): Checking this box indicates that the data contained in the raster
-    layer is categorical (e.g. landcover categories). Leaving this box unchecked indicates that
-    the data contained in the raster is continuous (e.g., a DEM layer). This distinction is important
-    in determining an appropriate resampling method.
-    
-    4. File Path: The location of the raster predictor file, which a user can specify by navigating to the
-    file's location on their file system. When a user is selecting an ESRI grid raster, the user should navigate
-    to the 'hdr.adf' file contained within the grid folder. 
-    
-    Accepted formats include:
-        ESRI Grid ('.bil', or the folder, or 'hdr.adf' file in the folder, see above)
-        GeoTiffs('.tif')
-        Imagine('.img')
-        ASCII('.asc')
-        Bitmap('.bmp')
-        Jpeg('.jpg')
-        For additional formats see: the Compiled by default options at
-                                    http://www.gdal.org/formats_list.html
+    Description:
+        The Predictor module allows a user to select a single raster layer for consideration in the
+    modeled analysis. Besides selecting the file the user also specifies the parameters to use for
+    resampling, aggregation, and whether the data is categorical.
+
+Input Ports:
+    categorical:  (optional)
+        This paramater allows a user to indicate the type of data represented.  The distinction
+        between continuous and categorical data will maintained throught a workflow by appending the
+        word '_categorical' to categorical layer names in the resulting MDS file.  It is also import
+        to select the nearest neighbor resampling option for categorical layers.
         
+        Default value = False (Unchecked)
+        
+        Options are:
+            True (Checked) - The data contained in the raster layer is categorical (e.g., landcover
+                    categories).
+            False(Unchecked) - The data contained in the raster is continuous (e.g., a DEM layer).
+
+    ResampleMethod:  (mandatory)
+        The resample method employed to interpolate new cell values when transforming the raster
+        layer to the coordinate space or cell size of the template layer.
+        
+        Options are:
+            near:  nearest neighbour resampling Fastest algorithm, worst interpolation quality, but
+                    best choice for categorical data.
+            bilinear:  bilinear resampling, good choice for continuous data.
+            cubic:   cubic resampling.
+            cubicspline:  cubic spline resampling.
+            lanczos:  Lanczos windowed sinc resampling.
+            see: http://www.gdal.org/gdalwarp.html for context
+
+    AggregationMethod:  (mandatory)
+        The aggregation method to be used in the event that the raster layer must be up-scaled to
+        match the template layer (e.g., generalizing a 10 m input layer to a 100 m output layer).
+        Care should be taken to ensure that the aggregation method that best preserves the integrity
+        of the data is used.  See the PARC module documentation for more information on how
+        resampling and aggregation are performed.
+        
+        Options are:
+            Mean:  Average value of all constituent pixels used.
+            Max:   Maximum value of all constituent pixels used.
+            Min:   Minimum value of all constituent pixels used.
+            Majority:   The value occuring most frequently in constituent pixels used.
+            None:   No Aggregation used.
+
+    file:  (mandatory)
+        The location of the raster file. A user can navigate to the location on their file system.
+        When a user is selecting an ESRI grid raster, the user should navigate to the ‘hdr.adf' file
+        contained within the grid folder
+
+Output Ports:
+    value:  (mandatory)
+
+        
+        Common connections:
+            The output from this port only connects to the PARC input port 'predictor'.
+
+    value_as_string:  (optional)
+        This is a VisTrails port that is not used in general SAHM workflows.
+        
+        Common connections:
+            Does not generally connect to other SAHM modules.
     '''
     _input_ports = [('categorical', '(edu.utah.sci.vistrails.basic:Boolean)'),
                     ('ResampleMethod', '(gov.usgs.sahm:ResampleMethod:Other)', {'defaults':'Bilinear'}),
@@ -272,36 +324,52 @@ class PredictorList(Constant):
 
 class PredictorListFile(Module):
     '''
-    Predictor List File
+    PredictorListFile
 
-    The PredictorListFile module allows a user to load a .csv file containing a list
-    of rasters for consideration in the modeled analysis. The .csv file should contain
-    a header row and four columns containing the following information, in order, for
-    each raster input. 
-    
-    Column 1: The full file path to the input raster layer.
-    
-    Column 2: A binary value indicating whether the input layer is categorical or not.
-    A value of "0" indicates that an input raster is non-categorical data (continuous),
-    while a value of "1" indicates that an input raster is categorical data.
-    
-    Column 3: The resampling method employed to interpolate new cell values when
-    transforming the raster layer to the coordinate space or cell size of the template
-    layer, if necessary. The resampling type should be specified using one of the following
-    values: "nearestneighbor," "bilinear," "cubic," or "lanczos."
-    
-    Column 4: The aggregation method to be used in the event that the raster layer
-    must be up-scaled to match the template layer (e.g., generalizing a 10 m input layer to a
-    100 m output layer). Care should be taken to ensure that the aggregation method that
-    best preserves the integrity of the data is used. The aggregation should be specified
-    using one of the following values: "Min," "Mean," "Max," "Majority," or "None."
+Description:
+        The PredictorListFile module allows a user to load a .csv file containing a list of rasters
+    for consideration in the modeled analysis. The .csv file should contain a header row and four
+    columns containing the following information, in order, for each raster input.
 
-    In formatting the list of predictor files, the titles assigned to each of the columns
-    are unimportant as the module retrieves the information based on the order of the
-    values in the .csv file (the ordering of the information and the permissible values
-    in the file however, are strictly enforced). The module also anticipates a header row
-    and will ignore the first row in the .csv file.
+        Column 1: The full file path to the input raster layer.
 
+        Column 2: A binary value indicating whether the input layer is categorical or not.  A value
+    of "0" indicates that an input raster is non-categorical data (continuous), while a value of "1"
+    indicates that an input raster is categorical data.
+
+        Column 3: The resampling method employed to interpolate new cell values when transforming
+    the raster layer to the coordinate space or cell size of the template layer, if necessary. The
+    resampling type should be specified using one of the following values: "nearestneighbor,"
+    "bilinear," "cubic," or "lanczos."
+
+        Column 4: The aggregation method to be used in the event that the raster layer must be up-
+    scaled to match the template layer (e.g., generalizing a 10 m input layer to a 100 m output
+    layer). Care should be taken to ensure that the aggregation method that best preserves the
+    integrity of the data is used. The aggregation should be specified using one of the following
+    values: "Min," "Mean," "Max," "Majority," or "None."
+
+        In formatting the list of predictor files, the titles assigned to each of the columns are
+    unimportant as the module retrieves the information based on the order of the values in the .csv
+    file (the ordering of the information and the permissible values in the file however, are
+    strictly enforced). The module also anticipates a header row and will ignore the first row in
+    the .csv file.
+
+
+
+Input Ports:
+    csvFileList:  (optional)
+        This is the CSV file on the file system.  While not strictly manditory this port will almost
+        always have an input.
+
+    predictor:  (optional)
+        Allows a user to add individual Predictor modules to a PredictorListFile
+        
+        Common connections:
+            The output port 'value' of a Predictor module.
+
+Output Ports:
+    RastersWithPARCInfoCSV:  (mandatory)
+        This port generally connects to the input port 'RastersWithPARCInfoCSV' on the PARC module.
     '''
     _input_ports = [('csvFileList', '(edu.utah.sci.vistrails.basic:File)'),
                                  ('predictor', "(gov.usgs.sahm:Predictor:DataInput)")]
@@ -366,17 +434,34 @@ class PredictorListFile(Module):
         
 class TemplateLayer(Path):
     '''
-    Template Layer
+    TemplateLayer
 
-    The TemplateLayer is a raster data layer with a defined coordinate system, a known cell size,
-    and an extent that defines the study area. This raster layer serves as the template for all
-    the other inputs in the analysis. All additional raster layers used in the analysis will be
-    resampled and reprojected as needed to match the template, snapped to the template, and
-    clipped to have an extent that matches the template. Users should ensure that any additional
-    layers considered in the analysis have coverage within the extent of the template layer.
+Description:
+        The second fundamental input in an analysis is the template layer.  It is used to define the
+    extent and resolution that will be used in all subsequent analyses.  The TemplateLayer is a
+    raster data layer with a defined coordinate system, a known cell size, and an extent that
+    defines the study area. The data type and values in this raster are not important.  All
+    additional raster layers used in the analysis will be resampled and reprojected as needed to
+    match the template, snapped to the template, and clipped to have an extent that matches the
+    template. Users should ensure that additional covariates considered in the analysis have
+    complete coverage of the template layer used.
 
-    The TemplateLayer is a required input for the PARC module.
+Input Ports:
+    None
 
+Output Ports:
+    value:  (mandatory)
+        This is the actual file object that is being passed to other modules in the workflow.
+        
+        Common connections:
+            The 'TemplateLayer' input port of the FieldDataAggregationAndWeight Module.
+            The 'TemplateLayer' input port of the PARC Module.
+
+    value_as_string:  (optional)
+        This is a VisTrails port that is not used in general SAHM workflows.
+        
+        Common connections:
+            This does not commonly connect to other SAHM modules.
     '''
 #    _input_ports = [('FilePath', '(edu.utah.sci.vistrails.basic:File)')]
     _output_ports = [('value', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
@@ -720,54 +805,111 @@ class BoostedRegressionTree(Model):
    
 class MDSBuilder(Module):
     '''
-    MDS Builder
+MDSBuilder
 
-    The Merged Data Set (MDS) Builder module is a utility that extracts the values of each predictor
-    layer to the point locations included in the field data set. The module produces a .csv file that
-    contains the x and y locations of the sample points and a column indicating whether each point
-    represents a presence recording, an absence recording, a presence count, or a background point.
-    Following these first three columns, each environmental predictor layer is appended as a column
-    with row entries representing the value present in the raster layer at each field sample point.
-    There are a total of three header rows in the output .csv of the MDSBuilder. The first row contains
-    the columns "x," "y," "ResponseBinary" or "ResponseCount," and the names of each of the raster
-    predictor files that were passed to the MDS Builder. The second row contains a binary value
-    indicating whether the column should be included when the model is finally applied; these values
-    are later modified during the Covariate Correlation and Selection process that takes place downstream
-    in the workflow. The final header row contains the full path on the file system to each of the raster
-    predictor files.
+Description:
+        The Merged Data Set (MDS) Builder module is a utility that extracts the values of each
+    predictor layer to the point locations included in the field data set. The module produces a
+    .csv file that contains the x and y locations of the sample points and a column indicating
+    whether each point represents a presence recording, an absence recording, a presence count, or a
+    background point.  Following these first three columns, each environmental predictor layer is
+    appended as a column with row entries representing the value present in the raster layer at each
+    field sample point.  There are a total of three header rows in the output .csv of the
+    MDSBuilder. The first row contains the columns "x," "y," "ResponseBinary" or "ResponseCount,"
+    and the names of each of the raster predictor files that were passed to the MDS Builder. The
+    second row contains a binary value indicating whether the column should be included when the
+    model is finally applied; these values are later modified during the Covariate Correlation and
+    Selection process that takes place downstream in the workflow. The final header row contains the
+    full path on the file system to each of the raster predictor files.
 
-    The MDSBuilder accepts four inputs from the user:
+        The output from this module is in the format expected by most of the pre-modeling data
+    manipulation modules, all of the model modules, as well as the RasterFormatConverter module.  As
+    such it can reasonabily be connected to numerous other modules depending on the type of modeling
+    being conducted.  A typical workflow would linearly connect MDSBuilder -> ModleEvaluationSplit
+    -> ModelSelectionSplit or ModelSelectionCrossValidation -> CovariateCorrelationAndSelection ->
+    any or all of the models (BoostedRegressionTree, GLM, MARS, RandomForest, Maxent).  If using
+    Maxent the output from CovariateCorrelationAndSelection would also go into the
+    RasterFormatConverter module which woulc connect to the projectionlayers of the maxent module.
 
-    1. Rasters with PARC Info .csv File: The raster layers listed in this file will have their values
-    extracted to the points in the field data .csv file. This parameter should be supplied by connecting
-    the output of a PARC module within the workflow to the MDSBuilder module. (In order to properly
-    extract the values of each predictor layer to the field data points, all the layers must have matching
-    coordinate systems and cell sizes; outputs from the PARC module will have had the prerequisite processing).
-    
-    2. Background Point Count: This is an optional value that applies only to workflows that employ the
-    Maxent modeling package. The dialogue box provides the option of specifying a number of background points
-    to be randomly scattered throughout the study area (the extent of the template layer) to capture a more
-    complete sample of the range of values present for each predictor layer. These points will be added to
-    the field data .csv file with a value of "-9999" denoting them as background points.
-    
-    3. Background Probability Surface: This is an optional parameter that applies only to workflows that
-    employ the Maxent modeling package. In some analyses, it may be appropriate to spatially limit background
-    points to a particular subset of the study area (e.g., islands within a study area polygon, particular
-    regions within a study area polygon, or a region determined by the known bias present in the field data).
-    Specifying a background probability surface raster allows a user to control where random points will be
-    scattered within the extent of the study area. The raster layer specified by a user should have the same
-    projection and extent as the template layer and contain values ranging from 0 to 100. These values represent
-    the probability that a randomly generated point will be retained should it fall within a particular cell.
-    That is, randomly generated points will not be generated in any part of the probability grid with a value
-    of "0" while all points falling in an area with a value of "100" will be retained. A point falling in an
-    area with a value of "50" will be kept as a background point 50% of the time.
-    
-    4. Field Data: The field data input corresponds to a .csv file containing presence/absence points or count
-    data recorded across a landscape for the phenomenon being modeled (e.g., plant sightings, evidence of
-    animal presence, etc.). This input file must be in a particular format, and in most cases, a user should
-    populate this field by connecting a FieldData element to the MDSBuilder in the visual display within VisTrails.
-    Please see the documention for the FieldData module for more details.
+Input Ports:
+    RastersWithPARCInfoCSV:  (mandatory)
+        This is a csv file which contains information about all of the predictors used. The user
+        will not generally need to create or edit this file as it is an output of the PARC module.
 
+        The folowing columns are in a RastersWithPARCInfoCSV:
+          PARCOutputFile - The raster file produced by PARC
+          Categorical - 0=not categorical data, 1=categorical data
+          Resampling - One of NearestNeighbor, bilinear, cubic, cubicspline, or lanczos
+          Aggregation - One of min, max, mean, or majority
+          OriginalFile - The location and name of the input file used by PARC
+        
+        Common connections:
+            This port will generally connect with the ouput from the PARC module.
+
+    fieldData:  (mandatory)
+        The field data input corresponds to a .csv file containing presence/absence points or count
+        data recorded across a landscape for the phenomenon being modeled (e.g., plant sightings,
+        evidence of animal presence, etc.).
+        
+        Common connections:
+            The output port of the FieldData Module
+            The output port of the FieldDataQuery Module
+            The output port of the FieldDataAggregationAndWeight Module
+
+    backgroundPointCount:  (optional)
+        This is an optional value that specifies how many randomly placed packground points to add
+        to the output.  These points will be randomly placed at pixel centroids within the template
+        extent with no more than one point assigned to any one pixel. In typical SAHM workflows
+        these points are only used by the Maxent modeling package.  These points will be added to
+        the output .csv file with a value of "-9999" denoting them as background points.
+        
+        Default value = 0, which is to say that no background point are added to the output.
+
+    backgroundProbSurf:  (optional)
+        Background Probability Surface: This is an optional parameter that applies only to workflows
+        that employ the Maxent modeling package. In some analyses, it may be appropriate to
+        spatially limit background points to a particular subset of the study area (e.g., islands
+        within a study area polygon, particular regions within a study area polygon, or a region
+        determined by the known bias present in the field data).  Specifying a background
+        probability surface raster allows a user to control where random points will be scattered
+        within the extent of the study area. The raster layer specified by a user should have the
+        same projection and extent as the template layer and contain values ranging from 0 to 100.
+        These values represent the probability that a randomly generated point will be retained
+        should it fall within a particular cell.  That is, randomly generated points will not be
+        generated in any part of the probability grid with a value of "0" while all points falling
+        in an area with a value of "100" will be retained. A point falling in an area with a value
+        of "50" will be kept as a background point 50% of the time.
+        
+        Default value = 0 (No background points are added to the output.)
+        
+        Options are:
+            Any positive integer.
+
+    Seed:  (optional)
+        The seed is used to be able recreate a specific output.  The seed used in each run will be
+        noted on the console output and saved in the output log in the session folder.
+        
+        Default value = If no seed is specified a random seed between -1*((2^32)/2) and ((2^32)/2) will be generated and used.
+        
+        Options are:
+            Any integer between -1*((2^32)/2) and ((2^32)/2)
+
+Output Ports:
+    mdsFile:  (optional)
+        This is the CSV flat file containing the location data and values extracted from each of the
+        covariates.
+        
+        Common connections:
+            The input port 'InputMDS' in the ModelEvaluationSplit module.
+            The input port 'InputMDS' in the ModelSelectionSplit module.
+            The input port 'InputMDS' in the ModelSelectionCrossValidation module.
+            The input port 'InputMDS' in the CovariateCorrelationAndSelection module.
+            The input port 'InputMDS' in the RasterFormatConverter module.
+            The input port 'InputMDS' in the Maxent module.
+            The input port 'InputMDS' in the BoostedRegressionTree module.
+            The input port 'InputMDS' in the GLM module.
+            The input port 'InputMDS' in the MARS module.
+            The input port 'InputMDS' in the RandomForest module.
     '''
 
     _input_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
@@ -778,6 +920,13 @@ class MDSBuilder(Module):
                             
     
     _output_ports = [('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)')]
+
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return utils.construct_port_msg(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+         return utils.construct_port_msg(cls, port_name, 'out')
 
     def compute(self):
         port_map = {'fieldData': ('fieldData', None, True),
@@ -822,29 +971,152 @@ class MDSBuilder(Module):
 
 class FieldDataQuery(Module):
     '''
-    FieldDataQuery
+FieldDataQuery
+
+Description:
+        Often raw field data come to us in a format that contains more information than we need to
+    include in any single model.  This can take the form of additional columns that contain
+    extraneous information, additional columns that contain occurrence data for additional species,
+    or rows that from a time period, collection method, or species that we are not interested in
+    modeling.  The Field Data Query module contains functionality to subset and reformat this output
+    into the format used by the SAHM package.
+            Columns can be specified with either a positional argument (1, 2, 3, etc) if you want to
+    select the first, second, third etc column.  Note these numbers start from 1.  Alternatively you
+    can select a column based on name by entering the text of the column name found in the header.
+
+            When selecting rows there are two types of queries that can be specified:
+               Simple - Select a Query_Column and enter a value in the Query port.  If the value for
+    a row in the selected column equals the value entered in the Query that row will be kept.  For
+    example you might have a 'year' column and you would want to select all 2009 entries.  NOTE:  DO
+    NOT ENCLOSE THE QUERY TEXT IN QUOTES IF YOU ARE TRYING TO MATCH A STRING!
+
+               Complex - Optionally you can construct complex queries using Python syntax.  To do
+    this enclose the column name in square brackets as part of a line of Python code.  Since the
+    columns used are specified in the query string there is no need to use the Query_column port and
+    it will be ignored.  For example to select years greater than 2005 you would use:  [year] > 2005
+    To include string equality make sure you enclose the entire bracketed field name in quotes as
+    well.  For example "[Observer]" == "Colin"  Complex queries involving multiple columns are
+    possible as well, for example "[Observer]" != "Colin" and [year] > 2005.
+
+Input Ports:
+    fieldData_file:  (mandatory)
+        The file containing Field data.  The acceptable formats vary but it must have a column with
+        X, Y, and response values.  Additional columns are permissible.
         
-    This module provides convienence functions for selecting the pertinent columns in a
-    raw field data file.  Also provided are functions for selecting the rows in the file
-    to include based on the values in another column.
-    
-    columns can be specified with either a number (1 based) or the header string name.
-    The string is not case sensitive and does not need to be enclosed in quotes.
-    if the name or number of any of the columns cannot be found an error will be thrown.
-    
-    For the Query column you can either enter an equality statement with x used as a 
-        placeholder to represent the values in the query column or you can construct 
-        more involved queries using Python syntax.
+        Common connections:
+            This port can be connected to a FieldData module or the FieldData file can be specified
+                    directly in the module information pane.
+
+    x_column:  (optional)
+        The column that contains the 'X' coordinates.  These values must be in the same coordinates,
+        projection, and units as those defined in the template layer.
+
+        Columns can be specified with either a positional argument (1, 2, 3, etc) if you want to
+        select the first, second, third etc column.  Note these numbers start from 1.  Alternatively
+        you can select a column based on name by entering the text of the column name found in the
+        header.
         
-        For example:
-            x < 2005 (would return values less than 2005)
-            x == 2000 or x == 2009 (would return 2000 or 2009)
-            The syntax is python in case you want to create an involved query.
+        Default value = 1, which is to say the first column in the input field data file.
+        
+        Common connections:
+            NA
+
+    y_column:  (optional)
+        The column that contains the 'Y' coordinates.  These values must be in the same coordinates,
+        projection, and units as those defined in the template layer.
+
+        Columns can be specified with either a positional argument (1, 2, 3, etc) if you want to
+        select the first, second, third etc column.  Note these numbers start from 1.  Alternatively
+        you can select a column based on name by entering the text of the column name found in the
+        header.
+        
+        Default value = 2, which is to say the second column in the input field data file.
+
+    Response_column:  (optional)
+        The column that contains the response of interest.
+
+        Columns can be specified with either a positional argument (1, 2, 3, etc) if you want to
+        select the first, second, third etc column.  Note these numbers start from 1.  Alternatively
+        you can select a column based on name by entering the text of the column name found in the
+        header.
+        
+        Default value = 3, which is to say the third column in the input field data file.
+
+    ResponseType:  (optional)
+        The type of response recorded in the response column
+        
+        Default value = 'Presence(Absence)'
+        
+        Options are:
+            'Presence(Absence)' = 1 for Presense, optionally also 0 for Absence and -9999 for
+                    background points.
+            'Count' = 0, 1, 2, 3 etc. observed count data.  Optionally also -9999 for background
+                    points
+
+    Response_Presence_value:  (optional)
+        The value in the response column that will be taken to indicate a presense.
+        
+        Default value = By default any value in the list '1', 'True', 'T', 'Present', 'Presence' will be assigned a value of 1 (presence) in the output. Note: not case sensitive.
+        
+        Options are:
+            And number or string can be entered, quotes are not required.
+
+    Response_Absence_value:  (optional)
+        The value in the response column that will be taken to indicate an absence.
+        
+        Default value = By default any value in the list '0', 'False', 'F', 'Absent', 'Absence' will be assigned a value of 0 (absence) in the output. Note: not case sensitive.
+        
+        Options are:
+            And number or string can be entered, quotes are not required.
+
+    Query_column:  (optional)
+        The column which contains values you would like to use to with the simple equality query
+        option.  The values in this column will be checked against the value entered in the query
+        port.
+
+    Query:  (optional)
+        If using the simple equality query functionality simply enter the value you would like to
+        filter on here.  NOTE:  DO NOT ENCLOSE THE QUERY TEXT IN QUOTES IF YOU ARE TRYING TO MATCH A
+        STRING!  Also do not include any additional spaces.
+
+        If using the complex Python syntax query a valid Python equality statement with the values
+        from each individual row indicated with square bracketed field (header row) names.
+        
+        Options are:
+            Simple - Select a Query_Column and enter a value in the Query port.  If the value for a
+                    row in the selected column equals the value entered in the Query that row will
+                    be kept.  For example you might have a 'year' column selected in the
+                    Query_column port and enter 2009 here to to select all 2009 entries.  NOTE:  DO
+                    NOT ENCLOSE THE QUERY TEXT IN QUOTES IF YOU ARE TRYING TO MATCH A STRING!
+            Complex - Optionally you can construct complex queries using Python syntax.  To do this
+                    enclose the column name in square brackets as part of a line of Python code.
+                    Since the columns used are specified in the query string there is no need to use
+                    the Query_column port and it will be ignored.  For example to select years
+                    greater than 2005 you would use:  [year] > 2005  To include string equality make
+                    sure you enclose the entire bracketed field name in quotes as well.  For example
+                    "[Observer]" == "Colin"  Complex queries involving multiple columns are possible
+                    as well, for example "[Observer]" != "Colin" and [year] > 2005.
+
+Output Ports:
+    fieldData:  (mandatory)
+        The file containing field data.
+        This output file will be in: X, Y, ResponseBinary/ResponseCount format.
+        
+        Common connections:
+            FieldDataAggregateAndWeight FieldData - For collapsing or weighting points relative to
+                    the template pixels.
+            MDS_builder - fieldData - for modeling without using the FieldDataAggregateAndWeight
+                    functionality.
+
+
+
     '''    
     _input_ports = [('fieldData_file', '(gov.usgs.sahm:FieldData:DataInput)'),
                                  ('x_column', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'1'}),
                                  ('y_column', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'2'}),
                                  ('Response_column', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'3'}),
+                                 ('Response_Presence_value', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'1'}),
+                                 ('Response_Absence_value', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'0'}),
                                  ('ResponseType', '(gov.usgs.sahm:ResponseType:Other)', {'defaults':'Presence(Absence)'}),
                                   ('Query_column', '(edu.utah.sci.vistrails.basic:String)'),
                                   ('Query', '(edu.utah.sci.vistrails.basic:String)')]
@@ -971,7 +1243,60 @@ class FieldDataQuery(Module):
      
 class FieldDataAggregateAndWeight(Module):
     '''
-    Documentation to be updated when module finalized.
+FieldDataAggregateAndWeight
+
+Description:
+        In many instances data collected in the field can be at a different spatial resolution than
+    we are modeling at.  For example we might have observations collected every five meters along a
+    200 m. transect when we are modeling with covariates with 1000 m. cells.  When running species
+    distribution models (SDMs) such as those contained in SAHM, spatial issues need to be addressed
+    in order to avoid introduction of pseudo-replication.   For instance, considering multiple field
+    data observations which are all spatially located in the same modeled pixel will generate
+    replicate values or redundant information.  When running a model, this redundancy causes pseudo-
+    replication and can negatively influence model development.  The FieldDataAggregateAndWeight
+    tool helps aggregate field data locations so only one field data observation is represented per
+    pixel or multiple points are downweighted proportionately.
+
+        Currently only GLM, MARS, and Boosted Regression Trees accept weights.  Any Weights column
+    will be ignored by Random Forest.
+
+
+Input Ports:
+    templateLayer:  (mandatory)
+        Raster file used to determine cell size and extent.
+        Note - The projection and coordinate system used in the template file must match that given
+        in the FieldData's X and Y columns.
+        
+        Common connections:
+            This input port generally will connnect to the 'value' port of a TemplateLayer Module.
+
+    fieldData:  (mandatory)
+        The file containing field data.  Must be in X, Y, ResponseBinary/ResponseCount format
+        
+        Common connections:
+            The'value' port of a FieldData module
+            The 'fieldData' port of the FieldDataQuery module
+
+    PointAggregationOrWeightMethod:  (mandatory)
+        The method used to either weight or aggregate field data points.
+        
+        Options are:
+            Collapse In Pixel : All field data points falling within a single pixel will be collapse
+                    into a single point at the center of that pixel.  If using Presense(Absense)
+                    data the point will be given a value of 1 if any are presense, otherwise 0 if
+                    any are absense, otherwise -9999 if all are background.  If using count data the
+                    point value will be the average of all points in a pixel.
+            Weight Per Pixel : All field data points are retained but a weight column is added and
+                    points in pixels with multiple points are given a weight of 1 over the number of
+                    points in that pixel.  For example all the points in a pixel with 4 points would
+                    be given a weight of 1/4.
+
+Output Ports:
+    fieldData:  (mandatory)
+        This is a CSV file in a X,Y,Response,(Weight) format.
+        
+        Common connections:
+            The input port 'fieldData' of the MDSBuilder module.
     '''
     _input_ports = [('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
@@ -1011,53 +1336,105 @@ class FieldDataAggregateAndWeight(Module):
 
 class PARC(Module):
     '''
-    PARC
+PARC
 
-    The Projection, Aggregation, Resampling, and Clipping (PARC) module is a powerful
-    utility that automates the preparation steps required for using raster layers in
-    most geospatial modeling packages. In order to successfully consider multiple
-    environmental predictors in raster format, each layer must have coincident cells
-    (pixels) of the same size, have the same coordinate system (and projection, if
-    applicable), and the same geographic extent. The PARC module ensures that all of
-    these conditions are met for the input layers by transforming and or reprojecting
-    each raster to match the coordinate system of the template layer. This process
-    usually involves aggregation (necessary when an input raster layer must be up-scaled
-    to match the template layer-- e.g., generalizing a 10 m input layer to a 100 m output
-    layer), and or resampling (necessary for interpolating new cell values when transforming
-    the raster layer to the coordinate space or cell size of the template layer). Lastly,
-    each raster predictor layer is clipped to match the extent of the template layer.
+Description:
+        The Projection, Aggregation, Resampling, and Clipping (PARC) module is a powerful utility
+    that automates the preparation steps required for using raster layers in most geospatial
+    modeling packages. In order to successfully consider multiple environmental predictors in raster
+    format, each layer must have coincident cells (pixels) of the same size, have the same
+    coordinate system (and projection, if applicable), and the same geographic extent. The PARC
+    module ensures that all of these conditions are met for the input layers by transforming and or
+    reprojecting each raster to match the coordinate system of the template layer. This process
+    usually involves aggregation (necessary when an input raster layer must be up-scaled to match
+    the template layer-- e.g., generalizing a 10 m input layer to a 100 m output layer), and or
+    resampling (necessary for interpolating new cell values when transforming the raster layer to
+    the coordinate space or cell size of the template layer). Lastly, each raster predictor layer is
+    clipped to match the extent of the template layer.
 
-    The settings used during these processing steps follow a particular set of decision rules
-    designed to preserve the integrity of data as much as possible. However, it is important
-    for a user to understand how these processing steps may modify the data inputs. For
-    additional information about the PARC module, please see the extended help and
-    documentation for the SAHM package. 
+        The settings used during these processing steps follow a particular set of decision rules
+    designed to preserve the integrity of data as much as possible. However, it is important for a
+    user to understand how these processing steps may modify the data inputs. For additional
+    information about the PARC module, please see the extended help and documentation for the SAHM
+    package.
 
-    The PARC module accepts four kinds of inputs: 
+Input Ports:
+    predictor:  (optional)
+        A single raster with resampling, aggregation, and categorical options.
+        
+        Common connections:
+            value' port of a Predictor module
+            Note - Multiple single Predictor modules can be connected to this single input port.
 
-    1. Predictor List: A user should not have to populate this field. This field is populated
-    when a selection is made from the pre-loaded .csv file of raster predictor layer inputs
-    (specified during the SAHM install) and connected to the PARC module in the visual display. 
-    
-    2. .csv File List: The .csv file list corresponds to the Predictor List File element and
-    allows a user to load a .csv file containing a list of rasters for consideration in the
-    modeled analysis. For additional information, please see the documentation for the Predictor
-    List File element.
-    
-    3. Predictor:  The predictor input allows a user to select a single raster predictor layer
-    to be considered in the analysis. It is recommended that a user add this input as a separate
-    element in the visual display (and then link it to the PARC module) so that the aggregation
-    and resampling settings can be established. The PARC module can accept multiple predictor
-    elements. For additional information, please see the documentation for the Predictor element.
-    
-    4. Template Layer: The template layer is a raster data layer with a defined coordinate system,
-    a known cell size, and an extent that defines the study area. This raster layer serves as the
-    template for all the other inputs in the analysis. All additional raster layers used in the
-    analysis will be resampled and reprojected as needed to match the template, snapped to the
-    template, and clipped to have an extent that matches the template. Users should ensure that
-    any additional layers considered in the analysis have coverage within the extent of the
-    template layer. The template layer is a required input for the PARC module.
+    PredictorList:  (optional)
+        This is an in memory data construct that contains a list of predictors each with resampling,
+        aggregation, and categorical options.
+        
+        Common connections:
+            value' port of any of the 'Individual Predictors selector' modules
+            Note - Multiple single Predictors selectors modules can be connected to this single
+                    input port.
 
+    RastersWithPARCInfoCSV:  (optional)
+        This is a CSV containing a list of files to include in the PARC operation.
+
+        The format of this list conforms to the 'PredictorListFile' specs:
+            Column 1: The full file path to the input raster layer including the drive.
+            Column 2: A binary value indicating whether the input layer is categorical or not. A
+        value of "0" indicates that an input raster is non-categorical data (continuous), while a
+        value of "1" indicates that an input raster is categorical data.
+            Column 3: The resampling method employed to interpolate new cell values when
+        transforming the raster layer to the coordinate space or cell size of the template layer, if
+        necessary. The resampling type should be specified using one of the following values:
+        "nearestneighbor," "bilinear," "cubic," or "lanczos."
+            Column 4: The aggregation method to be used in the event that the raster layer must be
+        up-scaled to match the template layer (e.g., generalizing a 10 m input layer to a 100 m
+        output layer). Care should be taken to ensure that the aggregation method that best
+        preserves the integrity of the data is used. The aggregation should be specified using one
+        of the following values: "Min," "Mean," "Max," "Majority," or "None."
+
+        In formatting the list of predictor files, the titles assigned to each of the columns are
+        unimportant as the module retrieves the information based on the order of the values in the
+        .csv file (the ordering of the information and the permissible values in the file however,
+        are strictly enforced). The module also anticipates a header row and will ignore the first
+        row in the .csv file.
+        
+        Common connections:
+            'value' port of PredictorListFile module
+
+    templateLayer:  (mandatory)
+        The templat layer raster file used to define the Extent, Cell size, Projection, raster snap,
+        and coordinate system of the outputs.
+        
+        Common connections:
+            'value' port of TemplateLayer module
+
+    ignoreNonOverlap:  (optional)
+        Option of using the intersection of all covariates and template or enforcing the template
+        extent.
+        
+        Options are:
+            True (checked) = Use intersection of all covariates extents.  Area of template extent
+                    will be reduce such all covariate layers extents can be completely covered by
+                    the new extent.
+            False (Unchecked) = The template extent will be used for all outputs and an error will
+                    be raised if any of the covariates are not completely covered by the template.
+
+    multipleCores:  (optional)
+        Option of running processing on multiple threads/cores.
+        
+        Options are:
+            True (checked) = Individual layers will be run consectively on separate threads.
+            False (Unchecked) = All processing will occur on the same thread as the main program.
+
+Output Ports:
+    RastersWithPARCInfoCSV:  (mandatory)
+        The VisTrails output from the PARC module is a interim CSV file that contains information
+        about each of the files processed.  This is used by the MDS builder to determine which files
+        to extract values from and which layers are categorical.
+        
+        Common connections:
+            Input port 'RastersWithPARCInfoCSV' of MDSBuilder module
     '''
 
     #configuration = []
@@ -1069,6 +1446,13 @@ class PARC(Module):
                                 ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':True})]
 
     _output_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
+    
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return utils.construct_port_msg(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+         return utils.construct_port_msg(cls, port_name, 'out')
     
     def compute(self):
         #writetolog("\nRunning PARC", True)
@@ -1149,41 +1533,69 @@ class PARC(Module):
 
 class RasterFormatConverter(Module):
     '''
-    Raster Format Converter
+RasterFormatConverter
 
-    The RasterFormatConverter module allows a user to easily convert .tif raster layers
-    into a different raster format for use and display in other software packages. The
-    module accepts as an input either a list of rasters in a Merged Dataset File (MDS)
-    or the location of a directory containing multiple raster files. All outputs will be
-    sent to a folder named "ConvertedRasters" (followed by an underscore and a number
-    corresponding to the run sequence of the module) within the user's current VisTrail
-    session folder.
+Description:
+        The RasterFormatConverter module allows a user to easily convert between raster file types
+    for a group of rasters. This group can be specified as either all the rasters in a single
+    directory or the rasters specified in a single MDS file (see below).  All outputs will be sent
+    to a folder named "ConvertedRasters" (followed by an underscore and a number corresponding to
+    the run sequence of the module) within the user's current VisTrail's session folder.  Typically
+    this module will be used within a workflow to convert the geotiff format used by the rest of the
+    modules to the ascii format needed by Maxent.  But the following file formats are accepted for
+    both inputs and outputs: Arc/Info ASCII Grid, ESRI BIL, ERDAS Imagine, and JPEG and others.  See
+    the compiled by default options at http://www.gdal.org/formats_list.html for a complete list of
+    the accepted file types.
 
-    Three parameters can be specified by the user:
+Input Ports:
+    inputMDS:  (optional)
+        Any merged dataset (MDS) format csv can be used as input to this module.  All of the rasters
+        pointed to in the third line of the file will be converted to the output format.
+        
+        Common connections:
+            This can be connected to the output 'mdsFile' port on any of the following modules:
+                    MDSBuilder, ModelEvaluationSplit, ModelSelectionSplit,
+                    ModelCrossValidationSplit, or CovariateCorrelationAndSelection.
 
-    1. Format: The format corresponds to the desired raster output format. The following
-    output file formats are supported: Arc/Info ASCII Grid, ESRI BIL, ERDAS Imagine, and JPEG.
-    
-    To specify the desired output, users should enter the values shown below.
-    For an ASCII (.asc) output, enter: "asc"
-    For an ESRI BIL output, enter: "bil"
-    For an Erdas Imagine (.img) output, enter: "img"
-    For a JPEG (.jpg) output, enter: "jpg"
-    
-    If no value is entered by the user, the module will default to an ASCII (.asc) output
-    format.
+    inputDir:  (optional)
+        An directory can be used to specify which files to process.  All of the rasters (of any
+        format) will be converted to the output format specified.
+        
+        Common connections:
+            This does not generally connect to any other SAHM modules.
 
-    2. Input Directory: The input directory allows a user to point to an entire folder as
-    an input to the RasterFormatConverter. The contents of the specified folder will be
-    checked for raster files and all the raster files contained within the directory will
-    be converted to the format specified in the "Format" dialogue box. The module will
-    identify and convert files of the following raster types: .bil, .img, .tif, .jpg, and .asc. 
+    format:  (optional)
+        The format to convert all the input grids into.  For Maxent this will be ASCII.
+        
+        Default value = Geotif
+        
+        Options are:
+            Geotif
+            Arc/Info Grid
+            ASCII Grid
+            ESRI Bil
+            ERDAS Imagine
+            JPEG
+            BMP
+            Additional uncommon file types are supported by GDAL.  For the complete list see the
+                    'compiled by default' options at http://www.gdal.org/formats_list.html for a
+                    complete list of the accepted file types.
 
-    3. Input Merged Dataset (MDS): The input merged dataset allows a user to specify a .csv
-    file created in the VisTrails workflow (containing a list of .tif raster files) as an
-    input to the raster converter. All of the files listed in the MDS will be converted to
-    the raster format specified in the "Format" dialogue box.
+    multipleCores:  (optional)
+        Option of running processing on multiple threads/cores.
+        
+        Options are:
+            True (checked) = Individual layers will be run consectively on separate threads.
+            False (Unchecked) = All processing will occur on the same thread as the main program.
 
+Output Ports:
+    outputDir:  (optional)
+        The directory where all output files will be saved to.
+        
+        Default value = This directory name is created by the module and it will be located in the session folder.
+        
+        Common connections:
+            This port will connect to the maxent input port 'projectionlayers'.
     '''
 
     #configuration = []
@@ -1193,6 +1605,13 @@ class RasterFormatConverter(Module):
                     ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':True})]
 
     _output_ports = [('outputDir', '(edu.utah.sci.vistrails.basic:Directory)')]
+
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return utils.construct_port_msg(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+         return utils.construct_port_msg(cls, port_name, 'out')
 
     def compute(self):
         writetolog("\nRunning TiffConverter", True)
@@ -1280,6 +1699,13 @@ class ModelEvaluationSplit(Module):
                     ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
     
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return utils.construct_port_msg(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+         return utils.construct_port_msg(cls, port_name, 'out')
+    
     def compute(self):
         writetolog("\nGenerating Model Evaluation split ", True)
         inputMDS = utils.dir_path_value(self.forceGetInputFromPort('inputMDS', []))
@@ -1338,7 +1764,14 @@ class ModelSelectionSplit(Module):
                     ('RatioPresAbs', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
-    
+
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return utils.construct_port_msg(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+         return utils.construct_port_msg(cls, port_name, 'out')
+     
     def compute(self):
         writetolog("\nGenerating Model Selection split ", True)
         inputMDS = utils.dir_path_value(self.forceGetInputFromPort('inputMDS', []))
@@ -1397,7 +1830,14 @@ class ModelSelectionCrossValidation(Module):
                     ('Stratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':True}),
                     ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
-    
+
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return utils.construct_port_msg(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+         return utils.construct_port_msg(cls, port_name, 'out')
+         
     def compute(self):
         writetolog("\nGenerating Cross Validation split ", True)
         port_map = {'inputMDS':('i', utils.dir_path_value, True),
@@ -1442,32 +1882,112 @@ class ModelSelectionCrossValidation(Module):
 
 class CovariateCorrelationAndSelection(Module):
     '''
-    Covariate Correlation And Selection
+    CovariateCorrelationAndSelection
 
-    The CovariateCorrelationAndSelection view provides a breakpoint in the modeling workflow
-    for the user to assess how well each variable explains the distribution of the sampled
-    data points and to remove any variables that may exhibit high correlation with others. 
+Description:
+        The CovariateCorrelationAndSelection view provides a breakpoint in the modeling workflow for
+    the user to assess how well each variable explains the distribution of the sampled data points
+    and to remove any variables that may exhibit high correlation with others.
+        The display shows the n variables that have the highest total number of correlations above a
+    threshold with other predictors using the maximum of the Pearson, Spearman and Kendall
+    coefficient. The column heading over each variable displays the number of other variables with
+    which the environmental predictor is correlated using the user supplied threshold which defaults
+    to .7.  Radio buttons are available to limit the display and correlation calculations to any
+    combination of presence, absence, or background points.  The first column in the plot shows the
+    relationship between the response and each predictor.  Row labels indicate the maximum of the
+    Spearman and Pearson correlation coefficient and a locally weighted smooth has been added to
+    help distinguish the nature of the relationship.
+        The remaining plots make up a square with histograms for each variable displayed on the
+    diagonal.  Their respective graphical display and correlation with other variables can be found
+    by locating the row/column intersection between each (above and below the diagonal).  The
+    scatter plot along with a locally weight smooth is shown below the diagonal.  Presence records
+    are represented by red points, absence by green, and background are yellow.  Above the diagonal
+    is the correlation coefficient between the two predictors.  If Spearman or Kendall correlation
+    coefficient is larger than the Pearson correlation coefficient then an s or k will show up in
+    the bottom right corner of this box.
 
-    The display shows the 10 most correlated variables of those selected. These variables
-    are displayed on the diagonal and their respective graphical display and correlation with
-    other variables can be found by locating the row/column intersection between each (above
-    and below the diagonal). The column heading over each variable displays the number of
-    other variables with which the environmental predictor is correlated. The user defined
-    "Threshold" option allows a user to specify the degree of correlation required between
-    two variables for them to be counted in this tally.
-
-    A user is provided with the opportunity to select a new set of the environmental predictor
-    variables and "Update" the Covariate Correlation screen to investigate the relationships
-    among the new variables selected. The options are provided to include or exclude the
-    presence/count points, the absence points (when applicable), and the background points in
-    this correlation test. Variables with a high degree of correlation with other variables
+        A user is provided with the opportunity to select a new set of the environmental predictor
+    variables and “Update” the Covariate Correlation screen to investigate the relationships among
+    the new variables selected.  Variables with a high degree of correlation with other variables
     should generally be unchecked in their respective radio buttons, and will be excluded from
     subsequent analysis steps in the model workflow.
+        Multiple iterations can be run at this screen, allowing the user to investigate the
+    relationships among the environmental predictor variables and choose the most appropriate set to
+    be used in the subsequent modeling. When the desired set of variables has been chosen, the “OK”
+    button is selected and processing will resume in the VisTrails workflow.
 
-    Multiple iterations can be run at this screen, allowing the user to investigate the
-    relationships among the environmental predictor variables and choose the most appropriate
-    set to be used in the subsequent modeling. When the desired set of variables has been chosen,
-    the "OK" button is selected and processing will resume in the VisTrails workflow.
+
+Input Ports:
+    inputMDS:  (mandatory)
+        The file to select from.  If this file contains unselected layers (0 in the second header
+        line) these will initially appear deselected in the GUI.
+        
+        Common connections:
+            The inputMDS can come from any module that outpus an MDS file.  These are: MDSBuilder,
+                    ModelEvaluationSplit, ModelSelectionSplit, and ModelSelectionCrossValidation.
+
+    selectionName:  (optional)
+        This serves two purposes.  First to uniquely identify a given selection.  This unique name
+        is used to determine if a selection has been previously made, to apply for example.  And
+        secondly to provide something that can be changed to trigger VisTrails to rerun this module
+        even if nothing upstream has changed.
+        
+        Options are:
+            Any text can be used.
+
+    ShowGUI:  (optional)
+        This Boolean indicates whether to stop execution and display the GUI for user interaction.
+        In some cases such as exploration you might want to make a selection in a previous run and
+        then change this to false so that the selection will be apply to subsequent runs without
+        interrupting execution.
+        
+        Default value = True
+        
+        Options are:
+            True - The GUI will be shown.
+            False - The GUI will not be shown, execution will not be interrupted, but the previous
+                    selection made with the specified selectionName will be applied to the current
+                    MDS file.
+
+    numPlots:  (optional)
+        The number of variables to display at a time in the plot frame.
+        
+        Default value = 8
+        
+        Options are:
+            An integer greater than 1 and generally no greater than 12
+
+    minCor:  (optional)
+        The minimum correlation used to summarize the number of other variables each variable is
+        highly correlated with.
+        
+        Default value = 0.7
+        
+        Options are:
+            A decimal number between 0 and 1.
+
+    corsWithHighest:  (optional)
+        If one desires to view only other parameters that have a correlation above the specified
+        threshold with the parameter than has the highest number of total correlations with other
+        parameters then this should be set to true.  Otherwise, by default, the parameters that are
+        selected for display will be the set of parameters that have the highest number of
+        correlations with other parameters above the given threshold.
+        
+        Default value = False
+        
+        Options are:
+            True (Checked)
+            False (Unchecked)
+
+Output Ports:
+    outputMDS:  
+        This is the output MDS file with the user supplied selection applied.
+        
+        Common connections:
+            The output from the CovariateCorrelationAndSelection will generally connect to one of
+                    the model modules (BoostedRegressionTree, GLM, MARS, RandomForest, or Maxent)
+            If using Maxent the output from CovariateCorrelationAndSelection might also conect to
+                    the RasterFormatConverter.
 
     '''
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
@@ -1478,6 +1998,13 @@ class CovariateCorrelationAndSelection(Module):
                     ('corsWithHighest', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':True})]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
 
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return utils.construct_port_msg(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+         return utils.construct_port_msg(cls, port_name, 'out')
+     
     def compute(self):
         writetolog("\nOpening Select Predictors Layers widget", True)
         
@@ -1710,6 +2237,9 @@ class CovariateCorrelationAndSelection(Module):
 #        writetolog("Finished Select Projection Layers widget", True)
 
 class MAXENT(Module):
+    '''
+    
+    '''
 
     _output_ports = [("lambdas", "(edu.utah.sci.vistrails.basic:File)"),
                      ("report", "(edu.utah.sci.vistrails.basic:File)"),
@@ -1834,7 +2364,8 @@ def initialize():
     global maxent_path, color_breaks_csv
     global session_dir 
     
-    load_port_docs()   
+    doc_file = os.path.abspath(os.path.join(os.path.dirname(__file__),  "documentation.xml"))
+    utils.load_documentation(doc_file)
     
     r_path = os.path.abspath(configuration.r_path)
     maxent_path = os.path.abspath(configuration.maxent_path)
@@ -1950,16 +2481,6 @@ def build_predictor_modules():
             
     return modules
 
-def load_port_docs():
-    pass
-#    csv_file = os.path.abspath(os.path.join(os.path.dirname(__file__),  "PortDocs.csv"))
-#    csvReader = csv.DictReader(open(csv_file, "r"))
-#    port_docs = {}
-#    for row in csvReader:
-#        k = row['Module'] + row['Port'] + row['Direction']
-#        port_docs[k] = row
-#        
-#    utils.port_docs = port_docs
 
 input_color = (0.76, 0.76, 0.8)
 input_fringe = [(0.0, 0.0),
@@ -2023,4 +2544,4 @@ _modules = generate_namespaces({'DataInput': [
                                           (SAHMSpatialOutputViewerCell, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe})
                                           ]
-                                })
+                                }
