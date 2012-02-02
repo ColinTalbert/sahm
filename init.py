@@ -863,6 +863,8 @@ class FieldDataQuery(Module):
             'x_column': ('x_col', None, True),
             'y_column': ('y_col', None, True),
             'Response_column': ('res_col', None, True),
+            'Response_Presence_value': ('res_pres_val', None, True),
+            'Response_Absence_value': ('res_abs_val', None, True),
             'ResponseType': ('response_type', None, True),
             'Query_column': ('query_col', None, False),
             'Query': ('query', None, False),}
@@ -871,9 +873,7 @@ class FieldDataQuery(Module):
         FDQOutput = utils.mknextfile(prefix='FDQ_', suffix='.csv')
         
         infile = open(FDQParams['fieldData'], "rb")
-        csvReader = csv.reader(infile)
-        header = csvReader.next()
-        
+        csvReader = csv.DictReader(infile)      
 
         outfile = open(FDQOutput, "wb")
         csvwriter = csv.writer(outfile)
@@ -883,25 +883,47 @@ class FieldDataQuery(Module):
             responsetype = 'responseBinary'
             
         csvwriter.writerow(['X','Y',responsetype,"input=" + infile.name])
-        x_index = self.find_column(header,FDQParams['x_col'])
-        y_index = self.find_column(header,FDQParams['y_col'])
-        res_index = self.find_column(header,FDQParams['res_col'])
+
+        header = csvReader.fieldnames
+        x_key = self.find_column(header,FDQParams['x_col'])
+        y_key = self.find_column(header,FDQParams['y_col'])
+        res_key = self.find_column(header,FDQParams['res_col'])
         
         use_query = False
-        if self.hasInputFromPort('Query_column'):
+        if self.hasInputFromPort('Query'):
             use_query = True
-            query_col_index = self.find_column(header,FDQParams['query_col'])
+            query  = FDQParams['query']
+            #check if we're using a simple (equality) or complex (python syntax) query
+            use_complex = any(str in query for str in ['[' + str + ']' for str in header] )
+            
+        if self.hasInputFromPort('Query_column'):
+            query_col_key = self.find_column(header,FDQParams['query_col'])
+        else:
+            query_col_key = None
+        
+        
+        
         
         for row in csvReader:
-            if not use_query or \
-             FDQParams['query'] == row[query_col_index] or \
-             self.check_query(row[query_col_index], FDQParams['query']):
-                response = row[res_index]
-                if response.lower() == 'present':
-                    response = '1'
-                elif response.lower() == 'absent':
-                    response = '0'
-                csvwriter.writerow([row[x_index], row[y_index], response])
+            if not use_query:
+                include_row = True
+            elif use_complex:
+                include_row = self.complex_query(row, query)
+            else:
+                include_row = self.simple_query(row, query, query_col_key)
+                
+            if include_row:
+                response = row[res_key]
+                if response.lower() in ["1", "true", "t", "present", "presence", FDQParams['res_pres_val']]:
+                    response = 1
+                elif response.lower() in ["0", "false", "f", "absent", "absense", FDQParams['res_abs_val']]:
+                    response = 0
+                else:
+                    response = row[res_key]
+                    
+                csvwriter.writerow([row[x_key],
+                                    row[y_key],
+                                    response])
         
         del infile
         del outfile
@@ -909,32 +931,41 @@ class FieldDataQuery(Module):
         output_file = utils.create_file_module(FDQOutput) 
         self.setResult('fieldData', output_file) 
     
-    def find_column(self, header, column_name):
+    
+    def find_column(self, header, column):
         try:
-            index = int(column_name) - 1
+            index = int(column) - 1
             if index > len(header) - 1:
                 msg = "Field data input contains fewer columns than the number specified\n"
                 msg += str(index + 1) + " is greater than " + str(len(header))
+                writetolog(msg, True, True)
                 raise ModuleError(self, msg)
-        except:
-            try:
-                all_lowers = [item.lower() for item in header]
-                index = all_lowers.index(column_name.lower())
-            except:
+            return header[index]
+        except ValueError:
+            if column in header:
+                return column
+            else:
                 msg = "The specified column wasn't in the input file\n"
                 msg += column_name + " not in " + str(header)
+                writetolog(msg, True, True)
                 raise ModuleError(self, msg)
-        return index
 
-    def check_query(self, value, query):
-        try:
-            #this works with numeric queries
-            toevaluate = query.replace('x', value)
-            return eval(toevaluate)
-        except (NameError,SyntaxError):
-            #this works with string queries
-            toevaluate = query.replace('x', "'" + value + "'")
-            return eval(toevaluate)
+    def simple_query(self, row, query, query_col):
+        return row[query_col] == query
+        
+    def complex_query(self, row, query):
+            
+        for key in row.keys():
+            query = query.replace('[' + key + ']', row[key])
+        try:   
+            return eval(query)
+        except NameError:
+            msg = "There was a 'NameError' in the complex query you entered.\n"
+            msg += "This is often an indication that strings are not being properly quoted in the python syntax.\n"
+            msg += "Try enclosing the [fieldName] item in quotes.\n\n"
+            msg += 'For example:  "[SourceType]" == "Expert"  instead of  [SourceType] == "Expert"' 
+            writetolog(msg, True, True)
+            raise ModuleError(self, msg)
 
             
      
