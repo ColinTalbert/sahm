@@ -409,23 +409,23 @@ class PARC:
                 else:
                     numCols = cols - j
                     
-            data = sourceDs.GetRasterBand(1).ReadAsArray(j, i, numCols, numRows)
-            ndMask = ma.masked_array(data, mask=(data==sourceParams["NoData"]))
-            if method == None:
-                method = "Mean"
-            if method in ["Mean", "Max", "Min"]:
-                ans = self.rebin(ndMask, (numRows/numSourcePerTarget, numCols/numSourcePerTarget), method)
-            else:
-                X, Y = ndMask.shape
-                x = X // numSourcePerTarget
-                y = Y // numSourcePerTarget
-                ndMask = ndMask.reshape( (x, numSourcePerTarget, y, numSourcePerTarget) )
-                ndMask = ndMask.transpose( [0, 2, 1, 3] )
-                ndMask = ndMask.reshape( (x*y, numSourcePerTarget*numSourcePerTarget) )
-                ans =  np.array(stats.mode(ndMask, 1)[0]).reshape(x, y)
+                data = sourceDs.GetRasterBand(1).ReadAsArray(j, i, numCols, numRows)
+                ndMask = ma.masked_array(data, mask=(data==sourceParams["NoData"]))
+                if method == None:
+                    method = "Mean"
+                if method in ["Mean", "Max", "Min"]:
+                    ans = self.rebin(ndMask, (numRows/numSourcePerTarget, numCols/numSourcePerTarget), method)
+                else:
+                    X, Y = ndMask.shape
+                    x = X // numSourcePerTarget
+                    y = Y // numSourcePerTarget
+                    ndMask = ndMask.reshape( (x, numSourcePerTarget, y, numSourcePerTarget) )
+                    ndMask = ndMask.transpose( [0, 2, 1, 3] )
+                    ndMask = ndMask.reshape( (x*y, numSourcePerTarget*numSourcePerTarget) )
+                    ans =  np.array(stats.mode(ndMask, 1)[0]).reshape(x, y)
             
             
-            outBand.WriteArray(ans, int(j / numSourcePerTarget), int(i / numSourcePerTarget))
+                outBand.WriteArray(ans, int(j / numSourcePerTarget), int(i / numSourcePerTarget))
             
                 
 #                    ans = ndMask.min()
