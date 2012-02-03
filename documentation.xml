@@ -214,7 +214,7 @@ Attached to each cell is a toolbar that allows changing of the displayed layer a
   </Module>
   <Module>
     <Title>BoostedRegressionTree</Title>
-    <Description>BRT uses decision trees to partition the the parameter space into the most homogeneous groups in terms of the response.  BRT starts with a single decision tree, then adds a tree that best explains error in the first tree, and so on.  Like random forest, BRT models automatically model interactions and nonlinear relationships, and are robust to missing observations.  Our implementation makes approximately 1,000 trees.  It incorporates advanced algorithms for tuning the model settings, simplifying the model using a cross-validation technique, and for detecting important interactions between covariates.  If more than 500 presence or absence records are found a random subset will be used for learning rate estimation and model simplification but all data will be used in the final model fitting step.  The cross-validation step within BRT should not be confused with that provided by the Model Selection Cross Validation step.  The former is used to optimize parameter values when defaults are not provided while the later is used to select models based on between model comparisons of evaluation metrics.  All discussion of cross-validation related to setting parameters in the BRT argument documentation refers to the algorithm used for parameter optimization and does not affect the cross validation split selected by Model Selection and Cross Validation.  
+    <Description>BRT uses decision trees to partition the the parameter space into the most homogeneous groups in terms of the response.  BRT starts with a single decision tree, then adds a tree that best explains error in the first tree, and so on.  Like random forest, BRT models automatically model interactions and nonlinear relationships and are robust to missing observations.  Our implementation makes approximately 1,000 trees.  It incorporates advanced algorithms for tuning the model settings, simplifying the model using a cross-validation technique, and for detecting important interactions between covariates.  If more than 500 presence or absence records are found a random subset will be used for learning rate estimation and model simplification but all data will be used in the final model fitting step.  The cross-validation step within BRT should not be confused with that provided by the Model Selection Cross Validation step.  The former is used to optimize parameter values when defaults are not provided while the later is used to select models based on between model comparisons of evaluation metrics.  All discussion of cross-validation related to setting parameters in the BRT argument documentation refers to the algorithm used for parameter optimization and does not affect the cross validation split selected by Model Selection and Cross Validation.  
 
 Several options are available for fitting BRTs when run using VisTrails special attention is required before moving away from the defaults because selection of certain parameters will disallow selection of others.  Optional parameters are described briefly here but a more in depth description can be found in Elith and Leathwich 2008.</Description>
     <InputPorts>
@@ -230,9 +230,10 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <PortName>makeBinMap</PortName>
         <Definition>Indicate whether to discretize the continues probability map into presence absence.  See the ThresholdOptimizationMethod for how this is done.  If time is a concern and many models are to be fit and assessed maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well.</Definition>
         <Manditory>False</Manditory>
-        <Default>False</Default>
+        <Default>False (Unchecked)</Default>
         <Options>
-          <Option>True or False</Option>
+          <Option>True (Checked)</Option>
+          <Option>False (Unchecked)</Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
@@ -240,9 +241,10 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <PortName>makeProbabilityMap</PortName>
         <Definition>Indicate whether a map of predicted values is to be produced for the model fit.</Definition>
         <Manditory>False</Manditory>
-        <Default>NA</Default>
+        <Default>False (Unchecked)</Default>
         <Options>
-          <Option>True or False</Option>
+          <Option>True (Checked)</Option>
+          <Option>False (Unchecked)</Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
@@ -250,9 +252,10 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <PortName>makeMESMap</PortName>
         <Definition>Indicate whether to produce a multivariate environmental similarity surface (MESS) and a map of which factor is limiting at each point see Elith et. al. 2010 for more details.  If time is a concern and many models are to be fit and assessed  maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well. </Definition>
         <Manditory>False</Manditory>
-        <Default>False</Default>
+        <Default>False (Unchecked)</Default>
         <Options>
-          <Option>True or False</Option>
+          <Option>True (Checked)</Option>
+          <Option>False (Unchecked)</Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
@@ -303,7 +306,7 @@ The value calculated for the train portion of the data will be applied to the te
         <Manditory>FALSE</Manditory>
         <Default>.75</Default>
         <Options>
-          <Default>Any positive number greater than 0 and less than or equal to 1</Default>
+          <Option>Any positive number greater than 0 and less than or equal to 1</Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
@@ -313,7 +316,7 @@ The value calculated for the train portion of the data will be applied to the te
         <Manditory>FALSE</Manditory>
         <Default>3</Default>
         <Options>
-          <Option>A positive integer generally between 2 and 10 but possible greater than 10 </Option>
+          <Option>A positive integer (generally between 2 and 10) </Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
@@ -331,9 +334,10 @@ The value calculated for the train portion of the data will be applied to the te
         <PortName>PrevalenceStratify</PortName>
         <Definition>This specifies whether cross validation samples should be stratified to match the overall prevalence.  This is currently only valid for presence\absence data and is only used in model simplification.</Definition>
         <Manditory>FALSE</Manditory>
-        <Default>True</Default>
+        <Default>True (Checked)</Default>
         <Options>
-          <Option>True or False</Option>
+          <Option>True (Checked)</Option>
+          <Option>False (Unchecked)</Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
@@ -672,104 +676,59 @@ The value calculated for the train portion of the data will be applied to the te
   </Module>
   <Module>
     <Title>ModelSelectionSplit</Title>
-    <Description>
-    The ModelSelectionSplit reserves a portion of the data from the model fitting 
-process but reports the evaluation metrics on all models not just the those selected as the 
-final models to be reported in the analysis (in contrast to the ModelEvaluationSplit).  This module 
-can be placed either directly before or directly after the CovariateCorrelationAndSelection.  If both a 
-ModelEvaluationSplit and a ModelSelectionSplit are specified then the training portion of the ModelEvalutationSplit will 
-be further partitioned by the ModelSelectionSplit thus the ModelEvalutationSplit should come 
-first in the workflow.  Both of these algorithms stratify the splits by the response.  
-That is, the ratio of presence to absence points should be nearly equal in the testing 
-and training split.  If a ModelSelectionSplit is included evaluation metrics applied to 
-the reserved data will be reported in the textual output, model evaluation plots including 
-AUC plots as well as the across model plots and the csv.  Both of these modules ignore 
-background points and treat all observations with values greater than 0 as presence 
-for the purpose of stratification by response. Three parameters can be set by the user for each of these modules:
-
-       1.	Ratio of Presence/Absence Points: This optional field is populated with a number corresponding 
-         to the desired ratio of presence to  absence points to be used in the analysis. If not populated 
-         then all occurrence records (not background points) will be portioned into either the test or 
-         training split with no reduction in the total number of points.  If populated, this entry should 
-         be a number greater than zero. (A value of '1' will result in an equal number of both presence 
-         and absence points being used, a value of '2' indicates that twice as many presence points 
-         will be used, a value of '0.5' indicates that twice as many absence points will be used, etc.). 
-         All field data points with a value equal to or greater than 1 are interpreted as presence points. 
-         Although the original field data is unmodified, this option will reduce the sample size as the 
-         merged dataset containing sample points will have points deleted from it to achieve the 
-         specified ratio as such it should be used with caution. A warning will be generated if 
-         more than 50% of either the presence or absence points will be deleted based on the ratio 
-         specified by the user. Background points are ignored by this module (they are read in 
-         and written out, but not assigned to either the test or training split).
+    <Description>The ModelSelectionSplit reserves a portion of the data from the model fitting process but reports the evaluation metrics on all models not just the those selected as the final models to be reported in the analysis (in contrast to the ModelEvaluationSplit).  This module should be placed directly the CovariateCorrelationAndSelection.  If both a ModelEvaluationSplit and a ModelSelectionSplit are specified then the training portion of the ModelEvalutationSplit will be further partitioned by the ModelSelectionSplit thus the ModelEvalutationSplit should come first in the workflow.  Both of these algorithms stratify the splits by the response.  That is, the ratio of presence to absence points should be nearly equal in the testing and training split.  If a ModelSelectionSplit is included evaluation metrics applied to the reserved data will be reported in the textual output, model evaluation plots including AUC plots as well as the across model plots and the csv.  Both of these modules ignore background points and treat all observations with values greater than 0 as presence for the purpose of stratification by response. 
 		
-         2.	Input Merged Data Set (MDS): This is the input data set consisting of location data for each sample 
-         point, the values of each predictor variable at those points, and if established, a field denoting the 
-         weight that will be assigned to each point in modeling. This input is usually provided by the upstream 
-         steps that precede the Test Training Split module. Any value entered here (e.g., specifying another 
-         existing MDS on the file system) will override the input specified by a model connection in the visual display.
+It is not valid to select models based on their performance on the reserved portion of the data and then report these metrics only for the top performing models claiming that we would expect similar performance on an independent dataset see Hastie 2009 for this discussion.  If one desires metrics for how the models might be expected to perform on an independent dataset then the ModelEvaluationSplit must be used. 
 
-         3.	 Training Proportion: This is the proportion of the sample points that will be used to train the model, 
-         relative to the total number of points. Entered values should be greater than 0 but less than 1. For example, 
-         a value of '0.9' will result in 90% of the sample points being used to train the model, with 10% of the sample 
-         being held out to test the model's performance. Choosing an appropriate training proportion can depend on various 
-         factors, such as the total number of sample points available.  Selecting an appropriate value for the training 
-         proportion is a complex issue that depends on many factors including the total number of observations, the 
-         complexity of the models that will be fit, and the signal to noise ratio in the data (Hastie et. al. 2009). 
-		
-    It is not valid to select models based on their performance on the reserved portion of the data and then report these 
-metrics only for the top performing models claiming that we would expect similar performance on an independent dataset see Hastie 2009 for 
-this discussion.  If one desires metrics for how the models might be expected to perform on an independent dataset then the ModelEvaluationSplit 
-must be used. 
-
-    Hastie T, Tibshirani R, Friedman JH. 2009. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. New York: Springer-Verlag. 744 pp. 2nd ed. 
-    
-    </Description>
+       </Description>
     <InputPorts>
       <Port>
         <PortName>inputMDS</PortName>
-        <Definition>NA</Definition>
-        <Manditory>False</Manditory>
+        <Definition>This is the input data set consisting of location data for each sample point, the values of each predictor variable at those points, and if established, a field denoting the weight that will be assigned to each point in modeling. This input is usually provided by the upstream steps that precede the Test Training Split module. Any value entered here (e.g., specifying another existing MDS on the file system) will override the input specified by a model connection in the visual display.</Definition>
+        <Manditory>TRUE</Manditory>
         <Default>NA</Default>
-        <Options>NA</Options>
-        <Connections>NA</Connections>
+        <Options>Colin Write</Options>
+        <Connections>Does not connect to any other module.</Connections>
       </Port>
       <Port>
         <PortName>trainingProportion</PortName>
-        <Definition>NA</Definition>
-        <Manditory>False</Manditory>
+        <Definition>This is the proportion of the sample points that will be used to train the model, relative to the total number of points. Entered values should be greater than 0 but less than 1. For example, a value of '0.9' will result in 90% of the sample points being used to train the model, with 10% of the sample being held out to test the model's performance. Choosing an appropriate training proportion can depend on various factors, such as the total number of sample points available.  Selecting an appropriate value for the training proportion is a complex issue that depends on many factors including the total number of observations, the complexity of the models that will be fit, and the signal to noise ratio in the data (Hastie et. al. 2009). </Definition>
+        <Manditory>FALSE</Manditory>
         <Default>NA</Default>
-        <Options>NA</Options>
-        <Connections>NA</Connections>
+        <Options>Most commonly values in the .5 to .9 range but other values between 0 and 1 are accepted </Options>
+        <Connections>Does not connect to any other module.</Connections>
       </Port>
       <Port>
         <PortName>RatioPresAbs</PortName>
-        <Definition>NA</Definition>
-        <Manditory>False</Manditory>
+        <Definition>This optional field is populated with a number corresponding to the desired ratio of presence to  absence points to be used in the analysis. If not populated then all occurrence records (not background points) will be portioned into either the test or training split with no reduction in the total number of points.  If populated, this entry should be a number greater than zero. (A value of '1' will result in an equal number of both presence and absence points being used, a value of '2' indicates that twice as many presence points will be used, a value of ‘0.5' indicates that twice as many absence points will be used, etc.). All field data points with a value equal to or greater than 1 are interpreted as presence points. Although the original field data is unmodified, this option will reduce the sample size as the merged dataset containing sample points will have points deleted from it to achieve the specified ratio as such it should be used with caution. A warning will be generated if more than 50% of either the presence or absence points will be deleted based on the ratio specified by the user. Background points are ignored by this module (they are read in and written out, but not assigned to either the test or training split).</Definition>
+        <Manditory>FALSE</Manditory>
         <Default>NA</Default>
-        <Options>NA</Options>
-        <Connections>NA</Connections>
+        <Options>A floating point most likely in the range .5 to 2</Options>
+        <Connections>Does not connect to any other module.</Connections>
       </Port>
       <Port>
         <PortName>Seed</PortName>
-        <Definition>NA</Definition>
-        <Manditory>False</Manditory>
-        <Default>NA</Default>
-        <Options>NA</Options>
-        <Connections>NA</Connections>
+        <Definition>The random number seed used by split the data.  If one desires to reproduce results from a previous split fit, one must enter the random number seed that is reported in the console output from that split step.  </Definition>
+        <Manditory>FALSE</Manditory>
+        <Default>Randomly selected</Default>
+        <Options>
+          <Option>Any integer between -2147483647 and 2147483647</Option>
+        </Options>
+        <Connections>Does not connect to any other module.</Connections>
       </Port>
     </InputPorts>
     <OutputPorts>
       <Port>
         <PortName>outputMDS</PortName>
-        <Definition>ToDo</Definition>
-        <Manditory>False</Manditory>
+        <Definition>This is an MDS file to be further used in the downstream workflow.  It is nearly identical to the input MDS file but with an added column under the header "Split" for each non-background observation will be labeled either "test", "train", or "NA" indicating whether the observation will be used for producing evaluation metrics, training the model, or excluded from the analysis respectively. "NA" generally indicates that the observation was reserved for evaluating the final models but can also occur if a desired ratio of presence to absence was set using the RatioPresAbs.  </Definition>
+        <Manditory>NA</Manditory>
         <Default>NA</Default>
         <Options>NA</Options>
-        <Connections>NA</Connections>
+        <Connections>Connects to downstream workflow</Connections>
       </Port>
     </OutputPorts>
     <References>
-      <Reference>NA</Reference>
+      <Reference>Hastie T, Tibshirani R, Friedman JH. 2009. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. New York: Springer-Verlag. 744 pp. 2nd ed. </Reference>
     </References>
     <SeeAlso />
   </Module>
@@ -1067,9 +1026,10 @@ This output file will be in: X, Y, ResponseBinary/ResponseCount format.</Definit
         <PortName>makeBinMap</PortName>
         <Definition>Indicate whether to discretize the continues probability map into presence absence.  See the ThresholdOptimizationMethod for how this is done.  If time is a concern and many models are to be fit and assessed maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well.</Definition>
         <Manditory>False</Manditory>
-        <Default>False</Default>
+        <Default>False (Unchecked)</Default>
         <Options>
-          <Option>True or False</Option>
+          <Option>True (Checked)</Option>
+          <Option>False (Unchecked)</Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
@@ -1077,9 +1037,10 @@ This output file will be in: X, Y, ResponseBinary/ResponseCount format.</Definit
         <PortName>makeProbabilityMap</PortName>
         <Definition>Indicate whether a map of predicted values is to be produced for the model fit.</Definition>
         <Manditory>False</Manditory>
-        <Default>NA</Default>
+        <Default>False (Unchecked)</Default>
         <Options>
-          <Option>True or False</Option>
+          <Option>True (Checked)</Option>
+          <Option>False (Unchecked)</Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
@@ -1087,9 +1048,10 @@ This output file will be in: X, Y, ResponseBinary/ResponseCount format.</Definit
         <PortName>makeMESMap</PortName>
         <Definition>Indicate whether to produce a multivariate environmental similarity surface (MESS) and a map of which factor is limiting at each point see Elith et. al. 2010 for more details.  If time is a concern and many models are to be fit and assessed  maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well. </Definition>
         <Manditory>False</Manditory>
-        <Default>False</Default>
+        <Default>False (Unchecked)</Default>
         <Options>
-          <Option>True or False</Option>
+          <Option>True (Checked)</Option>
+          <Option>False (Unchecked)</Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
@@ -1128,7 +1090,7 @@ The value calculated for the train portion of the data will be applied to the te
         <PortName>mTry</PortName>
         <Definition>By default this is optimized using the tuneRF function so that OOB error is minimized.  See the CRAN website for more details.</Definition>
         <Manditory>FALSE</Manditory>
-        <Default>randomForest function default</Default>
+        <Default>this is optimized using the tuneRF function so that out of bag error is minimized.</Default>
         <Options>
           <Option>A number between 1 and the total number of valid parameters used in model fitting </Option>
         </Options>
@@ -1165,13 +1127,13 @@ The value calculated for the train portion of the data will be applied to the te
       </Port>
       <Port>
         <PortName>maxnodes</PortName>
-        <Definition>NA</Definition>
+        <Definition>See the randomForest documentation on the CRAN website for details http://cran.r-project.org/web/packages/randomForest/index.html.</Definition>
         <Manditory>False</Manditory>
         <Default>randomForest function default</Default>
         <Options>
-          <Option>NA</Option>
+          <Option>See randomForest documentation for valid input</Option>
         </Options>
-        <Connections>NA</Connections>
+        <Connections>Does not connect to any other module</Connections>
       </Port>
       <Port>
         <PortName>importance</PortName>
@@ -1381,55 +1343,8 @@ The value calculated for the train portion of the data will be applied to the te
   </Module>
   <Module>
     <Title>ModelEvaluationSplit</Title>
-    <Description>
-     The ModelEvaluationSplit module provides the opportunity to reserve a specified portion of the data for 
-    producing and reporting evaluation metrics on an independent test set following model exploration and selection.  
-    The ModelEvaluationSplit must be applied before the CovariateCorrelationAndSelection module.  
-    The nearly identical ModelSelectionSplit reserves a portion of the data from the model fitting 
-    process but reports the evaluation metrics on all models not just the those selected as the 
-    final models to be reported in the analysis.  This module can be placed either directly before 
-    or directly after the CovariateCorrelationAndSelection.  If both a ModelEvaluationSplit and a 
-    ModelSelectionSplit are specified then the training portion of the ModelEvalutationSplit will 
-    be further partitioned by the ModelSelectionSplit thus the ModelEvalutationSplit should come 
-    first in the workflow.  Both of these algorithms stratify the splits by the response.  
-    That is, the ratio of presence to absence points should be nearly equal in the testing 
-    and training split.  If a ModelSelectionSplit is included evaluation metrics applied to 
-    the reserved data will be reported in the textual output, model evaluation plots including 
-    AUC plots as well as the across model plots and the csv.  Both of these modules ignore 
-    background points and treat all observations with values greater than 0 as presence 
-    for the purpose of stratification by response. Three parameters can be set by the user for each of these modules: 
-
-		1.	Ratio of Presence/Absence Points: This optional field is populated with a number corresponding 
-		to the desired ratio of presence to  absence points to be used in the analysis. If not populated 
-		then all occurrence records (not background points) will be portioned into either the test or 
-		training split with no reduction in the total number of points.  If populated, this entry should 
-		be a number greater than zero. (A value of '1' will result in an equal number of both presence 
-		and absence points being used, a value of '2' indicates that twice as many presence points 
-		will be used, a value of '0.5' indicates that twice as many absence points will be used, etc.). 
-		All field data points with a value equal to or greater than 1 are interpreted as presence points. 
-		Although the original field data is unmodified, this option will reduce the sample size as the 
-		merged dataset containing sample points will have points deleted from it to achieve the 
-		specified ratio as such it should be used with caution. A warning will be generated if 
-		more than 50% of either the presence or absence points will be deleted based on the ratio 
-		specified by the user. Background points are ignored by this module (they are read in 
-		and written out, but not assigned to either the test or training split).
-		
-		2.	Input Merged Data Set (MDS): This is the input data set consisting of location data for each sample 
-	    point, the values of each predictor variable at those points, and if established, a field denoting the 
-	    weight that will be assigned to each point in modeling. This input is usually provided by the upstream 
-	    steps that precede the Test Training Split module. Any value entered here (e.g., specifying another 
-	    existing MDS on the file system) will override the input specified by a model connection in the visual display.
-
-		3.	 Training Proportion: This is the proportion of the sample points that will be used to train the model, 
-		relative to the total number of points. Entered values should be greater than 0 but less than 1. For example, 
-		a value of '0.9' will result in 90% of the sample points being used to train the model, with 10% of the sample 
-		being held out to test the model's performance. Choosing an appropriate training proportion can depend on various 
-		factors, such as the total number of sample points available.  Selecting an appropriate value for the training 
-		proportion is a complex issue that depends on many factors including the total number of observations, the 
-		complexity of the models that will be fit, and the signal to noise ratio in the data (Hastie et. al. 2009).  
-
-	 	
-    Hastie T, Tibshirani R, Friedman JH. 2009. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. New York: Springer-Verlag. 744 pp. 2nd ed. 
+    <Description>The ModelEvaluationSplit module provides the opportunity to reserve a specified portion of the data for producing and reporting evaluation metrics on an independent test set following model exploration and selection.  The ModelEvaluationSplit must be applied before the CovariateCorrelationAndSelection module. The nearly identical ModelSelectionSplit reserves a portion of the data from the model fitting process but reports the evaluation metrics on all models not just the those selected as the final models to be reported in the analysis.  This module can be placed either directly before or directly after the CovariateCorrelationAndSelection.  If both a ModelEvaluationSplit and a ModelSelectionSplit are specified then the training portion of the ModelEvalutationSplit will be further partitioned by the ModelSelectionSplit thus the ModelEvalutationSplit should come first in the workflow.  Both of these algorithms stratify the splits by the response. That is, the ratio of presence to absence points should be nearly equal in the testing and training split.  If a ModelSelectionSplit is included evaluation metrics applied to the reserved data will be reported in the textual output, model evaluation plots including AUC plots as well as the across model plots and the csv.  Both of these modules ignore background points and treat all observations with values greater than 0 as presence for the purpose of stratification by response. 
+	 
 
     </Description>
     <InputPorts>
@@ -1459,25 +1374,27 @@ The value calculated for the train portion of the data will be applied to the te
       </Port>
       <Port>
         <PortName>Seed</PortName>
-        <Definition />
+        <Definition>The random number seed used to split the data.  If one desires to reproduce results from a previous split fit, one must enter the random number seed that is reported in the console output from that split step. </Definition>
         <Manditory>FALSE</Manditory>
-        <Default>NA</Default>
-        <Options>Any integer between -2147483647 and 2147483647</Options>
+        <Default>Randomly selected</Default>
+        <Options>
+          <Option>Any integer between -2147483647 and 2147483647</Option>
+        </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
     </InputPorts>
     <OutputPorts>
       <Port>
         <PortName>outputMDS</PortName>
-        <Definition />
+        <Definition>This is an MDS file to be further used in the downstream workflow.  It is nearly identical to the input MDS file but with an added column under the header "EvalSplit" for each non-background observation will be labeled either "test", "train", or "NA" indicating whether the observation will be withheld for producing final modelevaluation metrics, training the model, or excluded from the analysis respectively.    </Definition>
         <Manditory>NA</Manditory>
         <Default>NA</Default>
         <Options>NA</Options>
-        <Connections>Conn</Connections>
+        <Connections>Connects to downstream workflow</Connections>
       </Port>
     </OutputPorts>
     <References>
-      <Reference>NA</Reference>
+      <Reference>   Hastie T, Tibshirani R, Friedman JH. 2009. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. New York: Springer-Verlag. 744 pp. 2nd ed. </Reference>
     </References>
     <SeeAlso />
   </Module>
@@ -1499,9 +1416,10 @@ The value calculated for the train portion of the data will be applied to the te
         <PortName>makeBinMap</PortName>
         <Definition>Indicate whether to discretize the continues probability map into presence absence.  See the ThresholdOptimizationMethod for how this is done.  If time is a concern and many models are to be fit and assessed maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well.</Definition>
         <Manditory>False</Manditory>
-        <Default>False</Default>
+        <Default>False (Unchecked)</Default>
         <Options>
-          <Option>True or False</Option>
+          <Option>True (Checked)</Option>
+          <Option>False (Unchecked)</Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
@@ -1509,9 +1427,10 @@ The value calculated for the train portion of the data will be applied to the te
         <PortName>makeProbabilityMap</PortName>
         <Definition>Indicate whether a map of predicted values is to be produced for the model fit.</Definition>
         <Manditory>False</Manditory>
-        <Default>NA</Default>
+        <Default>False (Unchecked)</Default>
         <Options>
-          <Option>True or False</Option>
+          <Option>True (Checked)</Option>
+          <Option>False (Unchecked)</Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
@@ -1519,9 +1438,10 @@ The value calculated for the train portion of the data will be applied to the te
         <PortName>makeMESMap</PortName>
         <Definition>Indicate whether to produce a multivariate environmental similarity surface (MESS) and a map of which factor is limiting at each point see Elith et. al. 2010 for more details.  If time is a concern and many models are to be fit and assessed  maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well. </Definition>
         <Manditory>False</Manditory>
-        <Default>False</Default>
+        <Default>False (Unchecked)</Default>
         <Options>
-          <Option>True or False</Option>
+          <Option>True (Checked)</Option>
+          <Option>False (Unchecked)</Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
@@ -1695,38 +1615,45 @@ Under most circumstances the cross validation evaluation metrics reported by thi
         <Definition>The number of folds into which the data should be partitioned.  A trade-off exists in selecting the number of folds to use for cross validation.  When nFolds is close to the total number of observations the prediction error is nearly unbiased as the cross validation sample size is nearly equal to the total sample size but because the training sets are nearly identical in this case variance of the prediction error can be quite high (Hastie et. al 2009). </Definition>
         <Manditory>False</Manditory>
         <Default>10</Default>
-        <Options>Any integer less than the number of data points is valid but this is generally either set to 3 or 10</Options>
+        <Options>
+          <Option>Any integer less than the number of data points is valid but this is generally either set to 3 or 10</Option>
+        </Options>
         <Connections>NA</Connections>
       </Port>
       <Port>
         <PortName>Stratify</PortName>
-        <Definition>NA</Definition>
+        <Definition>Indicate whether cross-validation folds should be stratified by the response</Definition>
         <Manditory>False</Manditory>
-        <Default>NA</Default>
-        <Options>NA</Options>
+        <Default>True (Checked)</Default>
+        <Options>
+          <Option>True (Checked)</Option>
+          <Option>False (Unchecked)</Option>
+        </Options>
         <Connections>NA</Connections>
       </Port>
       <Port>
         <PortName>Seed</PortName>
-        <Definition>NA</Definition>
-        <Manditory>False</Manditory>
-        <Default>NA</Default>
-        <Options>NA</Options>
-        <Connections>NA</Connections>
+        <Definition>The random number seed used to split the data.  If one desires to reproduce results from a previous split fit, one must enter the random number seed that is reported in the console output from that split step. </Definition>
+        <Manditory>FALSE</Manditory>
+        <Default>Randomly selected</Default>
+        <Options>
+          <Option>Any integer between -2147483647 and 2147483647</Option>
+        </Options>
+        <Connections>Does not connect to any other module.</Connections>
       </Port>
     </InputPorts>
     <OutputPorts>
       <Port>
         <PortName>outputMDS</PortName>
-        <Definition>ToDo</Definition>
-        <Manditory>False</Manditory>
+        <Definition>This is an MDS file to be further used in the downstream workflow.  It is nearly identical to the input MDS file but with an added column under the header "Split". for each non-background observation will be labeled either a number from 1 to the number of folds selected or "NA" indicating which fold each observation has been partitioned into or whether it will not be included in the Model Selection step likely because it is being withheld for model evaluation. </Definition>
+        <Manditory>NA</Manditory>
         <Default>NA</Default>
         <Options>NA</Options>
-        <Connections>NA</Connections>
+        <Connections>Connects to downstream workflow</Connections>
       </Port>
     </OutputPorts>
     <References>
-      <Reference>NA</Reference>
+      <Reference>Hastie T, Tibshirani R, Friedman JH. 2009. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. New York: Springer-Verlag. 744 pp. 2nd ed.</Reference>
     </References>
     <SeeAlso />
   </Module>
@@ -1826,9 +1753,10 @@ In formatting the list of predictor files, the titles assigned to each of the co
         <PortName>makeBinMap</PortName>
         <Definition>Indicate whether to discretize the continues probability map into presence absence.  See the ThresholdOptimizationMethod for how this is done.  If time is a concern and many models are to be fit and assessed maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well.</Definition>
         <Manditory>False</Manditory>
-        <Default>False</Default>
+        <Default>False (Unchecked)</Default>
         <Options>
-          <Option>True or False</Option>
+          <Option>True (Checked)</Option>
+          <Option>False (Unchecked)</Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
@@ -1836,9 +1764,10 @@ In formatting the list of predictor files, the titles assigned to each of the co
         <PortName>makeProbabilityMap</PortName>
         <Definition>Indicate whether a map of predicted values is to be produced for the model fit.</Definition>
         <Manditory>False</Manditory>
-        <Default>NA</Default>
+        <Default>False (Unchecked)</Default>
         <Options>
-          <Option>True or False</Option>
+          <Option>True (Checked)</Option>
+          <Option>False (Unchecked)</Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
@@ -1846,9 +1775,10 @@ In formatting the list of predictor files, the titles assigned to each of the co
         <PortName>makeMESMap</PortName>
         <Definition>Indicate whether to produce a multivariate environmental similarity surface (MESS) and a map of which factor is limiting at each point see Elith et. al. 2010 for more details.  If time is a concern and many models are to be fit and assessed  maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well. </Definition>
         <Manditory>False</Manditory>
-        <Default>False</Default>
+        <Default>False (Unchecked)</Default>
         <Options>
-          <Option>True or False</Option>
+          <Option>True (Checked)</Option>
+          <Option>False (Unchecked)</Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
@@ -2015,10 +1945,13 @@ The value calculated for the train portion of the data will be applied to the te
   <Module>
     <Title>CovariateCorrelationAndSelection</Title>
     <Description>The CovariateCorrelationAndSelection view provides a breakpoint in the modeling workflow for the user to assess how well each variable explains the distribution of the sampled data points and to remove any variables that may exhibit high correlation with others. 
+
 The display shows the n variables that have the highest total number of correlations above a threshold with other predictors using the maximum of the Pearson, Spearman and Kendall coefficient. The column heading over each variable displays the number of other variables with which the environmental predictor is correlated using the user supplied threshold which defaults to .7.  Radio buttons are available to limit the display and correlation calculations to any combination of presence, absence, or background points.  The first column in the plot shows the relationship between the response and each predictor.  Row labels indicate the maximum of the Spearman and Pearson correlation coefficient and a locally weighted smooth has been added to help distinguish the nature of the relationship.  
+
 The remaining plots make up a square with histograms for each variable displayed on the diagonal.  Their respective graphical display and correlation with other variables can be found by locating the row/column intersection between each (above and below the diagonal).  The scatter plot along with a locally weight smooth is shown below the diagonal.  Presence records are represented by red points, absence by green, and background are yellow.  Above the diagonal is the correlation coefficient between the two predictors.  If Spearman or Kendall correlation coefficient is larger than the Pearson correlation coefficient then an s or k will show up in the bottom right corner of this box.   
  
 A user is provided with the opportunity to select a new set of the environmental predictor variables and “Update” the Covariate Correlation screen to investigate the relationships among the new variables selected.  Variables with a high degree of correlation with other variables should generally be unchecked in their respective radio buttons, and will be excluded from subsequent analysis steps in the model workflow.
+
 Multiple iterations can be run at this screen, allowing the user to investigate the relationships among the environmental predictor variables and choose the most appropriate set to be used in the subsequent modeling. When the desired set of variables has been chosen, the “OK” button is selected and processing will resume in the VisTrails workflow.  
 </Description>
     <InputPorts>
@@ -2028,7 +1961,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
         <Manditory>TRUE</Manditory>
         <Default>NA</Default>
         <Options>Colin Write</Options>
-        <Connections>Does not connect to any other module.<Connection>The inputMDS can come from any module that outpus an MDS file.  These are: MDSBuilder, ModelEvaluationSplit, ModelSelectionSplit, and ModelSelectionCrossValidation.</Connection></Connections>
+        <Connections>Does not connect to any other module.<Connection>The inputMDS can come from any module that outputs an MDS file.  These are: MDSBuilder, ModelEvaluationSplit, ModelSelectionSplit, and ModelSelectionCrossValidation.</Connection></Connections>
       </Port>
       <Port>
         <PortName>selectionName</PortName>
@@ -2042,7 +1975,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       </Port>
       <Port>
         <PortName>ShowGUI</PortName>
-        <Definition>This Boolean indicates whether to stop execution and display the GUI for user interaction.  In some cases such as exploration you might want to make a selection in a previous run and then change this to false so that the selection will be apply to subsequent runs without interrupting execution.</Definition>
+        <Definition>This Boolean indicates whether to stop execution and display the GUI for user interaction.  In some cases such as exploration you might want to make a selection in a previous run and then change this to false so that the selection will apply to subsequent runs without interrupting execution.</Definition>
         <Manditory>FALSE</Manditory>
         <Default>True</Default>
         <Options>
@@ -2168,7 +2101,7 @@ A .csv file with the following column headings, in order: "X," "Y," and "respons
   </Module>
   <Module>
     <Title>FieldDataAggregateAndWeight</Title>
-    <Description>In many instances data collected in the field can be at a different spatial resolution than we are modeling at.  For example we might have observations collected every five meters along a 200 m. transect when we are modeling with covariates with 1000 m. cells.  When running species distribution models (SDMs) such as those contained in SAHM, spatial issues need to be addressed in order to avoid introduction of pseudo-replication.   For instance, considering multiple field data observations which are all spatially located in the same modeled pixel will generate replicate values or redundant information.  When running a model, this redundancy causes pseudo-replication and can negatively influence model development.  The FieldDataAggregateAndWeight tool helps aggregate field data locations so only one field data observation is represented per pixel or multiple points are downweighted proportionately.
+    <Description>In many instances data collected in the field can be at a different projection and spatial resolution than we are modeling at.  For example we might have observations collected every five meters along a 200 m. transect when we are modeling with covariates with 1000 m. cells.  When running species distribution models (SDMs) such as those contained in SAHM, spatial issues need to be addressed in order to avoid introduction of pseudo-replication.   For instance, considering multiple field data observations which are all spatially located in the same modeled pixel will generate replicate values or redundant information.  When running a model, this redundancy causes pseudo-replication and can negatively influence model development.  The FieldDataAggregateAndWeight tool helps aggregate field data locations so only one field data observation is represented per pixel or multiple points are downweighted proportionately.  Additonally the FieldDataAggregationAndWeight module allows the user to change the datum / projection system of the FieldData x, y locations to match that used in the template. 
   
 Currently only GLM, MARS, and Boosted Regression Trees accept weights.  Any Weights column will be ignored by Random Forest.
 </Description>
@@ -2203,6 +2136,21 @@ Note - The projection and coordinate system used in the template file must match
         <Options>
           <Option>Collapse In Pixel : All field data points falling within a single pixel will be collapse into a single point at the center of that pixel.  If using Presense(Absense) data the point will be given a value of 1 if any are presense, otherwise 0 if any are absense, otherwise -9999 if all are background.  If using count data the point value will be the average of all points in a pixel.</Option>
           <Option>Weight Per Pixel : All field data points are retained but a weight column is added and points in pixels with multiple points are given a weight of 1 over the number of points in that pixel.  For example all the points in a pixel with 4 points would be given a weight of 1/4.</Option>
+        </Options>
+        <Connections>Does not generally Connect to any other Module.</Connections>
+      </Port>
+      <Port>
+        <PortName>FD_EPSG_projection</PortName>
+        <Definition>This optional parameter is a means of specifying the datum and projection information that the field data X and Y locations are in.  If this parameter is supplied the point locations will be transformed to the datum projection of the template layer.  Otherwise it will be assumed that the points and template are in the same projection and datum.  The value to enter in this port must be a valid EPSG code, see below.
+
+EPSG codes are numbers representing all commonly used geographic and projected coordinate systems.  These are generally 4 to 6 digit numbers.  For example 4326 represents geographic WGS84 data, 4260 represents geographic NAD83, 26912 represents NAD83 / UTM zone 12N, etc.  See the options below for a list of ways to lookup EPSG codes.</Definition>
+        <Manditory>False</Manditory>
+        <Default>None, This assumes that the points are in the same coordinate system as your template layer.</Default>
+        <Options>
+          <Option>Within your GDAL installation directory there is a gdal-data directory with two csv files which list all of the supported EPSG numbers and the name and information of the coordinate system.  Use gcs.csv for geographic systems and pcs.csv for projected systems.</Option>
+          <Option>EPSG codes can also be looked up at: http://spatialreference.org/ref/</Option>
+          <Option>If you have a .prj file or well known text (WKT) for your coordinate system you can find the EPSG using: http://prj2epsg.org/search</Option>
+          <Option>If you have ESRI ArcGIS and a layer in the coordinate system you can find the EPSG code in the items metadata.  Select the item in ArcCatalog, open the description tag, scroll down to the Spatial Reference section, the EPSG will be the number in the 'WELL-KNOWN-IDENDIFIER' tag.</Option>
         </Options>
         <Connections>Does not generally Connect to any other Module.</Connections>
       </Port>
