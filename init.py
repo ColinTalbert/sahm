@@ -1300,7 +1300,8 @@ Output Ports:
     '''
     _input_ports = [('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
-                                 ('PointAggregationOrWeightMethod', '(gov.usgs.sahm:PointAggregationMethod:Other)', {'defaults':'Collapse In Pixel'})
+                                 ('PointAggregationOrWeightMethod', '(gov.usgs.sahm:PointAggregationMethod:Other)', {'defaults':'Collapse In Pixel'}),
+                                 ('FD_EPSG_projection', '(edu.utah.sci.vistrails.basic:Integer)'),
                                  ]
     _output_ports = [('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')]
     
@@ -1316,7 +1317,8 @@ Output Ports:
         port_map = {'templateLayer': ('template', None, True),
             'fieldData': ('csv', None, True),
             'PointAggregationOrWeightMethod': ('aggMethod', None, True),
-            'SDofGaussianKernel': ('sd', None, False),}
+            'SDofGaussianKernel': ('sd', None, False),
+            'FD_EPSG_projection': ('epsg', None, False)}
         
         FDAWParams = utils.map_ports(self, port_map)
         output_fname = utils.mknextfile(prefix='FDAW_', suffix='.csv')
