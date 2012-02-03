@@ -65,6 +65,8 @@ class FieldDataQuery(object):
         self.aggMethod = 'Collapse In Pixel'
         self.verbose = False
         self.countdata = False
+        self.epsg = None
+        self.pointsSpatialRef = None
         self.logger = None
 
     def validateArgs(self):
@@ -105,6 +107,13 @@ class FieldDataQuery(object):
         if not os.path.exists(outDir):
             raise RuntimeError, "The directory of the supplied MDS output file path, " + self.output +", does not appear to exist on the filesystem"
         
+        if self.epsg:
+            try:
+                self.pointsSpatialRef = osr.SpatialReference()
+                self.pointsSpatialRef.ImportFromEPSG(self.epsg)
+            except:
+                raise RuntimeError, "The EPSG code provided, " + self.epsg +", is not known to the current installation of GDAL."
+        
         if self.logger is None:
             self.logger = utilities.logger(outDir, self.verbose)
         self.writetolog = self.logger.writetolog
@@ -130,11 +139,14 @@ class FieldDataQuery(object):
             
             # Get the PARC parameters from the rasterFile.
             dataset = gdal.Open(rasterFile, gdalconst.GA_ReadOnly)
+            
             if dataset is None:
                 params["Error"].append("Unable to open file")
                 #print "Unable to open " + rasterFile
                 #raise Exception, "Unable to open specifed file " + rasterFile
                 
+            wkt = dataset.GetProjection()
+            params["srs"] = osr.SpatialReference(wkt)    
             
             xform  = dataset.GetGeoTransform()
             params["xScale"] = xform[1]
@@ -155,6 +167,21 @@ class FieldDataQuery(object):
         finally:
             del dataset
             return params
+    
+    def transformPoint(self, x, y, from_srs, to_srs):
+        """
+        Transforms a point from one srs to another
+        """
+        coordXform = osr.CoordinateTransformation(from_srs, to_srs)
+        yRound = round(y, 8)
+        xRound = round(x, 8)
+
+        result = coordXform.TransformPoint(xRound, yRound)
+        
+        gx = result[0]
+        gy = result[1]
+
+        return gx, gy
     
     def processCSV(self):
         
@@ -217,11 +244,18 @@ class FieldDataQuery(object):
             except ValueError:
                 raise Exception, "Non-numeric X, Y used.\nLine number " + str(line)
             
-            if self.pointInTemplate(row[0], row[1]):
-                pixelColumn = int(floor((float(row[0]) - self.templateParams["ulx"]) 
-                                        / self.templateParams["xScale"]))
-                pixelRow = int(floor((float(row[1]) - self.templateParams["uly"]) 
-                                     / self.templateParams["yScale"]))
+            if self.pointsSpatialRef:
+                try:
+                    x, y = self.transformPoint(x, y, 
+                                 self.pointsSpatialRef, self.templateParams["srs"])
+                except:
+                    raise Exception, "Problem transforming point: " + str(line)
+            
+            if self.pointInTemplate(x, y):
+                pixelColumn = int(floor(x - self.templateParams["ulx"]) 
+                                        / self.templateParams["xScale"])
+                pixelRow = int(floor(y - self.templateParams["uly"]) 
+                                     / self.templateParams["yScale"])
                 pixel = "".join(["X:",str(pixelColumn),":Y:",str(pixelRow)])
                 #if verbose == True:
                 if not pixel in usedPixels:
@@ -232,7 +266,7 @@ class FieldDataQuery(object):
                     curVal.append(row)
                     usedPixels[pixel] = curVal
             else:
-                extraPoints.append([row[0], row[1], row[2]])
+                extraPoints.append([x, y, row[2]])
             pointCount += 1
             if self.verbose:
                 if float(pointCount)/lineCount > float(pcntDone)/100:
@@ -255,6 +289,12 @@ class FieldDataQuery(object):
                                         self.templateParams["xScale"]/2)
                 outPixelY = (self.templateParams["uly"] + (self.templateParams["yScale"] * pixelRow) + 
                                         self.templateParams["yScale"]/2)
+                
+#                if self.pointsSpatialRef:
+#                    outPixelX, outPixelY = self.transformPoint(outPixelX, outPixelY, 
+#                                                               self.templateParams["srs"], 
+#                                                               self.pointsSpatialRef)
+                
                 frequency = len(v)
         
                 #loop though the 'points' in each pixel
@@ -267,10 +307,12 @@ class FieldDataQuery(object):
                 #    Or 0 if there were any zeros (absenses)
                 #    Otherwise it's a background pixel.
                 total = 0
+                count = 0
                 numAbsense = 0
                 for i in range (frequency):
                     if int(float(v[i][2])) > 0:
                         total += int(float(v[i][2]))
+                        count += 1
                     if int(float(v[i][2])) == 0:
                         numAbsense += 1
                 
@@ -278,7 +320,7 @@ class FieldDataQuery(object):
                 outputLine[1] = outPixelY
                 
                 if self.countdata and total > 0:
-                    outputLine[2] = total
+                    outputLine[2] = total / float(count)
                 elif total > 0:
                     outputLine[2] = 1
                 elif numAbsense > 0:
@@ -294,7 +336,8 @@ class FieldDataQuery(object):
             else:
                 for point in v:
                     outputLine = point
-                    outputLine.append(str(1.0/len(v)))
+                    outputLine[2] = str(1.0/len(v))
+                    outputLine.append(len(v))
                     fOut.writerow(outputLine)  
     
         oFile.close

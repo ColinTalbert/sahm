@@ -58,9 +58,7 @@ class PointAggregationMethod(String):
     _output_ports = [('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
     _widget_class = build_enum_widget('PointAggregationMethod', 
                                       ['Collapse In Pixel', 
-                                       'Weight Per Pixel', 
-                                       'Inverse Density', 
-                                       'Total Presence = Total Absence'])
+                                       'Weight Per Pixel'])
 
     @staticmethod
     def get_widget_class():
