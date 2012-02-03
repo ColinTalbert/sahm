@@ -252,10 +252,10 @@ class FieldDataQuery(object):
                     raise Exception, "Problem transforming point: " + str(line)
             
             if self.pointInTemplate(x, y):
-                pixelColumn = int(floor(x - self.templateParams["ulx"]) 
-                                        / self.templateParams["xScale"])
-                pixelRow = int(floor(y - self.templateParams["uly"]) 
-                                     / self.templateParams["yScale"])
+                pixelColumn = int(floor((x - self.templateParams["ulx"]) 
+                                        / self.templateParams["xScale"]))
+                pixelRow = int(floor((y - self.templateParams["uly"]) 
+                                     / self.templateParams["yScale"]))
                 pixel = "".join(["X:",str(pixelColumn),":Y:",str(pixelRow)])
                 #if verbose == True:
                 if not pixel in usedPixels:

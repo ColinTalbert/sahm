@@ -196,14 +196,14 @@ class MAXENTRunner(object):
                 hasBackground = True
                 vals = self.usedValues(row, covariateIndexes)
                 backgroundWriter.writerow([''] + row[:2] + vals)
-            elif splitcol is None and row[2] <> 0:
+            elif splitcol is None and str(row[2]) != '0':
                 vals = self.usedValues(row, covariateIndexes)
                 trainingWriter.writerow([self.args['species_name']] + row[:2] + vals)
-            elif (row[splitcol] == 'test' and row[2] <> 0) or \
+            elif (row[splitcol] == 'test' and str(row[2]) != '0') or \
                 self.testCSV == '':
                 vals = self.usedValues(row, covariateIndexes)
                 testWriter.writerow([self.args['species_name']] + row[:2] + vals)
-            elif row[splitcol] == 'train'  and row[2] <> 0:
+            elif row[splitcol] == 'train'  and str(row[2]) != '0':
                 vals = self.usedValues(row, covariateIndexes)
                 trainingWriter.writerow([self.args['species_name']] + row[:2] + vals)
             #any absense points (row[2] == 0) will be ignored for maxent
