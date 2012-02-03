@@ -1443,7 +1443,7 @@ The value calculated for the train portion of the data will be applied to the te
       </Port>
       <Port>
         <PortName>trainingProportion</PortName>
-        <Definition>This is the proportion of the sample points that will be used to train the model, relative to the total number of points. Entered values should be greater than 0 but less than 1. For example, a value of ‘0.9' will result in 90% of the sample points being used to train the model, with 10% of the sample being held out to test the model's performance. Choosing an appropriate training proportion can depend on various factors, such as the total number of sample points available.  Selecting an appropriate value for the training proportion is a complex issue that depends on many factors including the total number of observations, the complexity of the models that will be fit, and the signal to noise ratio in the data (Hastie et. al. 2009). </Definition>
+        <Definition>This is the proportion of the sample points that will be used to train the model, relative to the total number of points. Entered values should be greater than 0 but less than 1. For example, a value of '0.9' will result in 90% of the sample points being used to train the model, with 10% of the sample being held out to test the model's performance. Choosing an appropriate training proportion can depend on various factors, such as the total number of sample points available.  Selecting an appropriate value for the training proportion is a complex issue that depends on many factors including the total number of observations, the complexity of the models that will be fit, and the signal to noise ratio in the data (Hastie et. al. 2009). </Definition>
         <Manditory>FALSE</Manditory>
         <Default>NA</Default>
         <Options>Most commonly values in the .5 to .9 range but other values between 0 and 1 are accepted </Options>
@@ -1451,7 +1451,7 @@ The value calculated for the train portion of the data will be applied to the te
       </Port>
       <Port>
         <PortName>RatioPresAbs</PortName>
-        <Definition>This optional field is populated with a number corresponding to the desired ratio of presence to  absence points to be used in the analysis. If not populated then all occurrence records (not background points) will be portioned into either the test or training split with no reduction in the total number of points.  If populated, this entry should be a number greater than zero. (A value of ‘1' will result in an equal number of both presence and absence points being used, a value of ‘2' indicates that twice as many presence points will be used, a value of ‘0.5' indicates that twice as many absence points will be used, etc.). All field data points with a value equal to or greater than 1 are interpreted as presence points. Although the original field data is unmodified, this option will reduce the sample size as the merged dataset containing sample points will have points deleted from it to achieve the specified ratio as such it should be used with caution. A warning will be generated if more than 50% of either the presence or absence points will be deleted based on the ratio specified by the user. Background points are ignored by this module (they are read in and written out, but not assigned to either the test or training split).</Definition>
+        <Definition>This optional field is populated with a number corresponding to the desired ratio of presence to  absence points to be used in the analysis. If not populated then all occurrence records (not background points) will be portioned into either the test or training split with no reduction in the total number of points.  If populated, this entry should be a number greater than zero. (A value of '1' will result in an equal number of both presence and absence points being used, a value of '2' indicates that twice as many presence points will be used, a value of ‘0.5' indicates that twice as many absence points will be used, etc.). All field data points with a value equal to or greater than 1 are interpreted as presence points. Although the original field data is unmodified, this option will reduce the sample size as the merged dataset containing sample points will have points deleted from it to achieve the specified ratio as such it should be used with caution. A warning will be generated if more than 50% of either the presence or absence points will be deleted based on the ratio specified by the user. Background points are ignored by this module (they are read in and written out, but not assigned to either the test or training split).</Definition>
         <Manditory>FALSE</Manditory>
         <Default>NA</Default>
         <Options>A floating point most likely in the range .5 to 2</Options>
@@ -2199,7 +2199,7 @@ Note - The projection and coordinate system used in the template file must match
         <PortName>PointAggregationOrWeightMethod</PortName>
         <Definition>The method used to either weight or aggregate field data points.</Definition>
         <Manditory>TRUE</Manditory>
-        <Default>NA</Default>
+        <Default>Collapse In Pixel</Default>
         <Options>
           <Option>Collapse In Pixel : All field data points falling within a single pixel will be collapse into a single point at the center of that pixel.  If using Presense(Absense) data the point will be given a value of 1 if any are presense, otherwise 0 if any are absense, otherwise -9999 if all are background.  If using count data the point value will be the average of all points in a pixel.</Option>
           <Option>Weight Per Pixel : All field data points are retained but a weight column is added and points in pixels with multiple points are given a weight of 1 over the number of points in that pixel.  For example all the points in a pixel with 4 points would be given a weight of 1/4.</Option>
@@ -2425,7 +2425,7 @@ Note - The projection and coordinate system used in the template file must match
       </Port>
       <Port>
         <PortName>file</PortName>
-        <Definition>The location of the raster file. A user can navigate to the location on their file system. When a user is selecting an ESRI grid raster, the user should navigate to the ‘hdr.adf' file contained within the grid folder</Definition>
+        <Definition>The location of the raster file. A user can navigate to the location on their file system. When a user is selecting an ESRI grid raster, the user should navigate to the 'hdr.adf' file contained within the grid folder</Definition>
         <Manditory>TRUE</Manditory>
         <Default>NA</Default>
         <Options>NA</Options>
