@@ -32,26 +32,8 @@ make.auc.plot.jpg<-function(out=out){
 
   if(out$input$model.family!="poisson"){
 
-     jpeg(file=paste(out$dat$bname,"confusion.matrix.jpg",sep="."),width=1000,height=1000,pointsize=13)
-      if(out$dat$split.type=="none"){
-      barplot3d(100*c(Stats$train$Cmx[2,1]/sum(Stats$train$Cmx),Stats$train$Cmx[1,1]/sum(Stats$train$Cmx),Stats$train$Cmx[2,2]/sum(Stats$train$Cmx),Stats$train$Cmx[1,2]/sum(Stats$train$Cmx)),transp="f9", rows=2, theta = 40, phi = 25, expand=.5,
-       bar.size=15*max(Stats$train$Cmx)/100,bar.space=6*max(Stats$train$Cmx)/100,
-    col.lab=c("Absence","Presence"), row.lab=c("Presence","Absence"), z.lab="Confusion Matrix",Stats=Stats,split.type=out$dat$split.type)
-         } else {
-       if(out$dat$split.type=="crossValidation"){
-                                 a<-lapply(Stats[names(Stats)!="train"],function(lst){lst$Cmx})
-                                  cmx<-a[[1]]
-                                  for(i in 2:length(a)) cmx<-cmx+a[[i]]
-         }  else  cmx<-Stats$test$Cmx
-                                  
-
-     barplot3d(100*c(Stats$train$Cmx[2,1]/sum(Stats$train$Cmx),cmx[2,1]/sum(cmx),
-                 Stats$train$Cmx[1,1]/sum(Stats$train$Cmx),cmx[1,1]/sum(cmx),
-                 Stats$train$Cmx[2,2]/sum(Stats$train$Cmx),cmx[2,2]/sum(cmx),
-                 Stats$train$Cmx[1,2]/sum(Stats$train$Cmx),cmx[1,2]/sum(cmx)),transp="f9", rows=2, theta = 40, phi = 25, expand=.5,
-       bar.size=20*max(Stats$train$Cmx)/(sum(Stats$train$Cmx)),bar.space=4*max(Stats$train$Cmx)/(sum(Stats$train$Cmx)),
-    col.lab=c("Absence","Presence"), row.lab=c("Presence","Absence"), z.lab="Confusion Matrix",Stats=lst,split.type=out$dat$split.type)
-    }
+   jpeg(file=paste(out$dat$bname,"confusion.matrix.jpg",sep="."),width=1000,height=1000,pointsize=13,quality=100)
+    confusion.matrix(Stats,out$dat$split.type)
     graphics.off()
    }
 ########################## PLOTS ################################
