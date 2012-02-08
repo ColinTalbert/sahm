@@ -401,15 +401,15 @@ Args <- commandArgs(T)
     	argSplit <- strsplit(arg, "=")
     	argSplit[[1]][1]
     	argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="p") num.plots <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="m") min.cor <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="p") num.plots <- as.numeric(argSplit[[1]][2])
+    	if(argSplit[[1]][1]=="m") min.cor <- as.numeric(argSplit[[1]][2])
     	if(argSplit[[1]][1]=="o") output.file <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="i") infile <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="core") cors.w.highest <- argSplit[[1]][2]
-      if(argSplit[[1]][1]=="pres") pres <- argSplit[[1]][2]
-      if(argSplit[[1]][1]=="absn") absn <- argSplit[[1]][2]
-      if(argSplit[[1]][1]=="bgd") bgd <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="core") cors.w.highest <- as.logical(argSplit[[1]][2])
+      if(argSplit[[1]][1]=="pres") pres <- as.logical(argSplit[[1]][2])
+      if(argSplit[[1]][1]=="absn") absn <- as.logical(argSplit[[1]][2])
+      if(argSplit[[1]][1]=="bgd") bgd <- as.logical(argSplit[[1]][2])
     }
 
     print(num.plots)
