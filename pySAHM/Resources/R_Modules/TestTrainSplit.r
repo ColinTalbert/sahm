@@ -53,13 +53,31 @@ set.seed(as.numeric(seed))
             bg.dat$TrainSplit=""
             }
 
-             if(length(response)<100) stop("A test training split is not advisable for less than 100 observations.  Consider cross validation as an alternative.")
-             if(length(response)<200) warning(paste("There are less than 200 observations.  Cross validation might be preferable to a test:",
-             "training split \n weigh the decision while keeping in mind the number of predictors being considered: ", ncol(dat)-3,sep=""))
+   ##### Warning against doing stupid stuff section
+             # tagging factors and looking at their levels warning users if their factors have few levels
+               factor.cols <- grep("categorical",names(dat))
+               if(length(factor.cols)!=0){
+                 for (i in 1:length(factor.cols)){
+                     factor.table<-table(dat[,factor.cols[i]])
+                       if(any(factor.table<10)) {warning(paste("Some levels for the categorical predictor ",names(dat)[factor.cols[i]]," do not have at least 10 observations.\n",
+                                                                   "you might want to consider removing or reclassifying this predictor before continuing.\n",
+                                                                   "Factors with few observations can cause failure in model fitting when the data is split and cannot be reilably used in training a model.",sep=""))
+                          factor.table<-as.data.frame(factor.table)
+                           colnames(factor.table)<-c("Factor Name","Factor Count")
+                           cat(paste("\n",names(dat)[factor.cols[i]],"\n"))
+                           print(factor.table)
+                           cat("\n\n")
+                         }
+                    }
+                  }
+                 if(length(response)<100) stop("A test training split is not advisable for less than 100 observations.  Consider cross validation as an alternative.")
+                 if(length(response)<200) warning(paste("There are less than 200 observations.  Cross validation might be preferable to a test:",
+                 "training split \n weigh the decision while keeping in mind the number of predictors being considered: ", ncol(dat)-3,sep=""))
 
-             if(tolower(response.col)=="responsebinary" & any(table(response)<10))
-             stop("Use of a test training split is not recommended when the dataset contains less than 10 presence or absence points")
-
+                 if(tolower(response.col)=="responsebinary" & any(table(response)<10))
+                 stop("Use of a test training split is not recommended when the dataset contains less than 10 presence or absence points")
+ ####### End don't do stupid stuff warning section
+ 
          temp<-if(!is.null(RatioPresAbs))(sum(response>=1)/sum(response==0)==RatioPresAbs)
          if(is.null(temp)) temp<-FALSE
        if(is.null(RatioPresAbs)| temp){
@@ -126,7 +144,7 @@ set.seed(as.numeric(seed))
                }
 
                if(sum(response>=1)/sum(response==0)<RatioPresAbs){
-                  browser()
+
                #first ballance all responses greater than 1
                TrainSplit<-numeric()
                 for(i in sort(as.numeric(unique(response[response!=0])))){

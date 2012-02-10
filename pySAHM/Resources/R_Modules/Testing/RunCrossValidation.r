@@ -1,4 +1,4 @@
-input.file="C:\\VisTrails\\mtalbert_20110504T132851\\readMaTests\\Split.csv"
+input.file="C:\\VisTrails\\mtalbert_20110504T132851\\readMaTests\\Factor.csv"
 response.col="ResponseBinary"
 output.file="C:\\VisTrails\\mtalbert_20110504T132851\\readMaTests\\Debugging.csv"
 CrossValidationSplit(input.file,output.file,stratify=TRUE,n.folds=5,seed=NULL)

@@ -114,6 +114,9 @@
                         if(nrow(x)<2){
                               out.list$bad.factor.cols <- c(out.list$bad.factor.cols,factor.names[i])
                               }
+                        if(any(x<10)) warning(paste("Some levels for the categorical predictor ",names(dat)[factor.cols[i]]," do not have at least 10 observations.\n",
+                                                                   "you might want to consider removing or reclassifying this predictor before continuing.\n",
+                                                                   "Factors with few observations can cause failure in model fitting when the data is split and cannot be reilably used in training a model.",sep=""))
                         lc.levs <-  as.numeric(row.names(x))[x>0] # make sure there is at least one "available" observation at each level
                         lc.levs <- data.frame(number=lc.levs,class=lc.levs)
                         factor.levels[[i]] <- lc.levs
