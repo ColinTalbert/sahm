@@ -53,7 +53,6 @@ make.auc.plot.jpg<-function(out=out){
     if(out$input$model.family%in%c("binomial","bernoulli")){
             jpeg(file=plotname,height=1000,width=1000,pointsize=20,quality=100)
 ## ROC AUC plots
-
             TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=input.list$train$thresh,add.legend=FALSE,lwd=2)
                  if(out$dat$split.type=="none") legend(x=.8,y=.15,paste("AUC=",round(Stats$train$auc.fit,digits=3),sep=""))
             if(out$dat$split.type!="none") {
@@ -71,8 +70,8 @@ make.auc.plot.jpg<-function(out=out){
               points(1-Stats$train$Specf,Stats$train$Sens,pch=21,cex=2.5,bg="red")
                segments(x0=0,y0=0,x1=1,y1=1,col="blue")
               text(x=(.96-Stats$train$Specf),y=Stats$train$Sens+.03,label=round(Stats$train$thresh,digits=2))
-                legend(x=.6,y=.2,c(paste("Training Split (AUC=",round(Stats$train$auc.fit,digits=3), ")",sep=""),
-                     paste("Cross Validation Mean \n (AUC=",round(mean(unlist(lapply(lst,function(lst){lst$auc.fit}))),digits=3), ")",sep="")),lty=c(1,1),col=c("red","black"))
+                legend(x=.6,y=.22,c(paste("Training Split (AUC=",round(Stats$train$auc.fit,digits=3), ")",sep=""),
+                     paste("Cross Validation Mean \n (AUC=",round(mean(unlist(lapply(lst,function(lst){lst$auc.fit}))),digits=3), ")",sep="")),lwd=c(4,1),lty=c(1,1),col=c("red","black"))
                 }}
                 graphics.off()
 
