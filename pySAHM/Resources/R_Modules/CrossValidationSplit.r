@@ -16,7 +16,7 @@ CrossValidationSplit<-function(input.file,output.file,response.col="ResponseBina
 #Written by Marian Talbert 9/29/2011
  if(is.null(seed)) seed<-round(runif(1,min=-((2^32)/2-1),max=((2^32)/2-1)))
 set.seed(as.numeric(seed))
-
+options(warn=1)
      if(n.folds<=1 | n.folds%%1!=0) stop("n.folds must be an integer greater than 1")
 
    #Read input data and remove any columns to be excluded
@@ -34,16 +34,35 @@ set.seed(as.numeric(seed))
       #Ignoring background data that might be present in the mds
 
           bg.dat<-dat[response==-9999,]
-
           if(dim(bg.dat)[1]!=0){
             dat<-dat[-c(which(response==-9999,arr.ind=TRUE)),]
             dat.in<-dat.in[-c(which(response==-9999,arr.ind=TRUE)+3),]
             response<-response[-c(which(response==-9999,arr.ind=TRUE))]
             bg.dat$Split=""
             }
+
+
+        # tagging factors and looking at their levels warning users if their factors have few levels
+         factor.cols <- grep("categorical",names(dat))
+         if(length(factor.cols)!=0){
+           for (i in 1:length(factor.cols)){
+               factor.table<-table(dat[,factor.cols[i]])
+                 if(any(factor.table<10)) {warning(paste("Some levels for the categorical predictor ",names(dat)[factor.cols[i]]," do not have at least 10 observations.\n",
+                                                                   "you might want to consider removing or reclassifying this predictor before continuing.\n",
+                                                                   "Factors with few observations can cause failure in model fitting when the data is split and cannot be reilably used in training a model.",sep=""))
+                    factor.table<-as.data.frame(factor.table)
+                     colnames(factor.table)<-c("Factor Name","Factor Count")
+                     cat(paste("\n",names(dat)[factor.cols[i]],"\n"))
+                     print(factor.table)
+                     cat("\n\n")
+                   }
+              }
+            }
             #this splits the training set
+              if(any(!is.na(match(tolower("evalsplit"),tolower(names(dat)))))){
              split.mask<-dat[,match(tolower("evalsplit"),tolower(names(dat)))]=="train"
              index<-seq(1:nrow(dat))[split.mask]
+             } else split.mask<-index<-seq(1:nrow(dat))
              if(stratify==TRUE){
                dat[,ncol(dat)+1]<-NA
                 for(i in 1:length(names(table(response)))){

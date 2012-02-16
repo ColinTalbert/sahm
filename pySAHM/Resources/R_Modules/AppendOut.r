@@ -62,7 +62,7 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
                         }
         #producing plots
                    for(i in 1:Parm.Len){
-                            plot(c(.6,(ncol(train)+2)),c(0,max(1.1,max(train[i,],na.rm=TRUE)+.1)),type="n",xaxt="n",
+                            plot(c(.6,(ncol(train)+2)),c(0,max(1.25,max(train[i,],na.rm=TRUE)+.2)),type="n",xaxt="n",yaxp=c(0,max(1,max(train[i,],na.rm=TRUE)),4),
                                 xlab=paste("Corresponding Column in the corresponding .csv",sep=""),
                                 ylab=x.labs[i])
                                    #have to label the maximum for everything except prediction error for which we label the min
@@ -74,7 +74,6 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
                               if(split.type!="crossValidation"){
                                rect(xleft=ss-.4,ybottom=0,xright=ss,ytop=train[i,],col=colors.train[i],lwd=2)
                                }
-                             #if test split
                              options(warn=-1)
                              if(length(test.lst)==1) rect(xleft=ss,ybottom=0,xright=(ss+.4),ytop=as.vector(pmax(0,test.lst[[1]][i,])),col=c(colors.test[i],"white")[(test.lst[[1]][i,]==0)+1],
                                                      border=c("black","white")[(test.lst[[1]][i,]==0)+1],lwd=2)
@@ -82,14 +81,14 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
                                                       for(k in ss){
                                                       a<-vector()
                                                         for(j in 1:length(test.lst)) a<-c(a,as.numeric(test.lst[[j]][i,k]))
-                                                        if(sum(a!=0)!=0) boxplot(a,add=TRUE,at=k,width=2,col=colors.test[i])
+                                                        if(sum(a!=0)!=0) boxplot(a,add=TRUE,at=k,width=2,col=colors.test[i],yaxt="n")
                                                         mean.cv<-c(mean.cv,median(a))
                                                       }
                               }
                                if(split.type=="crossValidation") {
                                points(ss,train[i,],bg=colors.train[i],col=colors.train[i],cex=1.5,pch=8,lwd=3)
                                text((which(mean.cv==temp.fct(mean.cv),arr.ind=TRUE)),
-                                 max(1,max(train[i,],na.rm=TRUE))-.1,
+                                 max(1,max(train[i,],na.rm=TRUE))+.15,
                                  labels=as.character(paste(round(temp.fct(mean.cv),digits=2),ifelse(split.type=="crossValidation"," test",""),sep="")),cex=.8)
                                }
                              options(warn=0)
@@ -98,7 +97,7 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
                                  Offset<-ifelse(split.type=="crossValidation",0,.25)
                                  
                             text((which(train[i,]==temp.fct(train[i,]),arr.ind=TRUE)-Offset),
-                                 ifelse(split.type=="crossValidation",max(1,max(train[i,],na.rm=TRUE)),temp.fct(train[i,])+.07),
+                                 ifelse(split.type=="crossValidation",max(1,max(train[i,],na.rm=TRUE))+.25,temp.fct(train[i,])+.07),
                                  labels=as.character(paste(round(temp.fct(train[i,]),digits=2),ifelse(split.type=="crossValidation"," train",""),sep="")),cex=.8)
                             if(length(test.lst)==1) text((which(test.lst[[1]][i,]==temp.fct(test.lst[[1]][i,]),arr.ind=TRUE)[2]+Offset),
                                   temp.fct(test.lst[[1]][i,])+.07,labels=as.character(round(temp.fct(test.lst[[1]][i,]),digits=2)),cex=.8)

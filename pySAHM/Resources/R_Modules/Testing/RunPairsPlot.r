@@ -104,7 +104,7 @@ response.col="ResponseBinary",cors.w.highest=TRUE)
 C:\R-2.12.1\bin\i386\Rterm.exe --vanilla -f I:\VisTrails\Central_VisTrailsInstall_debug\vistrails\packages\sahm\pySAHM\Resources\R_Modules\FIT_BRT_pluggable.r --args c=I:\VisTrails\WorkingFiles\workspace\GYA_demo\test.csv o=C:\temp rc=ResponseBinary
 
 
-C:\R-2.12.1\bin\i386\Rterm.exe --vanilla -f H:\Desktop\SAHM\Rcode\PredictorSelection\PairsExplore2.r --args p=10 m=.7 o=H:\Desktop\SAHM\Rcode\ExposingModelParameters\PDFCheck\ i="I:\VisTrails\WorkingFiles\workspace\GYA_demo\test.csv" rc="ResponseBinary" core=TRUE
+I:\VisTrails\Central_VisTrails_x32\Central_R\R-2.14.1\bin\i386\Rterm.exe --vanilla -f "I:\VisTrails\Central_VisTrails_x32_debug\VisTrails\vistrails\packages\sahm_MarianDev\pySAHM\Resources\R_Modules\PairsExplore.r" --args p=5 m=.7 o=H:\Desktop\pairPres.jpg i="C:\VisTrails\mtalbert_20110504T132851\readMaTests\Split.csv" rc="ResponseBinary" core=TRUE
 
 
 

@@ -63,20 +63,17 @@ EvaluateNewData<-function(workspace=NULL,outDir=NULL,binary.tif=NULL,p.tif=NULL,
 
               if(out$dat$split.type!="crossValidation") out$dat$ma<-(lapply(X=out$dat$ma,FUN=pred.vals,model=out$mods$final.mod,Model=Model))
                  else out$dat$ma$train$pred<-pred.vals(out$dat$ma$train,out$mods$final.mod,Model=Model)$pred  #produces the same thing as pred.mars(out$mods$final.mod,out$dat$ma$train$dat[2:ncol(out$dat$ma$train$dat)])
-
-                   assign("out",out,envir=.GlobalEnv)
-                    #getting the predictions for the test/train split
-                    out$dat$ma<-(lapply(X=out$dat$ma,FUN=pred.vals,model=out$mods$final.mod,Model=Model))
                     #Just for the training set for Random Forest we have to take out of bag predictions rather than the regular predictions
                     if(Model=="rf") out$dat$ma$train$pred<-tweak.p(as.vector(predict(out$mods$final.mod,type="prob")[,2]))
+                   assign("out",out,envir=.GlobalEnv)
+
 
              out$mods$auc.output<-make.auc.plot.jpg(out=out)
 
       assign("out",out,envir=.GlobalEnv)
       
-           #producing auc and residual plots model summary information and across model evaluation metric
+      #producing auc and residual plots model summary information and across model evaluation metric
 
-                
      ################################ Making the tiff
    if(out$input$make.p.tif==T | out$input$make.binary.tif==T){
         if((n.var <- out$mods$n.vars.final)<1){
@@ -125,7 +122,7 @@ Args <- commandArgs(trailingOnly=FALSE)
 make.p.tif=as.logical(make.p.tif)
 make.binary.tif=as.logical(make.binary.tif)
 MESS=as.logical(MESS)
-
+ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
 
 EvaluateNewData(workspace=ws,outDir=out.dir,binary.tif=make.binary.tif,p.tif=make.p.tif,mes=MESS)

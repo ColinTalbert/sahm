@@ -15,7 +15,7 @@ output.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSplitTest.csv"
 input.file="N:/Active/FORT_RAM/VisTrails/workspace/mtalbert_20110817T104421/MergedDataset_1.csv"
 input.file="I:/VisTrails/WorkingFiles/workspace/morisettej_20110810T153126/CovariateCorrelationOutputMDS_anothertry.csv"
 output.file="N:/Active/FORT_RAM/VisTrails/workspace/mtalbert_20110817T104421/MergedDatasetTestTrain_1.csv"
-response.col="ResponseBinary"
+response.col="responseBinary"
 input.file<-"C:\\temp\\SAHM_workspace\\mtalbert_20111121T094519\\MergedDataset_1.csv"
 
 output.file<-"C:\\temp\\maxent.debug2.csv"
