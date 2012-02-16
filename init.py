@@ -55,6 +55,9 @@ def menu_items():
         
         path = str(QtGui.QFileDialog.getExistingDirectory(None,
                                         'Browse to new session folder -'))
+        if path == '':
+            return None
+        
         session_dir = path
         utils.setrootdir(path)
         utils.createLogger(session_dir, configuration.output_dir)
@@ -68,8 +71,8 @@ def menu_items():
         
         STFM  = SelectAndTestFinalModel(session_dir, configuration.r_path) 
         retVal = STFM.exec_()
-        if retVal == 1:
-            raise ModuleError(self, "Cancel or Close selected (not OK) workflow halted.")
+#        if retVal == 1:
+#            raise ModuleError(self, "Cancel or Close selected (not OK) workflow halted.")
     
     lst = []
     lst.append(("Change session folder", change_session_folder))

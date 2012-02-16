@@ -14,7 +14,6 @@ from core.system import execute_cmdline
 import subprocess
 import glob
 
-
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -25,11 +24,11 @@ class SelectAndTestFinalModel(QtGui.QDialog):
 
     def __init__(self, session_folder, rPath, parent=None):
         self.rPath = rPath
+        self.session_folder = session_folder
+        self.findModel = FindModelType(session_folder, parent)
         
-        findModel = FindModelType(session_folder, parent)
-        
-        self.csv_file = findModel.csv_file
-        self.display_jpeg = findModel.jpeg_file
+        self.csv_file = self.findModel.csv_file
+        self.display_jpeg = self.findModel.jpeg_file
         
         QtGui.QDialog.__init__(self, parent)      
         
@@ -87,45 +86,12 @@ class SelectAndTestFinalModel(QtGui.QDialog):
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.btnRunR.sizePolicy().hasHeightForWidth())
-        self.btnRunR.setSizePolicy(sizePolicy)
-        self.btnRunR.setObjectName(_fromUtf8("btnRunR"))
+#        self.btnRunR.setSizePolicy(sizePolicy)
+#        self.btnRunR.setObjectName(_fromUtf8("btnRunR"))
         self.horizontalLayout_3.addWidget(self.btnRunR)
         spacerItem = QtGui.QSpacerItem(10, 0, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem)
-#        self.label = QtGui.QLabel(self.widget)
-#        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
-#        sizePolicy.setHorizontalStretch(0)
-#        sizePolicy.setVerticalStretch(0)
-#        sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
-#        self.label.setSizePolicy(sizePolicy)
-#        self.label.setObjectName(_fromUtf8("label"))
-#        self.horizontalLayout_3.addWidget(self.label)
-#        self.lineEdit = QtGui.QLineEdit(self.widget)
-#        self.lineEdit.setText(_fromUtf8("0.7"))
-#        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-#        sizePolicy.setHorizontalStretch(0)
-#        sizePolicy.setVerticalStretch(0)
-#        sizePolicy.setHeightForWidth(self.lineEdit.sizePolicy().hasHeightForWidth())
-#        self.lineEdit.setSizePolicy(sizePolicy)
-#        self.lineEdit.setMaximumSize(QtCore.QSize(75, 16777215))
-#        self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
-#        self.horizontalLayout_3.addWidget(self.lineEdit)
-        
-#        self.chkPresence = QtGui.QCheckBox(self.widget)
-#        self.chkPresence.setChecked(True)
-#        self.chkPresence.setText(_fromUtf8("Include presence/count points"))
-#        self.chkPresence.setObjectName(_fromUtf8("chkPresence"))
-#        self.verticalLayout.addWidget(self.chkPresence)
-#        self.chkAbsence = QtGui.QCheckBox(self.widget)
-#        self.chkAbsence.setChecked(True)
-#        self.chkAbsence.setText(_fromUtf8("Include absence points"))
-#        self.chkAbsence.setObjectName(_fromUtf8("chkAbsence"))
-#        self.verticalLayout.addWidget(self.chkAbsence)
-#        self.chkBackground = QtGui.QCheckBox(self.widget)
-#        self.chkBackground.setChecked(True)
-#        self.chkBackground.setText(_fromUtf8("Include background points"))
-#        self.chkBackground.setObjectName(_fromUtf8("chkBackground"))
-#        self.verticalLayout.addWidget(self.chkBackground)
+
         
         self.verticalLayout.addLayout(self.horizontalLayout_3)
         
@@ -137,7 +103,6 @@ class SelectAndTestFinalModel(QtGui.QDialog):
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(4)
         sizePolicy.setVerticalStretch(0)
-        #sizePolicy.setHeightForWidth(self.view.sizePolicy().hasHeightForWidth())
         self.view.setSizePolicy(sizePolicy)
         self.view.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
         self.view.setObjectName(_fromUtf8("view"))
@@ -148,34 +113,65 @@ class SelectAndTestFinalModel(QtGui.QDialog):
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setContentsMargins(-1, 3, -1, 3)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.chkEvalHoldout = QtGui.QCheckBox()
+        self.chkEvalHoldout.setText("Evaluate Hold Out")
+        self.chkEvalHoldout.setObjectName(_fromUtf8('chkEvalHoldout'))
+        self.lblProduceMaps = QtGui.QLabel()
+        self.lblProduceMaps.setText("Produce maps")
+        self.chkProb = QtGui.QCheckBox()
+        self.chkProb.setText("Probability")
+        self.chkProb.setObjectName(_fromUtf8('chkProb'))
+        self.chkBin = QtGui.QCheckBox()
+        self.chkBin.setText("Binary")
+        self.chkBin.setObjectName(_fromUtf8('chkBin'))
+        self.chkMess = QtGui.QCheckBox()
+        self.chkMess.setText("MESS")
+        self.chkMess.setObjectName(_fromUtf8('chkMess'))
+        
         self.btnOK = QtGui.QPushButton()
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.btnOK.sizePolicy().hasHeightForWidth())
-        self.btnOK.setSizePolicy(sizePolicy)
-        self.btnOK.setBaseSize(QtCore.QSize(100, 0))
-        self.btnOK.setToolTip(_fromUtf8(""))
         self.btnOK.setObjectName(_fromUtf8("btnOK"))
-        self.horizontalLayout.addWidget(self.btnOK)
+        self.btnOK.setText(_fromUtf8("OK"))
         self.btnCancel = QtGui.QPushButton()
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.btnCancel.sizePolicy().hasHeightForWidth())
-        self.btnCancel.setSizePolicy(sizePolicy)
-        self.btnCancel.setBaseSize(QtCore.QSize(100, 0))
+        self.btnCancel.setText(_fromUtf8("Cancel"))
         self.btnCancel.setObjectName(_fromUtf8("btnCancel"))
+        
+        self.horizontalLayout.addWidget(self.chkEvalHoldout)
+        self.horizontalLayout.addWidget(self.lblProduceMaps)
+        self.horizontalLayout.addWidget(self.chkProb)
+        self.horizontalLayout.addWidget(self.chkBin)
+        self.horizontalLayout.addWidget(self.chkMess)
+        self.horizontalLayout.addWidget(self.btnOK)
         self.horizontalLayout.addWidget(self.btnCancel)
+        
         self.verticalLayout_3.addLayout(self.horizontalLayout)
+        
+        
+#        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+#        sizePolicy.setHorizontalStretch(0)
+#        sizePolicy.setVerticalStretch(0)
+#        sizePolicy.setHeightForWidth(self.btnOK.sizePolicy().hasHeightForWidth())
+#        self.btnOK.setSizePolicy(sizePolicy)
+#        self.btnOK.setBaseSize(QtCore.QSize(100, 0))
+#        self.btnOK.setToolTip(_fromUtf8(""))
+        
+
+        
+        
+#        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+#        sizePolicy.setHorizontalStretch(0)
+#        sizePolicy.setVerticalStretch(0)
+#        sizePolicy.setHeightForWidth(self.btnCancel.sizePolicy().hasHeightForWidth())
+#        self.btnCancel.setSizePolicy(sizePolicy)
+#        self.btnCancel.setBaseSize(QtCore.QSize(100, 0))
+        
+        
         self.horizontalLayout_4.addLayout(self.verticalLayout_3)
 
-        self.setWindowTitle(_fromUtf8("Final Model Selection and Test"))
+        self.setWindowTitle(_fromUtf8("Evaluate Holdout data and/or produce maps"))
         self.label_2.setText(_fromUtf8("Models"))
-        self.btnRunR.setText(_fromUtf8("Run Final Test"))
+#        self.btnRunR.setText(_fromUtf8("Run Final Test"))
 #        self.label.setText(_fromUtf8("Threshold"))
-        self.btnOK.setText(_fromUtf8("OK"))
-        self.btnCancel.setText(_fromUtf8("Cancel"))
+        
         self.resize(1100, 800)
         self.view.resize(800, 750)
         
@@ -188,8 +184,8 @@ class SelectAndTestFinalModel(QtGui.QDialog):
                      self.okTriggered)
         self.connect(self.btnCancel, QtCore.SIGNAL('clicked(bool)'),
                      self.cancel)
-        self.connect(self.btnRunR, QtCore.SIGNAL('clicked(bool)'),
-                     self.updateROutput)
+#        self.connect(self.btnRunR, QtCore.SIGNAL('clicked(bool)'),
+#                     self.updateROutput)
         self.connect(self.view, QtCore.SIGNAL('resize()'),
                      self.resize)
         
@@ -207,7 +203,7 @@ class SelectAndTestFinalModel(QtGui.QDialog):
         self.load_picture(self.display_jpeg)
         
     def okTriggered(self):
-        self.SaveMDSFromTreeview()
+        self.runR()
         self.done(0)
 
     def cancel(self):
@@ -217,24 +213,33 @@ class SelectAndTestFinalModel(QtGui.QDialog):
         
     def PopulateTreeview(self):
         self.treeview.setColumnCount(1)
+        
+        
 
-        csvfile = open(self.csv_file, "r")
+        csvfile = open(self.csv_file, "rb")
         #print "MDS", self.inputMDS
         reader = csv.reader(csvfile)
         header = reader.next() #store the header
-        header2 = reader.next()
-        header3 = reader.next()
-        header4 = reader.next()
-        header5 = reader.next()
-        header6 = reader.next()
+        lines = []
+        for row in reader:
+            lines.append(row)
         
         i = 1
         for item in header[1:]:
-            tooltiptext = header2[0] + ":\t" + header2[i] + "\n"
-            tooltiptext += header3[0] + ":\t" + header3[i] + "\n"
-            tooltiptext += header4[0] + ":\t" + header4[i] + "\n"
-            tooltiptext += header5[0] + ":\t" + header5[i] + "\n"
-            tooltiptext += header6[0] + ":\t" + header6[i]
+            tooltiptext = ''
+            for line in lines:
+                try:
+                    formatedsecond = "%d4" %line[i]
+                except TypeError:
+                    formatedsecond = line[i]
+                    
+                if line[0] != '':
+                    if line[0][0].lower() == 's':
+                        tooltiptext += line[0] +":\t\t" + formatedsecond +"\n"
+                    else:
+                        tooltiptext += line[0] +":\t" + formatedsecond +"\n"
+                elif line[0] == '' and line[1] != '':
+                    tooltiptext += "\n" + line[1] +"\n"
             
             child_item = QtGui.QTreeWidgetItem([item,])
             child_item.setToolTip(0, _fromUtf8(tooltiptext))
@@ -247,110 +252,84 @@ class SelectAndTestFinalModel(QtGui.QDialog):
         csvfile.close()
         self.label_2.setText(_fromUtf8("Models previously run:"))
         
+   
         
+    def runR(self):
+#       
+        if self.chkEvalHoldout.checkState() == QtCore.Qt.Checked:
+            #create a finalModelEvaluation folder
+            eval_type = os.path.split(self.findModel.csv_file)[1]
+            eval_type = os.path.splitext(eval_type)[0]
+            eval_type = eval_type.replace("AcrossModel", "")
+            finalFolder = os.path.join(self.session_folder, "FinalModelEvaluation_" + eval_type)
+            if os.path.exists(finalFolder):
+                msg = "The folder " + "'FinalModelEvaluation_" + eval_type + "' already exists in this session folder."
+                msg += "\nThis indicates that the final evaluation metrics have already been calculated."
+                msg += "\nThese final statistics are only valid for the first time run."
+                msg += "\nThe previous run of statistics will be displayed now."
+                msg += "\nIf you really want to re-run these metrics, manually delete the previously created folder 'FinalModelEvaluation_" + eval_type + "'."
+                msg += "But from a statistical standpoint this is not advised!"
+                msgbox = QtGui.QMessageBox(self)
+                msgbox.setText(msg)
+                msgbox.exec_()
+                return None
+            else:
+                os.mkdir(finalFolder)
+                
         
-#    def button_push(self, event):
-#        pass
-
-
+ 
+        program = os.path.join(self.rPath, "i386", "Rterm.exe") 
+        script = os.path.join(utils.getModelsPath(), "EvaluateNewData.r")
         
-#        ''' Reads in the input MDS and populates the treeview widget
-#        with the items in covariate columns.  
-#        Sets the check state to be the same as the 0/1 include flag.
-#        '''
-#        writetolog("    PopulateTreeview inputMDS = " + self.inputMDS, False, False)
-#        self.treeview.setColumnCount(1)
-#        #If an outputMDS already exists then the user has run this module before.
-#        #We need to pull and apply their previous selections from that output file
-#
-#
-#            
-#        csvfile = open(self.inputMDS, "r")
-#        #print "MDS", self.inputMDS
-#        reader = csv.reader(csvfile)
-#        header = reader.next() #store the header
-#        header2 = reader.next() #the 2nd line of the mds with use/don't use
-#        header3 = reader.next() #the 3rd line of the mds with the path
-#        
-#        self.responseCol = header[2]
-#        
-#        headerList = []
-#        n = 0
-#        for i in range(0, len(header)):
-#            headerList.append([header[i], header2[i], header3[i]])
-#        
-#        noncovariate_columns = ['Split', 'EvalSplit']
-#        for item in headerList[3:]:
-#            if not item[0] in noncovariate_columns:
-#                child_item = QtGui.QTreeWidgetItem([item[0],])
-#                child_item.setFlags(QtCore.Qt.ItemIsUserCheckable |
-#                                QtCore.Qt.ItemIsEnabled)
-#                checked = True
-#                if int(item[1]) == 0:
-#                    checked = False 
-#                
-#                if not checked:
-#                    child_item.setCheckState(0, QtCore.Qt.Unchecked)
-#                else:
-#                    child_item.setCheckState(0, QtCore.Qt.Checked)
-#                
-#                self.treeview.addTopLevelItem(child_item)
-#                #self.tree_items[file] = child_item
-#                n += 1
-#        csvfile.close()
-#        #update the tree view label to show how many covariates there are
-#        self.label_2.setText(_fromUtf8("Covariates   (n=" + str(n) + ")"))
-        
-#    def SaveMDSFromTreeview(self):
-#        #updates the second header line on the input MDS file 
-#        #to reflect the checked items in the tree view 
-#        #and saves the results to the output MDS.
-#        
-#        reader = csv.reader(open(self.inputMDS, "r"))
-#        header = reader.next() #store the header
-#        header2 = reader.next() #the 2nd line of the mds with use/don't use
-#        header3 = reader.next() #the 3rd line of the mds with the path
-#        
-#        outHeader2 = header2
-#        outHeader2[2] = self.selection_name    
-#                  
-#        treeviewIter = QtGui.QTreeWidgetItemIterator(self.treeview)
-#        while treeviewIter.value():
-#            item = treeviewIter.value()
-#            col_index = header.index(item.text(0))
-#            if item.checkState(0) == QtCore.Qt.Checked:
-#                outHeader2[col_index] = "1"
-#            else:
-#                outHeader2[col_index] = "0"
-#            treeviewIter += 1
-#
-#        oFile = open(self.outputMDS, 'wb')
-#        writer = csv.writer(oFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-#        writer.writerow(header)
-#        writer.writerow(outHeader2)
-#        writer.writerow(header3)
-#        for row in reader:
-#            writer.writerow(row)
-#        oFile.close
-
-    def updateROutput(self):
         treeviewIter = QtGui.QTreeWidgetItemIterator(self.treeview)
-        selected_models = []
+        checked_count = 0
         while treeviewIter.value():
             item = treeviewIter.value()
 #            col_index = header.index(item.text(0))
             if item.checkState(0) == QtCore.Qt.Checked:
-                selected_models.append(str(item.text(0)))
-#            else:
-#                outHeader2[col_index] = "0"
+                checked_count += 1
+                origWS = os.path.join(self.session_folder, str(item.text(0)), "modelWorkspace")
+                outfolder = os.path.join(finalFolder, str(item.text(0)))
+                os.mkdir(outfolder)
+                
+                args = "ws=" + origWS
+                args += " o=" + outfolder
+                if self.chkProb.checkState() == QtCore.Qt.Checked:
+                    args += " mpt=TRUE"
+                else:
+                    args += " mpt=FALSE"
+                if self.chkBin.checkState() == QtCore.Qt.Checked:
+                    args += " mbt=TRUE"
+                else:
+                    args += " mbt=FALSE"
+                if self.chkMess.checkState() == QtCore.Qt.Checked:
+                    args += " mes=TRUE"
+                else:
+                    args += " mes=FALSE"
+                
+                command = program + " --vanilla -f " + script + " --args " + args
+                writetolog("    " + command, False, False)
+                utils.runRScript("EvaluateNewData.r", args)
+                writetolog("Finished running R for: " + str(item.text(0)) , False, True)
             treeviewIter += 1
-        outputPic = self.runR(self.outputMDS)
-        self.load_picture(outputPic)
         
-    def runR(self, MDSfile):
-#        
-        program = os.path.join(self.rPath, "i386", "Rterm.exe") 
-        script = os.path.join(utils.getModelsPath(), "PairsExplore.r")
+        if checked_count == 0:
+            msg = "No models selected for final evaluation/map production."
+            msgbox = QtGui.QMessageBox(self)
+            msgbox.setText(msg)
+            msgbox.exec_()
+        
+        elif self.chkEvalHoldout.checkState() == QtCore.Qt.Checked:
+            output_disp = os.path.join(finalFolder, "somethinghere")
+            self.load_picture(output_disp)
+        else:
+            msg = "All map production finished."
+            msgbox = QtGui.QMessageBox(self)
+            msgbox.setText(msg)
+            msgbox.exec_()
+        
+        
+        
 #        args = "i=" + '"' + MDSfile + '"' + " o=" + '"' + self.displayJPEG + '"' + " m=" + str(self.lineEdit.text())
 #        args += " rc=" + self.responseCol
 #        
