@@ -25,10 +25,10 @@ input.file[12]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
 input.file[13]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
 
 output.dir<-vector()
-output.dir[1]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction1.23\\rf"
-output.dir[2]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction1.23\\brt"
-output.dir[3]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction1.23\\mars"
-output.dir[4]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction1.23\\glm"
+output.dir[1]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction2.15\\rf"
+output.dir[2]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction2.15\\brt"
+output.dir[3]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction2.15\\mars"
+output.dir[4]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction2.15\\glm"
 
 
 

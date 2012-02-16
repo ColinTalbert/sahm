@@ -7,12 +7,12 @@ source("GLM.helper.fcts.r")
 source("BRT.helper.fcts.r")
 source("RF.helper.fcts.r")
 output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
+rc="responseBinary"
+#options(error=expression(if(interactive()) recover() else dump.calls()))
+#options(error=NULL)
+#trace(proc.tiff,browser)
+#list.files()
 
-options(error=expression(if(interactive()) recover() else dump.calls()))
-options(error=NULL)
-trace(proc.tiff,browser)
-
-list.files()
 #Testing Compile Output on data with no test train and with a test train
 
 rc="responseCount"
@@ -27,11 +27,13 @@ input.file[11]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv
 ############### Quick debug  ##############################################
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Split.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/NoSplit.csv"
-input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Factor.csv"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
+
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Spat.Weights.csv"
 
-rc="responseBinary"
+
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation\\modelSelection_split_1.csv"
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation\\modelSelection_cv_1.csv"
 input.file="I:/VisTrails/WorkingFiles/workspace/Test_CrossValidation2/CovariateCorrelationOutputMDS_no categorical2.csv"

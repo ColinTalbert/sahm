@@ -1,5 +1,5 @@
-setwd("I:\\VisTrails\\Central_VisTrails_x32_debug\\VisTrails\\vistrails\\packages\\sahm_test\\pySAHM\\Resources\\R_Modules")
-ScriptPath="I:\\VisTrails\\Central_VisTrails_x32_debug\\VisTrails\\vistrails\\packages\\sahm_test\\pySAHM\\Resources\\R_Modules"
+setwd("I:\\VisTrails\\Central_VisTrails_x32\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\Central_VisTrails_x32\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
 
 #The idea here is to run this code then change above directories then rerun with the new code and compare (using append output and possible comparing maps)
 source("FIT_BRT_pluggable.r")
@@ -28,10 +28,10 @@ input.file[12]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
 input.file[13]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
 
 output.dir<-vector()
-output.dir[1]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\NewMasterBranch1.23\\rf"
-output.dir[2]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\NewMasterBranch1.23\\brt"
-output.dir[3]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\NewMasterBranch1.23\\mars"
-output.dir[4]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\NewMasterBranch1.23\\glm"
+output.dir[1]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\NewMasterBranch2.10\\rf"
+output.dir[2]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\NewMasterBranch2.10\\brt"
+output.dir[3]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\NewMasterBranch2.10\\mars"
+output.dir[4]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\NewMasterBranch2.10\\glm"
 
 ##BRT
  for(i in 1:length(input.file)){
