@@ -60,7 +60,7 @@ set.seed(as.numeric(seed))
                  for (i in 1:length(factor.cols)){
                      factor.table<-table(dat[,factor.cols[i]])
                        if(any(factor.table<10)) {warning(paste("Some levels for the categorical predictor ",names(dat)[factor.cols[i]]," do not have at least 10 observations.\n",
-                                                                   "you might want to consider removing or reclassifying this predictor before continuing.\n",
+                                                                   "You might want to consider removing or reclassifying this predictor before continuing.\n",
                                                                    "Factors with few observations can cause failure in model fitting when the data is split and cannot be reilably used in training a model.",sep=""))
                           factor.table<-as.data.frame(factor.table)
                            colnames(factor.table)<-c("Factor Name","Factor Count")
@@ -70,8 +70,8 @@ set.seed(as.numeric(seed))
                          }
                     }
                   }
-                 if(length(response)<100) stop("A test training split is not advisable for less than 100 observations.  Consider cross validation as an alternative.")
-                 if(length(response)<200) warning(paste("There are less than 200 observations.  Cross validation might be preferable to a test:",
+                 if(length(response)<100) stop("A test training split is not advisable for less than 100 observations.  Consider-cross validation as an alternative.")
+                 if(length(response)<200) warning(paste("There are less than 200 observations.  Cross-validation might be preferable to a test:",
                  "training split \n weigh the decision while keeping in mind the number of predictors being considered: ", ncol(dat)-3,sep=""))
 
                  if(tolower(response.col)=="responsebinary" & any(table(response)<10))
