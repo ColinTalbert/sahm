@@ -14,7 +14,7 @@ A .csv file with the following column headings, in order: "X," "Y," and "respons
       <Port>
         <PortName>value</PortName>
         <Definition>This is the actual file object that is being passed to other modules in the workflow.</Definition>
-        <mandatory>True</mandatory>
+        <Mandatory>True</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -26,7 +26,7 @@ A .csv file with the following column headings, in order: "X," "Y," and "respons
       <Port>
         <PortName>value_as_string</PortName>
         <Definition>This is a VisTrails port that is not used in general SAHM workflows.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -43,7 +43,7 @@ A .csv file with the following column headings, in order: "X," "Y," and "respons
       <Port>
         <PortName>categorical</PortName>
         <Definition>This parameter allows a user to indicate the type of data represented.  The distinction between continuous and categorical data will maintained through a workflow by appending the word '_categorical' to categorical layer names in the resulting MDS file.  It is also import to select the nearest neighbor resampling option for categorical layers.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>False (Unchecked)</Default>
         <Options>NA<Option>True (Checked) - The data contained in the raster layer is categorical (e.g., landcover categories).</Option><Option>False(Unchecked) - The data contained in the raster is continuous (e.g., a DEM layer).</Option></Options>
         <Connections>Does not generally Connect to any other Module.</Connections>
@@ -51,7 +51,7 @@ A .csv file with the following column headings, in order: "X," "Y," and "respons
       <Port>
         <PortName>ResampleMethod</PortName>
         <Definition>The resample method employed to interpolate new cell values when transforming the raster layer to the coordinate space or cell size of the template layer. </Definition>
-        <mandatory>TRUE</mandatory>
+        <Mandatory>TRUE</Mandatory>
         <Default>NA</Default>
         <Options>
           <Option>near:  nearest neighbor resampling Fastest algorithm, worst interpolation quality, but best choice for categorical data.  </Option>
@@ -66,7 +66,7 @@ A .csv file with the following column headings, in order: "X," "Y," and "respons
       <Port>
         <PortName>AggregationMethod</PortName>
         <Definition>The aggregation method to be used in the event that the raster layer must be up-scaled to match the template layer (e.g., generalizing a 10 m input layer to a 100 m output layer). Care should be taken to ensure that the aggregation method that best preserves the integrity of the data is used.  See the PARC module documentation for more information on how resampling and aggregation are performed.</Definition>
-        <mandatory>TRUE</mandatory>
+        <Mandatory>TRUE</Mandatory>
         <Default>NA</Default>
         <Options>
           <Option>Mean:  Average value of all constituent pixels used.</Option>
@@ -80,7 +80,7 @@ A .csv file with the following column headings, in order: "X," "Y," and "respons
       <Port>
         <PortName>file</PortName>
         <Definition>The location of the raster file. A user can navigate to the location on their file system. When a user is selecting an ESRI grid raster, the user should navigate to the 'hdr.adf' file contained within the grid folder</Definition>
-        <mandatory>TRUE</mandatory>
+        <Mandatory>TRUE</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not generally Connect to any other Module.</Connections>
@@ -90,7 +90,7 @@ A .csv file with the following column headings, in order: "X," "Y," and "respons
       <Port>
         <PortName>value</PortName>
         <Definition />
-        <mandatory>TRUE</mandatory>
+        <Mandatory>TRUE</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -100,7 +100,7 @@ A .csv file with the following column headings, in order: "X," "Y," and "respons
       <Port>
         <PortName>value_as_string</PortName>
         <Definition>This is a VisTrails port that is not used in general SAHM workflows.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA<Connection>Does not generally connect to other SAHM modules.</Connection></Connections>
@@ -117,7 +117,7 @@ A .csv file with the following column headings, in order: "X," "Y," and "respons
       <Port>
         <PortName>value</PortName>
         <Definition>This is the actual file object that is being passed to other modules in the workflow.</Definition>
-        <mandatory>True</mandatory>
+        <Mandatory>True</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -128,7 +128,7 @@ A .csv file with the following column headings, in order: "X," "Y," and "respons
       <Port>
         <PortName>value_as_string</PortName>
         <Definition>This is a VisTrails port that is not used in general SAHM workflows.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -156,7 +156,7 @@ In formatting the list of predictor files, the titles assigned to each of the co
       <Port>
         <PortName>csvFileList</PortName>
         <Definition>This is the CSV file on the file system.  While not strictly mandatory this port will almost always have an input.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -164,7 +164,7 @@ In formatting the list of predictor files, the titles assigned to each of the co
       <Port>
         <PortName>predictor</PortName>
         <Definition>Allows a user to add individual Predictor modules to a PredictorListFile</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -176,7 +176,7 @@ In formatting the list of predictor files, the titles assigned to each of the co
       <Port>
         <PortName>RastersWithPARCInfoCSV</PortName>
         <Definition>This port generally connects to the input port 'RastersWithPARCInfoCSV' on the PARC module.</Definition>
-        <mandatory>True</mandatory>
+        <Mandatory>True</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -195,7 +195,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>mdsFile</PortName>
         <Definition>The the input data set consisting of locational data for each sample point, the values of each predictor variable at those points  This input file is almost always generated by the upstream steps. </Definition>
-        <mandatory>True</mandatory>
+        <Mandatory>True</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -205,7 +205,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>makeBinMap</PortName>
         <Definition>Indicate whether to discretize the continues probability map into presence absence.  See the ThresholdOptimizationMethod for how this is done.  If time is a concern and many models are to be fit and assessed maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>False (Unchecked)</Default>
         <Options>
           <Option>True (Checked)</Option>
@@ -216,7 +216,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>makeProbabilityMap</PortName>
         <Definition>Indicate whether a map of predicted values is to be produced for the model fit.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>False (Unchecked)</Default>
         <Options>
           <Option>True (Checked)</Option>
@@ -227,7 +227,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>makeMESMap</PortName>
         <Definition>Indicate whether to produce a multivariate environmental similarity surface (MESS) and a map of which factor is limiting at each point see Elith et. al. 2010 for more details.  If time is a concern and many models are to be fit and assessed  maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well. </Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>False (Unchecked)</Default>
         <Options>
           <Option>True (Checked)</Option>
@@ -238,7 +238,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>ThresholdOptimizationMethod</PortName>
         <Definition>Determines how the threshold is optimized in order to discretize continuous predictions into binary. These are used for evaluation metrics calculated based on the confusion matrix as well as for the binary map. The value calculated for the train portion of the data will be applied to the test portion and if cross validation was specified, the value is calculated separately for each fold using the threshold from the training data and applying it to the test data for the hold out fold.  </Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>2</Default>
         <Options>
           <Option>1:  Threshold=0.5</Option>
@@ -256,7 +256,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>Seed</PortName>
         <Definition>The random number seed used by BRT.  If one desires to reproduce results from a previous BRT fit, one must enter the random number seed that is reported in the textual output from that model fit.  The seed used is always reported in the textual output.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>Randomly Generated</Default>
         <Options>
           <Option>Any integer between -2147483647 and 2147483647</Option>
@@ -266,7 +266,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>TreeComplexity</PortName>
         <Definition>Sets the level of interactions fitted in the model.  A tree complexity of 1 fits no interactions, 2 will fit up to but not necessarily all two way interactions and so on.  </Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>If not set, tree complexity will be selected based on the number of observations and what produces the best model.</Default>
         <Options>
           <Option>any positive integer (generally no greater than 3)</Option>
@@ -276,7 +276,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>BagFraction</PortName>
         <Definition>Controls the proportion of the data that is used to fit the model at each step.  Using a bag fraction of 1 will give a fully deterministic model but this is generally not preferable as stochasticity generally improves model performance (Elith and Leathwick 2008).</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>.75</Default>
         <Options>
           <Option>Any positive number greater than 0 and less than or equal to 1</Option>
@@ -286,7 +286,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>NumberOfFolds</PortName>
         <Definition>If cross-validation is used for model simplification, this sets the number of folds used for cross-validation.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>3</Default>
         <Options>
           <Option>A positive integer (generally between 2 and 10) </Option>
@@ -296,7 +296,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>Alpha</PortName>
         <Definition>Controls when the algorithm stops in the model simplification step.  The change in deviance is calculated between the previous and current iteration in model simplification and if the average change in deviance per observation is less than the standard error of the original deviance multiplied by alpha then the simplification step is accepted as long as we have not reached the maximum number of drops allowed. </Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>1</Default>
         <Options>
           <Option>Any positive floating point value is valid</Option>
@@ -306,7 +306,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>PrevalenceStratify</PortName>
         <Definition>This specifies whether cross validation samples should be stratified to match the overall prevalence.  This is currently only valid for presence absence data and is only used in model simplification.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>True (Checked)</Default>
         <Options>
           <Option>True (Checked)</Option>
@@ -317,7 +317,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>ToleranceMethod</PortName>
         <Definition>Method used in determining when to stop model simplification.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>"auto"</Default>
         <Options>
           <Option>Either "auto" or "fixed"</Option>
@@ -327,7 +327,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>Tolerance</PortName>
         <Definition>Can be set to control the stopping rule in model simplification. If ToleranceMethod is set to “auto” this value will be multiplied by the mean total deviance of the null model.  Change in deviance is compared to the tolerance to determine when to stop model simplification.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>.001</Default>
         <Options>
           <Option>Any positive floating point value is valid</Option>
@@ -337,7 +337,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>LearningRate</PortName>
         <Definition>Controls the amount each tree contributes to the model.   A small learning rate restricts individual tree contributions to the overall model.  </Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>If not specified, learning rate will be determined based on the number of trees and the tree complexity.</Default>
         <Options>
           <Option>Any positive number greater than 0 and less than 1</Option>
@@ -347,7 +347,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>MaximumTrees</PortName>
         <Definition>The absolute upper limit on the total number of tress to fit.  Setting this below 5000 will result in an error.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>10,000</Default>
         <Options>
           <Option>Any positive integer greater than 5,000</Option>
@@ -359,7 +359,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>modelWorkspace</PortName>
         <Definition>The R workspace where all internal details regarding the fitted model are stored.  This is used by the Select and Test the Final Model module.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -370,7 +370,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>BinaryMap</PortName>
         <Definition>If specified using MakeBinaryMap=True then a surface of binary predictions is produced by discretizing the probability map based on the selected threshold.  This map indicates whether one could expect each site to be occupied or unoccupied based on the model.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -379,7 +379,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <PortName>ProbabilityMap</PortName>
         <Definition>If specified using MakeProbabilityMap=True then a surface of predicted values is produced based on the tiffs in the input .mds file and the fitted model.  These can but do not always indicate the probability of finding the species at a given site.  For example if model calibration is poor then these will not agree well with the true probabilities though discrimination between presence and absences might still be good.
 </Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -387,7 +387,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>ResidualsMap</PortName>
         <Definition>Model residual plots show the spatial relationship between the model deviance residuals.  Most models assume residuals will be independent thus spatial pattern in the deviance residuals can be indicative of a problem with the model fit and inference based on the fit.  It can for example indicate that important predictors were not included in the model and can be compared with the spatial pattern of predictors that were not included in the model.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -395,7 +395,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>MessMap</PortName>
         <Definition>If specified by selecting makeMESMap=True the the MESS and MoD surfaces will be produced.  The MESS surface is the multivariate environment similarity surface and shows how well each point fits into the univariate ranges of the points for which the model was fit.  Negative values in this map indicate that the point is out of the range of the training data.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -404,7 +404,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <PortName>MoDMap</PortName>
         <Definition>If specified by selecting makeMESMap=TRUE the the MESS and MoD surfaces will be produced.  The MoD map is related to the MESS map and indicates which variable was furthest from the range over which the model was fit for each spatial location.  See Elith et. al. 2010 for details on how the MESS map calculations are performed.
 </Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -412,7 +412,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>modelEvalPlot</PortName>
         <Definition>For binary data this will be a Receiver operating characteristic curve.  Which shows the relationship between sensitivity and specificity as the threshold for discretizing continuous predictions into presence absence is varied.  The threshold selected using the specified ThresholdOptimizationMethod is shown.  If a model selection test training split was specified the ROC curve for this will be shown in red and if a cross-validation split was specified ROC curves for each cross-validation fold will be overlaied with box plots summarizing cross-validation results.  For count data this display will show several standard plots for assessment of model residuals.       </Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -420,7 +420,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>ResponseCurves</PortName>
         <Definition>Model response curves show the relationship between each predictor included in the model, while holding all other predictors constant at their means, and the fitted values.  MARS response curves are shown on a logit scale thus the response axis will not necessarily be bounded on the 0 to 1 interval.  BRT response curves will show response surfaces for any interaction terms included in the final model along with the percent relative influence.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -428,14 +428,14 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>Text_Output</PortName>
         <Definition>This file contains a summary of  the model fit.  The information contained here includes the number of presence observations (counts equal to or greater than 1 for count models), the number of absence points, the number of covariates that were considered by the model selection algorithm.  Note all of these can differ from the numbers in the original .mds due to incomplete records being deleted, and predictors with only one unique value being removed.  The random number seed is recorded if applicable which allows completely reproducible results as well as a summary of the model fit.  Evaluation Statistics are reported for the data used to fit the model as well as for the test or cross-validation split if applicable.  References for how to interpret most of these are ubiquitous in the literature but it is worth mentioning that interpretation of the calibration statistics is described by Pearce and Ferrier 2000 as well as Miller and Hui 1991.  Most metrics reported here can also be found in related graphical displays.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
       <Port>
         <PortName>modelCalibrationPlot</PortName>
         <Definition>The calibration plot shows the predicted probability of occurrence plotted against the actual proportions of occurrence for each of 5 bins along the probability axis.  A logistic regression model is fit to the logits of the predicted probabilities of occurrence and is shown on the plot.  These plots are used to determine how reliably a model will predict if a site is occupied or unoccupied (Pearce and Ferrier 2000)</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -459,7 +459,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>mdsFile</PortName>
         <Definition>The the input data set consisting of locational data for each sample point, the values of each predictor variable at those points  This input file is almost always generated by the upstream steps. </Definition>
-        <mandatory>True</mandatory>
+        <Mandatory>True</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -469,7 +469,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>makeBinMap</PortName>
         <Definition>Indicate whether to discretize the continues probability map into presence absence.  See the ThresholdOptimizationMethod for how this is done.  If time is a concern and many models are to be fit and assessed maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>False (Unchecked)</Default>
         <Options>
           <Option>True (Checked)</Option>
@@ -480,7 +480,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>makeProbabilityMap</PortName>
         <Definition>Indicate whether a map of predicted values is to be produced for the model fit.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>False (Unchecked)</Default>
         <Options>
           <Option>True (Checked)</Option>
@@ -491,7 +491,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>makeMESMap</PortName>
         <Definition>Indicate whether to produce a multivariate environmental similarity surface (MESS) and a map of which factor is limiting at each point see Elith et. al. 2010 for more details.  If time is a concern and many models are to be fit and assessed  maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well. </Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>False (Unchecked)</Default>
         <Options>
           <Option>True (Checked)</Option>
@@ -502,7 +502,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>Seed</PortName>
         <Definition>The random number seed used by BRT.  If one desires to reproduce results from a previous randomForest fit, one must enter the random number seed that is reported in the textual output from that model fit.  The seed used is always reported in the textual output.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>Randomly Generated</Default>
         <Options>
           <Option>Any integer between -2147483647 and 2147483647</Option>
@@ -512,7 +512,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>ThresholdOptimizationMethod</PortName>
         <Definition>Determines how the threshold is optimized in order to discretize continuous predictions into binary. These are used for evaluation metrics calculated based on the confusion matrix as well as for the binary map. The value calculated for the train portion of the data will be applied to the test portion and if cross validation was specified, the value is calculated separately for each fold using the threshold from the training data and applying it to the test data for the hold out fold.  </Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>2</Default>
         <Options>
           <Option>1:  Threshold=0.5</Option>
@@ -530,7 +530,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>mTry</PortName>
         <Definition>By default this is optimized using the tuneRF function so that OOB error is minimized.  See the CRAN website for more details.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>this is optimized using the tuneRF function so that out of bag error is minimized.</Default>
         <Options>
           <Option>A number between 1 and the total number of valid parameters used in model fitting </Option>
@@ -540,7 +540,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>nTrees</PortName>
         <Definition>See the randomForest documentation on the CRAN website for details http://cran.r-project.org/web/packages/randomForest/index.html.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>randomForest function default</Default>
         <Options>See randomForest documentation for valid input</Options>
         <Option />
@@ -549,7 +549,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>nodesize</PortName>
         <Definition>See the randomForest documentation on the CRAN website for details http://cran.r-project.org/web/packages/randomForest/index.html.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>randomForest function default</Default>
         <Options>
           <Option>See randomForest documentation for valid input</Option>
@@ -559,7 +559,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>replace</PortName>
         <Definition>See the randomForest documentation on the CRAN website for details http://cran.r-project.org/web/packages/randomForest/index.html.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>randomForest function default</Default>
         <Options>
           <Option>See randomForest documentation for valid input</Option>
@@ -569,7 +569,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>maxnodes</PortName>
         <Definition>See the randomForest documentation on the CRAN website for details http://cran.r-project.org/web/packages/randomForest/index.html.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>randomForest function default</Default>
         <Options>
           <Option>See randomForest documentation for valid input</Option>
@@ -579,7 +579,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>importance</PortName>
         <Definition>See the randomForest documentation on the CRAN website for details http://cran.r-project.org/web/packages/randomForest/index.html.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>randomForest function default</Default>
         <Options>
           <Option>See randomForest documentation for valid input</Option>
@@ -589,7 +589,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>localImp</PortName>
         <Definition>See the randomForest documentation on the CRAN website for details http://cran.r-project.org/web/packages/randomForest/index.html.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>randomForest function default</Default>
         <Options>
           <Option>See randomForest documentation for valid input</Option>
@@ -599,7 +599,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>proximity</PortName>
         <Definition>See the randomForest documentation on the CRAN website for details http://cran.r-project.org/web/packages/randomForest/index.html.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>randomForest function default</Default>
         <Options>
           <Option>See randomForest documentation for valid input</Option>
@@ -609,7 +609,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>oobProx</PortName>
         <Definition>See the randomForest documentation on the CRAN website for details http://cran.r-project.org/web/packages/randomForest/index.html.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>randomForest function default</Default>
         <Options>
           <Option>See randomForest documentation for valid input</Option>
@@ -619,7 +619,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>normVotes</PortName>
         <Definition>See the randomForest documentation on the CRAN website for details http://cran.r-project.org/web/packages/randomForest/index.html.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>randomForest function default</Default>
         <Options>
           <Option>See randomForest documentation for valid input</Option>
@@ -629,7 +629,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>doTrace</PortName>
         <Definition>See the randomForest documentation on the CRAN website for details http://cran.r-project.org/web/packages/randomForest/index.html.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>randomForest function default</Default>
         <Options>
           <Option>See randomForest documentation for valid input</Option>
@@ -639,7 +639,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>keepForest</PortName>
         <Definition>See the randomForest documentation on the CRAN website for details http://cran.r-project.org/web/packages/randomForest/index.html.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>randomForest function default</Default>
         <Options>
           <Option>See randomForest documentation for valid input</Option>
@@ -651,7 +651,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>modelWorkspace</PortName>
         <Definition>The R workspace where all internal details regarding the fitted model are stored.  This is used by the Select and Test the Final Model module.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -662,7 +662,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>BinaryMap</PortName>
         <Definition>If specified using MakeBinaryMap=True then a surface of binary predictions is produced by discretizing the probability map based on the selected threshold.  This map indicates whether one could expect each site to be occupied or unoccupied based on the model.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -671,7 +671,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <PortName>ProbabilityMap</PortName>
         <Definition>If specified using MakeProbabilityMap=True then a surface of predicted values is produced based on the tiffs in the input .mds file and the fitted model.  These can but do not always indicate the probability of finding the species at a given site.  For example if model calibration is poor then these will not agree well with the true probabilities though discrimination between presence and absences might still be good.
 </Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -679,7 +679,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>ResidualsMap</PortName>
         <Definition>Model residual plots show the spatial relationship between the model deviance residuals.  Most models assume residuals will be independent thus spatial pattern in the deviance residuals can be indicative of a problem with the model fit and inference based on the fit.  It can for example indicate that important predictors were not included in the model and can be compared with the spatial pattern of predictors that were not included in the model.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -687,7 +687,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>MessMap</PortName>
         <Definition>If specified by selecting makeMESMap=True the the MESS and MoD surfaces will be produced.  The MESS surface is the multivariate environment similarity surface and shows how well each point fits into the univariate ranges of the points for which the model was fit.  Negative values in this map indicate that the point is out of the range of the training data.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -696,7 +696,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <PortName>MoDMap</PortName>
         <Definition>If specified by selecting makeMESMap=TRUE the the MESS and MoD surfaces will be produced.  The MoD map is related to the MESS map and indicates which variable was furthest from the range over which the model was fit for each spatial location.  See Elith et. al. 2010 for details on how the MESS map calculations are performed.
 </Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -705,7 +705,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <PortName>modelEvalPlot</PortName>
         <Definition>For binary data this will be a Receiver operating characteristic curve.  Which shows the relationship between sensitivity and specificity as the threshold for discretizing continuous predictions into presence absence is varied.  The threshold selected using the specified ThresholdOptimizationMethod is shown.  If a model selection test training split was specified the ROC curve for this will be shown in red and if a cross-validation split was specified ROC curves for each cross-validation fold will be overlaied with box plots summarizing cross-validation results.  For count data this display will show several standard plots for assessment of model residuals.     
 </Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -713,7 +713,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>ResponseCurves</PortName>
         <Definition>Model response curves show the relationship between each predictor included in the model, while holding all other predictors constant at their means, and the fitted values.  MARS response curves are shown on a logit scale thus the response axis will not necessarily be bounded on the 0 to 1 interval.  BRT response curves will show response surfaces for any interaction terms included in the final model along with the percent relative influence.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -721,14 +721,14 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>Text_Output</PortName>
         <Definition>This file contains a summary of  the model fit.  The information contained here includes the number of presence observations (counts equal to or greater than 1 for count models), the number of absence points, the number of covariates that were considered by the model selection algorithm.  Note all of these can differ from the numbers in the original .mds due to incomplete records being deleted, and predictors with only one unique value being removed.  The random number seed is recorded if applicable which allows completely reproducible results as well as a summary of the model fit.  Evaluation Statistics are reported for the data used to fit the model as well as for the test or cross-validation split if applicable.  References for how to interpret most of these are ubiquitous in the literature but it is worth mentioning that interpretation of the calibration statistics is described by Pearce and Ferrier 2000 as well as Miller and Hui 1991.  Most metrics reported here can also be found in related graphical displays.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
       <Port>
         <PortName>modelCalibrationPlot</PortName>
         <Definition>The calibration plot shows the predicted probability of occurrence plotted against the actual proportions of occurrence for each of 5 bins along the probability axis.  A logistic regression model is fit to the logits of the predicted probabilities of occurrence and is shown on the plot.  These plots are used to determine how reliably a model will predict if a site is occupied or unoccupied (Pearce and Ferrier 2000)</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -757,7 +757,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>mdsFile</PortName>
         <Definition>The the input data set consisting of locational data for each sample point, the values of each predictor variable at those points  This input file is almost always generated by the upstream steps. </Definition>
-        <mandatory>True</mandatory>
+        <Mandatory>True</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -767,7 +767,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>makeBinMap</PortName>
         <Definition>Indicate whether to discretize the continues probability map into presence absence.  See the ThresholdOptimizationMethod for how this is done.  If time is a concern and many models are to be fit and assessed maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>False (Unchecked)</Default>
         <Options>
           <Option>True (Checked)</Option>
@@ -778,7 +778,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>makeProbabilityMap</PortName>
         <Definition>Indicate whether a map of predicted values is to be produced for the model fit.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>False (Unchecked)</Default>
         <Options>
           <Option>True (Checked)</Option>
@@ -789,7 +789,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>makeMESMap</PortName>
         <Definition>Indicate whether to produce a multivariate environmental similarity surface (MESS) and a map of which factor is limiting at each point see Elith et. al. 2010 for more details.  If time is a concern and many models are to be fit and assessed  maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well. </Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>False (Unchecked)</Default>
         <Options>
           <Option>True (Checked)</Option>
@@ -800,7 +800,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>ThresholdOptimizationMethod</PortName>
         <Definition>Determines how the threshold is optimized in order to discretize continuous predictions into binary. These are used for evaluation metrics calculated based on the confusion matrix as well as for the binary map. The value calculated for the train portion of the data will be applied to the test portion and if cross validation was specified, the value is calculated separately for each fold using the threshold from the training data and applying it to the test data for the hold out fold.  </Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>2</Default>
         <Options>
           <Option>1:  Threshold=0.5</Option>
@@ -821,7 +821,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
     1=no interactions (default) terms are allowed in the model
     2=1st order interactions
     3=2nd order interactions and so on.  </Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>1</Default>
         <Options>
           <Option>A positive integer generally no greater than 3 or possibly 4</Option>
@@ -831,7 +831,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>MarsPenalty</PortName>
         <Definition>The cost per degree of freedom charge in fitting the mars model (from the mda library).</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>2</Default>
         <Options>
           <Option>A positive float</Option>
@@ -843,7 +843,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>modelWorkspace</PortName>
         <Definition>The R workspace where all internal details regarding the fitted model are stored.  This is used by the Select and Test the Final Model module.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -854,7 +854,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>BinaryMap</PortName>
         <Definition>If specified using MakeBinaryMap=True then a surface of binary predictions is produced by discretizing the probability map based on the selected threshold.  This map indicates whether one could expect each site to be occupied or unoccupied based on the model.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -863,7 +863,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <PortName>ProbabilityMap</PortName>
         <Definition>If specified using MakeProbabilityMap=True then a surface of predicted values is produced based on the tiffs in the input .mds file and the fitted model.  These can but do not always indicate the probability of finding the species at a given site.  For example if model calibration is poor then these will not agree well with the true probabilities though discrimination between presence and absences might still be good.
 </Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -871,7 +871,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>ResidualsMap</PortName>
         <Definition>Model residual plots show the spatial relationship between the model deviance residuals.  Most models assume residuals will be independent thus spatial pattern in the deviance residuals can be indicative of a problem with the model fit and inference based on the fit.  It can for example indicate that important predictors were not included in the model and can be compared with the spatial pattern of predictors that were not included in the model.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -879,7 +879,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>MessMap</PortName>
         <Definition>If specified by selecting makeMESMap=True the the MESS and MoD surfaces will be produced.  The MESS surface is the multivariate environment similarity surface and shows how well each point fits into the univariate ranges of the points for which the model was fit.  Negative values in this map indicate that the point is out of the range of the training data.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -888,7 +888,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <PortName>MoDMap</PortName>
         <Definition>If specified by selecting makeMESMap=TRUE the the MESS and MoD surfaces will be produced.  The MoD map is related to the MESS map and indicates which variable was furthest from the range over which the model was fit for each spatial location.  See Elith et. al. 2010 for details on how the MESS map calculations are performed.
 </Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -897,7 +897,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <PortName>modelEvalPlot</PortName>
         <Definition>For binary data this will be a Receiver operating characteristic curve.  Which shows the relationship between sensitivity and specificity as the threshold for discretizing continuous predictions into presence absence is varied.  The threshold selected using the specified ThresholdOptimizationMethod is shown.  If a model selection test training split was specified the ROC curve for this will be shown in red and if a cross-validation split was specified ROC curves for each cross-validation fold will be overlaied with box plots summarizing cross-validation results. For count data this display will show several standard plots for assessment of model residuals.     
 </Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -905,7 +905,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>ResponseCurves</PortName>
         <Definition>Model response curves show the relationship between each predictor included in the model, while holding all other predictors constant at their means, and the fitted values.  MARS response curves are shown on a logit scale thus the response axis will not necessarily be bounded on the 0 to 1 interval.  BRT response curves will show response surfaces for any interaction terms included in the final model along with the percent relative influence.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -913,14 +913,14 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>Text_Output</PortName>
         <Definition>This file contains a summary of  the model fit.  The information contained here includes the number of presence observations (counts equal to or greater than 1 for count models), the number of absence points, the number of covariates that were considered by the model selection algorithm.  Note all of these can differ from the numbers in the original .mds due to incomplete records being deleted, and predictors with only one unique value being removed.  The random number seed is recorded if applicable which allows completely reproducible results as well as a summary of the model fit.  Evaluation Statistics are reported for the data used to fit the model as well as for the test or cross-validation split if applicable.  References for how to interpret most of these are ubiquitous in the literature but it is worth mentioning that interpretation of the calibration statistics is described by Pearce and Ferrier 2000 as well as Miller and Hui 1991.  Most metrics reported here can also be found in related graphical displays.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
       <Port>
         <PortName>modelCalibrationPlot</PortName>
         <Definition>The calibration plot shows the predicted probability of occurrence plotted against the actual proportions of occurrence for each of 5 bins along the probability axis.  A logistic regression model is fit to the logits of the predicted probabilities of occurrence and is shown on the plot.  These plots are used to determine how reliably a model will predict if a site is occupied or unoccupied (Pearce and Ferrier 2000)</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -946,7 +946,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>mdsFile</PortName>
         <Definition>The the input data set consisting of locational data for each sample point, the values of each predictor variable at those points  This input file is almost always generated by the upstream steps. </Definition>
-        <mandatory>True</mandatory>
+        <Mandatory>True</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -956,7 +956,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>makeBinMap</PortName>
         <Definition>Indicate whether to discretize the continues probability map into presence absence.  See the ThresholdOptimizationMethod for how this is done.  If time is a concern and many models are to be fit and assessed maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>False (Unchecked)</Default>
         <Options>
           <Option>True (Checked)</Option>
@@ -967,7 +967,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>makeProbabilityMap</PortName>
         <Definition>Indicate whether a map of predicted values is to be produced for the model fit.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>False (Unchecked)</Default>
         <Options>
           <Option>True (Checked)</Option>
@@ -978,7 +978,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>makeMESMap</PortName>
         <Definition>Indicate whether to produce a multivariate environmental similarity surface (MESS) and a map of which factor is limiting at each point see Elith et. al. 2010 for more details.  If time is a concern and many models are to be fit and assessed  maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well. </Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>False (Unchecked)</Default>
         <Options>
           <Option>True (Checked)</Option>
@@ -989,7 +989,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>ThresholdOptimizationMethod</PortName>
         <Definition>Determines how the threshold is optimized in order to discretize continuous predictions into binary. These are used for evaluation metrics calculated based on the confusion matrix as well as for the binary map. The value calculated for the train portion of the data will be applied to the test portion and if cross validation was specified, the value is calculated separately for each fold using the threshold from the training data and applying it to the test data for the hold out fold.  </Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>2</Default>
         <Options>
           <Option>1:  Threshold=0.5</Option>
@@ -1007,7 +1007,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>SimplificationMethod</PortName>
         <Definition>This alters the decision rule governing how the model is pruned in the stepwise model selection step.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>AIC</Default>
         <Options>
           <Option>AIC or BIC</Option>
@@ -1019,7 +1019,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>modelWorkspace</PortName>
         <Definition>The R workspace where all internal details regarding the fitted model are stored.  This is used by the Select and Test the Final Model module.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1030,7 +1030,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>BinaryMap</PortName>
         <Definition>If specified using MakeBinaryMap=True then a surface of binary predictions is produced by discretizing the probability map based on the selected threshold.  This map indicates whether one could expect each site to be occupied or unoccupied based on the model.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -1039,7 +1039,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <PortName>ProbabilityMap</PortName>
         <Definition>If specified using MakeProbabilityMap=True then a surface of predicted values is produced based on the tiffs in the input .mds file and the fitted model.  These can but do not always indicate the probability of finding the species at a given site.  For example if model calibration is poor then these will not agree well with the true probabilities though discrimination between presence and absences might still be good.
 </Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -1047,7 +1047,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>ResidualsMap</PortName>
         <Definition>Model residual plots show the spatial relationship between the model deviance residuals.  Most models assume residuals will be independent thus spatial pattern in the deviance residuals can be indicative of a problem with the model fit and inference based on the fit.  It can for example indicate that important predictors were not included in the model and can be compared with the spatial pattern of predictors that were not included in the model.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -1055,7 +1055,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>MessMap</PortName>
         <Definition>If specified by selecting makeMESMap=True the the MESS and MoD surfaces will be produced.  The MESS surface is the multivariate environment similarity surface and shows how well each point fits into the univariate ranges of the points for which the model was fit.  Negative values in this map indicate that the point is out of the range of the training data.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -1064,7 +1064,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <PortName>MoDMap</PortName>
         <Definition>If specified by selecting makeMESMap=TRUE the the MESS and MoD surfaces will be produced.  The MoD map is related to the MESS map and indicates which variable was furthest from the range over which the model was fit for each spatial location.  See Elith et. al. 2010 for details on how the MESS map calculations are performed.
 </Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -1073,7 +1073,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <PortName>modelEvalPlot</PortName>
         <Definition>For binary data this will be a Receiver operating characteristic curve.  Which shows the relationship between sensitivity and specificity as the threshold for discretizing continuous predictions into presence absence is varied.  The threshold selected using the specified ThresholdOptimizationMethod is shown.  If a model selection test training split was specified the ROC curve for this will be shown in red and if a cross-validation split was specified ROC curves for each cross-validation fold will be overlaied with box plots summarizing cross-validation results.  For count data this display will show several standard plots for assessment of model residuals.     
 </Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -1081,7 +1081,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>ResponseCurves</PortName>
         <Definition>Model response curves show the relationship between each predictor included in the model, while holding all other predictors constant at their means, and the fitted values.  MARS response curves are shown on a logit scale thus the response axis will not necessarily be bounded on the 0 to 1 interval.  BRT response curves will show response surfaces for any interaction terms included in the final model along with the percent relative influence.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -1089,14 +1089,14 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Port>
         <PortName>Text_Output</PortName>
         <Definition>This file contains a summary of  the model fit.  The information contained here includes the number of presence observations (counts equal to or greater than 1 for count models), the number of absence points, the number of covariates that were considered by the model selection algorithm.  Note all of these can differ from the numbers in the original .mds due to incomplete records being deleted, and predictors with only one unique value being removed.  The random number seed is recorded if applicable which allows completely reproducible results as well as a summary of the model fit.  Evaluation Statistics are reported for the data used to fit the model as well as for the test or cross-validation split if applicable.  References for how to interpret most of these are ubiquitous in the literature but it is worth mentioning that interpretation of the calibration statistics is described by Pearce and Ferrier 2000 as well as Miller and Hui 1991.  Most metrics reported here can also be found in related graphical displays.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
       <Port>
         <PortName>modelCalibrationPlot</PortName>
         <Definition>The calibration plot shows the predicted probability of occurrence plotted against the actual proportions of occurrence for each of 5 bins along the probability axis.  A logistic regression model is fit to the logits of the predicted probabilities of occurrence and is shown on the plot.  These plots are used to determine how reliably a model will predict if a site is occupied or unoccupied (Pearce and Ferrier 2000)</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -1125,7 +1125,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <PortName>row</PortName>
         <Definition>Entering a value here forces the output for this cell to appear on the row specified on the output spreadsheet.
 Row counts start from 1.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>VisTrails will autoselect the next empty cell, but you do not have control over which outputs appear where.</Default>
         <Options>Any positive integer.</Options>
         <Connections>NA</Connections>
@@ -1134,7 +1134,7 @@ Row counts start from 1.</Definition>
         <PortName>column</PortName>
         <Definition>Entering a value here forces the output for this cell to appear on the column specified on the output spreadsheet.
 Row counts start from 1.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>Any positive integer.</Options>
         <Connections>NA</Connections>
@@ -1142,7 +1142,7 @@ Row counts start from 1.</Definition>
       <Port>
         <PortName>model_workspace</PortName>
         <Definition>This is the model workspace output by any of the R models.  This widget finds all of the various outputs for display relative to the location of this file.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1152,7 +1152,7 @@ Row counts start from 1.</Definition>
       <Port>
         <PortName>max_cells_dimension</PortName>
         <Definition>For very large GIS datasets the Matplotlib based viewer used to display GIS data runs into memory issues.  To get around this limitation we downsample the full resolution and only display the resampled image.  This number represents the number of resampled pixels that will be displayed in the largest dimension.  For example if your template layer is 20,000 by 10,000 pixels and the max_cells_dimension is set at 5000 your output will be displayed at 5,000 by 2,500 resolution.  Zooming in the map does cause the resampled cells to be displayed at their original resolution as is the case in most GIS programs.  If the resampled resolution is not sufficient for your needs you will need to display the final outputs in an external GIS program.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>5000</Default>
         <Options>Any positive integer.  </Options>
         <Connections>NA</Connections>
@@ -1170,7 +1170,7 @@ Attached to each cell is a toolbar that allows changing of the displayed layer a
         <PortName>row</PortName>
         <Definition>Entering a value here forces the output for this cell to appear on the row specified on the output spreadsheet.
 Row counts start from 1.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>VisTrails will autoselect the next empty cell, but you do not have control over which outputs appear where.</Default>
         <Options>Any positive integer.</Options>
         <Connections>NA</Connections>
@@ -1179,7 +1179,7 @@ Row counts start from 1.</Definition>
         <PortName>column</PortName>
         <Definition>Entering a value here forces the output for this cell to appear on the column specified on the output spreadsheet.
 Row counts start from 1.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>Any positive integer.</Options>
         <Connections>NA</Connections>
@@ -1187,7 +1187,7 @@ Row counts start from 1.</Definition>
       <Port>
         <PortName>model_workspace</PortName>
         <Definition>This is the model workspace output by any of the R models.  This widget finds all of the various outputs for display relative to the location of this file.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1197,7 +1197,7 @@ Row counts start from 1.</Definition>
       <Port>
         <PortName>InitialModelOutputDisplay</PortName>
         <Definition>The display tab to show initially.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>AUC Curves</Default>
         <Options>
           <Option>Text</Option>
@@ -1226,7 +1226,7 @@ Row counts start from 1.</Definition>
       <Port>
         <PortName>fieldData_file</PortName>
         <Definition>The file containing Field data.  The acceptable formats vary but it must have a column with X, Y, and response values.  Additional columns are permissible.</Definition>
-        <mandatory>TRUE</mandatory>
+        <Mandatory>TRUE</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1238,7 +1238,7 @@ Row counts start from 1.</Definition>
         <Definition>The column that contains the 'X' coordinates.  These values must be in the same coordinates, projection, and units as those defined in the template layer.
 
 Columns can be specified with either a positional argument (1, 2, 3, etc) if you want to select the first, second, third etc column.  Note these numbers start from 1.  Alternatively you can select a column based on name by entering the text of the column name found in the header.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>1, which is to say the first column in the input field data file.</Default>
         <Options>NA</Options>
         <Connections>
@@ -1250,7 +1250,7 @@ Columns can be specified with either a positional argument (1, 2, 3, etc) if you
         <Definition>The column that contains the 'Y' coordinates.  These values must be in the same coordinates, projection, and units as those defined in the template layer.
 
 Columns can be specified with either a positional argument (1, 2, 3, etc) if you want to select the first, second, third etc column.  Note these numbers start from 1.  Alternatively you can select a column based on name by entering the text of the column name found in the header.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>2, which is to say the second column in the input field data file.</Default>
         <Options>NA</Options>
         <Connections>Does not generally Connect to any other Module.</Connections>
@@ -1260,7 +1260,7 @@ Columns can be specified with either a positional argument (1, 2, 3, etc) if you
         <Definition>The column that contains the response of interest.
 
 Columns can be specified with either a positional argument (1, 2, 3, etc) if you want to select the first, second, third etc column.  Note these numbers start from 1.  Alternatively you can select a column based on name by entering the text of the column name found in the header.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>3, which is to say the third column in the input field data file.</Default>
         <Options>NA</Options>
         <Connections>Does not generally Connect to any other Module.</Connections>
@@ -1268,7 +1268,7 @@ Columns can be specified with either a positional argument (1, 2, 3, etc) if you
       <Port>
         <PortName>ResponseType</PortName>
         <Definition>The type of response recorded in the response column</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>'Presence(Absence)'</Default>
         <Options>
           <Option>'Presence(Absence)' = 1 for Presence, optionally also 0 for Absence and -9999 for background points.</Option>
@@ -1279,7 +1279,7 @@ Columns can be specified with either a positional argument (1, 2, 3, etc) if you
       <Port>
         <PortName>Response_Presence_value</PortName>
         <Definition>The value in the response column that will be taken to indicate a presence.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>By default any value in the list '1', 'True', 'T', 'Present', 'Presence' will be assigned a value of 1 (presence) in the output. Note: not case sensitive.</Default>
         <Options>
           <Option>And number or string can be entered, quotes are not required.</Option>
@@ -1289,7 +1289,7 @@ Columns can be specified with either a positional argument (1, 2, 3, etc) if you
       <Port>
         <PortName>Response_Absence_value</PortName>
         <Definition>The value in the response column that will be taken to indicate an absence.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>By default any value in the list '0', 'False', 'F', 'Absent', 'Absence' will be assigned a value of 0 (absence) in the output. Note: not case sensitive.</Default>
         <Options>
           <Option>And number or string can be entered, quotes are not required.</Option>
@@ -1299,7 +1299,7 @@ Columns can be specified with either a positional argument (1, 2, 3, etc) if you
       <Port>
         <PortName>Query_column</PortName>
         <Definition>The column which contains values you would like to use to with the simple equality query option.  The values in this column will be checked against the value entered in the query port.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not generally Connect to any other Module.</Connections>
@@ -1309,7 +1309,7 @@ Columns can be specified with either a positional argument (1, 2, 3, etc) if you
         <Definition>If using the simple equality query functionality simply enter the value you would like to filter on here.  NOTE:  DO NOT ENCLOSE THE QUERY TEXT IN QUOTES IF YOU ARE TRYING TO MATCH A STRING!  Also do not include any additional spaces.  
 
 If using the complex Python syntax query a valid Python equality statement with the values from each individual row indicated with square bracketed field (header row) names.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>NA</Default>
         <Options>    For the Query column you can either enter an equality statement with x used as a 
         placeholder to represent the values in the query column or you can construct 
@@ -1327,7 +1327,7 @@ If using the complex Python syntax query a valid Python equality statement with 
         <PortName>fieldData</PortName>
         <Definition>The file containing field data.  
 This output file will be in: X, Y, ResponseBinary/ResponseCount format.</Definition>
-        <mandatory>TRUE</mandatory>
+        <Mandatory>TRUE</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1350,7 +1350,7 @@ Currently only GLM, MARS, and Boosted Regression Trees accept weights.  Any Weig
         <PortName>templateLayer</PortName>
         <Definition>Raster file used to determine cell size and extent.
 Note - The projection and coordinate system used in the template file must match that given in the FieldData's X and Y columns.</Definition>
-        <mandatory>TRUE</mandatory>
+        <Mandatory>TRUE</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1360,7 +1360,7 @@ Note - The projection and coordinate system used in the template file must match
       <Port>
         <PortName>fieldData</PortName>
         <Definition>The file containing field data.  Must be in X, Y, ResponseBinary/ResponseCount format</Definition>
-        <mandatory>TRUE</mandatory>
+        <Mandatory>TRUE</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1371,7 +1371,7 @@ Note - The projection and coordinate system used in the template file must match
       <Port>
         <PortName>PointAggregationOrWeightMethod</PortName>
         <Definition>The method used to either weight or aggregate field data points.</Definition>
-        <mandatory>TRUE</mandatory>
+        <Mandatory>TRUE</Mandatory>
         <Default>Collapse In Pixel</Default>
         <Options>
           <Option>Collapse In Pixel : All field data points falling within a single pixel will be collapse into a single point at the center of that pixel.  If using Presence(Absence) data the point will be given a value of 1 if any are presense, otherwise 0 if any are absence, otherwise -9999 if all are background.  If using count data the point value will be the average of all points in a pixel.</Option>
@@ -1384,7 +1384,7 @@ Note - The projection and coordinate system used in the template file must match
         <Definition>This optional parameter is a means of specifying the datum and projection information that the field data X and Y locations are in.  If this parameter is supplied the point locations will be transformed to the datum projection of the template layer.  Otherwise it will be assumed that the points and template are in the same projection and datum.  The value to enter in this port must be a valid EPSG code, see below.
 
 EPSG codes are numbers representing all commonly used geographic and projected coordinate systems.  These are generally 4 to 6 digit numbers.  For example 4326 represents geographic WGS84 data, 4260 represents geographic NAD83, 26912 represents NAD83 / UTM zone 12N, etc.  See the options below for a list of ways to lookup EPSG codes.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>None, This assumes that the points are in the same coordinate system as your template layer.</Default>
         <Options>
           <Option>Within your GDAL installation directory there is a gdal-data directory with two csv files which list all of the supported EPSG numbers and the name and information of the coordinate system.  Use gcs.csv for geographic systems and pcs.csv for projected systems.</Option>
@@ -1399,7 +1399,7 @@ EPSG codes are numbers representing all commonly used geographic and projected c
       <Port>
         <PortName>fieldData</PortName>
         <Definition>This is a CSV file in a X,Y,Response,(Weight) format.</Definition>
-        <mandatory>True</mandatory>
+        <Mandatory>True</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1419,7 +1419,7 @@ The settings used during these processing steps follow a particular set of decis
       <Port>
         <PortName>predictor</PortName>
         <Definition>A single raster with resampling, aggregation, and categorical options.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1430,7 +1430,7 @@ Note - Multiple single Predictor modules can be connected to this single input p
       <Port>
         <PortName>PredictorList</PortName>
         <Definition>This is an in memory data construct that contains a list of predictors each with resampling, aggregation, and categorical options.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1449,7 +1449,7 @@ The format of this list conforms to the 'PredictorListFile' specs:
     Column 4: The aggregation method to be used in the event that the raster layer must be up-scaled to match the template layer (e.g., generalizing a 10 m input layer to a 100 m output layer). Care should be taken to ensure that the aggregation method that best preserves the integrity of the data is used. The aggregation should be specified using one of the following values: "Min," "Mean," "Max," "Majority," or "None."
 
 In formatting the list of predictor files, the titles assigned to each of the columns are unimportant as the module retrieves the information based on the order of the values in the .csv file (the ordering of the information and the permissible values in the file however, are strictly enforced). The module also anticipates a header row and will ignore the first row in the .csv file.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1459,7 +1459,7 @@ In formatting the list of predictor files, the titles assigned to each of the co
       <Port>
         <PortName>templateLayer</PortName>
         <Definition>The template layer raster file used to define the Extent, Cell size, Projection, raster snap, and coordinate system of the outputs.</Definition>
-        <mandatory>TRUE</mandatory>
+        <Mandatory>TRUE</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1469,7 +1469,7 @@ In formatting the list of predictor files, the titles assigned to each of the co
       <Port>
         <PortName>ignoreNonOverlap</PortName>
         <Definition>Option of using the intersection of all covariates and template or enforcing the template extent.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>NA</Default>
         <Options>
           <Option>True (checked) = Use intersection of all covariates extents.  Area of template extent will be reduce such all covariate layers extents can be completely covered by the new extent.</Option>
@@ -1480,7 +1480,7 @@ In formatting the list of predictor files, the titles assigned to each of the co
       <Port>
         <PortName>multipleCores</PortName>
         <Definition>Option of running processing on multiple threads/cores.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>NA</Default>
         <Options>
           <Option>True (checked) = Individual layers will be run consecutively on separate threads. </Option>
@@ -1493,7 +1493,7 @@ In formatting the list of predictor files, the titles assigned to each of the co
       <Port>
         <PortName>RastersWithPARCInfoCSV</PortName>
         <Definition>The VisTrails output from the PARC module is a interim CSV file that contains information about each of the files processed.  This is used by the MDS builder to determine which files to extract values from and which layers are categorical.</Definition>
-        <mandatory>TRUE</mandatory>
+        <Mandatory>TRUE</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1510,7 +1510,7 @@ In formatting the list of predictor files, the titles assigned to each of the co
       <Port>
         <PortName>inputMDS</PortName>
         <Definition>Any merged dataset (MDS) format csv can be used as input to this module.  All of the rasters pointed to in the third line of the file will be converted to the output format.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1520,7 +1520,7 @@ In formatting the list of predictor files, the titles assigned to each of the co
       <Port>
         <PortName>inputDir</PortName>
         <Definition>An directory can be used to specify which files to process.  All of the rasters (of any format) will be converted to the output format specified.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1530,7 +1530,7 @@ In formatting the list of predictor files, the titles assigned to each of the co
       <Port>
         <PortName>format</PortName>
         <Definition>The format to convert all the input grids into.  For Maxent this will be ASCII.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>Geotif</Default>
         <Options>
           <Option>Geotif</Option>
@@ -1547,7 +1547,7 @@ In formatting the list of predictor files, the titles assigned to each of the co
       <Port>
         <PortName>multipleCores</PortName>
         <Definition>Option of running processing on multiple threads/cores.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>
           <Option>True (checked) = Individual layers will be run consecutively on separate threads. </Option>
@@ -1560,7 +1560,7 @@ In formatting the list of predictor files, the titles assigned to each of the co
       <Port>
         <PortName>outputDir</PortName>
         <Definition>The directory where all output files will be saved to.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>This directory name is created by the module and it will be located in the session folder.</Default>
         <Options>NA</Options>
         <Connections>
@@ -1587,7 +1587,7 @@ The following columns are in a RastersWithPARCInfoCSV:
   Resampling - One of NearestNeighbor, bilinear, cubic, cubicspline, or lanczos
   Aggregation - One of min, max, mean, or majority
   OriginalFile - The location and name of the input file used by PARC</Definition>
-        <mandatory>True</mandatory>
+        <Mandatory>True</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1597,7 +1597,7 @@ The following columns are in a RastersWithPARCInfoCSV:
       <Port>
         <PortName>fieldData</PortName>
         <Definition>The field data input corresponds to a .csv file containing presence/absence points or count data recorded across a landscape for the phenomenon being modeled (e.g., plant sightings, evidence of animal presence, etc.).</Definition>
-        <mandatory>True</mandatory>
+        <Mandatory>True</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1609,7 +1609,7 @@ The following columns are in a RastersWithPARCInfoCSV:
       <Port>
         <PortName>backgroundPointCount</PortName>
         <Definition>This is an optional value that specifies how many randomly placed background points to add to the output.  These points will be randomly placed at pixel centroids within the template extent with no more than one point assigned to any one pixel. In typical SAHM workflows these points are only used by the Maxent modeling package.  These points will be added to the output .csv file with a value of "-9999" denoting them as background points.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>0, which is to say that no background point are added to the output.</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -1617,7 +1617,7 @@ The following columns are in a RastersWithPARCInfoCSV:
       <Port>
         <PortName>backgroundProbSurf</PortName>
         <Definition>Background Probability Surface: This is an optional parameter that applies only to workflows that employ the Maxent modeling package. In some analysis, it may be appropriate to spatially limit background points to a particular subset of the study area (e.g., islands within a study area polygon, particular regions within a study area polygon, or a region determined by the known bias present in the field data).  Specifying a background probability surface raster allows a user to control where random points will be scattered within the extent of the study area. The raster layer specified by a user should have the same projection and extent as the template layer and contain values ranging from 0 to 100. These values represent the probability that a randomly generated point will be retained should it fall within a particular cell.  That is, randomly generated points will not be generated in any part of the probability grid with a value of "0" while all points falling in an area with a value of "100" will be retained. A point falling in an area with a value of "50" will be kept as a background point 50% of the time.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>0 (No background points are added to the output.)</Default>
         <Options>
           <Option>Any positive integer.</Option>
@@ -1627,7 +1627,7 @@ The following columns are in a RastersWithPARCInfoCSV:
       <Port>
         <PortName>Seed</PortName>
         <Definition>The seed is used to be able recreate a specific output.  The seed used in each run will be noted on the console output and saved in the output log in the session folder.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>If no seed is specified a random seed between -1*((2^32)/2) and ((2^32)/2) will be generated and used.</Default>
         <Options>
           <Option>Any integer between -1*((2^32)/2) and ((2^32)/2)</Option>
@@ -1639,7 +1639,7 @@ The following columns are in a RastersWithPARCInfoCSV:
       <Port>
         <PortName>mdsFile</PortName>
         <Definition>This is the CSV flat file containing the location data and values extracted from each of the covariates.</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1670,7 +1670,7 @@ It is not valid to select models based on their performance on the reserved port
       <Port>
         <PortName>inputMDS</PortName>
         <Definition>This is the input data set consisting of location data for each sample point, the values of each predictor variable at those points. This input is usually provided by the upstream steps that precede the Test Training Split module. Any value entered here (e.g., specifying another existing MDS on the file system) will override the input specified by a model connection in the visual display.</Definition>
-        <mandatory>TRUE</mandatory>
+        <Mandatory>TRUE</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1681,7 +1681,7 @@ It is not valid to select models based on their performance on the reserved port
       <Port>
         <PortName>trainingProportion</PortName>
         <Definition>This is the proportion of the sample points that will be used to train the model, relative to the total number of points. Entered values should be greater than 0 but less than 1. For example, a value of '0.9' will result in 90% of the sample points being used to train the model, with 10% of the sample being held out to test the model's performance. Choosing an appropriate training proportion can depend on various factors, such as the total number of sample points available.  Selecting an appropriate value for the training proportion is a complex issue that depends on many factors including the total number of observations, the complexity of the models that will be fit, and the signal to noise ratio in the data (Hastie et. al. 2009). </Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>NA</Default>
         <Options>Most commonly values in the .5 to .9 range but other values between 0 and 1 are accepted </Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -1689,7 +1689,7 @@ It is not valid to select models based on their performance on the reserved port
       <Port>
         <PortName>RatioPresAbs</PortName>
         <Definition>This optional field is populated with a number corresponding to the desired ratio of presence to  absence points to be used in the analysis. If not populated then all occurrence records (not background points) will be portioned into either the test or training split with no reduction in the total number of points.  If populated, this entry should be a number greater than zero. (A value of '1' will result in an equal number of both presence and absence points being used, a value of '2' indicates that twice as many presence points will be used, a value of ‘0.5' indicates that twice as many absence points will be used, etc.). All field data points with a value equal to or greater than 1 are interpreted as presence points. Although the original field data is unmodified, this option will reduce the sample size as the merged dataset containing sample points will have points deleted from it to achieve the specified ratio as such it should be used with caution. A warning will be generated if more than 50% of either the presence or absence points will be deleted based on the ratio specified by the user. Background points are ignored by this module (they are read in and written out, but not assigned to either the test or training split).</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>NA</Default>
         <Options>A floating point most likely in the range .5 to 2</Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -1697,7 +1697,7 @@ It is not valid to select models based on their performance on the reserved port
       <Port>
         <PortName>Seed</PortName>
         <Definition>The random number seed used by split the data.  If one desires to reproduce results from a previous split fit, one must enter the random number seed that is reported in the console output from that split step.  </Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>Randomly selected</Default>
         <Options>
           <Option>Any integer between -2147483647 and 2147483647</Option>
@@ -1709,7 +1709,7 @@ It is not valid to select models based on their performance on the reserved port
       <Port>
         <PortName>outputMDS</PortName>
         <Definition>This is an MDS file to be further used in the downstream workflow.  It is nearly identical to the input MDS file but with an added column under the header "Split" for each non-background observation will be labeled either "test", "train", or "NA" indicating whether the observation will be used for producing evaluation metrics, training the model, or excluded from the analysis respectively. "NA" generally indicates that the observation was reserved for evaluating the final models but can also occur if a desired ratio of presence to absence was set using the RatioPresAbs.  </Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1733,7 +1733,7 @@ It is not valid to select models based on their performance on the reserved port
       <Port>
         <PortName>inputMDS</PortName>
         <Definition>This is the input data set consisting of location data for each sample point, the values of each predictor variable at those points. This input is usually provided by the upstream steps that precede the Test Training Split module. Any value entered here (e.g., specifying another existing MDS on the file system) will override the input specified by a model connection in the visual display.</Definition>
-        <mandatory>TRUE</mandatory>
+        <Mandatory>TRUE</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1744,7 +1744,7 @@ It is not valid to select models based on their performance on the reserved port
       <Port>
         <PortName>trainingProportion</PortName>
         <Definition>This is the proportion of the sample points that will be used to train the model, relative to the total number of points. Entered values should be greater than 0 but less than 1. For example, a value of '0.9' will result in 90% of the sample points being used to train the model, with 10% of the sample being held out to test the model's performance. Choosing an appropriate training proportion can depend on various factors, such as the total number of sample points available.  Selecting an appropriate value for the training proportion is a complex issue that depends on many factors including the total number of observations, the complexity of the models that will be fit, and the signal to noise ratio in the data (Hastie et. al. 2009). </Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>NA</Default>
         <Options>Most commonly values in the .5 to .9 range but other values between 0 and 1 are accepted </Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -1752,7 +1752,7 @@ It is not valid to select models based on their performance on the reserved port
       <Port>
         <PortName>RatioPresAbs</PortName>
         <Definition>This optional field is populated with a number corresponding to the desired ratio of presence to  absence points to be used in the analysis. If not populated then all occurrence records (not background points) will be portioned into either the test or training split with no reduction in the total number of points.  If populated, this entry should be a number greater than zero. (A value of '1' will result in an equal number of both presence and absence points being used, a value of '2' indicates that twice as many presence points will be used, a value of ‘0.5' indicates that twice as many absence points will be used, etc.). All field data points with a value equal to or greater than 1 are interpreted as presence points. Although the original field data is unmodified, this option will reduce the sample size as the merged dataset containing sample points will have points deleted from it to achieve the specified ratio as such it should be used with caution. A warning will be generated if more than 50% of either the presence or absence points will be deleted based on the ratio specified by the user. Background points are ignored by this module (they are read in and written out, but not assigned to either the test or training split).</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>NA</Default>
         <Options>A floating point most likely in the range .5 to 2</Options>
         <Connections>Does not connect to any other module.</Connections>
@@ -1760,7 +1760,7 @@ It is not valid to select models based on their performance on the reserved port
       <Port>
         <PortName>Seed</PortName>
         <Definition>The random number seed used to split the data.  If one desires to reproduce results from a previous split fit, one must enter the random number seed that is reported in the console output from that split step. </Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>Randomly selected</Default>
         <Options>
           <Option>Any integer between -2147483647 and 2147483647</Option>
@@ -1772,7 +1772,7 @@ It is not valid to select models based on their performance on the reserved port
       <Port>
         <PortName>outputMDS</PortName>
         <Definition>This is an MDS file to be further used in the downstream workflow.  It is nearly identical to the input MDS file but with an added column under the header "EvalSplit" for each non-background observation will be labeled either "test", "train", or "NA" indicating whether the observation will be withheld for producing final model evaluation metrics, training the model, or excluded from the analysis respectively.    </Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1796,7 +1796,7 @@ Under most circumstances the cross validation evaluation metrics reported by thi
       <Port>
         <PortName>inputMDS</PortName>
         <Definition>This is the input data set consisting of locational data for each sample point, the values of each predictor variable at those points. This input is usually provided by the upstream steps that precede the Test Training Split module. Any value entered here (e.g., specifying another existing MDS on the file system) will override the input specified by a model connection in the visual display.</Definition>
-        <mandatory>True</mandatory>
+        <Mandatory>True</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1807,7 +1807,7 @@ Under most circumstances the cross validation evaluation metrics reported by thi
       <Port>
         <PortName>nFolds</PortName>
         <Definition>The number of folds into which the data should be partitioned.  A trade-off exists in selecting the number of folds to use for cross validation.  When nFolds is close to the total number of observations the prediction error is nearly unbiased as the cross validation sample size is nearly equal to the total sample size but because the training sets are nearly identical in this case variance of the prediction error can be quite high (Hastie et. al 2009). </Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>10</Default>
         <Options>
           <Option>Any integer less than the number of data points is valid but this is generally either set to 3 or 10</Option>
@@ -1817,7 +1817,7 @@ Under most circumstances the cross validation evaluation metrics reported by thi
       <Port>
         <PortName>Stratify</PortName>
         <Definition>Indicate whether cross-validation folds should be stratified by the response</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>True (Checked)</Default>
         <Options>
           <Option>True (Checked)</Option>
@@ -1828,7 +1828,7 @@ Under most circumstances the cross validation evaluation metrics reported by thi
       <Port>
         <PortName>Seed</PortName>
         <Definition>The random number seed used to split the data.  If one desires to reproduce results from a previous split fit, one must enter the random number seed that is reported in the console output from that split step. </Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>Randomly selected</Default>
         <Options>
           <Option>Any integer between -2147483647 and 2147483647</Option>
@@ -1840,7 +1840,7 @@ Under most circumstances the cross validation evaluation metrics reported by thi
       <Port>
         <PortName>outputMDS</PortName>
         <Definition>This is an MDS file to be further used in the downstream workflow.  It is nearly identical to the input MDS file but with an added column under the header "Split". for each non-background observation will be labeled either a number from 1 to the number of folds selected or "NA" indicating which fold each observation has been partitioned into or whether it will not be included in the Model Selection step likely because it is being withheld for model evaluation. </Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1870,7 +1870,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>inputMDS</PortName>
         <Definition>The file to select from.  If this file contains unselected layers (0 in the second header line) these will initially appear deselected in the GUI.</Definition>
-        <mandatory>TRUE</mandatory>
+        <Mandatory>TRUE</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1880,7 +1880,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>selectionName</PortName>
         <Definition>This serves two purposes.  First to uniquely identify a given selection.  This unique name is used to determine if a selection has been previously made, to apply for example.  And secondly to provide something that can be changed to trigger VisTrails to rerun this module even if nothing upstream has changed.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>NA</Default>
         <Options>
           <Option>Any text can be used.</Option>
@@ -1890,7 +1890,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>ShowGUI</PortName>
         <Definition>This Boolean indicates whether to stop execution and display the GUI for user interaction.  In some cases such as exploration you might want to make a selection in a previous run and then change this to false so that the selection will apply to subsequent runs without interrupting execution.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>True</Default>
         <Options>
           <Option>True - The GUI will be shown.</Option>
@@ -1901,7 +1901,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>numPlots</PortName>
         <Definition>The number of variables to display at a time in the plot frame.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>8</Default>
         <Options>
           <Option>An integer greater than 1 and generally no greater than 12</Option>
@@ -1911,7 +1911,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>minCor</PortName>
         <Definition>The minimum correlation used to summarize the number of other variables each variable is highly correlated with. </Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>0.7</Default>
         <Options>
           <Option>A decimal number between 0 and 1.</Option>
@@ -1921,7 +1921,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>corsWithHighest</PortName>
         <Definition>If one desires to view only other parameters that have a correlation above the specified threshold with the parameter than has the highest number of total correlations with other parameters then this should be set to true.  Otherwise, by default, the parameters that are selected for display will be the set of parameters that have the highest number of correlations with other parameters above the given threshold.</Definition>
-        <mandatory>FALSE</mandatory>
+        <Mandatory>FALSE</Mandatory>
         <Default>False</Default>
         <Options>
           <Option>True (Checked)</Option>
@@ -1934,7 +1934,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>outputMDS</PortName>
         <Definition>This is the output MDS file with the user supplied selection applied.</Definition>
-        <mandatory>NA</mandatory>
+        <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>
@@ -1958,7 +1958,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>value</PortName>
         <Definition>NA</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -1968,7 +1968,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>value_as_string</PortName>
         <Definition>ToDo</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -1987,7 +1987,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>value</PortName>
         <Definition>NA</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -1997,7 +1997,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>value_as_string</PortName>
         <Definition>ToDo</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2016,7 +2016,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>value</PortName>
         <Definition>NA</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2026,7 +2026,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>value_as_string</PortName>
         <Definition>ToDo</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2045,7 +2045,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>value</PortName>
         <Definition>NA</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2055,7 +2055,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>value_as_string</PortName>
         <Definition>ToDo</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2074,7 +2074,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>mdsFile</PortName>
         <Definition>NA</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2084,7 +2084,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>value</PortName>
         <Definition>ToDo</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2103,7 +2103,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>value</PortName>
         <Definition>NA</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2113,7 +2113,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>value_as_string</PortName>
         <Definition>ToDo</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2132,7 +2132,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>mdsFile</PortName>
         <Definition>NA</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2140,7 +2140,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>makeBinMap</PortName>
         <Definition>NA</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2148,7 +2148,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>makeProbabilityMap</PortName>
         <Definition>NA</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2156,7 +2156,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>makeMESMap</PortName>
         <Definition>NA</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2164,7 +2164,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>ThresholdOptimizationMethod</PortName>
         <Definition>NA</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2174,7 +2174,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>modelWorkspace</PortName>
         <Definition>ToDo</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2182,7 +2182,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>BinaryMap</PortName>
         <Definition>ToDo</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2190,7 +2190,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>ProbabilityMap</PortName>
         <Definition>ToDo</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2198,7 +2198,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>ResidualsMap</PortName>
         <Definition>ToDo</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2206,7 +2206,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>MessMap</PortName>
         <Definition>ToDo</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2214,7 +2214,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>MoDMap</PortName>
         <Definition>ToDo</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2222,7 +2222,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>modelEvalPlot</PortName>
         <Definition>ToDo</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2230,7 +2230,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>ResponseCurves</PortName>
         <Definition>ToDo</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2238,7 +2238,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>Text_Output</PortName>
         <Definition>ToDo</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2254,7 +2254,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>value</PortName>
         <Definition>NA</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2262,7 +2262,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>addPredictor</PortName>
         <Definition>NA</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2272,7 +2272,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>value</PortName>
         <Definition>ToDo</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>
@@ -2280,7 +2280,7 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       <Port>
         <PortName>value_as_string</PortName>
         <Definition>ToDo</Definition>
-        <mandatory>False</mandatory>
+        <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>NA</Connections>

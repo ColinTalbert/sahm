@@ -100,7 +100,7 @@ def construct_port_msg(port, indent):
     nl = "\n" + " "*indent
     Portname = port.find("PortName").text
     Definition = cleanupstring(port.find("Definition").text, indent, indent)
-    Mandatory = port.find("Manditory").text
+    Mandatory = port.find("Mandatory").text
     Default = port.find("Default").text
     Options = port.findall("Options/Option")
     Connections = port.findall("Connections/Connection")
