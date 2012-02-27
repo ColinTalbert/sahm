@@ -8,9 +8,9 @@ chk.libs <- function(Model){
       lib.mssg <- unlist(suppressMessages(suppressWarnings(lapply(libs,require,quietly = T, warn.conflicts=F,character.only=T))))
       if(any(!lib.mssg)){
             install.packages(unlist(libs[!lib.mssg]), repos = "http://cran.r-project.org")
-            lib.mssg <- unlist(suppressMessages(suppressWarnings(lapply(unlist(libs[!lib.mssg]),require,quietly = T, warn.conflicts=F,character.only=T))))
+            lib.mssg <- unlist(suppressMessages(suppressWarnings(lapply(libs,require,quietly = T, warn.conflicts=F,character.only=T))))
             }
-        if(any(!lib.mssg)) stop("the following package(s) could not be loaded:",out$dat$missing.libs)
+        if(any(!lib.mssg)) stop(paste("\nthe following package(s) could not be loaded: ",paste(unlist(libs[!lib.mssg]),sep="")))
 
       }
 
