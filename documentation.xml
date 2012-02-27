@@ -188,7 +188,7 @@ In formatting the list of predictor files, the titles assigned to each of the co
   <Models />
   <Module>
     <Title>BoostedRegressionTree</Title>
-    <Description>BRT uses decision trees to partition the the parameter space into the most homogeneous groups in terms of the response.  BRT starts with a single decision tree, then adds a tree that best explains error in the first tree, and so on.  Like random forest, BRT models automatically model interactions and nonlinear relationships and are robust to missing observations.  Our implementation makes approximately 1,000 trees.  It incorporates advanced algorithms for tuning the model settings, simplifying the model using a cross-validation technique, and for detecting important interactions between covariates.  If more than 500 presence or absence records are found a random subset will be used for learning rate estimation and model simplification but all data will be used in the final model fitting step.  The cross-validation step within BRT should not be confused with that provided by the Model Selection Cross Validation step.  The former is used to optimize parameter values when defaults are not provided while the later is used to select models based on between model comparisons of evaluation metrics.  All discussion of cross-validation related to setting parameters in the BRT argument documentation refers to the algorithm used for parameter optimization and does not affect the cross validation split selected by Model Selection and Cross Validation.  
+    <Description>BRT uses decision trees to partition the the parameter space into the most homogeneous groups in terms of the response.  BRT starts with a single decision tree, then adds a tree that best explains error in the first tree, and so on.  Like random forest, BRT models automatically model interactions and nonlinear relationships and are robust to missing observations.  Our implementation makes approximately 1,000 trees.  It incorporates advanced algorithms for tuning the model settings, simplifying the model using a cross-validation technique, and for detecting important interactions between covariates.  If more than 500 presence or absence records are found a random subset will be used for learning rate estimation and model simplification but all data will be used in the final model fitting step.  The cross-validation step within BRT should not be confused with that provided by the Model Selection cross-validation step.  The former is used to optimize parameter values when defaults are not provided while the later is used to select models based on between model comparisons of evaluation metrics.  All discussion of cross-validation related to setting parameters in the BRT argument documentation refers to the algorithm used for parameter optimization and does not affect the cross-validation split selected by Model Selection and cross-validation.  
 
 Several options are available for fitting BRTs when run using VisTrails special attention is required before moving away from the defaults because selection of certain parameters will disallow selection of others.  Optional parameters are described briefly here but a more in depth description can be found in Elith and Leathwich 2008.</Description>
     <InputPorts>
@@ -204,7 +204,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       </Port>
       <Port>
         <PortName>makeBinMap</PortName>
-        <Definition>Indicate whether to discretize the continues probability map into presence absence.  See the ThresholdOptimizationMethod for how this is done.  If time is a concern and many models are to be fit and assessed maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well.</Definition>
+        <Definition>Indicate whether to discretize the continues prediction map into presence absence.  See the ThresholdOptimizationMethod for how this is done.  If time is a concern and many models are to be fit and assessed maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well.</Definition>
         <Mandatory>False</Mandatory>
         <Default>False (Unchecked)</Default>
         <Options>
@@ -237,19 +237,19 @@ Several options are available for fitting BRTs when run using VisTrails special 
       </Port>
       <Port>
         <PortName>ThresholdOptimizationMethod</PortName>
-        <Definition>Determines how the threshold is optimized in order to discretize continuous predictions into binary. These are used for evaluation metrics calculated based on the confusion matrix as well as for the binary map. The value calculated for the train portion of the data will be applied to the test portion and if cross validation was specified, the value is calculated separately for each fold using the threshold from the training data and applying it to the test data for the hold out fold.  </Definition>
+        <Definition>Determines how the threshold is optimized in order to discretize continuous predictions into binary. These are used for evaluation metrics calculated based on the confusion matrix as well as for the binary map. The value calculated for the train portion of the data will be applied to the test portion and if cross-validation was specified, the value is calculated separately for each fold using the threshold from the training data and applying it to the test data for the hold out fold.  These options come from the R package PresenceAbsence and more details can be found in the associated manual see Freeman 2007.  </Definition>
         <Mandatory>False</Mandatory>
         <Default>2</Default>
         <Options>
           <Option>1:  Threshold=0.5</Option>
-          <Option>2:  Sens=Spec sensitivity=specificity</Option>
-          <Option>3:  MaxSens+Spec maximizes (sensitivity+specificity)/2</Option>
-          <Option>4:  MaxKappa maximizes Kappa</Option>
-          <Option>5:  MaxPCC maximizes PCC (percent correctly classified)</Option>
-          <Option>6:  PredPrev=Obs predicted prevalence=observed prevalence</Option>
-          <Option>7:  ObsPrev threshold=observed prevalence</Option>
-          <Option>8:  MeanProb mean predicted probability</Option>
-          <Option>9:  MinROCdist minimizes distance between ROC plot and (0,1)</Option>
+          <Option>2:  Sensitivity=Specificity</Option>
+          <Option>3:  Maximizes (sensitivity+specificity)/2</Option>
+          <Option>4:  Maximizes Cohen's Kappa</Option>
+          <Option>5:  Maximizes PCC (percent correctly classified)</Option>
+          <Option>6:  Predicted prevalence=observed prevalence</Option>
+          <Option>7:  Threshold=observed prevalence</Option>
+          <Option>8:  Mean predicted probability</Option>
+          <Option>9:  Minimizes distance between ROC plot and (0,1)</Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
@@ -267,15 +267,15 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <PortName>TreeComplexity</PortName>
         <Definition>Sets the level of interactions fitted in the model.  A tree complexity of 1 fits no interactions, 2 will fit up to but not necessarily all two way interactions and so on.  </Definition>
         <Mandatory>FALSE</Mandatory>
-        <Default>If not set, tree complexity will be selected based on the number of observations and what produces the best model.</Default>
+        <Default>If not set, tree complexity will be selected based on the number of observations and what produces the best model</Default>
         <Options>
-          <Option>any positive integer (generally no greater than 3)</Option>
+          <Option>any positive integer (generally not greater than 3)</Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
       <Port>
         <PortName>BagFraction</PortName>
-        <Definition>Controls the proportion of the data that is used to fit the model at each step.  Using a bag fraction of 1 will give a fully deterministic model but this is generally not preferable as stochasticity generally improves model performance (Elith and Leathwick 2008).</Definition>
+        <Definition>Controls the proportion of the data that is used to fit the model at each step.  Using a bag fraction of 1 will give a fully deterministic model but this is usually not preferable as stochasticity generally improves model performance (Elith and Leathwick 2008).</Definition>
         <Mandatory>FALSE</Mandatory>
         <Default>.75</Default>
         <Options>
@@ -305,7 +305,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       </Port>
       <Port>
         <PortName>PrevalenceStratify</PortName>
-        <Definition>This specifies whether cross validation samples should be stratified to match the overall prevalence.  This is currently only valid for presence absence data and is only used in model simplification.</Definition>
+        <Definition>This specifies whether cross-validation samples should be stratified to match the overall prevalence.  This is currently only valid for presence absence data and is only used in model simplification.</Definition>
         <Mandatory>FALSE</Mandatory>
         <Default>True (Checked)</Default>
         <Options>
@@ -338,7 +338,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <PortName>LearningRate</PortName>
         <Definition>Controls the amount each tree contributes to the model.   A small learning rate restricts individual tree contributions to the overall model.  </Definition>
         <Mandatory>FALSE</Mandatory>
-        <Default>If not specified, learning rate will be determined based on the number of trees and the tree complexity.</Default>
+        <Default>If not specified, learning rate will be determined based on the number of trees and the tree complexity</Default>
         <Options>
           <Option>Any positive number greater than 0 and less than 1</Option>
         </Options>
@@ -369,7 +369,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       </Port>
       <Port>
         <PortName>BinaryMap</PortName>
-        <Definition>If specified using MakeBinaryMap=True then a surface of binary predictions is produced by discretizing the probability map based on the selected threshold.  This map indicates whether one could expect each site to be occupied or unoccupied based on the model.</Definition>
+        <Definition>If specified using MakeBinaryMap=True then a surface of binary predictions is produced by discretizing the prediction map based on the selected threshold.  This map indicates whether one could expect each site to be occupied or unoccupied based on the model.</Definition>
         <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
@@ -450,6 +450,8 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Reference>Miller, M.E., Hui, S.L., Tierney, W.M. (1991). Validation techniques for logistic regression models. Statistics in Medicine 10: 1213-26</Reference>
       <Reference>Pearce, J., and S. Ferrier. (2000). Evaluating the predictive performance of habitat models developed using logistic regression. Ecological Modelling 133:225–245.</Reference>
       <Reference>R Development Core Team (2011). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. </Reference>
+      <Reference>Freeman, E. (2007). PresenceAbsence: An R Package for Presence-Absence Model Evaluation. USDA Forest Service, Rocky Mountain Research Station, 507 25th street,Ogden, UT, USA
+</Reference>
     </References>
   </Module>
   <Module>
@@ -468,7 +470,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       </Port>
       <Port>
         <PortName>makeBinMap</PortName>
-        <Definition>Indicate whether to discretize the continues probability map into presence absence.  See the ThresholdOptimizationMethod for how this is done.  If time is a concern and many models are to be fit and assessed maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well.</Definition>
+        <Definition>Indicate whether to discretize the continues prediction map into presence absence.  See the ThresholdOptimizationMethod for how this is done.  If time is a concern and many models are to be fit and assessed maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well.</Definition>
         <Mandatory>False</Mandatory>
         <Default>False (Unchecked)</Default>
         <Options>
@@ -511,19 +513,19 @@ Several options are available for fitting BRTs when run using VisTrails special 
       </Port>
       <Port>
         <PortName>ThresholdOptimizationMethod</PortName>
-        <Definition>Determines how the threshold is optimized in order to discretize continuous predictions into binary. These are used for evaluation metrics calculated based on the confusion matrix as well as for the binary map. The value calculated for the train portion of the data will be applied to the test portion and if cross validation was specified, the value is calculated separately for each fold using the threshold from the training data and applying it to the test data for the hold out fold.  </Definition>
+        <Definition>Determines how the threshold is optimized in order to discretize continuous predictions into binary. These are used for evaluation metrics calculated based on the confusion matrix as well as for the binary map. The value calculated for the train portion of the data will be applied to the test portion and if cross-validation was specified, the value is calculated separately for each fold using the threshold from the training data and applying it to the test data for the hold out fold.  These options come from the R package PresenceAbsence and more details can be found in the associated manual see Freeman 2007.  </Definition>
         <Mandatory>False</Mandatory>
         <Default>2</Default>
         <Options>
           <Option>1:  Threshold=0.5</Option>
-          <Option>2:  Sens=Spec sensitivity=specificity</Option>
-          <Option>3:  MaxSens+Spec maximizes (sensitivity+specificity)/2</Option>
-          <Option>4:  MaxKappa maximizes Kappa</Option>
-          <Option>5:  MaxPCC maximizes PCC (percent correctly classified)</Option>
-          <Option>6:  PredPrev=Obs predicted prevalence=observed prevalence</Option>
-          <Option>7:  ObsPrev threshold=observed prevalence</Option>
-          <Option>8:  MeanProb mean predicted probability</Option>
-          <Option>9:  MinROCdist minimizes distance between ROC plot and (0,1)</Option>
+          <Option>2:  Sensitivity=Specificity</Option>
+          <Option>3:  Maximizes (sensitivity+specificity)/2</Option>
+          <Option>4:  Maximizes Cohen's Kappa</Option>
+          <Option>5:  Maximizes PCC (percent correctly classified)</Option>
+          <Option>6:  Predicted prevalence=observed prevalence</Option>
+          <Option>7:  Threshold=observed prevalence</Option>
+          <Option>8:  Mean predicted probability</Option>
+          <Option>9:  Minimizes distance between ROC plot and (0,1)</Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
@@ -661,7 +663,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       </Port>
       <Port>
         <PortName>BinaryMap</PortName>
-        <Definition>If specified using MakeBinaryMap=True then a surface of binary predictions is produced by discretizing the probability map based on the selected threshold.  This map indicates whether one could expect each site to be occupied or unoccupied based on the model.</Definition>
+        <Definition>If specified using MakeBinaryMap=True then a surface of binary predictions is produced by discretizing the prediction map based on the selected threshold.  This map indicates whether one could expect each site to be occupied or unoccupied based on the model.</Definition>
         <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
@@ -742,6 +744,8 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Reference>Miller, M.E., Hui, S.L., Tierney, W.M. (1991). Validation techniques for logistic regression models. Statistics in Medicine 10: 1213-26</Reference>
       <Reference>Pearce, J., and S. Ferrier. (2000). Evaluating the predictive performance of habitat models developed using logistic regression. Ecological Modelling 133:225–245.</Reference>
       <Reference>R Development Core Team (2011). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. </Reference>
+      <Reference>Freeman, E. (2007). PresenceAbsence: An R Package for Presence-Absence Model Evaluation. USDA Forest Service, Rocky Mountain Research Station, 507 25th street,Ogden, UT, USA
+</Reference>
     </References>
     <SeeAlso />
   </Module>
@@ -766,7 +770,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       </Port>
       <Port>
         <PortName>makeBinMap</PortName>
-        <Definition>Indicate whether to discretize the continues probability map into presence absence.  See the ThresholdOptimizationMethod for how this is done.  If time is a concern and many models are to be fit and assessed maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well.</Definition>
+        <Definition>Indicate whether to discretize the continues prediction map into presence absence.  See the ThresholdOptimizationMethod for how this is done.  If time is a concern and many models are to be fit and assessed maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well.</Definition>
         <Mandatory>False</Mandatory>
         <Default>False (Unchecked)</Default>
         <Options>
@@ -799,19 +803,19 @@ Several options are available for fitting BRTs when run using VisTrails special 
       </Port>
       <Port>
         <PortName>ThresholdOptimizationMethod</PortName>
-        <Definition>Determines how the threshold is optimized in order to discretize continuous predictions into binary. These are used for evaluation metrics calculated based on the confusion matrix as well as for the binary map. The value calculated for the train portion of the data will be applied to the test portion and if cross validation was specified, the value is calculated separately for each fold using the threshold from the training data and applying it to the test data for the hold out fold.  </Definition>
+        <Definition>Determines how the threshold is optimized in order to discretize continuous predictions into binary. These are used for evaluation metrics calculated based on the confusion matrix as well as for the binary map. The value calculated for the train portion of the data will be applied to the test portion and if cross-validation was specified, the value is calculated separately for each fold using the threshold from the training data and applying it to the test data for the hold out fold.  These options come from the R package PresenceAbsence and more details can be found in the associated manual see Freeman 2007.  </Definition>
         <Mandatory>False</Mandatory>
         <Default>2</Default>
         <Options>
           <Option>1:  Threshold=0.5</Option>
-          <Option>2:  Sens=Spec sensitivity=specificity</Option>
-          <Option>3:  MaxSens+Spec maximizes (sensitivity+specificity)/2</Option>
-          <Option>4:  MaxKappa maximizes Kappa</Option>
-          <Option>5:  MaxPCC maximizes PCC (percent correctly classified)</Option>
-          <Option>6:  PredPrev=Obs predicted prevalence=observed prevalence</Option>
-          <Option>7:  ObsPrev threshold=observed prevalence</Option>
-          <Option>8:  MeanProb mean predicted probability</Option>
-          <Option>9:  MinROCdist minimizes distance between ROC plot and (0,1)</Option>
+          <Option>2:  Sensitivity=Specificity</Option>
+          <Option>3:  Maximizes (sensitivity+specificity)/2</Option>
+          <Option>4:  Maximizes Cohen's Kappa</Option>
+          <Option>5:  Maximizes PCC (percent correctly classified)</Option>
+          <Option>6:  Predicted prevalence=observed prevalence</Option>
+          <Option>7:  Threshold=observed prevalence</Option>
+          <Option>8:  Mean predicted probability</Option>
+          <Option>9:  Minimizes distance between ROC plot and (0,1)</Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
@@ -853,7 +857,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       </Port>
       <Port>
         <PortName>BinaryMap</PortName>
-        <Definition>If specified using MakeBinaryMap=True then a surface of binary predictions is produced by discretizing the probability map based on the selected threshold.  This map indicates whether one could expect each site to be occupied or unoccupied based on the model.</Definition>
+        <Definition>If specified using MakeBinaryMap=True then a surface of binary predictions is produced by discretizing the prediction map based on the selected threshold.  This map indicates whether one could expect each site to be occupied or unoccupied based on the model.</Definition>
         <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
@@ -935,6 +939,8 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Reference>Miller, M.E., Hui, S.L., Tierney, W.M. (1991). Validation techniques for logistic regression models. Statistics in Medicine 10: 1213-26</Reference>
       <Reference>Pearce, J., and S. Ferrier. (2000). Evaluating the predictive performance of habitat models developed using logistic regression. Ecological Modelling 133:225–245.</Reference>
       <Reference>R Development Core Team (2011). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. </Reference>
+      <Reference>Freeman, E. (2007). PresenceAbsence: An R Package for Presence-Absence Model Evaluation. USDA Forest Service, Rocky Mountain Research Station, 507 25th street,Ogden, UT, USA
+</Reference>
     </References>
   </Module>
   <Module>
@@ -955,7 +961,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       </Port>
       <Port>
         <PortName>makeBinMap</PortName>
-        <Definition>Indicate whether to discretize the continues probability map into presence absence.  See the ThresholdOptimizationMethod for how this is done.  If time is a concern and many models are to be fit and assessed maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well.</Definition>
+        <Definition>Indicate whether to discretize the continues prediction map into presence absence.  See the ThresholdOptimizationMethod for how this is done.  If time is a concern and many models are to be fit and assessed maps can be produced after model selection for only the best models using the Select and Test the Final Model tool.  Options are available for producing Probability, Binary and MESS maps there as well.</Definition>
         <Mandatory>False</Mandatory>
         <Default>False (Unchecked)</Default>
         <Options>
@@ -988,19 +994,19 @@ Several options are available for fitting BRTs when run using VisTrails special 
       </Port>
       <Port>
         <PortName>ThresholdOptimizationMethod</PortName>
-        <Definition>Determines how the threshold is optimized in order to discretize continuous predictions into binary. These are used for evaluation metrics calculated based on the confusion matrix as well as for the binary map. The value calculated for the train portion of the data will be applied to the test portion and if cross validation was specified, the value is calculated separately for each fold using the threshold from the training data and applying it to the test data for the hold out fold.  </Definition>
+        <Definition>Determines how the threshold is optimized in order to discretize continuous predictions into binary. These are used for evaluation metrics calculated based on the confusion matrix as well as for the binary map. The value calculated for the train portion of the data will be applied to the test portion and if cross-validation was specified, the value is calculated separately for each fold using the threshold from the training data and applying it to the test data for the hold out fold.  These options come from the R package PresenceAbsence and more details can be found in the associated manual see Freeman 2007.  </Definition>
         <Mandatory>False</Mandatory>
         <Default>2</Default>
         <Options>
           <Option>1:  Threshold=0.5</Option>
-          <Option>2:  Sens=Spec sensitivity=specificity</Option>
-          <Option>3:  MaxSens+Spec maximizes (sensitivity+specificity)/2</Option>
-          <Option>4:  MaxKappa maximizes Kappa</Option>
-          <Option>5:  MaxPCC maximizes PCC (percent correctly classified)</Option>
-          <Option>6:  PredPrev=Obs predicted prevalence=observed prevalence</Option>
-          <Option>7:  ObsPrev threshold=observed prevalence</Option>
-          <Option>8:  MeanProb mean predicted probability</Option>
-          <Option>9:  MinROCdist minimizes distance between ROC plot and (0,1)</Option>
+          <Option>2:  Sensitivity=Specificity</Option>
+          <Option>3:  Maximizes (sensitivity+specificity)/2</Option>
+          <Option>4:  Maximizes Cohen's Kappa</Option>
+          <Option>5:  Maximizes PCC (percent correctly classified)</Option>
+          <Option>6:  Predicted prevalence=observed prevalence</Option>
+          <Option>7:  Threshold=observed prevalence</Option>
+          <Option>8:  Mean predicted probability</Option>
+          <Option>9:  Minimizes distance between ROC plot and (0,1)</Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
@@ -1029,7 +1035,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       </Port>
       <Port>
         <PortName>BinaryMap</PortName>
-        <Definition>If specified using MakeBinaryMap=True then a surface of binary predictions is produced by discretizing the probability map based on the selected threshold.  This map indicates whether one could expect each site to be occupied or unoccupied based on the model.</Definition>
+        <Definition>If specified using MakeBinaryMap=True then a surface of binary predictions is produced by discretizing the prediction map based on the selected threshold.  This map indicates whether one could expect each site to be occupied or unoccupied based on the model.</Definition>
         <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
@@ -1109,6 +1115,8 @@ Several options are available for fitting BRTs when run using VisTrails special 
       <Reference>Miller, M.E., Hui, S.L., Tierney, W.M. (1991). Validation techniques for logistic regression models. Statistics in Medicine 10: 1213-26</Reference>
       <Reference>Pearce, J., and S. Ferrier. (2000). Evaluating the predictive performance of habitat models developed using logistic regression. Ecological Modelling 133:225–245.</Reference>
       <Reference>R Development Core Team (2011). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. </Reference>
+      <Reference>Freeman, E. (2007). PresenceAbsence: An R Package for Presence-Absence Model Evaluation. USDA Forest Service, Rocky Mountain Research Station, 507 25th street,Ogden, UT, USA
+</Reference>
     </References>
     <SeeAlso />
   </Module>
@@ -1788,9 +1796,9 @@ It is not valid to select models based on their performance on the reserved port
   </Module>
   <Module>
     <Title>ModelSelectionCrossValidation</Title>
-    <Description>The ModelSelectionCrossValidation module provides another tool for model selection by splitting the field data observations into cross validation folds.  This should not be used with the ModelSelectionSplit but can be used with the ModelEvaluationSplit in which case only the training portion of the ModelEvalutationSplit is partitioned into folds.  If specified then the individual models will fit a model using all of the data and report this as the training results.  Following the model fitting step sub-models with be fit to each set of n-1 folds and then evaluation metrics calculated on the remaining fold.  These will show up as ranges in the AUC plot, means and standard deviations are reported in textual output and box plots in across model comparison plots.  Evaluation metrics for each individual fold are reported in the across model comparison csv.  The cross validation method incorporated here was originally written for evaluation of MARS models by Leathwick et. al. 2006.  The current implementation does not attempt any sort of model averaging but rather is only used for calculation of evaluation metrics.  The ModelSelectionCrossValidation module makes better use of data then the ModelSelectionSplit as it uses all of the data to fit the final model but can be substantially more time consuming.
+    <Description>The ModelSelectionCrossValidation module provides another tool for model selection by splitting the field data observations into cross-validation folds.  This should not be used with the ModelSelectionSplit but can be used with the ModelEvaluationSplit in which case only the training portion of the ModelEvalutationSplit is partitioned into folds.  If specified then the individual models will fit a model using all of the data and report this as the training results.  Following the model fitting step sub-models with be fit to each set of n-1 folds and then evaluation metrics calculated on the remaining fold.  These will show up as ranges in the AUC plot, means and standard deviations are reported in textual output and box plots in across model comparison plots.  Evaluation metrics for each individual fold are reported in the across model comparison csv.  The cross-validation method incorporated here was originally written for evaluation of MARS models by Leathwick et. al. 2006.  The current implementation does not attempt any sort of model averaging but rather is only used for calculation of evaluation metrics.  The ModelSelectionCrossValidation module makes better use of data then the ModelSelectionSplit as it uses all of the data to fit the final model but can be substantially more time consuming.
    
-Under most circumstances the cross validation evaluation metrics reported by this module do not indicate how the the model might perform if applied to an independent set of data but rather are to be used only for model selection purposes.  The first issue is that when cross validation is applied any feature selection based on the relationship between the response and the predictors must be carried out on each cross validation training set.  The CovariateCorrelationAndSelection module includes an exploration of the relationship between the predictors and the response and thus would need to be carried out for each for each cross validation training set.  The second issue is that it is invalid to use an evaluation metric for model selection and then report that metric for only the best performing model without acknowledgment to the total number of models that were considered and the range of the evaluation metrics.  This module ignores background points.  
+Under most circumstances the cross-validation evaluation metrics reported by this module do not indicate how the the model might perform if applied to an independent set of data but rather are to be used only for model selection purposes.  The first issue is that when cross-validation is applied any feature selection based on the relationship between the response and the predictors must be carried out on each cross validation training set.  The CovariateCorrelationAndSelection module includes an exploration of the relationship between the predictors and the response and thus would need to be carried out for each for each cross validation training set.  The second issue is that it is invalid to use an evaluation metric for model selection and then report that metric for only the best performing model without acknowledgment to the total number of models that were considered and the range of the evaluation metrics.  This module ignores background points.  
 </Description>
     <InputPorts>
       <Port>
@@ -1806,7 +1814,7 @@ Under most circumstances the cross validation evaluation metrics reported by thi
       </Port>
       <Port>
         <PortName>nFolds</PortName>
-        <Definition>The number of folds into which the data should be partitioned.  A trade-off exists in selecting the number of folds to use for cross validation.  When nFolds is close to the total number of observations the prediction error is nearly unbiased as the cross validation sample size is nearly equal to the total sample size but because the training sets are nearly identical in this case variance of the prediction error can be quite high (Hastie et. al 2009). </Definition>
+        <Definition>The number of folds into which the data should be partitioned.  A trade-off exists in selecting the number of folds to use for cross-validation.  When nFolds is close to the total number of observations the prediction error is nearly unbiased as the cross-validation sample size is nearly equal to the total sample size but because the training sets are nearly identical in this case variance of the prediction error can be quite high (Hastie et. al 2009). </Definition>
         <Mandatory>False</Mandatory>
         <Default>10</Default>
         <Options>
