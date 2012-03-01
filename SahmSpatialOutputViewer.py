@@ -19,6 +19,7 @@ from matplotlib.offsetbox import AnchoredOffsetbox, TextArea
 import matplotlib.colors as colors
 
 import numpy as np
+import gc
 
 from osgeo import gdal, gdalconst
 
@@ -135,12 +136,12 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         self.inputs = inputs
         
         self.load_layers()
-        self.on_draw()
-        self.xlim = self.axes.get_xlim()
-        self.ylim = self.axes.get_ylim()
+        self.update_layers()
         self.update()
         
     def create_main_frame(self):
+        ''' Set up our matplot lib figure
+        self.ax1 is the chart that contains our GIS Data'''
         self.dpi = 100
         self.fig = Figure((5.0, 4.0), dpi=self.dpi)
         
@@ -148,7 +149,16 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         self.fig.subplots_adjust(left = 0, right=1, top=1, bottom=0)
         self.map_canvas = MyMapCanvas(self.fig)
         self.map_canvas.mpl_connect('scroll_event', self.wheel_zoom)
-        self.add_axis()
+        
+        self.ax1 = self.fig.add_subplot(111, aspect='equal', adjustable='datalim')
+        self.ax1.spines['right'].set_color('none')
+        self.ax1.spines['top'].set_color('none')
+        self.ax1.spines['bottom'].set_color('none')
+        self.ax1.spines['left'].set_color('none')
+        self.ax1.get_xaxis().set_visible(False)
+        self.ax1.get_yaxis().set_visible(False)
+           
+
            
         self.mpl_toolbar = NavigationToolbar(self.map_canvas, None)
         #Strip out the unused actions
@@ -161,18 +171,18 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
                     os.path.dirname(__file__), "Images", "zoom.png"))
                 action.setIcon(QtGui.QIcon(icon))
 
-        
         self.layout().addWidget(self.map_canvas)
-        
+
+
           
     def wheel_zoom(self, event):
         #zoom in or out centered on the current cursor position
 
-        inv = self.axes.transData.inverted()
+        inv = self.ax1.transData.inverted()
         curX, curY = inv.transform((event.x, event.y))
 
-        curL, curR = self.axes.get_xlim()
-        curB, curT = self.axes.get_ylim()
+        curL, curR = self.ax1.get_xlim()
+        curB, curT = self.ax1.get_ylim()
         width = curR - curL
         height = curT - curB
         steps = -1 * event.step / 0.25
@@ -195,8 +205,11 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         newR = curR - (dWidth*(1-pcntLofX))
         newB = curB + (dHeight * pcntUnderTop)
         newT = curT - (dWidth * (1 - pcntUnderTop))
-        self.axes.set_xlim((newL, newR))
-        self.axes.set_ylim((newB, newT))
+        self.ax1.set_xlim((newL, newR))
+        self.ax1.set_ylim((newB, newT))
+        
+#        self.on_draw()
+        
         self.map_canvas.draw()
     
     def deleteLater(self):
@@ -209,7 +222,11 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         gc.collect()
         
         QCellWidget.deleteLater(self)
+    
     def load_layers(self):
+        '''Sets up a dictionary with entries for each of our layers which contains info like the file location,
+        the colormap to use for display, and the order to display.
+        '''
         self.displayTL = True
         self.all_layers = {"prob_map":{"type":"raster", "title":"Probability" ,"categorical":False, "min":0, "max":1, 'cmap':matplotlib.cm.jet, "displayorder":9999, "displayed":True, "enabled":False, "file":""},
                          "bin_map":{"type":"raster", "title":"Binary probability" , "categorical":False, "categories":[0,1], 'cmap':matplotlib.cm.Greys, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
@@ -220,6 +237,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
                          "abs_points":{"type":"Vector", "color":(0,1,0), "displayorder":2, "num_breaks":7, "displayed":True, "enabled":False, "file":""},
                          "backs_points":{"type":"Vector", "color":(0,0,0), "displayorder":1, "num_breaks":7, "displayed":False, "enabled":False, "file":""}}
         
+        #assign the file and enable all provided inputs
         for k,v in self.all_layers.items():
             if k in self.inputs.keys():
                 if os.path.exists(self.inputs[k]):
@@ -234,36 +252,63 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
             self.all_layers["MoD_map"]["cmap"] = self.make_categorical_cmap(self.all_layers["MoD_map"])       
                  
         pointfile = self.inputs["mds"]
-        points = np.genfromtxt(pointfile, delimiter=",", skip_header=3)
+        points = np.genfromtxt(pointfile, delimiter=",", skip_header=3)   
+               
                     
         for name, val in {"abs_points":0, "pres_points":1, "backs_points":-9999}.items():
-            #parse out the x, y s for the points in each of our categoreis
+            #parse out the x, y s for the points in each of our categorys
             self.all_layers[name]['x'] = np.delete(points, np.argwhere(points[:,2]<>val), 0)[:,0]
             self.all_layers[name]['y'] = np.delete(points, np.argwhere(points[:,2]<>val), 0)[:,1]
             if len(self.all_layers[name]['x']) == 0:
                 self.all_layers[name]["enabled"] = False
             else:
                 self.all_layers[name]["enabled"] = True
-                
+        
+        del points
+        
+    def update_layers(self):
+        """
+        """
+        #clear map plot
+#        self.fig.clear()
+#        self.add_axis()
+#        self.ax1.clf()
+#        self.legend_axes.cla()
+#        self.legend_fig.clear()
+        
+        displayed_keys = [key for key in self.all_layers.keys() if self.all_layers[key]['displayed']]
+        displayed_keys = sorted(displayed_keys, key=lambda disp_key: self.all_layers[disp_key]['displayorder'])
+        #loop through all_layers and display the enabled layers
+        #only displayed layers sorted by display order
+        title = self.inputs["model_tag"] + "\n"
+        for k in displayed_keys:
+            v = self.all_layers[k]
+            if v['enabled']:
+                if v['type'] == 'Vector':
+                    self.add_vector(v)
+                else:
+                    self.add_raster(v)
+#                    self.rasterlayer.rasterfile = v['file']
+#                    self.rasterlayer.switch_raster(v['file'])
+#                    self.rasterlayer.kwargs = v
+                    title += self.all_layers[k]['title']
+         
                
-    def add_axis(self):
-        self.axes = self.fig.add_subplot(111, aspect='equal', adjustable='datalim')
-        self.axes.spines['right'].set_color('none')
-        self.axes.spines['top'].set_color('none')
-        self.axes.spines['bottom'].set_color('none')
-        self.axes.spines['left'].set_color('none')
-        self.axes.get_xaxis().set_visible(False)
-        self.axes.get_yaxis().set_visible(False)
+        if self.displayTL:
+            self.add_title(title)
+            self.add_colorbar()
+        
         
     def add_title(self, title):
+        ''' Adds a title label element to the matplotlib chart'''
         at = AnchoredText(title,
                           loc=2, frameon=True, pad=.05, borderpad=0.2)
         at.patch.set_boxstyle("round,rounding_size=0.2")
         at.set_alpha(0.1)
-        self.axes.add_artist(at)
+        self.ax1.add_artist(at)
 
     def make_resid_cmap(self, kwargs):
-
+        '''    returns the special colormap for a residual surface'''
         vals = self.get_array_from_raster(kwargs['file'])
         vals_min = np.amin(vals)
         vals_max = np.amax(vals)
@@ -280,9 +325,11 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
                           (zero_ratio, 1, 0.0),
                           (1.0, 0.0, 1.0))}
         
+        del vals
         return matplotlib.colors.LinearSegmentedColormap('my_colormap',cdict,256)
 
     def make_categorical_cmap(self, kwargs):
+        '''    returns the special colormap for a residual surface'''
         vals = self.get_array_from_raster(kwargs['file'])
         uniques = np.unique(vals)
         vatdbf = kwargs['file'] + ".vat.dbf"
@@ -299,62 +346,54 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         kwargs['cbar_labels'] = labels
         return matplotlib.cm.get_cmap('Accent', len(uniques))
         
-    def on_draw(self):
-        """ Redraws the figure
-        """
-        #clear map plot
-        self.fig.clear()
-        self.add_axis()
-#        self.axes.cla()
-#        self.legend_axes.cla()
-#        self.legend_fig.clear()
-        
-        displayed_keys = [key for key in self.all_layers.keys() if self.all_layers[key]['displayed']]
-        displayed_keys = sorted(displayed_keys, key=lambda disp_key: self.all_layers[disp_key]['displayorder'])
-        #loop through all_layers and display the enabled layers
-        #only displayed layers sorted by display order
-        title = self.inputs["model_tag"] + "\n"
-        for k in displayed_keys:
-            v = self.all_layers[k]
-            if v['enabled']:
-                if v['type'] == 'Vector':
-                    self.add_vector(v)
-                else:
-                    self.add_raster(v)
-                    title += self.all_layers[k]['title']
-         
-               
-        if self.displayTL:
-            self.add_title(title)
-         
+ 
     def add_vector(self, kwargs):
-        self.axes.scatter(kwargs['x'], kwargs['y'], s=10, c=kwargs['color'], linewidth=0.5, antialiased=True)
+        self.test = self.ax1.scatter(kwargs['x'], kwargs['y'], s=10, c=kwargs['color'], linewidth=0.5, antialiased=True)
+        del self.test
+    
+    def add_colorbar(self):
+        if self.rasterlayer.kwargs['categorical']:
+            cb = self.fig.colorbar(raster_plot, ticks=self.rasterlayer.kwargs['cbar_ticks'], orientation='vertical', pad=0.01, shrink=.9, fraction=.3, aspect=15)
+            cb.ax.set_yticklabels(kwargs['cbar_labels'])
+        else:
+            cb = self.fig.colorbar(raster_plot, orientation='horizontal', pad=0.01, fraction=.1, shrink=.9, aspect=30)
+            
+        for t in cb.ax.get_xticklabels():
+            if self.rasterlayer.kwargs['categorical']:
+                t.set_fontsize(5)
+                t.set_rotation(90)
+            else:
+                t.set_fontsize(7)
     
     def add_raster(self, kwargs):
         rasterfile = kwargs['file']
+        self.rasterlayer = RasterDisplay()
+        self.ax1.callbacks.connect('xlim_changed', self.rasterlayer.ax_update)
+        self.ax1.callbacks.connect('ylim_changed', self.rasterlayer.ax_update)
+        self.rasterlayer.switch_raster(rasterfile)
+        self.rasterlayer.kwargs = kwargs
+        
+        
         raster_array = self.get_array_from_raster(rasterfile)
         rasterparams = self.getRasterParams(rasterfile)
         rmin = np.amin(raster_array)
         rmax = np.amax(raster_array)
         norm = colors.normalize(rmin, rmax)
+#        cur_extent = self.ax1.viewLim.extents
+#        cur_extent = [cur_extent[0], cur_extent[2], cur_extent[1], cur_extent[3]]
         map_extent = [rasterparams["ulx"],rasterparams["lrx"],rasterparams["lry"],rasterparams["uly"]]
-        raster_plot = self.axes.imshow(raster_array,interpolation="nearest", cmap=kwargs['cmap'], norm=norm, origin='upper', extent=map_extent)
-        
-        if self.displayTL:
-            
-            if kwargs['categorical']:
-                cb = self.fig.colorbar(raster_plot, ticks=kwargs['cbar_ticks'], orientation='vertical', pad=0.01, shrink=.9, fraction=.3, aspect=15)
-                cb.ax.set_yticklabels(kwargs['cbar_labels'])
-            else:
-                cb = self.fig.colorbar(raster_plot, orientation='horizontal', pad=0.01, fraction=.1, shrink=.9, aspect=30)
-                
-            for t in cb.ax.get_xticklabels():
-                if kwargs['categorical']:
-                    t.set_fontsize(5)
-                    t.set_rotation(90)
-                else:
-                    t.set_fontsize(7)
-                
+
+        #Get the range for the new area
+        xstart,ystart,xdelta,ydelta = self.ax1.viewLim.bounds
+        xend = xstart + xdelta
+        yend = ystart + ydelta
+        cur_extent = [xstart, xend, ystart, yend]
+
+        raster_array = self.rasterlayer(rasterparams["ulx"], rasterparams["lrx"], rasterparams["lry"], rasterparams["uly"])
+
+        self.raster_plot = self.ax1.imshow(raster_array, interpolation="nearest", cmap=kwargs['cmap'], norm=norm, origin='upper', extent=map_extent)
+        self.rasterlayer.ax_update(self.ax1)
+       
         
 
     def get_array_from_raster(self, raster_file):
@@ -367,11 +406,20 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         rasterparams = self.getRasterParams(raster_file)
         nrows = rasterparams["height"]
         ncols = rasterparams["width"]
-        max_dimension = max([nrows, ncols])
-        if max_dimension > self.inputs["max_cells_dimension"]:
-            ratio = float(self.inputs["max_cells_dimension"]) / max_dimension
-            nrows = int(ratio * nrows)
-            ncols = int(ratio * ncols)
+        
+        if nrows > 500:
+            nrows = 500
+        if ncols > 500:
+            ncols = 500
+        
+#        max_dimension = max([nrows, ncols])
+#        extent=self.map_canvas.figure.get_window_extent().transformed(self.map_canvas.figure.dpi_scale_trans.inverted())
+#        max_pixel_dimension = max(extent.max) * 100
+##        max_dimension = self.fig.
+##        if max_dimension > self.inputs["max_cells_dimension"]:
+#        ratio = max_pixel_dimension / max_dimension
+#        nrows = int(ratio * nrows)
+#        ncols = int(ratio * ncols)
                 
         try:
             ary = ds.GetRasterBand(1).ReadAsArray(buf_ysize=nrows, buf_xsize=ncols)
@@ -439,7 +487,6 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         pass
 
 
-
 class MyMapCanvas(FigureCanvas):
     def __init__(self, fig):
         FigureCanvas.__init__(self, fig)
@@ -474,6 +521,110 @@ class MyMapCanvas(FigureCanvas):
 #        print "delta", event.delta()
 #        self.set
 
+
+class RasterDisplay(object):
+    def __init__(self, width=300, height=300):
+        self.height = height
+        self.width = width
+        
+    def switch_raster(self, rasterfile):
+        self.rasterfile = rasterfile
+        self.rasterparams = self.getRasterParams(rasterfile)
+
+    def __call__(self, xstart, xend, ystart, yend):
+        self.x = np.linspace(xstart, xend, self.width)
+        self.y = np.linspace(ystart, yend, self.height).reshape(-1,1)
+
+        #pull the pixels we need, no more
+        ds = gdal.Open(self.rasterfile, gdal.GA_ReadOnly)
+
+        ncols = int((xend - xstart) / self.rasterparams["xScale"])
+        nrows = int((yend - ystart) / abs(self.rasterparams["yScale"]))
+        
+            
+        xOffset = int((xstart - self.rasterparams["ulx"]) / self.rasterparams["xScale"])
+        yOffset = int((yend - self.rasterparams["uly"]) / self.rasterparams["yScale"])   
+                
+        try:
+            ary = ds.GetRasterBand(1).ReadAsArray(xoff=xOffset, yoff=yOffset, 
+                                                  win_xsize=ncols, win_ysize=nrows, 
+                                                  buf_ysize=self.height, buf_xsize=self.width)
+            ndval = ds.GetRasterBand(1).GetNoDataValue()
+        except MemoryError:
+            msgbox = QtGui.QMessageBox(self)
+            msgbox.setText("This viewer cannot handle datasets this large.\nTry setting the max_cells_dimension to a smaller value.")
+            msgbox.exec_()
+            raise MemoryError
+            
+        return np.ma.masked_array(ary, mask=(ary==ndval))   
+
+    def ax_update(self, ax):
+        ax.set_autoscale_on(False) # Otherwise, infinite loop
+
+        #Get the number of points from the number of pixels in the window
+        dims = ax.axesPatch.get_window_extent().bounds
+        self.width = int(dims[2] + 0.5)
+        self.height = int(dims[2] + 0.5)
+
+        #Get the range for the new area
+        xstart,ystart,xdelta,ydelta = ax.viewLim.bounds
+        xend = xstart + xdelta
+        yend = ystart + ydelta
+
+        # Update the image object with our new data and extent
+        im = ax.images[-1]
+        im.set_data(self.__call__(xstart, xend, ystart, yend))
+        im.set_extent((xstart, xend, ystart, yend))
+        ax.figure.canvas.draw_idle()
+
+    def getRasterParams(self, rasterFile):
+        """
+        Extracts a series of bits of information from a passed raster
+        All values are stored in a dictionary which is returned.
+        If errors are encountered along the way the error messages will
+        be returned as a list in the Error element.
+        """
+        try:
+            #initialize our params dictionary to have None for all parma
+            params = {}
+            allRasterParams = ["Error", "xScale", "yScale", "width", "height",
+                            "ulx", "uly", "lrx", "lry", "Wkt", 
+                            "tUlx", "tUly", "tLrx", "tLry", 
+                            "srs", "gt", "prj", "NoData", "PixelType"]
+            
+            for param in allRasterParams:
+                params[param] = None
+            params["Error"] = []
+            
+            # Get the PARC parameters from the rasterFile.
+            dataset = gdal.Open(rasterFile, gdalconst.GA_ReadOnly)
+            if dataset is None:
+                params["Error"].append("Unable to open file")
+                #print "Unable to open " + rasterFile
+                #raise Exception, "Unable to open specifed file " + rasterFile
+                
+            
+            xform  = dataset.GetGeoTransform()
+            params["xScale"] = xform[1]
+            params["yScale"] = xform[5]
+    
+            params["width"]  = dataset.RasterXSize
+            params["height"] = dataset.RasterYSize
+    
+            params["ulx"] = xform[0]
+            params["uly"] = xform[3]
+            params["lrx"] = params["ulx"] + params["width"]  * params["xScale"]
+            params["lry"] = params["uly"] + params["height"] * params["yScale"]
+                
+            
+        except:
+            #print "We ran into problems extracting raster parameters from " + rasterFile
+            params["Error"].append("Some untrapped error was encountered")
+        finally:
+            del dataset
+            return params
+
+
 class fullExtent(QtGui.QAction):
     def __init__(self, parent=None):
         icon = os.path.abspath(os.path.join(
@@ -507,14 +658,14 @@ class viewTitleLegend(QtGui.QAction):
     def triggeredSlot(self):
         cellWidget = self.toolBar.getSnappedWidget()
         
-        xlim = cellWidget.axes.get_xlim()
-        ylim = cellWidget.axes.get_ylim()
+#        xlim = cellWidget.axes.get_xlim()
+#        ylim = cellWidget.axes.get_ylim()
         cellWidget.displayTL = self.isChecked()
-        cellWidget.on_draw()
+#        cellWidget.on_draw()
         cellWidget.fig.canvas.draw()
         cellWidget.update()
-        cellWidget.axes.set_xlim(xlim)
-        cellWidget.axes.set_ylim(ylim)            
+#        cellWidget.axes.set_xlim(xlim)
+#        cellWidget.axes.set_ylim(ylim)            
 
 class ViewLayerAction(QtGui.QAction):
     def __init__(self, action_dict, parent=None):
@@ -531,8 +682,8 @@ class ViewLayerAction(QtGui.QAction):
 
     def triggeredSlot(self, checked=False):
         cellWidget = self.toolBar.getSnappedWidget()
-        xlim = cellWidget.axes.get_xlim()
-        ylim = cellWidget.axes.get_ylim()
+        xlim = cellWidget.ax1.get_xlim()
+        ylim = cellWidget.ax1.get_ylim()
         self.toggleOthers()
         self.displayLayer()
         self.toolBar.updateToolBar()
@@ -563,7 +714,7 @@ class ViewLayerAction(QtGui.QAction):
                     cellWidget.all_layers[action.tag]['displayed'] = True
             except AttributeError:
                 pass #ignore buttons that don't have a tag set
-        cellWidget.on_draw()
+        cellWidget.update_layers()
         try:
             cellWidget.fig.canvas.draw()
         except MemoryError:
