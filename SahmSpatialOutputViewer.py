@@ -199,6 +199,16 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         self.axes.set_ylim((newB, newT))
         self.map_canvas.draw()
     
+    def deleteLater(self):
+        """ deleteLater() -> None        
+        Overriding PyQt deleteLater to free up resources
+        
+        """
+        self.fig.clf()
+        self.map_canvas.close()
+        gc.collect()
+        
+        QCellWidget.deleteLater(self)
     def load_layers(self):
         self.displayTL = True
         self.all_layers = {"prob_map":{"type":"raster", "title":"Probability" ,"categorical":False, "min":0, "max":1, 'cmap':matplotlib.cm.jet, "displayorder":9999, "displayed":True, "enabled":False, "file":""},
