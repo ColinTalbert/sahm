@@ -40,8 +40,67 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
         SpreadsheetCell.__init__(self)
 
     def compute(self):
+        
+        model_workspace = self.forceGetInputFromPort('model_workspace').name
+        
+        if self.hasInputFromPort("row"):
+            if not self.location:
+                self.location = CellLocation()
+            self.location.row = self.getInputFromPort('row') - 1
+        
+        if self.hasInputFromPort("column"):
+            if not self.location:
+                self.location = CellLocation()
+            self.location.col = self.getInputFromPort('column') - 1
+            
+        if self.hasInputFromPort("max_cells_dimension"):
+            max_cell_dimension = self.getInputFromPort('max_cells_dimension')
+        else:
+            max_cell_dimension = [item for item in self._input_ports if item[0] == 'max_cells_dimension'][0][2]['defaults']
+
+        args = [model_workspace, max_cell_dimension]
+        self.displayAndWait(SAHMSpatialOutputViewerCellWidget,
+                            args)
+
+
+
+
+
+class SAHMSpatialOutputViewerCellWidget(QCellWidget):
+    """
+
+    """
+    def __init__(self, parent=None):
+        """ QGISCellWidget(parent: QWidget) -> QGISCellWidget
+        Initialize the widget with its central layout
+
+        """
+        QCellWidget.__init__(self, parent)
+
+        centralLayout = QtGui.QVBoxLayout()
+        self.setLayout(centralLayout)
+        centralLayout.setMargin(0)
+        centralLayout.setSpacing(0)
+        self.create_main_frame()
+        
+        self.setAnimationEnabled(False)
+
+    def updateContents(self, args):
+        """ updateContents(inputs: dictionary) -> None
+        Update the widget contents based on the input data
+        """
+        model_workspace, max_cell_dimension = args
+        self.toolBarType = SAHMSpatialViewerToolBar
+        self.controlBarType = SAHMSpatialViewerToolBar
+        self.inputs = self.updateInputs(model_workspace, max_cell_dimension)
+        
+        self.load_layers()
+        self.update_layers()
+        self.update()
+        
+    def updateInputs(self, model_workspace, max_cell_dimension):    
         inputs = {}
-        inputs["model_workspace"] = self.forceGetInputFromPort('model_workspace').name
+        inputs["model_workspace"] = model_workspace
         inputs["model_dir"] = os.path.split(os.path.normcase(inputs["model_workspace"]))[0]
 
         for model_output in ['prob', 'bin', 'resid', 'mess', 'MoD']:
@@ -55,32 +114,11 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
 
         inputs["model_tag"] = os.path.split(inputs["model_dir"])[1]
 
-        if self.hasInputFromPort("row"):
-            if not self.location:
-                self.location = CellLocation()
-            self.location.row = self.getInputFromPort('row') - 1
+
+
+
+        return inputs
         
-        if self.hasInputFromPort("column"):
-            if not self.location:
-                self.location = CellLocation()
-            self.location.col = self.getInputFromPort('column') - 1
-
-        if self.hasInputFromPort("max_cells_dimension"):
-            inputs["max_cells_dimension"] = self.getInputFromPort('max_cells_dimension')
-        else:
-            inputs["max_cells_dimension"] = [item for item in self._input_ports if item[0] == 'max_cells_dimension'][0][2]['defaults']
-
-        self.displayAndWait(SAHMSpatialOutputViewerCellWidget,
-                            inputs)
-
-    def find_file(self, model_dir, suffix):
-        try:
-            return [file_name for file_name in os.listdir(model_dir)
-                                     if file_name.endswith(suffix)][0]
-        except IndexError:
-            raise RuntimeError('The expected model output ' 
-                               + suffix + ' was not found in the model output directory')
-
     def find_mds(self, model_dir):
         """returns the path to the mds that was used to generate this
         model output.  While the text file that the R model produces
@@ -107,38 +145,16 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
             return result
         else:
             raise RuntimeError('Valid input MDS file not found in Model text output.')
-
-class SAHMSpatialOutputViewerCellWidget(QCellWidget):
-    """
-
-    """
-    def __init__(self, parent=None):
-        """ QGISCellWidget(parent: QWidget) -> QGISCellWidget
-        Initialize the widget with its central layout
-
-        """
-        QCellWidget.__init__(self, parent)
-
-        centralLayout = QtGui.QVBoxLayout()
-        self.setLayout(centralLayout)
-        centralLayout.setMargin(0)
-        centralLayout.setSpacing(0)
-        self.create_main_frame()
-        
-        self.setAnimationEnabled(False)
-
-    def updateContents(self, inputs):
-        """ updateContents(inputs: dictionary) -> None
-        Update the widget contents based on the input data
-        """
-        self.toolBarType = SAHMSpatialViewerToolBar
-        self.controlBarType = SAHMSpatialViewerToolBar
-        self.inputs = inputs
-        
-        self.load_layers()
-        self.update_layers()
-        self.update()
-        
+    
+    
+    def find_file(self, model_dir, suffix):
+        try:
+            return [file_name for file_name in os.listdir(model_dir)
+                                     if file_name.endswith(suffix)][0]
+        except IndexError:
+            raise RuntimeError('The expected model output ' 
+                               + suffix + ' was not found in the model output directory')
+    
     def create_main_frame(self):
         ''' Set up our matplot lib figure
         self.ax1 is the chart that contains our GIS Data'''

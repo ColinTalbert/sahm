@@ -91,7 +91,6 @@ if(Model=="brt"){
             nvar <- nrow(out$mods$final.mod$contributions)
             pcol <- min(ceiling(sqrt(nvar)),4)
             prow <- min(ceiling(nvar/pcol),3)
-
             pdf(paste(bname,"_response_curves.pdf",sep=""),width=11,height=8.5,onefile=T)
                 par(oma=c(2,2,4,2))
                 out$mods$r.curves <- gbm.plot(out$mods$final.mod,plotit=T,plot.layout=c(prow,pcol))

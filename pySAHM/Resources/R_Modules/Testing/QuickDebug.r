@@ -72,7 +72,9 @@ localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=proximity,norm.votes=TRUE,
 do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=TRUE)
 
 #BRT
-set.seed(1)
+input.file="I:\\VisTrails\\WorkingFiles\\secondseason\\noseason_workfile_2012_03_12\\ModelEvaluation_Split_1.csv"
+input.file="I:\\VisTrails\\WorkingFiles\\secondseason\\noseason_workfile_2012_03_12\\ModelEvaluation_Split_1.csv"
+set.seed(50817089)
 FitModels(ma.name=input.file,
           tif.dir=NULL,output.dir=output.dir,
           response.col=rc,make.p.tif=T,make.binary.tif=T,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
