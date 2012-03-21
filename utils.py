@@ -105,6 +105,7 @@ def mknextdir(prefix, directory=""):
 def setrootdir(session_dir):
     global _roottempdir
     _roottempdir = session_dir
+    
 
 def getrootdir():
     global _roottempdir

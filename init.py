@@ -17,6 +17,7 @@ from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
 from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
 
 from core.modules.basic_modules import String
+from core.packagemanager import get_package_manager
 
 from PyQt4 import QtCore, QtGui
 
@@ -61,6 +62,14 @@ def menu_items():
         session_dir = path
         utils.setrootdir(path)
         utils.createLogger(session_dir, configuration.output_dir)
+        
+        configuration.cur_session_folder = path
+        
+        package_manager = get_package_manager()
+        package = package_manager.get_package(identifier)
+        dom, element = package.find_own_dom_element()
+        
+        configuration.write_to_dom(dom, element)
         
         writetolog("*" * 79 + "\n" + "*" * 79)
         writetolog(" output directory:   " + session_dir)
@@ -1621,7 +1630,7 @@ def initialize():
     maxent_path = os.path.abspath(configuration.maxent_path)
     utils.r_path = r_path    
     
-    session_dir = utils.createrootdir(configuration.output_dir)
+    session_dir = configuration.cur_session_folder 
     utils.createLogger(session_dir, configuration.verbose)
 
     color_breaks_csv = os.path.abspath(os.path.join(os.path.dirname(__file__),  "ColorBreaks.csv"))
