@@ -123,7 +123,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         centralLayout.setMargin(0)
         centralLayout.setSpacing(0)
         self.create_main_frame()
-        
+        self.fig.canvas.draw()   
         self.setAnimationEnabled(False)
 
     def updateContents(self, inputs):
@@ -138,7 +138,9 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         self.on_draw()
         self.xlim = self.axes.get_xlim()
         self.ylim = self.axes.get_ylim()
+        self.fig.canvas.draw()
         self.update()
+        
         
     def create_main_frame(self):
         self.dpi = 100
