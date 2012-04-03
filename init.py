@@ -1630,7 +1630,8 @@ def initialize():
     maxent_path = os.path.abspath(configuration.maxent_path)
     utils.r_path = r_path    
     
-    session_dir = configuration.cur_session_folder 
+    session_dir = configuration.cur_session_folder
+    utils.setrootdir(session_dir) 
     utils.createLogger(session_dir, configuration.verbose)
 
     color_breaks_csv = os.path.abspath(os.path.join(os.path.dirname(__file__),  "ColorBreaks.csv"))
