@@ -464,6 +464,7 @@ class Model(Module):
                     ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':False}),
                     ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False}),
                     ('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'2', 'optional':False})
+                    ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False})
                     ]
     _output_ports = [('modelWorkspace', '(edu.utah.sci.vistrails.basic:File)'), 
                      ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
@@ -546,6 +547,7 @@ class GLM(Model):
     
     _input_ports = list(Model._input_ports)
     _input_ports.extend([('SimplificationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'AIC', 'optional':True}),
+                         ('SquaredTerms', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
                          ]) 
     def __init__(self):
         global models_path
@@ -556,7 +558,8 @@ class GLM(Model):
                          'makeBinMap':('mbt', utils.R_boolean, False),
                          'makeMESMap':('mes', utils.R_boolean, False),
                          'ThresholdOptimizationMethod':('om', None, False),
-                         'SimplificationMethod':('sm', None, False) #This is a GLM specific port
+                         'SimplificationMethod':('sm', None, False), #This is a GLM specific port
+                         'SquaredTerms':('sqt', utils.R_boolean, False), #This is a GLM specific port
                          }
 
 class RandomForest(Model):
