@@ -9,6 +9,7 @@ opt.methods=2
 save.model=FALSE
 MESS=FALSE
 squared.terms=FALSE
+pseudoabs=FALSE
 
 Args <- commandArgs(trailingOnly=FALSE)
 
@@ -31,6 +32,7 @@ Args <- commandArgs(trailingOnly=FALSE)
  			if(argSplit[[1]][1]=="savm")  save.model <- argSplit[[1]][2]
  			if(argSplit[[1]][1]=="sm")  simp.method <- argSplit[[1]][2]
  			if(argSplit[[1]][1]=="mes")  MESS <- argSplit[[1]][2]
+		  if(argSplit[[1]][1]=="psa")  pseudoabs <- argSplit[[1]][2]
     }
 	print(csv)
 	print(output)
@@ -45,8 +47,10 @@ make.binary.tif<-as.logical(make.binary.tif)
 save.model<-make.p.tif | make.binary.tif
 opt.methods<-as.numeric(opt.methods)
 MESS<-as.logical(MESS)
+pseudoabs<-as.logical(pseudoabs)
 
 FitModels(ma.name=csv,
       tif.dir=NULL,output.dir=output,
       response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
-      simp.method=simp.method,debug.mode=F,responseCurveForm="pdf",script.name="glm",opt.methods=opt.methods,save.model=save.model,MESS=MESS)
+      simp.method=simp.method,debug.mode=F,responseCurveForm="pdf",script.name="glm",opt.methods=opt.methods,save.model=save.model,
+      MESS=MESS,squared.terms=squared.terms,pseudoabs=pseudoabs)

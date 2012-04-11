@@ -52,7 +52,8 @@
       names(ma)[r.col]<-"response"
       rm.list<-vector()
         
-        # remove background points which aren't used here
+        # remove background points or record these as absence for pseudoabsence (Only partially implemented)
+        if(out$input$pseudoabsence) ma[which(ma[,r.col]==-9999,arr.ind=TRUE),r.col]<-0
          if(length(which(ma[,r.col]==-9999,arr.ind=TRUE))>0) ma<-ma[-c(which(ma[,r.col]==-9999,arr.ind=TRUE)),]
         # remove evaluation points
         if(any(!is.na(match("EvalSplit",names(ma))))){
@@ -205,7 +206,7 @@
         out.list$dims <- sum(out.list$nPresAbs$train)
 
         out.list$used.covs <-  names(dat.out$train$dat)[-1]
-
+   
       if(out$input$script.name%in%c("brt","rf")){
       #brt uses a subsample for quicker estimation of learning rate and model simplificaiton
       #random forest uses a subsample only for producing response curves
