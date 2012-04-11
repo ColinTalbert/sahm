@@ -15,6 +15,8 @@ seed=NULL
 opt.methods=2
 save.model=TRUE
 MESS=FALSE
+pseudoabs=FALSE
+
 # Interpret command line argurments #
 # Make Function Call #
 Args <- commandArgs(trailingOnly=FALSE)
@@ -45,6 +47,7 @@ Args <- commandArgs(trailingOnly=FALSE)
  		  if(argSplit[[1]][1]=="tolm")  tolerance.method <- argSplit[[1]][2]
  		  if(argSplit[[1]][1]=="tol")  tolerance <- argSplit[[1]][2]
  		  if(argSplit[[1]][1]=="mes")  MESS <- argSplit[[1]][2]
+	    if(argSplit[[1]][1]=="psa")  pseudoabs <- argSplit[[1]][2]
  			
     }
 	print(csv)
@@ -66,6 +69,7 @@ tolerance=as.numeric(tolerance)
 bag.fraction<-as.numeric(bag.fraction)
 max.trees<-as.numeric(max.trees)
 n.folds<-as.numeric(n.folds)
+pseudoabs<-as.logical(pseudoabs)
 
 print(getwd())
 print(ScriptPath)
@@ -76,7 +80,7 @@ print(ScriptPath)
 		make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
 		simp.method="cross-validation",debug.mode=F,responseCurveForm="pdf",tc=tc,n.folds=n.folds,alpha=alpha,script.name="brt",
 		learning.rate =learning.rate, bag.fraction = bag.fraction,prev.stratify = prev.stratify,max.trees = max.trees,seed=seed,
-    save.model=save.model,opt.methods=opt.methods,MESS=MESS,tolerance.method = tolerance.method,tolerance=tolerance)
+    save.model=save.model,opt.methods=opt.methods,MESS=MESS,tolerance.method = tolerance.method,tolerance=tolerance,pseudoabs=pseudoabs)
 
 
 

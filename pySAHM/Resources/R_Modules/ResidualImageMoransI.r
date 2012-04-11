@@ -4,9 +4,9 @@
      diag(resid.dists.inv) <- 0
      m<-Moran.I(z, resid.dists.inv)
 
-resid.image<-function(dev.contrib,pred,raw.dat,x,y,model.type,file.name,out){
+resid.image<-function(dev.contrib,pred,raw.dat,x,y,model.type,file.name,label,out){
    z<-sign(pred-raw.dat)*dev.contrib
-              browser()
+   browser()
               ####################################################
               ####  New experimental section
               ## Currently not sure where to go with this. Moran's I is produced below
@@ -20,25 +20,28 @@ resid.image<-function(dev.contrib,pred,raw.dat,x,y,model.type,file.name,out){
               library(spdep)
               library(ncf)
                z<-dev.contrib
-              correlog1.1 <- correlog(z, y, z,na.rm=T, increment=100, resamp=100)
+              spln<-spline.correlog(x,y,z,resamp=100,latlon=TRUE)
+              correlog1.1 <- correlog(x, y, z,na.rm=T, increment=100, resamp=100,latlon=TRUE)
+              plot(spln)
+              plot(correlog1.1)
               par(mar=c(5,5,0.1, 0.1))
               plot(correlog1.1)
               plot(correlog1.1$correlation, type="l", pch=16, cex=1.5, lwd=1.5,
               xlab="distance", ylab="Moran's I", cex.lab=2, cex.axis=1.5); abline(h=0)
-
-
+              #
+               #
               correlog1.1 <- correlog(z, y, z,na.rm=T, increment=1, resamp=20)
               # make a map of the residuals:
               plot(x, y, col=c("blue",
               "red")[sign(z)/2+1.5], pch=19,
               cex=abs(z)/max(z)*2.5, xlab="geographical xcoordinates",
               ylab="geographical y-coordinates")
-              
+              #
               dist.nb <- dnearneigh(as.matrix(cbind(x,y)), 0, 5000) #give lower and
               dist.listw <- nb2listw(dist.nb) #turns neighbourhood object into a
               GlobMT<- moran.test(z, listw=dist.listw)
               GlobMT<-moran.mc(z, listw=dist.listw,nsim=1000)
-                            #####################################################
+               #             #####################################################
               a<-loess(z~x*y)
                x.lim<-rep(seq(from=min(out$dat$ma$train.xy[,1]),to=max(out$dat$ma$train.xy[,1]),length=100),each=100)
                y.lim<-rep(seq(from=min(out$dat$ma$train.xy[,2]),to=max(out$dat$ma$train.xy[,2]),length=100),times=100)
@@ -56,11 +59,6 @@ resid.image<-function(dev.contrib,pred,raw.dat,x,y,model.type,file.name,out){
                 #    ps <- as.vector(gi)[6:7]
                 #    ll <- as.vector(gi)[4:5]
                  #   pref<-attr(gi,"projection")
-
-
-                 # }
-                  
-                  
                  ##########################################################
               jpeg(file=paste(file.name,"resid.plot.jpg",sep="/"))
                  par(oma=c(3,3,3,3))

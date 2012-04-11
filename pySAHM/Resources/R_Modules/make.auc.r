@@ -14,6 +14,18 @@ make.auc.plot.jpg<-function(out=out){
             }
             else input.list$train$thresh=NULL
 
+##################################################################
+### Standard residual analysis plots for glm
+    if(out$input$script.name%in%c("glm","mars")){
+          pdf(paste(out$dat$bname,"_stand.resid.plots.pdf",sep=""),width=11,height=8.5,onefile=T)
+          par(mfrow=c(2,2))
+          if(out$input$script.name=="glm") plot(out$mods$final.mod)
+          if(out$input$script.name=="mars") plot(out$mods$final.mod$model.glm)
+          par(mfrow=c(1,1))
+          graphics.off()
+    }
+
+
 ################# Calculate all statistics on test\train or train\cv splits
   Stats<-lapply(input.list,calcStat,family=out$input$model.family)
 
@@ -37,7 +49,6 @@ make.auc.plot.jpg<-function(out=out){
     graphics.off()
    }
 ########################## PLOTS ################################
-
 #########  Residual surface of input data  ##########
   if(out$dat$split.label!="eval"){
   residual.smooth.fct<-resid.image(calc.dev(input.list$train$dat$response, input.list$train$pred, input.list$train$weight, family=out$input$model.family)$dev.cont,input.list$train$pred,

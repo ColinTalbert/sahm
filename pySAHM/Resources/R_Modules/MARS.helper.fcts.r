@@ -298,7 +298,7 @@ function (data,                         # the input data frame
 
   return(list(mars.table = m.table, basis.functions = bf.data, y.values = ydat,
     fitted.values = fitted.values, residuals = model.residuals, weights = weights, deviances = deviances,
-    p.values = p.values, mars.call = mars.detail,mars.object=mars.object))
+    p.values = p.values, mars.call = mars.detail,mars.object=mars.object,model.glm=model.glm))
 }
 
 "mars.new.dataframe" <-
