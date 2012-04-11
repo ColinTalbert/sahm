@@ -22,6 +22,7 @@ import numpy as np
 
 from osgeo import gdal, gdalconst
 
+from core.packagemanager import get_package_manager
 
 class SAHMSpatialOutputViewerCell(SpreadsheetCell):
     """
@@ -41,6 +42,16 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
     def compute(self):
         inputs = {}
         inputs["model_workspace"] = self.forceGetInputFromPort('model_workspace').name
+
+        pm = get_package_manager()
+        hasIVis = pm.has_package('edu.utah.sci.vistrails.iVisServer')
+        if hasIVis:
+            row = self.forceGetInputFromPort("row", -1)
+            col = self.forceGetInputFromPort("column", -1)
+            from packages.iVisServer import display_sahm_output
+            display_sahm_output(row, col, {"model_workspace": inputs["model_workspace"]}, 'SpatialOutput')
+            return
+
         inputs["model_dir"] = os.path.split(os.path.normcase(inputs["model_workspace"]))[0]
 
         for model_output in ['prob', 'bin', 'resid', 'mess', 'MoD']:

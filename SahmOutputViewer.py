@@ -9,6 +9,8 @@ from packages.spreadsheet.spreadsheet_controller import spreadsheetController
 
 from packages.sahm.sahm_picklists import ModelOutputType
 
+from core.packagemanager import get_package_manager
+
 import os
 ################################################################################
 
@@ -69,6 +71,23 @@ Input Ports:
         if self.hasInputFromPort("ModelWorkspace"):
             window = spreadsheetController.findSpreadsheetWindow()
             model_workspace = self.getInputFromPort("ModelWorkspace").name
+
+            pm = get_package_manager()
+            hasIVis = pm.has_package('edu.utah.sci.vistrails.iVisServer')
+            if hasIVis:
+                row = self.forceGetInputFromPort("row", -1)
+                col = self.forceGetInputFromPort("column", -1)
+
+                initial_display = self.forceGetInputFromPort('InitialModelOutputDisplay', 'AUC')
+
+                from packages.iVisServer import display_sahm_output
+                display_sahm_output(row, col, 
+                                    {"ModelWorkspace": model_workspace,
+                                     "InitialModelOutputDisplay": initial_display}, 
+                                    'ModelOutput')
+                return
+
+
             model_dir_full = os.path.normcase(os.path.split(model_workspace)[0])
             model_dir = os.path.split(model_dir_full)[1]
             model_name = model_dir[:model_dir.index('_')]
