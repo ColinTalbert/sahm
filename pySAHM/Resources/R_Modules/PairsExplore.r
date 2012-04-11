@@ -12,7 +12,10 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
       #any counts higher than or equal to 1 are set to be presence though I might consider
       #adding the option to have a threshold set instead of using just presence/absence
 
-
+       if(is.na(match("gam",installed.packages()[,1]))) {
+             install.packages("gam",repos="http://lib.stat.cmu.edu/R/CRAN")
+            }
+        library(gam)    
       absn<-as.logical(absn)
       pres<-as.logical(pres)
       bgd<-as.logical(bgd)
@@ -38,7 +41,6 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
      #remove testing split
      if(!is.na(match("EvalSplit",names(dat)))) dat<-dat[-c(which(dat$EvalSplit=="test"),arr.ind=TRUE),]
     if(!is.na(match("Split",names(dat)))) dat<-dat[-c(which(dat$Split=="test"),arr.ind=TRUE),]
-
     include[is.na(include)]<-0
     rm.cols<-unique(c(rm.cols,which(include==0,arr.ind=TRUE)))
     response<-dat[,match(tolower(response.col),tolower(names(dat)))]
@@ -57,12 +59,15 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
      dat<-dat[response%in%temp,]
      response<-response[response%in%temp]
 
-
-     if(sum(response==-9999)>1000){
-      s<-sample(which(response==-9999,arr.ind=TRUE),size=(sum(response==-9999)-1000))
-      dat<-dat[-c(s),]
-      response<-response[-c(s)]
-    }
+     response.table<-table(response)
+     max.points<-3000
+     if(any(response.table> max.points)){
+       for(i in names(response.table[response.table> max.points])){
+             s<-sample(which(response==i,arr.ind=TRUE),size=(sum(response==i)- max.points))
+             dat<-dat[-c(s),]
+             response<-response[-c(s)]
+       }
+     }
 
    if (response.col=="responseCount") {
     TrueResponse<-dat[,match(tolower(response.col),tolower(names(dat)))]
@@ -302,20 +307,17 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
                      my.lab<-paste("cor=",round(max(abs(cor(x[,(i)],response,use="pairwise.complete.obs")),abs(cor(x[,(i)],response,method="spearman",use="pairwise.complete.obs")),
                      abs(cor(x[,(i)],response,method="kendall",use="pairwise.complete.obs"))),digits=2),sep="")
 
-                  #panel smooth doesn't work for two reasons: one, the response is binary and it requires more than two unique values
-                  #second I don't think it can use weights which is necessary with an overwhelming amount of background points so that presnce points
-                  #can't be viewed
-                  #panel.smooth(as.vector(x[, (i)]), as.vector(jitter(response,factor=.1)),weights=
-                  #        c(rep(table(response)[2]/table(response)[1],times=table(response)[1]),rep(1,times=table(response)[2])),...)
-
-                   if(length(unique(response))>2) panel.smooth(as.vector(x[, (i)]), as.vector(response),...)
-                   else my.panel.smooth(as.vector(x[, (i)]), as.vector(response),weights=
-                          c(rep(table(response)[2]/table(response)[1],times=table(response)[1]),rep(1,times=table(response)[2])),...)
-                          
-                          title(ylab=paste("cor=",round(max(abs(cor(x[,(i)],response,use="pairwise.complete.obs")),
+                   if(length(unique(response))>2) {panel.smooth(as.vector(x[, (i)]), as.vector(response),...)
+                      title(ylab=paste("cor=",round(max(abs(cor(x[,(i)],response,use="pairwise.complete.obs")),
                           abs(cor(x[,(i)],response,method="spearman",use="pairwise.complete.obs")),abs(cor(x[,(i)],response,method="kendall",use="pairwise.complete.obs"))),digits=2),
                           sep=""),line=.02,cex.lab=1.5)
-                          #,y=.85,x=max(x[,(i)])-.2*diff(range(x[,(i)])),cex=1.5)
+                   }
+                   else {pct.dev<-my.panel.smooth(as.vector(x[, (i)]), as.vector(response),weights=
+                          c(rep(table(response)[2]/table(response)[1],times=table(response)[1]),rep(1,times=table(response)[2])),...)
+                          
+                          title(ylab=paste("%dev exp ",round(pct.dev,digits=2),
+                          sep=""),line=.02,cex.lab=1.4)}
+                         
 
                  } else{
         if (i == j || (i < j && has.lower) || (i > j && has.upper)) {
@@ -375,14 +377,20 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
 
 my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),
     cex = 1, col.smooth = "red", span = 2/3, iter = 3, weights=rep(1,times=length(y)), ...)
-{
+{  
     o<-order(x)
-    points(x, y, pch = pch, col = col, bg = bg, cex = cex*1.5)
+    x<-x[o]
+    y<-y[o]
+    col<-col[o]
+    bg<-bg[o]
+    points(x, y, pch = pch, col = "black", bg = bg, cex = cex*1.5)
+    g<-gam(y~s(x,2),family=binomial)
     ok <- is.finite(x) & is.finite(y)
     if (any(ok) && length(unique(x))>3)
-    lines(lowess(x[o],y[o],iter=0),col="red")
-        #lines(smooth.spline(x,w=weights,jitter(y,amount=(max(y)-min(y))/100),nknots=min(length(unique(x)),4)),col="red")
-
+          y.fit<-predict.gam(g,type="response")
+    segments(x0=x[1:(length(x)-1)],y0=y.fit[1:(length(x)-1)],x1=x[2:length(x)],y1=y.fit[2:length(x)],col="red",cex=3)
+    
+    return(100*(1-g$dev/g$null.deviance))
 }
 
 
