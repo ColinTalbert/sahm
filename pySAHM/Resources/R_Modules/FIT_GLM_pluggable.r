@@ -8,6 +8,7 @@ simp.method="AIC"
 opt.methods=2
 save.model=FALSE
 MESS=FALSE
+squared.terms=FALSE
 
 Args <- commandArgs(trailingOnly=FALSE)
 
@@ -20,6 +21,7 @@ Args <- commandArgs(trailingOnly=FALSE)
     	argSplit <- strsplit(arg, "=")
     	argSplit[[1]][1]
     	argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="sqt") squared.terms <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="c") csv <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="o") output <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
@@ -37,7 +39,7 @@ Args <- commandArgs(trailingOnly=FALSE)
 ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
 source(paste(ScriptPath,"GLM.helper.fcts.r",sep="\\"))
-
+squared.terms<-as.logical(squared.terms)
 make.p.tif<-as.logical(make.p.tif)
 make.binary.tif<-as.logical(make.binary.tif)
 save.model<-make.p.tif | make.binary.tif
