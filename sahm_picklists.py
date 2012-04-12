@@ -83,3 +83,19 @@ class ModelOutputType(String):
     @staticmethod
     def get_widget_class():
         return ModelOutputType._widget_class
+    
+class RandomPointType(String):
+    '''
+    This module is a required class for other modules and scripts within the
+    SAHM package. It is not intended for direct use or incorporation into
+    the VisTrails workflow by the user.
+    '''
+    _input_ports = [('value', '(gov.usgs.sahm:RandomPointType:Other)')]
+    _output_ports = [('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
+    _widget_class = build_enum_widget('RandomPointType', 
+                                      ['Background',
+                                       'Pseudo-absence (for R models)'])
+
+    @staticmethod
+    def get_widget_class():
+        return RandomPointType._widget_class

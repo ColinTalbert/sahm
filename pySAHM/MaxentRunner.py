@@ -192,7 +192,7 @@ class MAXENTRunner(object):
         hasBackground = False
         for row in MDSreader:
             self.convertNA(row)
-            if row[2] == '-9999':
+            if row[2] == '-9999' or row [2] == '-9998':
                 hasBackground = True
                 vals = self.usedValues(row, covariateIndexes)
                 backgroundWriter.writerow([''] + row[:2] + vals)

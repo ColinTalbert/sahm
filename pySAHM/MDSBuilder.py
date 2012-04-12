@@ -45,6 +45,7 @@ class MDSBuilder(object):
         self.inputs = []
         self.fieldData = ''
         self.outputMDS  = ''
+        self.pointtype = 'Background'
         self.probsurf = ''
         self.pointcount = 0
         self.NDFlag = 'NA'
@@ -335,6 +336,12 @@ class MDSBuilder(object):
         follow this otherwise it will be uniform within the extent of the first of our inputs.
         No more than one per pixel is used.
         '''
+        
+        if self.pointtype == 'Background':
+            pointval = '-9999'
+        else:
+            pointval = '-9998'
+        
         #initialize the random seed in case one was passed
         if not self.seed:
             self.seed = random.randint(0, sys.maxint)
@@ -385,7 +392,7 @@ class MDSBuilder(object):
             x = random.randint(0, cols - 1) 
             y = random.randint(0, rows - 1)
             #print x, y
-            tmpPixel = [x, y, '-9999'] # a random pixel in the entire image
+            tmpPixel = [x, y, pointval] # a random pixel in the entire image
             if useProbSurf:
                 # if they supplied a probability surface ignore the random pixel
                 # if a random number between 1 and 100 is > the probability surface value

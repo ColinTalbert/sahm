@@ -37,7 +37,7 @@ import packages.sahm.pySAHM.MaxentRunner as MaxentRunner
 from packages.sahm.SahmOutputViewer import SAHMModelOutputViewerCell
 from packages.sahm.SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
 from packages.sahm.sahm_picklists import ResponseType, AggregationMethod, \
-        ResampleMethod, PointAggregationMethod, ModelOutputType
+        ResampleMethod, PointAggregationMethod, ModelOutputType, RandomPointType
 
 from utils import writetolog
 from pySAHM.utilities import TrappedError
@@ -481,7 +481,8 @@ class Model(Module):
                          'makeBinMap':('mbt', utils.R_boolean, False),
                          'makeMESMap':('mes', utils.R_boolean, False),
                          'ThresholdOptimizationMethod':('om', None, False),
-                         'UsePseudoAbs':('psa', utils.R_boolean, False)}
+#                         'UsePseudoAbs':('psa', utils.R_boolean, False)
+                    }
 
     @classmethod
     def provide_input_port_documentation(cls, port_name):
@@ -654,6 +655,7 @@ class MDSBuilder(Module):
 
     _input_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
+                                 ('backgroundPointType', '(gov.usgs.sahm:RandomPointType:Other)', {'defaults':'Background'}),
                                  ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
                                  ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)'),
                                  ('Seed', '(edu.utah.sci.vistrails.basic:Integer)')]
@@ -670,6 +672,7 @@ class MDSBuilder(Module):
 
     def compute(self):
         port_map = {'fieldData': ('fieldData', None, True),
+                    'backgroundPointType': ('pointtype', None, False),
                     'backgroundPointCount': ('pointcount', None, False),
                     'backgroundProbSurf': ('probsurf', None, False),
                     'Seed': ('seed', None, False)}
@@ -1300,7 +1303,6 @@ class CovariateCorrelationAndSelection(Module):
     def callDisplayMDS(self, kwargs):
         dialog = SelectListDialog(kwargs)
         #dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
-#        print " ... finished with dialog "  
         retVal = dialog.exec_()
         #outputPredictorList = dialog.outputList
         if retVal == 1:
@@ -1790,6 +1792,7 @@ _modules = generate_namespaces({'DataInput': [
                                            (RastersWithPARCInfoCSV, {'abstract': True}),
                                            (PointAggregationMethod, {'abstract': True}),
                                            (ModelOutputType, {'abstract': True}),
+                                           (RandomPointType, {'abstract': True}),
                                            ],
                                 'Output': [(SAHMModelOutputViewerCell, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe}),
