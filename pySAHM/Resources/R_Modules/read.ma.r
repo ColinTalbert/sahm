@@ -44,7 +44,7 @@
 
           r.name <- out$input$response.col
           if(r.name=="responseCount") out$input$model.family="poisson"
-
+     
       r.col <- grep(r.name,names(ma))
       if(length(r.col)==0) stop("Response column was not found")
       if(length(r.col)>1) stop("Multiple columns matched the response column")
@@ -53,7 +53,9 @@
       rm.list<-vector()
         
         # remove background points or record these as absence for pseudoabsence (Only partially implemented)
-        if(out$input$pseudoabsence) ma[which(ma[,r.col]==-9999,arr.ind=TRUE),r.col]<-0
+        if(any(ma[,r.col]==-9998)) {ma[which(ma[,r.col]==-9998,arr.ind=TRUE),r.col]<-0
+        out.list$input$PsuedoAbs=TRUE
+        }
          if(length(which(ma[,r.col]==-9999,arr.ind=TRUE))>0) ma<-ma[-c(which(ma[,r.col]==-9999,arr.ind=TRUE)),]
         # remove evaluation points
         if(any(!is.na(match("EvalSplit",names(ma))))){

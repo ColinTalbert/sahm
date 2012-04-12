@@ -44,7 +44,9 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
     include[is.na(include)]<-0
     rm.cols<-unique(c(rm.cols,which(include==0,arr.ind=TRUE)))
     response<-dat[,match(tolower(response.col),tolower(names(dat)))]
-
+          if(any(response==-9998)) {
+           response[response==-9998]<-0
+           }
        dat<-dat[order(response),]
        response<-response[order(response)]
 

@@ -39,7 +39,10 @@ set.seed(as.numeric(seed))
           names(dat)<-dat.in[1,]
 
         response<-dat[,match(tolower(response.col),tolower(names(dat)))]
-
+                 
+                 if(any(response==-9998)) {
+           response[response==-9998]<-0
+           }
           if(sum(as.numeric(response)==0)==0 && !is.null(RatioPresAbs)) stop("The ratio of presence to absence cannot be set with only presence data")
           
   #Ignoring background data that might be present in the mds

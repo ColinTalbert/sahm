@@ -28,7 +28,7 @@ seed=NULL
 MESS=FALSE
 xtest=NULL
 ytest=NULL
-pseudoabs=FALSE
+
 
 Args <- commandArgs(trailingOnly=FALSE)
 
@@ -65,7 +65,7 @@ Args <- commandArgs(trailingOnly=FALSE)
       if(argSplit[[1]][1]=="savm")  save.model <- argSplit[[1]][2]
       if(argSplit[[1]][1]=="mes")  MESS <- argSplit[[1]][2]
       if(argSplit[[1]][1]=="seed")  seed <- argSplit[[1]][2]
-       if(argSplit[[1]][1]=="psa")  pseudoabs <- argSplit[[1]][2]
+
  		  
     }
 	print(csv)
@@ -86,7 +86,6 @@ n.trees<-as.numeric(n.trees)
 opt.methods<-as.numeric(opt.methods)
 ScriptPath<-dirname(ScriptPath)
 MESS<-as.logical(MESS)
-pseudoabs<-as.logical(pseudoabs)
 
 source(paste(ScriptPath,"RF.helper.fcts.r",sep="\\"))
 source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
@@ -96,6 +95,6 @@ FitModels(ma.name=csv,tif.dir=NULL,output.dir=output,response.col=responseCol,ma
       nodesize=nodesize,maxnodes=maxnodes,importance=importance,
       localImp=localImp,nPerm=nPerm,proximity=proximity,oob.prox=oob.prox,norm.votes=norm.votes,do.trace=do.trace,keep.forest=keep.forest,
       keep.inbag=keep.inbag,make.r.curves=make.r.curves,
-      seed=seed,script.name="rf",opt.methods=opt.methods,save.model=save.model,MESS=MESS,pseudoabs=pseudoabs)
+      seed=seed,script.name="rf",opt.methods=opt.methods,save.model=save.model,MESS=MESS)
 
  

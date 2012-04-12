@@ -21,9 +21,9 @@ input.file[8]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitWeights.cs
 input.file[9]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
 input.file[10]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/NoSplit.csv"
 input.file[11]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
-input.file[11]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/LargeDataset.csv"
-input.file[12]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
-input.file[13]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
+input.file[12]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/LargeDataset.csv"
+input.file[13]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
+input.file[14]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
 
 output.dir<-vector()
 output.dir[1]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction4.11\\rf"
@@ -42,7 +42,7 @@ try(FitModels(ma.name=input.file[i],
       family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
   tolerance = 0.001,seed=1,opt.methods=2,
           simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
-          learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=TRUE))
+          learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=TRUE,pseudoabsence=FALSE))
         }
    # PredictModel(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir="C:\\VisTrails")
 
@@ -51,7 +51,7 @@ for(i in 1:length(input.file)){
     try(FitModels(ma.name=input.file[i],
             tif.dir=NULL,output.dir=output.dir[3],
             response.col=rc[i],make.p.tif=T,make.binary.tif=T,
-            mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars",opt.methods=2,MESS=TRUE))
+            mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars",opt.methods=2,MESS=TRUE,pseudoabsence=FALSE))
         }
    # PredictModel(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir="C:\\VisTrails")
 
@@ -61,7 +61,7 @@ for(i in 1:length(input.file)){
           tif.dir=NULL,
           output.dir=output.dir[4],
           response.col=rc[i],make.p.tif=T,make.binary.tif=T,
-          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=TRUE,opt.methods=2))
+          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=TRUE,opt.methods=2,pseudoabsence=FALSE))
           }
 
 ### Random Forest
@@ -75,6 +75,6 @@ try(FitModels(ma.name=input.file[i],
 responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
 samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
 localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=proximity,norm.votes=TRUE,
-do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=TRUE,seed=1))
+do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=TRUE,seed=1,pseudoabsence=FALSE))
          }
    # PredictModel(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir)

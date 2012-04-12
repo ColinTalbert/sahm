@@ -7,7 +7,7 @@ mars.penalty=2
 opt.methods=2
 save.model=TRUE
 MESS=FALSE
-pseudoabs=FALSE
+
 
 # Interpret command line argurments #
 # Make Function Call #
@@ -32,7 +32,6 @@ Args <- commandArgs(trailingOnly=FALSE)
     	if(argSplit[[1]][1]=="om")  opt.methods <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="savm")  save.model <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="mes")  MESS <- argSplit[[1]][2]
-  	  if(argSplit[[1]][1]=="psa")  pseudoabs <- argSplit[[1]][2]
     }
 	print(csv)
 	print(output)
@@ -48,11 +47,9 @@ make.binary.tif<-as.logical(make.binary.tif)
 save.model<-make.p.tif | make.binary.tif
 opt.methods<-as.numeric(opt.methods)
 MESS<-as.logical(MESS)
-pseudoabs<-as.logical(pseudoabs)
 
 FitModels(ma.name=csv,
         tif.dir=NULL,output.dir=output,
         response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
             mars.degree=mars.degree,mars.penalty=mars.penalty,debug.mode=F,responseCurveForm="pdf",
-            script.name="mars",save.model=save.model,opt.methods=as.numeric(opt.methods),MESS=MESS,
-            pseudoabs=pseudoabs)
+            script.name="mars",save.model=save.model,opt.methods=as.numeric(opt.methods),MESS=MESS)

@@ -12,6 +12,13 @@ output.dir<-"J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\95MCP.ti
 PseudoAbsGen(input.file,output.dir,response.col="ResponseBinary",method="MCP",bw.otim="adhoc",isopleth=95,bias=FALSE)
 output.dir<-"J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\ContinKDE.tif"
 PseudoAbsGen(input.file,output.dir,response.col="ResponseBinary",method="KDE",bw.otim="adhoc",isopleth=95,bias=TRUE)
+
+
+input.file="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\FDAW_1.csv"
+output.dir<-"J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\95HpiKDE.tif"
+PseudoAbsGen(input.file,output.dir,response.col="ResponseBinary",method="KDE",bw.otim="Hpi",isopleth=95,bias=FALSE)
+output.dir<-"J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\FDAW_2.csv"
+PseudoAbsGen(input.file,output.dir,response.col="ResponseBinary",method="KDE",bw.otim="hpi",isopleth=95,bias=TRUE)
 #PseudoAbsGen(input.file,output.file,response.col="ResponseBinary",method="Density",isopleth=95)
 
 input.file="C:\\temp\\TestDataSets\\TestTrainingSplit_8.csv"
