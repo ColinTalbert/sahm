@@ -48,10 +48,12 @@
       r.col <- grep(r.name,names(ma))
       if(length(r.col)==0) stop("Response column was not found")
       if(length(r.col)>1) stop("Multiple columns matched the response column")
+      if(length(table(ma[r.col]))<2) stop("Response column has only one unique value")
       names(ma)[r.col]<-"response"
       rm.list<-vector()
-
-        # remove background points which aren't used here
+        
+        # remove background points or record these as absence for pseudoabsence (Only partially implemented)
+        if(out$input$pseudoabsence) ma[which(ma[,r.col]==-9999,arr.ind=TRUE),r.col]<-0
          if(length(which(ma[,r.col]==-9999,arr.ind=TRUE))>0) ma<-ma[-c(which(ma[,r.col]==-9999,arr.ind=TRUE)),]
         # remove evaluation points
         if(any(!is.na(match("EvalSplit",names(ma))))){
@@ -59,8 +61,6 @@
              ma<-ma[-c(which(ma[,EvalIndx]=="test",arr.ind=TRUE)),]
              rm.list<-EvalIndx
         }
-
-
 
       # find and save xy columns#
       xy.cols <- na.omit(c(match("x",tolower(names(ma))),match("y",tolower(names(ma)))))
@@ -94,8 +94,7 @@
           if(comp.cases/all.cases<.9) warning(paste(round((1-comp.cases/all.cases)*100,digits=2),"% of cases were removed because of missing values",sep=""))
       #########################################################################
         #split out the weights,response, and xy.columns after removing incomplete cases
-
-        
+         
       ma.names<-names(ma)
       # tagging factors and looking at their levels
          factor.cols <- grep("categorical",names(ma))
@@ -161,6 +160,7 @@
                         dat.out[[i]]<-list(resp=dat.out[[i]][r.col],XY=dat.out[[i]][,xy.cols],dat=dat.out[[i]][,-c(rm.list)],weight=dat.out[[i]][,site.weights])
                         names(dat.out[[i]]$XY)<-toupper(names(dat.out[[i]]$XY))
                      }
+                
                      if(nrow(dat.out$train$dat)/(ncol(dat.out$train$dat)-1)<3) stop("You have less than 3 observations for every predictor\n consider reducing the number of predictors before continuing")
 
                    temp.fct<-function(l){table(l$resp)}
@@ -206,7 +206,7 @@
         out.list$dims <- sum(out.list$nPresAbs$train)
 
         out.list$used.covs <-  names(dat.out$train$dat)[-1]
-
+   
       if(out$input$script.name%in%c("brt","rf")){
       #brt uses a subsample for quicker estimation of learning rate and model simplificaiton
       #random forest uses a subsample only for producing response curves

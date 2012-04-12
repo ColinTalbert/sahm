@@ -9,14 +9,13 @@ est.lr <- function(out){
    attach(out$input)
    on.exit(detach(out$input))
     t0 <- unclass(Sys.time())
-
     # set tree complexity for full-data run #
     a<-2.69; b<-0.0012174
     if(is.null(out$mods$parms$tc.full)) out$mods$parms$tc.full<-min(round(a+b*out$dat$ma$train$dat[1]),15) # this gives 3 for n=250
     if(is.null(out$mods$parms$tc.sub)){
         n <- nrow(out$dat$Subset$dat)  # this gives 3 for n=250
        if(is.na(n)) (n=length(out$dat$Subset$weight))
-        out$mods$parms$tc.sub <- round(a+b*n)
+        out$mods$parms$tc.sub <- min(round(a+b*n),4) # don't let tree complexity be greater than 4
     }
 
     cat("\n");cat("tree complexity set to",out$mods$parms$tc.sub,"\n")
@@ -50,12 +49,12 @@ est.lr <- function(out){
        i<-i+1 #ifelse(max.trees<=200,i+2,i+1)
        }
     # pick lr that gives closest to 1000 trees #
-
     lr.out$i <- 1:nrow(lr.out)
     lr.out <- lr.out[lr.out$max.trees!=0,]
     ab<-coef(lm(max.trees~log(lrs),data=lr.out))
     tt <- out$dat$Subset$ratio*800
     lr.full <- round(as.numeric(exp((tt-ab[1])/ab[2])),4)
+    if(is.na(lr.full)) lr.full<-lr.out$lrs # sometimes just one lr is calculated in the while loop and we can't fit a line
     lr <- round(as.numeric(exp((1000-ab[1])/ab[2])),6)
     lr.out$abs <- abs(lr.out$max.trees-1000)
     lr.out$d.lr <- abs(lr.out$lrs-lr)
@@ -72,6 +71,7 @@ est.lr <- function(out){
     if(!is.null(out$input$learning.rate)) {out$mods$lr.mod$lr0=out$input$learning.rate
        out$mods$lr.mod$lr=out$input$learning.rate
     }
+    
     return(out)
     }
 

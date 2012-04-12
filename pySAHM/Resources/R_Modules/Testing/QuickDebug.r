@@ -8,7 +8,8 @@ source("BRT.helper.fcts.r")
 source("RF.helper.fcts.r")
 output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
 rc="responseBinary"
-#options(error=expression(if(interactive()) recover() else dump.calls()))
+options(warn=2)
+options(error=expression(if(interactive()) recover() else dump.calls()))
 #options(error=NULL)
 #trace(proc.tiff,browser)
 #list.files()
@@ -30,23 +31,15 @@ input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/NoSplit.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Factor.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
-
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Spat.Weights.csv"
 
-
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation\\modelSelection_split_1.csv"
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation\\modelSelection_cv_1.csv"
-input.file="I:/VisTrails/WorkingFiles/workspace/Test_CrossValidation2/CovariateCorrelationOutputMDS_no categorical2.csv"
-output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation3\\modelSelection_cv_1.csv"
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation4\\modelSelection_cv_1.csv"
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Test_CrossValidation4\\modelSelection_marianTest.csv"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/LargeDataset.csv"
 #######################################################################
 ##MARS
-input.file="C:\\temp\\SAHM_workspace\\mtalbert_20120130T124933\\CovariateCorrelationOutputMDS_initial.csv"
+
 FitModels(ma.name=input.file,
             output.dir=output.dir,
-            response.col=rc,make.p.tif=F,make.binary.tif=F,
+            response.col=rc,make.p.tif=T,make.binary.tif=T,
             mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars",opt.methods=2,MESS=F)
 
 EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,make.binary.tif=TRUE,make.p.tif=TRUE,MESS=TRUE)
@@ -56,7 +49,7 @@ FitModels(ma.name=input.file,
           tif.dir=NULL,
           output.dir=output.dir,
           response.col=rc,make.p.tif=T,make.binary.tif=T,
-          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=TRUE,opt.methods=2)
+          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=TRUE,opt.methods=2,squared.terms=TRUE)
           
 #RF
 set.seed(1)
@@ -64,17 +57,16 @@ proximity=NULL
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,
-      response.col=rc,make.p.tif=T,make.binary.tif=T,
+      response.col=rc,make.p.tif=F,make.binary.tif=F,
           debug.mode=T,opt.methods=2,script.name="rf",
 responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
 samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
 localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=proximity,norm.votes=TRUE,
-do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=TRUE)
+do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=FALSE)
 
 #BRT
-input.file="I:\\VisTrails\\WorkingFiles\\secondseason\\noseason_workfile_2012_03_12\\ModelEvaluation_Split_1.csv"
-input.file="I:\\VisTrails\\WorkingFiles\\secondseason\\noseason_workfile_2012_03_12\\ModelEvaluation_Split_1.csv"
-set.seed(50817089)
+set.seed(1)
+#input.file="I:\\SpeciesData\\APHIS\\GypsyMoth\\modelSelection_split_2.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,output.dir=output.dir,
           response.col=rc,make.p.tif=T,make.binary.tif=T,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,

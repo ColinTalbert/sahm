@@ -4,9 +4,8 @@ options(error=NULL)
 FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,script.name,make.p.tif=TRUE,make.binary.tif=TRUE,...){
       
        Call<-match.call()
-    # This function fits a stepwise GLM model to presence-absence data.
-    # written by Alan Swanson, 2008-2009
-    # # Maintained and edited by Marian Talbert September 2010-
+    # This function fits a generic model to presence-pseudoabsence, presence-absence or count data.
+    # written by Marian Talbert, 2011-2012
     # Arguements.
     # ma.name: is the name of a .csv file with a model array.  full path must be included unless it is in the current
     #  R working directory # THIS FILE CAN NOW INCLUDE AN OPTIONAL COLUMN OF SITE WEIGHTS WHICH MUST BE LABELED "site.weights"
@@ -65,7 +64,7 @@ set.seed(as.numeric(out$input$seed))
               cat("Progress:20%\n");flush.console();
              cat("\n","Fitting",toupper(Model),"model","\n")
              flush.console()
-          
+             
     # Fit the desired model#
                out<-generic.model.fit(out,Model,t0)
 
@@ -116,7 +115,7 @@ set.seed(as.numeric(out$input$seed))
           t4 <- unclass(Sys.time())
           cat("\nfinished with final model summarization, t=",round(t4-t3,2),"sec\n");flush.console()
          cat("Progress:80%\n");flush.console()
-
+      
     # Make .tif of predictions #
     if(out$input$make.p.tif==T | out$input$make.binary.tif==T){
         if((n.var <- out$mods$n.vars.final)<1){

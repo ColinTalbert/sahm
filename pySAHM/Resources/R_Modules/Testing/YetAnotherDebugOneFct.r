@@ -8,7 +8,7 @@ source("BRT.helper.fcts.r")
 source("RF.helper.fcts.r")
 
 
-rc=c(rep("responseBinary",times=11),rep("responseCount",times=2))
+rc=c(rep("responseBinary",times=12),rep("responseCount",times=2))
 input.file<-vector()
 input.file[1]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/BadPath.csv"
 input.file[2]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/LargeSplit.csv"
@@ -21,14 +21,15 @@ input.file[8]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitWeights.cs
 input.file[9]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
 input.file[10]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/NoSplit.csv"
 input.file[11]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
+input.file[11]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/LargeDataset.csv"
 input.file[12]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
 input.file[13]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
 
 output.dir<-vector()
-output.dir[1]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction2.15\\rf"
-output.dir[2]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction2.15\\brt"
-output.dir[3]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction2.15\\mars"
-output.dir[4]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction2.15\\glm"
+output.dir[1]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction4.11\\rf"
+output.dir[2]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction4.11\\brt"
+output.dir[3]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction4.11\\mars"
+output.dir[4]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction4.11\\glm"
 
 
 

@@ -42,13 +42,24 @@ on.exit(detach(out$input))
           }
 
   if(Model=="glm") {
-          penalty <- if(out$input$simp.method=="AIC") 2 else log(nrow(out$dat$ma$ma))
-          scope.glm <- list(lower=as.formula(paste("response","~1")),
-          upper=as.formula(paste("response","~",paste(out$dat$used.covs,collapse='+'))))
+  penalty <- if(out$input$simp.method=="AIC") 2 else log(nrow(out$dat$ma$ma))
+          if(!out$input$squared.terms){   
+              scope.glm <- list(lower=as.formula(paste("response","~1")),
+              upper=as.formula(paste("response","~",paste(out$dat$used.covs,collapse='+'))))
+              }else{
+              factor.mask<-na.omit(match(names(out$dat$factor.levels),out$dat$used.covs))
+              cont.mask<-seq(1:length(out$dat$used.covs))
+              if(length(factor.mask!=0)) cont.mask<-cont.mask[-c(factor.mask)]
 
+               scope.glm <- list(lower=as.formula(paste("response","~1")),
+                 upper=as.formula(paste("response","~",paste(c(if(length(factor.mask)>0) paste(out$dat$used.covs[factor.mask],collapse=" + "),
+                 paste("(",paste(out$dat$used.covs[cont.mask],collapse=" + "),")^2",sep=""),
+                 paste("I(",out$dat$used.covs[cont.mask],"^2)",sep="")),collapse=" + "),sep="")))
+           }  
+         
           mymodel.glm.step <- step(glm(as.formula(paste("response","~1")),family=out$input$model.family,data=out$dat$ma$train$dat,weights=out$dat$ma$train$weight,na.action="na.exclude"),
-          direction='both',scope=scope.glm,trace=0,k=penalty)
-
+          direction='both',scope=scope.glm,k=penalty,trace=1)
+          
           out$mods$final.mod<-mymodel.glm.step
             txt0 <- paste("Generalized Linear Results\n",out$input$run.time,"\n\n","Data:\n\t ",ma.name,"\n\t ","n(pres)=",
         out$dat$nPresAbs$train[2],"\n\t n(abs)=",out$dat$nPresAbs$train[1],"\n\t number of covariates considered=",length(out$dat$used.covs),
@@ -68,6 +79,8 @@ on.exit(detach(out$input))
               #storing number of variables in final model
               out$mods$n.vars.final<-length(attr(terms(formula(out$mods$final.mod)),"term.labels"))
               out$mods$vnames<-attr(terms(formula(out$mods$final.mod)),"term.labels")
+              #have to remove all the junk with powsers and interactions for mess map production to work
+              out$mods$vnames<-unique(unlist(strsplit(gsub("I\\(","",gsub("\\^2)","",out$mods$vnames)),":")))
                }
          
  if(Model=="brt"){

@@ -1007,6 +1007,7 @@ class PARC:
     
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
+    #cleanup
 #    try:
 ##        PARC().testing()
 #        sys.exit(PARC().main(sys.argv[1:]))

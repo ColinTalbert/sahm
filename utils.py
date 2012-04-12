@@ -96,7 +96,7 @@ def mknextdir(prefix, directory=""):
                     seq = f_seq
             except ValueError:
                 #someone has renamed a folder to a non-numeric string
-                pass
+                pass 
     seq += 1
     dirname = prefix + str(seq)
     os.mkdir(os.path.join(directory, dirname))
@@ -105,6 +105,7 @@ def mknextdir(prefix, directory=""):
 def setrootdir(session_dir):
     global _roottempdir
     _roottempdir = session_dir
+    
 
 def getrootdir():
     global _roottempdir
