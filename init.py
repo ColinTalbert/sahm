@@ -463,7 +463,7 @@ class Model(Module):
                     ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':False}),
                     ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':False}),
                     ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False}),
-                    ('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'2', 'optional':False})
+                    ('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'2', 'optional':False}),
                     ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False})
                     ]
     _output_ports = [('modelWorkspace', '(edu.utah.sci.vistrails.basic:File)'), 
@@ -475,6 +475,13 @@ class Model(Module):
                      ('modelEvalPlot', '(edu.utah.sci.vistrails.basic:File)'),
                      ('ResponseCurves', '(edu.utah.sci.vistrails.basic:File)'),
                      ('Text_Output', '(edu.utah.sci.vistrails.basic:File)')]
+
+    port_map = {'mdsFile':('c', None, True),#These ports are for all Models
+                         'makeProbabilityMap':('mpt', utils.R_boolean, False),
+                         'makeBinMap':('mbt', utils.R_boolean, False),
+                         'makeMESMap':('mes', utils.R_boolean, False),
+                         'ThresholdOptimizationMethod':('om', None, False),
+                         'UsePseudoAbs':('psa', utils.R_boolean, False)}
 
     @classmethod
     def provide_input_port_documentation(cls, port_name):
@@ -511,6 +518,7 @@ class Model(Module):
                 args += ' ' + '='.join([str(k),str(v)])
         args += " o=" + '"' + self.output_dname + '"'
         args += " rc=" + utils.MDSresponseCol(mdsFile)
+
                 
         utils.runRScript(self.name, args, self)
         
@@ -553,14 +561,9 @@ class GLM(Model):
         global models_path
         Model.__init__(self) 
         self.name = 'FIT_GLM_pluggable.r'
-        self.port_map = {'mdsFile':('c', None, True),#These ports are for all Models
-                         'makeProbabilityMap':('mpt', utils.R_boolean, False),
-                         'makeBinMap':('mbt', utils.R_boolean, False),
-                         'makeMESMap':('mes', utils.R_boolean, False),
-                         'ThresholdOptimizationMethod':('om', None, False),
-                         'SimplificationMethod':('sm', None, False), #This is a GLM specific port
+        self.port_map.update({'SimplificationMethod':('sm', None, False), #This is a GLM specific port
                          'SquaredTerms':('sqt', utils.R_boolean, False), #This is a GLM specific port
-                         }
+                         })
 
 class RandomForest(Model):
     __doc__ = GenModDoc.construct_module_doc('RandomForest')
@@ -584,12 +587,7 @@ class RandomForest(Model):
         global models_path
         Model.__init__(self)
         self.name = 'FIT_RF_pluggable.r'
-        self.port_map = {'mdsFile':('c', None, True),#These ports are for all Models
-                         'makeProbabilityMap':('mpt', utils.R_boolean, False),
-                         'makeBinMap':('mbt', utils.R_boolean, False),
-                         'makeMESMap':('mes', utils.R_boolean, False), 
-                         'ThresholdOptimizationMethod':('om', None, False),
-                         'Seed':('seed', None, False), #This is a BRT specific port
+        self.port_map.update({'Seed':('seed', None, False), #This is a BRT specific port
                          'mTry': ('mtry', None, False), #This is a Random Forest specific port
                          'nodesize': ('nodeS', None, False), #This is a Random Forest specific port
                          'replace': ('sampR', utils.R_boolean, False), #This is a Random Forest specific port
@@ -601,7 +599,7 @@ class RandomForest(Model):
                          'normVotes': ('nVot', utils.R_boolean, False), #This is a Random Forest specific port
                          'doTrace': ('Trce', utils.R_boolean, False), #This is a Random Forest specific port
                          'keepForest': ('kf', utils.R_boolean, False), #This is a Random Forest specific port
-                         }
+                         })
 
 class MARS(Model):
     __doc__ = GenModDoc.construct_module_doc('MARS')
@@ -614,14 +612,9 @@ class MARS(Model):
         global models_path        
         Model.__init__(self)
         self.name = 'FIT_MARS_pluggable.r'
-        self.port_map = {'mdsFile':('c', None, True),#These ports are for all Models
-                         'makeProbabilityMap':('mpt', utils.R_boolean, False),
-                         'makeBinMap':('mbt', utils.R_boolean, False),
-                         'makeMESMap':('mes', utils.R_boolean, False), 
-                         'ThresholdOptimizationMethod':('om', None, False),
-                         'MarsDegree':('deg', None, False), #This is a MARS specific port
+        self.port_map.update({'MarsDegree':('deg', None, False), #This is a MARS specific port
                          'MarsPenalty':('pen', None, False), #This is a MARS specific port
-                         }
+                         })
 
 class BoostedRegressionTree(Model):
     __doc__ = GenModDoc.construct_module_doc('BoostedRegressionTree')
@@ -642,12 +635,7 @@ class BoostedRegressionTree(Model):
         global models_path
         Model.__init__(self)
         self.name = 'FIT_BRT_pluggable.r'
-        self.port_map = {'mdsFile':('c', None, True),#These ports are for all Models
-                         'makeProbabilityMap':('mpt', utils.R_boolean, False),
-                         'makeBinMap':('mbt', utils.R_boolean, False),
-                         'makeMESMap':('mes', utils.R_boolean, False), 
-                         'ThresholdOptimizationMethod':('om', None, False),
-                         'Seed':('seed', None, False), #This is a BRT specific port
+        self.port_map.update({'Seed':('seed', None, False), #This is a BRT specific port
                          'TreeComplexity':('tc', None, False), #This is a BRT specific port
                          'BagFraction':('bf', None, False), #This is a BRT specific port
                          'NumberOfFolds':('nf', None, False), #This is a BRT specific port
@@ -657,7 +645,7 @@ class BoostedRegressionTree(Model):
                          'Tolerance':('tol', None, False), #This is a BRT specific port
                          'LearningRate':('lr', None, False), #This is a BRT specific port
                          'MaximumTrees':('mt', None, False), #This is a BRT specific port
-                         }
+                         })
    
 class MDSBuilder(Module):
     '''
