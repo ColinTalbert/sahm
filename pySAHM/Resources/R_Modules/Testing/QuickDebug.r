@@ -8,8 +8,8 @@ source("BRT.helper.fcts.r")
 source("RF.helper.fcts.r")
 output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
 rc="responseBinary"
-options(warn=2)
-options(error=expression(if(interactive()) recover() else dump.calls()))
+#options(warn=2)
+#options(error=expression(if(interactive()) recover() else dump.calls()))
 #options(error=NULL)
 #trace(proc.tiff,browser)
 #list.files()
@@ -32,15 +32,16 @@ input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Factor.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Spat.Weights.csv"
-
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/LargeDataset.csv"
+
+input.file<-"I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_CVSplit.csv"
 #######################################################################
 ##MARS
 
 FitModels(ma.name=input.file,
             output.dir=output.dir,
             response.col=rc,make.p.tif=T,make.binary.tif=T,
-            mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars",opt.methods=2,MESS=F)
+            mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars",opt.methods=2,MESS=F,pseudoabsence=TRUE)
 
 EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,make.binary.tif=TRUE,make.p.tif=TRUE,MESS=TRUE)
 
@@ -52,6 +53,7 @@ FitModels(ma.name=input.file,
           simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=TRUE,opt.methods=2,squared.terms=TRUE)
           
 #RF
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_3.csv"
 set.seed(1)
 proximity=NULL
 FitModels(ma.name=input.file,
@@ -62,7 +64,7 @@ FitModels(ma.name=input.file,
 responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
 samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
 localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=proximity,norm.votes=TRUE,
-do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=FALSE)
+do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=FALSE,pseudoabsence=TRUE)
 
 #BRT
 set.seed(1)

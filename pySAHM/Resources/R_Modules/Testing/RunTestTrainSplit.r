@@ -3,24 +3,11 @@
 setwd("I:\\VisTrails\\Central_VisTrailsInstall_debug\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
 source("TestTrainSplit.r")
 
-input.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSetNullModelTest.csv"
-output.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSetNullSplit.csv"
-
-input.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSetIncludeTest.csv"
-output.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSetIncludeSplit.csv"
-
-input.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSet_1.csv"
-output.file="C:\\VisTrails\\mtalbert_20110504T132851\\MergedDataSplitTest.csv"
-
-input.file="N:/Active/FORT_RAM/VisTrails/workspace/mtalbert_20110817T104421/MergedDataset_1.csv"
-input.file="I:/VisTrails/WorkingFiles/workspace/morisettej_20110810T153126/CovariateCorrelationOutputMDS_anothertry.csv"
-output.file="N:/Active/FORT_RAM/VisTrails/workspace/mtalbert_20110817T104421/MergedDatasetTestTrain_1.csv"
 response.col="responseBinary"
-input.file<-"C:\\temp\\SAHM_workspace\\mtalbert_20111121T094519\\MergedDataset_1.csv"
-
-output.file<-"C:\\temp\\maxent.debug2.csv"
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_3.csv"
+output.file<-"I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
 ## Running the code
-TestTrainSplit(input.file,output.file,response.col=response.col,trainProp=.7,seed=NULL)  #tried also with .8, and no RatioPresAb
+TestTrainSplit(input.file,output.file,response.col=response.col,trainProp=.7,seed=NULL,Eval.Split=TRUE)  #tried also with .8, and no RatioPresAb
 
 ## Running some tests on the output
 input.file<-output.file

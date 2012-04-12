@@ -19,7 +19,7 @@ source("I:\\VisTrails\\Central_VisTrails_x32_debug\\Vistrails\\vistrails\\packag
     infil="C:\\temp\\SAHM_workspace\\mtalbert_20120123T110745\\modelSelection_split_2.csv"
 
 time1<-Sys.time()    
-    infil="I:\\SpeciesData\\APHIS\\GypsyMoth\\MergedDataset_2.csv"
+    infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
     output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPres2.jpg"
 Pairs.Explore(num.plots=8,
     min.cor=min.cor,

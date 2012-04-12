@@ -1,14 +1,5 @@
 PseudoAbsGen<-function(input.file,output.dir,response.col="ResponseBinary",method="KDE",bw.otim="adhoc",isopleth=95,bias=FALSE){
 
-#Description:
-#This function sets weights as a potential remedial measure when autocorrelation is found in the residuals of
-#the model fit based on the number of points in an area using a leave one out algorithm wiht a gaussian isotrophic kernel and optional argument
-#sigma (standard deviation of the kernel) or weights can be set so that the total weight of absence points
-#is equal to the weight of presence.  The Density options should never be used on presence only data with randomly selected
-#background points.  The problem with this functions is that there is no way that I can think of to optimize weights based on the Density
-#I don't know how much near by points should be downweighted or how close constitutes near as this would seem to depend on the species being
-#modeled and it's environment.  If the density method is selected, a map of the spatial weights is produced
-
 #Written by Marian Talbert 4/5/2012
 #make sure all libraries are available and loaded
     libs<-list("adehabitatHR","ks","raster","rgdal","sp","spatstat")
@@ -38,6 +29,7 @@ PseudoAbsGen<-function(input.file,output.dir,response.col="ResponseBinary",metho
               ud=kernelUD(xy,extent=.5,grid=150)
                #take the 95% home range contour
               ver=getverticeshr(ud, isopleth)
+              image(ver)
               
               if(bias){
                   #why they can't put the data in a logical order I don't know but it makes me angry
@@ -47,8 +39,8 @@ PseudoAbsGen<-function(input.file,output.dir,response.col="ResponseBinary",metho
                   kde.mat<-matrix(m,nrow=length(unique(ud@coords[,1])))
                   x.cut<-sort(unique(ud@coords[,1]))
                   y.cut<-sort(unique(ud@coords[,2]))
-                  #image(x.cut,y.cut,kde.mat)
-                  #contour(sort(unique(ud@coords[,1])),sort(unique(ud@coords[,2])),kde.mat,add=TRUE)
+                  image(x.cut,y.cut,kde.mat)
+                  contour(sort(unique(ud@coords[,1])),sort(unique(ud@coords[,2])),kde.mat,add=TRUE)
               }
            
              
@@ -73,7 +65,6 @@ PseudoAbsGen<-function(input.file,output.dir,response.col="ResponseBinary",metho
                   }
             }  
     } else{
-    
       bw.to.use<-switch(bw.otim,
            Hpi = Hpi(xy,binned=TRUE,bgridsize=rep(500,times=2)),
            Hscv = Hscv(xy,binned=TRUE,bgridsize=rep(500,times=2)),
@@ -97,8 +88,7 @@ PseudoAbsGen<-function(input.file,output.dir,response.col="ResponseBinary",metho
 ####################################################################
 ##### now write the info to a raster eventually this should be an additional function
 ##### since all but the selection of values is already written as a separate function
-
-    
+ 
 fullnames<-names(dat)[8] # I'm not sure which column I'll be able to match at this point in the workflow 
  options(warn=-1)
     gi <- GDALinfo(fullnames[1])
