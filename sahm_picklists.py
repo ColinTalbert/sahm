@@ -99,3 +99,23 @@ class RandomPointType(String):
     @staticmethod
     def get_widget_class():
         return RandomPointType._widget_class
+    
+    
+class OutputRaster(String):
+    '''
+    This module is a required class for other modules and scripts within the
+    SAHM package. It is not intended for direct use or incorporation into
+    the VisTrails workflow by the user.
+    '''
+    _input_ports = [('value', '(gov.usgs.sahm:OutputRaster:Other)')]
+    _output_ports = [('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
+    _widget_class = build_enum_widget('OutputRaster', 
+                                      ['Probability',
+                                       'Binary Probability',
+                                       'Residuals',
+                                       'Mess',
+                                       'MoD'])
+
+    @staticmethod
+    def get_widget_class():
+        return OutputRaster._widget_class

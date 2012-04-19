@@ -37,7 +37,8 @@ import packages.sahm.pySAHM.MaxentRunner as MaxentRunner
 from packages.sahm.SahmOutputViewer import SAHMModelOutputViewerCell
 from packages.sahm.SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
 from packages.sahm.sahm_picklists import ResponseType, AggregationMethod, \
-        ResampleMethod, PointAggregationMethod, ModelOutputType, RandomPointType
+        ResampleMethod, PointAggregationMethod, ModelOutputType, RandomPointType, \
+        OutputRaster
 
 from utils import writetolog
 from pySAHM.utilities import TrappedError
@@ -1793,6 +1794,7 @@ _modules = generate_namespaces({'DataInput': [
                                            (PointAggregationMethod, {'abstract': True}),
                                            (ModelOutputType, {'abstract': True}),
                                            (RandomPointType, {'abstract': True}),
+                                           (OutputRaster, {'abstract': True}),
                                            ],
                                 'Output': [(SAHMModelOutputViewerCell, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe}),
