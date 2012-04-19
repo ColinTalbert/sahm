@@ -3,6 +3,7 @@
 ################################################################################
 import os
 import csv
+import gc
 
 from PyQt4 import QtCore, QtGui, QAxContainer
 from core.modules.vistrails_module import Module
