@@ -864,8 +864,8 @@ class PARC:
 
                 if self.ignoreNonOverlap:
                    #if this input is smaller in any of the dimensions
-                   self.shrink_template_extent(sourceParams)
-
+#                   self.shrink_template_extent(sourceParams)
+                    pass
 
             if len(row) < 2 or not row[1] in ['0', '1']:
                 self.writetolog("  " + os.path.split(inputFile)[1] + " categorical either missing or not 0 or 1:\n   Defaulting to 0 (continuous)")
