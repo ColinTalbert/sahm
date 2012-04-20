@@ -1625,6 +1625,9 @@ def initialize():
     utils.r_path = r_path    
     
     session_dir = configuration.cur_session_folder
+    if not os.path.exists(session_dir):
+        os.makedirs(session_dir)
+        
     utils.setrootdir(session_dir) 
     utils.createLogger(session_dir, configuration.verbose)
 
