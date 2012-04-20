@@ -294,12 +294,12 @@ def getModelsPath():
 
 def runRScript(script, args, module=None):
     global r_path
-    program = os.path.join(r_path, "i386", "Rterm.exe") #-q prevents program from running
-    scriptFile = os.path.join(getModelsPath(), script)
+    program = '"' + os.path.join(r_path, "i386", "Rterm.exe") + '"' #-q prevents program from running
+    scriptFile = '"' + os.path.join(getModelsPath(), script) + '"' 
     
     command = program + " --vanilla -f " + scriptFile + " --args " + args
     
-    writetolog("\nStarting R Processing of " + script, True)
+    writetolog("\nStarting R Processing of "  + script , True)
     writetolog("    args: " + args, False, False)
     writetolog("    command: " + command, False, False)
     p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)

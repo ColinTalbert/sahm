@@ -159,9 +159,9 @@ class PARC:
                 args += ' --tWidth ' + str(self.template_params['width'])
     
             execDir = os.path.split(__file__)[0]
-            executable = os.path.join(execDir, 'singlePARC.py')
+            executable = '"' + os.path.join(execDir, 'singlePARC.py')  + '"'
             
-            pyEx = sys.executable
+            pyEx = '"' + sys.executable + '"'
             command = ' '.join([pyEx, executable, args])
             self.logger.writetolog(command, False, False)
             proc = subprocess.Popen( command )

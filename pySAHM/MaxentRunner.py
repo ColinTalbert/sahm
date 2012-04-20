@@ -60,15 +60,15 @@ class MAXENTRunner(object):
             self.args['projectionlayers'] = ''
 
         if self.trainingCSV <> '':
-            self.args['samplesfile'] = self.trainingCSV
+            self.args['samplesfile'] = '"' + self.trainingCSV + '"'
         else:
             raise Exception, "No Samples file supplied"
         
         if self.testCSV <> '':
-            self.args['testsamplesfile'] = self.testCSV
+            self.args['testsamplesfile'] = '"' + self.testCSV + '"'
         
         if self.backgroundCSV <> '':
-            self.args['environmentallayers'] = self.backgroundCSV
+            self.args['environmentallayers'] = '"' + self.backgroundCSV + '"'
         
         
         self.args['autorun'] = 'true'
@@ -85,9 +85,9 @@ class MAXENTRunner(object):
         #print strargs
         
         if not self.maxentpath.endswith('.jar'):
-            jar = os.path.join(self.maxentpath, 'maxent.jar')
+            jar = '"' + os.path.join(self.maxentpath, 'maxent.jar') + '"'
         else:
-            jar = self.maxentpath
+            jar = '"' + self.maxentpath + '"' 
             
         self.run_cmd_line_jar(jar, strargs)
         

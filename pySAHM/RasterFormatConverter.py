@@ -135,7 +135,7 @@ class FormatConverter(object):
             execDir = os.path.split(__file__)[0]
             executable = os.path.join(execDir, 'singleRasterFormatConverter.py')
             
-            pyEx = sys.executable
+            pyEx = '"' + sys.executable + '"' 
             command = ' '.join([pyEx, executable, args])
             self.logger.writetolog(command, False, False)
             proc = subprocess.Popen( command )
