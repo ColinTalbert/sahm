@@ -62,7 +62,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
      response<-response[response%in%temp]
 
      response.table<-table(response)
-     max.points<-3000
+     max.points<-1500
      if(any(response.table> max.points)){
        for(i in names(response.table[response.table> max.points])){
              s<-sample(which(response==i,arr.ind=TRUE),size=(sum(response==i)- max.points))
@@ -138,7 +138,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
 
   ## put (absolute) correlations on the upper panels,
   ## with size proportional to the correlations.
-      panel.cor <- function(x, y, digits=2, prefix="", cor.range,cex.cor, ...)
+      panel.cor <- function(x, y, digits=2, prefix="", cor.range,cor.mult, ...)
       {
       a<-colors()
           usr <- par("usr"); on.exit(par(usr))
@@ -147,16 +147,12 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
           spear<-abs(cor(x,y,method="spearman",use="pairwise.complete.obs"))
           ken<- abs(cor(x,y,method="kendall",use="pairwise.complete.obs"))
           all.cor<-max(r,spear,ken)
-          #range.seq<-seq(from=cor.range[1],to=cor.range[2],length=20)
-          if(all.cor>=cor.range[4]){
+               ramp<-heat.colors(20, alpha = .7)[20:1]
+          if(all.cor>=.6){        
             rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], col =
-            a[59])} else if(all.cor>=cor.range[3]){
-            rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], col =
-            a[76])} else if(all.cor>=cor.range[2]){
-            rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], col =
-            a[382])}
+            ramp[which.min(abs(all.cor-seq(from=.65,to=1,length=20)))])} 
           r<-max(all.cor)
-               cex.cor=3
+               cex.cor=3*cor.mult
          txt <- format(c(r, 0.123456789), digits=digits)[1]
           txt <- paste(prefix, txt, sep="")
            #if(missing(cex.cor)) cex.cor <- 1.2/strwidth(txt)
@@ -170,29 +166,18 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
 
          }
           text(0.5, 0.5, txt, cex = .7+cex.cor * (r-min(cor.range))/(max(cor.range)-min(cor.range)))
-          text(.9,.1,txt2,cex=1.5)   
+          text(.9,.1,txt2,cex=cor.mult)   
          }
-         
-#   #Find a new unique file name (one in the desired directory that hasn't yet been used)
-#   outfile <- paste(output.dir,"Predictor_Correlation.pdf",sep="\\")
-#             while(file.access(outfile)==0) outfile<-paste(output.dir,"Predictor_Correlation.pdf",sep="\\")
-# 
-#  options(warn=-1)
-#   pdf(outfile,width=11,height=9,onefile=T)
-#     MyPairs(HighToPlot,cor.range=cor.range,my.labels=(as.vector(High.cor)[1:num.plots]),
-#     lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,bg = c("red","steelblue")[as.factor(response)],col.smooth = "red")
-#   graphics.off()
-#  options(warn=0)
-#  
-#   }
-
   
   #Find a new unique file name (one in the desired directory that hasn't yet been used)
 
  options(warn=-1)
- if(Debug==FALSE) jpeg(output.file,width=1000,height=1000,pointsize=13)
+ if(num.plots<8) wdth=1500
+ else if(num.plots<15) wdth=3000
+      else wdth=4500
+ if(Debug==FALSE) jpeg(output.file,width=wdth,height=wdth,pointsize=13)
     MyPairs(cbind(TrueResponse,HighToPlot),cor.range=cor.range,my.labels=(as.vector(High.cor)[1:num.plots]),
-    lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,bg = c("forestgreen","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red")
+    lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,bg = c("blue","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red")
 
  if(Debug==FALSE) graphics.off()
  options(warn=0)
@@ -207,7 +192,7 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
     response<-x[,1]
     response[response==-9999]<-0
     x<-x[,2:dim(x)[2]]
-
+    cex.mult<-3
     textPanel <- function(x = 0.5, y = 0.5, txt, cex, font) text(x,
         y, txt, cex = cex, font = font)
     localAxis <- function(side, x, y, xpd, bg, col = NULL, main,
@@ -269,41 +254,24 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
         if (!is.null(main))
             oma[3L] <- 6
     }
-
     nCol<-ifelse(length(unique(response))>1,nc+1,nc)
     j.start<-ifelse(length(unique(response))>1,0,1)
-    opar <- par(mfrow = c(nc, nCol), mar = rep.int(gap/2, 4), oma = oma)
+    opar <- par(mfrow = c(nc, nCol), mar = rep.int(gap/2, 4))
     on.exit(par(opar))
     for (i in if (row1attop)
         1L:(nc)
     else nc:1L) for (j in j.start:(nc)) {
-
-
-        if(i==1){ par(mar = c(gap/2,gap/2,gap,gap/2)) #top row add extra room at top
-          if(j==0){
-                par(mar = c(gap/2,gap,gap,gap)) #top left corner room at top and on right
-          localPlot(x[, i],response, xlab = "", ylab = "", axes = FALSE,
+       top.gap<-c(3*gap,rep(gap/2,times=nc-1))
+       bottom.gap<-c(rep(gap/2,times=nc-1),3*gap)
+       left.gap<-c(3*gap,3*gap,rep(gap/2,times=nc-1))
+       par(mar = c(bottom.gap[i],left.gap[j+1],top.gap[i],gap/2))
+       
+       
+       
+         if(j==0){
+         localPlot(x[, i],response, xlab = "", ylab = "", axes = FALSE,
                 type="n",...)
-                }else if(j==1) {par(mar = c(gap/2,gap,gap,gap/2)) #extra room on left and topfor second plot top row
-                    localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
-           type="n",...)} else  {
-           par(mar = c(gap/2,gap/2,gap,gap/2)) #all other top row plots need extra room at top only
-           localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
-           type="n",...)
-           }}else { par(mar = rep.int(gap/2, 4))
-               if(j==0){ par(mar = c(gap/2,gap,gap/2,gap))  #left column needs extra room on right only
-               localPlot(x[, i],response, xlab = "", ylab = "", axes = FALSE,
-                type="n",...)
-                }else if(j==1){ par(mar = c(gap/2,gap,gap/2,gap/2)) #second column needs extra room on left so labels fit
-                localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
-           type="n",...)
-        }else localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
-           type="n",...)}
-         if(j==0) {
-             if(i==1) par(mar=c(gap/2,gap,gap,gap))
-                else par(mar = c(gap/2,gap,gap/2,gap))
-
-                  if(i==1) title(main="Response",line=.04,cex.main=1.5)
+          if(i==1) title(main="Response",line=.04,cex.main=1.4*cex.mult)
 
                   box()
                      my.lab<-paste("cor=",round(max(abs(cor(x[,(i)],response,use="pairwise.complete.obs")),abs(cor(x[,(i)],response,method="spearman",use="pairwise.complete.obs")),
@@ -315,28 +283,32 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
                           sep=""),line=.02,cex.lab=1.5)
                    }
                    else {pct.dev<-my.panel.smooth(as.vector(x[, (i)]), as.vector(response),weights=
-                          c(rep(table(response)[2]/table(response)[1],times=table(response)[1]),rep(1,times=table(response)[2])),...)
+                          c(rep(table(response)[2]/table(response)[1],times=table(response)[1]),rep(1,times=table(response)[2])),cex.mult=cex.mult,...)
                           
                           title(ylab=paste("%dev exp ",round(pct.dev,digits=2),
-                          sep=""),line=.02,cex.lab=1.4)}
+                          sep=""),line=.02,cex.lab=cex.mult)}
                          
 
                  } else{
+            
+             localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
+           type="n",...)   
         if (i == j || (i < j && has.lower) || (i > j && has.upper)) {
             box()
-            if(i==1) title(main=paste("Total Cor=",my.labels[j],sep=""),line=.04,cex.main=1.5)
+            if(i==1) title(main=paste("Total Cor=",my.labels[j],sep=""),line=.04,cex.main=1.2*cex.mult)
             #if (i == 1 && (!(j%%2) || !has.upper || !has.lower))
              #   localAxis(1 + 2 * row1attop, x[, j], x[, i],
              #   ...)
             if (i == nc)
-                localAxis(3 - 2 * row1attop, x[, j], x[, i],
+                localAxis(3 - 2 * row1attop, x[, j], x[, i],cex.axis=cex.mult*.5,
                   ...)
             if (j == 1 && (i!=1 || !has.upper || !has.lower))
-                localAxis(2, x[, j], x[, i], ...)
+                localAxis(2, x[, j], x[, i],cex.axis=cex.mult*.5, ...)
             #if (j == nc && (i%%2 || !has.upper || !has.lower))
             #    localAxis(4, x[, j], x[, i], ...)
             mfg <- par("mfg")
-            if (i == j) {
+            if (i == j) { 
+            
                 if (has.diag)
                   localDiagPanel(as.vector(x[, i]),...)
                 if (has.labs) {
@@ -345,20 +317,22 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
                     l.wid <- strwidth(labels, "user")
                     cex.labels <- max(0.8, min(2, 0.9/max(l.wid)))
                   }
-
-                  text.panel(0.5, label.pos, labels[i], cex = cex.labels,
+                  if((lng<-nchar(labels[i]))>20)
+                  labels[i]<-paste(substr(labels[i],1,15),"\n",substr(labels[i],16,lng),sep="")
+                  text.panel(0.5, label.pos, labels[i], cex = .65*cex.labels*cex.mult,
                     font = font.labels)
                 }
             }
             else if (i < j)
                   if(length(unique(x[,i])>2)){
                   localLowerPanel(as.vector(x[, j]), as.vector(x[,
-                    i]), ...) } else {
-                      my.panel.smooth(as.vector(x[, j]),as.vector(x[,i]))
-                    }
-                  
-            else localUpperPanel(as.vector(x[, j]), as.vector(x[,
-                i]),cex=1.5, ...)
+                    i]),cex=cex.mult*3,cor.mult=cex.mult,...) } else {
+                      my.panel.smooth(as.vector(x[, j]),as.vector(x[,i]),cex.mult=cex.mult*2)
+                    }    
+            else {
+            localUpperPanel(as.vector(x[, j]), as.vector(x[,
+                i]),cex=cex.mult,...)    
+                }
             if (any(par("mfg") != mfg))
                 stop("the 'panel' function made a new plot")
         }
@@ -378,19 +352,19 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
 
 
 my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),
-    cex = 1, col.smooth = "red", span = 2/3, iter = 3, weights=rep(1,times=length(y)), ...)
+    cex = 1, col.smooth = "red", span = 2/3, iter = 3, weights=rep(1,times=length(y)),cex.mult,...)
 {  
     o<-order(x)
     x<-x[o]
     y<-y[o]
     col<-col[o]
     bg<-bg[o]
-    points(x, y, pch = pch, col = "black", bg = bg, cex = cex*1.5)
+    points(x, y, pch = pch, col = "black", bg = bg, cex = cex*cex.mult)
     g<-gam(y~s(x,2),family=binomial)
     ok <- is.finite(x) & is.finite(y)
     if (any(ok) && length(unique(x))>3)
           y.fit<-predict.gam(g,type="response")
-    segments(x0=x[1:(length(x)-1)],y0=y.fit[1:(length(x)-1)],x1=x[2:length(x)],y1=y.fit[2:length(x)],col="red",cex=3)
+    segments(x0=x[1:(length(x)-1)],y0=y.fit[1:(length(x)-1)],x1=x[2:length(x)],y1=y.fit[2:length(x)],col="red",cex=3*cex.mult,lwd=cex.mult)
     
     return(100*(1-g$dev/g$null.deviance))
 }

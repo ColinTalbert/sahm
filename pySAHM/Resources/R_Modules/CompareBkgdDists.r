@@ -1,3 +1,12 @@
+file.list<-c("J:\\Projects\\Climate_RS_Comparison\\backgroundPoint_sensitivityAnalysis\\withoutPresAbs2\\PointFiles\\95MCP\\pts_320000\\MergedDataset_1.csv",
+"J:\\Projects\\Climate_RS_Comparison\\backgroundPoint_sensitivityAnalysis\\withoutPresAbs2\\PointFiles\\95HpiKDE\\pts_320000\\MergedDataset_1.csv",
+"J:\\Projects\\Climate_RS_Comparison\\backgroundPoint_sensitivityAnalysis\\withoutPresAbs2\\PointFiles\\95HpiContKDE\\pts_320000\\MergedDataset_1.csv",
+"J:\\Projects\\Climate_RS_Comparison\\backgroundPoint_sensitivityAnalysis\\withoutPresAbs2\\PointFiles\\95AdHocIsoplethKDE\\pts_320000\\MergedDataset_1.csv",
+"J:\\Projects\\Climate_RS_Comparison\\backgroundPoint_sensitivityAnalysis\\withoutPresAbs2\\PointFiles\\95AdHocContKDE\\pts_320000\\MergedDataset_1.csv")
+num.reps=10
+num.pts<-c(500,1000,2000,4000,8000,16000,32000)
+
+
 file.list<-c("J:\\Projects\\Climate_RS_Comparison\\backgroundPoint_sensitivityAnalysis\\withoutPresAbs3\\95MCP\\pts_320000\\MergedDataset_1.csv",
 "J:\\Projects\\Climate_RS_Comparison\\backgroundPoint_sensitivityAnalysis\\withoutPresAbs3\\95MCP\\pts_32\\MergedDataset_1.csv")
 num.reps=10
@@ -14,7 +23,7 @@ CompareBkgdDists<-function(file.list,num.reps,num.pts){
         last.dir<-strsplit(file.list[1],split="\\\\")
          parent<-sub(paste("\\\\",last.dir[[1]][length(last.dir[[1]])],sep=""),"",file.list[1])
          parent<-sub(paste("\\\\",last.dir[[1]][length(last.dir[[1]])-1],sep=""),"",parent)
-        
+          parent<-sub(paste("\\\\",last.dir[[1]][length(last.dir[[1]])-2],sep=""),"",parent)
         
         Hist.list<-Var.list<-Mean.list<-mins<-maxes<-max.counts<-Hist.List<-Var.List<-Mean.List<-Min.List<-Max.List<-Max.Counts<-list()
         

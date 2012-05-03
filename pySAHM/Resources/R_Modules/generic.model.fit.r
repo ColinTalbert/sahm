@@ -43,6 +43,7 @@ on.exit(detach(out$input))
 
   if(Model=="glm") {
   penalty <- if(out$input$simp.method=="AIC") 2 else log(nrow(out$dat$ma$ma))
+  browser()
           if(!out$input$squared.terms){   
               scope.glm <- list(lower=as.formula(paste("response","~1")),
               upper=as.formula(paste("response","~",paste(out$dat$used.covs,collapse='+'))))
