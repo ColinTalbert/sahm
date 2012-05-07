@@ -295,7 +295,7 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
            type="n",...)   
         if (i == j || (i < j && has.lower) || (i > j && has.upper)) {
             box()
-            if(i==1) title(main=paste("Total Cor=",my.labels[j],sep=""),line=.04,cex.main=1.2*cex.mult)
+            if(i==1) title(main=paste("Total Cor=",my.labels[j],sep=""),line=.04,cex.main=1.1*cex.mult)
             #if (i == 1 && (!(j%%2) || !has.upper || !has.lower))
              #   localAxis(1 + 2 * row1attop, x[, j], x[, i],
              #   ...)
@@ -317,9 +317,9 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
                     l.wid <- strwidth(labels, "user")
                     cex.labels <- max(0.8, min(2, 0.9/max(l.wid)))
                   }
-                  if((lng<-nchar(labels[i]))>20)
-                  labels[i]<-paste(substr(labels[i],1,15),"\n",substr(labels[i],16,lng),sep="")
-                  text.panel(0.5, label.pos, labels[i], cex = .65*cex.labels*cex.mult,
+                  if((lng<-nchar(labels[i]))>16)
+                  labels[i]<-paste(substr(labels[i],1,12),"\n",substr(labels[i],13,lng),sep="")
+                  text.panel(0.5, label.pos, labels[i], cex = .7*cex.labels*cex.mult,
                     font = font.labels)
                 }
             }
