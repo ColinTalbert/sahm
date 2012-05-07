@@ -19,10 +19,6 @@ rc="responseBinary"
 rc="responseCount"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
 
-input.file[11]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
-
-#fit.model(ma.name=input.file,output.dir=output.dir,response.col=rc,make.p.tif=T,make.binary.tif=T,script.name="glm.r",
-#opt.methods=2,save.model=TRUE,UnitTest=FALSE,MESS=FALSE,aic.form=TRUE,parm2=4)
 
 ###########################################################################
 ############### Quick debug  ##############################################
@@ -33,9 +29,11 @@ input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Factor.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Spat.Weights.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/LargeDataset.csv"
-
 input.file<-"I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_CVSplit.csv"
 #######################################################################
+
+input.file="C:\\temp\\TestDataSets\\CanadaThistlePseudoAbsenceWeights.csv"
+input.file<-"C:\\temp\\TestDataSets\\CanadaThistleWeights.csv"
 ##MARS
 
 FitModels(ma.name=input.file,
@@ -46,11 +44,12 @@ FitModels(ma.name=input.file,
 EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,make.binary.tif=TRUE,make.p.tif=TRUE,MESS=TRUE)
 
 ##GLM
+input.file="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_3.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,
           output.dir=output.dir,
-          response.col=rc,make.p.tif=T,make.binary.tif=T,
-          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=TRUE,opt.methods=2,squared.terms=TRUE)
+          response.col=rc,make.p.tif=F,make.binary.tif=F,
+          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=FALSE)
           
 #RF
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_3.csv"
@@ -86,42 +85,6 @@ EvaluateNewData(workspace=paste(workspace,"modelWorkspace",sep="\\"),outDir=outp
   sink(logname, type="message")
 
  PredictModel(workspace=,out.dir=output.dir)
-##RF
-set.seed(1)
-    fit.rf.fct(ma.name=input.file,
-      tif.dir=NULL,
-      output.dir=output.dir,
-      response.col=rc,make.p.tif=F,make.binary.tif=F,
-          debug.mode=T)
-
-    PredictModel(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir)
-
-##BRT
-
-    fit.brt.fct(ma.name=input.file,
-          tif.dir=NULL,output.dir=output.dir,
-          response.col=rc,make.p.tif=T,make.binary.tif=T,
-          simp.method="cross-validation",debug.mode=F,responseCurveForm="pdf",script.name="brt.r",
-          learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,seed=1,save.model=TRUE,MESS=TRUE)
-          
-    PredictModel(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir="C:\\VisTrails")
-
-##MARS
-    fit.mars.fct(ma.name=input.file,
-            tif.dir=NULL,output.dir=output.dir,
-            response.col=rc,make.p.tif=T,make.binary.tif=T,
-            mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars.r",opt.methods=2)
-
-    PredictModel(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir="C:\\VisTrails")
-
-##GLM
-    fit.glm.fct(ma.name=input.file,
-          tif.dir=NULL,
-          output.dir=output.dir,
-          response.col=rc,make.p.tif=T,make.binary.tif=T,
-          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm.r",MESS=TRUE)
-
-    PredictModel(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir="C:\\VisTrails")
 
 
 ## Command line C:\temp\SAHM_workspace\mtalbert_20111014T113851\TestTrainingSplit_1.csv

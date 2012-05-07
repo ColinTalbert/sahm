@@ -49,7 +49,7 @@ Pairs.Explore(num.plots=15,
 Sys.time()-time1
 
 time1<-Sys.time() 
-infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
+infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\MergedDataset_7.csv"   
     #infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
     output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPres1.jpg"
 Pairs.Explore(num.plots=4,
@@ -64,7 +64,7 @@ Pairs.Explore(num.plots=4,
 Sys.time()-time1
 
 time1<-Sys.time() 
-infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
+#infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
     #infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
     output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPres2.jpg"
 Pairs.Explore(num.plots=8,
@@ -79,7 +79,7 @@ Pairs.Explore(num.plots=8,
 Sys.time()-time1
 
 time1<-Sys.time() 
-infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
+#infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
     #infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
     output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPres3.jpg"
 Pairs.Explore(num.plots=9,
@@ -94,10 +94,10 @@ Pairs.Explore(num.plots=9,
 Sys.time()-time1
 
 time1<-Sys.time() 
-infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
+#infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
     #infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
     output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPres4.jpg"
-Pairs.Explore(num.plots=16,
+Pairs.Explore(num.plots=14,
     min.cor=min.cor,
     input.file=infil,
 		output.file=output.file,
@@ -109,10 +109,10 @@ Pairs.Explore(num.plots=16,
 Sys.time()-time1
 
 time1<-Sys.time() 
-infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
+#infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
     #infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
     output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPres5.jpg"
-Pairs.Explore(num.plots=17,
+Pairs.Explore(num.plots=15,
     min.cor=min.cor,
     input.file=infil,
 		output.file=output.file,
@@ -124,7 +124,7 @@ Pairs.Explore(num.plots=17,
 Sys.time()-time1
 
  time1<-Sys.time() 
-infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
+#infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
     #infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
     output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPres6.jpg"
 Pairs.Explore(num.plots=25,

@@ -42,15 +42,17 @@ on.exit(detach(out$input))
           }
 
   if(Model=="glm") {
-  penalty <- if(out$input$simp.method=="AIC") 2 else log(nrow(out$dat$ma$ma))
-  browser()
+
+  penalty <- if(out$input$simp.method=="AIC") 2*sum(out$dat$ma$train$weight)/length(out$dat$ma$train$weight) else 
+             log(nrow(out$dat$ma$ma)*sum(out$dat$ma$train$weight)/length(out$dat$ma$train$weight))
+
           if(!out$input$squared.terms){   
               scope.glm <- list(lower=as.formula(paste("response","~1")),
               upper=as.formula(paste("response","~",paste(out$dat$used.covs,collapse='+'))))
               }else{
               factor.mask<-na.omit(match(names(out$dat$factor.levels),out$dat$used.covs))
               cont.mask<-seq(1:length(out$dat$used.covs))
-              if(length(factor.mask!=0)) cont.mask<-cont.mask[-c(factor.mask)]
+              if(length(factor.mask)!=0) cont.mask<-cont.mask[-c(factor.mask)]
 
                scope.glm <- list(lower=as.formula(paste("response","~1")),
                  upper=as.formula(paste("response","~",paste(c(if(length(factor.mask)>0) paste(out$dat$used.covs[factor.mask],collapse=" + "),
@@ -169,34 +171,46 @@ on.exit(detach(out$input))
  }
  
 if(Model=="rf"){
-
-              # tune the mtry parameter - this controls the number of covariates randomly subset for each split #
-              cat("\ntuning mtry parameter\n")
-
-            x=out$dat$ma$train$dat[,-1]
-            y=factor(out$dat$ma$train$dat[,1])
-                if(is.null(out$input$mtry)){
-               mtry <- tuneRF(x=out$dat$ma$train$dat[,-1],y=factor(out$dat$ma$train$dat[,1]),mtryStart=3,importance=TRUE,ntreeTry=100,
-                  replace=FALSE, doBest=F, plot=F)
-                    mtry <- mtry[mtry[,2]==min(mtry[,2]),1][1]
-                    t2 <- unclass(Sys.time())
-                    {cat("\n");cat("30%\n")}
-                  }
-
-              cat("\nnow fitting full random forest model using mtry=",mtry,"\n")
-              if(debug.mode) flush.console()
-
-               rf.full <- randomForest(x=out$dat$ma$train$dat[,-1],y=factor(out$dat$ma$train$dat[,1]),xtest=xtest,ytest=ytest,importance=TRUE, ntree=n.trees,
-                  mtry=mtry,replace=samp.replace,sampsize=ifelse(is.null(sampsize),(ifelse(samp.replace,nrow(x),ceiling(.632*nrow(x)))),sampsize),
-                  nodesize=ifelse(is.null(nodesize),(if (!is.null(y) && !is.factor(y)) 5 else 1),nodesize),maxnodes=maxnodes,
-                  localImp=localImp, nPerm=nPerm, keep.forest=ifelse(is.null(keep.forest),!is.null(y) && is.null(xtest),keep.forest),
-                  corr.bias=corr.bias, keep.inbag=keep.inbag)
-
+          browser()
+          if(out$input$pseudoabsence){
+          num.splits<-floor(sum(out$dat$ma$train$dat$response==0)/sum(out$dat$ma$train$dat$response==1))
+              #partition the pseudoabsences as evenly as possible to match the number of presence
+              #this will always give more absence in a split than presence maybe use round instead of floor
+               Split<-c(rep(seq(from=1,to=num.splits),each=sum(out$dat$ma$train$dat$response==1)),
+                sample(1:num.splits,size=sum(out$dat$ma$train$dat$response==0)-num.splits*sum(out$dat$ma$train$dat$response==1),replace=FALSE))
+               Split<-sample(Split,size=length(Split),replace=FALSE) 
+               } else Split<-rep(1,times=sum(out$dat$ma$train$dat$response==0))
+                   psd.abs<-out$dat$ma$train$dat[out$dat$ma$train$dat$response==0,]
+              rf.full<-list() 
+               for(i in 1:length(table(Split))){
+                        # tune the mtry parameter - this controls the number of covariates randomly subset for each split #
+                        cat("\ntuning mtry parameter\n")  
+                      x=rbind(out$dat$ma$train$dat[out$dat$ma$train$dat$response==1,-1],psd.abs[i==Split,-1])
+                      y=factor(c(out$dat$ma$train$dat[out$dat$ma$train$dat$response==1,1],psd.abs[i==Split,1]))
+                          if(is.null(out$input$mtry)){
+                         mtry <- tuneRF(x=x,y=y,mtryStart=3,importance=TRUE,ntreeTry=100,
+                            replace=FALSE, doBest=F, plot=F)
+                              mtry <- mtry[mtry[,2]==min(mtry[,2]),1][1]
+                              t2 <- unclass(Sys.time())
+                              {cat("\n");cat("30%\n")}
+                            }
+                        cat("\nnow fitting full random forest model using mtry=",mtry,"\n")
+                        if(debug.mode) flush.console()
+                           #
+                         rf.full[[i]] <- randomForest(x=x,y=y,xtest=xtest,ytest=ytest,importance=TRUE, ntree=n.trees,
+                            mtry=mtry,replace=samp.replace,sampsize=ifelse(is.null(sampsize),(ifelse(samp.replace,nrow(x),ceiling(.632*nrow(x)))),sampsize),
+                            nodesize=ifelse(is.null(nodesize),(if (!is.null(y) && !is.factor(y)) 5 else 1),nodesize),maxnodes=maxnodes,
+                            localImp=localImp, nPerm=nPerm, keep.forest=ifelse(is.null(keep.forest),!is.null(y) && is.null(xtest),keep.forest),
+                            corr.bias=corr.bias, keep.inbag=keep.inbag)
+                            if(i==1)model.summary<-importance(rf.full[[i]])
+                            else model.summary<-model.summary+importance(rf.full[[i]])
+               }
+               
                         out$mods$parms$mtry<-mtry
                         out$mods$final.mod <- rf.full
 
-                  model.summary <- importance(out$mods$final.mod)
-              model.summary<-model.summary[order(model.summary[,3],decreasing=T),]
+                 
+              model.summary<-1/num.splits*model.summary[order(model.summary[,3],decreasing=T),]
               out$mods$summary <- model.summary
               txt0 <- paste("Random Forest Modeling Results\n",out$input$run.time,"\n\n",
                 "Data:\n\t",ma.name,
