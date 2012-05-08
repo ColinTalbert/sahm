@@ -17,10 +17,10 @@ make.auc.plot.jpg<-function(out=out){
 ##################################################################
 ### Standard residual analysis plots for glm
     if(out$input$script.name%in%c("glm","mars")){
-          pdf(paste(out$dat$bname,"_stand.resid.plots.pdf",sep=""),width=11,height=8.5,onefile=T)
+          jpeg(paste(out$dat$bname,"_stand.resid.plots.jpeg",sep=""),height=1000,width=1000)
           par(mfrow=c(2,2))
-          if(out$input$script.name=="glm") plot(out$mods$final.mod)
-          if(out$input$script.name=="mars") plot(out$mods$final.mod$model.glm)
+          if(out$input$script.name=="glm") plot(out$mods$final.mod,cex=1.5,lwd=1.5,cex.main=1.5,cex.lab=1.5)
+          if(out$input$script.name=="mars") plot(out$mods$final.mod$model.glm,cex=1.5,lwd=1.5,cex.main=1.5,cex.lab=1.5)
           par(mfrow=c(1,1))
           graphics.off()
     }
