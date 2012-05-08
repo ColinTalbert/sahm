@@ -11,7 +11,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
       #5/10/2011 altered to handle count data as well presence absence.
       #any counts higher than or equal to 1 are set to be presence though I might consider
       #adding the option to have a threshold set instead of using just presence/absence
-
+     
        if(is.na(match("gam",installed.packages()[,1]))) {
              install.packages("gam",repos="http://lib.stat.cmu.edu/R/CRAN")
             }
@@ -60,6 +60,10 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
      temp<-temp[c(absn,pres,bgd)]
      dat<-dat[response%in%temp,]
      response<-response[response%in%temp]
+        
+        dat<-dat[-rm.cols]
+     dat[dat==-9999]<-NA
+     missing.summary<-1-apply(apply(dat,2,complete.cases),2,sum)/nrow(dat)
 
      response.table<-table(response)
      max.points<-1500
@@ -75,15 +79,11 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
     TrueResponse<-dat[,match(tolower(response.col),tolower(names(dat)))]
     } else TrueResponse<-response
 
-    #now remove all columns except predictors
-    dat<-dat[-rm.cols]
-     dat[dat==-9999]<-NA
+    #now remove all columns except predictors  
       response<-response[complete.cases(dat)]
       TrueResponse<-TrueResponse[complete.cases(dat)]
      dat<-dat[complete.cases(dat),]
 
-
-    #dat<-dat[1:2000,]
   #Remove columns with only one unique value
       varr <- function(x) var(x,na.rm=TRUE)
       
@@ -98,10 +98,9 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
     else {s<-sample(seq(1:dim(dat)[1]),size=2000,replace=FALSE)
      kmat<-cor(dat[s,],method="kendall",use="pairwise.complete.obs")
     }
-    
     cmat=pmax(abs(cmat),abs(smat),abs(kmat),na.rm=TRUE)
     High.cor<-sort(apply(abs(cmat)>min.cor,2,sum)-1,decreasing=TRUE)
-
+         
   #take the top num.plots to put in the pairs plot or if the looking at a single
   #predictor and other predictors it's correlated with, take the top num.plots-1
   #of those with which it is correlated
@@ -122,7 +121,8 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
               cor.hightoplot<-abs(cor(HighToPlot,use="pairwise.complete.obs"))
               diag(cor.hightoplot)<-0
     cor.range<-c(quantile(as.vector(cor.hightoplot),probs=c(0,.5,.7,.85)),1)
-
+     
+     missing.summary<-missing.summary[match(names(High.cor),names(missing.summary))[1:min(num.plots,length(High.cor))]]
   ## put histograms on the diagonal
     panel.hist <- function(x, ...)
     {
@@ -176,16 +176,17 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
  else if(num.plots<15) wdth=3000
       else wdth=4500
  if(Debug==FALSE) jpeg(output.file,width=wdth,height=wdth,pointsize=13)
-    MyPairs(cbind(TrueResponse,HighToPlot),cor.range=cor.range,my.labels=(as.vector(High.cor)[1:num.plots]),
-    lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,bg = c("blue","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red")
+    MyPairs(cbind(TrueResponse,HighToPlot),cor.range=cor.range,missing.summary=missing.summary,my.labels=(as.vector(High.cor)[1:num.plots]),
+    lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,
+    bg = c("blue","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red")
 
  if(Debug==FALSE) graphics.off()
  options(warn=0)
  
   }
 
-MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
-    upper.panel = panel, diag.panel = NULL, text.panel = textPanel,
+MyPairs<-function (x,missing.summary,my.labels,labels, panel = points, ..., lower.panel = panel,
+    upper.panel = panel,diag.panel = NULL, text.panel = textPanel,
     label.pos = 0.5 + has.diag/3, cex.labels = NULL, font.labels = 1,
     row1attop = TRUE, gap = 1,Toplabs=NULL)
 {
@@ -261,7 +262,7 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
     for (i in if (row1attop)
         1L:(nc)
     else nc:1L) for (j in j.start:(nc)) {
-       top.gap<-c(3*gap,rep(gap/2,times=nc-1))
+       top.gap<-c(6*gap,rep(gap/2,times=nc-1))
        bottom.gap<-c(rep(gap/2,times=nc-1),3*gap)
        left.gap<-c(3*gap,3*gap,rep(gap/2,times=nc-1))
        par(mar = c(bottom.gap[i],left.gap[j+1],top.gap[i],gap/2))
@@ -282,10 +283,10 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
                           abs(cor(x[,(i)],response,method="spearman",use="pairwise.complete.obs")),abs(cor(x[,(i)],response,method="kendall",use="pairwise.complete.obs"))),digits=2),
                           sep=""),line=.02,cex.lab=1.5)
                    }
-                   else {pct.dev<-my.panel.smooth(as.vector(x[, (i)]), as.vector(response),weights=
-                          c(rep(table(response)[2]/table(response)[1],times=table(response)[1]),rep(1,times=table(response)[2])),cex.mult=cex.mult,...)
+                   else {pct.dev<-try(my.panel.smooth(as.vector(x[, (i)]), as.vector(response),weights=
+                          c(rep(table(response)[2]/table(response)[1],times=table(response)[1]),rep(1,times=table(response)[2])),cex.mult=cex.mult,...),silent=TRUE)
                           
-                          title(ylab=paste("%dev exp ",round(pct.dev,digits=2),
+                          if(class(pct.dev)!="try-error") title(ylab=paste("%dev exp ",round(pct.dev,digits=2),
                           sep=""),line=.02,cex.lab=cex.mult)}
                          
 
@@ -294,8 +295,11 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
              localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
            type="n",...)   
         if (i == j || (i < j && has.lower) || (i > j && has.upper)) {
-            box()
-            if(i==1) title(main=paste("Total Cor=",my.labels[j],sep=""),line=.04,cex.main=1.1*cex.mult)
+            box() 
+            if(i==1) {
+            title(main=paste("Total Cor=",my.labels[j],sep=""),line=ifelse(missing.summary[i]>.03,2.2,.04),cex.main=1.1*cex.mult)
+            if(missing.summary[i]>.03) mtext(paste(round(missing.summary[i]*100), "% missing",sep=""),side=3,line=.04,cex=cex.mult*.6)
+            }
             #if (i == 1 && (!(j%%2) || !has.upper || !has.lower))
              #   localAxis(1 + 2 * row1attop, x[, j], x[, i],
              #   ...)
@@ -317,9 +321,9 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
                     l.wid <- strwidth(labels, "user")
                     cex.labels <- max(0.8, min(2, 0.9/max(l.wid)))
                   }
-                  if((lng<-nchar(labels[i]))>16)
+                  if((lng<-nchar(labels[i]))>14)
                   labels[i]<-paste(substr(labels[i],1,12),"\n",substr(labels[i],13,lng),sep="")
-                  text.panel(0.5, label.pos, labels[i], cex = .7*cex.labels*cex.mult,
+                  text.panel(0.5, label.pos, labels[i], cex = .65*cex.labels*cex.mult,
                     font = font.labels)
                 }
             }
@@ -359,12 +363,14 @@ my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),
     y<-y[o]
     col<-col[o]
     bg<-bg[o]
-    points(x, y, pch = pch, col = "black", bg = bg, cex = cex*cex.mult)
-    g<-gam(y~s(x,2),family=binomial)
+    points(x, y, pch = pch, col=c("blue4","red4")[factor(y,levels=c(0,1))], bg = bg, cex = cex*cex.mult)
+    g<-try(gam(y~s(x,2),family=binomial),silent=TRUE)
     ok <- is.finite(x) & is.finite(y)
     if (any(ok) && length(unique(x))>3)
+      if(class(g)!="try-error"){
           y.fit<-predict.gam(g,type="response")
-    segments(x0=x[1:(length(x)-1)],y0=y.fit[1:(length(x)-1)],x1=x[2:length(x)],y1=y.fit[2:length(x)],col="red",cex=3*cex.mult,lwd=cex.mult)
+        segments(x0=x[1:(length(x)-1)],y0=y.fit[1:(length(x)-1)],x1=x[2:length(x)],y1=y.fit[2:length(x)],col="red",cex=3*cex.mult,lwd=cex.mult) 
+    }
     
     return(100*(1-g$dev/g$null.deviance))
 }
