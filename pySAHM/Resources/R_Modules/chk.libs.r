@@ -1,5 +1,5 @@
 chk.libs <- function(Model){
-
+     if(Model=="Pred.inpect") libs=list("raster","gam")
      if(Model=="mars") libs<-list("PresenceAbsence","rgdal","sp","survival","mda","raster","tcltk2","foreign","ade4","ROCR","ncf")
      if(Model=="glm")  libs<-list("PresenceAbsence","rgdal","sp","survival","tools","raster","tcltk2","foreign","ade4","ROCR","ncf")
      if(Model=="rf")   libs<-list("randomForest","PresenceAbsence","rgdal","sp","raster","tcltk2","foreign","ade4","ROCR","ncf")
