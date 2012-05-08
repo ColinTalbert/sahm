@@ -1,4 +1,47 @@
 # -*- coding: latin-1 -*-
+###############################################################################
+##
+## Copyright (C) 2010-2012, USGS Fort Collins Science Center. 
+## All rights reserved.
+## Contact: talbertc@usgs.gov
+##
+## This file is part of the Software for Assisted Habitat Modeling package
+## for VisTrails.
+##
+## "Redistribution and use in source and binary forms, with or without 
+## modification, are permitted provided that the following conditions are met:
+##
+##  - Redistributions of source code must retain the above copyright notice, 
+##    this list of conditions and the following disclaimer.
+##  - Redistributions in binary form must reproduce the above copyright 
+##    notice, this list of conditions and the following disclaimer in the 
+##    documentation and/or other materials provided with the distribution.
+##  - Neither the name of the University of Utah nor the names of its 
+##    contributors may be used to endorse or promote products derived from 
+##    this software without specific prior written permission.
+##
+## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+## AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, 
+## THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
+## PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
+## CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+## EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+## PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
+## OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+## WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
+## OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+## ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+##
+## Although this program has been used by the U.S. Geological Survey (USGS), 
+## no warranty, expressed or implied, is made by the USGS or the 
+## U.S. Government as to the accuracy and functioning of the program and 
+## related program material nor shall the fact of distribution constitute 
+## any such warranty, and no responsibility is assumed by the USGS 
+## in connection therewith.
+##
+## Any use of trade, firm, or product names is for descriptive purposes only 
+## and does not imply endorsement by the U.S. Government.
+###############################################################################
 
 import csv
 from datetime import datetime
@@ -37,7 +80,8 @@ import packages.sahm.pySAHM.MaxentRunner as MaxentRunner
 from packages.sahm.SahmOutputViewer import SAHMModelOutputViewerCell
 from packages.sahm.SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
 from packages.sahm.sahm_picklists import ResponseType, AggregationMethod, \
-        ResampleMethod, PointAggregationMethod, ModelOutputType
+        ResampleMethod, PointAggregationMethod, ModelOutputType, RandomPointType, \
+        OutputRaster
 
 from utils import writetolog
 from pySAHM.utilities import TrappedError
@@ -481,7 +525,8 @@ class Model(Module):
                          'makeBinMap':('mbt', utils.R_boolean, False),
                          'makeMESMap':('mes', utils.R_boolean, False),
                          'ThresholdOptimizationMethod':('om', None, False),
-                         'UsePseudoAbs':('psa', utils.R_boolean, False)}
+#                         'UsePseudoAbs':('psa', utils.R_boolean, False)
+                    }
 
     @classmethod
     def provide_input_port_documentation(cls, port_name):
@@ -654,6 +699,7 @@ class MDSBuilder(Module):
 
     _input_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
+                                 ('backgroundPointType', '(gov.usgs.sahm:RandomPointType:Other)', {'defaults':'Background'}),
                                  ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
                                  ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)'),
                                  ('Seed', '(edu.utah.sci.vistrails.basic:Integer)')]
@@ -670,6 +716,7 @@ class MDSBuilder(Module):
 
     def compute(self):
         port_map = {'fieldData': ('fieldData', None, True),
+                    'backgroundPointType': ('pointtype', None, False),
                     'backgroundPointCount': ('pointcount', None, False),
                     'backgroundProbSurf': ('probsurf', None, False),
                     'Seed': ('seed', None, False)}
@@ -1300,7 +1347,6 @@ class CovariateCorrelationAndSelection(Module):
     def callDisplayMDS(self, kwargs):
         dialog = SelectListDialog(kwargs)
         #dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
-#        print " ... finished with dialog "  
         retVal = dialog.exec_()
         #outputPredictorList = dialog.outputList
         if retVal == 1:
@@ -1622,6 +1668,9 @@ def initialize():
     utils.r_path = r_path    
     
     session_dir = configuration.cur_session_folder
+    if not os.path.exists(session_dir):
+        os.makedirs(session_dir)
+        
     utils.setrootdir(session_dir) 
     utils.createLogger(session_dir, configuration.verbose)
 
@@ -1790,6 +1839,8 @@ _modules = generate_namespaces({'DataInput': [
                                            (RastersWithPARCInfoCSV, {'abstract': True}),
                                            (PointAggregationMethod, {'abstract': True}),
                                            (ModelOutputType, {'abstract': True}),
+                                           (RandomPointType, {'abstract': True}),
+                                           (OutputRaster, {'abstract': True}),
                                            ],
                                 'Output': [(SAHMModelOutputViewerCell, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe}),

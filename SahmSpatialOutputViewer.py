@@ -1,14 +1,63 @@
+###############################################################################
+##
+## Copyright (C) 2010-2012, USGS Fort Collins Science Center. 
+## All rights reserved.
+## Contact: talbertc@usgs.gov
+##
+## This file is part of the Software for Assisted Habitat Modeling package
+## for VisTrails.
+##
+## "Redistribution and use in source and binary forms, with or without 
+## modification, are permitted provided that the following conditions are met:
+##
+##  - Redistributions of source code must retain the above copyright notice, 
+##    this list of conditions and the following disclaimer.
+##  - Redistributions in binary form must reproduce the above copyright 
+##    notice, this list of conditions and the following disclaimer in the 
+##    documentation and/or other materials provided with the distribution.
+##  - Neither the name of the University of Utah nor the names of its 
+##    contributors may be used to endorse or promote products derived from 
+##    this software without specific prior written permission.
+##
+## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+## AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, 
+## THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
+## PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
+## CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+## EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+## PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
+## OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+## WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
+## OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+## ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+##
+## Although this program has been used by the U.S. Geological Survey (USGS), 
+## no warranty, expressed or implied, is made by the USGS or the 
+## U.S. Government as to the accuracy and functioning of the program and 
+## related program material nor shall the fact of distribution constitute 
+## any such warranty, and no responsibility is assumed by the USGS 
+## in connection therewith.
+##
+## Any use of trade, firm, or product names is for descriptive purposes only 
+## and does not imply endorsement by the U.S. Government.
+###############################################################################
+
 ################################################################################
 # ImageViewer widgets/toolbar implementation
 ################################################################################
 import os
 import csv
+import gc
 
 from PyQt4 import QtCore, QtGui, QAxContainer
 from core.modules.vistrails_module import Module
 from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
 from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
 from packages.spreadsheet.spreadsheet_controller import spreadsheetController
+
+from packages.sahm.sahm_picklists import OutputRaster
+from packages.sahm.utils import map_ports
+
 from utils import dbfreader
 
 import matplotlib
@@ -32,6 +81,10 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
     """
     _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
+                    ('display_presense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False}),
+                    ('display_absense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False}),
+                    ('display_background_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False}),
+                    ('initial_raster_display', '(gov.usgs.sahm:OutputRaster:Other)', {'defaults':'Probability'}),
                     ('model_workspace', '(edu.utah.sci.vistrails.basic:File)'),
                     ("max_cells_dimension", "(edu.utah.sci.vistrails.basic:Integer)", {'defaults':str(['5000']), 'optional':True})]
     #all inputs are determined relative to the model_workspace
@@ -41,7 +94,18 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
 
     def compute(self):
         inputs = {}
-        inputs["model_workspace"] = self.forceGetInputFromPort('model_workspace').name
+        port_map = {'display_presense_points': ("display_pres_points", None, True),
+            'display_absense_points': ("display_abs_points", None, True),
+            'display_background_points': ("display_backs_points", None, True),
+            'initial_raster_display': ("initial_raster", None, True),
+            "model_workspace": ("model_workspace", None, True)}
+
+        inputs = map_ports(self, port_map)
+        
+#        inputs["model_workspace"] = self.forceGetInputFromPort('model_workspace').name
+#        
+#        for port in ['display_presense_points', 'display_absense_points', 'display_background_points', 'initial-raster_display']:
+#            inputs[port] = self.forceGetInputFromPort(port)
 
         pm = get_package_manager()
         hasIVis = pm.has_package('edu.utah.sci.vistrails.iVisServer')
@@ -149,11 +213,13 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         self.on_draw()
         self.xlim = self.axes.get_xlim()
         self.ylim = self.axes.get_ylim()
+        
         self.fig.canvas.draw()
         self.update()
         
         
     def create_main_frame(self):
+        self.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.dpi = 100
         self.fig = Figure((5.0, 4.0), dpi=self.dpi)
         
@@ -161,6 +227,8 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         self.fig.subplots_adjust(left = 0, right=1, top=1, bottom=0)
         self.map_canvas = MyMapCanvas(self.fig)
         self.map_canvas.mpl_connect('scroll_event', self.wheel_zoom)
+#        self.connect(self, QtCore.SIGNAL('keyPressEvent(QString)'),
+#             self.key_press)
         self.add_axis()
            
         self.mpl_toolbar = NavigationToolbar(self.map_canvas, None)
@@ -173,10 +241,16 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
                 icon = os.path.abspath(os.path.join(
                     os.path.dirname(__file__), "Images", "zoom.png"))
                 action.setIcon(QtGui.QIcon(icon))
+#                action.setCheckable(True)
+            if action.text()  == 'Pan':
+                action.setChecked(True)
+#                action.setCheckable(True)
 
-        
+        self.mpl_toolbar.pan()
         self.layout().addWidget(self.map_canvas)
         
+
+          
           
     def wheel_zoom(self, event):
         #zoom in or out centered on the current cursor position
@@ -212,6 +286,18 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         self.axes.set_ylim((newB, newT))
         self.map_canvas.draw()
     
+    
+    def keyPressEvent(self, event):
+        if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_T:
+            active_cells = self.getSelectedCellWidgets()
+            
+            displayed = not self.displayTL
+            for cell in active_cells:            
+                cell.displayTL = displayed
+                cell.on_draw()
+                cell.fig.canvas.draw()
+                cell.update()
+        
     def deleteLater(self):
         """ deleteLater() -> None        
         Overriding PyQt deleteLater to free up resources
@@ -222,16 +308,25 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         gc.collect()
         
         QCellWidget.deleteLater(self)
+        
     def load_layers(self):
         self.displayTL = True
-        self.all_layers = {"prob_map":{"type":"raster", "title":"Probability" ,"categorical":False, "min":0, "max":1, 'cmap':matplotlib.cm.jet, "displayorder":9999, "displayed":True, "enabled":False, "file":""},
+        self.all_layers = {"prob_map":{"type":"raster", "title":"Probability" ,"categorical":False, "min":0, "max":1, 'cmap':matplotlib.cm.jet, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
                          "bin_map":{"type":"raster", "title":"Binary probability" , "categorical":False, "categories":[0,1], 'cmap':matplotlib.cm.Greys, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
                          "resid_map":{"type":"raster", "title":"Residuals" , "categorical":False, "min":0, "max":"pullfromdata", 'cmap':matplotlib.cm.Accent, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
                          "mess_map":{"type":"raster", "title":"Mess" , "categorical":False, "categories":"pullfromdata", 'cmap':matplotlib.cm.jet, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
                          "MoD_map":{"type":"raster", "title":"MoD" , "categorical":True, "min":0, "max":"pullfromdata", 'cmap':matplotlib.cm.prism, "displayorder":9999, "num_breaks":7, "displayed":False, "enabled":False, "file":""},
-                         "pres_points":{"type":"Vector", "color":(1,0,0), "displayorder":3, "num_breaks":7, "displayed":True, "enabled":False, "file":""},
-                         "abs_points":{"type":"Vector", "color":(0,1,0), "displayorder":2, "num_breaks":7, "displayed":True, "enabled":False, "file":""},
-                         "backs_points":{"type":"Vector", "color":(0,0,0), "displayorder":1, "num_breaks":7, "displayed":False, "enabled":False, "file":""}}
+                         "pres_points":{"type":"Vector", "title":"Presence", "color":(1,0,0), "displayorder":3, "num_breaks":7, "displayed":False, "enabled":False, "file":""},
+                         "abs_points":{"type":"Vector", "title":"Absence", "color":(0,1,0), "displayorder":2, "num_breaks":7, "displayed":False, "enabled":False, "file":""},
+                         "backs_points":{"type":"Vector", "title":"Background", "color":(0,0,0), "displayorder":1, "num_breaks":7, "displayed":False, "enabled":False, "file":""}}
+        
+        #set the inital layers to display passed on passed in inputs
+        for layer in ["display_pres_points", "display_abs_points", "display_backs_points"]:
+            self.all_layers[layer.replace("display_", "")]["displayed"] = self.inputs[layer]
+        
+        initial_map_dict = {'Probability':"prob_map", 'Binary Probability':"bin_map", 
+                                       'Residuals':"resid_map", 'Mess':"mess_map", 'MoD':"MoD_map"}
+        self.all_layers[initial_map_dict[self.inputs['initial_raster']]]["displayed"] = True
         
         for k,v in self.all_layers.items():
             if k in self.inputs.keys():
@@ -250,15 +345,14 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         points = np.genfromtxt(pointfile, delimiter=",", skip_header=3)
                     
         for name, val in {"abs_points":0, "pres_points":1, "backs_points":-9999}.items():
-            #parse out the x, y s for the points in each of our categoreis
+            #parse out the x, y s for the points in each of our categories
             self.all_layers[name]['x'] = np.delete(points, np.argwhere(points[:,2]<>val), 0)[:,0]
             self.all_layers[name]['y'] = np.delete(points, np.argwhere(points[:,2]<>val), 0)[:,1]
             if len(self.all_layers[name]['x']) == 0:
                 self.all_layers[name]["enabled"] = False
             else:
                 self.all_layers[name]["enabled"] = True
-                
-               
+                          
     def add_axis(self):
         self.axes = self.fig.add_subplot(111, aspect='equal', adjustable='datalim')
         self.axes.spines['right'].set_color('none')
@@ -267,7 +361,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         self.axes.spines['left'].set_color('none')
         self.axes.get_xaxis().set_visible(False)
         self.axes.get_yaxis().set_visible(False)
-        
+       
     def add_title(self, title):
         at = AnchoredText(title,
                           loc=2, frameon=True, pad=.05, borderpad=0.2)
@@ -275,6 +369,19 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         at.set_alpha(0.1)
         self.axes.add_artist(at)
 
+    def updated_ylim(self, ax):
+#        print "Updated ylim"
+        active_cells = self.getSelectedCellWidgets()
+        for cell in active_cells:
+            if cell != self:
+#                cell.axes.callbacks.disconnect(cell.ylim_id)
+                cell.axes.set_ylim(self.axes.get_ylim(), emit=False)
+                cell.axes.set_xlim(self.axes.get_xlim(), emit=False)
+#                cell.ylim_id = cell.axes.callbacks.connect('ylim_changed', cell.updated_ylim)
+                cell.fig.canvas.draw()
+                cell.update()
+
+            
     def make_resid_cmap(self, kwargs):
 
         vals = self.get_array_from_raster(kwargs['file'])
@@ -318,6 +425,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         #clear map plot
         self.fig.clear()
         self.add_axis()
+        self.ylim_id = self.axes.callbacks.connect('ylim_changed', self.updated_ylim)
 #        self.axes.cla()
 #        self.legend_axes.cla()
 #        self.legend_fig.clear()
@@ -451,6 +559,66 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
     def saveToPDF(self, filename):
         pass
 
+    def findSheetTabWidget(self):
+        """ findSheetTabWidget() -> QTabWidget
+        Find and return the sheet tab widget
+        
+        """
+        p = self.parent()
+        while p:
+            if hasattr(p, 'isSheetTabWidget'):
+                if p.isSheetTabWidget()==True:
+                    return p
+            p = p.parent()
+        return None
+
+    def getSAHMSpatialsInCellList(self, sheet, cells):
+        """  Get the list of SAHM spatial out viewrins
+         inside a list of (row, column) cells.
+        """
+        SAHMspatials = []
+        for (row, col) in cells:
+            cell = sheet.getCell(row, col)
+            if hasattr(cell, 'make_resid_cmap'):
+                SAHMspatials.append(cell)
+        return SAHMspatials
+
+    def getSelectedCellWidgets(self):
+        sheet = self.findSheetTabWidget()
+        if sheet:
+            selected_cells = sheet.getSelectedLocations()
+            return self.getSAHMSpatialsInCellList(sheet, selected_cells)
+        return []
+
+
+    def interactionEvent(self, istyle, name):
+        """ interactionEvent(istyle: vtkInteractorStyle, name: str) -> None
+        Make sure interactions sync across selected renderers
+        
+        """
+        if name=='MouseWheelForwardEvent':
+            istyle.OnMouseWheelForward()
+        if name=='MouseWheelBackwardEvent':
+            istyle.OnMouseWheelBackward()
+        ren = self.interacting
+        if not ren:
+            ren = self.getActiveRenderer(istyle.GetInteractor())
+        if ren:
+            cam = ren.GetActiveCamera()
+            cpos = cam.GetPosition()
+            cfol = cam.GetFocalPoint()
+            cup = cam.GetViewUp()
+            for cell in self.getSelectedCellWidgets():
+                if cell!=self and hasattr(cell, 'getRendererList'): 
+                    rens = cell.getRendererList()
+                    for r in rens:
+                        if r!=ren:
+                            dcam = r.GetActiveCamera()
+                            dcam.SetPosition(cpos)
+                            dcam.SetFocalPoint(cfol)
+                            dcam.SetViewUp(cup)
+                            r.ResetCameraClippingRange()
+                    cell.update()
 
 
 class MyMapCanvas(FigureCanvas):
