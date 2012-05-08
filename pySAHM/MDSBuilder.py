@@ -1,22 +1,46 @@
-'''
-Created on Jan 31, 2011
-
-This module creates a Merged Data Set (MDS)
-from an input CSV and directory 
-or list of rasters. The MDS consists of three
-header lines 1st is a x, y, ResponseBinary, 
-{other info fields}, then a list of raster covariates.
-The next header line contains ones and zeros for each of the 
-raster covariates and indicates if the covariate is to be 
-used in subsequent analyses.  The last header line contains
-the full network path the raster dataset for that covariate.
-After the header lines comes the data which is the 
-covariate values pulled from the raster cell 
-with those coordinates. 
-
-@author: talbertc
-
-'''
+###############################################################################
+##
+## Copyright (C) 2010-2012, USGS Fort Collins Science Center. 
+## All rights reserved.
+## Contact: talbertc@usgs.gov
+##
+## This file is part of the Software for Assisted Habitat Modeling package
+## for VisTrails.
+##
+## "Redistribution and use in source and binary forms, with or without 
+## modification, are permitted provided that the following conditions are met:
+##
+##  - Redistributions of source code must retain the above copyright notice, 
+##    this list of conditions and the following disclaimer.
+##  - Redistributions in binary form must reproduce the above copyright 
+##    notice, this list of conditions and the following disclaimer in the 
+##    documentation and/or other materials provided with the distribution.
+##  - Neither the name of the University of Utah nor the names of its 
+##    contributors may be used to endorse or promote products derived from 
+##    this software without specific prior written permission.
+##
+## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+## AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, 
+## THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
+## PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
+## CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+## EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+## PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
+## OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+## WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
+## OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+## ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+##
+## Although this program has been used by the U.S. Geological Survey (USGS), 
+## no warranty, expressed or implied, is made by the USGS or the 
+## U.S. Government as to the accuracy and functioning of the program and 
+## related program material nor shall the fact of distribution constitute 
+## any such warranty, and no responsibility is assumed by the USGS 
+## in connection therewith.
+##
+## Any use of trade, firm, or product names is for descriptive purposes only 
+## and does not imply endorsement by the U.S. Government.
+###############################################################################
 
 import sys
 import csv
@@ -45,6 +69,7 @@ class MDSBuilder(object):
         self.inputs = []
         self.fieldData = ''
         self.outputMDS  = ''
+        self.pointtype = 'Background'
         self.probsurf = ''
         self.pointcount = 0
         self.NDFlag = 'NA'
@@ -335,6 +360,12 @@ class MDSBuilder(object):
         follow this otherwise it will be uniform within the extent of the first of our inputs.
         No more than one per pixel is used.
         '''
+        
+        if self.pointtype == 'Background':
+            pointval = '-9999'
+        else:
+            pointval = '-9998'
+        
         #initialize the random seed in case one was passed
         if not self.seed:
             self.seed = random.randint(0, sys.maxint)
@@ -385,7 +416,7 @@ class MDSBuilder(object):
             x = random.randint(0, cols - 1) 
             y = random.randint(0, rows - 1)
             #print x, y
-            tmpPixel = [x, y, '-9999'] # a random pixel in the entire image
+            tmpPixel = [x, y, pointval] # a random pixel in the entire image
             if useProbSurf:
                 # if they supplied a probability surface ignore the random pixel
                 # if a random number between 1 and 100 is > the probability surface value
