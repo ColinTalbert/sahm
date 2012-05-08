@@ -491,7 +491,8 @@ class PARC:
 #                    ans = ndMask.mean()
             
             
-        
+        outBand.FlushCache()
+        outBand.GetStatistics(0, 1)
         
         
         dst_ds = None
@@ -975,9 +976,13 @@ class PARC:
         tmpOutDataset = None
 
     def calc_stats(self, filename):
-        dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
+        print filename
+        dataset = gdal.Open(filename, gdalconst.GA_Update)
         band = dataset.GetRasterBand(1)
+        band.FlushCache()
         band.GetStatistics(0,1)
+        histogram = band.GetDefaultHistogram()
+        band.SetDefaultHistogram(histogram[0], histogram[1], histogram[3])
         
 
     def generateOutputDS(self, sourceParams, templateParams, 
