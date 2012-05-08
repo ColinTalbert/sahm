@@ -44,7 +44,8 @@ FitModels(ma.name=input.file,
 EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,make.binary.tif=TRUE,make.p.tif=TRUE,MESS=TRUE)
 
 ##GLM
-input.file="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_3.csv"
+input.file="C:\\temp\\TestDataSets\\CanadaThistlePseudoAbsenceWeights.csv"
+input.file<-"C:\\temp\\TestDataSets\\CanadaThistleWeights.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,
           output.dir=output.dir,

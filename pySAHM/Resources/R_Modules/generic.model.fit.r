@@ -59,7 +59,7 @@ on.exit(detach(out$input))
                  paste("(",paste(out$dat$used.covs[cont.mask],collapse=" + "),")^2",sep=""),
                  paste("I(",out$dat$used.covs[cont.mask],"^2)",sep="")),collapse=" + "),sep="")))
            }  
-         
+         browser()
           mymodel.glm.step <- step(glm(as.formula(paste("response","~1")),family=out$input$model.family,data=out$dat$ma$train$dat,weights=out$dat$ma$train$weight,na.action="na.exclude"),
           direction='both',scope=scope.glm,k=penalty,trace=1)
           
