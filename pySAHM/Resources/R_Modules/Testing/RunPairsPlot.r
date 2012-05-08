@@ -18,8 +18,55 @@ source("I:\\VisTrails\\Central_VisTrails_x32_debug\\Vistrails\\vistrails\\packag
     #infile="I:\\VisTrails\\WorkingFiles\\workspace\\talbertc_20110510T100421\\TestTrainingSplit_1.csv"
     infil="C:\\temp\\SAHM_workspace\\mtalbert_20120123T110745\\modelSelection_split_2.csv"
 
-time1<-Sys.time()    
-    infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
+time1<-Sys.time() 
+infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
+    #infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
+#infil="C:\\temp\\TestDataSets\\TestTrainingSplit_8.csv"
+   # output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPresTesting.jpg"
+Pairs.Explore(num.plots=15,
+    min.cor=min.cor,
+    input.file=infil,
+		output.file=output.file,
+		response.col=responseCol,
+		pres=TRUE,
+		absn=TRUE,
+		bgd=FALSE,
+    Debug=FALSE)
+Sys.time()-time1
+
+time1<-Sys.time() 
+infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
+    #infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
+    output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPres17.jpg"
+Pairs.Explore(num.plots=15,
+    min.cor=min.cor,
+    input.file=infil,
+		output.file=output.file,
+		response.col=responseCol,
+		pres=TRUE,
+		absn=TRUE,
+		bgd=FALSE,
+    Debug=FALSE)
+Sys.time()-time1
+
+time1<-Sys.time() 
+infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
+    #infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
+    output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPres1.jpg"
+Pairs.Explore(num.plots=4,
+    min.cor=min.cor,
+    input.file=infil,
+		output.file=output.file,
+		response.col=responseCol,
+		pres=TRUE,
+		absn=TRUE,
+		bgd=FALSE,
+    Debug=FALSE)
+Sys.time()-time1
+
+time1<-Sys.time() 
+infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
+    #infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
     output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPres2.jpg"
 Pairs.Explore(num.plots=8,
     min.cor=min.cor,
@@ -32,6 +79,65 @@ Pairs.Explore(num.plots=8,
     Debug=FALSE)
 Sys.time()-time1
 
+time1<-Sys.time() 
+infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
+    #infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
+    output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPres3.jpg"
+Pairs.Explore(num.plots=9,
+    min.cor=min.cor,
+    input.file=infil,
+		output.file=output.file,
+		response.col=responseCol,
+		pres=TRUE,
+		absn=TRUE,
+		bgd=FALSE,
+    Debug=FALSE)
+Sys.time()-time1
+
+time1<-Sys.time() 
+infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
+    #infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
+    output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPres4.jpg"
+Pairs.Explore(num.plots=16,
+    min.cor=min.cor,
+    input.file=infil,
+		output.file=output.file,
+		response.col=responseCol,
+		pres=TRUE,
+		absn=TRUE,
+		bgd=FALSE,
+    Debug=FALSE)
+Sys.time()-time1
+
+time1<-Sys.time() 
+infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
+    #infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
+    output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPres5.jpg"
+Pairs.Explore(num.plots=17,
+    min.cor=min.cor,
+    input.file=infil,
+		output.file=output.file,
+		response.col=responseCol,
+		pres=TRUE,
+		absn=TRUE,
+		bgd=FALSE,
+    Debug=FALSE)
+Sys.time()-time1
+
+ time1<-Sys.time() 
+infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
+    #infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
+    output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPres6.jpg"
+Pairs.Explore(num.plots=25,
+    min.cor=min.cor,
+    input.file=infil,
+		output.file=output.file,
+		response.col=responseCol,
+		pres=TRUE,
+		absn=TRUE,
+		bgd=FALSE,
+    Debug=FALSE)
+Sys.time()-time1
 #binary
 input.file="C:\\VisTrails\\EAMEBinTT.csv"
 input.file="C:\\VisTrails\\DICKBinTT.csv"

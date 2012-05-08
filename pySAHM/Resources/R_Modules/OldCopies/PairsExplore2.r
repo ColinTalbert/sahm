@@ -12,7 +12,10 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
       #any counts higher than or equal to 1 are set to be presence though I might consider
       #adding the option to have a threshold set instead of using just presence/absence
 
-
+       if(is.na(match("gam",installed.packages()[,1]))) {
+             install.packages("gam",repos="http://lib.stat.cmu.edu/R/CRAN")
+            }
+        library(gam)    
       absn<-as.logical(absn)
       pres<-as.logical(pres)
       bgd<-as.logical(bgd)
@@ -27,20 +30,23 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
 
           tif.info<-readLines(input.file,3)
           tif.info<-strsplit(tif.info,',')
+          options(warn=-1)
           include<-(as.numeric(tif.info[[2]]))
-
+          options(warn=1)
   #Remove coordinates, response column, site.weights
   #before exploring predictor relationship
     rm.cols <- as.vector(na.omit(c(match("x",tolower(names(dat))),match("y",tolower(names(dat))),
-    match("site.weights",tolower(names(dat))),match(tolower(response.col),tolower(names(dat))),match("Split",names(dat)))))
+    match("site.weights",tolower(names(dat))),match(tolower(response.col),tolower(names(dat))),match("Split",names(dat)),match("EvalSplit",names(dat)))))
 
      #remove testing split
+     if(!is.na(match("EvalSplit",names(dat)))) dat<-dat[-c(which(dat$EvalSplit=="test"),arr.ind=TRUE),]
     if(!is.na(match("Split",names(dat)))) dat<-dat[-c(which(dat$Split=="test"),arr.ind=TRUE),]
-
     include[is.na(include)]<-0
     rm.cols<-unique(c(rm.cols,which(include==0,arr.ind=TRUE)))
     response<-dat[,match(tolower(response.col),tolower(names(dat)))]
-
+          if(any(response==-9998)) {
+           response[response==-9998]<-0
+           }
        dat<-dat[order(response),]
        response<-response[order(response)]
 
@@ -55,12 +61,15 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
      dat<-dat[response%in%temp,]
      response<-response[response%in%temp]
 
-
-     if(sum(response==-9999)>1000){
-      s<-sample(which(response==-9999,arr.ind=TRUE),size=(sum(response==-9999)-1000))
-      dat<-dat[-c(s),]
-      response<-response[-c(s)]
-    }
+     response.table<-table(response)
+     max.points<-1500
+     if(any(response.table> max.points)){
+       for(i in names(response.table[response.table> max.points])){
+             s<-sample(which(response==i,arr.ind=TRUE),size=(sum(response==i)- max.points))
+             dat<-dat[-c(s),]
+             response<-response[-c(s)]
+       }
+     }
 
    if (response.col=="responseCount") {
     TrueResponse<-dat[,match(tolower(response.col),tolower(names(dat)))]
@@ -69,6 +78,11 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
     #now remove all columns except predictors
     dat<-dat[-rm.cols]
      dat[dat==-9999]<-NA
+      response<-response[complete.cases(dat)]
+      TrueResponse<-TrueResponse[complete.cases(dat)]
+     dat<-dat[complete.cases(dat),]
+
+
     #dat<-dat[1:2000,]
   #Remove columns with only one unique value
       varr <- function(x) var(x,na.rm=TRUE)
@@ -86,7 +100,6 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
     }
     
     cmat=pmax(abs(cmat),abs(smat),abs(kmat),na.rm=TRUE)
-    
     High.cor<-sort(apply(abs(cmat)>min.cor,2,sum)-1,decreasing=TRUE)
 
   #take the top num.plots to put in the pairs plot or if the looking at a single
@@ -125,7 +138,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
 
   ## put (absolute) correlations on the upper panels,
   ## with size proportional to the correlations.
-      panel.cor <- function(x, y, digits=2, prefix="", cor.range,cex.cor, ...)
+      panel.cor <- function(x, y, digits=2, prefix="", cor.range,cor.mult, ...)
       {
       a<-colors()
           usr <- par("usr"); on.exit(par(usr))
@@ -143,7 +156,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
             rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], col =
             a[382])}
           r<-max(all.cor)
-               cex.cor=3
+               cex.cor=3*cor.mult
          txt <- format(c(r, 0.123456789), digits=digits)[1]
           txt <- paste(prefix, txt, sep="")
            #if(missing(cex.cor)) cex.cor <- 1.2/strwidth(txt)
@@ -157,29 +170,18 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
 
          }
           text(0.5, 0.5, txt, cex = .7+cex.cor * (r-min(cor.range))/(max(cor.range)-min(cor.range)))
-          text(.9,.1,txt2,cex=1.5)   
+          text(.9,.1,txt2,cex=cor.mult)   
          }
-         
-#   #Find a new unique file name (one in the desired directory that hasn't yet been used)
-#   outfile <- paste(output.dir,"Predictor_Correlation.pdf",sep="\\")
-#             while(file.access(outfile)==0) outfile<-paste(output.dir,"Predictor_Correlation.pdf",sep="\\")
-# 
-#  options(warn=-1)
-#   pdf(outfile,width=11,height=9,onefile=T)
-#     MyPairs(HighToPlot,cor.range=cor.range,my.labels=(as.vector(High.cor)[1:num.plots]),
-#     lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,bg = c("red","steelblue")[as.factor(response)],col.smooth = "red")
-#   graphics.off()
-#  options(warn=0)
-#  
-#   }
-
   
   #Find a new unique file name (one in the desired directory that hasn't yet been used)
 
  options(warn=-1)
- if(Debug==FALSE) jpeg(output.file,width=1000,height=1000,pointsize=13)
+ if(num.plots<8) wdth=1500
+ else if(num.plots<15) wdth=3000
+      else wdth=4500
+ if(Debug==FALSE) jpeg(output.file,width=wdth,height=wdth,pointsize=13)
     MyPairs(cbind(TrueResponse,HighToPlot),cor.range=cor.range,my.labels=(as.vector(High.cor)[1:num.plots]),
-    lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,bg = c("green","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red")
+    lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,bg = c("blue","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red")
 
  if(Debug==FALSE) graphics.off()
  options(warn=0)
@@ -194,7 +196,7 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
     response<-x[,1]
     response[response==-9999]<-0
     x<-x[,2:dim(x)[2]]
-
+    cex.mult<-3
     textPanel <- function(x = 0.5, y = 0.5, txt, cex, font) text(x,
         y, txt, cex = cex, font = font)
     localAxis <- function(side, x, y, xpd, bg, col = NULL, main,
@@ -256,77 +258,61 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
         if (!is.null(main))
             oma[3L] <- 6
     }
-
     nCol<-ifelse(length(unique(response))>1,nc+1,nc)
     j.start<-ifelse(length(unique(response))>1,0,1)
-    opar <- par(mfrow = c(nc, nCol), mar = rep.int(gap/2, 4), oma = oma)
+    opar <- par(mfrow = c(nc, nCol), mar = rep.int(gap/2, 4))
     on.exit(par(opar))
     for (i in if (row1attop)
         1L:(nc)
     else nc:1L) for (j in j.start:(nc)) {
-
-
-        if(i==1){ par(mar = c(gap/2,gap/2,gap,gap/2)) #top row add extra room at top
-          if(j==0){
-                par(mar = c(gap/2,gap,gap,gap)) #top left corner room at top and on right
-          localPlot(x[, i],response, xlab = "", ylab = "", axes = FALSE,
+       top.gap<-c(3*gap,rep(gap/2,times=nc-1))
+       bottom.gap<-c(rep(gap/2,times=nc-1),3*gap)
+       left.gap<-c(3*gap,3*gap,rep(gap/2,times=nc-1))
+       par(mar = c(bottom.gap[i],left.gap[j+1],top.gap[i],gap/2))
+       
+       
+       
+         if(j==0){
+         localPlot(x[, i],response, xlab = "", ylab = "", axes = FALSE,
                 type="n",...)
-                }else if(j==1) {par(mar = c(gap/2,gap,gap,gap/2)) #extra room on left and topfor second plot top row
-                    localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
-           type="n",...)} else  {
-           par(mar = c(gap/2,gap/2,gap,gap/2)) #all other top row plots need extra room at top only
-           localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
-           type="n",...)
-           }}else { par(mar = rep.int(gap/2, 4))
-               if(j==0){ par(mar = c(gap/2,gap,gap/2,gap))  #left column needs extra room on right only
-               localPlot(x[, i],response, xlab = "", ylab = "", axes = FALSE,
-                type="n",...)
-                }else if(j==1){ par(mar = c(gap/2,gap,gap/2,gap/2)) #second column needs extra room on left so labels fit
-                localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
-           type="n",...)
-        }else localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
-           type="n",...)}
-         if(j==0) {
-             if(i==1) par(mar=c(gap/2,gap,gap,gap))
-                else par(mar = c(gap/2,gap,gap/2,gap))
-
-                  if(i==1) title(main="Response",line=.04,cex.main=1.5)
+          if(i==1) title(main="Response",line=.04,cex.main=1.4*cex.mult)
 
                   box()
                      my.lab<-paste("cor=",round(max(abs(cor(x[,(i)],response,use="pairwise.complete.obs")),abs(cor(x[,(i)],response,method="spearman",use="pairwise.complete.obs")),
                      abs(cor(x[,(i)],response,method="kendall",use="pairwise.complete.obs"))),digits=2),sep="")
 
-                  #panel smooth doesn't work for two reasons: one, the response is binary and it requires more than two unique values
-                  #second I don't think it can use weights which is necessary with an overwhelming amount of background points so that presnce points
-                  #can't be viewed
-                  #panel.smooth(as.vector(x[, (i)]), as.vector(jitter(response,factor=.1)),weights=
-                  #        c(rep(table(response)[2]/table(response)[1],times=table(response)[1]),rep(1,times=table(response)[2])),...)
-
-                   if(length(unique(response))>2) panel.smooth(as.vector(x[, (i)]), as.vector(response),...)
-                   else my.panel.smooth(as.vector(x[, (i)]), as.vector(response),weights=
-                          c(rep(table(response)[2]/table(response)[1],times=table(response)[1]),rep(1,times=table(response)[2])),...)
-                          
-                          title(ylab=paste("cor=",round(max(abs(cor(x[,(i)],response,use="pairwise.complete.obs")),
+                   if(length(unique(response))>2) {panel.smooth(as.vector(x[, (i)]), as.vector(response),...)
+                      title(ylab=paste("cor=",round(max(abs(cor(x[,(i)],response,use="pairwise.complete.obs")),
                           abs(cor(x[,(i)],response,method="spearman",use="pairwise.complete.obs")),abs(cor(x[,(i)],response,method="kendall",use="pairwise.complete.obs"))),digits=2),
                           sep=""),line=.02,cex.lab=1.5)
-                          #,y=.85,x=max(x[,(i)])-.2*diff(range(x[,(i)])),cex=1.5)
+                   }
+                   else {pct.dev<-my.panel.smooth(as.vector(x[, (i)]), as.vector(response),weights=
+                          c(rep(table(response)[2]/table(response)[1],times=table(response)[1]),rep(1,times=table(response)[2])),cex.mult=cex.mult,...)
+                          
+                          title(ylab=paste("%dev exp ",round(pct.dev,digits=2),
+                          sep=""),line=.02,cex.lab=cex.mult)}
+                         
 
                  } else{
+            
+             localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,
+           type="n",...)   
         if (i == j || (i < j && has.lower) || (i > j && has.upper)) {
             box()
-            if(i==1) title(main=paste("Total Cor=",my.labels[j],sep=""),line=.04,cex.main=1.5)
+            if(i==1) title(main=paste("Total Cor=",my.labels[j],sep=""),line=.04,cex.main=1.2*cex.mult)
             #if (i == 1 && (!(j%%2) || !has.upper || !has.lower))
              #   localAxis(1 + 2 * row1attop, x[, j], x[, i],
              #   ...)
             if (i == nc)
-                localAxis(3 - 2 * row1attop, x[, j], x[, i],
+                localAxis(3 - 2 * row1attop, x[, j], x[, i],cex.axis=cex.mult*.5,
                   ...)
             if (j == 1 && (i!=1 || !has.upper || !has.lower))
-                localAxis(2, x[, j], x[, i], ...)
+                localAxis(2, x[, j], x[, i],cex.axis=cex.mult*.5, ...)
             #if (j == nc && (i%%2 || !has.upper || !has.lower))
             #    localAxis(4, x[, j], x[, i], ...)
             mfg <- par("mfg")
-            if (i == j) {
+            if (i == j) { 
+            
                 if (has.diag)
                   localDiagPanel(as.vector(x[, i]),...)
                 if (has.labs) {
@@ -335,21 +321,22 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
                     l.wid <- strwidth(labels, "user")
                     cex.labels <- max(0.8, min(2, 0.9/max(l.wid)))
                   }
-
-                  text.panel(0.5, label.pos, labels[i], cex = cex.labels,
+                  if((lng<-nchar(labels[i]))>20)
+                  labels[i]<-paste(substr(labels[i],1,15),"\n",substr(labels[i],16,lng),sep="")
+                  text.panel(0.5, label.pos, labels[i], cex = .7*cex.labels*cex.mult,
                     font = font.labels)
                 }
             }
-
             else if (i < j)
                   if(length(unique(x[,i])>2)){
                   localLowerPanel(as.vector(x[, j]), as.vector(x[,
-                    i]), ...) } else {
-                      my.panel.smooth(as.vector(x[, j]),as.vector(x[,i]))
-                    }
-                  
-            else localUpperPanel(as.vector(x[, j]), as.vector(x[,
-                i]), ...)
+                    i]),cex=cex.mult*3,cor.mult=cex.mult,...) } else {
+                      my.panel.smooth(as.vector(x[, j]),as.vector(x[,i]),cex.mult=cex.mult*2)
+                    }    
+            else {
+            localUpperPanel(as.vector(x[, j]), as.vector(x[,
+                i]),cex=cex.mult,...)    
+                }
             if (any(par("mfg") != mfg))
                 stop("the 'panel' function made a new plot")
         }
@@ -369,15 +356,21 @@ MyPairs<-function (x,my.labels,labels, panel = points, ..., lower.panel = panel,
 
 
 my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),
-    cex = 1, col.smooth = "red", span = 2/3, iter = 3, weights=rep(1,times=length(y)), ...)
-{
+    cex = 1, col.smooth = "red", span = 2/3, iter = 3, weights=rep(1,times=length(y)),cex.mult,...)
+{  
     o<-order(x)
-    points(x, y, pch = pch, col = col, bg = bg, cex = cex)
+    x<-x[o]
+    y<-y[o]
+    col<-col[o]
+    bg<-bg[o]
+    points(x, y, pch = pch, col = "black", bg = bg, cex = cex*cex.mult)
+    g<-gam(y~s(x,2),family=binomial)
     ok <- is.finite(x) & is.finite(y)
     if (any(ok) && length(unique(x))>3)
-    lines(lowess(x[o],y[o],iter=0),col="red")
-        #lines(smooth.spline(x,w=weights,jitter(y,amount=(max(y)-min(y))/100),nknots=min(length(unique(x)),4)),col="red")
-
+          y.fit<-predict.gam(g,type="response")
+    segments(x0=x[1:(length(x)-1)],y0=y.fit[1:(length(x)-1)],x1=x[2:length(x)],y1=y.fit[2:length(x)],col="red",cex=3*cex.mult,lwd=cex.mult)
+    
+    return(100*(1-g$dev/g$null.deviance))
 }
 
 
@@ -396,15 +389,15 @@ Args <- commandArgs(T)
     	argSplit <- strsplit(arg, "=")
     	argSplit[[1]][1]
     	argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="p") num.plots <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="m") min.cor <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="p") num.plots <- as.numeric(argSplit[[1]][2])
+    	if(argSplit[[1]][1]=="m") min.cor <- as.numeric(argSplit[[1]][2])
     	if(argSplit[[1]][1]=="o") output.file <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="i") infile <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="core") cors.w.highest <- argSplit[[1]][2]
-      if(argSplit[[1]][1]=="pres") pres <- argSplit[[1]][2]
-      if(argSplit[[1]][1]=="absn") absn <- argSplit[[1]][2]
-      if(argSplit[[1]][1]=="bgd") bgd <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="core") cors.w.highest <- as.logical(argSplit[[1]][2])
+      if(argSplit[[1]][1]=="pres") pres <- as.logical(argSplit[[1]][2])
+      if(argSplit[[1]][1]=="absn") absn <- as.logical(argSplit[[1]][2])
+      if(argSplit[[1]][1]=="bgd") bgd <- as.logical(argSplit[[1]][2])
     }
 
     print(num.plots)

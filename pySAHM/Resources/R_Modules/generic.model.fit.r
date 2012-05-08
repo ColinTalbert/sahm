@@ -87,6 +87,7 @@ on.exit(detach(out$input))
 
   if(Model=="glm") {
   penalty <- if(out$input$simp.method=="AIC") 2 else log(nrow(out$dat$ma$ma))
+ 
           if(!out$input$squared.terms){   
               scope.glm <- list(lower=as.formula(paste("response","~1")),
               upper=as.formula(paste("response","~",paste(out$dat$used.covs,collapse='+'))))
@@ -105,6 +106,7 @@ on.exit(detach(out$input))
           direction='both',scope=scope.glm,k=penalty,trace=1)
           
           out$mods$final.mod<-mymodel.glm.step
+         
             txt0 <- paste("Generalized Linear Results\n",out$input$run.time,"\n\n","Data:\n\t ",ma.name,"\n\t ","n(pres)=",
         out$dat$nPresAbs$train[2],"\n\t n(abs)=",out$dat$nPresAbs$train[1],"\n\t number of covariates considered=",length(out$dat$used.covs),
         "\n\n","Settings:\n","\n\t model family=",out$input$model.family,
