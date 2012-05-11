@@ -153,8 +153,13 @@ class PARC:
         # Clip and reproject each source image.
         for image in self.inputs:
             inPath, inFileName = os.path.split(image[0])
-            outFile, ext = os.path.splitext(inFileName) 
-            outFile = os.path.join(self.out_dir, outFile + ".tif")
+                            
+            outFile, ext = os.path.splitext(inFileName)
+            if outFile[0].isdigit():
+                outFile = os.path.join(self.out_dir, "_" + outFile + ".tif")
+            else:
+                outFile = os.path.join(self.out_dir, outFile + ".tif")
+                
             shortname = (os.path.split(outFile)[1])
             
             if os.path.exists(outFile):
