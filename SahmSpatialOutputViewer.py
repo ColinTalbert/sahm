@@ -58,7 +58,7 @@ from packages.spreadsheet.spreadsheet_controller import spreadsheetController
 from packages.sahm.sahm_picklists import OutputRaster
 from packages.sahm.utils import map_ports
 
-from utils import dbfreader
+from utils import dbfreader, getRasterParams
 
 import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -247,11 +247,18 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 #                action.setCheckable(True)
 
         self.mpl_toolbar.pan()
+        
+        self.popMenu = popup_menu(self)
+
+        
+        self.map_canvas.setContextMenuPolicy( QtCore.Qt.CustomContextMenu ) 
+        self.connect(self.map_canvas, QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'), self.on_context_menu)
+        
         self.layout().addWidget(self.map_canvas)
         
-
-          
-          
+    def on_context_menu(self, point):
+        self.popMenu.exec_(self.map_canvas.mapToGlobal(point))
+   
     def wheel_zoom(self, event):
         #zoom in or out centered on the current cursor position
 
@@ -425,7 +432,8 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         #clear map plot
         self.fig.clear()
         self.add_axis()
-        self.ylim_id = self.axes.callbacks.connect('ylim_changed', self.updated_ylim)
+#        self.ylim_id = self.axes.callbacks.connect('ylim_changed', self.updated_ylim)
+
 #        self.axes.cla()
 #        self.legend_axes.cla()
 #        self.legend_fig.clear()
@@ -442,7 +450,11 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
                     self.add_vector(v)
                 else:
                     self.add_raster(v)
+                    
                     title += self.all_layers[k]['title']
+                    
+        self.ylim_id = self.axes.callbacks.connect('ylim_changed', self.rasterlayer.ax_update)
+        self.xlim_id = self.axes.callbacks.connect('xlim_changed', self.rasterlayer.ax_update)
          
                
         if self.displayTL:
@@ -453,12 +465,24 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
     
     def add_raster(self, kwargs):
         rasterfile = kwargs['file']
-        raster_array = self.get_array_from_raster(rasterfile)
-        rasterparams = self.getRasterParams(rasterfile)
+        
+        self.rasterlayer = RasterDisplay()
+        self.rasterlayer.switch_raster(rasterfile)
+        
+        rasterparams = getRasterParams(rasterfile)
+        map_extent = [rasterparams["ulx"],rasterparams["lrx"],rasterparams["lry"],rasterparams["uly"]]
+                
+        
+#        raster_array = self.get_array_from_raster(rasterfile)
+        raster_array = self.rasterlayer(rasterparams["ulx"], rasterparams["lrx"], rasterparams["lry"], rasterparams["uly"])
+        
+        
         rmin = np.amin(raster_array)
         rmax = np.amax(raster_array)
         norm = colors.normalize(rmin, rmax)
-        map_extent = [rasterparams["ulx"],rasterparams["lrx"],rasterparams["lry"],rasterparams["uly"]]
+        
+
+        
         raster_plot = self.axes.imshow(raster_array,interpolation="nearest", cmap=kwargs['cmap'], norm=norm, origin='upper', extent=map_extent)
         
         if self.displayTL:
@@ -485,7 +509,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         All nodata values will be removed
         '''
         ds = gdal.Open(raster_file, gdal.GA_ReadOnly)
-        rasterparams = self.getRasterParams(raster_file)
+        rasterparams = getRasterParams(raster_file)
         nrows = rasterparams["height"]
         ncols = rasterparams["width"]
         max_dimension = max([nrows, ncols])
@@ -505,53 +529,6 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
             
         return np.ma.masked_array(ary, mask=(ary==ndval))
         
-        
-    def getRasterParams(self, rasterFile):
-        """
-        Extracts a series of bits of information from a passed raster
-        All values are stored in a dictionary which is returned.
-        If errors are encountered along the way the error messages will
-        be returned as a list in the Error element.
-        """
-        try:
-            #initialize our params dictionary to have None for all parma
-            params = {}
-            allRasterParams = ["Error", "xScale", "yScale", "width", "height",
-                            "ulx", "uly", "lrx", "lry", "Wkt", 
-                            "tUlx", "tUly", "tLrx", "tLry", 
-                            "srs", "gt", "prj", "NoData", "PixelType"]
-            
-            for param in allRasterParams:
-                params[param] = None
-            params["Error"] = []
-            
-            # Get the PARC parameters from the rasterFile.
-            dataset = gdal.Open(rasterFile, gdalconst.GA_ReadOnly)
-            if dataset is None:
-                params["Error"].append("Unable to open file")
-                #print "Unable to open " + rasterFile
-                #raise Exception, "Unable to open specifed file " + rasterFile
-                
-            
-            xform  = dataset.GetGeoTransform()
-            params["xScale"] = xform[1]
-            params["yScale"] = xform[5]
-    
-            params["width"]  = dataset.RasterXSize
-            params["height"] = dataset.RasterYSize
-    
-            params["ulx"] = xform[0]
-            params["uly"] = xform[3]
-            params["lrx"] = params["ulx"] + params["width"]  * params["xScale"]
-            params["lry"] = params["uly"] + params["height"] * params["yScale"]
-                
-            
-        except:
-            #print "We ran into problems extracting raster parameters from " + rasterFile
-            params["Error"].append("Some untrapped error was encountered")
-        finally:
-            del dataset
-            return params
         
     def dumpToFile(self, filename):
         pass
@@ -641,19 +618,100 @@ class MyMapCanvas(FigureCanvas):
         QtGui.QApplication.restoreOverrideCursor()         
         FigureCanvas.leaveEvent(self, event)
         
-#    def scrollEvent(self, event):
-#        print event
-#        
-#    def scroll_event(self, x, y, steps):
-#        print steps
-#
-#    def wheelEvent(self, event):
-#        x, y = event.x(), event.y()
-#        
-#        print event.x()
-#        print "y", event.y()
-#        print "delta", event.delta()
-#        self.set
+        
+class RasterDisplay(object):
+    '''The idea behind this is from 
+    http://matplotlib.sourceforge.net/examples/event_handling/viewlims.py
+    basically we want to only query as much data as we have screen pixels for.
+    When the user zooms, pans, resizes we'll go back to the original display
+    and get another set of pixels.
+    
+    This object has a pointer to the original raster and functions 
+    for switching the input file or getting an array of pixel values
+    '''
+    def __init__(self, width=300, height=300):
+        self.height = height
+        self.width = width
+        
+    def switch_raster(self, rasterfile):
+        self.rasterfile = rasterfile
+        self.rasterparams = getRasterParams(rasterfile)
+
+    def __call__(self, xstart, xend, ystart, yend):
+        self.x = np.linspace(xstart, xend, self.width)
+        self.y = np.linspace(ystart, yend, self.height).reshape(-1,1)
+
+  
+    #pull the pixels we need, no more
+        ds = gdal.Open(self.rasterfile, gdal.GA_ReadOnly)
+        
+        xform  = ds.GetGeoTransform()
+
+        ncols = int((xend - xstart) / xform[1])
+        nrows = int((yend - ystart) / abs(xform[5]))
+        
+        xOffset = int((xstart - xform[0]) / xform[1])
+        yOffset = int((yend- xform[3]) / xform[5]) 
+        
+        
+        if xOffset + ncols > ds.RasterXSize:
+            xOffset = 0
+        if xOffset < 0:
+            xOffset = 0
+           
+        if yOffset + nrows > ds.RasterYSize:
+            yOffset = 0
+        if yOffset < 0:
+            yOffset = 0
+        
+        if ncols + xOffset > ds.RasterXSize:
+            ncols = ds.RasterXSize - xOffset
+        if ncols < 0:
+            ncols = ds.RasterXSize
+          
+        if nrows + yOffset > ds.RasterYSize:
+            nrows = ds.RasterYSize - yOffset
+        if nrows < 0:
+            nrows = ds.RasterYSize
+            
+        ary = ds.GetRasterBand(1).ReadAsArray(xoff=xOffset, yoff=yOffset, 
+                                              win_xsize=ncols, win_ysize=nrows, 
+                                              buf_ysize=self.height, buf_xsize=self.width)
+        ndval = ds.GetRasterBand(1).GetNoDataValue()
+
+
+ 
+        return np.ma.masked_array(ary, mask=(ary==ndval))
+
+
+    def ax_update(self, ax):
+        ax.set_autoscale_on(False) # Otherwise, infinite loop
+
+        #Get the number of points from the number of pixels in the window
+        dims = ax.axesPatch.get_window_extent().bounds
+        self.width = int(dims[2] + 0.5)
+        self.height = int(dims[3] + 0.5)
+
+        #Get the range for the new area
+        xstart,ystart,xdelta,ydelta = ax.viewLim.bounds
+        xend = xstart + xdelta
+        yend = ystart + ydelta
+
+        if xstart < self.rasterparams["ulx"]:
+            xstart = self.rasterparams["ulx"]
+        if xend > self.rasterparams["lrx"]:
+            xend = self.rasterparams["lrx"]
+        if ystart < self.rasterparams["lry"]:
+            ystart = self.rasterparams["lry"]
+        if yend > self.rasterparams["uly"]:
+            yend = self.rasterparams["uly"]
+
+
+        # Update the image object with our new data and extent
+        im = ax.images[-1]
+        im.set_data(self.__call__(xstart, xend, ystart, yend))
+        im.set_extent((xstart, xend, ystart, yend))
+        ax.figure.canvas.draw_idle()
 
 class fullExtent(QtGui.QAction):
     def __init__(self, parent=None):
@@ -846,3 +904,28 @@ class AnchoredText(AnchoredOffsetbox):
                                            prop=prop,
                                            frameon=frameon)
 
+class popup_menu(QtGui.QMenu):
+    def __init__(self, parent=None):
+        
+        QtGui.QMenu.__init__(self, parent)
+        
+        toolbar = QtGui.QToolBar()
+        # Actions
+        icon = os.path.abspath(os.path.join(os.path.dirname(__file__), "Images", "RedPoints.png"))
+        self.actionPresence = QtGui.QAction(QtGui.QIcon(icon), "Presence points", self)
+        self.actionPresence.setStatusTip("Display/hide presence points")
+        self.connect(self.actionPresence, QtCore.SIGNAL("triggered()"), self.on_pointsclick) 
+        self.actionPresence.setIconVisibleInMenu(True)   
+         
+        self.actionAbsence = QtGui.QAction(QtGui.QIcon("GreenPoints.png"), "Presence points", self)
+        self.actionAbsence.setStatusTip("Display/hide absence points") 
+         
+        
+        # create context menu 
+        self.addAction(self.actionPresence)
+        self.addAction(self.actionAbsence)
+        self.addSeparator() 
+
+        
+    def on_pointsclick(self):
+        QtGui.QMessageBox.about(self, "I do nothing", "no really")

@@ -305,5 +305,50 @@ def getRasterName(fullPathName):
         rastername = fullPathName
     return rastername
 
+def getRasterParams(self, rasterFile):
+    """
+    Extracts a series of bits of information from a passed raster
+    All values are stored in a dictionary which is returned.
+    If errors are encountered along the way the error messages will
+    be returned as a list in the Error element.
+    """
+    try:
+        #initialize our params dictionary to have None for all parma
+        params = {}
+        allRasterParams = ["Error", "xScale", "yScale", "width", "height",
+                        "ulx", "uly", "lrx", "lry", "Wkt", 
+                        "tUlx", "tUly", "tLrx", "tLry", 
+                        "srs", "gt", "prj", "NoData", "PixelType"]
+        
+        for param in allRasterParams:
+            params[param] = None
+        params["Error"] = []
+        
+        # Get the PARC parameters from the rasterFile.
+        dataset = gdal.Open(rasterFile, gdalconst.GA_ReadOnly)
+        if dataset is None:
+            params["Error"].append("Unable to open file")
+            #print "Unable to open " + rasterFile
+            #raise Exception, "Unable to open specifed file " + rasterFile
+            
+        
+        xform  = dataset.GetGeoTransform()
+        params["xScale"] = xform[1]
+        params["yScale"] = xform[5]
 
+        params["width"]  = dataset.RasterXSize
+        params["height"] = dataset.RasterYSize
+
+        params["ulx"] = xform[0]
+        params["uly"] = xform[3]
+        params["lrx"] = params["ulx"] + params["width"]  * params["xScale"]
+        params["lry"] = params["uly"] + params["height"] * params["yScale"]
+            
+        
+    except:
+        #print "We ran into problems extracting raster parameters from " + rasterFile
+        params["Error"].append("Some untrapped error was encountered")
+    finally:
+        del dataset
+        return params
 
