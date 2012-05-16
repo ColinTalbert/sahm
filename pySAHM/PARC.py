@@ -890,6 +890,10 @@ class PARC:
                 row[0] = inputFile
                 input_just_file = os.path.split(inputFile)[1]
                 
+            if input_just_file[0].isdigit():
+                row[0] = os.path.join(os.path.split(inputFile)[0], "_" + input_just_file)
+
+                
             if input_just_file in inputs:
                 strInputFileErrors += "\n  PARC not currently set up to handle identically named inputs."
                 strInputFileErrors += "\n\t" + input_just_file + " used multiple times"
