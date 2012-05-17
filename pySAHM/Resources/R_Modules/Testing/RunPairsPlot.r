@@ -19,10 +19,12 @@ source("I:\\VisTrails\\Central_VisTrails_x32_debug\\Vistrails\\vistrails\\packag
     infil="C:\\temp\\SAHM_workspace\\mtalbert_20120123T110745\\modelSelection_split_2.csv"
 
 time1<-Sys.time() 
-infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
+infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv" 
+infil="J:\\Projects\\SAHM test\\MergedDataset_2.csv"  
     #infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
-#infil="C:\\temp\\TestDataSets\\TestTrainingSplit_8.csv"
-   # output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPresTesting.jpg"
+infil="C:\\temp\\TestDataSets\\CanadaThistleWeights.csv"
+infil="C:\\temp\\TestDataSets\\CanadaThistlePseudoAbsenceWeights.csv"
+   output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPresTesting.jpg"
 Pairs.Explore(num.plots=15,
     min.cor=min.cor,
     input.file=infil,

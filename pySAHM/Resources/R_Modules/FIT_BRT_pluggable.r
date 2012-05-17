@@ -111,6 +111,7 @@ tolerance=as.numeric(tolerance)
 bag.fraction<-as.numeric(bag.fraction)
 max.trees<-as.numeric(max.trees)
 n.folds<-as.numeric(n.folds)
+learning.rate<-as.numeric(learning.rate)
 
     FitModels(ma.name=csv,
 		tif.dir=NULL,

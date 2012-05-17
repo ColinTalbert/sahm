@@ -54,6 +54,7 @@ FitModels(ma.name=input.file,
           
 #RF
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_3.csv"
+input.file="C:\\temp\\TestDataSets\\CanadaThistlePseudoAbsenceWeights.csv"
 set.seed(1)
 proximity=NULL
 FitModels(ma.name=input.file,
@@ -68,14 +69,14 @@ do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=FALSE,pseu
 
 #BRT
 set.seed(1)
-#input.file="I:\\SpeciesData\\APHIS\\GypsyMoth\\modelSelection_split_2.csv"
+input.file="J:\\Projects\\SAHM test\\MergedDataset_2.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,output.dir=output.dir,
-          response.col=rc,make.p.tif=T,make.binary.tif=T,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
+          response.col=rc,make.p.tif=F,make.binary.tif=F,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
       family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
   tolerance = 0.001,seed=NULL,opt.methods=2,
           simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
-          learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=TRUE)
+          learning.rate =.000005, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=FALSE)
 
 #Now evaluating new data
 workspace="I:\\VisTrails\\WorkingFiles\\workspace\\_TutorialTesting\\brt_1"
