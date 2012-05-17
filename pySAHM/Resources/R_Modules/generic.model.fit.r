@@ -94,7 +94,7 @@ on.exit(detach(out$input))
               }else{
               factor.mask<-na.omit(match(names(out$dat$factor.levels),out$dat$used.covs))
               cont.mask<-seq(1:length(out$dat$used.covs))
-              if(length(factor.mask!=0)) cont.mask<-cont.mask[-c(factor.mask)]
+              if(length(factor.mask)!=0) cont.mask<-cont.mask[-c(factor.mask)]
 
                scope.glm <- list(lower=as.formula(paste("response","~1")),
                  upper=as.formula(paste("response","~",paste(c(if(length(factor.mask)>0) paste(out$dat$used.covs[factor.mask],collapse=" + "),
