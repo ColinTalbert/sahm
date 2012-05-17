@@ -48,6 +48,7 @@
 import os
 import csv
 import gc
+import utils
 
 from PyQt4 import QtCore, QtGui, QAxContainer
 from core.modules.vistrails_module import Module
@@ -381,19 +382,21 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         active_cells = self.getSelectedCellWidgets()
         for cell in active_cells:
             if cell != self:
-#                cell.axes.callbacks.disconnect(cell.ylim_id)
+                cell.axes.callbacks.disconnect(cell.ylim_id)
                 cell.axes.set_ylim(self.axes.get_ylim(), emit=False)
                 cell.axes.set_xlim(self.axes.get_xlim(), emit=False)
-#                cell.ylim_id = cell.axes.callbacks.connect('ylim_changed', cell.updated_ylim)
+                cell.ylim_id = cell.axes.callbacks.connect('ylim_changed', cell.updated_ylim)
                 cell.fig.canvas.draw()
                 cell.update()
 
             
     def make_resid_cmap(self, kwargs):
 
-        vals = self.get_array_from_raster(kwargs['file'])
-        vals_min = np.amin(vals)
-        vals_max = np.amax(vals)
+#        vals = self.get_array_from_raster(kwargs['file'])
+#        vals = self.rasterlayer()
+#        vals_min = np.amin(vals)
+#        vals_max = np.amax(vals)
+        vals_min, vals_max = utils.getrasterminmax(kwargs['file'])
         diff = vals_max - vals_min
         zero_ratio = abs(vals_min) / diff
 
@@ -410,8 +413,10 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         return matplotlib.colors.LinearSegmentedColormap('my_colormap',cdict,256)
 
     def make_categorical_cmap(self, kwargs):
-        vals = self.get_array_from_raster(kwargs['file'])
-        uniques = np.unique(vals)
+#        vals = self.get_array_from_raster(kwargs['file'])
+#        vals = self.rasterlayer()
+#        uniques = np.unique(vals)
+        uniques 
         vatdbf = kwargs['file'] + ".vat.dbf"
         if os.path.exists(vatdbf):
             #we'll pull labels from this file
@@ -453,13 +458,28 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
                     
                     title += self.all_layers[k]['title']
                     
-        self.ylim_id = self.axes.callbacks.connect('ylim_changed', self.rasterlayer.ax_update)
-        self.xlim_id = self.axes.callbacks.connect('xlim_changed', self.rasterlayer.ax_update)
+#        self.ylim_id = self.axes.callbacks.connect('ylim_changed', self.ax_update)
+        self.xlim_id = self.axes.callbacks.connect('xlim_changed', self.ax_update)
          
                
         if self.displayTL:
             self.add_title(title)
          
+    def ax_update(self, ax):
+        self.rasterlayer.ax_update(ax)
+        
+        active_cells = self.getSelectedCellWidgets()
+        for cell in active_cells:
+            if cell != self:
+                cell.axes.callbacks.disconnect(cell.xlim_id)
+#                cell.axes.callbacks.disconnect(cell.ylim_id)
+                cell.axes.set_ylim(self.axes.get_ylim(), emit=False)
+                cell.axes.set_xlim(self.axes.get_xlim(), emit=False)
+                cell.ylim_id = cell.axes.callbacks.connect('xlim_changed', cell.ax_update)
+#                cell.ylim_id = cell.axes.callbacks.connect('ylim_changed', cell.ax_update)
+                cell.fig.canvas.draw()
+                cell.update()
+    
     def add_vector(self, kwargs):
         self.axes.scatter(kwargs['x'], kwargs['y'], s=10, c=kwargs['color'], linewidth=0.5, antialiased=True)
     
@@ -501,33 +521,33 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
                     t.set_fontsize(7)
                 
         
-
-    def get_array_from_raster(self, raster_file):
-        '''return a numpy array with the values from the raster_file
-        if there are more than 10,000 rows or cols the data will be 
-        subsampled and self.map_ratio will be set.
-        All nodata values will be removed
-        '''
-        ds = gdal.Open(raster_file, gdal.GA_ReadOnly)
-        rasterparams = getRasterParams(raster_file)
-        nrows = rasterparams["height"]
-        ncols = rasterparams["width"]
-        max_dimension = max([nrows, ncols])
-        if max_dimension > self.inputs["max_cells_dimension"]:
-            ratio = float(self.inputs["max_cells_dimension"]) / max_dimension
-            nrows = int(ratio * nrows)
-            ncols = int(ratio * ncols)
-                
-        try:
-            ary = ds.GetRasterBand(1).ReadAsArray(buf_ysize=nrows, buf_xsize=ncols)
-            ndval = ds.GetRasterBand(1).GetNoDataValue()
-        except MemoryError:
-            msgbox = QtGui.QMessageBox(self)
-            msgbox.setText("This viewer cannot handle datasets this large.\nTry setting the max_cells_dimension to a smaller value.")
-            msgbox.exec_()
-            raise MemoryError
-            
-        return np.ma.masked_array(ary, mask=(ary==ndval))
+#
+#    def get_array_from_raster(self, raster_file):
+#        '''return a numpy array with the values from the raster_file
+#        if there are more than 10,000 rows or cols the data will be 
+#        subsampled and self.map_ratio will be set.
+#        All nodata values will be removed
+#        '''
+#        ds = gdal.Open(raster_file, gdal.GA_ReadOnly)
+#        rasterparams = getRasterParams(raster_file)
+#        nrows = rasterparams["height"]
+#        ncols = rasterparams["width"]
+#        max_dimension = max([nrows, ncols])
+#        if max_dimension > self.inputs["max_cells_dimension"]:
+#            ratio = float(self.inputs["max_cells_dimension"]) / max_dimension
+#            nrows = int(ratio * nrows)
+#            ncols = int(ratio * ncols)
+#                
+#        try:
+#            ary = ds.GetRasterBand(1).ReadAsArray(buf_ysize=nrows, buf_xsize=ncols)
+#            ndval = ds.GetRasterBand(1).GetNoDataValue()
+#        except MemoryError:
+#            msgbox = QtGui.QMessageBox(self)
+#            msgbox.setText("This viewer cannot handle datasets this large.\nTry setting the max_cells_dimension to a smaller value.")
+#            msgbox.exec_()
+#            raise MemoryError
+#            
+#        return np.ma.masked_array(ary, mask=(ary==ndval))
         
         
     def dumpToFile(self, filename):
@@ -637,6 +657,7 @@ class RasterDisplay(object):
         self.rasterfile = rasterfile
         self.rasterparams = getRasterParams(rasterfile)
 
+
     def __call__(self, xstart, xend, ystart, yend):
         self.x = np.linspace(xstart, xend, self.width)
         self.y = np.linspace(ystart, yend, self.height).reshape(-1,1)
@@ -712,6 +733,8 @@ class RasterDisplay(object):
         im.set_data(self.__call__(xstart, xend, ystart, yend))
         im.set_extent((xstart, xend, ystart, yend))
         ax.figure.canvas.draw_idle()
+        
+
 
 class fullExtent(QtGui.QAction):
     def __init__(self, parent=None):
