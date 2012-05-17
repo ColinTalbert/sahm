@@ -113,7 +113,7 @@ max.trees<-as.numeric(max.trees)
 n.folds<-as.numeric(n.folds)
 learning.rate<-as.numeric(learning.rate)
 seed<-as.numeric(seed)
-tc<-as.numric(tc)
+tc<-as.numeric(tc)
 
     FitModels(ma.name=csv,
 		tif.dir=NULL,
