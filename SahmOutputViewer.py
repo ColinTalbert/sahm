@@ -56,6 +56,7 @@ from packages.sahm.sahm_picklists import ModelOutputType
 from core.packagemanager import get_package_manager
 
 import os
+import itertools
 ################################################################################
 
 class SAHMModelOutputViewerCell(SpreadsheetCell):
@@ -194,6 +195,8 @@ class SAHMOutputViewerCellWidget(QCellWidget):
     def __init__(self, parent=None):
         QCellWidget.__init__(self, parent)
         
+        self.sync_changes = "all"
+        
         centralLayout = QtGui.QVBoxLayout()
         self.setLayout(centralLayout)
         centralLayout.setMargin(0)
@@ -240,8 +243,15 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         self.ui.response_curves_layout.addWidget(self.response_browser)
         self.response_urlSrc = None
         
+        self.connect(self.ui.tabWidget,QtCore.SIGNAL('currentChanged(int)'), self.tabChanged)
         
         self.layout().addWidget(self.Frame)
+
+    def tabChanged(self):
+        active_cells = self.get_active_cells()
+        
+        for cell in active_cells: 
+            cell.ui.tabWidget.setCurrentIndex(self.ui.tabWidget.currentIndex())
 
     def updateContents(self, inputPorts):
         """ updateContents(inputPorts: tuple) -> None
@@ -420,13 +430,53 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         painter.setWindow(pixmap.rect())
         painter.drawPixmap(0, 0, pixmap)
         painter.end()
-#
-#    def resizeEvent(self, e):
-#        if self.originalPix!=None:
-#            self.label.setPixmap(self.originalPix.scaled(self.label.size(),
-#                                                         QtCore.Qt.KeepAspectRatio,
-#                                                         QtCore.Qt.SmoothTransformation))
-#                
+
+
+    def findSheetTabWidget(self):
+        """ findSheetTabWidget() -> QTabWidget
+        Find and return the sheet tab widget
+        
+        """
+        p = self.parent()
+        while p:
+            if hasattr(p, 'isSheetTabWidget'):
+                if p.isSheetTabWidget()==True:
+                    return p
+            p = p.parent()
+        return None
+
+    def getSAHMOutputsInCellList(self, sheet, cells):
+        """  Get the list of SAHM output viewers
+         inside a list of (row, column) cells.
+        """
+        SAHMspatials = []
+        for (row, col) in cells:
+            cell = sheet.getCell(row, col)
+            if hasattr(cell, 'gs_auc_graph'):
+                SAHMspatials.append(cell)
+        return SAHMspatials
+
+    def getSelectedCellWidgets(self):
+        sheet = self.findSheetTabWidget()
+        if sheet:
+            selected_cells = sheet.getSelectedLocations()
+            return self.getSAHMOutputsInCellList(sheet, selected_cells)
+        return []
+    
+    def get_allCellWidgets(self):
+        sheet = self.findSheetTabWidget()
+        if sheet:
+            all_cells = list(itertools.product(range(sheet.getDimension()[0]), range(sheet.getDimension()[1])))
+            return self.getSAHMOutputsInCellList(sheet, all_cells)
+        return []
+
+    def get_active_cells(self):
+        if self.sync_changes == "all":
+            return self.get_allCellWidgets()
+        elif self.sync_changes == "sel":
+            return self.getSelectedCellWidgets()
+        else:
+            return [self]    
 
 class ImageViewerFitToCellAction(QtGui.QAction):
     """

@@ -48,6 +48,8 @@
 import os
 import csv
 import gc
+import itertools
+
 import utils
 
 from PyQt4 import QtCore, QtGui, QAxContainer
@@ -202,7 +204,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         centralLayout.setSpacing(0)
         self.create_main_frame()
         self.fig.canvas.draw()
-        self.sync_changes = True   
+        self.sync_changes = "all"  
         self.setAnimationEnabled(False)
 
     def updateContents(self, inputs):
@@ -298,11 +300,12 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         self.axes.set_xlim((newL, newR))
         self.axes.set_ylim((newB, newT))
         
-        self.pull_pixels()
+        self.sync_extents()
         self.map_canvas.draw()
     
     def button_up(self, event):
         self.pull_pixels()
+        self.sync_extents()
         
     def resize(self):
         self.pull_pixels()
@@ -450,7 +453,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
     def on_draw(self):
         """ Redraws the figure
         """
-        print "on_draw"
+#        print "on_draw"
         #clear map plot
         self.fig.clear()
         self.add_axis()
@@ -482,17 +485,16 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         if self.displayTL:
             self.add_title(title)
     
-    def sync_selected(self):
-        active_cells = self.getSelectedCellWidgets()
+    def sync_extents(self):
+        
+        active_cells = self.get_active_cells()
+        
         for cell in active_cells:
             if cell != self:
 
                 cell.axes.set_ylim(self.axes.get_ylim(), emit=False)
                 cell.axes.set_xlim(self.axes.get_xlim(), emit=False)
                 cell.pull_pixels()
-
-#                if self.displaylegend:
-#                    cell.
                 
                 cell.fig.canvas.draw()
                 cell.update()
@@ -621,14 +623,20 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
             return self.getSAHMSpatialsInCellList(sheet, selected_cells)
         return []
     
-    def get allCellWidgets(self):
+    def get_allCellWidgets(self):
         sheet = self.findSheetTabWidget()
-        return self.getSAHMSpatialsInCellList(sheet, all_cells)
         if sheet:
-            for i in range(sheet.rows.count):
-                for j in range(sheet.columns.count):
-                    if shhet
+            all_cells = list(itertools.product(range(sheet.getDimension()[0]), range(sheet.getDimension()[1])))
+            return self.getSAHMSpatialsInCellList(sheet, all_cells)
+        return []
 
+    def get_active_cells(self):
+        if self.sync_changes == "all":
+            return self.get_allCellWidgets()
+        elif self.sync_changes == "sel":
+            return self.getSelectedCellWidgets()
+        else:
+            return [self]
 
 class MyMapCanvas(FigureCanvas):
     def __init__(self, fig):
@@ -764,8 +772,8 @@ class fullExtent(QtGui.QAction):
         cellWidget.fig.canvas.draw()
         cellWidget.update()
 
-        if cellWidget.sync_changes:
-            cellWidget.sync_selected()
+        if cellWidget.sync_changes != "one":
+            cellWidget.sync_extents()
 
 class viewTitleLegend(QtGui.QAction):
     def __init__(self, parent=None):
@@ -781,29 +789,41 @@ class viewTitleLegend(QtGui.QAction):
     def triggeredSlot(self):
         cellWidget = self.toolBar.getSnappedWidget()
         
-        xlim = cellWidget.axes.get_xlim()
-        ylim = cellWidget.axes.get_ylim()
-        cellWidget.displayTL = self.isChecked()
-        cellWidget.on_draw()
-        cellWidget.fig.canvas.draw()
-        cellWidget.update()
-        cellWidget.axes.set_xlim(xlim)
-        cellWidget.axes.set_ylim(ylim)   
+        active_cells = cellWidget.get_active_cells()
+        for cell in active_cells:
+        
+            xlim = cell.axes.get_xlim()
+            ylim = cell.axes.get_ylim()
+            cell.displayTL = self.isChecked()
+            cell.on_draw()
+            cell.fig.canvas.draw()
+            cell.update()
+            cell.axes.set_xlim(xlim)
+            cell.axes.set_ylim(ylim)   
         
 class sync_changes(QtGui.QAction):
+    
     def __init__(self, parent=None):
-        icon = os.path.abspath(os.path.join(
-                    os.path.dirname(__file__), "Images", "more.png"))
+        self.sync_options = itertools.cycle(["all", "sel", "one"])
+        
         QtGui.QAction.__init__(self,
-                               QtGui.QIcon(icon),
-                               "Apply changes to all maps",
+                               self.getIcon(self.sync_options.next()),
+                               r"Apply changes to all / selected / single cell",
                                parent)
         self.setCheckable(True)
         self.setChecked(True)
-        
+
+    
+    def getIcon(self, tag):
+        icon = os.path.abspath(os.path.join(
+                    os.path.dirname(__file__), "Images", tag + ".png"))
+        return QtGui.QIcon(icon)
+    
     def triggeredSlot(self):
         cellWidget = self.toolBar.getSnappedWidget()
-        cellWidget.sync_changes = self.isChecked()
+        next_option = self.sync_options.next()
+        self.setIcon(self.getIcon(next_option))
+        cellWidget.sync_changes = next_option
                 
 
 class ViewLayerAction(QtGui.QAction):
@@ -828,9 +848,10 @@ class ViewLayerAction(QtGui.QAction):
         self.toolBar.updateToolBar()
         cellWidget.axes.set_xlim(xlim)
         cellWidget.axes.set_ylim(ylim)
+        cellWidget.sync_extents()
 
     def toggleOthers(self):
-        '''Unselect the other raster layers
+        '''Unselect the other raster or vector layers
         '''
         for action in self.toolBar.actions():
             if "group" in dir(action) and \
@@ -843,36 +864,31 @@ class ViewLayerAction(QtGui.QAction):
         actions selected in the toolbar
         '''
         cellWidget = self.toolBar.getSnappedWidget()
-        #set all to not displayed
-        for k, v in cellWidget.all_layers.items():
-            v['displayed'] = False
-        #turn on the selected layers
-        for action in self.toolBar.actions():
+        active_cells = cellWidget.get_active_cells()
+        
+        for cell in active_cells:
+        
+            #set all to not displayed
+            for k, v in cell.all_layers.items():
+                v['displayed'] = False
+            #turn on the selected layers
+            for action in self.toolBar.actions():
+                try:
+                    if action.isChecked() and cell.all_layers.has_key(action.tag):
+                        cell.all_layers[action.tag]['displayed'] = True
+                except AttributeError:
+                    pass #ignore buttons that don't have a tag set
+            cell.on_draw()
             try:
-                if action.isChecked() and cellWidget.all_layers.has_key(action.tag):
-                    cellWidget.all_layers[action.tag]['displayed'] = True
-            except AttributeError:
-                pass #ignore buttons that don't have a tag set
-        cellWidget.on_draw()
-        try:
-            cellWidget.fig.canvas.draw()
-        except MemoryError:
-            msgbox = QtGui.QMessageBox(self)
-            msgbox.setText("This viewer cannot handle datasets this large.\nTry setting the max_cells_dimension to a smaller value.")
-            msgbox.exec_()
-            raise MemoryError
-            
-        cellWidget.update()
-#        all_layers = cellWidget.all_layers
-#        layerset = []
-#        for action in self.toolBar.actions():
-#            if action.isChecked() and all_layers.has_key(action.tag):
-#                layer = all_layers[action.tag]
-#                layerset.append(qgis.gui.QgsMapCanvasLayer(layer))
-#
-#        cellWidget.map_canvas.setLayerSet(layerset)
-##        cellWidget.canvas.repaint()
-#        cellWidget.update()
+                cell.fig.canvas.draw()
+            except MemoryError:
+                msgbox = QtGui.QMessageBox(self)
+                msgbox.setText("This viewer cannot handle datasets this large.\nTry setting the max_cells_dimension to a smaller value.")
+                msgbox.exec_()
+                raise MemoryError
+                
+            cell.update()
+
 
 class SAHMSpatialViewerToolBar(QCellToolBar):
     """
@@ -913,6 +929,7 @@ class SAHMSpatialViewerToolBar(QCellToolBar):
                      "checked":False, "label":"Display Most Dissimilar Variable (MoD) map",
                      "group":"Grids"}]
         
+        self.appendAction(sync_changes(self))
         lyrs_label = QtGui.QLabel()
         lyrs_label.setText("Layers:")
         self.appendWidget(lyrs_label)
@@ -927,7 +944,7 @@ class SAHMSpatialViewerToolBar(QCellToolBar):
         self.addSeparator()
         self.appendWidget(nav_label)
                 
-        self.appendAction(sync_changes(self))
+        
         self.appendAction(viewTitleLegend(self))
         self.appendAction(fullExtent(self))
 
@@ -962,12 +979,9 @@ class SAHMSpatialViewerToolBar(QCellToolBar):
         for action in sw.mpl_toolbar.actions():
             action.setIconVisibleInMenu(True) 
             popmenu.addAction(action)
+            
         return popmenu
-        
-#        for action in self.actions():
-#            if type(action) == ViewLayerAction:
-#                #disenable all action refering to data we don't have
-#                action.setEnabled(action.tag in sw.all_layers)
+    
 
 class AnchoredText(AnchoredOffsetbox):
     def __init__(self, s, loc, pad=0.4, borderpad=0.5, prop=None, frameon=True):
