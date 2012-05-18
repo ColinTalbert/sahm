@@ -1813,12 +1813,12 @@ _modules = generate_namespaces({'DataInput': [
                                           MDSBuilder,
                                           PARC,
                                           RasterFormatConverter,
-#                                          ProjectionLayers,
+                                          ProjectionLayers,
                                           ModelEvaluationSplit,
                                           ModelSelectionSplit,
                                           ModelSelectionCrossValidation,
                                           CovariateCorrelationAndSelection,
-#                                          ApplyModel
+                                          ApplyModel
                                           ],                                          
                                 'Models': [(GLM, {'moduleColor':model_color,
                                                            'moduleFringe':model_fringe}),
