@@ -194,12 +194,15 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         """
         QCellWidget.__init__(self, parent)
 
+        self.displaylegend = True
+
         centralLayout = QtGui.QVBoxLayout()
         self.setLayout(centralLayout)
         centralLayout.setMargin(0)
         centralLayout.setSpacing(0)
         self.create_main_frame()
-        self.fig.canvas.draw()   
+        self.fig.canvas.draw()
+        self.sync_changes = True   
         self.setAnimationEnabled(False)
 
     def updateContents(self, inputs):
@@ -230,6 +233,8 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         self.map_canvas.mpl_connect('scroll_event', self.wheel_zoom)
 #        self.connect(self, QtCore.SIGNAL('keyPressEvent(QString)'),
 #             self.key_press)
+        self.map_canvas.mpl_connect('button_release_event', self.button_up)
+        self.map_canvas.mpl_connect('resize_event', self.resize)
         self.add_axis()
            
         self.mpl_toolbar = NavigationToolbar(self.map_canvas, None)
@@ -249,8 +254,8 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 
         self.mpl_toolbar.pan()
         
-        self.popMenu = popup_menu(self)
-
+#        self.popMenu = popup_menu(self, self.mpl_toolbar)
+        self.popMenu = None
         
         self.map_canvas.setContextMenuPolicy( QtCore.Qt.CustomContextMenu ) 
         self.connect(self.map_canvas, QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'), self.on_context_menu)
@@ -292,8 +297,18 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         newT = curT - (dWidth * (1 - pcntUnderTop))
         self.axes.set_xlim((newL, newR))
         self.axes.set_ylim((newB, newT))
+        
+        self.pull_pixels()
         self.map_canvas.draw()
     
+    def button_up(self, event):
+        self.pull_pixels()
+        
+    def resize(self):
+        self.pull_pixels()
+    
+    def pull_pixels(self):
+        self.rasterlayer.ax_update(self.axes)
     
     def keyPressEvent(self, event):
         if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_T:
@@ -377,17 +392,17 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         at.set_alpha(0.1)
         self.axes.add_artist(at)
 
-    def updated_ylim(self, ax):
-#        print "Updated ylim"
-        active_cells = self.getSelectedCellWidgets()
-        for cell in active_cells:
-            if cell != self:
-                cell.axes.callbacks.disconnect(cell.ylim_id)
-                cell.axes.set_ylim(self.axes.get_ylim(), emit=False)
-                cell.axes.set_xlim(self.axes.get_xlim(), emit=False)
-                cell.ylim_id = cell.axes.callbacks.connect('ylim_changed', cell.updated_ylim)
-                cell.fig.canvas.draw()
-                cell.update()
+#    def updated_ylim(self, ax):
+##        print "Updated ylim"
+#        active_cells = self.getSelectedCellWidgets()
+#        for cell in active_cells:
+#            if cell != self:
+#                cell.axes.callbacks.disconnect(cell.ylim_id)
+#                cell.axes.set_ylim(self.axes.get_ylim(), emit=False)
+#                cell.axes.set_xlim(self.axes.get_xlim(), emit=False)
+#                cell.ylim_id = cell.axes.callbacks.connect('ylim_changed', cell.updated_ylim)
+#                cell.fig.canvas.draw()
+#                cell.update()
 
             
     def make_resid_cmap(self, kwargs):
@@ -416,7 +431,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 #        vals = self.get_array_from_raster(kwargs['file'])
 #        vals = self.rasterlayer()
 #        uniques = np.unique(vals)
-        uniques 
+        uniques = []
         vatdbf = kwargs['file'] + ".vat.dbf"
         if os.path.exists(vatdbf):
             #we'll pull labels from this file
@@ -425,6 +440,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
             f.close()
             labels = []
             for record in db[2:]:
+                uniques.append(record[0])
                 labels.append(record[1])
 
         kwargs['cbar_ticks'] = uniques
@@ -434,6 +450,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
     def on_draw(self):
         """ Redraws the figure
         """
+        print "on_draw"
         #clear map plot
         self.fig.clear()
         self.add_axis()
@@ -459,26 +476,42 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
                     title += self.all_layers[k]['title']
                     
 #        self.ylim_id = self.axes.callbacks.connect('ylim_changed', self.ax_update)
-        self.xlim_id = self.axes.callbacks.connect('xlim_changed', self.ax_update)
+#        self.xlim_id = self.axes.callbacks.connect('xlim_changed', self.ax_update)
          
                
         if self.displayTL:
             self.add_title(title)
-         
-    def ax_update(self, ax):
-        self.rasterlayer.ax_update(ax)
-        
+    
+    def sync_selected(self):
         active_cells = self.getSelectedCellWidgets()
         for cell in active_cells:
             if cell != self:
-                cell.axes.callbacks.disconnect(cell.xlim_id)
-#                cell.axes.callbacks.disconnect(cell.ylim_id)
+
                 cell.axes.set_ylim(self.axes.get_ylim(), emit=False)
                 cell.axes.set_xlim(self.axes.get_xlim(), emit=False)
-                cell.ylim_id = cell.axes.callbacks.connect('xlim_changed', cell.ax_update)
-#                cell.ylim_id = cell.axes.callbacks.connect('ylim_changed', cell.ax_update)
+                cell.pull_pixels()
+
+#                if self.displaylegend:
+#                    cell.
+                
                 cell.fig.canvas.draw()
                 cell.update()
+         
+#    def ax_update(self, ax):
+#        print "ax_update"
+#        self.rasterlayer.ax_update(ax)
+#        
+#        active_cells = self.getSelectedCellWidgets()
+#        for cell in active_cells:
+#            if cell != self:
+#                cell.axes.callbacks.disconnect(cell.xlim_id)
+##                cell.axes.callbacks.disconnect(cell.ylim_id)
+#                cell.axes.set_ylim(self.axes.get_ylim(), emit=False)
+#                cell.axes.set_xlim(self.axes.get_xlim(), emit=False)
+##                cell.ylim_id = cell.axes.callbacks.connect('xlim_changed', cell.ax_update)
+##                cell.ylim_id = cell.axes.callbacks.connect('ylim_changed', cell.ax_update)
+#                cell.fig.canvas.draw()
+#                cell.update()
     
     def add_vector(self, kwargs):
         self.axes.scatter(kwargs['x'], kwargs['y'], s=10, c=kwargs['color'], linewidth=0.5, antialiased=True)
@@ -493,12 +526,13 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         map_extent = [rasterparams["ulx"],rasterparams["lrx"],rasterparams["lry"],rasterparams["uly"]]
                 
         
-#        raster_array = self.get_array_from_raster(rasterfile)
+##        raster_array = self.get_array_from_raster(rasterfile)
         raster_array = self.rasterlayer(rasterparams["ulx"], rasterparams["lrx"], rasterparams["lry"], rasterparams["uly"])
-        
-        
-        rmin = np.amin(raster_array)
-        rmax = np.amax(raster_array)
+#        
+#        
+#        rmin = np.amin(raster_array)
+#        rmax = np.amax(raster_array)
+        rmin, rmax = utils.getrasterminmax(kwargs['file'])
         norm = colors.normalize(rmin, rmax)
         
 
@@ -570,7 +604,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         return None
 
     def getSAHMSpatialsInCellList(self, sheet, cells):
-        """  Get the list of SAHM spatial out viewrins
+        """  Get the list of SAHM spatial outputviewers
          inside a list of (row, column) cells.
         """
         SAHMspatials = []
@@ -586,36 +620,14 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
             selected_cells = sheet.getSelectedLocations()
             return self.getSAHMSpatialsInCellList(sheet, selected_cells)
         return []
-
-
-    def interactionEvent(self, istyle, name):
-        """ interactionEvent(istyle: vtkInteractorStyle, name: str) -> None
-        Make sure interactions sync across selected renderers
-        
-        """
-        if name=='MouseWheelForwardEvent':
-            istyle.OnMouseWheelForward()
-        if name=='MouseWheelBackwardEvent':
-            istyle.OnMouseWheelBackward()
-        ren = self.interacting
-        if not ren:
-            ren = self.getActiveRenderer(istyle.GetInteractor())
-        if ren:
-            cam = ren.GetActiveCamera()
-            cpos = cam.GetPosition()
-            cfol = cam.GetFocalPoint()
-            cup = cam.GetViewUp()
-            for cell in self.getSelectedCellWidgets():
-                if cell!=self and hasattr(cell, 'getRendererList'): 
-                    rens = cell.getRendererList()
-                    for r in rens:
-                        if r!=ren:
-                            dcam = r.GetActiveCamera()
-                            dcam.SetPosition(cpos)
-                            dcam.SetFocalPoint(cfol)
-                            dcam.SetViewUp(cup)
-                            r.ResetCameraClippingRange()
-                    cell.update()
+    
+    def get allCellWidgets(self):
+        sheet = self.findSheetTabWidget()
+        return self.getSAHMSpatialsInCellList(sheet, all_cells)
+        if sheet:
+            for i in range(sheet.rows.count):
+                for j in range(sheet.columns.count):
+                    if shhet
 
 
 class MyMapCanvas(FigureCanvas):
@@ -637,8 +649,7 @@ class MyMapCanvas(FigureCanvas):
         self._cursor = QtGui.QCursor(QtGui.QApplication.overrideCursor())         
         QtGui.QApplication.restoreOverrideCursor()         
         FigureCanvas.leaveEvent(self, event)
-        
-        
+          
 class RasterDisplay(object):
     '''The idea behind this is from 
     http://matplotlib.sourceforge.net/examples/event_handling/viewlims.py
@@ -662,8 +673,7 @@ class RasterDisplay(object):
         self.x = np.linspace(xstart, xend, self.width)
         self.y = np.linspace(ystart, yend, self.height).reshape(-1,1)
 
-  
-    #pull the pixels we need, no more
+         #pull the pixels we need, no more
         ds = gdal.Open(self.rasterfile, gdal.GA_ReadOnly)
         
         xform  = ds.GetGeoTransform()
@@ -673,7 +683,6 @@ class RasterDisplay(object):
         
         xOffset = int((xstart - xform[0]) / xform[1])
         yOffset = int((yend- xform[3]) / xform[5]) 
-        
         
         if xOffset + ncols > ds.RasterXSize:
             xOffset = 0
@@ -700,8 +709,6 @@ class RasterDisplay(object):
                                               buf_ysize=self.height, buf_xsize=self.width)
         ndval = ds.GetRasterBand(1).GetNoDataValue()
 
-
- 
         return np.ma.masked_array(ary, mask=(ary==ndval))
 
 
@@ -735,7 +742,6 @@ class RasterDisplay(object):
         ax.figure.canvas.draw_idle()
         
 
-
 class fullExtent(QtGui.QAction):
     def __init__(self, parent=None):
         icon = os.path.abspath(os.path.join(
@@ -748,12 +754,18 @@ class fullExtent(QtGui.QAction):
 
     def triggeredSlot(self):
         cellWidget = self.toolBar.getSnappedWidget()
+        
+            
         xlim = cellWidget.xlim
         ylim = cellWidget.ylim
         cellWidget.axes.set_xlim(xlim)
         cellWidget.axes.set_ylim(ylim)
+        cellWidget.pull_pixels()
         cellWidget.fig.canvas.draw()
         cellWidget.update()
+
+        if cellWidget.sync_changes:
+            cellWidget.sync_selected()
 
 class viewTitleLegend(QtGui.QAction):
     def __init__(self, parent=None):
@@ -776,7 +788,23 @@ class viewTitleLegend(QtGui.QAction):
         cellWidget.fig.canvas.draw()
         cellWidget.update()
         cellWidget.axes.set_xlim(xlim)
-        cellWidget.axes.set_ylim(ylim)            
+        cellWidget.axes.set_ylim(ylim)   
+        
+class sync_changes(QtGui.QAction):
+    def __init__(self, parent=None):
+        icon = os.path.abspath(os.path.join(
+                    os.path.dirname(__file__), "Images", "more.png"))
+        QtGui.QAction.__init__(self,
+                               QtGui.QIcon(icon),
+                               "Apply changes to all maps",
+                               parent)
+        self.setCheckable(True)
+        self.setChecked(True)
+        
+    def triggeredSlot(self):
+        cellWidget = self.toolBar.getSnappedWidget()
+        cellWidget.sync_changes = self.isChecked()
+                
 
 class ViewLayerAction(QtGui.QAction):
     def __init__(self, action_dict, parent=None):
@@ -893,11 +921,17 @@ class SAHMSpatialViewerToolBar(QCellToolBar):
             self.appendAction(ViewLayerAction(action_dict, self))
         
         nav_label = QtGui.QLabel()
+        
         nav_label.setText("  Navigation:")
+        self.addSeparator()
+        self.addSeparator()
         self.appendWidget(nav_label)
+                
+        self.appendAction(sync_changes(self))
         self.appendAction(viewTitleLegend(self))
         self.appendAction(fullExtent(self))
-#        self.appendWidget(sw.mpl_toolbar)
+
+
         
     def updateToolBar(self):
         QCellToolBar.updateToolBar(self)
@@ -909,6 +943,26 @@ class SAHMSpatialViewerToolBar(QCellToolBar):
                 action.setEnabled(sw.all_layers[action.tag]['enabled'])
         
         self.appendWidget(sw.mpl_toolbar)
+        
+        sw.popMenu = self.gen_popup_menu()
+    
+    def gen_popup_menu(self):
+        sw = self.getSnappedWidget()
+        popmenu = QtGui.QMenu(sw)
+        toolbar = QtGui.QToolBar()
+        for action in self.actions():
+            if action.isSeparator():
+                popmenu.addSeparator()
+            elif not isinstance(action, QtGui.QWidgetAction):
+                action.setIconVisibleInMenu(True) 
+                popmenu.addAction(action)
+            else:
+                popmenu.addSeparator()
+                
+        for action in sw.mpl_toolbar.actions():
+            action.setIconVisibleInMenu(True) 
+            popmenu.addAction(action)
+        return popmenu
         
 #        for action in self.actions():
 #            if type(action) == ViewLayerAction:
@@ -927,28 +981,32 @@ class AnchoredText(AnchoredOffsetbox):
                                            prop=prop,
                                            frameon=frameon)
 
-class popup_menu(QtGui.QMenu):
-    def __init__(self, parent=None):
-        
-        QtGui.QMenu.__init__(self, parent)
-        
-        toolbar = QtGui.QToolBar()
-        # Actions
-        icon = os.path.abspath(os.path.join(os.path.dirname(__file__), "Images", "RedPoints.png"))
-        self.actionPresence = QtGui.QAction(QtGui.QIcon(icon), "Presence points", self)
-        self.actionPresence.setStatusTip("Display/hide presence points")
-        self.connect(self.actionPresence, QtCore.SIGNAL("triggered()"), self.on_pointsclick) 
-        self.actionPresence.setIconVisibleInMenu(True)   
-         
-        self.actionAbsence = QtGui.QAction(QtGui.QIcon("GreenPoints.png"), "Presence points", self)
-        self.actionAbsence.setStatusTip("Display/hide absence points") 
-         
-        
-        # create context menu 
-        self.addAction(self.actionPresence)
-        self.addAction(self.actionAbsence)
-        self.addSeparator() 
-
-        
-    def on_pointsclick(self):
-        QtGui.QMessageBox.about(self, "I do nothing", "no really")
+#class popup_menu(QtGui.QMenu):
+#    def __init__(self, parent=None, mpl_toolbar=None):
+#        
+#        QtGui.QMenu.__init__(self, parent)
+#        
+#        toolbar = QtGui.QToolBar()
+#        for action in mpl_toolbar.actions():
+#            action.setIconVisibleInMenu(True) 
+#            self.addAction(action)
+#        
+#        # Actions
+#        icon = os.path.abspath(os.path.join(os.path.dirname(__file__), "Images", "RedPoints.png"))
+#        self.actionPresence = QtGui.QAction(QtGui.QIcon(icon), "Presence points", self)
+#        self.actionPresence.setStatusTip("Display/hide presence points")
+#        self.connect(self.actionPresence, QtCore.SIGNAL("triggered()"), self.on_pointsclick) 
+#        self.actionPresence.setIconVisibleInMenu(True)   
+#         
+#        self.actionAbsence = QtGui.QAction(QtGui.QIcon("GreenPoints.png"), "Presence points", self)
+#        self.actionAbsence.setStatusTip("Display/hide absence points") 
+#         
+#        
+#        # create context menu 
+#        self.addAction(self.actionPresence)
+#        self.addAction(self.actionAbsence)
+#        self.addSeparator() 
+#
+#        
+#    def on_pointsclick(self):
+#        QtGui.QMessageBox.about(self, "I do nothing", "no really")

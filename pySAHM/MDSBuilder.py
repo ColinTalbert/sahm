@@ -136,6 +136,7 @@ class MDSBuilder(object):
         
         #loop though each of the supplied rasters and add the 
         #extracted values to
+        badpoints = []
         for input in self.inputs:
             inputND = self.getND(input)
             rasterDS = gdal.Open(input, gdalconst.GA_ReadOnly)
@@ -156,7 +157,6 @@ class MDSBuilder(object):
             
             pcntDone = 0
             i = 1
-            badpoints = []
             for row in outputRows:
                 'loop through each of our points'
                 x = float(row[0])
@@ -212,7 +212,7 @@ class MDSBuilder(object):
                 weight = row[3]
                 del row[3]
                 row.append(weight)
-                
+
             if not str(self.NDFlag) in row[3:]:
                 outputMDS.writerow(row)
                 kept += 1
