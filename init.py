@@ -397,105 +397,105 @@ class RastersWithPARCInfoCSV(File):
 #    def compute(self, is_input=None):
 #        PersistentPath.compute(self, is_input, 'blob')
 
-#removed for the V1.0 release
-#class ApplyModel(Module):
-#    '''
-#    Apply Model
-#
-#    The ApplyModel module allows the user to apply a model developed using a
-#    particular package within the workflow and generate output probability and binary
-#    maps. The process of creating an output probability map and binary map based on
-#    a particular model can be time-consuming, depending on the input data. By
-#    existing as a stand-alone process in the workflow, the ApplyModel module allows
-#    a user to investigate the performance metrics for a particular model (such as
-#    the ROC curve or the AUC) before dedicating the processing time needed to generate
-#    the output maps. In most cases, a user will "fine tune" a model by exploring the
-#    performance metrics of different model iterations before applying the model and
-#    generating the actual maps as a final step.
-#    
-#    The ApplyModel module also provides the user with the option of projecting the results
-#    of a model developed from one set of environmental predictors onto a new modeled space
-#    containing that same set of environmental predictors but representing data captured at
-#    a different temporal or spatial location. For example, a user could generate a model
-#    predicting habitat suitability using recorded presence points and certain environmental
-#    predictors such as elevation, landcover, and proximity to water in one geographic
-#    location. Based on the training from this information, the modeled results could be
-#    generated for (or "projected to") a new location based on the range of values seen in
-#    elevation, landcover, and proximity to water in the second geographic area. Similarly,
-#    modeling predicted results through time is also possible. A model trained using field
-#    data and a set of predictor layers representative of one time period could be projected
-#    onto the same geographical area using a new set of layers corresponding to the same
-#    predictors but representing data from a different time period (e.g., different climate
-#    data).
-#
-#    The ApplyModel module accepts two inputs from the user:
-#
-#    1. Model Workspace: The model workspace field accepts as an input a modeling
-#    package element (complete with all required parameters) from upstream in the workflow.
-#    The inputs and specifications provided in the dialogue fields of the model will be applied
-#    and used to generate the output maps. A user should populate the model workspace field by
-#    connecting a model element to the appropriate input port of the ApplyModel module in the
-#    visual display of the model workflow.
-#    
-#    2. Projection Target: The projection target is an optional parameter that allows a user to
-#    apply a model to a particular geographic area and or set of predictors (other than those
-#    used to train the model) and create output maps within the spatial extent of the projection
-#    target layers. This input field should be populated by connecting either the output of the
-#    ProjectionLayers module or a separate MDSBuilder element to the appropriate input port of
-#    the ApplyModel module.
-#    
-#    '''
-#    
-#    _input_ports = [('projectionTarget', '(gov.usgs.sahm:MergedDataSet:Other)'),
-#                    ('modelWorkspace', '(edu.utah.sci.vistrails.basic:File)'),
-#                    ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)'),
-#                    ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)'),]
-#    _output_ports = [('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
-#                     ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)')]
-#    
-#    
-#    
-#    def compute(self):
-#        
-#        workspace = self.forceGetInputFromPort('modelWorkspace').name
-#        output_dname = utils.mknextdir(prefix='AppliedModel_')
-#        if self.hasInputFromPort('projectionTarget'):
-#            mdsFile = self.forceGetInputFromPort('projectionTarget').name
-#            args = "ws=" + '"' + workspace + '"' + " c=" + '"' + mdsFile + '"' + " o=" + '"' + output_dname + '"'
-#        else:
-#            args = "ws=" + '"' + workspace + '"' + " o=" + '"' + output_dname + '"'
-#        
-#        if self.hasInputFromPort('makeBinMap'):
-#            makeBinMap = self.forceGetInputFromPort('makeBinMap')
-#            args += ' mbt=' + str(makeBinMap).upper()
-#        else:
-#            args += ' mbt=TRUE'
-#            
-#        if self.hasInputFromPort('makeProbabilityMap'):
-#            makeProbabilityMap = self.forceGetInputFromPort('makeProbabilityMap')
-#            args += ' mpt=' + str(makeProbabilityMap).upper()
-#        else:
-#             args += ' mpt=TRUE'
-#                
-#        
-#        utils.runRScript('PredictModel.r', args, self)
-#        
-#        input_fname = os.path.join(output_dname, "prob_map.tif")
-#        output_fname = os.path.join(output_dname, 'prob_map.jpeg')
-#        if os.path.exists(input_fname):
-#            utils.tif_to_color_jpeg(input_fname, output_fname, color_breaks_csv)
-#            output_file1 = utils.create_file_module(output_fname)
-#            self.setResult('ProbabilityMap', output_file1)
-#        else:
-#            msg = "Expected output from ApplyModel was not found."
-#            msg += "\nThis likely indicates problems with the inputs to the R module."
-#            writetolog(msg, False, True)
-#            raise ModuleError(self, msg)
-#        
-#        if  os.path.exists(os.path.join(output_dname, "bin_map.tif")):
-#            outFileName = os.path.join(output_dname, "bin_map.tif")
-#            output_file2 = utils.create_file_module(outFileName)
-#            self.setResult('BinaryMap', output_file2)
+
+class ApplyModel(Module):
+    '''
+    Apply Model
+
+    The ApplyModel module allows the user to apply a model developed using a
+    particular package within the workflow and generate output probability and binary
+    maps. The process of creating an output probability map and binary map based on
+    a particular model can be time-consuming, depending on the input data. By
+    existing as a stand-alone process in the workflow, the ApplyModel module allows
+    a user to investigate the performance metrics for a particular model (such as
+    the ROC curve or the AUC) before dedicating the processing time needed to generate
+    the output maps. In most cases, a user will "fine tune" a model by exploring the
+    performance metrics of different model iterations before applying the model and
+    generating the actual maps as a final step.
+    
+    The ApplyModel module also provides the user with the option of projecting the results
+    of a model developed from one set of environmental predictors onto a new modeled space
+    containing that same set of environmental predictors but representing data captured at
+    a different temporal or spatial location. For example, a user could generate a model
+    predicting habitat suitability using recorded presence points and certain environmental
+    predictors such as elevation, landcover, and proximity to water in one geographic
+    location. Based on the training from this information, the modeled results could be
+    generated for (or "projected to") a new location based on the range of values seen in
+    elevation, landcover, and proximity to water in the second geographic area. Similarly,
+    modeling predicted results through time is also possible. A model trained using field
+    data and a set of predictor layers representative of one time period could be projected
+    onto the same geographical area using a new set of layers corresponding to the same
+    predictors but representing data from a different time period (e.g., different climate
+    data).
+
+    The ApplyModel module accepts two inputs from the user:
+
+    1. Model Workspace: The model workspace field accepts as an input a modeling
+    package element (complete with all required parameters) from upstream in the workflow.
+    The inputs and specifications provided in the dialogue fields of the model will be applied
+    and used to generate the output maps. A user should populate the model workspace field by
+    connecting a model element to the appropriate input port of the ApplyModel module in the
+    visual display of the model workflow.
+    
+    2. Projection Target: The projection target is an optional parameter that allows a user to
+    apply a model to a particular geographic area and or set of predictors (other than those
+    used to train the model) and create output maps within the spatial extent of the projection
+    target layers. This input field should be populated by connecting either the output of the
+    ProjectionLayers module or a separate MDSBuilder element to the appropriate input port of
+    the ApplyModel module.
+    
+    '''
+    
+    _input_ports = [('projectionTarget', '(gov.usgs.sahm:MergedDataSet:Other)'),
+                    ('modelWorkspace', '(edu.utah.sci.vistrails.basic:File)'),
+                    ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)'),
+                    ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)'),]
+    _output_ports = [('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
+                     ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)')]
+    
+    
+    
+    def compute(self):
+        
+        workspace = self.forceGetInputFromPort('modelWorkspace').name
+        output_dname = utils.mknextdir(prefix='AppliedModel_')
+        if self.hasInputFromPort('projectionTarget'):
+            mdsFile = self.forceGetInputFromPort('projectionTarget').name
+            args = "ws=" + '"' + workspace + '"' + " c=" + '"' + mdsFile + '"' + " o=" + '"' + output_dname + '"'
+        else:
+            args = "ws=" + '"' + workspace + '"' + " o=" + '"' + output_dname + '"'
+        
+        if self.hasInputFromPort('makeBinMap'):
+            makeBinMap = self.forceGetInputFromPort('makeBinMap')
+            args += ' mbt=' + str(makeBinMap).upper()
+        else:
+            args += ' mbt=TRUE'
+            
+        if self.hasInputFromPort('makeProbabilityMap'):
+            makeProbabilityMap = self.forceGetInputFromPort('makeProbabilityMap')
+            args += ' mpt=' + str(makeProbabilityMap).upper()
+        else:
+             args += ' mpt=TRUE'
+                
+        
+        utils.runRScript('PredictModel.r', args, self)
+        
+        input_fname = os.path.join(output_dname, "prob_map.tif")
+        output_fname = os.path.join(output_dname, 'prob_map.jpeg')
+        if os.path.exists(input_fname):
+            utils.tif_to_color_jpeg(input_fname, output_fname, color_breaks_csv)
+            output_file1 = utils.create_file_module(output_fname)
+            self.setResult('ProbabilityMap', output_file1)
+        else:
+            msg = "Expected output from ApplyModel was not found."
+            msg += "\nThis likely indicates problems with the inputs to the R module."
+            writetolog(msg, False, True)
+            raise ModuleError(self, msg)
+        
+        if  os.path.exists(os.path.join(output_dname, "bin_map.tif")):
+            outFileName = os.path.join(output_dname, "bin_map.tif")
+            output_file2 = utils.create_file_module(outFileName)
+            self.setResult('BinaryMap', output_file2)
         
 class Model(Module):
     '''
@@ -1352,188 +1352,188 @@ class CovariateCorrelationAndSelection(Module):
         if retVal == 1:
             raise ModuleError(self, "Cancel or Close selected (not OK) workflow halted.")
 
-#removed for the V1.0 release
-#class ProjectionLayers(Module):
-#    '''
-#    Projection Layers
-#
-#    Note: as of June 2011, this module offers some functionality that is only available
-#    to users running the SAHM package within the USGS Fort Collins Science Center (FORT).
-#
-#    The ProjectionLayers module provides the option to prepare a separate set of predictor
-#    layers so that the results of a model developed from one set of environmental predictors
-#    can be projected onto a new modeled space. This second set of environmental predictors
-#    (corresponding to the "projection target") most often contains the same environmental
-#    predictors but represents data captured at a different temporal or spatial location. For
-#    example, a user could generate a model predicting habitat suitability using recorded
-#    presence points and certain environmental predictors such as elevation, landcover, and
-#    proximity to water in one geographic location. Based on the training from this information,
-#    the modeled results could be generated for (or "projected to") a new location based on the
-#    range of values seen in elevation, landcover, and proximity to water in the second geographic
-#    area. Similarly, modeling predicted results through time is also possible. A model trained
-#    using field data and a set of predictor layers representative of one time period could be
-#    projected onto the same geographical area using a new set of predictor layers corresponding
-#    to the same predictors but representing data from a different time period (e.g., different
-#    climate data). 
-#
-#    The output of this module is subsequently used as the projection target in the ApplyModel module.
-#
-#    (As part of the process of preparing the layers for modeling, the ProjectionLayers module runs
-#    the PARC module internally on the inputs. Outputs from the ProjectionLayers module will possess
-#    matching coordinate systems, cell sizes, and extents and do not need to be run through PARC
-#    before being used downstream in the workflow.)
-#
-#    Six parameters can be set by the user:
-#
-#    1. Directory Crosswalk CSV: This is a .csv file containing two columns designating
-#    the layers that should be swapped out in the projected model. The first column
-#    contains a list of the full paths to the predictor layers used to develop the original
-#    model that will be replaced in the projection process. The second column contains the
-#    full paths to the new predictor layers that will substitute the respective layers used
-#    in the original model. Each original layer in the first column should be paired with
-#    its replacement in the second column (e.g., Column 1 = C:\ModelLayers\Precipitation1980.tif,
-#    Column 2 = C:\ModelLayers\Precipitation2000.tif). In the case of any file used to develop
-#    the first model that is not expressly listed in the Directory Crosswalk CSV with a
-#    replacement, the original file will be used in the new model projection. The module
-#    anticipates a header row in this .csv file (thus, the first row of data will be ignored).
-#    
-#    2. File List CSV: This is a .csv file containing the list of predictor files used to
-#    develop the first model. Effectively, this file will be updated based on the information
-#    provided in the directory crosswalk .csv and used as the input to the training process
-#    for the projected model. The output of the PARC module from the first model iteration
-#    should be used as the input to this parameter.
-#    
-#    3. Model (available only to users at the FORT): This parameter allows VisTrail users
-#    running the SAHM package on site at the USGS Science Center in Fort Collins (FORT) to
-#    specify one of three models to use for the projected model run ("CCCMA," "CSIRO,"
-#    or "hadcm3").
-#    
-#    4. Scenario (available only to users at the FORT): This parameter allows VisTrail
-#    users running the SAHM package on site at the USGS Science Center in Fort Collins 
-#    FORT) to specify one of two scenarios for the projected model run ("A2a" or "B2b"). 
-#    
-#    5. Template: This parameter allows a user to specify the new template layer to be used
-#    in the projected model run. The template layer is a raster data layer with a defined
-#    coordinate system, a known cell size, and an extent that defines the (new) study area.
-#    This raster layer serves as the template for all the other inputs in the analysis. All
-#    additional raster layers used in the analysis will be resampled and reprojected as
-#    needed to match the template, snapped to the template, and clipped to have an extent
-#    that matches the template. Users should ensure that all the layers used for the projected
-#    analysis have coverage within the extent of the template layer.
-#    
-#    6. Year (available only to users at the FORT): This parameter allows VisTrail users
-#    running the SAHM package on site at the USGS Science Center in Fort Collins (FORT)
-#    to specify one of three years to use for the projected model run ("2020," "2050," or "2080").
-#
-#    '''
-#    _input_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
-#                    ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
-#                    ('model', '(edu.utah.sci.vistrails.basic:String)'),
-#                    ('scenario', '(edu.utah.sci.vistrails.basic:String)'),
-#                    ('year', '(edu.utah.sci.vistrails.basic:String)'),
-#                    ('directoryCrosswalkCSV', '(edu.utah.sci.vistrails.basic:File)')
-#                    ]
-#    _output_ports = [("MDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
-#
-#    def compute(self):
-#        models = ['CCCMA', 'CSIRO', 'hadcm3']
-#        scenarioss = ['A2a', 'B2b']
-#        years = ['2020', '2050', '2080']
-#        
-#        writetolog("\nRunning make Projection Layers", True)
-#        
-#        inputCSV = self.forceGetInputFromPort('RastersWithPARCInfoCSV').name
-#    
-#        if self.hasInputFromPort('templateLayer'):
-#            template = self.forceGetInputFromPort('templateLayer').name
-#        else:
-#            template = '' #we'll get a template below
-#            
-#        fromto = []
-#        climargs = {}
-#        
-#        for input in ['model', 'scenario', 'year']:
-#            if self.hasInputFromPort(input):
-#                climargs[input] = self.forceGetInputFromPort(input)
-#        if climargs <> {} and climargs.keys() <> ['model', 'scenario', 'year']:
-#            #they did not add in one of each, Not going to fly
-#            raise ModuleError(self, "All of model, scenario, and year must be supplied if any are used.")
-#        elif climargs <> {} and climargs.keys <> ['model', 'scenario', 'year']:
-#            #they specified a alt climate scenario add this to our list to search for
-#            fromto.append([r'K:\GIS_LIBRARY\Climate\WorldClim\BioclimaticVariables\bio_30s_esri\bio',
-#                           os.path.join('I:\WorldClim_Future_Climate\RenamedBILs', 
-#                                        climargs['model'], climargs['scenario'], climargs['year'])])
-#        
-#        if self.hasInputFromPort('directoryCrosswalkCSV'):
-#            crosswalkCSV = csv.reader(open(self.forceGetInputFromPort('directoryCrosswalkCSV'), 'r'))
-#            header = crosswalkCSV.next()
-#            for row in crosswalkCSV:
-#                fromto.append(row[0], row[1])
-#            del crosswalkCSV    
-#            
-#        #write out the outputs to an empty MDS file (just the header is needed to PARC the outputs)
-#            
-#        
-#        inCSV = csv.reader(open(inputCSV, 'r'))
-#        inCSV.next() #skip header
-#        workingCSV = utils.mknextfile(prefix='tmpFilesToPARC_', suffix='.csv')
-#        tmpCSV = csv.writer(open(workingCSV, 'wb'))
-#        tmpCSV.writerow(["FilePath", "Categorical", "Resampling", "Aggregation"])
-#        outHeader1 = ['X', 'Y', 'response']
-#        outHeader2 = ['', '', '']
-#        outHeader3 = ['', '', '']
-#        
-#        output_dname = utils.mknextdir(prefix='ProjectionLayers_')
-#        
-#        for row in inCSV:
-#            if template == '':
-#                template = row[0]
-#            fileShortName = utils.getShortName(row[0])
-#            if row[1] == 1:
-#                outHeader1.append(fileShortName + '_categorical')
-#            else:
-#                outHeader1.append(fileShortName)
-#            outHeader2.append('1')
-#            outHeader3.append(os.path.join(output_dname, fileShortName + '.tif'))
-#
-#            origFile = row[4]
-#            newOrigFile = origFile
-#            for lookup in fromto:
-#               if lookup[0] in origFile:
-#                   newOrigFile = origFile.replace(lookup[0], lookup[1])
-#            tmpCSV.writerow([newOrigFile,] + row[1:4])
-#        del tmpCSV
-#        
-#        #PARC the files here
-#        ourPARC = parc.PARC()
-#        
-#        
-#        if configuration.verbose:
-#            ourPARC.verbose = True
-#        writetolog("    output_dname=" + output_dname, False, False)
-#        ourPARC.outDir = output_dname
-#        ourPARC.inputsCSV = workingCSV
-#        ourPARC.template = template
-#
-#        try:
-#            ourPARC.parcFiles()
-#        except TrappedError as e:
-#            raise ModuleError(self, e.message)
-#        except :
-#            utils.informative_untrapped_error(self, "PARC")
-#        
-#        #loop through our workingCSV and format it into an MDS header
-#        
-#        #outputMDS = utils.mknextfile(prefix='ProjectionLayersMDS_', suffix = '.csv')
-#        outputMDS = os.path.join(output_dname, 'ProjectionLayersMDS.csv')
-#        outCSV = csv.writer(open(outputMDS, 'wb'))
-#        outCSV.writerow(outHeader1)
-#        outCSV.writerow(outHeader2)
-#        outCSV.writerow(outHeader3)
-#        
-#        output_file = utils.create_file_module(outputMDS)
-#        self.setResult("MDS", output_file)
-#        writetolog("Finished Select Projection Layers widget", True)
+
+class ProjectionLayers(Module):
+    '''
+    Projection Layers
+
+    Note: as of June 2011, this module offers some functionality that is only available
+    to users running the SAHM package within the USGS Fort Collins Science Center (FORT).
+
+    The ProjectionLayers module provides the option to prepare a separate set of predictor
+    layers so that the results of a model developed from one set of environmental predictors
+    can be projected onto a new modeled space. This second set of environmental predictors
+    (corresponding to the "projection target") most often contains the same environmental
+    predictors but represents data captured at a different temporal or spatial location. For
+    example, a user could generate a model predicting habitat suitability using recorded
+    presence points and certain environmental predictors such as elevation, landcover, and
+    proximity to water in one geographic location. Based on the training from this information,
+    the modeled results could be generated for (or "projected to") a new location based on the
+    range of values seen in elevation, landcover, and proximity to water in the second geographic
+    area. Similarly, modeling predicted results through time is also possible. A model trained
+    using field data and a set of predictor layers representative of one time period could be
+    projected onto the same geographical area using a new set of predictor layers corresponding
+    to the same predictors but representing data from a different time period (e.g., different
+    climate data). 
+
+    The output of this module is subsequently used as the projection target in the ApplyModel module.
+
+    (As part of the process of preparing the layers for modeling, the ProjectionLayers module runs
+    the PARC module internally on the inputs. Outputs from the ProjectionLayers module will possess
+    matching coordinate systems, cell sizes, and extents and do not need to be run through PARC
+    before being used downstream in the workflow.)
+
+    Six parameters can be set by the user:
+
+    1. Directory Crosswalk CSV: This is a .csv file containing two columns designating
+    the layers that should be swapped out in the projected model. The first column
+    contains a list of the full paths to the predictor layers used to develop the original
+    model that will be replaced in the projection process. The second column contains the
+    full paths to the new predictor layers that will substitute the respective layers used
+    in the original model. Each original layer in the first column should be paired with
+    its replacement in the second column (e.g., Column 1 = C:\ModelLayers\Precipitation1980.tif,
+    Column 2 = C:\ModelLayers\Precipitation2000.tif). In the case of any file used to develop
+    the first model that is not expressly listed in the Directory Crosswalk CSV with a
+    replacement, the original file will be used in the new model projection. The module
+    anticipates a header row in this .csv file (thus, the first row of data will be ignored).
+    
+    2. File List CSV: This is a .csv file containing the list of predictor files used to
+    develop the first model. Effectively, this file will be updated based on the information
+    provided in the directory crosswalk .csv and used as the input to the training process
+    for the projected model. The output of the PARC module from the first model iteration
+    should be used as the input to this parameter.
+    
+    3. Model (available only to users at the FORT): This parameter allows VisTrail users
+    running the SAHM package on site at the USGS Science Center in Fort Collins (FORT) to
+    specify one of three models to use for the projected model run ("CCCMA," "CSIRO,"
+    or "hadcm3").
+    
+    4. Scenario (available only to users at the FORT): This parameter allows VisTrail
+    users running the SAHM package on site at the USGS Science Center in Fort Collins 
+    FORT) to specify one of two scenarios for the projected model run ("A2a" or "B2b"). 
+    
+    5. Template: This parameter allows a user to specify the new template layer to be used
+    in the projected model run. The template layer is a raster data layer with a defined
+    coordinate system, a known cell size, and an extent that defines the (new) study area.
+    This raster layer serves as the template for all the other inputs in the analysis. All
+    additional raster layers used in the analysis will be resampled and reprojected as
+    needed to match the template, snapped to the template, and clipped to have an extent
+    that matches the template. Users should ensure that all the layers used for the projected
+    analysis have coverage within the extent of the template layer.
+    
+    6. Year (available only to users at the FORT): This parameter allows VisTrail users
+    running the SAHM package on site at the USGS Science Center in Fort Collins (FORT)
+    to specify one of three years to use for the projected model run ("2020," "2050," or "2080").
+
+    '''
+    _input_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
+                    ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
+                    ('model', '(edu.utah.sci.vistrails.basic:String)'),
+                    ('scenario', '(edu.utah.sci.vistrails.basic:String)'),
+                    ('year', '(edu.utah.sci.vistrails.basic:String)'),
+                    ('directoryCrosswalkCSV', '(edu.utah.sci.vistrails.basic:File)')
+                    ]
+    _output_ports = [("MDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
+
+    def compute(self):
+        models = ['CCCMA', 'CSIRO', 'hadcm3']
+        scenarioss = ['A2a', 'B2b']
+        years = ['2020', '2050', '2080']
+        
+        writetolog("\nRunning make Projection Layers", True)
+        
+        inputCSV = self.forceGetInputFromPort('RastersWithPARCInfoCSV').name
+    
+        if self.hasInputFromPort('templateLayer'):
+            template = self.forceGetInputFromPort('templateLayer').name
+        else:
+            template = '' #we'll get a template below
+            
+        fromto = []
+        climargs = {}
+        
+        for input in ['model', 'scenario', 'year']:
+            if self.hasInputFromPort(input):
+                climargs[input] = self.forceGetInputFromPort(input)
+        if climargs <> {} and climargs.keys() <> ['model', 'scenario', 'year']:
+            #they did not add in one of each, Not going to fly
+            raise ModuleError(self, "All of model, scenario, and year must be supplied if any are used.")
+        elif climargs <> {} and climargs.keys <> ['model', 'scenario', 'year']:
+            #they specified a alt climate scenario add this to our list to search for
+            fromto.append([r'K:\GIS_LIBRARY\Climate\WorldClim\BioclimaticVariables\bio_30s_esri\bio',
+                           os.path.join('I:\WorldClim_Future_Climate\RenamedBILs', 
+                                        climargs['model'], climargs['scenario'], climargs['year'])])
+        
+        if self.hasInputFromPort('directoryCrosswalkCSV'):
+            crosswalkCSV = csv.reader(open(self.forceGetInputFromPort('directoryCrosswalkCSV'), 'r'))
+            header = crosswalkCSV.next()
+            for row in crosswalkCSV:
+                fromto.append(row[0], row[1])
+            del crosswalkCSV    
+            
+        #write out the outputs to an empty MDS file (just the header is needed to PARC the outputs)
+            
+        
+        inCSV = csv.reader(open(inputCSV, 'r'))
+        inCSV.next() #skip header
+        workingCSV = utils.mknextfile(prefix='tmpFilesToPARC_', suffix='.csv')
+        tmpCSV = csv.writer(open(workingCSV, 'wb'))
+        tmpCSV.writerow(["FilePath", "Categorical", "Resampling", "Aggregation"])
+        outHeader1 = ['X', 'Y', 'response']
+        outHeader2 = ['', '', '']
+        outHeader3 = ['', '', '']
+        
+        output_dname = utils.mknextdir(prefix='ProjectionLayers_')
+        
+        for row in inCSV:
+            if template == '':
+                template = row[0]
+            fileShortName = utils.getShortName(row[0])
+            if row[1] == 1:
+                outHeader1.append(fileShortName + '_categorical')
+            else:
+                outHeader1.append(fileShortName)
+            outHeader2.append('1')
+            outHeader3.append(os.path.join(output_dname, fileShortName + '.tif'))
+
+            origFile = row[4]
+            newOrigFile = origFile
+            for lookup in fromto:
+               if lookup[0] in origFile:
+                   newOrigFile = origFile.replace(lookup[0], lookup[1])
+            tmpCSV.writerow([newOrigFile,] + row[1:4])
+        del tmpCSV
+        
+        #PARC the files here
+        ourPARC = parc.PARC()
+        
+        
+        if configuration.verbose:
+            ourPARC.verbose = True
+        writetolog("    output_dname=" + output_dname, False, False)
+        ourPARC.outDir = output_dname
+        ourPARC.inputsCSV = workingCSV
+        ourPARC.template = template
+
+        try:
+            ourPARC.parcFiles()
+        except TrappedError as e:
+            raise ModuleError(self, e.message)
+        except :
+            utils.informative_untrapped_error(self, "PARC")
+        
+        #loop through our workingCSV and format it into an MDS header
+        
+        #outputMDS = utils.mknextfile(prefix='ProjectionLayersMDS_', suffix = '.csv')
+        outputMDS = os.path.join(output_dname, 'ProjectionLayersMDS.csv')
+        outCSV = csv.writer(open(outputMDS, 'wb'))
+        outCSV.writerow(outHeader1)
+        outCSV.writerow(outHeader2)
+        outCSV.writerow(outHeader3)
+        
+        output_file = utils.create_file_module(outputMDS)
+        self.setResult("MDS", output_file)
+        writetolog("Finished Select Projection Layers widget", True)
 
 class MAXENT(Module):
     '''
