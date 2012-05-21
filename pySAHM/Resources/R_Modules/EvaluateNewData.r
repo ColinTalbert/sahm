@@ -31,31 +31,43 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
               out$dat$bname<-bname
     #Determine if we will be evaluating a holdout set if so rename it to the split portion so evaluation metrics will be caluclated and reported
    if(produce.metrics){
-        hl=readLines(out$input$ma.name,1)
-         hl=strsplit(hl,',')
-         
+            
          ##################################################################################
          ###################### Producing Evalutaiton Metrics for the hold out data
-               if(!is.na(Eval.split<-match("evalsplit",tolower(unlist(hl))))){
-                           tif.info<-readLines(out$input$ma.name,3)
-                            tif.info<-strsplit(tif.info,',')
-                            temp<-tif.info[[2]]
-                            temp[1:3]<-0
-                            include<-as.numeric(temp)
-                       if(!is.na(Split<-match("split",tolower(unlist(hl))))) {hl[[1]][Split]<-"Unused"
-                          include[Split]<-0
-                          }
-                           hl[[1]][Eval.split]<-"Split"
-    
-                           out <- read.ma(out,hl=hl,include=include)
-    
-                             out$dat$bname<-bname
-                             out$dat$split.type="eval"
+                 #if evaluating on brand new data switch out the mds 
+                 if(!is.null(new.tifs)){out$input$ma.name<-new.tifs
+                 store.train<-out$dat$ma$train
+                 }
+                    hl=readLines(out$input$ma.name,1)
+                    hl=strsplit(hl,',')
+                    tif.info<-readLines(out$input$ma.name,3)
+                                tif.info<-strsplit(tif.info,',')
+                                temp<-tif.info[[2]]
+                                temp[1:3]<-0
+                                include<-as.numeric(temp)
+                 if(is.null(new.tifs)){ #Switching the name Eval.Split to split so we evaluate on final holdout data
+                         if(!is.na(Eval.split<-match("evalsplit",tolower(unlist(hl))))){
+                                if(!is.na(Split<-match("split",tolower(unlist(hl))))) {hl[[1]][Split]<-"Unused"
+                                  include[Split]<-0
+                                }
+                                hl[[1]][Eval.split]<-"Split"  
+                       }
+                 }
+                        out <- read.ma(out,hl=hl,include=include)
+        
+                                out$dat$bname<-bname
+                                out$dat$split.type=out$dat$split.label="eval"
+                    
+                    #if we have completely new data then the whole dataset should be used for testing and the original displayed as training data
+                    if(!is.null(new.tifs)) {
+                        names(out$dat$ma)<-"test"
+                        out$dat$ma$train<-store.train
+                    }
                 # Making Predictions
                          pred.vals<-function(x,model,Model){
                         x$pred<-pred.fct(model,x$dat[,2:ncol(x$dat)],Model)
                         return(x)}
-                           print("line 57 browser")
+                        
     
                        assign("out",out,envir=.GlobalEnv)
                         #getting the predictions for the test/train split
@@ -66,7 +78,6 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                         #producing auc and residual plots model summary information and accross model evaluation metric
                     out$mods$auc.output<-make.auc.plot.jpg(out=out)
            }
-      }
       if(!is.null(new.tifs)){
                  ma.name <- new.tifs
                       #get the paths off of the new mds file
@@ -76,7 +87,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                           paths<-as.character(tif.info[[3]])
     
                   paths<-paths[paths!=""]
-                  browser()
+                
     
                 ma.cols <- match(names(out$dat$ma$train$dat)[-1],sub(".tif","",basename(paths)))
                 paths<-paths[ma.cols]

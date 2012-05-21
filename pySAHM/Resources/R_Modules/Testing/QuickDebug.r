@@ -43,15 +43,18 @@ FitModels(ma.name=input.file,
             response.col=rc,make.p.tif=T,make.binary.tif=T,
             mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars",opt.methods=2,MESS=F,pseudoabsence=TRUE)
 
-EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,make.binary.tif=TRUE,make.p.tif=TRUE,MESS=TRUE)
-
 ##GLM
 FitModels(ma.name=input.file,
           tif.dir=NULL,
           output.dir=output.dir,
-          response.col=rc,make.p.tif=T,make.binary.tif=T,
-          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=TRUE,opt.methods=2,squared.terms=TRUE)
-          
+          response.col=rc,make.p.tif=F,make.binary.tif=F,
+          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=F,opt.methods=2,squared.terms=FALSE)
+
+
+EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,b.tif=FALSE,p.tif=FALSE,mess=TRUE,new.tifs=NULL,produce.metrics=TRUE)
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/NoSplit.csv" 
+EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,b.tif=FALSE,p.tif=FALSE,mess=TRUE,new.tifs=input.file,produce.metrics=TRUE) 
+         
 #RF
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_3.csv"
 set.seed(1)

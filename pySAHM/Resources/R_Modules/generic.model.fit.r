@@ -84,7 +84,7 @@ on.exit(detach(out$input))
                   capture.output(print(out$mods$summary),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
 
           }
-
+  
   if(Model=="glm") {
   penalty <- if(out$input$simp.method=="AIC") 2 else log(nrow(out$dat$ma$ma))
  

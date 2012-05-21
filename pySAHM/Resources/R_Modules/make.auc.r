@@ -48,7 +48,7 @@ make.auc.plot.jpg<-function(out=out){
   calib.plot<-paste(out$dat$bname,"_CalibrationPlot.jpg",sep="")
   modelname<-toupper(out$input$model)
   input.list<-out$dat$ma
-
+ 
 ########################################################################
 ######################### Calc threshold on train split #################
  if(out$input$model.family!="poisson"){
@@ -60,7 +60,7 @@ make.auc.plot.jpg<-function(out=out){
 
 ##################################################################
 ### Standard residual analysis plots for glm
-    if(out$input$script.name%in%c("glm","mars")){
+    if(out$input$script.name%in%c("glm","mars") & out$dat$split.type!="eval"){
           jpeg(paste(out$dat$bname,"_stand.resid.plots.jpeg",sep=""),height=1000,width=1000)
           par(mfrow=c(2,2))
           if(out$input$script.name=="glm") plot(out$mods$final.mod,cex=1.5,lwd=1.5,cex.main=1.5,cex.lab=1.5)
@@ -112,7 +112,7 @@ make.auc.plot.jpg<-function(out=out){
                  if(out$dat$split.type=="none") legend(x=.8,y=.15,paste("AUC=",round(Stats$train$auc.fit,digits=3),sep=""))
             if(out$dat$split.type!="none") {
             #so here we have to extract a sublist and apply a function to the sublist but if it has length 2 the structure of the list changes when the sublist is extracted
-           if(out$dat$split.type=="test"){ TestTrainRocPlot(do.call("rbind",lapply(lst,function(lst){lst$auc.data})),add.roc=TRUE,line.type=2,color="red",add.legend=FALSE)
+           if(out$dat$split.type%in%c("test","eval")){ TestTrainRocPlot(do.call("rbind",lapply(lst,function(lst){lst$auc.data})),add.roc=TRUE,line.type=2,color="red",add.legend=FALSE)
                 legend(x=.55,y=.2,c(paste("Training Split (AUC=",round(Stats$train$auc.fit,digits=3), ")",sep=""),paste("Testing Split  (AUC=",round(Stats$test$auc.fit,digits=3), ")",sep="")),lty=2,col=c("black","red"),lwd=2)
                 }
              if(out$dat$split.type=="crossValidation"){
@@ -135,10 +135,11 @@ make.auc.plot.jpg<-function(out=out){
                 cal.results<-switch(out$dat$split.type,
                             none = Stats$train$calibration.stats,
                              test = Stats$test$calibration.stats,
+                             eval = Stats$test$calibration.stats,
                                 crossValidation =  apply(do.call("rbind",lapply(lst,function(lst){lst$calibration.stats})),2,mean))
 ## Calibration plot
             a<-do.call("rbind",lapply(lst,function(lst){lst$auc.data}))
-            calibration.plot(a,main=paste("Calibration Plot for ",switch(out$dat$split.type,none="Training Data",test="Test Split",crossValidation="Cross Validation Split"),sep=""))
+            calibration.plot(a,main=paste("Calibration Plot for ",switch(out$dat$split.type,none="Training Data",test="Test Split",eval="Test Split",crossValidation="Cross Validation Split"),sep=""))
             preds<-a$pred
             obs<-a$pres.abs
             pred <- preds + 1e-005
@@ -147,7 +148,7 @@ make.auc.plot.jpg<-function(out=out){
              predseq<-data.frame("pred"=seq(from=0,to=1,length=100))
              lines(predseq$pred,sort(predict(mod,newdata=predseq,type="response")))
             rug(pred)
-
+             
             legend(x=-.05,y=1.05,c(as.expression(substitute(Int~~alpha==val, list(Int="Intercept:",val=signif(cal.results[1],digits=3)))),
              as.expression(substitute(Slope~~beta==val, list(Slope="Slope:",val=signif(cal.results[2],digits=3)))),
              as.expression(substitute(P(alpha==0, beta==1)==Prob,list(Prob=signif(cal.results[3],digits=3)))),
