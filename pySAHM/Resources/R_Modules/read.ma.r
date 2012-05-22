@@ -237,13 +237,7 @@
       # if producing geotiff output, check to make sure geotiffs are available for each column of the model array #
         if(out$input$make.binary.tif==T | out$input$make.p.tif==T){
                 #Check that tiffs to be used exist
-         if(sum(file.access(paths),mode=0)!=0){
-                         temp<-as.vector(file.access(paths))==-1
-                         temp.paths<-paths[temp]
-                  stop("the following geotiff(s) are missing:",
-                      "\nif these are intentionally left blank, uncheck makeBinMap and makeProbabilityMap options\n",
-                        paste(paths[temp],collapse="\n"),sep="")
-                          }
+         path.check(paths)
 
                  } else out.list$tif.names <- ma.names[-1]
 

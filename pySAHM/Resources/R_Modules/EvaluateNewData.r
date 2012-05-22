@@ -23,60 +23,68 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                 out$input$MESS<-mess
                 Model<-out$input$script.name
               bname<-paste(out$input$output.dir,paste("/",Model,sep=""),sep="")
-
-
-            # logname <- file(paste(bname,"_log.txt",sep=""), open="wt")
-             #                sink(logname)
-              #               sink(logname, type="message")
+               if(!produce.metrics & !is.null(new.tifs)) out$input$NoResidMaps=TRUE
+               
               out$dat$bname<-bname
+              browser()
     #Determine if we will be evaluating a holdout set if so rename it to the split portion so evaluation metrics will be caluclated and reported
-   if(produce.metrics){
+  
             
          ##################################################################################
          ###################### Producing Evalutaiton Metrics for the hold out data
                  #if evaluating on brand new data switch out the mds 
                  if(!is.null(new.tifs)){out$input$ma.name<-new.tifs
-                 store.train<-out$dat$ma$train
+                    store.train<-out$dat$ma$train
                  }
-                    hl=readLines(out$input$ma.name,1)
-                    hl=strsplit(hl,',')
-                    tif.info<-readLines(out$input$ma.name,3)
-                                tif.info<-strsplit(tif.info,',')
-                                temp<-tif.info[[2]]
-                                temp[1:3]<-0
-                                include<-as.numeric(temp)
-                 if(is.null(new.tifs)){ #Switching the name Eval.Split to split so we evaluate on final holdout data
-                         if(!is.na(Eval.split<-match("evalsplit",tolower(unlist(hl))))){
-                                if(!is.na(Split<-match("split",tolower(unlist(hl))))) {hl[[1]][Split]<-"Unused"
-                                  include[Split]<-0
-                                }
-                                hl[[1]][Eval.split]<-"Split"  
-                       }
-                 }
-                        out <- read.ma(out,hl=hl,include=include)
-        
-                                out$dat$bname<-bname
-                                out$dat$split.type=out$dat$split.label="eval"
-                    
-                    #if we have completely new data then the whole dataset should be used for testing and the original displayed as training data
-                    if(!is.null(new.tifs)) {
-                        names(out$dat$ma)<-"test"
-                        out$dat$ma$train<-store.train
-                    }
-                # Making Predictions
-                         pred.vals<-function(x,model,Model){
-                        x$pred<-pred.fct(model,x$dat[,2:ncol(x$dat)],Model)
-                        return(x)}
-                        
-    
-                       assign("out",out,envir=.GlobalEnv)
-                        #getting the predictions for the test/train split
-                        out$dat$ma<-(lapply(X=out$dat$ma,FUN=pred.vals,model=out$mods$final.mod,Model=Model))
-                        #Just for the training set for Random Forest we have to take out of bag predictions rather than the regular predictions
-                        if(Model=="rf") out$dat$ma$train$pred<-tweak.p(as.vector(predict(out$mods$final.mod,type="prob")[,2]))
-    
-                        #producing auc and residual plots model summary information and accross model evaluation metric
-                    out$mods$auc.output<-make.auc.plot.jpg(out=out)
+                 hl=readLines(out$input$ma.name,1)
+                 hl=strsplit(hl,',')
+                 tif.info<-readLines(out$input$ma.name,3)
+                 tif.info<-strsplit(tif.info,',')
+                 temp<-tif.info[[2]]
+                 paths<-as.character(tif.info[[3]])
+                 if(!is.null(new.tifs) & any(!is.na(match(hl[[1]],c("EvalSplit","Split")))))
+                 stop("The input dataset to this module should not have any data split for testing or model evaluation")
+             #since we can be missing any of xy or response we need to remove only what's included    
+                 unused=na.omit(match(tolower(hl[[1]]),c("x","y",tolower(out$input$response.col))))  
+                 if(any(!is.na(unused))) temp[unused]<-0
+                 include<-as.numeric(temp)
+                 if(!is.null(new.tifs)){
+                 paths<-paths[include==1]
+                 path.check(paths)
+                  out.list$tif.ind<-paths}
+             if(produce.metrics){   
+                   if(is.null(new.tifs)){ #Switching the name Eval.Split to split so we evaluate on final holdout data
+                           if(!is.na(Eval.split<-match("evalsplit",tolower(unlist(hl))))){
+                                  if(!is.na(Split<-match("split",tolower(unlist(hl))))) {hl[[1]][Split]<-"Unused"
+                                    include[Split]<-0
+                                  }
+                                  hl[[1]][Eval.split]<-"Split"  
+                         }
+                   }
+                          out <- read.ma(out,hl=hl,include=include)
+          
+                                  out$dat$bname<-bname
+                                  out$dat$split.type=out$dat$split.label="eval"
+                      
+                      #if we have completely new data then the whole dataset should be used for testing and the original displayed as training data
+                      if(!is.null(new.tifs)) {
+                          names(out$dat$ma)<-"test"
+                          out$dat$ma$train<-store.train
+                      }
+                  # Making Predictions
+                           pred.vals<-function(x,model,Model){
+                          x$pred<-pred.fct(model,x$dat[,2:ncol(x$dat)],Model)
+                          return(x)}
+                          
+      
+                         assign("out",out,envir=.GlobalEnv)
+                          #getting the predictions for the test/train split
+                          out$dat$ma<-(lapply(X=out$dat$ma,FUN=pred.vals,model=out$mods$final.mod,Model=Model))
+                          #Just for the training set for Random Forest we have to take out of bag predictions rather than the regular predictions
+                          if(Model=="rf") out$dat$ma$train$pred<-tweak.p(as.vector(predict(out$mods$final.mod,type="prob")[,2]))
+      
+                          #producing auc and residual plots model summary information and accross model evaluation metric
+                      out$mods$auc.output<-make.auc.plot.jpg(out=out)
            }
       if(!is.null(new.tifs)){
                  ma.name <- new.tifs
