@@ -83,30 +83,32 @@ cex.mult<-3.2
        ####PLOT 4.  
                  max.points<-1000
                  response.table<-table(response)
-                 if(any(response.table> max.points)){
-                   for(i in names(response.table[response.table> max.points])){
-                         s<-sample(which(response==i,arr.ind=TRUE),size=(sum(response==i)- max.points))
-                         pred<-pred[-c(s)]
-                         response<-response[-c(s)]
-                   }
-                 }  
-                   x<-pred[complete.cases(pred)]
-                   y<-response[complete.cases(pred)]
-                   o<-order(x)
-                    x<-x[o]
-                    y<-y[o]
-                    options(warn=2) #promote warnings to errors so we don't plot terrible fits
-                    g<-try(gam(y~s(x,2),family=binomial),silent=TRUE)
-                    options(warn=0)
-                 #   g<-gam(as.vector(response[!is.na(pred)])~s(as.vector(na.omit(pred)),2),family=binomial)
-      #  browser()
-          plot(x,y,bg=c("blue","red","yellow")[factor(y,levels=c(0,1,-9999))],pch=21,col=c("blue4","red4","yellow3")[factor(y,levels=c(0,1,-9999))],
-                   ylab=ifelse("gam"%in%class(g),paste("% dev exp ",round(100*(1-g$dev/g$null.deviance),digits=1),sep=""),""),
-                   main="GAM showing predictor response relationship",cex.lab=cex.mult,cex=cex.mult,cex.main=.8*cex.mult,cex.axis=.7*cex.mult)
-             if(!("try-error"%in%class(g))){
-              y.fit<-try(predict.gam(g,type="response"),silent=TRUE)
-               segments(x0=x[1:(length(x)-1)],y0=y.fit[1:(length(x)-1)],x1=x[2:length(x)],y1=y.fit[2:length(x)],col="red",lwd=cex.mult)
-               }
+         if(length(response.table)>1){
+                       if(any(response.table> max.points)){
+                         for(i in names(response.table[response.table> max.points])){
+                               s<-sample(which(response==i,arr.ind=TRUE),size=(sum(response==i)- max.points))
+                               pred<-pred[-c(s)]
+                               response<-response[-c(s)]
+                         }
+                       }  
+                         x<-pred[complete.cases(pred)]
+                         y<-response[complete.cases(pred)]
+                         o<-order(x)
+                          x<-x[o]
+                          y<-y[o]
+                          options(warn=2) #promote warnings to errors so we don't plot terrible fits
+                          g<-try(gam(y~s(x,2),family=binomial),silent=TRUE)
+                          options(warn=0)
+                       #   g<-gam(as.vector(response[!is.na(pred)])~s(as.vector(na.omit(pred)),2),family=binomial)
+            #  browser()
+                plot(x,y,bg=c("blue","red","yellow")[factor(y,levels=c(0,1,-9999))],pch=21,col=c("blue4","red4","yellow3")[factor(y,levels=c(0,1,-9999))],
+                         ylab=ifelse("gam"%in%class(g),paste("% dev exp ",round(100*(1-g$dev/g$null.deviance),digits=1),sep=""),""),
+                         main="GAM showing predictor response relationship",cex.lab=cex.mult,cex=cex.mult,cex.main=.8*cex.mult,cex.axis=.7*cex.mult)
+                   if(!("try-error"%in%class(g))){
+                    y.fit<-try(predict.gam(g,type="response"),silent=TRUE)
+                     segments(x0=x[1:(length(x)-1)],y0=y.fit[1:(length(x)-1)],x1=x[2:length(x)],y1=y.fit[2:length(x)],col="red",lwd=cex.mult)
+                     }
+      }
             #           xnew<-as.data.frame(unique(x))
             #           colnames(xnew)="x"
             #  y.fit<-predict.gam(g,newdata=xnew,type="response")
@@ -116,7 +118,11 @@ cex.mult<-3.2
 
 # Interpret command line argurments #
 # Make Function Call #
-Args <- commandArgs(T)
+Args <- commandArgs(trailingOnly=FALSE)
+
+    for (i in 1:length(Args)){
+     if(Args[i]=="-f") ScriptPath<-Args[i+1]
+     }
    
     #assign default values
    
