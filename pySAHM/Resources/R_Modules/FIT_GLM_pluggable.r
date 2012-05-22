@@ -65,30 +65,24 @@ Args <- commandArgs(trailingOnly=FALSE)
     	argSplit <- strsplit(arg, "=")
     	argSplit[[1]][1]
     	argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="sqt") squared.terms <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="sqt") squared.terms <- as.logical(argSplit[[1]][2])
     	if(argSplit[[1]][1]=="c") csv <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="o") output <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="mpt") make.p.tif <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="om")  opt.methods <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="savm")  save.model <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="mpt") make.p.tif <- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="om")  opt.methods <- as.numeric(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="savm")  save.model <- as.logical(argSplit[[1]][2])
  			if(argSplit[[1]][1]=="sm")  simp.method <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="mes")  MESS <- argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="mes")  MESS <- as.logical(argSplit[[1]][2])
     }
-	print(csv)
-	print(output)
-	print(responseCol)
 
 ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
 source(paste(ScriptPath,"GLM.helper.fcts.r",sep="\\"))
-squared.terms<-as.logical(squared.terms)
-make.p.tif<-as.logical(make.p.tif)
-make.binary.tif<-as.logical(make.binary.tif)
+
 save.model<-make.p.tif | make.binary.tif
-opt.methods<-as.numeric(opt.methods)
-MESS<-as.logical(MESS)
+
 
 FitModels(ma.name=csv,
       tif.dir=NULL,output.dir=output,

@@ -54,7 +54,9 @@ FitModels(ma.name=input.file,
 EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,b.tif=FALSE,p.tif=FALSE,mess=TRUE,new.tifs=NULL,produce.metrics=TRUE)
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/NoSplit.csv" 
 EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,b.tif=FALSE,p.tif=FALSE,mess=TRUE,new.tifs=input.file,produce.metrics=TRUE) 
-         
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/HeaderOnly.csv"  
+EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=TRUE,new.tifs=input.file,produce.metrics=FALSE)
+       
 #RF
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_3.csv"
 set.seed(1)
