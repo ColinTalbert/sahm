@@ -408,7 +408,9 @@ my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),
     col<-col[o]
     bg<-bg[o]
     points(x, y, pch = pch, col=c("blue4","red4")[factor(y,levels=c(0,1))], bg = bg, cex = cex*cex.mult)
+    options(warn=2)
     g<-try(gam(y~s(x,2),family=binomial),silent=TRUE)
+    options(warn=-1)
     ok <- is.finite(x) & is.finite(y)
     if (any(ok) && length(unique(x))>3)
       if(class(g)!="try-error"){
@@ -446,16 +448,6 @@ Args <- commandArgs(T)
       if(argSplit[[1]][1]=="bgd") bgd <- as.logical(argSplit[[1]][2])
     }
 
-    print(num.plots)
-    print(min.cor)
-    print(output.file)
-    print (infile)
-    print(responseCol)
-    print(cors.w.highest)
-    print(pres)
-    print(absn)
-    print(bgd)
-    
 	#Run the Pairs Explore function with these parameters
     Pairs.Explore(num.plots=num.plots,
     min.cor=min.cor,
