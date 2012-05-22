@@ -76,7 +76,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
                     interactions=NULL,  # not used #
                     summary=NULL))
 
-
+             out$input$NoResidMaps=FALSE
 if(is.null(out$input$seed)) out$input$seed<-round(runif(1,min=-((2^32)/2-1),max=((2^32)/2-1)))
 set.seed(as.numeric(out$input$seed))
    #print warnings as they occur

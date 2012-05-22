@@ -52,7 +52,6 @@ opt.methods=2
 save.model=TRUE
 MESS=FALSE
 
-
 # Interpret command line argurments #
 # Make Function Call #
 Args <- commandArgs(trailingOnly=FALSE)
@@ -69,28 +68,20 @@ Args <- commandArgs(trailingOnly=FALSE)
     	if(argSplit[[1]][1]=="c") csv <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="o") output <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="mpt") make.p.tif <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="deg") mars.degree <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="pen") mars.penalty <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="om")  opt.methods <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="savm")  save.model <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="mes")  MESS <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="mpt") make.p.tif <- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- as.logical(argSplit[[1]][2])
+    	if(argSplit[[1]][1]=="deg") mars.degree <- as.numeric(argSplit[[1]][2])
+    	if(argSplit[[1]][1]=="pen") mars.penalty <- as.numeric(argSplit[[1]][2])
+    	if(argSplit[[1]][1]=="om")  opt.methods <- as.numeric(argSplit[[1]][2])
+    	if(argSplit[[1]][1]=="savm")  save.model <- as.logical(argSplit[[1]][2])
+    	if(argSplit[[1]][1]=="mes")  MESS <- as.logical(argSplit[[1]][2])
     }
-	print(csv)
-	print(output)
-	print(responseCol)
 
 ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
 source(paste(ScriptPath,"MARS.helper.fcts.r",sep="\\"))
-print(ScriptPath)
 
-make.p.tif<-as.logical(make.p.tif)
-make.binary.tif<-as.logical(make.binary.tif)
 save.model<-make.p.tif | make.binary.tif
-opt.methods<-as.numeric(opt.methods)
-MESS<-as.logical(MESS)
 
 FitModels(ma.name=csv,
         tif.dir=NULL,output.dir=output,

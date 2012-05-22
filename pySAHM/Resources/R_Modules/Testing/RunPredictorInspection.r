@@ -3,18 +3,23 @@ predictor="bio_13"
 
 infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\ModelEvaluation_Split_2.csv"
 predictor="bio_08_2000_2009_2km"
-infil="C:\\temp\\TestDataSets\\TestTrainingSplit_8.csv"
-predictor="bio_01_2008_2km"
+infil="I:\\VisTrails\\WorkingFiles\\secondseason\\secondseason_workfile_2012_02_28b\\ModelEvaluation_Split_10.csv"
+predictor="PRISM_bio_06_1971_2000_800m"
 output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
 response.col="responseBinary"
 pres=TRUE
 absn=TRUE
 bgd=TRUE
+infil="C:\\VisTrails\\mtalbert_20110504T132851\\readMaTests\\Split.csv"
+predictor="bio_13_wgs84"
 
+infil="I:\\VisTrails\\WorkingFiles\\secondseason\\secondseason_workfile_2012_02_28b\\ModelEvaluation_Split_9.csv"
+predictor="bio_17_2009_2km"
+predictor="bio_14_2009_2km"
 Predictor.inspection(predictor,
     input.file=infil,
 		output.dir=output.dir,
 		response.col=response.col,
 		pres=TRUE,
 		absn=TRUE,
-		bgd=FALSE)
+		bgd=TRUE)
