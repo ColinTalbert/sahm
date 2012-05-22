@@ -137,9 +137,6 @@ Args <- commandArgs(T)
       if(argSplit[[1]][1]=="absn") absn <- as.logical(argSplit[[1]][2])
       if(argSplit[[1]][1]=="bgd") bgd <- as.logical(argSplit[[1]][2])
     }
-	print(csv)
-	print(output)
-	print(responseCol)
 
 ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"chk.libs.r",sep="\\"))

@@ -553,105 +553,97 @@ def getRasterParams(rasterFile):
         return params
 
 
+class InteractiveQGraphicsView(QtGui.QGraphicsView):
+    '''
+    Extends a QGraphicsView to enable wheel zooming and scrolling
+    The main QGraphicsView contains a graphics scene which is dynamically
     
+    l_pix - original picture
+    c_view - scaled picture
+    '''
+    def __init__(self, parent=None):
+        self.scene = QtGui.QGraphicsScene()
+        self.scene.wheelEvent = self.wheel_event
+        QtGui.QGraphicsView.__init__(self, self.scene)
+        
+        self.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
+        
 
+    def load_picture(self, strPicture):
+        '''This loads and zooms to a new picture
+        a new l_pix is created 
+        and a c_view is derived from it.
+        '''
 
+        self.picture_fname = strPicture
+        self.l_pix = QtGui.QPixmap(strPicture)
+        if self.size().width()  <= self.size().height(): 
+            self.max_vsize = self.size().width() * 0.95
+        else: 
+            self.max_vsize = self.size().height() * 0.95
+            
+        self.c_view = self.l_pix.scaled(self.max_vsize, self.max_vsize, 
+                                            QtCore.Qt.KeepAspectRatio, 
+                                            QtCore.Qt.SmoothTransformation) 
+        self.scene.clear()
+        self.scene.setSceneRect(0, 0, self.c_view.size().width(), self.c_view.size().height()) 
+        self.scene.addPixmap(self.c_view)
+        
+        self.view_current()
+        
+   
+    def view_current(self):
 
-#def construct_port_msg(cls, port_name, direction):
-#    #get the po
-#    global nodes
-#    if direction == "in":
-#        ports = nodes[cls.__name__].getElementsByTagName("InputPorts")[0]
-#    else:
-#        ports = nodes[cls.__name__].getElementsByTagName("OutputPorts")[0]
-#    
-#    port_nodes = ports.getElementsByTagName("Port")
-#    for node in port_nodes:
-#        if node.getElementsByTagName("PortName")[0].firstChild.data == port_name:
-#            port_node = node
-#            
-#    indent = " "*0
-#    nl = "\n" + indent
-#    Definition = port_node.getElementsByTagName("Definition")[0].firstChild.data
-#    Definition = cleanupstring(Definition, 0, 0)
-#    
-#    Mandatory = port_node.getElementsByTagName("Manditory")[0].firstChild.data
-#    
-#    Default = port_node.getElementsByTagName("Default")[0].firstChild.data
-#    
-#    Options = port_node.getElementsByTagName("Options")[0].getElementsByTagName("Option")
-#    
-#    Connections = port_node.getElementsByTagName("Connections")[0].getElementsByTagName("Connection")
-#    
-#    msg = port_name + ":  "
-#    if Mandatory.lower() == "true":
-#        msg += "(mandatory)\n"
-#    elif Mandatory.lower() == "false":
-#        msg += "(optional)\n"
-#    ":"
-#    msg += "\n"+ Definition
-#    
-#        
-#    if Default != "NA":
-#        msg += nl +"Default value = " + Default
-#        
-#    if Options:
-#        msg += nl + "\nOptions are:"
-#        for Option in Options:
-#            msg += "\n" + cleanupstring(Option.firstChild.data, 4, 12)
-#            
-#    if Connections:
-#        msg += nl + "\nCommon connections:"
-#        for Connection in Connections:
-#            msg += "\n"+ cleanupstring(Connection.firstChild.data, 4, 12)
-#
-#    return msg
-#
-#def cleanupstring(str, indent1, indent2):
-#    
-#    textwidth = 120
-#    if str is None:
-#        return ""
-#    lines = str.split("\n")
-#    cleanstr = ""
-#    for line in lines:
-#        cleanstr += textwrap.fill(line, initial_indent=' '*indent1, subsequent_indent=' '*indent2, width = textwidth) +"\n"
-##    str = textwrap.dedent(str)
-#    cleanstr = cleanstr[:-1]
-#    return cleanstr
+        self.scene.clear() 
+        self.scene.setSceneRect(0, 0, self.c_view.size().width(), self.c_view.size().height())
+        self.scene.addPixmap(self.c_view) 
+        QtCore.QCoreApplication.processEvents() 
+        
 
+    def wheel_event (self, event):
 
-#
-#
-#def construct_port_msg(cls, port_name, direction):
-#    global doc_tree
-#    
-#    
-#    
-#    
-#    
-#    
-#    key = cls.__name__ + port_name + direction
-#    
-#    
-#    
-#    
-#    kwargs = port_docs.get(key, False)
-#    
-#    if kwargs == False:
-#        return "Not used and/or defined by SAHM package."
-#    
-#    msg = "Definition:\n    " + kwargs['Definition'].replace('\\n', '\n').replace('\\t', '\t') 
-#    if kwargs['Mandatory'] == "TRUE":
-#        msg += "\n\nThis port is Mandatory"
-#    else:
-#        msg += "\n\nThis port is Optional"
-#        
-#    if kwargs["Default"] != "NA":
-#        msg += "\n\nDefault value = " + kwargs["Default"].replace('\\n', '\n').replace('\\t', '\t')
-#        
-#    if kwargs['Options'] != "NA":
-#        msg += "\n\nOptions are:\n    " + kwargs['Options'].replace('\\n', '\n').replace('\\t', '\t') 
-#    msg += "\n\nCommon port connections:\n    " + kwargs['ConnectsTo'].replace('\\n', '\n').replace('\\t', '\t') 
-#    return msg
-#    
+        self.cur_x = self.scene.sceneRect().x()
+        self.cur_y = self.scene.sceneRect().y()
+        numDegrees = event.delta() / 8 
+        numSteps = numDegrees / 15.0 
+        self.zoom(numSteps) 
+        event.accept() 
+
+    def zoom(self, step):
+
+        zoom_step = 0.06
+        self.scene.clear() 
+        w = self.c_view.size().width() 
+        h = self.c_view.size().height() 
+        w, h = w * (1 + zoom_step*step), h * (1 + zoom_step*step) 
+        self.c_view = self.l_pix.scaled(w, h, 
+                                            QtCore.Qt.KeepAspectRatio, 
+                                            QtCore.Qt.SmoothTransformation) 
+        self.view_current() 
+
+    def resizeEvent(self, event):
+
+        old_width = event.oldSize().width()
+        old_height = event.oldSize().height()
+       
+        width_prop = self.size().width() / float(old_width)
+        height_prop = self.size().height() / float(old_height)
+        
+        scaled_pic_width = self.c_view.size().width() 
+        scaled_pic_height = self.c_view.size().height() 
+        
+        w = scaled_pic_width * width_prop
+        h = scaled_pic_height * height_prop
+        if w < 0:
+            w = self.size().width()
+        if h < 0:
+            h = self.size().height()
+        
+        if self.c_view.size().width() < old_width * 0.9 and \
+            self.c_view.size().height() < old_height * 0.9 :
+            self.c_view = self.l_pix.scaled(w, h, 
+                                                QtCore.Qt.KeepAspectRatio, 
+                                                QtCore.Qt.SmoothTransformation)
+        self.view_current()
+        
+
