@@ -2,12 +2,20 @@ Predictor.inspection<-function(predictor,input.file,output.dir,response.col="Res
   chk.libs("Pred.inpect")
 cex.mult<-3.2
 
+#This function produces several plots to inspect the relationship between the predictor and response
+#and the spatial relationship between response and the predictor. 
+#It fits a gam to the response/predictor but this seems to be unstable if there is an overwhelming 
+#amount of absence data so I weight the absence so that the sum of absences weights is equal to sum of presence weights
+#if the initial presence\abs ratio is >1.2 The gam can still break so if a negaive percent deviance explained is reported
+#I replace the gam with a glm quadratic in the predictor 
+#Written by Marian Talbert 5/23/2012
+
    #Read input data and remove any columns to be excluded
     dat<-read.csv(input.file,skip=3,header=FALSE)
 
           hl<-readLines(input.file,1)
           hl=strsplit(hl,',')
-          colnames(dat) = hl[[1]]
+          colnames(dat) = hl[[1]]                                                                
 
           tif.info<-readLines(input.file,3)
           tif.info<-strsplit(tif.info,',')
@@ -64,7 +72,6 @@ cex.mult<-3.2
                }
        ####PLOT 2.
               a<-raster(tif.info[[3]][pred.indx])
-              text("Spatial Distribution of Predictor")
          plot(a,maxpixels=5000,main="",cex.lab=cex.mult,cex=cex.mult,
               cex.axis=.7*cex.mult,cex.main=cex.mult,legend.shrink = cex.mult*.3, legend.width = cex.mult*.5)
        ####PLOT 3.
@@ -80,39 +87,18 @@ cex.mult<-3.2
                    fill=c(if(any(is.na(pred))) "yellow",if(any(is.na(pred))) "black","red","blue"),xjust=0,yjust=1,
                    ncol = 2,cex=cex.mult*.9,bg="white")
                   #
-       ####PLOT 4.  
-                 max.points<-1000
+       ####PLOT 4. 
+                response<-as.numeric(response[complete.cases(pred)])
+                pred<-as.numeric(pred[complete.cases(pred)])
+                 x<-pred[complete.cases(pred)]
+                 y<-response[complete.cases(pred)] 
                  response.table<-table(response)
+               
          if(length(response.table)>1){
-                       if(any(response.table> max.points)){
-                         for(i in names(response.table[response.table> max.points])){
-                               s<-sample(which(response==i,arr.ind=TRUE),size=(sum(response==i)- max.points))
-                               pred<-pred[-c(s)]
-                               response<-response[-c(s)]
-                         }
-                       }  
-                         x<-pred[complete.cases(pred)]
-                         y<-response[complete.cases(pred)]
-                         o<-order(x)
-                          x<-x[o]
-                          y<-y[o]
-                          options(warn=2) #promote warnings to errors so we don't plot terrible fits
-                          g<-try(gam(y~s(x,2),family=binomial),silent=TRUE)
-                          options(warn=0)
-                       #   g<-gam(as.vector(response[!is.na(pred)])~s(as.vector(na.omit(pred)),2),family=binomial)
-            #  browser()
-                plot(x,y,bg=c("blue","red","yellow")[factor(y,levels=c(0,1,-9999))],pch=21,col=c("blue4","red4","yellow3")[factor(y,levels=c(0,1,-9999))],
-                         ylab=ifelse("gam"%in%class(g),paste("% dev exp ",round(100*(1-g$dev/g$null.deviance),digits=1),sep=""),""),
-                         main="GAM showing predictor response relationship",cex.lab=cex.mult,cex=cex.mult,cex.main=.8*cex.mult,cex.axis=.7*cex.mult)
-                   if(!("try-error"%in%class(g))){
-                    y.fit<-try(predict.gam(g,type="response"),silent=TRUE)
-                     segments(x0=x[1:(length(x)-1)],y0=y.fit[1:(length(x)-1)],x1=x[2:length(x)],y1=y.fit[2:length(x)],col="red",lwd=cex.mult)
-                     }
-      }
-            #           xnew<-as.data.frame(unique(x))
-            #           colnames(xnew)="x"
-            #  y.fit<-predict.gam(g,newdata=xnew,type="response")
-            #  segments(x0=xnew[1:(nrow(xnew)-1),],y0=y.fit[1:(nrow(xnew)-1)],x1=xnew[2:nrow(xnew),],y1=y.fit[2:nrow(xnew)],col="red",lwd=cex.mult)
+            plot(x,y,ylab="",xlab=predictor,type="n",cex.lab=cex.mult,cex.axis=.7*cex.mult,)
+            gam.failed<-my.panel.smooth(x=x, y=y,cex.mult=cex.mult,pch=21,cex.lab=cex.mult,cex.axis=.7*cex.mult,cex.lab=cex.mult)
+            title(main=paste(ifelse(gam.failed,"GLM","GAM")," showing predictor response relationship",sep=""),cex.main=.8*cex.mult)
+        }
     dev.off()    
 }
 
@@ -146,5 +132,6 @@ Args <- commandArgs(trailingOnly=FALSE)
 
 ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"chk.libs.r",sep="\\"))
+source(paste(ScriptPath,"my.panel.smooth.binary.r",sep="\\"))
 
 Predictor.inspection(predictor=predictor,input.file=infile,output.dir=output,response.col=responseCol,pres=TRUE,absn=TRUE,bgd=TRUE)

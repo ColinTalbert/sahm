@@ -43,6 +43,13 @@
 ###############################################################################
 
 generic.model.fit<-function(out,Model,t0){
+
+#This code recognizes the specified model signature as well as several tags that change the analysis such as
+#differnt responses (pres/abs, used/available, count) and user specified options and fits the appropriate model 
+#returning results in a 
+#format common to all models so further output functions can work the same for all models.
+#Written by Marian Talbert 11/2011
+
 attach(out$input)
 on.exit(detach(out$input))
   if(Model=="mars"){

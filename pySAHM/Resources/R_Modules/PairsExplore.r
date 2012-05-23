@@ -55,6 +55,9 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
       #5/10/2011 altered to handle count data as well presence absence.
       #any counts higher than or equal to 1 are set to be presence though I might consider
       #adding the option to have a threshold set instead of using just presence/absence
+      #this subsamples data to improve running speed this along with weights set in glm/gam to improve output inspection
+      #makes the gam/glm only really appropriate for looking at the relationship between the predictor and response
+      #Written by Marian Talbert 2011
      
        if(is.na(match("gam",installed.packages()[,1]))) {
              install.packages("gam",repos="http://lib.stat.cmu.edu/R/CRAN")
@@ -327,11 +330,7 @@ MyPairs<-function (x,missing.summary,my.labels,labels, panel = points, ..., lowe
                           abs(cor(x[,(i)],response,method="spearman",use="pairwise.complete.obs")),abs(cor(x[,(i)],response,method="kendall",use="pairwise.complete.obs"))),digits=2),
                           sep=""),line=.02,cex.lab=1.5)
                    }
-                   else {pct.dev<-try(my.panel.smooth(as.vector(x[, (i)]), as.vector(response),weights=
-                          c(rep(table(response)[2]/table(response)[1],times=table(response)[1]),rep(1,times=table(response)[2])),cex.mult=cex.mult,...),silent=TRUE)
-                          
-                          if(class(pct.dev)!="try-error") title(ylab=paste("%dev exp ",round(pct.dev,digits=2),
-                          sep=""),line=.02,cex.lab=cex.mult)}
+                  pct.dev<-try(my.panel.smooth(as.vector(x[, (i)]), as.vector(response),cex.mult=cex.mult,cex.lab=cex.mult,line=.02,...),silent=TRUE)
                          
 
                  } else{
@@ -375,7 +374,7 @@ MyPairs<-function (x,missing.summary,my.labels,labels, panel = points, ..., lowe
                   if(length(unique(x[,i])>2)){
                   localLowerPanel(as.vector(x[, j]), as.vector(x[,
                     i]),cex=cex.mult*3,cor.mult=cex.mult,...) } else {
-                      my.panel.smooth(as.vector(x[, j]),as.vector(x[,i]),cex.mult=cex.mult*2)
+                      my.panel.smooth(as.vector(x[, j]),as.vector(x[,i]),cex.mult=cex.mult*2,Ylab="")
                     }    
             else {
             localUpperPanel(as.vector(x[, j]), as.vector(x[,
@@ -399,31 +398,15 @@ MyPairs<-function (x,missing.summary,my.labels,labels, panel = points, ..., lowe
 }
 
 
-my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),
-    cex = 1, col.smooth = "red", span = 2/3, iter = 3, weights=rep(1,times=length(y)),cex.mult,...)
-{  
-    o<-order(x)
-    x<-x[o]
-    y<-y[o]
-    col<-col[o]
-    bg<-bg[o]
-    points(x, y, pch = pch, col=c("blue4","red4")[factor(y,levels=c(0,1))], bg = bg, cex = cex*cex.mult)
-    options(warn=2)
-    g<-try(gam(y~s(x,2),family=binomial),silent=TRUE)
-    options(warn=-1)
-    ok <- is.finite(x) & is.finite(y)
-    if (any(ok) && length(unique(x))>3)
-      if(class(g)!="try-error"){
-          y.fit<-predict.gam(g,type="response")
-        segments(x0=x[1:(length(x)-1)],y0=y.fit[1:(length(x)-1)],x1=x[2:length(x)],y1=y.fit[2:length(x)],col="red",cex=3*cex.mult,lwd=cex.mult) 
-    }
-    
-    return(100*(1-g$dev/g$null.deviance))
-}
 
 
-Args <- commandArgs(T)
-    print(Args)
+
+Args <- commandArgs(trailingOnly=FALSE)
+
+    for (i in 1:length(Args)){
+     if(Args[i]=="-f") ScriptPath<-Args[i+1]
+     }
+     
     #assign default values
     num.plots <- 10
     min.cor <- .7
