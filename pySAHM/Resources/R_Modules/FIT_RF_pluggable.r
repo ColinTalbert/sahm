@@ -73,7 +73,6 @@ MESS=FALSE
 xtest=NULL
 ytest=NULL
 
-
 Args <- commandArgs(trailingOnly=FALSE)
 
     for (i in 1:length(Args)){
@@ -87,52 +86,37 @@ Args <- commandArgs(trailingOnly=FALSE)
     	if(argSplit[[1]][1]=="c") csv <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="o") output <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="mpt") make.p.tif <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="ntree")  n.trees <- argSplit[[1]][2]
-      if(argSplit[[1]][1]=="mtry")  mtry <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="sampR")  samp.replace <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="sampS")  sampsize <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="nodeS")  nodesize <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="maxN")  maxnodes <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="impt")  importance <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="locImp")  localImp <- argSplit[[1]][2]
- 		  if(argSplit[[1]][1]=="nPerm")  nPerm <- argSplit[[1]][2]
- 		  if(argSplit[[1]][1]=="prox")  proximity <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="oopp")  oop.prox <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="NVot")  norm.votes <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="Trce")  do.trace <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="kf")  keep.forest <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="Kbag")  keep.inbag <- argSplit[[1]][2]
- 		  if(argSplit[[1]][1]=="curves")  make.r.curves <- argSplit[[1]][2]
- 		  if(argSplit[[1]][1]=="om")  opt.methods <- argSplit[[1]][2]
-      if(argSplit[[1]][1]=="savm")  save.model <- argSplit[[1]][2]
-      if(argSplit[[1]][1]=="mes")  MESS <- argSplit[[1]][2]
-      if(argSplit[[1]][1]=="seed")  seed <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="mpt")  make.p.tif <- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="ntree")  n.trees <- as.numeric(argSplit[[1]][2])
+      if(argSplit[[1]][1]=="mtry")  mtry <- as.numeric(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="sampR")  samp.replace <- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="sampS")  sampsize <- as.numeric(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="nodeS")  nodesize <- as.numeric(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="maxN")  maxnodes <- as.numeric(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="impt")  importance <- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="locImp")  localImp <- as.logical(argSplit[[1]][2])
+ 		  if(argSplit[[1]][1]=="nPerm")  nPerm <- as.numeric(argSplit[[1]][2])
+ 		  if(argSplit[[1]][1]=="prox")  proximity <- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="oopp")  oop.prox <- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="NVot")  norm.votes <- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="Trce")  do.trace <- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="kf")  keep.forest <-  as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="Kbag")  keep.inbag <-  as.logical(argSplit[[1]][2])
+ 		  if(argSplit[[1]][1]=="curves")  make.r.curves <-  as.logical(argSplit[[1]][2])
+ 		  if(argSplit[[1]][1]=="om")  opt.methods <- as.numeric(argSplit[[1]][2])
+      if(argSplit[[1]][1]=="savm")  save.model <- as.logical(argSplit[[1]][2])
+      if(argSplit[[1]][1]=="mes")  MESS <- as.logical(argSplit[[1]][2])
+      if(argSplit[[1]][1]=="seed")  seed <- as.numeric(argSplit[[1]][2])
 
  		  
     }
-	print(csv)
-	print(output)
-	print(responseCol)
-	
-make.p.tif<-as.logical(make.p.tif)
-make.binary.tif<-as.logical(make.binary.tif)
-samp.replace<-as.logical(samp.replace)
-importance<-as.logical(importance)
-localImp<-as.logical(localImp)
-norm.votes<-as.logical(norm.votes)
-do.trace<-as.logical(do.trace)
-keep.inbag<-as.logical(keep.inbag)
-make.r.curves<-as.logical(make.r.curves)
-save.model<-make.p.tif | make.binary.tif
-n.trees<-as.numeric(n.trees)
-opt.methods<-as.numeric(opt.methods)
-ScriptPath<-dirname(ScriptPath)
-MESS<-as.logical(MESS)
 
+ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"RF.helper.fcts.r",sep="\\"))
 source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
+
+save.model<-make.p.tif | make.binary.tif
 
 FitModels(ma.name=csv,tif.dir=NULL,output.dir=output,response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
       debug.mode=F,responseCurveForm="pdf",xtest=xtest,ytest=ytest,n.trees=n.trees,mtry=mtry,samp.replace=samp.replace, sampsize=sampsize,

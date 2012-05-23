@@ -46,7 +46,7 @@
 
           ma.name <- out$input$ma.name
 
-      out.list <- out$dat$ma
+      out.list <- list()
       if(file.access(ma.name,mode=0)!=0) stop(paste("input file supplied", ma.name, "does not exist",sep=" "))
 
           try(ma<-read.csv(ma.name,skip=2))
@@ -181,7 +181,7 @@
 
                 if(!is.null(out.list$bad.factor.cols)) rm.list<-c(rm.list,match(out.list$bad.factor.cols,names(ma)))
           }
-
+  
             #removing predictors with only one unique value
             if(length(which(lapply(apply(ma[,-c(rm.list)],2,unique),length)==1,arr.ind=TRUE))>0){
                 warning(paste("\nThe Following Predictors will be removed because they have only 1 unique value: ",
@@ -237,13 +237,7 @@
       # if producing geotiff output, check to make sure geotiffs are available for each column of the model array #
         if(out$input$make.binary.tif==T | out$input$make.p.tif==T){
                 #Check that tiffs to be used exist
-         if(sum(file.access(paths),mode=0)!=0){
-                         temp<-as.vector(file.access(paths))==-1
-                         temp.paths<-paths[temp]
-                  stop("the following geotiff(s) are missing:",
-                      "\nif these are intentionally left blank, uncheck makeBinMap and makeProbabilityMap options\n",
-                        paste(paths[temp],collapse="\n"),sep="")
-                          }
+         path.check(paths)
 
                  } else out.list$tif.names <- ma.names[-1]
 
@@ -252,7 +246,7 @@
         out.list$dims <- sum(out.list$nPresAbs$train)
 
         out.list$used.covs <-  names(dat.out$train$dat)[-1]
-   
+  
       if(out$input$script.name%in%c("brt","rf")){
       #brt uses a subsample for quicker estimation of learning rate and model simplificaiton
       #random forest uses a subsample only for producing response curves
@@ -269,6 +263,5 @@
               out.list$split.type=Split.type
               out.list$ma<-dat.out
           out$dat <- out.list
-
 return(out)
 }

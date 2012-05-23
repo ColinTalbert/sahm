@@ -75,43 +75,30 @@ Args <- commandArgs(trailingOnly=FALSE)
     	if(argSplit[[1]][1]=="c") csv <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="o") output <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
-   		if(argSplit[[1]][1]=="mpt") make.p.tif <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- argSplit[[1]][2]
-      if(argSplit[[1]][1]=="tc")  tc <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="nf")  n.folds <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="alp")  alpha <- argSplit[[1]][2]
-      if(argSplit[[1]][1]=="lr")  learning.rate <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="bf")  bag.fraction <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="ps")  prev.stratify <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="mt")  max.trees <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="om")  opt.methods <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="seed")  seed <- argSplit[[1]][2]
- 		  if(argSplit[[1]][1]=="savm")  save.model <- argSplit[[1]][2]
+   		if(argSplit[[1]][1]=="mpt") make.p.tif <- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- as.logical(argSplit[[1]][2])
+      if(argSplit[[1]][1]=="tc")  tc <- as.numeric(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="nf")  n.folds <- as.numeric(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="alp")  alpha <- as.numeric(argSplit[[1]][2])
+      if(argSplit[[1]][1]=="lr")  learning.rate <- as.numeric(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="bf")  bag.fraction <- as.numeric(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="ps")  prev.stratify <- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="mt")  max.trees <- as.numeric(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="om")  opt.methods <- as.numeric(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="seed")  seed <- as.numeric(argSplit[[1]][2])
+ 		  if(argSplit[[1]][1]=="savm")  save.model <- as.logical(argSplit[[1]][2])
  		  if(argSplit[[1]][1]=="tolm")  tolerance.method <- argSplit[[1]][2]
- 		  if(argSplit[[1]][1]=="tol")  tolerance <- argSplit[[1]][2]
- 		  if(argSplit[[1]][1]=="mes")  MESS <- argSplit[[1]][2]
+ 		  if(argSplit[[1]][1]=="tol")  tolerance <- as.numeric(argSplit[[1]][2])
+ 		  if(argSplit[[1]][1]=="mes")  MESS <-as.logical(argSplit[[1]][2])
  			
     }
-	print(csv)
-	print(output)
-	print(responseCol)
 
 ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
 source(paste(ScriptPath,"BRT.helper.fcts.r",sep="\\"))
 
-alpha<-as.numeric(alpha)
-make.p.tif<-as.logical(make.p.tif)
-make.binary.tif<-as.logical(make.binary.tif)
-prev.stratify<-as.logical(prev.stratify)
 save.model<-make.p.tif | make.binary.tif
-opt.methods<-as.numeric(opt.methods)
-MESS<-as.logical(MESS)
-tolerance=as.numeric(tolerance)
-bag.fraction<-as.numeric(bag.fraction)
-max.trees<-as.numeric(max.trees)
-n.folds<-as.numeric(n.folds)
-learning.rate<-as.numeric(learning.rate)
+
 
     FitModels(ma.name=csv,
 		tif.dir=NULL,
