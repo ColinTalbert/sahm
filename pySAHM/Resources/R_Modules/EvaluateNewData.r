@@ -1,15 +1,19 @@
 EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess=FALSE,new.tifs=NULL,produce.metrics=TRUE){
 
-#This functions separates the step of model fit from producing probability or binary surfaces and MESS maps
+#This functions has several tasks that it will perform
+
+#1. (Produce Maps for best models)It separates the step of model fit from producing probability 
+#or binary surfaces and MESS maps
 #the default is to read in a workspace and make predictions using the original tiffs supplied
 #but if an mds with new tiff directories are supplied, the function will instead use these
-#options are available for setting the threshold
-#and true and false for whether to make binary or prob.tif
 
-#my stuff to delete
-#workspace=paste("C:\\VisTrails\\mtalbert_20110504T132851","modelWorkspace",sep="\\")
-#new.tifs<-out$input$ma.name
-#end delete
+#2. (Apply Model to a New Region) It can also project to a new region if a header is supplied specifying just new tiffs is supplied if a response is available for 
+# the new region then it can produce evaluation metrics as well
+
+#3. (Evaluate independent data or Evaluation Split) It will evaluate either data withheld for evaluation (using EvalSplit in the original mds) 
+#or evaluate a model on a completely new region if an mds is available for the new region new.tifs should be the mds and produce.metrics should be set to true 
+
+#Written by Marian Talbert 5/2012
 
     load(workspace)
 
@@ -26,9 +30,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                if(!produce.metrics & !is.null(new.tifs)) out$input$NoResidMaps=TRUE
                
               out$dat$bname<-bname
-              browser()
-    #Determine if we will be evaluating a holdout set if so rename it to the split portion so evaluation metrics will be caluclated and reported
-  
+    
             
          ##################################################################################
          ###################### Producing Evalutaiton Metrics for the hold out data
@@ -48,12 +50,15 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                  unused=na.omit(match(tolower(hl[[1]]),c("x","y",tolower(out$input$response.col))))  
                  if(any(!is.na(unused))) temp[unused]<-0
                  include<-as.numeric(temp)
+             #if a new mds was supplied switch out the tiffs for map production    
                  if(!is.null(new.tifs)){
                  paths<-paths[include==1]
                  path.check(paths)
-                  out.list$tif.ind<-paths}
+                  out$dat$tif.ind<-paths}
              if(produce.metrics){   
-                   if(is.null(new.tifs)){ #Switching the name Eval.Split to split so we evaluate on final holdout data
+                   if(is.null(new.tifs)){ 
+                   #Determine if we will be evaluating a holdout set if so rename it to the split portion so evaluation metrics will be caluclated and reported
+                   #Switching the name Eval.Split to split so we evaluate on final holdout data
                            if(!is.na(Eval.split<-match("evalsplit",tolower(unlist(hl))))){
                                   if(!is.na(Split<-match("split",tolower(unlist(hl))))) {hl[[1]][Split]<-"Unused"
                                     include[Split]<-0
@@ -61,13 +66,12 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                                   hl[[1]][Eval.split]<-"Split"  
                          }
                    }
-                          out <- read.ma(out,hl=hl,include=include)
-          
                                   out$dat$bname<-bname
                                   out$dat$split.type=out$dat$split.label="eval"
                       
                       #if we have completely new data then the whole dataset should be used for testing and the original displayed as training data
                       if(!is.null(new.tifs)) {
+                      out <- read.ma(out,hl=hl,include=include)
                           names(out$dat$ma)<-"test"
                           out$dat$ma$train<-store.train
                       }
@@ -86,33 +90,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                           #producing auc and residual plots model summary information and accross model evaluation metric
                       out$mods$auc.output<-make.auc.plot.jpg(out=out)
            }
-      if(!is.null(new.tifs)){
-                 ma.name <- new.tifs
-                      #get the paths off of the new mds file
-                          tif.info<-readLines(ma.name,3)
-                          tif.info<-strsplit(tif.info,',')
-                          include<-(as.numeric(tif.info[[2]]))
-                          paths<-as.character(tif.info[[3]])
     
-                  paths<-paths[paths!=""]
-                
-    
-                ma.cols <- match(names(out$dat$ma$train$dat)[-1],sub(".tif","",basename(paths)))
-                paths<-paths[ma.cols]
-                #checking that all tifs are present
-                if(any(is.na(ma.cols))){
-    
-                                  stop("ERROR: the following geotiff(s) are missing in ",
-                                        tif.dir,":  ",paste(ma.names[-r.col][is.na(ma.cols)],collapse=" ,"),sep="")
-                                }
-                #checking that we have read access to all tiffs
-                 if(sum(file.access(paths),mode=0)!=0){
-                                  stop("ERROR: the following geotiff(s) are missing : ",
-                                        paths[(file.access(paths)!=0),][1],sep="")
-    
-                                }
-                                out$dat$tif.ind<-paths
-      }
      ################################ Making the tiff
    if(p.tif==T | b.tif==T){
         if((n.var <- out$mods$n.vars.final)<1){
