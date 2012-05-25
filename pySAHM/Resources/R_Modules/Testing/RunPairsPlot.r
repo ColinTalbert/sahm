@@ -38,7 +38,7 @@ time1<-Sys.time()
 infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
     #infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
     output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPres17.jpg"
-Pairs.Explore(num.plots=15,
+Pairs.Explore(num.plots=5,
     min.cor=min.cor,
     input.file=infil,
 		output.file=output.file,
