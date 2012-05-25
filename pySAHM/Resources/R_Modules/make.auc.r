@@ -140,21 +140,18 @@ make.auc.plot.jpg<-function(out=out){
                                 crossValidation =  apply(do.call("rbind",lapply(lst,function(lst){lst$calibration.stats})),2,mean))
 ## Calibration plot
             a<-do.call("rbind",lapply(lst,function(lst){lst$auc.data}))
-            calibration.plot(a,main=paste("Calibration Plot for ",switch(out$dat$split.type,none="Training Data",test="Test Split",eval="Test Split",crossValidation="Cross Validation Split"),sep=""))
-            preds<-a$pred
-            obs<-a$pres.abs
-            pred <- preds + 1e-005
-            pred[pred >= 1] <- 0.99999
-            mod <- glm(obs ~ log((pred)/(1 - (pred))), family = binomial)
-             predseq<-data.frame("pred"=seq(from=0,to=1,length=100))
-             lines(predseq$pred,sort(predict(mod,newdata=predseq,type="response")))
-            rug(pred)
-             
-            legend(x=-.05,y=1.05,c(as.expression(substitute(Int~~alpha==val, list(Int="Intercept:",val=signif(cal.results[1],digits=3)))),
-             as.expression(substitute(Slope~~beta==val, list(Slope="Slope:",val=signif(cal.results[2],digits=3)))),
-             as.expression(substitute(P(alpha==0, beta==1)==Prob,list(Prob=signif(cal.results[3],digits=3)))),
-             as.expression(substitute(P(alpha==0~a~beta==1)==Prob,list(Prob=signif(cal.results[4],digits=3),a="|"))),
-             as.expression(substitute(P(beta==1~a~alpha==0)==Prob,list(Prob=signif(cal.results[5],digits=3),a="|")))),bg="white")
+            if(out$input$PsdoAbs==TRUE) {
+                pocplot(a$pred[a$pres.abs==1], a$pred[a$pres.abs==0], 
+                title=paste("Presence Only Calibration Plot for \n",switch(out$dat$split.type,none="Training Data",test="Test Split",
+                eval="Test Split",crossValidation="Cross Validation Split"),sep=""))
+            } else{ 
+            pacplot(a$pred,a$pres.abs,title=paste("Calibration Plot for ",switch(out$dat$split.type,none="Training Data",test="Test Split",eval="Test Split",crossValidation="Cross Validation Split"),sep=""))
+                legend(x=0,y=1,c(as.expression(substitute(Int~~alpha==val, list(Int="Intercept:",val=signif(cal.results[1],digits=3)))),
+                 as.expression(substitute(Slope~~beta==val, list(Slope="Slope:",val=signif(cal.results[2],digits=3)))),
+                 as.expression(substitute(P(alpha==0, beta==1)==Prob,list(Prob=signif(cal.results[3],digits=3)))),
+                 as.expression(substitute(P(alpha==0~a~beta==1)==Prob,list(Prob=signif(cal.results[4],digits=3),a="|"))),
+                 as.expression(substitute(P(beta==1~a~alpha==0)==Prob,list(Prob=signif(cal.results[5],digits=3),a="|")))),bg="white")
+             }
             dev.off()
             }
 #Some residual plots for poisson data

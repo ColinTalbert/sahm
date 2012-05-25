@@ -1,5 +1,5 @@
 Predictor.inspection<-function(predictor,input.file,output.dir,response.col="ResponseBinary",pres=TRUE,absn=TRUE,bgd=TRUE){
-  chk.libs("Pred.inpect")
+  chk.libs("Pred.inspect")
 cex.mult<-3.2
 
 #This function produces several plots to inspect the relationship between the predictor and response

@@ -33,7 +33,8 @@ input.file<-"I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_C
 #######################################################################
 
 input.file="C:\\temp\\TestDataSets\\CanadaThistlePseudoAbsenceWeights.csv"
-input.file<-"C:\\temp\\TestDataSets\\CanadaThistleWeights.csv"
+input.file="C:\\temp\\TestDataSets\\CanadaThistleWeights.csv"
+
 ##MARS
 
 FitModels(ma.name=input.file,
@@ -44,17 +45,20 @@ FitModels(ma.name=input.file,
 EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,make.binary.tif=TRUE,make.p.tif=TRUE,MESS=TRUE)
 
 ##GLM
-input.file="C:\\temp\\TestDataSets\\CanadaThistlePseudoAbsenceWeights.csv"
-input.file<-"C:\\temp\\TestDataSets\\CanadaThistleWeights.csv"
+input.file="C:\\temp\\TestDataSets\\CanadaAbsenceWeights.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,
           output.dir=output.dir,
           response.col=rc,make.p.tif=F,make.binary.tif=F,
-          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=FALSE)
-          
+          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=FALSE,PsdoAbs=TRUE)
+
+FitModels(ma.name=input.file,
+          tif.dir=NULL,
+          output.dir=output.dir,
+          response.col=rc,make.p.tif=F,make.binary.tif=F,
+          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=FALSE,PsdoAbs=FALSE)          
 #RF
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_3.csv"
-input.file="C:\\temp\\TestDataSets\\CanadaThistlePseudoAbsenceWeights.csv"
+
 set.seed(1)
 proximity=NULL
 FitModels(ma.name=input.file,
@@ -69,7 +73,7 @@ do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=FALSE,pseu
 
 #BRT
 set.seed(1)
-input.file="J:\\Projects\\SAHM test\\MergedDataset_2.csv"
+
 FitModels(ma.name=input.file,
           tif.dir=NULL,output.dir=output.dir,
           response.col=rc,make.p.tif=F,make.binary.tif=F,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,

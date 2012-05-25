@@ -98,7 +98,7 @@
         
         # remove background points or record these as absence for pseudoabsence (Only partially implemented)
         if(any(ma[,r.col]==-9998)) {ma[which(ma[,r.col]==-9998,arr.ind=TRUE),r.col]<-0
-        out.list$input$PsuedoAbs=TRUE
+        out$input$PsuedoAbs=TRUE
         }
          if(length(which(ma[,r.col]==-9999,arr.ind=TRUE))>0) ma<-ma[-c(which(ma[,r.col]==-9999,arr.ind=TRUE)),]
         # remove evaluation points
@@ -110,8 +110,10 @@
 
       # find and save xy columns#
       xy.cols <- na.omit(c(match("x",tolower(names(ma))),match("y",tolower(names(ma)))))
-      if(length(xy.cols)>0)  rm.list<-c(rm.list,xy.cols)
-
+      if(length(xy.cols)>0)  {
+          rm.list<-c(rm.list,xy.cols)
+          out$input$NoResidMaps=FALSE
+                } else out$input$NoResidMaps=TRUE
        # remove weight column except for Random Forest
        site.weights<-c(match("weights",tolower(names(ma))),c(match("site.weights",tolower(names(ma)))))
         if(any(!is.na(site.weights))) {rm.list<-c(rm.list,na.omit(site.weights))
