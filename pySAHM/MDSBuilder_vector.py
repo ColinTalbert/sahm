@@ -48,40 +48,40 @@ import os
 import time
 import random
 import shutil
-import numpy as np
-import scipy.stats.stats as stats 
+import numpy
 
 from osgeo import gdalconst
 from osgeo import gdal
+from osgeo import ogr, osr
 
 from optparse import OptionParser
 import utilities
 #from Utilities import self.writetolog
 
-class MDSBuilder(object):
-    '''Takes a csv with animal location x,y and attributes each with the values 
-    extracted from each of the grids (covariates) indicated in the supplied 
-    csv list of files
+class MDSBuilder_vector(object):
+    '''Takes a shapefile or other vector file and iterates through
+    the unique geometries specified in a certain field.  
+    Extracting out min, max, mean or majority for each of the input covariates.
+    Outputs a csv with this info
     '''
     def __init__(self):
         #instance level variables
         self.verbose = False
         self.inputsCSV = ''
         self.inputs = []
-        self.fieldData = ''
+        self.VectorFieldData = ''
+        self.KeyField = ''
+        self.Statistic = 'mean'
+        self.ResponseType = "Binary"
         self.outputMDS  = ''
-        self.pointtype = 'Background'
-        self.probsurf = ''
-        self.pointcount = 0
         self.NDFlag = 'NA'
-        self.seed = None
         self.deleteTmp = False
         self.logger = None
     
     def validateArgs(self):
         #check our CSV file for expectations
-        if self.fieldData != '' and not os.path.exists(self.fieldData):
-            raise RuntimeError, "Could not find supplied CSV file of fieldData provided.  Please check input file: " + str(self.fieldData)
+        if not os.path.exists(self.VectorFieldData):
+            raise RuntimeError, "Could not find spatial file of fieldData provided.  Please check input file: " + str(self.fieldData)
          
         if not os.path.exists(self.inputsCSV):
             raise RuntimeError, "Could not find CSV file of inputs provided.  Please check input file: " + str(self.inputsCSV) 
@@ -98,14 +98,6 @@ class MDSBuilder(object):
             msg += "\n    ".join(missingfiles)
             raise RuntimeError, msg
             
-        if self.probsurf <> '':
-            if not self.isRaster(self.probsurf):
-                raise RuntimeError, "The supplied probability surface, " + self.probsurf + ", does not appear to be a valid raster."
-        
-        try:
-            self.pointcount = int(self.pointcount)
-        except:
-            raise RuntimeError, "The supplied point count parameter, " + self.pointcount +", does not appear to be an integer"
         
         #make sure the directory the mds file is going into exists:
         outDir = os.path.split(self.outputMDS)[0]
@@ -122,7 +114,7 @@ class MDSBuilder(object):
         '''
         
         self.validateArgs()
-        self.writetolog('\nRunning MDSBuilder', True, True)
+        self.writetolog('\nRunning MDSBuilder_vector', True, True)
         # start timing
         startTime = time.time()
         gdal.UseExceptions()
@@ -130,284 +122,67 @@ class MDSBuilder(object):
         
         self.constructEmptyMDS()
         
-        if self.pointcount <> 0:
-            self.addBackgroundPoints()
+        self.reproject_input_vector()
         
-        if self.fieldData != '':
-            self.pull_fielddata_vals()
+#        if self.pointcount <> 0:
+#            self.addBackgroundPoints()
         
-        
-        # figure out how long the script took to run
-        endTime = time.time()
-        
-        if self.verbose:
-            self.writetolog('Finished running MDSBuilder', True, True)
-            self.writetolog('    The process took ' + str(endTime - startTime) + ' seconds')
-        
-    def constructEmptyMDS(self):
-        '''Creates the triple header line format of our output file.
-        Also parses the inputs file to append the '_categorical' flag 
-        to the covariate names of all categorical inputs.
-        '''        
-        
-        if os.path.exists(self.fieldData):
-            field_data_CSV = csv.reader(open(self.fieldData, "r"))
-            orig_header = field_data_CSV.next()
-            full_header = ["X", "Y"]
-            if orig_header[2].lower not in ["responsebinary", "responsecount"]:
-                #inputs not conforming to our expected format will be assumed
-                #to be binary data
-                full_header.append("responseBinary")
-            else:
-                full_header.append(orig_header[2])
-        else:
-            full_header = ["X", "Y", "responseBinary"]
-            orig_header = []
-
-        
-        inputs_CSV = csv.reader(open(self.inputsCSV, "r"))
-        inputs_header = inputs_CSV.next()
-        self.inputs = []
-
-        #each row contains a covariate raster layer
-        #item 0 is the full path to the file
-        #item 1 is 0/1 indicating categorical
-        #Construct our output header by extracting each individual 
-        #file (raster) name and appending '_categorical' if the flag is 1
-        rasters = {}
-        for row in inputs_CSV:
-            temp_raster = row[0]
-#            self.inputs.append(temp_raster)
-            raster_shortname = os.path.split(temp_raster)[1]
-            raster_shortname = os.path.splitext(raster_shortname)[0]
-            if len(row) > 1 and row[1] == '1':
-                raster_shortname += "_categorical"
-            rasters[raster_shortname] = temp_raster
-            
-        keys = rasters.keys()
-        keys.sort(key=lambda s: s.lower())
-        keys.sort(key=lambda s: s.lower())
-        for key in keys:
-            self.inputs.append(rasters[key])
-            full_header.append(key)
-
-        #Open up and write to an output file
-        oFile = open(self.outputMDS, 'wb')
-        fOut = csv.writer(oFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        
-        #Format and write out our three header lines
-        #    the original template, fieldData, and parc folder are 
-        #    stored in spots 1,2,3 in the second header line
-        if len(orig_header) > 3 and \
-            (orig_header[3] == 'Weights' or
-             orig_header[3] == 'frequency'):
-            #The input is an output from Field data query
-            original_field_data = orig_header[-1]
-            field_data_template = orig_header[-2]
-        else:
-            #The input is a raw field data file
-            original_field_data = self.fieldData
-            field_data_template = "NA"
-        
-        if len(inputs_header) > 5:
-            parc_template = inputs_header[5]
-            parc_workspace = inputs_header[6]
-        else:
-            parc_template = "Unknown"
-            parc_workspace = "Unknown"
-        
-
-        secondRow = [original_field_data, field_data_template, ""] + ["1" for elem in self.inputs]
-        thirdRow = [parc_template, parc_workspace, ""] + self.inputs
-        
-        if "Weights" in orig_header:
-            full_header.append("Weights")
-            secondRow.append("0")
-            thirdRow.append("0")
-            self.hasWeight = True
-            self.weightCol = orig_header.index("Weights")
-        else:
-            self.hasWeight = False
-        
-        fOut.writerow(full_header)
-        fOut.writerow(secondRow)
-        fOut.writerow(thirdRow)
-        oFile.close()
-        del fOut
-    
-    def readInPoints(self):
-        '''Loop through each row in our field data and add the X, Y, response
-        to our in memory list of rows to write to our output MDS file
-        '''
-        fieldDataCSV = csv.reader(open(self.fieldData, "r"))
-        origHeader = fieldDataCSV.next()
-        points = []
-#        tmpRow = 
-        for row in fieldDataCSV:
-            tmpRow = row[:3]
-            if self.hasWeight:
-                try:
-                    tmpRow.append(row[self.weightCol])
-                except IndexError:
-                    tmpRow.append("1")
-            points.append(tmpRow)
-
-        del fieldDataCSV
-        return points
-    
-    def addBackgroundPoints(self):
-        '''Add pointcount number of points to the supplied field data
-        If a probability surface was provided the distribution will 
-        follow this otherwise it will be uniform within the extent of the first of our inputs.
-        No more than one per pixel is used.
-        '''
-        
-        if self.pointtype == 'Background':
-            pointval = '-9999'
-        else:
-            pointval = '-9998'
-        
-        #initialize the random seed in case one was passed
-        if not self.seed:
-            self.seed = random.randint(0, sys.maxint)
-        random.seed(self.seed)
-        self.writetolog("    seed used for background point generation = " + str(self.seed))
-        
-        #First we'll create a temp copy of the Field Data to work with.
-        shutil.copy(self.fieldData, self.fieldData + ".tmp.csv")
-        self.fieldData = self.fieldData + ".tmp.csv"
-        self.deleteTmp = True
-        
-        if self.probsurf <> '':
-            rasterDS = gdal.Open(self.probsurf, gdalconst.GA_ReadOnly)
-            
-            probND = self.getND(self.probsurf)
-            
-            self.probsurface_sanitycheck(rasterDS)
-            
-            useProbSurf = True
-        else:
-            print self.inputs[0]
-            rasterDS = gdal.Open(self.inputs[0], gdalconst.GA_ReadOnly)
-            useProbSurf = False
-            
-        # get image size
-        rows = rasterDS.RasterYSize
-        cols = rasterDS.RasterXSize
-        band = rasterDS.GetRasterBand(1)
-        # get georeference info
-        transform = rasterDS.GetGeoTransform()
-        xOrigin = transform[0]
-        yOrigin = transform[3]
-        pixelWidth = transform[1]
-        pixelHeight = transform[5]
-        xRange = [xOrigin, xOrigin * pixelWidth * cols]
-        yRange = [yOrigin, yOrigin * pixelHeight * rows]
-        
-        #Open up and write to an output file
-        oFile = open(self.fieldData, 'ab')
-        fOut = csv.writer(oFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        
-        
-        if self.verbose:
-            self.writetolog('    Starting generation of ' + str(self.pointcount) + ' random background points, ')
-            if self.probsurf <> '':
-                self.writetolog('      using ' + self.probsurf + ' as the probability surface.')
-            print "    Percent Done:    ",
-        
-        foundPoints = 0 # The running count of how many we've found
-        pcntDone = 0 #for status bar
-        while foundPoints < self.pointcount: #loop until we find enough
-            x = random.randint(0, cols - 1) 
-            y = random.randint(0, rows - 1)
-            #print x, y
-            tmpPixel = [x, y, pointval] # a random pixel in the entire image
-            if useProbSurf:
-                # if they supplied a probability surface ignore the random pixel
-                # if a random number between 1 and 100 is > the probability surface value
-                pixelProb = int(band.ReadAsArray(tmpPixel[0], tmpPixel[1], 1, 1)[0,0])
-                if self.equal_float(pixelProb, probND) or np.isnan(pixelProb):
-                    continue
-                    #don't record this pixel it was ND in the Prob Surface
-                
-                #pixelProb is the extracted probability from the probability surface
-                rand = random.randint(1,100)
-                #rand is a uniform random integer between 1 and 100 inclusive
-                if rand > pixelProb:
-                    continue
-                    #don't record this pixel in our output file 
-                    #because our rand number was lower (or equal) than that pixel's probability
-                    
-            #convert our outValues for row, col to coordinates
-            tmpPixel[0] = xOrigin + tmpPixel[0] * pixelWidth
-            tmpPixel[1] = yOrigin + tmpPixel[1] * pixelHeight
-            
-            fOut.writerow(tmpPixel)
-            foundPoints += 1
-            if self.verbose:
-                if float(foundPoints)/self.pointcount > float(pcntDone)/100:
-                    pcntDone += 10
-                    print str(pcntDone) + "...",
-        print "Done!\n"
-        oFile.close()
-        del fOut
-    
-    def pull_fielddata_vals(self):
-        outputRows = self.readInPoints()
+        self.outputRows = self.readInPoints()
         
         #loop though each of the supplied rasters and add the 
         #extracted values to
         badpoints = []
         for input in self.inputs:
-            inputND = self.getND(input)
-            rasterDS = gdal.Open(input, gdalconst.GA_ReadOnly)
-            # get image size
-            rows = rasterDS.RasterYSize
-            cols = rasterDS.RasterXSize
-            band = rasterDS.GetRasterBand(1)
-            # get georeference info
-            transform = rasterDS.GetGeoTransform()
-            xOrigin = transform[0]
-            yOrigin = transform[3]
-            pixelWidth = transform[1]
-            pixelHeight = transform[5]
-            
-            if self.verbose:
-                self.writetolog("    Extracting raster values for " + input)
-                print "    ",
-            
-            pcntDone = 0
-            i = 1
-            for row in outputRows:
-                'loop through each of our points'
-                x = float(row[0])
-                y = float(row[1])
-#                if 
-                # compute pixel offset
-                xOffset = int((x - xOrigin) / pixelWidth)
-                yOffset = int((y - yOrigin) / pixelHeight)
-#                try:
-                if xOffset < 0 or yOffset < 0:
-                    if row[:3] not in badpoints:
-                        badpoints.append(row[:3])
-                    row.append(str(self.NDFlag))
-                else:
-                    try:
-                        data = band.ReadAsArray(xOffset, yOffset, 1, 1)
-                        value = data[0,0]
-                        if value <> inputND and not np.isnan(value):
-                            row.append(value)
-                        else:
-                            row.append(str(self.NDFlag))
-                    except:
-                        badpoints.append(row[:3])
-                        row.append(str(self.NDFlag))
+            self.process_one(input)
+#            inputND = self.getND(input)
+#            rasterDS = gdal.Open(input, gdalconst.GA_ReadOnly)
+#            # get image size
+#            rows = rasterDS.RasterYSize
+#            cols = rasterDS.RasterXSize
+#            band = rasterDS.GetRasterBand(1)
+#            # get georeference info
+#            transform = rasterDS.GetGeoTransform()
+#            xOrigin = transform[0]
+#            yOrigin = transform[3]
+#            pixelWidth = transform[1]
+#            pixelHeight = transform[5]
+#            
+#            if self.verbose:
+#                self.writetolog("    Extracting raster values for " + input)
+#                print "    ",
+#            
+#            pcntDone = 0
+#            i = 1
+#            for row in outputRows:
+#                'loop through each of our points'
+#                x = float(row[0])
+#                y = float(row[1])
+##                if 
+#                # compute pixel offset
+#                xOffset = int((x - xOrigin) / pixelWidth)
+#                yOffset = int((y - yOrigin) / pixelHeight)
+##                try:
+#                if xOffset < 0 or yOffset < 0:
+#                    if row[:3] not in badpoints:
+#                        badpoints.append(row[:3])
+#                    row.append(str(self.NDFlag))
+#                else:
+#                    try:
+#                        data = band.ReadAsArray(xOffset, yOffset, 1, 1)
+#                        value = data[0,0]
+#                        if value <> inputND and not numpy.isnan(value):
+#                            row.append(value)
+#                        else:
+#                            row.append(str(self.NDFlag))
+#                    except:
+#                        badpoints.append(row[:3])
+#                        row.append(str(self.NDFlag))
                 
-                if self.verbose:
-                    if i/float(len(outputRows)) > float(pcntDone)/100:
-                        pcntDone += 10
-                        print str(pcntDone) + "...",
-                i += 1
+            if self.verbose:
+                if i/float(len(outputRows)) > float(pcntDone)/100:
+                    pcntDone += 10
+                    print str(pcntDone) + "...",
+            i += 1
                 
             
             if self.verbose:
@@ -454,13 +229,335 @@ class MDSBuilder(object):
         output_shp = self.outputMDS.replace(".csv", "_shapefiles")
         utilities.mds_to_shape(self.outputMDS, output_shp)
         
-
+        # figure out how long the script took to run
+        endTime = time.time()
         
         if self.deleteTmp:
             #if this flag is trud the field data we're working with is 
             # a temporary copy which we created so that we could add
             # background points.  Delete it to clean up our working file.
             os.remove(self.fieldData)
+        
+        if self.verbose:
+            self.writetolog('Finished running MDSBuilder', True, True)
+            self.writetolog('    The process took ' + str(endTime - startTime) + ' seconds')
+        
+    def reproject_input_vector(self):
+        '''reprojects our input vector shapefile into the projection 
+        used by PARC.  Uses the first file from the parc input csv.
+        '''
+        output_dir = os.path.split(self.outputMDS)[0]
+        out_fname = os.path.split(self.VectorFieldData)[1]
+        out_fname, ext = os.path.splitext(out_fname)
+        self.repro_vector = os.path.join(output_dir, out_fname + "_repro" + ext)
+        if os.path.exists(self.repro_vector):
+            os.unlink(self.repro_vector)
+            
+        self.reproject_vector(self.VectorFieldData, self.repro_vector, self.inputs[0])
+            
+    def reproject_vector(self, VectorFieldData, output_vector, template):
+        '''originally taken from http://www.gis.usu.edu/~chrisg/python/2009/lectures/ospy_hw2b.py
+        '''
+        # get the shapefile driver
+        driver = ogr.GetDriverByName('ESRI Shapefile')
+        
+        # open the input data source and get the layer
+        inDS = driver.Open(VectorFieldData, 0)
+        if inDS is None:
+          print 'Could not open file'
+        inLayer = inDS.GetLayer()
+        
+        # create the input SpatialReference
+#        inSpatialRef = osr.SpatialReference()
+        inSpatialRef = inLayer.GetSpatialRef() 
+        
+        
+        dataset = gdal.Open(template, gdalconst.GA_ReadOnly)
+        # create the output SpatialReference
+        outSpatialRef = osr.SpatialReference()
+        outSpatialRef.ImportFromWkt(dataset.GetProjection())
+        del dataset
+        
+        # create the CoordinateTransformation
+        coordTrans = osr.CoordinateTransformation(inSpatialRef, outSpatialRef)
+        
+        
+        # create a new data source and layer
+        fn = output_vector
+        if os.path.exists(fn):
+          driver.DeleteDataSource(fn)
+        outDS = driver.CreateDataSource(fn)
+        if outDS is None:
+          print 'Could not create file'
+        just_fname = os.path.splitext(os.path.split(output_vector)[1])[0]
+#        just_fname = just_fname.replace(" ", "")
+        outLayer = outDS.CreateLayer(just_fname, geom_type=ogr.wkbPolygon)
+        
+        
+        #copy the old fields to the new file
+        inlayerDef = inLayer.GetLayerDefn()
+        outlayerDef = outLayer.GetLayerDefn()
+        for i in range(inlayerDef.GetFieldCount() - 1):
+            field = inlayerDef.GetFieldDefn(i)
+#            outlayerDef.AddFieldDefn(field)
+            outLayer.CreateField(field)
+            
+#        # get the FieldDefn for the county name field
+#        feature = inLayer.GetFeature(0)
+#        fieldDefn = feature.GetFieldDefnRef('name')
+#        
+#        # add the field to the output shapefile
+#        outLayer.CreateField(fieldDefn)
+#        
+#        # get the FeatureDefn for the output shapefile
+#        featureDefn = outLayer.GetLayerDefn()
+        
+        # loop through the input features
+        inFeature = inLayer.GetNextFeature()
+        while inFeature:
+        
+            # get the input geometry
+            geom = inFeature.GetGeometryRef()
+            
+            # reproject the geometry
+            geom.Transform(coordTrans)
+            
+            # create a new feature
+            outFeature = ogr.Feature(outlayerDef)
+            
+            # set the geometry and attribute
+            outFeature.SetGeometry(geom)
+          
+            for i in range(inlayerDef.GetFieldCount() - 1):
+                field = inlayerDef.GetFieldDefn(i)
+                outFeature.SetField(field.name, inFeature.GetField(field.name))
+            
+            # add the feature to the shapefile
+            outLayer.CreateFeature(outFeature)
+        
+            # destroy the features and get the next input feature
+            outFeature.Destroy
+            inFeature.Destroy
+            inFeature = inLayer.GetNextFeature()
+        
+        # close the shapefiles
+        inDS.Destroy()
+        outDS.Destroy()
+        
+        # create the *.prj file
+        outSpatialRef.MorphToESRI()
+        prjfile = os.path.splitext(output_vector)[0] + ".prj"
+        file = open(prjfile, 'w')
+        file.write(outSpatialRef.ExportToWkt())
+        file.close()
+        
+    def constructEmptyMDS(self):
+        '''Creates the triple header line format of our output file.
+        Also parses the inputs file to append the '_categorical' flag 
+        to the covariate names of all categorical inputs.
+        '''        
+        
+#        field_data_CSV = csv.reader(open(self.fieldData, "r"))
+#        orig_header = field_data_CSV.next()
+#        full_header = ["X", "Y"]
+#        if orig_header[2].lower not in ["responsebinary", "responsecount"]:
+#            #inputs not conforming to our expected format will be assumed
+#            #to be binary data
+#            full_header.append("responseBinary")
+#        else:
+#            full_header.append(orig_header[2])
+        
+        full_header = ["ID", "response" + self.ResponseType]
+        
+        inputs_CSV = csv.reader(open(self.inputsCSV, "r"))
+        inputs_header = inputs_CSV.next()
+        self.inputs = []
+
+        #each row contains a covariate raster layer
+        #item 0 is the full path to the file
+        #item 1 is 0/1 indicating categorical
+        #Construct our output header by extracting each individual 
+        #file (raster) name and appending '_categorical' if the flag is 1
+        rasters = {}
+        for row in inputs_CSV:
+            temp_raster = row[0]
+#            self.inputs.append(temp_raster)
+            raster_shortname = os.path.split(temp_raster)[1]
+            raster_shortname = os.path.splitext(raster_shortname)[0]
+            if len(row) > 1 and row[1] == '1':
+                raster_shortname += "_categorical"
+            rasters[raster_shortname] = temp_raster
+            
+        keys = rasters.keys()
+        keys.sort(key=lambda s: s.lower())
+        keys.sort(key=lambda s: s.lower())
+        for key in keys:
+            self.inputs.append(rasters[key])
+            full_header.append(key)
+
+        #Open up and write to an output file
+        oFile = open(self.outputMDS, 'wb')
+        fOut = csv.writer(oFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        
+#        #Format and write out our three header lines
+#        #    the original template, fieldData, and parc folder are 
+#        #    stored in spots 1,2,3 in the second header line
+#        if len(orig_header) > 3 and \
+#            (orig_header[3] == 'Weights' or
+#             orig_header[3] == 'frequency'):
+#            #The input is an output from Field data query
+#            original_field_data = orig_header[-1]
+#            field_data_template = orig_header[-2]
+#        else:
+#            #The input is a raw field data file
+#            original_field_data = self.fieldData
+#            field_data_template = "NA"
+#        
+#        if len(inputs_header) > 5:
+#            parc_template = inputs_header[5]
+#            parc_workspace = inputs_header[6]
+#        else:
+#            parc_template = "Unknown"
+#            parc_workspace = "Unknown"
+        
+
+        secondRow = [self.VectorFieldData, self.KeyField] + ["1" for elem in self.inputs]
+        thirdRow = ["", ""] + self.inputs
+        
+#        if "Weights" in orig_header:
+#            full_header.append("Weights")
+#            secondRow.append("0")
+#            thirdRow.append("0")
+#            self.hasWeight = True
+#            self.weightCol = orig_header.index("Weights")
+#        else:
+#            self.hasWeight = False
+        
+        fOut.writerow(full_header)
+        fOut.writerow(secondRow)
+        fOut.writerow(thirdRow)
+        oFile.close()
+        del fOut
+    
+    def readInPoints(self):
+        '''Loop through each row in our field data and add the X, Y, response
+        to our in memory list of rows to write to our output MDS file
+        '''
+        
+        # get the driver
+        driver = ogr.GetDriverByName('ESRI Shapefile')
+        # open the data source
+        datasource = driver.Open(self.VectorFieldData, 0)
+        if datasource is None:
+            print 'Could not open file'
+
+        # get the data layer
+        layer = datasource.GetLayer()
+        # loop through the features and count them
+        uniques = set()
+        feature = layer.GetNextFeature()
+        while feature:
+            uniques.add(feature.GetFieldAsString(self.KeyField))
+            feature.Destroy()
+            feature = layer.GetNextFeature()
+        print 'There are ' + str(len(uniques)) + ' unique features'
+        # close the data source
+        datasource.Destroy()
+        
+        return uniques
+    
+    def addBackgroundPoints(self):
+        '''Add pointcount number of points to the supplied field data
+        If a probability surface was provided the distribution will 
+        follow this otherwise it will be uniform within the extent of the first of our inputs.
+        No more than one per pixel is used.
+        '''
+        
+        if self.pointtype == 'Background':
+            pointval = '-9999'
+        else:
+            pointval = '-9998'
+        
+        #initialize the random seed in case one was passed
+        if not self.seed:
+            self.seed = random.randint(0, sys.maxint)
+        random.seed(self.seed)
+        self.writetolog("    seed used for background point generation = " + str(self.seed))
+        
+        #First we'll create a temp copy of the Field Data to work with.
+        shutil.copy(self.fieldData, self.fieldData + ".tmp.csv")
+        self.fieldData = self.fieldData + ".tmp.csv"
+        self.deleteTmp = True
+        
+        if self.probsurf <> '':
+            rasterDS = gdal.Open(self.probsurf, gdalconst.GA_ReadOnly)
+            probND = self.getND(self.probsurf)
+            useProbSurf = True
+        else:
+            print self.inputs[0]
+            rasterDS = gdal.Open(self.inputs[0], gdalconst.GA_ReadOnly)
+            useProbSurf = False
+            
+        # get image size
+        rows = rasterDS.RasterYSize
+        cols = rasterDS.RasterXSize
+        band = rasterDS.GetRasterBand(1)
+        # get georeference info
+        transform = rasterDS.GetGeoTransform()
+        xOrigin = transform[0]
+        yOrigin = transform[3]
+        pixelWidth = transform[1]
+        pixelHeight = transform[5]
+        xRange = [xOrigin, xOrigin * pixelWidth * cols]
+        yRange = [yOrigin, yOrigin * pixelHeight * rows]
+        
+        #Open up and write to an output file
+        oFile = open(self.fieldData, 'ab')
+        fOut = csv.writer(oFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        
+        
+        if self.verbose:
+            self.writetolog('    Starting generation of ' + str(self.pointcount) + ' random background points, ')
+            if self.probsurf <> '':
+                self.writetolog('      using ' + self.probsurf + ' as the probability surface.')
+            print "    Percent Done:    ",
+        
+        foundPoints = 0 # The running count of how many we've found
+        pcntDone = 0 #for status bar
+        while foundPoints < self.pointcount: #loop until we find enough
+            x = random.randint(0, cols - 1) 
+            y = random.randint(0, rows - 1)
+            #print x, y
+            tmpPixel = [x, y, pointval] # a random pixel in the entire image
+            if useProbSurf:
+                # if they supplied a probability surface ignore the random pixel
+                # if a random number between 1 and 100 is > the probability surface value
+                pixelProb = int(band.ReadAsArray(tmpPixel[0], tmpPixel[1], 1, 1)[0,0])
+                if self.equal_float(pixelProb, probND) or numpy.isnan(pixelProb):
+                    continue
+                    #don't record this pixel it was ND in the Prob Surface
+                
+                #pixelProb is the extracted probability from the probability surface
+                rand = random.randint(1,100)
+                #rand is a uniform random integer between 1 and 100 inclusive
+                if rand > pixelProb:
+                    continue
+                    #don't record this pixel in our output file 
+                    #because our rand number was lower (or equal) than that pixel's probability
+                    
+            #convert our outValues for row, col to coordinates
+            tmpPixel[0] = xOrigin + tmpPixel[0] * pixelWidth
+            tmpPixel[1] = yOrigin + tmpPixel[1] * pixelHeight
+            
+            fOut.writerow(tmpPixel)
+            foundPoints += 1
+            if self.verbose:
+                if float(foundPoints)/self.pointcount > float(pcntDone)/100:
+                    pcntDone += 10
+                    print str(pcntDone) + "...",
+        print "Done!\n"
+        oFile.close()
+        del fOut
     
     def equal_float(self, a, b):
         #equality comparison between two floating point values
@@ -524,80 +621,41 @@ class MDSBuilder(object):
         else:
             return ND
 
-    def probsurface_sanitycheck(self, probsurfaceDS):
-        '''function to acertain how hard it will be to find the required
-        number of points given the entered probability surface. 
-        '''
-        #step one find the prop surface average pixel probability
-        ave_prob = self.get_mean_prob(probsurfaceDS)
 
-        #step2 calculate the expected maximum number of points available
-        probparams = utilities.getRasterParams(self, self.probsurf)
-        max_points = ave_prob * probparams["width"] * probparams["height"]
-        
-        #Check if our number of points is approaching the number of availible points
-        if  self.pointcount > max_points:
-            print "not going to happen"
-        elif self.pointcount > max_points * 0.9:
-            print "gonna take forever"
-        elif self.pointcount > max_points * 0.5:
-            print "gonna take a while"
+    def process_one(self, raster):
+        # get the driver
+        driver = ogr.GetDriverByName('ESRI Shapefile')
+        # open the data source
+        datasource = driver.Open(self.repro_vector, 0)
+        if datasource is None:
+            print 'Could not open file'
 
-                
-#                ndMask = ma.masked_array(data, mask=(data==probparams["NoData"]))
-#                if method == None:
-#                    method = "Mean"
-#                if method in ["Mean", "Max", "Min"]:
-#                    ans = self.rebin(ndMask, (numRows/numSourcePerTarget, numCols/numSourcePerTarget), method)
-#                else:
-#                    X, Y = ndMask.shape
-#                    x = X // numSourcePerTarget
-#                    y = Y // numSourcePerTarget
-#                    ndMask = ndMask.reshape( (x, numSourcePerTarget, y, numSourcePerTarget) )
-#                    ndMask = ndMask.transpose( [0, 2, 1, 3] )
-#                    ndMask = ndMask.reshape( (x*y, numSourcePerTarget*numSourcePerTarget) )
-#                    ans =  np.array(stats.mode(ndMask, 1)[0]).reshape(x, y)
-#            
-#            
-#                outBand.WriteArray(ans, int(j / numSourcePerTarget), int(i / numSourcePerTarget))
-            
-
-
-    def get_mean_prob(self, probsurfaceDS):
-        probparams = utilities.getRasterParams(self, self.probsurf)
-        rows = int(probparams["height"])
-        cols = int(probparams["width"])
+        # get the data layer
+        layer = datasource.GetLayer()
         
-        #loop of 'blocks' of data maybe.  
-        bSize = 1024 #source pixels
-        fullPixelCount = float(bSize * bSize)
-        #convert this to the nearest whole number of target pixels
+        for feature in self.outputRows:
+            layer.SetAttributeFilter(self.KeyField + " = '" + feature + "'")
+            extent = self.get_extent(layer)
+            print layer.GetExtent()
         
-        avs = []
-        wts = []
         
-        for i in range(0, rows, bSize):
-            if i + bSize  < rows:
-                numRows = bSize
-            else:
-                numRows = rows - i
-                
-            for j in range(0, cols, bSize):
-                if j + bSize < cols:
-                    numCols = bSize
-                else:
-                    numCols = cols - j
-                
-                
-                    
-                data = probsurfaceDS.GetRasterBand(1).ReadAsArray(j, i, numCols, numRows)
-                data[data==probparams["NoData"]] = 0
-                
-                avs.append(np.average(data))
-                wts.append(data.size / fullPixelCount)
-                
-            
-        return np.average(avs,weights=wts)
+    def get_extent(self, layer):
+        feature = layer.GetNextFeature()
+#        geom = feature.GetGeometryRef()
+#        fullgeom = ogr.Geometry(ogr.wkbPolygon)
+        maxenv = feature.GetGeometryRef().GetEnvelope()
+        while feature:
+#            print feature.GetGeometryRef().GetEnvelope()
+#            geom = feature.GetGeometryRef()
+#            fullgeom = fullgeom.Union(geom)
+            env = feature.GetGeometryRef().GetEnvelope()
+            maxenv = (min(env[0], maxenv[0]), 
+                      max(env[1], maxenv[1]),
+                      min(env[2], maxenv[2]),
+                      max(env[3], maxenv[3]))
+            feature = layer.GetNextFeature()
+#        env = fullgeom.GetEnvelope()
+        return maxenv
 
 def main(argv):
     

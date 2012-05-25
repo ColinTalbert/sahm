@@ -74,6 +74,7 @@ import GenerateModuleDoc as GenModDoc
 #import our python SAHM Processing files
 import packages.sahm.pySAHM.FieldDataAggreagateAndWeight as FDAW
 import packages.sahm.pySAHM.MDSBuilder as MDSB
+import packages.sahm.pySAHM.MDSBuilder_vector as MDSB_V
 import packages.sahm.pySAHM.PARC as parc
 import packages.sahm.pySAHM.RasterFormatConverter as RFC
 import packages.sahm.pySAHM.MaxentRunner as MaxentRunner
@@ -715,7 +716,7 @@ class MDSBuilder(Module):
          return GenModDoc.construct_port_doc(cls, port_name, 'out')
 
     def compute(self):
-        port_map = {'fieldData': ('fieldData', None, True),
+        port_map = {'fieldData': ('fieldData', None, False),
                     'backgroundPointType': ('pointtype', None, False),
                     'backgroundPointCount': ('pointcount', None, False),
                     'backgroundProbSurf': ('probsurf', None, False),
@@ -744,6 +745,67 @@ class MDSBuilder(Module):
 
         writetolog("    inputsCSV=" + ourMDSBuilder.inputsCSV, False, False)
         writetolog("    fieldData=" + ourMDSBuilder.fieldData, False, False)
+        writetolog("    outputMDS=" + ourMDSBuilder.outputMDS, False, False)
+        
+        try:
+            ourMDSBuilder.run()
+        except TrappedError as e:
+            raise ModuleError(self, e.message)
+        except:
+            utils.informative_untrapped_error(self, "MDSBuilder")
+
+        output_file = utils.create_file_module(ourMDSBuilder.outputMDS) 
+        self.setResult('mdsFile', output_file)
+
+class MDSBuilder_vector(Module):
+    '''
+    '''
+    __doc__ = GenModDoc.construct_module_doc('MDSBuilder')
+
+    _input_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
+                                 ('VectorFieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
+                                 ('KeyField', '(edu.utah.sci.vistrails.basic:String)'),
+                                 ('Statistic', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'Mean', 'optional':True}),
+                                 ('ResponseType', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'Binary', 'optional':True})]
+                            
+    
+    _output_ports = [('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)')]
+
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return GenModDoc.construct_port_doc(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+         return GenModDoc.construct_port_doc(cls, port_name, 'out')
+
+    def compute(self):
+        port_map = {'VectorFieldData': ('VectorFieldData', None, True),
+                    'KeyField': ('KeyField', None, True),
+                    'Statistic': ('Statistic', None, False)}
+        
+        MDSParams = utils.map_ports(self, port_map)            
+        MDSParams['outputMDS'] = utils.mknextfile(prefix='MergedDataset_', suffix='.csv')
+        
+        #allow multiple CSV of inputs to be provided.  
+        #if more than one then combine into a single CSV before sending to MDSBuilder
+        inputs_csvs = self.forceGetInputListFromPort('RastersWithPARCInfoCSV')
+        if len(inputs_csvs) == 0:
+            raise ModuleError(self, "Must supply at least one 'RastersWithPARCInfoCSV'/nThis is the output from the PARC module")
+        if len(inputs_csvs) > 1:
+            inputs_csv = utils.mknextfile(prefix='CombinedPARCFiles_', suffix='.csv')
+            inputs_names = [f.name for f in inputs_csvs]
+            utils.merge_inputs_csvs(inputs_names, inputs_csv)
+        else:
+            inputs_csv = inputs_csvs[0].name
+        MDSParams['inputsCSV'] = inputs_csv
+        
+        #inputsCSV = utils.path_port(self, 'RastersWithPARCInfoCSV')
+        
+        ourMDSBuilder = MDSB_V.MDSBuilder_vector()
+        utils.PySAHM_instance_params(ourMDSBuilder, MDSParams)
+
+        writetolog("    inputsCSV=" + ourMDSBuilder.inputsCSV, False, False)
+        writetolog("    fieldData=" + ourMDSBuilder.VectorFieldData, False, False)
         writetolog("    outputMDS=" + ourMDSBuilder.outputMDS, False, False)
         
         try:
@@ -1811,6 +1873,7 @@ _modules = generate_namespaces({'DataInput': [
                                 'Tools': [FieldDataQuery,
                                           FieldDataAggregateAndWeight,
                                           MDSBuilder,
+                                          MDSBuilder_vector,
                                           PARC,
                                           RasterFormatConverter,
                                           ProjectionLayers,

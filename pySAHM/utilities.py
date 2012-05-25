@@ -48,6 +48,7 @@ import time
 import csv
 import string
 
+from osgeo import gdalconst
 from osgeo import gdal
 from osgeo import osr
 from osgeo import ogr
@@ -306,49 +307,126 @@ def getRasterName(fullPathName):
     return rastername
 
 def getRasterParams(self, rasterFile):
-    """
-    Extracts a series of bits of information from a passed raster
-    All values are stored in a dictionary which is returned.
-    If errors are encountered along the way the error messages will
-    be returned as a list in the Error element.
-    """
-    try:
-        #initialize our params dictionary to have None for all parma
-        params = {}
-        allRasterParams = ["Error", "xScale", "yScale", "width", "height",
-                        "ulx", "uly", "lrx", "lry", "Wkt", 
-                        "tUlx", "tUly", "tLrx", "tLry", 
-                        "srs", "gt", "prj", "NoData", "PixelType"]
-        
-        for param in allRasterParams:
-            params[param] = None
-        params["Error"] = []
-        
-        # Get the PARC parameters from the rasterFile.
-        dataset = gdal.Open(rasterFile, gdalconst.GA_ReadOnly)
-        if dataset is None:
-            params["Error"].append("Unable to open file")
-            #print "Unable to open " + rasterFile
-            #raise Exception, "Unable to open specifed file " + rasterFile
+        """
+        Extracts properties from a passed raster
+        All values are stored in a dictionary which is returned.
+        If errors are encountered along the way the error messages will
+        be returned as a list in the 'Error' element.
+        """
+        try:
+            #initialize our params dictionary to have None for all parma
+            params = {}
+            allRasterParams = ["Error", "xScale", "yScale", "width", "height",
+                            "east", "north", "west", "south",  
+                            "tEast", "tNorth", "tWest", "tSouth",
+                            "gEast", "gNorth", "gWest", "gSouth",  
+                            "Wkt", "srs", "gt", "prj", "NoData", "PixelType", "file_name"]
             
-        
-        xform  = dataset.GetGeoTransform()
-        params["xScale"] = xform[1]
-        params["yScale"] = xform[5]
-
-        params["width"]  = dataset.RasterXSize
-        params["height"] = dataset.RasterYSize
-
-        params["ulx"] = xform[0]
-        params["uly"] = xform[3]
-        params["lrx"] = params["ulx"] + params["width"]  * params["xScale"]
-        params["lry"] = params["uly"] + params["height"] * params["yScale"]
+            for param in allRasterParams:
+                params[param] = None
+                
+            params["Error"] = []
             
-        
-    except:
-        #print "We ran into problems extracting raster parameters from " + rasterFile
-        params["Error"].append("Some untrapped error was encountered")
-    finally:
-        del dataset
-        return params
+            
+            params["file_name"] = rasterFile
+            if not os.path.exists(rasterFile):
+                params["Error"].append("The input file (" + rasterFile + ") does not exist on the file system.")
+                return params
+            
+            # Get the PARC parameters from the rasterFile.
+            dataset = gdal.Open(rasterFile, gdalconst.GA_ReadOnly)
+            if dataset is None:
+                params["Error"].append("Unable to open file")
+                return params
+                
+                #print "Unable to open " + rasterFile
+                #raise Exception, "Unable to open specifed file " + rasterFile
+                
+            
+            xform  = dataset.GetGeoTransform()
+            params["xScale"] = xform[1]
+            params["yScale"] = xform[5]
+    
+            params["width"]  = dataset.RasterXSize
+            params["height"] = dataset.RasterYSize
+    
+            params["west"] = xform[0]
+            params["north"] = xform[3]
+            params["east"] = params["west"] + params["width"]  * params["xScale"]
+            params["south"] = params["north"] + params["height"] * params["yScale"]
+    
+            try:
+                wkt = dataset.GetProjection()
+                params["gt"] = dataset.GetGeoTransform()
+                params["prj"] = dataset.GetProjectionRef()
+                params["srs"] = osr.SpatialReference(wkt)
+                if wkt == '':
+                    params["Error"].append("Undefined projection")
+                else:
+                    
+                    if rasterFile == self.template:
+                        params["tWest"], params["tNorth"] = params["west"], params["north"]
+                        params["tEast"], params["tSouth"] = params["east"], params["south"]
+                    elif params["srs"].ExportToWkt() == self.template_params["srs"].ExportToWkt():
+                        params["tWest"], params["tNorth"] = params["west"], params["north"]
+                        params["tEast"], params["tSouth"] = params["east"], params["south"]
+                    else:
+                        try:
+                            params["tWest"], params["tNorth"] = self.transformPoint(params["west"], params["north"], params["srs"], self.template_params["srs"])
+                            params["tEast"], params["tSouth"] = self.transformPoint(params["east"], params["south"], params["srs"], self.template_params["srs"])
+                        except:
+                            params["Error"].append("Could not transform extent coordinates to template spatial reference")
+                            #params["Error"] = "We ran into problems converting projected coordinates to template for " +  rasterFile
+                    try:
+                        geographic = osr.SpatialReference()
+                        geographic.ImportFromEPSG(4326)
+                        params["gWest"], params["gNorth"] = self.transformPoint(params["west"], params["north"], params["srs"], geographic)
+                        params["gEast"], params["gSouth"] = self.transformPoint(params["east"], params["south"], params["srs"], geographic)
+                    except:
+                        pass
+                    
+            except:
+                #print "We ran into problems getting the projection information for " +  rasterFile
+                params["Error"].append("Undefined problems extracting the projection information")
+                
+            try:
+                params["signedByte"] = dataset.GetRasterBand(1).GetMetadata('IMAGE_STRUCTURE')['PIXELTYPE'] == 'SIGNEDBYTE'
+            except KeyError:
+                params["signedByte"] = False
+            
+            params["NoData"] = dataset.GetRasterBand(1).GetNoDataValue()
+            if params["NoData"] == None:
+                if dataset.GetRasterBand(1).DataType == 1:
+                    print "Warning:  Could not extract NoData value.  Using assumed nodata value of 255"
+                    params["NoData"] = 255
+                elif dataset.GetRasterBand(1).DataType == 2:
+                    print "Warning:  Could not extract NoData value.  Using assumed nodata value of 65536"
+                    params["NoData"] = 65536
+                elif dataset.GetRasterBand(1).DataType == 3:
+                    print "Warning:  Could not extract NoData value.  Using assumed nodata value of 32767"
+                    params["NoData"] = 32767
+                elif dataset.GetRasterBand(1).DataType == 4:
+                    print "Warning:  Could not extract NoData value.  Using assumed nodata value of 2147483647"
+                    params["NoData"] = 2147483647
+                elif dataset.GetRasterBand(1).DataType == 5:
+                    print "Warning:  Could not extract NoData value.  Using assumed nodata value of 2147483647"
+                    params["NoData"] = 2147483647
+                elif dataset.GetRasterBand(1).DataType == 6:
+                    print "Warning:  Could not extract NoData value.  Using assumed nodata value of -3.40282346639e+038"
+                    params["NoData"] = -3.40282346639e+038
+                else:
+                    params["Error"].append("Could not identify nodata value")
+            params["PixelType"] = dataset.GetRasterBand(1).DataType
+            if params["PixelType"] == None:
+                params["Error"].append("Could not identify pixel type (bit depth)")
+            
+        except:
+            #print "We ran into problems extracting raster parameters from " + rasterFile
+            params["Error"].append("Some untrapped error was encountered")
+        finally:
+            try:
+                del dataset
+            except NameError:
+                pass
+            return params
 

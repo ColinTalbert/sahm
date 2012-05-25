@@ -286,15 +286,16 @@ class SelectListDialog(QtGui.QDialog):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
             
-        self.make_new_covariate_plot(output_dir, item)
-        
-        outputPic = self.make_new_pairs_plot(self.inputMDS)
+        outputPic = self.make_new_covariate_plot(output_dir, str(item.text(0)))
         self.popup = QtGui.QDialog()
+#        self.popup.setBaseSize(1200, 1200)
+        self.popup.resize(1500, 1500)
         viewWindow = utils.InteractiveQGraphicsView(self.popup)
-        viewWindow.load_picture(outputPic)
         layout = QtGui.QVBoxLayout()
         layout.addWidget(viewWindow)
         self.popup.setLayout(layout)
+        viewWindow.load_picture(outputPic)
+        
         
         retVal = self.popup.exec_()
         
@@ -462,10 +463,12 @@ class SelectListDialog(QtGui.QDialog):
             raise Exception, "Missing output from R processing"
 
     def make_new_covariate_plot(self, output_dir, covariate):
+        output_fname = os.path.join(output_dir, covariate + ".jpg")
+        
         args = "i=" + '"' + self.inputMDS + '"' 
         args += " o=" + '"' + output_dir + '"' 
         args += " rc=" + self.responseCol
-        args += " p=" + str(covariate.text(0))
+        args += " p=" + covariate
         
         if self.chkPresence.checkState() == QtCore.Qt.Checked:
             args += " pres=TRUE"
@@ -482,13 +485,13 @@ class SelectListDialog(QtGui.QDialog):
         else:
             args += " bgd=FALSE"
         
-        if os.path.exists(os.path.join(self.outputDir, "Predictor_Correlation.jpg")):
-            os.remove(os.path.join(self.outputDir, "Predictor_Correlation.jpg"))
+        if os.path.exists(output_fname):
+            os.remove(output_fname)
             
         utils.runRScript('Predictor.inspection.r', args)
         
-        if os.path.exists(os.path.join(self.displayJPEG)):
-            return os.path.join(self.displayJPEG)
+        if os.path.exists(output_fname):
+            return output_fname
         else:
             writetolog("Missing output from R processing: " + self.displayJPEG)
             raise Exception, "Missing output from R processing"
