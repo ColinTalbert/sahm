@@ -283,13 +283,15 @@ class MDSBuilder(object):
             
             probND = self.getND(self.probsurf)
             
-            self.probsurface_sanitycheck(rasterDS)
+            pixels_sample_count = self.probsurface_sanitycheck(rasterDS)
             
             useProbSurf = True
         else:
             print self.inputs[0]
             rasterDS = gdal.Open(self.inputs[0], gdalconst.GA_ReadOnly)
             useProbSurf = False
+            
+            pixels_sample_count = self.pointcount
             
         # get image size
         rows = rasterDS.RasterYSize
@@ -535,13 +537,29 @@ class MDSBuilder(object):
         probparams = utilities.getRasterParams(self, self.probsurf)
         max_points = ave_prob * probparams["width"] * probparams["height"]
         
-        #Check if our number of points is approaching the number of availible points
+        #Check if our number of points is approaching the number of available points
         if  self.pointcount > max_points:
-            print "not going to happen"
-        elif self.pointcount > max_points * 0.9:
-            print "gonna take forever"
+            msg = "The number of random background points, " + str(self.pointcount)
+            msg += " exceeds the expected number of available points given the specified probability surface. "
+            msg += "\n" + self.probsurf + " has an average pixel probability of " + str(ave_prob) + ".\n"
+            msg += "Which when multiplied by the cell dimensions of " + str(probparams["width"]) + " x " + str(probparams["height"])
+            msg += " results in an expected maximum number of available random points of " + str(max_points)
+            raise RuntimeError, msg
         elif self.pointcount > max_points * 0.5:
-            print "gonna take a while"
+            msg = "The number of random background points, " + str(self.pointcount)
+            msg += " is greater than 50% the expected number of available points given the specified probability surface. "
+            msg += "\n" + self.probsurf + " has an average pixel probability of " + str(ave_prob) + ".\n"
+            msg += "Which when multiplied by the cell dimensions of " + str(probparams["width"]) + " x " + str(probparams["height"])
+            msg += " results in an expected maximum number of available random points of " + str(max_points)
+            msg += "\n\n processing time and memory use could be excessive and problematic." 
+            self.writetolog()
+        elif self.pointcount > max_points * 0.25:
+            pass
+            
+        # return the expected number of points we will have to sample to get the 
+        # desired number (self.pointcount).  The 1.1 is a 10% fudge factor.
+        return 1.0/ave_prob * self.pointcount * 1.1 
+    
 
                 
 #                ndMask = ma.masked_array(data, mask=(data==probparams["NoData"]))
@@ -599,6 +617,30 @@ class MDSBuilder(object):
             
         return np.average(avs,weights=wts)
 
+    def draw_sample(self, sample_size, rows, cols):
+        if sample_size < (rows * cols * 0.3):
+            # Blacklist
+            # we need a relatively small sample it's most efficient to
+            # to randomly select points and throw out duplicates.
+            #this is the most memory and processing efficient way to accomplish this
+            #for small relative sample sizes.
+            tried_cells = set()
+            kept_cells = set()
+            
+            pcntDone
+            while sample_size < kept_cells:
+                x = rdm.randint(0, x_count)
+                y = rdm.randint(0, y_count)
+                if (x, y) in tried_cells:
+                    pass
+                else:
+                    tried_cells.add((x, y))
+                    keep = rdm.random() < keep_probability
+                    if keep:
+                        kept_cells.add((x,y))
+        else:
+            #whitelist
+            
 def main(argv):
     
     usageStmt = "usage:  options: -f --fieldData -i --inCSV -o --output -pc --pointcount -ps --probsurf"

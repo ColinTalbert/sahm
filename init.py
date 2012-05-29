@@ -53,6 +53,8 @@ import sys
 import subprocess
 import traceback
 import random
+import copy
+
 
 from core.modules.vistrails_module import Module, ModuleError, ModuleConnector
 from core.modules.basic_modules import File, Directory, Path, new_constant, Constant
@@ -399,104 +401,114 @@ class RastersWithPARCInfoCSV(File):
 #        PersistentPath.compute(self, is_input, 'blob')
 
 
-class ApplyModel(Module):
-    '''
-    Apply Model
-
-    The ApplyModel module allows the user to apply a model developed using a
-    particular package within the workflow and generate output probability and binary
-    maps. The process of creating an output probability map and binary map based on
-    a particular model can be time-consuming, depending on the input data. By
-    existing as a stand-alone process in the workflow, the ApplyModel module allows
-    a user to investigate the performance metrics for a particular model (such as
-    the ROC curve or the AUC) before dedicating the processing time needed to generate
-    the output maps. In most cases, a user will "fine tune" a model by exploring the
-    performance metrics of different model iterations before applying the model and
-    generating the actual maps as a final step.
-    
-    The ApplyModel module also provides the user with the option of projecting the results
-    of a model developed from one set of environmental predictors onto a new modeled space
-    containing that same set of environmental predictors but representing data captured at
-    a different temporal or spatial location. For example, a user could generate a model
-    predicting habitat suitability using recorded presence points and certain environmental
-    predictors such as elevation, landcover, and proximity to water in one geographic
-    location. Based on the training from this information, the modeled results could be
-    generated for (or "projected to") a new location based on the range of values seen in
-    elevation, landcover, and proximity to water in the second geographic area. Similarly,
-    modeling predicted results through time is also possible. A model trained using field
-    data and a set of predictor layers representative of one time period could be projected
-    onto the same geographical area using a new set of layers corresponding to the same
-    predictors but representing data from a different time period (e.g., different climate
-    data).
-
-    The ApplyModel module accepts two inputs from the user:
-
-    1. Model Workspace: The model workspace field accepts as an input a modeling
-    package element (complete with all required parameters) from upstream in the workflow.
-    The inputs and specifications provided in the dialogue fields of the model will be applied
-    and used to generate the output maps. A user should populate the model workspace field by
-    connecting a model element to the appropriate input port of the ApplyModel module in the
-    visual display of the model workflow.
-    
-    2. Projection Target: The projection target is an optional parameter that allows a user to
-    apply a model to a particular geographic area and or set of predictors (other than those
-    used to train the model) and create output maps within the spatial extent of the projection
-    target layers. This input field should be populated by connecting either the output of the
-    ProjectionLayers module or a separate MDSBuilder element to the appropriate input port of
-    the ApplyModel module.
-    
-    '''
-    
-    _input_ports = [('projectionTarget', '(gov.usgs.sahm:MergedDataSet:Other)'),
-                    ('modelWorkspace', '(edu.utah.sci.vistrails.basic:File)'),
-                    ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)'),
-                    ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)'),]
-    _output_ports = [('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
-                     ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)')]
-    
-    
-    
-    def compute(self):
-        
-        workspace = self.forceGetInputFromPort('modelWorkspace').name
-        output_dname = utils.mknextdir(prefix='AppliedModel_')
-        if self.hasInputFromPort('projectionTarget'):
-            mdsFile = self.forceGetInputFromPort('projectionTarget').name
-            args = "ws=" + '"' + workspace + '"' + " c=" + '"' + mdsFile + '"' + " o=" + '"' + output_dname + '"'
-        else:
-            args = "ws=" + '"' + workspace + '"' + " o=" + '"' + output_dname + '"'
-        
-        if self.hasInputFromPort('makeBinMap'):
-            makeBinMap = self.forceGetInputFromPort('makeBinMap')
-            args += ' mbt=' + str(makeBinMap).upper()
-        else:
-            args += ' mbt=TRUE'
-            
-        if self.hasInputFromPort('makeProbabilityMap'):
-            makeProbabilityMap = self.forceGetInputFromPort('makeProbabilityMap')
-            args += ' mpt=' + str(makeProbabilityMap).upper()
-        else:
-             args += ' mpt=TRUE'
-                
-        
-        utils.runRScript('PredictModel.r', args, self)
-        
-        input_fname = os.path.join(output_dname, "prob_map.tif")
-        output_fname = os.path.join(output_dname, 'prob_map.jpeg')
-        if os.path.exists(input_fname):
-            utils.tif_to_color_jpeg(input_fname, output_fname, color_breaks_csv)
-            output_file1 = utils.create_file_module(output_fname)
-            self.setResult('ProbabilityMap', output_file1)
-        else:
-            msg = "Expected output from ApplyModel was not found."
-            msg += "\nThis likely indicates problems with the inputs to the R module."
-            writetolog(msg, False, True)
-            raise ModuleError(self, msg)
-        
-        if  os.path.exists(os.path.join(output_dname, "bin_map.tif")):
-            outFileName = os.path.join(output_dname, "bin_map.tif")
-            output_file2 = utils.create_file_module(outFileName)
-            self.setResult('BinaryMap', output_file2)
+#class ApplyModel(Module):
+#    '''
+#    Apply Model
+#
+#    The ApplyModel module allows the user to apply a model developed using a
+#    particular package within the workflow and generate output probability and binary
+#    maps. The process of creating an output probability map and binary map based on
+#    a particular model can be time-consuming, depending on the input data. By
+#    existing as a stand-alone process in the workflow, the ApplyModel module allows
+#    a user to investigate the performance metrics for a particular model (such as
+#    the ROC curve or the AUC) before dedicating the processing time needed to generate
+#    the output maps. In most cases, a user will "fine tune" a model by exploring the
+#    performance metrics of different model iterations before applying the model and
+#    generating the actual maps as a final step.
+#    
+#    The ApplyModel module also provides the user with the option of projecting the results
+#    of a model developed from one set of environmental predictors onto a new modeled space
+#    containing that same set of environmental predictors but representing data captured at
+#    a different temporal or spatial location. For example, a user could generate a model
+#    predicting habitat suitability using recorded presence points and certain environmental
+#    predictors such as elevation, landcover, and proximity to water in one geographic
+#    location. Based on the training from this information, the modeled results could be
+#    generated for (or "projected to") a new location based on the range of values seen in
+#    elevation, landcover, and proximity to water in the second geographic area. Similarly,
+#    modeling predicted results through time is also possible. A model trained using field
+#    data and a set of predictor layers representative of one time period could be projected
+#    onto the same geographical area using a new set of layers corresponding to the same
+#    predictors but representing data from a different time period (e.g., different climate
+#    data).
+#
+#    The ApplyModel module accepts two inputs from the user:
+#
+#    1. Model Workspace: The model workspace field accepts as an input a modeling
+#    package element (complete with all required parameters) from upstream in the workflow.
+#    The inputs and specifications provided in the dialogue fields of the model will be applied
+#    and used to generate the output maps. A user should populate the model workspace field by
+#    connecting a model element to the appropriate input port of the ApplyModel module in the
+#    visual display of the model workflow.
+#    
+#    2. Projection Target: The projection target is an optional parameter that allows a user to
+#    apply a model to a particular geographic area and or set of predictors (other than those
+#    used to train the model) and create output maps within the spatial extent of the projection
+#    target layers. This input field should be populated by connecting either the output of the
+#    ProjectionLayers module or a separate MDSBuilder element to the appropriate input port of
+#    the ApplyModel module.
+#    
+#    '''
+#    
+#    _input_ports = [('projectionTargetMDS', '(gov.usgs.sahm:MergedDataSet:Other)'),
+#                    ('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'),
+#                    ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':False}),
+#                    ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':False}),
+#                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False}),
+#                    ('produceMetrics', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False})]
+#    _output_ports =  [('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'), 
+#                     ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
+#                     ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)'),
+#                     ('ResidualsMap', '(edu.utah.sci.vistrails.basic:File)'),
+#                     ('MessMap', '(edu.utah.sci.vistrails.basic:File)'),
+#                     ('MoDMap', '(edu.utah.sci.vistrails.basic:File)'),
+#                     ('modelEvalPlot', '(edu.utah.sci.vistrails.basic:File)'),
+#                     ('ResponseCurves', '(edu.utah.sci.vistrails.basic:File)'),
+#                     ('Text_Output', '(edu.utah.sci.vistrails.basic:File)')]
+#    
+#    
+#    
+#    def compute(self):
+#        
+#
+#        args = "ws=" + '"' + self.forceGetInputFromPort('modelWorkspace').name + '"'
+#        output_dname = utils.mknextdir(prefix='AppliedModel_')
+#        args += " o=" + '"' + output_dname + '"'
+#        
+#        mdsFile = self.forceGetInputFromPort('projectionTargetMDS').name
+#        args += " ntfs=" + '"' + mdsFile + '"'
+#
+#            
+#        if self.hasInputFromPort('makeBinMap'):
+#            makeBinMap = self.forceGetInputFromPort('makeBinMap')
+#            args += ' mbt=' + str(makeBinMap).upper()
+#        else:
+#            args += ' mbt=TRUE'
+#            
+#        if self.hasInputFromPort('makeProbabilityMap'):
+#            makeProbabilityMap = self.forceGetInputFromPort('makeProbabilityMap')
+#            args += ' mpt=' + str(makeProbabilityMap).upper()
+#        else:
+#             args += ' mpt=TRUE'
+#                
+#        
+#        utils.runRScript('PredictModel.r', args, self)
+#        
+#        input_fname = os.path.join(output_dname, "prob_map.tif")
+#        output_fname = os.path.join(output_dname, 'prob_map.jpeg')
+#        if os.path.exists(input_fname):
+#            utils.tif_to_color_jpeg(input_fname, output_fname, color_breaks_csv)
+#            output_file1 = utils.create_file_module(output_fname)
+#            self.setResult('ProbabilityMap', output_file1)
+#        else:
+#            msg = "Expected output from ApplyModel was not found."
+#            msg += "\nThis likely indicates problems with the inputs to the R module."
+#            writetolog(msg, False, True)
+#            raise ModuleError(self, msg)
+#        
+#        if  os.path.exists(os.path.join(output_dname, "bin_map.tif")):
+#            outFileName = os.path.join(output_dname, "bin_map.tif")
+#            output_file2 = utils.create_file_module(outFileName)
+#            self.setResult('BinaryMap', output_file2)
         
 class Model(Module):
     '''
@@ -508,10 +520,8 @@ class Model(Module):
                     ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':False}),
                     ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':False}),
                     ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False}),
-                    ('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'2', 'optional':False}),
-                    ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False})
                     ]
-    _output_ports = [('modelWorkspace', '(edu.utah.sci.vistrails.basic:File)'), 
+    _output_ports = [('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'), 
                      ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
                      ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('ResidualsMap', '(edu.utah.sci.vistrails.basic:File)'),
@@ -536,37 +546,43 @@ class Model(Module):
     def provide_output_port_documentation(cls, port_name):
          return GenModDoc.construct_port_doc(cls, port_name, 'out') 
 
+
     def compute(self):
         
         ModelOutput = {"FIT_BRT_pluggable.r":"brt",
                        "FIT_GLM_pluggable.r":"glm",
                        "FIT_RF_pluggable.r":"rf",
-                       "FIT_MARS_pluggable.r":"mars"}
+                       "FIT_MARS_pluggable.r":"mars",
+                       "EvaluateNewData.r":"ApplyModel"}
         self.ModelAbbrev = ModelOutput[self.name]
+        
+        try:
+            self.args
+        except AttributeError:
+            self.args = ''
         
         self.output_dname = utils.mknextdir(prefix=self.ModelAbbrev + '_')
         self.argsDict = utils.map_ports(self, self.port_map)
 
         mdsFile = self.forceGetInputFromPort('mdsFile').name
         
-        args = ''
         if self.ModelAbbrev == 'brt' or \
             self.ModelAbbrev == 'rf':
             if not "seed" in self.argsDict.keys():
                 self.argsDict['seed'] = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
             writetolog("    seed used for " + self.ModelAbbrev + " = " + str(self.argsDict['seed']))
-            args += " seed=" + str(str(self.argsDict['seed']))
+            self.args += " seed=" + str(str(self.argsDict['seed']))
         
         for k, v in self.argsDict.iteritems():
             if k == 'c':
-                args += ' ' + '='.join([str(k),'"' + str(v) + '"'])
+                self.args += ' ' + '='.join([str(k),'"' + str(v) + '"'])
             else:
-                args += ' ' + '='.join([str(k),str(v)])
-        args += " o=" + '"' + self.output_dname + '"'
-        args += " rc=" + utils.MDSresponseCol(mdsFile)
+                self.args += ' ' + '='.join([str(k),str(v)])
+        self.args += " o=" + '"' + self.output_dname + '"'
+        self.args += " rc=" + utils.MDSresponseCol(mdsFile)
 
                 
-        utils.runRScript(self.name, args, self)
+        utils.runRScript(self.name, self.args, self)
         
         if not self.argsDict.has_key('mes'):
             self.argsDict['mes'] = 'FALSE'
@@ -578,7 +594,10 @@ class Model(Module):
         self.setModelResult(self.ModelAbbrev + "_output.txt", 'Text_Output')
         self.setModelResult(self.ModelAbbrev + "_modelEvalPlot.jpg", 'modelEvalPlot') 
         self.setModelResult(self.ModelAbbrev + "_response_curves.pdf", 'ResponseCurves')
-        self.setModelResult("modelWorkspace", 'modelWorkspace')        
+        
+        modelWorkspace = utils.create_dir_module(self.output_dname)
+        self.setResult("modelWorkspace", modelWorkspace)
+              
         writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
         
     def setModelResult(self, filename, portname, arg_key=None):
@@ -600,9 +619,11 @@ class GLM(Model):
     __doc__ = GenModDoc.construct_module_doc('GLM')
     
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('SimplificationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'AIC', 'optional':True}),
+    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'2', 'optional':False}),
+                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False}),
+                         ('SimplificationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'AIC', 'optional':True}),
                          ('SquaredTerms', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
-                         ]) 
+                         ])
     def __init__(self):
         global models_path
         Model.__init__(self) 
@@ -615,7 +636,9 @@ class RandomForest(Model):
     __doc__ = GenModDoc.construct_module_doc('RandomForest')
     
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
+    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'2', 'optional':False}),
+                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False}),
+                         ('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                          ('mTry', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'1', 'optional':True}),
                          ('nTrees', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                          ('nodesize', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
@@ -651,7 +674,9 @@ class MARS(Model):
     __doc__ = GenModDoc.construct_module_doc('MARS')
     
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('MarsDegree', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'1', 'optional':True}),
+    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'2', 'optional':False}),
+                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False}),
+                         ('MarsDegree', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'1', 'optional':True}),
                           ('MarsPenalty', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'2', 'optional':True}),
                           ])
     def __init__(self):
@@ -662,11 +687,47 @@ class MARS(Model):
                          'MarsPenalty':('pen', None, False), #This is a MARS specific port
                          })
 
+class ApplyModel(Model):
+    __doc__ = GenModDoc.construct_module_doc('ApplyModel')
+    _input_ports = list(Model._input_ports)
+    _input_ports.insert(0, ('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'))
+#    _input_ports.extend([('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)')])
+                         
+    def __init__(self):
+        global models_path       
+        Model.__init__(self)
+        self.name = 'EvaluateNewData.r'
+        self.port_map = copy.deepcopy(self.port_map)
+        self.port_map.update({'modelWorkspace':('ws', 
+                lambda x: '"' + os.path.join(utils.dir_path_value(x), "modelWorkspace" + '"'), True),})
+        
+    def compute(self):
+        #if the suplied mds has rows, observations then 
+        #pass r code the flag to produce metrics
+        mdsfile = open(self.forceGetInputFromPort('mdsFile').name, "r")
+        lines = 0 
+        readline = mdsfile.readline 
+        while readline(): 
+            lines += 1
+            if lines > 4:
+                break
+            
+        if lines > 3:
+            #we have rows R will need to recreate metrics.
+            self.args = 'pmt=TRUE '
+        else:
+            self.args = 'pmt=FALSE '
+        
+        Model.compute(self)
+
+        
 class BoostedRegressionTree(Model):
     __doc__ = GenModDoc.construct_module_doc('BoostedRegressionTree')
     
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
+    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'2', 'optional':False}),
+                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False}),
+                         ('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ('TreeComplexity', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ('BagFraction', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'0.5', 'optional':True}),
                               ('NumberOfFolds', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'3', 'optional':True}),
@@ -931,7 +992,7 @@ class FieldDataQuery(Module):
                 return column
             else:
                 msg = "The specified column wasn't in the input file\n"
-                msg += column_name + " not in " + str(header)
+                msg += column + " not in " + str(header)
                 writetolog(msg, True, True)
                 raise ModuleError(self, msg)
 

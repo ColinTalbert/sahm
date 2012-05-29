@@ -88,7 +88,7 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
                     ('display_absense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False}),
                     ('display_background_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False}),
                     ('initial_raster_display', '(gov.usgs.sahm:OutputRaster:Other)', {'defaults':'Probability'}),
-                    ('model_workspace', '(edu.utah.sci.vistrails.basic:File)'),
+                    ('model_workspace', '(edu.utah.sci.vistrails.basic:Directory)'),
                     ("max_cells_dimension", "(edu.utah.sci.vistrails.basic:Integer)", {'defaults':str(['5000']), 'optional':True})]
     #all inputs are determined relative to the model_workspace
 
@@ -119,7 +119,7 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
             display_sahm_output(row, col, {"model_workspace": inputs["model_workspace"]}, 'SpatialOutput')
             return
 
-        inputs["model_dir"] = os.path.split(os.path.normcase(inputs["model_workspace"]))[0]
+        inputs["model_dir"] = os.path.normcase(inputs["model_workspace"])
 
         for model_output in ['prob', 'bin', 'resid', 'mess', 'MoD']:
             try:

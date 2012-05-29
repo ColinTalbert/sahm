@@ -98,7 +98,7 @@ Input Ports:
     """
     _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
-                    ('ModelWorkspace', '(edu.utah.sci.vistrails.basic:File)'),
+                    ('ModelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'),
                     ('InitialModelOutputDisplay', '(gov.usgs.sahm:ModelOutputType:Other)', {'defaults':str(['AUC'])})
                     ]
     @classmethod
@@ -133,7 +133,7 @@ Input Ports:
                 return
 
 
-            model_dir_full = os.path.normcase(os.path.split(model_workspace)[0])
+            model_dir_full = os.path.normcase(model_workspace)
             model_dir = os.path.split(model_dir_full)[1]
             model_name = model_dir[:model_dir.index('_')]
             

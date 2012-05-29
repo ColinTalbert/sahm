@@ -131,9 +131,9 @@ Args <- commandArgs(trailingOnly=FALSE)
     	if(argSplit[[1]][1]=="o") out.dir <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="mes")  mess <- argSplit[[1]][2]
    		if(argSplit[[1]][1]=="mpt") p.tif <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="mbt")  b.tif <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="ntfs") new.tiffs <- argSplit[[1]][2]   #mds file header
- 			if(argSplit[[1]][1]=="pmt")  produce.metrics <- argSplit[[1]][2]
+ 		if(argSplit[[1]][1]=="mbt")  b.tif <- argSplit[[1]][2]
+ 		if(argSplit[[1]][1]=="c") new.tiffs <- argSplit[[1]][2]   #mds file header
+ 		if(argSplit[[1]][1]=="pmt")  produce.metrics <- argSplit[[1]][2]
     }
 
 EvaluateNewData(workspace=ws,out.dir=out.dir,b.tif=as.logical(b.tif),p.tif=as.logical(p.tif),mess=as.logical(mess),new.tifs=new.tiffs,produce.metrics=as.logical(produce.metrics))
