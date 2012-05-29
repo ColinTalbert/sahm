@@ -16,20 +16,17 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
 #Written by Marian Talbert 5/2012
 
     load(workspace)
-
+    chk.libs(out$input$script.name)
        out1<-out
        rm(out,envir=.GlobalEnv)
        rm(out)
        out<-out1
-
     # generate a filename for output #
                 out$input$output.dir<-out.dir
                 out$input$MESS<-mess
                 Model<-out$input$script.name
-              bname<-paste(out$input$output.dir,paste("/",Model,sep=""),sep="")
+              out$dat$bname<-paste(out$input$output.dir,paste("/",Model,sep=""),sep="")
                if(!produce.metrics & !is.null(new.tifs)) out$input$NoResidMaps=TRUE
-               
-              out$dat$bname<-bname
     
             
          ##################################################################################
@@ -132,9 +129,10 @@ Args <- commandArgs(trailingOnly=FALSE)
     	if(argSplit[[1]][1]=="mes")  mess <- argSplit[[1]][2]
    		if(argSplit[[1]][1]=="mpt") p.tif <- argSplit[[1]][2]
  			if(argSplit[[1]][1]=="mbt")  b.tif <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="ntfs") new.tiffs <- argSplit[[1]][2]   #mds file header
+ 			if(argSplit[[1]][1]=="c") new.tiffs <- argSplit[[1]][2]   #mds file header
  			if(argSplit[[1]][1]=="pmt")  produce.metrics <- argSplit[[1]][2]
     }
+
 
 EvaluateNewData(workspace=ws,out.dir=out.dir,b.tif=as.logical(b.tif),p.tif=as.logical(p.tif),mess=as.logical(mess),new.tifs=new.tiffs,produce.metrics=as.logical(produce.metrics))
 
