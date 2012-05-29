@@ -132,7 +132,7 @@ Args <- commandArgs(trailingOnly=FALSE)
     	if(argSplit[[1]][1]=="mes")  mess <- argSplit[[1]][2]
    		if(argSplit[[1]][1]=="mpt") p.tif <- argSplit[[1]][2]
  			if(argSplit[[1]][1]=="mbt")  b.tif <- argSplit[[1]][2]
- 			if(argSplit[[1]][1]=="ntfs") new.tiffs <- argSplit[[1]][2]   #mds file header
+ 			if(argSplit[[1]][1]=="c") new.tiffs <- argSplit[[1]][2]   #mds file header
  			if(argSplit[[1]][1]=="pmt")  produce.metrics <- argSplit[[1]][2]
     }
 

@@ -24,8 +24,9 @@ input.file[8]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitWeights.cs
 input.file[9]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
 input.file[10]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/NoSplit.csv"
 input.file[11]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
-input.file[12]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
-input.file[13]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
+input.file[12]<-"C:/VisTrails/mtalbert_20110504T132851/readMaTests/UsedAvailable.csv"
+input.file[13]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
+input.file[14]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
 
 output.dir<-vector()
 output.dir[1]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\NewMasterBranch2.10\\rf"
@@ -77,3 +78,22 @@ localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=proximity,norm.votes=TRUE,
 do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=TRUE,seed=1))
          }
 
+#Predictor Inspection Tests
+predictor="romoveg_rc_categorical"
+infil<-vector()
+infil[1]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/UsedAvailable.csv"
+infil[2]="C:\\VisTrails\\mtalbert_20110504T132851\\readMaTests\\Split.csv"
+
+predictor<-vector()
+predictor[1]<-"romoveg_rc_categorical"
+predictor[2]="bio_13_wgs84"
+
+for(i in 1:length(input.file)){
+      try(Predictor.inspection(predictor[i],
+          input.file=infil[i],
+      		output.dir=output.dir,
+      		response.col=response.col,
+      		pres=TRUE,
+      		absn=TRUE,
+      		bgd=TRUE))
+		}

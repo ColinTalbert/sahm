@@ -5,7 +5,7 @@
     #min.cor<-.7
     #num.plots<-10
 source("I:\\VisTrails\\Central_VisTrails_x32_debug\\Vistrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\PairsExplore.r")
-
+source("I:\\VisTrails\\Central_VisTrails_x32_debug\\Vistrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\my.panel.smooth.binary.r")
 
 
     num.plots <- 10
@@ -32,7 +32,7 @@ Pairs.Explore(num.plots=15,
 		response.col=responseCol,
 		pres=TRUE,
 		absn=TRUE,
-		bgd=FALSE,
+		bgd=TRUE,
     Debug=FALSE)
 Sys.time()-time1
 

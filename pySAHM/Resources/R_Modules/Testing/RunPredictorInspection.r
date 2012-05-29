@@ -1,3 +1,5 @@
+source("I:\\VisTrails\\Central_VisTrails_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\Predictor.inspection.r")
+source("I:\\VisTrails\\Central_VisTrails_x32_debug\\Vistrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\my.panel.smooth.binary.r")
 infil="C:\\temp\\TestDataSets\\CanadaThistleNewFormat.csv"
 predictor="bio_13"
 
@@ -16,6 +18,8 @@ predictor="bio_13_wgs84"
 infil="I:\\VisTrails\\WorkingFiles\\secondseason\\secondseason_workfile_2012_02_28b\\ModelEvaluation_Split_9.csv"
 predictor="bio_17_2009_2km"
 predictor="bio_14_2009_2km"
+predictor="romoveg_rc_categorical"
+
 Predictor.inspection(predictor,
     input.file=infil,
 		output.dir=output.dir,

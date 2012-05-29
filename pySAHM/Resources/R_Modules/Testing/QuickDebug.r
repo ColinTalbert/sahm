@@ -29,12 +29,12 @@ input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Factor.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Spat.Weights.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/LargeDataset.csv"
-input.file<-"I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_CVSplit.csv"
+input.file<-"C:/VisTrails/mtalbert_20110504T132851/readMaTests/UsedAvailable.csv"
 #######################################################################
 
 input.file="C:\\temp\\TestDataSets\\CanadaThistlePseudoAbsenceWeights.csv"
 input.file="C:\\temp\\TestDataSets\\CanadaThistleWeights.csv"
-
+input.file="C:\\temp\\SAHM_workspace\\MergedDataset_10.csv"
 ##MARS
 
 FitModels(ma.name=input.file,
