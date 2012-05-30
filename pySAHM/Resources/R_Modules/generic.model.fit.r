@@ -95,7 +95,7 @@ on.exit(detach(out$input))
   if(Model=="glm") {
   penalty <- if(out$input$simp.method=="AIC") 2 else 
              log(nrow(out$dat$ma$ma))
- browser()
+             
           if(!out$input$squared.terms){   
               scope.glm <- list(lower=as.formula(paste("response","~1")),
               upper=as.formula(paste("response","~",paste(out$dat$used.covs,collapse='+'))))
@@ -220,7 +220,7 @@ on.exit(detach(out$input))
  }
  
 if(Model=="rf"){
-          if(out$input$pseudoabsence){
+          if(out$input$PsdoAbs){
           num.splits<-floor(sum(out$dat$ma$train$dat$response==0)/sum(out$dat$ma$train$dat$response==1))
               #partition the pseudoabsences as evenly as possible to match the number of presence
               #this will always give more absence in a split than presence maybe use round instead of floor
@@ -254,12 +254,10 @@ if(Model=="rf"){
                             else model.summary<-model.summary+importance(rf.full[[i]])
                }
                      n.pres<-sum(out$dat$ma$train$dat$response==1)
-                        out$mods$parms$mtry=mean(unlist(lapply(rf.full,FUN=function(lst){lst$mtry})))       
-                        
-          browser()             
+                        out$mods$parms$mtry=mean(unlist(lapply(rf.full,FUN=function(lst){lst$mtry})))            
                         #Reduce("combine",rf.full)
                         out$mods$final.mod <- rf.full
-                        if(out$input$pseudoabs){
+                        if(out$input$PsdoAbs){
                                   #this just takes the average over each confusion matrix
                                   #confusion.mat<-(mean(table(Split))+n.pres)*
                                    #              Reduce("+",lapply(rf.full, function(lst){lst$confusion[1:2,1:2]}))/(length(Split)+num.splits*n.pres)
@@ -267,11 +265,12 @@ if(Model=="rf"){
                                 votes<-apply(do.call("rbind",lapply(lapply(rf.full,predict,type="vote"),"[",1:n.pres,2)),2,mean)           
                                 #these should be oob votes for the absence in a fairly random order       
                                 votes<-c(votes,as.vector(unlist(lapply(lapply(rf.full,predict,type="vote"),"[",-c(1:n.pres),2)))[order(Split)]) 
-                                
-                                 response<-apply(do.call("rbind",lapply(lapply(lapply(rf.full,predict,type="response"),"[",1:n.pres),function(lst){as.numeric(as.character(lst))})),2,mean)           
+                                 #discritizing the votes ta
+                                 response<-c(0,1)[factor(votes>.5)]
+                                 #response<-apply(do.call("rbind",lapply(lapply(lapply(rf.full,predict,type="response"),"[",1:n.pres),function(lst){as.numeric(as.character(lst))})),2,mean)           
                                 #these should be oob votes for the absence in a fairly random order       
-                                response<-c(response,as.vector(as.numeric(as.character(unlist(lapply(lapply(rf.full,predict,type="response"),"[",-c(1:n.pres))))))[order(Split)])     
-                                response<-round(response)
+                                #response<-c(response,as.vector(as.numeric(as.character(unlist(lapply(lapply(rf.full,predict,type="response"),"[",-c(1:n.pres))))))[order(Split)])     
+                                #response<-round(response)
                                 #this is the oob confusion matrix though it only uses oob response from 1 split for absence response and it rounds votes for pres which might or might not
                                 #be exactly correct
                                 confusion.mat<-table(out$dat$ma$train$dat$response,response)
@@ -285,14 +284,12 @@ if(Model=="rf"){
                                  #           confusion=cbind(confusion.mat,class.error))  
                                 # class(model.info)<-"randomForest"
                                  #print(model.info)                    
+                       out$mods$final.mod$predictions<-votes
                         }
-                                      
-             if(!out$input$pseudoabs){                          
-                         # predict(rf.full[[1]],type="prob")[sum(out$dat$ma$train$dat$response==1),]
-                         do.call("+",lapply(rf.full,"[",))
-                          #rf.full[[1]]$confusion
-              model.summary<-1/num.splits*model.summary[order(model.summary[,3],decreasing=T),]
-              out$mods$summary <- model.summary
+          model.summary<-1/num.splits*model.summary[order(model.summary[,3],decreasing=T),]
+          out$mods$summary <- model.summary                    
+             if(!out$input$PsdoAbs){                          
+              
               txt0 <- paste("Random Forest Modeling Results\n",out$input$run.time,"\n\n",
                 "Data:\n\t",ma.name,
                 "\n\tn(pres)=",out$dat$nPresAbs$train[2],
@@ -305,8 +302,31 @@ if(Model=="rf"){
               "\n\ttotal time for model fitting=",round((unclass(Sys.time())-t0)/60,2),"min\n",sep="")
           txt1 <- "\nRelative performance of predictors in final model:\n\n"
           txt2 <- "\nDefault summary of random forest fit:\n"
+          
+          to.print<-function(x,ntree,oob.error,confusion.mat,class.error){
+                cat("\nCall:\n", deparse(x$mods$final.mod[[1]]$call), "\n")
+                  cat("               Type of random forest: ", x$mods$final.mod[[1]]$type, "\n", 
+                  sep = "")
+              cat("                     Number of trees: ", ntree, "\n", 
+                  sep = "")
+              cat("Avg. No. of variables tried at each split: ",x$mods$parms$mtry, "\n", 
+                  sep = "")
+                  cat("        OOB estimate of  error rate: ", round(oob.error, dig = 2), "%\n", sep = "")
+                  cat("Confusion matrix:\n")
+                  cfmt<-as.matrix(cbind(confusion.mat,class.error))
+                  print(cfmt)
+                  if (!is.null(x$test$err.rate)) {
+                      cat("                Test set error rate: ", 
+                        round(x$test$err.rate[x$ntree, "Test"] * 100, 
+                          dig = 2), "%\n", sep = "")
+                      cat("Confusion matrix:\n\tobserved")
+                      print(cbind(confusion.mat,signif(class.error,digits=4)),quote=FALSE)
+                  }
+          }
+              
           capture.output(cat(txt0),cat(txt1),print(round(model.summary,4)),cat(txt2),print(out$mods$final.mod),file=paste(out$dat$bname,"_output.txt",sep=""))
-          cat(txt0);cat(txt1);print(round(model.summary,4));cat(txt2);print(out$mods$final.mod);cat("\n\n")
+          cat(txt0);cat(txt1);print(round(model.summary,4));cat(txt2);ifelse(!out$input$PsdoAbs,print(out$mods$final.mod),
+               to.print(out,out$input$n.tree*length(unique(Split)),oob.error,confusion.mat,class.error));cat("\n\n")
           }
          #storing number of variables in final model
               out$mods$n.vars.final<-length(out$dat$used.covs) #random forest doesn't drop variables
