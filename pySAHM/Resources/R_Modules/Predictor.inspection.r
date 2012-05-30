@@ -1,5 +1,5 @@
 Predictor.inspection<-function(predictor,input.file,output.dir,response.col="ResponseBinary",pres=TRUE,absn=TRUE,bgd=TRUE){
-  chk.libs("Pred.inpect")
+  chk.libs("Pred.inspect")
 cex.mult<-3.2
 
 #This function produces several plots to inspect the relationship between the predictor and response
@@ -54,19 +54,19 @@ cex.mult<-3.2
     jpeg(output.file,pointsize=13,height=2000,width=2000,quality=100)
          par(mfrow=c(2,2),mar=c(5,7,9,6))
              hst<-hist(pred,plot=FALSE)
-      ####PLOT 1.
+      ####PLOT 1. new
          hist(pred,col="red",xlab="",main="",cex.lab=cex.mult,cex=cex.mult,cex.main=cex.mult,cex.axis=.7*cex.mult,ylim=c(0,1.5*max(hst$counts)))
              hist(pred[response==0],breaks=hst$breaks,add=TRUE,col="blue")
              legend("topright",xjust=1,yjust=1,legend=c(pres.lab,abs.lab),fill=c("red","blue"),cex=cex.mult)
               mtext(paste(names(dat[pred.indx]),"  (",round(100*(1-sum(complete.cases(pred))/length(pred)),digits=1),"% missing)",sep=""), side = 3,outer=TRUE,line=-4,cex=1.2*cex.mult)
-             if(any(is.na(pred))){ #a table of missing values but only if we have missing data
-                  rect(1.1*min(hst$breaks),1.1*max(hst$counts),quantile(hst$breaks,prob=.55),ytop=1.45*max(hst$counts),lwd=cex.mult)
+             if(sum(is.na(pred))/length(pred)>.003){ #a table of missing values but only if we have missing data
+                  rect(1*min(hst$breaks),1.1*max(hst$counts),quantile(hst$breaks,prob=.55),ytop=1.45*max(hst$counts),lwd=cex.mult)
                    xloc<-rep(as.vector(quantile(hst$breaks,probs=c(0,.2,.4))),c(2,3,3))
                    yloc<-rep(c(1.4,1.3,1.2)*max(hst$counts),times=3)
                    yloc<-yloc[-1]
                    my.table<-table(complete.cases(pred),response)
-                   text(labels=c("Missing","Not Mssg",abs.lab,paste(round(100*table(complete.cases(pred[response==0]))/sum(response==0),digits=1),"%",sep=""),
-                   pres.lab,paste(round(100*table(complete.cases(pred[response==1]))/sum(response==1),digits=1),"%",sep="")),x=xloc,
+                   text(labels=c("Missing","Not Mssg",abs.lab,paste(round(100*my.table[,1]/sum(my.table[,1]),digits=1),"%",sep=""),
+                   pres.lab,paste(round(100*my.table[,2]/sum(my.table[,2]),digits=1),"%",sep="")),x=xloc,
                         y=yloc,pos=4,cex=.7*cex.mult)
                    text("Missing By Response",x=xloc[1],y=1.5*max(hst$counts),pos=4,cex=.9*cex.mult)
                }
