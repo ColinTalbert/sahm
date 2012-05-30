@@ -81,10 +81,10 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
           include<-(as.numeric(tif.info[[2]]))
           options(warn=1)
   #Remove coordinates, response column, site.weights
-  #before exploring predictor relationship
+  #before exploring predictor relationship 
     rm.cols <- as.vector(na.omit(c(match("x",tolower(names(dat))),match("y",tolower(names(dat))),
     match("site.weights",tolower(names(dat))),match(tolower(response.col),tolower(names(dat))),match("Split",names(dat)),match("EvalSplit",names(dat)))))
-
+   
      #remove testing split
      if(!is.na(match("EvalSplit",names(dat)))) dat<-dat[-c(which(dat$EvalSplit=="test"),arr.ind=TRUE),]
     if(!is.na(match("Split",names(dat)))) dat<-dat[-c(which(dat$Split=="test"),arr.ind=TRUE),]
@@ -219,6 +219,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
   #Find a new unique file name (one in the desired directory that hasn't yet been used)
 
  options(warn=-1)
+ num.plots<-min(ncol(HighToPlot),num.plots)
  if(num.plots<8) wdth=1500
  else if(num.plots<15) wdth=3000
       else wdth=4500
@@ -340,8 +341,8 @@ MyPairs<-function (x,missing.summary,my.labels,labels, panel = points, ..., lowe
         if (i == j || (i < j && has.lower) || (i > j && has.upper)) {
             box() 
             if(i==1) {
-            title(main=paste("Total Cor=",my.labels[j],sep=""),line=ifelse(missing.summary[i]>.03,2.2,.04),cex.main=1.1*cex.mult)
-            if(missing.summary[i]>.03) mtext(paste(round(missing.summary[i]*100), "% missing",sep=""),side=3,line=.04,cex=cex.mult*.6)
+            title(main=paste("Total Cor=",my.labels[j],sep=""),line=ifelse(missing.summary[j]>.03,2.2,.04),cex.main=1.1*cex.mult)
+            if(missing.summary[j]>.03) mtext(paste(round(missing.summary[j]*100), "% missing",sep=""),side=3,line=.04,cex=cex.mult*.6)
             }
             #if (i == 1 && (!(j%%2) || !has.upper || !has.lower))
              #   localAxis(1 + 2 * row1attop, x[, j], x[, i],
