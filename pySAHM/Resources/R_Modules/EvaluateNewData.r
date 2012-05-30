@@ -40,7 +40,9 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                  tif.info<-readLines(out$input$ma.name,3)
                  tif.info<-strsplit(tif.info,',')
                  temp<-tif.info[[2]]
-                 paths<-as.character(tif.info[[3]])
+                 paths<-matrix(as.character(tif.info[[3]]))
+                 rownames(paths) <-tif.info[[1]][1:length(paths)]
+                 
                  if(!is.null(new.tifs) & any(!is.na(match(hl[[1]],c("EvalSplit","Split")))))
                  stop("The input dataset to this module should not have any data split for testing or model evaluation")
              #since we can be missing any of xy or response we need to remove only what's included    
@@ -49,7 +51,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                  include<-as.numeric(temp)
              #if a new mds was supplied switch out the tiffs for map production    
                  if(!is.null(new.tifs)){
-                 paths<-paths[include==1]
+                 paths<-paths[include==1,]
                  path.check(paths)
                   out$dat$tif.ind<-paths}
              if(produce.metrics){   

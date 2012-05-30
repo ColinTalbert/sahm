@@ -37,6 +37,7 @@ input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/LargeDataset.csv"
 input.file<-"I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_CVSplit.csv"
 #######################################################################
 ##MARS
+EvaluateNewData(workspace="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\brt_1\\modelWorkspace",out.dir="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\ApplyModel_1",b.tif=TRUE,p.tif=TRUE,mess=TRUE,new.tifs="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\MergedDataset_2.csv",produce.metrics=FALSE)
 
 FitModels(ma.name=input.file,
             output.dir=output.dir,
