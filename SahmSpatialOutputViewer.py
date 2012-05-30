@@ -128,7 +128,10 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
             except:
                 inputs[model_output + "_map"] = ""
             
-        inputs["mds"] = self.find_mds(inputs["model_dir"])
+        try:
+            inputs["mds"] = self.find_mds(inputs["model_dir"])
+        except RuntimeError:
+            inputs["mds"] = ""
 
         inputs["model_tag"] = os.path.split(inputs["model_dir"])[1]
 
@@ -142,10 +145,10 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
                 self.location = CellLocation()
             self.location.col = self.getInputFromPort('column') - 1
 
-        if self.hasInputFromPort("max_cells_dimension"):
-            inputs["max_cells_dimension"] = self.getInputFromPort('max_cells_dimension')
-        else:
-            inputs["max_cells_dimension"] = [item for item in self._input_ports if item[0] == 'max_cells_dimension'][0][2]['defaults']
+#        if self.hasInputFromPort("max_cells_dimension"):
+#            inputs["max_cells_dimension"] = self.getInputFromPort('max_cells_dimension')
+#        else:
+#            inputs["max_cells_dimension"] = [item for item in self._input_ports if item[0] == 'max_cells_dimension'][0][2]['defaults']
 
         self.displayAndWait(SAHMSpatialOutputViewerCellWidget,
                             inputs)
@@ -367,17 +370,22 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         if self.all_layers["MoD_map"]['enabled']:
             self.all_layers["MoD_map"]["cmap"] = self.make_categorical_cmap(self.all_layers["MoD_map"])       
                  
-        pointfile = self.inputs["mds"]
-        points = np.genfromtxt(pointfile, delimiter=",", skip_header=3)
-                    
-        for name, val in {"abs_points":0, "pres_points":1, "backs_points":-9999}.items():
-            #parse out the x, y s for the points in each of our categories
-            self.all_layers[name]['x'] = np.delete(points, np.argwhere(points[:,2]<>val), 0)[:,0]
-            self.all_layers[name]['y'] = np.delete(points, np.argwhere(points[:,2]<>val), 0)[:,1]
-            if len(self.all_layers[name]['x']) == 0:
+        try:
+            points = np.genfromtxt(self.inputs["mds"], delimiter=",", skip_header=3)
+            for name, val in {"abs_points":0, "pres_points":1, "backs_points":-9999}.items():
+               #parse out the x, y s for the points in each of our categories
+               self.all_layers[name]['x'] = np.delete(points, np.argwhere(points[:,2]<>val), 0)[:,0]
+               self.all_layers[name]['y'] = np.delete(points, np.argwhere(points[:,2]<>val), 0)[:,1]
+               if len(self.all_layers[name]['x']) == 0:
+                   self.all_layers[name]["enabled"] = False
+               else:
+                   self.all_layers[name]["enabled"] = True           
+        except IOError:
+            #this is the case when the model has been applied to a novel area
+            for name, val in {"abs_points":0, "pres_points":1, "backs_points":-9999}.items():
                 self.all_layers[name]["enabled"] = False
-            else:
-                self.all_layers[name]["enabled"] = True
+                    
+
                           
     def add_axis(self):
         self.axes = self.fig.add_subplot(111, aspect='equal', adjustable='datalim')

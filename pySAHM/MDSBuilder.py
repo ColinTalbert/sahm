@@ -639,8 +639,9 @@ class MDSBuilder(object):
                     if keep:
                         kept_cells.add((x,y))
         else:
-            #whitelist
-            
+            #Whitelist
+            #every possible cell
+            all_cells = np.arange(x_count * y_count)
 def main(argv):
     
     usageStmt = "usage:  options: -f --fieldData -i --inCSV -o --output -pc --pointcount -ps --probsurf"

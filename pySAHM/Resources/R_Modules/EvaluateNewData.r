@@ -18,8 +18,10 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
     load(workspace)
     chk.libs(out$input$script.name)
        out1<-out
-       rm(out,envir=.GlobalEnv)
-       rm(out)
+
+      try(rm(out,envir=.GlobalEnv))
+      try(rm(out))
+
        out<-out1
     # generate a filename for output #
                 out$input$output.dir<-out.dir

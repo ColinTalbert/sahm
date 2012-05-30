@@ -586,14 +586,14 @@ class Model(Module):
         
         if not self.argsDict.has_key('mes'):
             self.argsDict['mes'] = 'FALSE'
-        self.setModelResult(self.ModelAbbrev + "_prob_map.tif", 'ProbabilityMap', 'mpt')
-        self.setModelResult(self.ModelAbbrev + "_bin_map.tif", 'BinaryMap', 'mbt')
-        self.setModelResult(self.ModelAbbrev + "_resid_map.tif", 'ResidualsMap', 'mes')
-        self.setModelResult(self.ModelAbbrev + "_mess_map.tif", 'MessMap', 'mes')
-        self.setModelResult(self.ModelAbbrev + "_MoD_map.tif", 'MoDMap', 'mes')
-        self.setModelResult(self.ModelAbbrev + "_output.txt", 'Text_Output')
-        self.setModelResult(self.ModelAbbrev + "_modelEvalPlot.jpg", 'modelEvalPlot') 
-        self.setModelResult(self.ModelAbbrev + "_response_curves.pdf", 'ResponseCurves')
+        self.setModelResult("_prob_map.tif", 'ProbabilityMap', 'mpt')
+        self.setModelResult("_bin_map.tif", 'BinaryMap', 'mbt')
+        self.setModelResult("_resid_map.tif", 'ResidualsMap', 'mes')
+        self.setModelResult("_mess_map.tif", 'MessMap', 'mes')
+        self.setModelResult("_MoD_map.tif", 'MoDMap', 'mes')
+        self.setModelResult("_output.txt", 'Text_Output')
+        self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot') 
+        self.setModelResult("response_curves.pdf", 'ResponseCurves')
         
         modelWorkspace = utils.create_dir_module(self.output_dname)
         self.setResult("modelWorkspace", modelWorkspace)
@@ -601,12 +601,18 @@ class Model(Module):
         writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
         
     def setModelResult(self, filename, portname, arg_key=None):
-        outFileName = os.path.join(self.output_dname, filename)
+        outFileName = os.path.join(self.output_dname, "*" + filename)
         required = not (self.argsDict.has_key(arg_key) and 
                         self.argsDict[arg_key].lower() == 'false')
-        if required and not os.path.exists(outFileName):
+        
+        if (self.ModelAbbrev == "ApplyModel" and portname == "ResidualsMap") \
+            or (self.ModelAbbrev == "ApplyModel" and arg_key is None):
+            required = False
+        
+        outfile_exists = len(glob.glob(outFileName)) > 0
+        if required and not outfile_exists:
             msg = "Expected output from " + self.ModelAbbrev + " was not found."
-            msg += "\nSpecifically " + outFileName + " was missing."
+            msg += "\nSpecifically " + self.ModelAbbrev + filename + " was missing."
             msg += "\nThis might indicate problems with the inputs to the R module."
             msg += "\nCheck the console output for additional R warnings "
             writetolog(msg, False, True)
