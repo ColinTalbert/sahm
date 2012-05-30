@@ -3,19 +3,13 @@ PseudoAbsGen<-function(input.file,output.dir,method="KDE",bw.otim="adhoc",isople
     #Written by Marian Talbert 4/5/2012
     #This function takes a field data file and based on the options specified creates a bias or binary mask for generation of background points
     #The mask can be based on a KDE function or a minimum convex polygon (method=KDE or MCP) bias specifies that a continuous surface is to be created
-    #This is ignored by method=MCP isopleth specifies the isopleth to be used.  It is assumed that the 8th name in the input csv is the name of a template
+    #This is ignored by method=MCP isopleth specifies the isopleth to be used (a number, generally 95).  It is assumed that the 8th name in the input csv is the name of a template
     #that can be used.  currently 4 methods are available for optimization of the kde bandwith (bw.otim=adhoc, Hpi,Hscv,Hbcv,Hlscv.
     #A tiff is generated using the header from the template csv which can be used by the MDS builder to generate background points.
     
     
     #make sure all libraries are available and loaded
-        libs<-list("adehabitatHR","ks","raster","rgdal","sp","spatstat")
-          lib.mssg <- unlist(suppressMessages(suppressWarnings(lapply(libs,require,quietly = T, warn.conflicts=F,character.only=T))))
-              if(any(!lib.mssg)){
-                    install.packages(unlist(libs[!lib.mssg]), repos = "http://cran.r-project.org")
-                    lib.mssg <- unlist(suppressMessages(suppressWarnings(lapply(libs,require,quietly = T, warn.conflicts=F,character.only=T))))
-                    }
-                if(any(!lib.mssg)) stop(paste("\nthe following package(s) could not be loaded: ",paste(unlist(libs[!lib.mssg]),sep="")))
+        chk.libs("GenPsdAbs")
               
     #Read input data and remove any columns to be excluded
               dat.in<-read.csv(input.file,header=FALSE,as.is=TRUE)
@@ -26,7 +20,7 @@ PseudoAbsGen<-function(input.file,output.dir,method="KDE",bw.otim="adhoc",isople
     
     #################################################################
     ### library adehabitatHR methods gives 95% isopleth for kde but LSCV is flaky
-        
+     
         if(bw.otim=="adhoc" | method=="MCP"){    
              
               names(xy)<-c("X","Y")
@@ -40,7 +34,7 @@ PseudoAbsGen<-function(input.file,output.dir,method="KDE",bw.otim="adhoc",isople
                   if(bias){
                       #why they can't put the data in a logical order I don't know but it makes me angry
                       mm<-ud@coords[order(ud@coords[,1]),]
-                      mm<-order(ud@coords[,2])
+                      mm<-order(ud@coords[,2])                                                      
                       m<-ud@data$ud[mm]
                       kde.mat<-matrix(m,nrow=length(unique(ud@coords[,1])))
                       x.cut<-sort(unique(ud@coords[,1]))
@@ -90,7 +84,16 @@ PseudoAbsGen<-function(input.file,output.dir,method="KDE",bw.otim="adhoc",isople
                y.cut<-a$eval.points[[2]]
           }
         }
-    
+        
+        #if(bias==TRUE) {
+            #I extend the range a little bit on each side of the kde.matrix and insert a boundary of zero values so anything 
+            #outside the range of the input data gets a kde estmate of 0
+         #   x.cut<-c(x.cut[1]-diff(x.cut[1:2]),x.cut,x.cut[length(x.cut)]+diff(x.cut[1:2]))
+          #  y.cut<-c(y.cut[1]-diff(y.cut[1:2]),y.cut,y.cut[length(y.cut)]+diff(y.cut[1:2]))
+           #  kde.mat<-cbind(rep(0,times=nrow(kde.mat)),kde.mat,rep(0,times=nrow(kde.mat)))
+           #  kde.mat<-rbind(rep(0,times=ncol(kde.mat)),kde.mat,rep(0,times=ncol(kde.mat)))
+        #}
+        
     ####################################################################
     ##### now write the info to a raster eventually this should be an additional function
     ##### since all but the selection of values is already written as a separate function
@@ -195,4 +198,37 @@ get.nearest.index<-function(a,cuts){
   temp<-which.min(abs(cuts-a))
   }    
     
+
+# Interpret command line argurments #
+# Make Function Call #
+Args <- commandArgs(trailingOnly=FALSE)
+
+    for (i in 1:length(Args)){
+     if(Args[i]=="-f") ScriptPath<-Args[i+1]
+     }
+   
+    #assign default values
+    method <- "KDE"
+    bw.opt="adhoc"
+    ispt=95
+    bias=FALSE
     
+    #replace the defaults with passed values
+    for (arg in Args) {
+    	argSplit <- strsplit(arg, "=")
+    	argSplit[[1]][1]
+    	argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="o") output <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="i") infile <- argSplit[[1]][2]
+   	  if(argSplit[[1]][1]=="mth") method <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="bwopt") bw.otim <- argSplit[[1]][2]
+      if(argSplit[[1]][1]=="ispt") isopleth <- as.numeric(argSplit[[1]][2])
+      if(argSplit[[1]][1]=="bias") bias <- as.logical(argSplit[[1]][2])
+     
+    }
+
+
+ScriptPath<-dirname(ScriptPath)
+source(paste(ScriptPath,"chk.libs.r",sep="\\"))
+
+PseudoAbsGen(input.file=infile,output.dir=output,method="KDE",bw.otim="adhoc",isopleth=95,bias=FALSE)
