@@ -36,6 +36,7 @@ input.file="C:\\temp\\TestDataSets\\CanadaThistlePseudoAbsenceWeights.csv"
 input.file="C:\\temp\\TestDataSets\\CanadaThistleWeights.csv"
 input.file="C:\\temp\\SAHM_workspace\\MergedDataset_10.csv"
 ##MARS
+EvaluateNewData(workspace="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\brt_1\\modelWorkspace",out.dir="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\ApplyModel_1",b.tif=TRUE,p.tif=TRUE,mess=TRUE,new.tifs="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\MergedDataset_2.csv",produce.metrics=FALSE)
 
 FitModels(ma.name=input.file,
             output.dir=output.dir,

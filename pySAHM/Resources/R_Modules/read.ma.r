@@ -61,9 +61,8 @@
           temp<-tif.info[[2]]
           temp[1:3]<-0
           if(is.null(include)) include<-as.numeric(temp)
-
-          paths<-as.character(tif.info[[3]])
-
+          paths<-matrix(as.character(tif.info[[3]]))
+          rownames(paths) <-tif.info[[1]][1:length(paths)]
       if(class(ma)=="try-error") stop("Error reading MDS")
 
           #reading some info on the other steps in the workflow to be used in
@@ -230,8 +229,7 @@
           if(length(out.list$nPresAbs$train)==1)
           stop("response column (#",r.col,") in ",ma.name," does not have at least two unique values in the train split",sep="")
           }
-
-                    paths<-paths[-c(r.col,rm.list)]
+                    paths<-paths[-c(r.col,rm.list),]
                     include<-include[-c(r.col,rm.list)]
                     
          ma.names<-names(ma)

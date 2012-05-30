@@ -16,20 +16,17 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
 #Written by Marian Talbert 5/2012
 
     load(workspace)
-
+    chk.libs(out$input$script.name)
        out1<-out
        rm(out,envir=.GlobalEnv)
        rm(out)
        out<-out1
-
     # generate a filename for output #
                 out$input$output.dir<-out.dir
                 out$input$MESS<-mess
                 Model<-out$input$script.name
-              bname<-paste(out$input$output.dir,paste("/",Model,sep=""),sep="")
+              out$dat$bname<-paste(out$input$output.dir,paste("/",Model,sep=""),sep="")
                if(!produce.metrics & !is.null(new.tifs)) out$input$NoResidMaps=TRUE
-               
-              out$dat$bname<-bname
     
             
          ##################################################################################
@@ -43,7 +40,9 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                  tif.info<-readLines(out$input$ma.name,3)
                  tif.info<-strsplit(tif.info,',')
                  temp<-tif.info[[2]]
-                 paths<-as.character(tif.info[[3]])
+                 paths<-matrix(as.character(tif.info[[3]]))
+                 rownames(paths) <-tif.info[[1]][1:length(paths)]
+                 
                  if(!is.null(new.tifs) & any(!is.na(match(hl[[1]],c("EvalSplit","Split")))))
                  stop("The input dataset to this module should not have any data split for testing or model evaluation")
              #since we can be missing any of xy or response we need to remove only what's included    
@@ -52,7 +51,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                  include<-as.numeric(temp)
              #if a new mds was supplied switch out the tiffs for map production    
                  if(!is.null(new.tifs)){
-                 paths<-paths[include==1]
+                 paths<-paths[include==1,]
                  path.check(paths)
                   out$dat$tif.ind<-paths}
              if(produce.metrics){   
@@ -135,6 +134,7 @@ Args <- commandArgs(trailingOnly=FALSE)
  			if(argSplit[[1]][1]=="c") new.tiffs <- argSplit[[1]][2]   #mds file header
  			if(argSplit[[1]][1]=="pmt")  produce.metrics <- argSplit[[1]][2]
     }
+
 
 EvaluateNewData(workspace=ws,out.dir=out.dir,b.tif=as.logical(b.tif),p.tif=as.logical(p.tif),mess=as.logical(mess),new.tifs=new.tiffs,produce.metrics=as.logical(produce.metrics))
 
