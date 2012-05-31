@@ -28,7 +28,23 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
               out$dat$bname<-paste(out$input$output.dir,paste("/",Model,sep=""),sep="")
                if(!produce.metrics & !is.null(new.tifs)) out$input$NoResidMaps=TRUE
     
-            
+    #write a few details on the data to the output txt document
+        txt0 <- paste("Original Model:\n\t",
+                  switch(out$input$script.name,
+                                brt="Boosted Regression Tree",
+                                rf="Random Forest",
+                                glm="Generalized Linear Model",
+                                mars="Multivariate Adaptive Regression Spline"),
+                  "\n",              
+                "\nOriginal Data:\n\t",out1$input$ma.name,
+                "\n\tn(pres)=",out1$dat$nPresAbs$train[2],
+                "\n\tn(abs)=",out1$dat$nPresAbs$train[1],
+                if(!is.null(new.tifs)) paste("\n\nModel applied to:\n\t",
+                                new.tifs,sep=""),
+                "\n",sep="")                
+                
+           capture.output(cat(txt0),file=paste(out$dat$bname,"_output.txt",sep=""))
+           rm(out1) 
          ##################################################################################
          ###################### Producing Evalutaiton Metrics for the hold out data
                  #if evaluating on brand new data switch out the mds 

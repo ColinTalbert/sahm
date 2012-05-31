@@ -134,9 +134,9 @@ PseudoAbsGen<-function(input.file,output.dir,method="KDE",bw.otim="adhoc",isople
         inc<-round(10/nbs,1)
         chunksize<-bs[1]*bs[2]
         tr<-blockSize(RasterInfo,chunksize=chunksize)
-        
+     
       predrast <- raster(RasterInfo)
-    		filename <- trim(output.dir)
+    		filename <- paste(output.dir,paste(ifelse(method=="KDE","bw.otim",method),if(bias==FALSE) isopleth,".tif",sep=""),sep="/")
     			firstrow <- 1
     			firstcol <- 1
     		ncols <- ncol(predrast)
