@@ -164,7 +164,6 @@ def map_ports(module, port_map):
     args = {}
     for port, (flag, access, required) in port_map.iteritems():
         if required or module.hasInputFromPort(port):
-            #breakpoint()
             value = module.forceGetInputListFromPort(port)
             if len(value) > 1:
                 raise ModuleError(module, 'Multiple items found from Port ' + 

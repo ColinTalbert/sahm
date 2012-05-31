@@ -210,15 +210,15 @@ class MDSBuilder(object):
             field_data_template = "NA"
         
         if len(inputs_header) > 5:
-            parc_template = inputs_header[5]
+            self.parc_template = inputs_header[5]
             parc_workspace = inputs_header[6]
         else:
-            parc_template = "Unknown"
+            self.parc_template = "Unknown"
             parc_workspace = "Unknown"
         
 
         secondRow = [original_field_data, field_data_template, ""] + ["1" for elem in self.inputs]
-        thirdRow = [parc_template, parc_workspace, ""] + self.inputs
+        thirdRow = [self.parc_template, parc_workspace, ""] + self.inputs
         
         if "Weights" in orig_header:
             full_header.append("Weights")
@@ -278,38 +278,42 @@ class MDSBuilder(object):
         self.fieldData = self.fieldData + ".tmp.csv"
         self.deleteTmp = True
         
-        if self.probsurf <> '':
-            rasterDS = gdal.Open(self.probsurf, gdalconst.GA_ReadOnly)
+        #step one check how many points we'll have to sample before we can 
+        #expect to get as many as requested
+        tocheck_pointcount = self.estimate_backgroundpoints()
+        
+        proportion_to_check = self.probsurface_sanitycheck()
+        if proportion_to_check < 0.33:
+            #we need relatively few points it will be most efficient 
+            #to simply loop through random points and throw out the 
+            #duplicates
+            self.pull_background_singly()
+        else:
+            #The simple algorithm doesn't scale.
+            #instead we're going to tile through our probability surface
+            #randomly assign each pixel to it's include/remove status
+            #and store a list of the pixels to include.  
+            #A random sample of this list will be used as our background points.
+            if self.probsurf == '':
+                self.pull_background_tiled_noprob()
+            else: 
+                self.pull_background_tiled_probsurface()
             
-            probND = self.getND(self.probsurf)
             
-            pixels_sample_count = self.probsurface_sanitycheck(rasterDS)
-            
+    def pull_background_singly(self):
+        
+        if self.probsurf == '':
+            probparams = utilities.getRasterParams(self, self.inputs[0])
+            probDS = gdal.Open(self.probsurf, gdalconst.GA_ReadOnly)
+            band = probDS.GetRasterBand(1)
             useProbSurf = True
         else:
-            print self.inputs[0]
-            rasterDS = gdal.Open(self.inputs[0], gdalconst.GA_ReadOnly)
+            probparams = utilities.getRasterParams(self, self.probsurf)
             useProbSurf = False
-            
-            pixels_sample_count = self.pointcount
-            
-        # get image size
-        rows = rasterDS.RasterYSize
-        cols = rasterDS.RasterXSize
-        band = rasterDS.GetRasterBand(1)
-        # get georeference info
-        transform = rasterDS.GetGeoTransform()
-        xOrigin = transform[0]
-        yOrigin = transform[3]
-        pixelWidth = transform[1]
-        pixelHeight = transform[5]
-        xRange = [xOrigin, xOrigin * pixelWidth * cols]
-        yRange = [yOrigin, yOrigin * pixelHeight * rows]
         
         #Open up and write to an output file
         oFile = open(self.fieldData, 'ab')
         fOut = csv.writer(oFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        
         
         if self.verbose:
             self.writetolog('    Starting generation of ' + str(self.pointcount) + ' random background points, ')
@@ -317,42 +321,73 @@ class MDSBuilder(object):
                 self.writetolog('      using ' + self.probsurf + ' as the probability surface.')
             print "    Percent Done:    ",
         
-        foundPoints = 0 # The running count of how many we've found
-        pcntDone = 0 #for status bar
-        while foundPoints < self.pointcount: #loop until we find enough
-            x = random.randint(0, cols - 1) 
-            y = random.randint(0, rows - 1)
-            #print x, y
-            tmpPixel = [x, y, pointval] # a random pixel in the entire image
-            if useProbSurf:
+        tried_cells = set()#all the pixels we've tried.
+       
+        pcntDone = 0
+        foundPoints = 0
+        pixelProb = 100
+        while foundPoints < self.pointcount: #loop until we find enough:
+            x = random.randint(0, probparams["width"] - 1) 
+            y = random.randint(0, probparams["height"] - 1)
+            
+            if (x, y) in tried_cells:
+                pass
+            else:
+                tried_cells.add((x, y))
                 # if they supplied a probability surface ignore the random pixel
                 # if a random number between 1 and 100 is > the probability surface value
-                pixelProb = int(band.ReadAsArray(tmpPixel[0], tmpPixel[1], 1, 1)[0,0])
-                if self.equal_float(pixelProb, probND) or np.isnan(pixelProb):
-                    continue
-                    #don't record this pixel it was ND in the Prob Surface
-                
-                #pixelProb is the extracted probability from the probability surface
-                rand = random.randint(1,100)
-                #rand is a uniform random integer between 1 and 100 inclusive
-                if rand > pixelProb:
-                    continue
-                    #don't record this pixel in our output file 
-                    #because our rand number was lower (or equal) than that pixel's probability
+                if useProbSurf:
+                    pixelProb = int(band.ReadAsArray(x, y, 1, 1)[0,0])
+                keep = random.randint(1,100) > pixelProb
+                if keep:
+                    #convert our outValues for row, col to coordinates
+                    tmpPixel = [x, y, pointval]
+                    tmpPixel[0] = probparams["west"] + tmpPixel[0] * probparams["xScale"]
+                    tmpPixel[1] = probparams["north"] + tmpPixel[1] * probparams["yScale"]
                     
-            #convert our outValues for row, col to coordinates
-            tmpPixel[0] = xOrigin + tmpPixel[0] * pixelWidth
-            tmpPixel[1] = yOrigin + tmpPixel[1] * pixelHeight
-            
-            fOut.writerow(tmpPixel)
-            foundPoints += 1
-            if self.verbose:
-                if float(foundPoints)/self.pointcount > float(pcntDone)/100:
-                    pcntDone += 10
-                    print str(pcntDone) + "...",
+                    fOut.writerow(tmpPixel)
+                    foundPoints += 1
+                    if self.verbose:
+                        if float(foundPoints)/self.pointcount > float(pcntDone)/100:
+                            pcntDone += 10
+                            print str(pcntDone) + "...",
+                    if float(len(kept_cells))/sample_count > float(pcntDone)/100:
+                        pcntDone += 10
+                        print str(pcntDone) + "...",
+        
         print "Done!\n"
         oFile.close()
         del fOut
+
+    def pull_background_tiled_noprob(self):
+        if self.probsurf == '':
+            probparams = utilities.getRasterParams(self, self.inputs[0])
+            probDS = gdal.Open(self.probsurf, gdalconst.GA_ReadOnly)
+            band = probDS.GetRasterBand(1)
+            useProbSurf = True
+        else:
+            probparams = utilities.getRasterParams(self, self.probsurf)
+            useProbSurf = False
+          
+        outDir = os.path.split(self.outputMDS)[0] 
+        tmpOutput = os.path.join(outDir,  + "tmp_classified_prob.tif")
+        
+        os.path.unlink(tmpOutput)
+
+    def pull_background_tiled_probsurface(self):
+        if self.probsurf == '':
+            probparams = utilities.getRasterParams(self, self.inputs[0])
+            probDS = gdal.Open(self.probsurf, gdalconst.GA_ReadOnly)
+            band = probDS.GetRasterBand(1)
+            useProbSurf = True
+        else:
+            probparams = utilities.getRasterParams(self, self.probsurf)
+            useProbSurf = False
+          
+        outDir = os.path.split(self.outputMDS)[0] 
+        tmpOutput = os.path.join(outDir,  + "tmp_classified_prob.tif")
+        
+        os.path.unlink(tmpOutput)
     
     def pull_fielddata_vals(self):
         outputRows = self.readInPoints()
@@ -526,15 +561,28 @@ class MDSBuilder(object):
         else:
             return ND
 
-    def probsurface_sanitycheck(self, probsurfaceDS):
-        '''function to acertain how hard it will be to find the required
+    def estimate_pointstocheck(self):
+        if self.probsurf == '':
+            #everypoint is included
+            return self.pointcount
+        else:
+            probsurfaceDS = gdal.Open(self.probsurf, gdalconst.GA_ReadOnly)
+            ave_prob = self.get_mean_prob(probsurfaceDS)
+            # return the expected number of points we will have to sample to get the 
+            # desired number (self.pointcount).  The 1.1 is a 10% fudge factor.
+            return 1.0/ave_prob * self.pointcount * 1.1 
+
+    def probsurface_sanitycheck(self, ave_prob):
+        '''function to asertain how hard it will be to find the required
         number of points given the entered probability surface. 
         '''
-        #step one find the prop surface average pixel probability
-        ave_prob = self.get_mean_prob(probsurfaceDS)
 
         #step2 calculate the expected maximum number of points available
-        probparams = utilities.getRasterParams(self, self.probsurf)
+        if self.probsurf == '':
+            probparams = utilities.getRasterParams(self, self.inputs[0])
+        else:
+            probparams = utilities.getRasterParams(self, self.probsurf)
+            
         max_points = ave_prob * probparams["width"] * probparams["height"]
         
         #Check if our number of points is approaching the number of available points
@@ -544,6 +592,7 @@ class MDSBuilder(object):
             msg += "\n" + self.probsurf + " has an average pixel probability of " + str(ave_prob) + ".\n"
             msg += "Which when multiplied by the cell dimensions of " + str(probparams["width"]) + " x " + str(probparams["height"])
             msg += " results in an expected maximum number of available random points of " + str(max_points)
+            msg += "\n\nTry either reducing the number of background points or using a less restrictive probability surface\n"
             raise RuntimeError, msg
         elif self.pointcount > max_points * 0.5:
             msg = "The number of random background points, " + str(self.pointcount)
@@ -551,14 +600,12 @@ class MDSBuilder(object):
             msg += "\n" + self.probsurf + " has an average pixel probability of " + str(ave_prob) + ".\n"
             msg += "Which when multiplied by the cell dimensions of " + str(probparams["width"]) + " x " + str(probparams["height"])
             msg += " results in an expected maximum number of available random points of " + str(max_points)
-            msg += "\n\n processing time and memory use could be excessive and problematic." 
+            msg += "\n\n processing time and memory use could be excessive and problematic.\n" 
             self.writetolog()
-        elif self.pointcount > max_points * 0.25:
-            pass
-            
+
         # return the expected number of points we will have to sample to get the 
         # desired number (self.pointcount).  The 1.1 is a 10% fudge factor.
-        return 1.0/ave_prob * self.pointcount * 1.1 
+        return 1.0/ave_prob 
     
 
                 
@@ -619,11 +666,9 @@ class MDSBuilder(object):
 
     def draw_sample(self, sample_size, rows, cols):
         if sample_size < (rows * cols * 0.3):
-            # Blacklist
-            # we need a relatively small sample it's most efficient to
-            # to randomly select points and throw out duplicates.
-            #this is the most memory and processing efficient way to accomplish this
-            #for small relative sample sizes.
+            # we need a relatively small sample relative to the total number of possible pixels
+            #it's most efficient to randomly select points and throw out duplicates.
+
             tried_cells = set()
             kept_cells = set()
             
@@ -639,9 +684,11 @@ class MDSBuilder(object):
                     if keep:
                         kept_cells.add((x,y))
         else:
-            #Whitelist
+            #We need many samples relative to the total population of pixels.
+            #
             #every possible cell
             all_cells = np.arange(x_count * y_count)
+            
 def main(argv):
     
     usageStmt = "usage:  options: -f --fieldData -i --inCSV -o --output -pc --pointcount -ps --probsurf"

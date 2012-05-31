@@ -102,7 +102,7 @@ def menu_items():
         global session_dir
         
         path = str(QtGui.QFileDialog.getExistingDirectory(None,
-                                        'Browse to new session folder -'))
+                                        'Browse to new session folder -', utils.getrootdir()))
         if path == '':
             return None
         
@@ -397,6 +397,7 @@ class RastersWithPARCInfoCSV(File):
     _output_ports = [('value', '(gov.usgs.sahm:MergedDataSet:Other)'),]
     
     pass
+
 #    def compute(self, is_input=None):
 #        PersistentPath.compute(self, is_input, 'blob')
 
@@ -759,6 +760,54 @@ class BoostedRegressionTree(Model):
                          'LearningRate':('lr', None, False), #This is a BRT specific port
                          'MaximumTrees':('mt', None, False), #This is a BRT specific port
                          })
+   
+class KDE_generator(Module):
+    '''
+    
+    #Written by Marian Talbert 4/5/2012
+    #This function takes a field data file and based on the options specified creates a bias or binary mask for generation of background points
+    #The mask can be based on a KDE function or a minimum convex polygon (method=KDE or MCP) bias specifies that a continuous surface is to be created
+    #This is ignored by method=MCP isopleth specifies the isopleth to be used (a number, generally 95).  It is assumed that the 8th name in the input csv is the name of a template
+    #that can be used.  currently 4 methods are available for optimization of the kde bandwith (bw.otim=adhoc, Hpi,Hscv,Hbcv,Hlscv.
+    #A tiff is generated using the header from the template csv which can be used by the MDS builder to generate background points.
+    '''
+    _input_ports = [('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
+                        ('method', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'KDE', 'optional':True}),
+                        ('bandwidthOptimizationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'adhoc', 'optional':True}),
+                        ('isopleth', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'95', 'optional':True}),
+                        ('bias', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':True})]
+    _output_ports = [("KDE", "(edu.utah.sci.vistrails.basic:File)")]
+                        
+    def compute(self):
+        port_map = {'fieldData': ('fieldData', None, False),
+            'method': ('method', None, True),
+            'bandwidthOptimizationMethod': ('bandOptMeth', None, True),
+            'isopleth': ('isopleth', None, True),
+            'bias': ('bias', utils.R_boolean, True)}
+        
+        kde_params = utils.map_ports(self, port_map)
+        
+        global models_path
+        
+        args = "i=" + '"' + kde_params["fieldData"] + '"' 
+        args += " o=" + '"' + utils.getrootdir() + '"'
+        args += " mth=" + kde_params["method"]
+        args += " bwopt=" + kde_params["bandOptMeth"]
+        args += " ispt=" + kde_params["isopleth"]
+        args += " bias=" + kde_params["bias"]
+
+        utils.runRScript("PseudoAbs.r", args, self)
+        
+        output = os.path.join(outputMDS)
+        if os.path.exists(output):
+            output_file = utils.create_file_module(output)
+            writetolog("Finished Model Selection split ", True)
+        else:
+            msg = "Problem encountered generating Model Selection split.  Expected output file not found."
+            writetolog(msg, False)
+            raise ModuleError(self, msg)
+        self.setResult("outputMDS", output_file)
+        
    
 class MDSBuilder(Module):
     '''
@@ -1287,7 +1336,6 @@ class ModelEvaluationSplit(Module):
         
 class ModelSelectionSplit(Module):
     '''
-    ToDo: Marian to write
     '''        
     __doc__ = GenModDoc.construct_module_doc('ModelSelectionSplit')
     
@@ -1948,7 +1996,8 @@ _modules = generate_namespaces({'DataInput': [
                                           ModelSelectionSplit,
                                           ModelSelectionCrossValidation,
                                           CovariateCorrelationAndSelection,
-                                          ApplyModel
+                                          ApplyModel,
+                                          KDE_generator
                                           ],                                          
                                 'Models': [(GLM, {'moduleColor':model_color,
                                                            'moduleFringe':model_fringe}),

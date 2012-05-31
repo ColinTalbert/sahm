@@ -341,9 +341,9 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
     def load_layers(self):
         self.displayTL = True
         self.all_layers = {"prob_map":{"type":"raster", "title":"Probability" ,"categorical":False, "min":0, "max":1, 'cmap':matplotlib.cm.jet, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
-                         "bin_map":{"type":"raster", "title":"Binary probability" , "categorical":False, "categories":[0,1], 'cmap':matplotlib.cm.Greys, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
+                         "bin_map":{"type":"raster", "title":"Binary probability" , "categorical":False, "min":0, "max":1, 'cmap':matplotlib.cm.Greys, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
                          "resid_map":{"type":"raster", "title":"Residuals" , "categorical":False, "min":0, "max":"pullfromdata", 'cmap':matplotlib.cm.Accent, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
-                         "mess_map":{"type":"raster", "title":"Mess" , "categorical":False, "categories":"pullfromdata", 'cmap':matplotlib.cm.jet, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
+                         "mess_map":{"type":"raster", "title":"Mess" , "categorical":False, "min":0, "max":"pullfromdata", "categories":"pullfromdata", 'cmap':matplotlib.cm.jet, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
                          "MoD_map":{"type":"raster", "title":"MoD" , "categorical":True, "min":0, "max":"pullfromdata", 'cmap':matplotlib.cm.prism, "displayorder":9999, "num_breaks":7, "displayed":False, "enabled":False, "file":""},
                          "pres_points":{"type":"Vector", "title":"Presence", "color":(1,0,0), "displayorder":3, "num_breaks":7, "displayed":False, "enabled":False, "file":""},
                          "abs_points":{"type":"Vector", "title":"Absence", "color":(0,1,0), "displayorder":2, "num_breaks":7, "displayed":False, "enabled":False, "file":""},
@@ -542,12 +542,22 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 #        
 #        rmin = np.amin(raster_array)
 #        rmax = np.amax(raster_array)
-        rmin, rmax = utils.getrasterminmax(kwargs['file'])
-        norm = colors.normalize(rmin, rmax)
         
-
-        
-        raster_plot = self.axes.imshow(raster_array,interpolation="nearest", cmap=kwargs['cmap'], norm=norm, origin='upper', extent=map_extent)
+        if kwargs['categorical']:
+            raster_plot = self.axes.imshow(raster_array,interpolation="nearest", cmap=kwargs['cmap'], origin='upper', extent=map_extent)
+        else:
+            rmin = kwargs['min']
+            rmax = kwargs['max']
+            if kwargs["max"] == "pullfromdata" or \
+                kwargs["min"] == "pullfromdata":
+                min, max = utils.getrasterminmax(kwargs['file'])
+                if kwargs["max"] == "pullfromdata":
+                    rmax = max
+                if kwargs["min"] == "pullfromdata":
+                    rmin = min
+      
+            norm = colors.normalize(rmin, rmax)        
+            raster_plot = self.axes.imshow(raster_array,interpolation="nearest", cmap=kwargs['cmap'], norm=norm, origin='upper', extent=map_extent)
         
         if self.displayTL:
             
