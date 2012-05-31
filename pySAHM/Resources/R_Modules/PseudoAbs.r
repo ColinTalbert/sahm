@@ -1,4 +1,4 @@
-PseudoAbsGen<-function(input.file,output.dir,method="KDE",bw.otim="adhoc",isopleth=95,bias=FALSE){
+PseudoAbsGen<-function(input.file,outfile,method="KDE",bw.otim="adhoc",isopleth=95,bias=FALSE,template){
     
     #Written by Marian Talbert 4/5/2012
     #This function takes a field data file and based on the options specified creates a bias or binary mask for generation of background points
@@ -98,16 +98,16 @@ PseudoAbsGen<-function(input.file,output.dir,method="KDE",bw.otim="adhoc",isople
     ##### now write the info to a raster eventually this should be an additional function
     ##### since all but the selection of values is already written as a separate function
      
-    fullnames<-names(dat)[8] # I'm not sure which column I'll be able to match at this point in the workflow 
+    
      options(warn=-1)
-        gi <- GDALinfo(fullnames[1])
+        gi <- GDALinfo(template)
     options(warn=1)
         dims <- as.vector(gi)[1:2]
         ps <- as.vector(gi)[6:7]
         ll <- as.vector(gi)[4:5]
         pref<-attr(gi,"projection")
         
-    RasterInfo=raster(fullnames[1])
+    RasterInfo=raster(template)
     RasterInfo@file@datanotation<-"FLT4S"
     NAval<- -3.399999999999999961272e+38
     
@@ -136,7 +136,7 @@ PseudoAbsGen<-function(input.file,output.dir,method="KDE",bw.otim="adhoc",isople
         tr<-blockSize(RasterInfo,chunksize=chunksize)
      
       predrast <- raster(RasterInfo)
-    		filename <- paste(output.dir,paste(ifelse(method=="KDE","bw.otim",method),if(bias==FALSE) isopleth,".tif",sep=""),sep="/")
+    		filename <-outfile
     			firstrow <- 1
     			firstcol <- 1
     		ncols <- ncol(predrast)
@@ -224,6 +224,7 @@ Args <- commandArgs(trailingOnly=FALSE)
     	if(argSplit[[1]][1]=="bwopt") bw.otim <- argSplit[[1]][2]
       if(argSplit[[1]][1]=="ispt") isopleth <- as.numeric(argSplit[[1]][2])
       if(argSplit[[1]][1]=="bias") bias <- as.logical(argSplit[[1]][2])
+      if(argSplit[[1]][1]=="tmplt") template<-argSplit[[1]][2]
      
     }
 
@@ -231,4 +232,4 @@ Args <- commandArgs(trailingOnly=FALSE)
 ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"chk.libs.r",sep="\\"))
 
-PseudoAbsGen(input.file=infile,output.dir=output,method="KDE",bw.otim="adhoc",isopleth=95,bias=FALSE)
+PseudoAbsGen(input.file=infile,outfile=output,method="KDE",bw.otim="adhoc",isopleth=95,bias=FALSE,template=template)
