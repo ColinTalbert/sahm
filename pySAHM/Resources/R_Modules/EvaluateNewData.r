@@ -43,7 +43,8 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                                 new.tifs,sep=""),
                 "\n",sep="")                
                 
-           capture.output(cat(txt0),file=paste(out$dat$bname,"_output.txt",sep="")) 
+           capture.output(cat(txt0),file=paste(out$dat$bname,"_output.txt",sep=""))
+           rm(out1) 
          ##################################################################################
          ###################### Producing Evalutaiton Metrics for the hold out data
                  #if evaluating on brand new data switch out the mds 
