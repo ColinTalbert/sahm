@@ -18,8 +18,8 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
     load(workspace)
     chk.libs(out$input$script.name)
        out1<-out
-       rm(out,envir=.GlobalEnv)
-       rm(out)
+       try(rm(out,envir=.GlobalEnv),silent=TRUE)
+       try(rm(out),silent=TRUE)
        out<-out1
     # generate a filename for output #
                 out$input$output.dir<-out.dir
@@ -65,14 +65,17 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                                   hl[[1]][Eval.split]<-"Split"  
                          }
                    }
-                                  out$dat$bname<-bname
-                                  out$dat$split.type=out$dat$split.label="eval"
+                                
                       
                       #if we have completely new data then the whole dataset should be used for testing and the original displayed as training data
                       if(!is.null(new.tifs)) {
                       out <- read.ma(out,hl=hl,include=include)
+                         #read.ma wasn't designed for what it's doing here and overwrites a few things it shouldn't 
+                         #these are reset correctly here
                           names(out$dat$ma)<-"test"
                           out$dat$ma$train<-store.train
+                            out$dat$split.type=out$dat$split.label="eval"
+                            out$dat$bname<-paste(out$input$output.dir,paste("/",Model,sep=""),sep="")
                       }
                   # Making Predictions
                            pred.vals<-function(x,model,Model){
@@ -89,7 +92,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                           #producing auc and residual plots model summary information and accross model evaluation metric
                       out$mods$auc.output<-make.auc.plot.jpg(out=out)
            }
-    
+          
      ################################ Making the tiff
    if(p.tif==T | b.tif==T){
         if((n.var <- out$mods$n.vars.final)<1){
@@ -109,7 +112,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
 
 p.tif=T
 b.tif=T
-mess=FALSE
+Mess=FALSE
 new.tiffs=NULL
 produce.metrics=TRUE
 
@@ -135,8 +138,10 @@ Args <- commandArgs(trailingOnly=FALSE)
  			if(argSplit[[1]][1]=="pmt")  produce.metrics <- argSplit[[1]][2]
     }
 
+ScriptPath<-dirname(ScriptPath)
+source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
 
-EvaluateNewData(workspace=ws,out.dir=out.dir,b.tif=as.logical(b.tif),p.tif=as.logical(p.tif),mess=as.logical(mess),new.tifs=new.tiffs,produce.metrics=as.logical(produce.metrics))
+EvaluateNewData(workspace=ws,out.dir=out.dir,b.tif=as.logical(b.tif),p.tif=as.logical(p.tif),mess=as.logical(Mess),new.tifs=new.tiffs,produce.metrics=as.logical(produce.metrics))
 
 
 

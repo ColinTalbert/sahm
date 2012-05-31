@@ -141,18 +141,16 @@ ymax(RasterInfo) <- ymax(RasterInfo) + 0.5 * rs[2]
     if(make.binary.tif) {
      binaryRaster<-raster(RasterInfo)
       binaryRaster <- writeStart(binaryRaster, filename=outfile.bin, overwrite=TRUE)}
-    if(MESS) {
-     MessRaster<-raster(RasterInfo)
-     ModRaster<-raster(RasterInfo)
-      MessRaster <- writeStart(MessRaster, filename=sub("bin","mess",outfile.bin), overwrite=TRUE)
-      ModRaster <- writeStart(ModRaster, filename=sub("bin","MoD",outfile.bin), overwrite=TRUE)
-      }
-
+    
 temp <- data.frame(matrix(ncol=nvars,nrow=tr$nrows[1]*ncol(RasterInfo))) # temp data.frame.
 names(temp) <- vnames
 FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
   if((nvars-length(FactorInd))==0) MESS<-FALSE #turn this off if only one factor column was selected
-    if(MESS) {
+  if(MESS) {
+     MessRaster<-raster(RasterInfo)
+     ModRaster<-raster(RasterInfo)
+      MessRaster <- writeStart(MessRaster, filename=sub("bin","mess",outfile.bin), overwrite=TRUE)
+      ModRaster <- writeStart(ModRaster, filename=sub("bin","MoD",outfile.bin), overwrite=TRUE)
       pred.rng<-temp[,names(temp)%in%vnames.final.mod]
         CalcMESS<-function(tiff.entry,pred.vect){
               f<-sum(pred.vect<tiff.entry)/length(pred.vect)*100

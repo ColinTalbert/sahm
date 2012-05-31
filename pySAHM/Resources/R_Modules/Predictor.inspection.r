@@ -54,7 +54,7 @@ cex.mult<-3.2
     jpeg(output.file,pointsize=13,height=2000,width=2000,quality=100)
          par(mfrow=c(2,2),mar=c(5,7,9,6))
              hst<-hist(pred,plot=FALSE)
-      ####PLOT 1.
+      ####PLOT 1. new
          hist(pred,col="red",xlab="",main="",cex.lab=cex.mult,cex=cex.mult,cex.main=cex.mult,cex.axis=.7*cex.mult,ylim=c(0,1.5*max(hst$counts)))
              hist(pred[response==0],breaks=hst$breaks,add=TRUE,col="blue")
              legend("topright",xjust=1,yjust=1,legend=c(pres.lab,abs.lab),fill=c("red","blue"),cex=cex.mult)

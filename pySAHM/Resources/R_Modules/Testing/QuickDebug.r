@@ -37,7 +37,8 @@ input.file="C:\\temp\\TestDataSets\\CanadaThistleWeights.csv"
 input.file="C:\\temp\\SAHM_workspace\\MergedDataset_10.csv"
 ##MARS
 EvaluateNewData(workspace="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\brt_1\\modelWorkspace",out.dir="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\ApplyModel_1",b.tif=TRUE,p.tif=TRUE,mess=TRUE,new.tifs="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\MergedDataset_2.csv",produce.metrics=FALSE)
-
+EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess=FALSE,new.tifs=NULL,produce.metrics=TRUE)
+EvaluateNewData(produce.metrics=TRUE, new.tifs="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\MergedDataset_10.csv", workspace="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\brt_4\\modelWorkspace", out.dir="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\ApplyModel_12")
 FitModels(ma.name=input.file,
             output.dir=output.dir,
             response.col=rc,make.p.tif=T,make.binary.tif=T,
@@ -65,14 +66,15 @@ proximity=NULL
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,
-      response.col=rc,make.p.tif=F,make.binary.tif=F,
+      response.col=rc,make.p.tif=T,make.binary.tif=T,
           debug.mode=T,opt.methods=2,script.name="rf",
 responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
 samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
 localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=proximity,norm.votes=TRUE,
-do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=FALSE,pseudoabsence=TRUE)
+do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=TRUE,pseudoabsence=TRUE)
 
 #BRT
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\modelSelection_split_5.csv"
 set.seed(1)
 
 FitModels(ma.name=input.file,
@@ -83,6 +85,7 @@ FitModels(ma.name=input.file,
           simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
           learning.rate =.000005, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=FALSE)
 
+EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=TRUE,new.tifs="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\MergedDataset_10.csv",produce.metrics=TRUE)
 #Now evaluating new data
 workspace="I:\\VisTrails\\WorkingFiles\\workspace\\_TutorialTesting\\brt_1"
 

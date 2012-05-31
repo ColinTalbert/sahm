@@ -81,7 +81,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
           include<-(as.numeric(tif.info[[2]]))
           options(warn=1)
   #Remove coordinates, response column, site.weights
-  #before exploring predictor relationship
+  #before exploring predictor relationship 
     rm.cols <- as.vector(na.omit(c(match("x",tolower(names(dat))),match("y",tolower(names(dat))),
     match("site.weights",tolower(names(dat))),match(tolower(response.col),tolower(names(dat))),match("Split",names(dat)),match("EvalSplit",names(dat)))))
    
