@@ -431,7 +431,9 @@ Args <- commandArgs(trailingOnly=FALSE)
       if(argSplit[[1]][1]=="absn") absn <- as.logical(argSplit[[1]][2])
       if(argSplit[[1]][1]=="bgd") bgd <- as.logical(argSplit[[1]][2])
     }
-
+ 
+ ScriptPath<-dirname(ScriptPath)
+source(paste(ScriptPath,"my.panel.smooth.binary.r",sep="\\"))
 	#Run the Pairs Explore function with these parameters
     Pairs.Explore(num.plots=num.plots,
     min.cor=min.cor,

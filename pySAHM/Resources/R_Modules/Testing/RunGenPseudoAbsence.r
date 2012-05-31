@@ -13,7 +13,7 @@ PseudoAbsGen(input.file,output.dir,method="KDE",bw.otim="adhoc",isopleth=95,bias
 output.dir<-"J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\BackgroundPtSurfaces\\95HpiKDE.tif"
 PseudoAbsGen(input.file,output.dir,method="KDE",bw.otim="Hpi",isopleth=95,bias=FALSE)
 
-output.dir<-"J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\BackgroundPtSurfaces\\95HpiContKDE.tif"
+output.dir<-"J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\BackgroundPtSurfaces"
 PseudoAbsGen(input.file,output.dir,method="KDE",bw.otim="Hpi",isopleth=95,bias=TRUE)
 #PseudoAbsGen(input.file,output.file,response.col="ResponseBinary",method="Density",isopleth=95)
 
