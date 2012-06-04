@@ -289,13 +289,16 @@ class SelectListDialog(QtGui.QDialog):
         outputPic = self.make_new_covariate_plot(output_dir, str(item.text(0)))
         self.popup = QtGui.QDialog()
 #        self.popup.setBaseSize(1200, 1200)
-        self.popup.resize(1500, 1500)
+        size = 800
+        self.popup.resize(size, size)
+        
         viewWindow = utils.InteractiveQGraphicsView(self.popup)
+        viewWindow.resize(size, size)
         layout = QtGui.QVBoxLayout()
         layout.addWidget(viewWindow)
         self.popup.setLayout(layout)
         viewWindow.load_picture(outputPic)
-        
+        viewWindow.view_current()
         
         retVal = self.popup.exec_()
         

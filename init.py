@@ -202,8 +202,8 @@ class Predictor(Constant):
     __doc__ = GenModDoc.construct_module_doc('Predictor')
 
     _input_ports = [('categorical', '(edu.utah.sci.vistrails.basic:Boolean)'),
-                    ('ResampleMethod', '(gov.usgs.sahm:ResampleMethod:Other)', {'defaults':'Bilinear'}),
-                    ('AggregationMethod', '(gov.usgs.sahm:AggregationMethod:Other)', {'defaults':'Mean'}),
+                    ('ResampleMethod', '(gov.usgs.sahm:ResampleMethod:Other)', {'defaults':'["Bilinear"]'}),
+                    ('AggregationMethod', '(gov.usgs.sahm:AggregationMethod:Other)', {'defaults':'["Mean"]'}),
                     ('file', '(edu.utah.sci.vistrails.basic:Path)')]
     _output_ports = [('value', '(gov.usgs.sahm:Predictor:DataInput)'),
                      ('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
@@ -452,10 +452,10 @@ class RastersWithPARCInfoCSV(File):
 #    
 #    _input_ports = [('projectionTargetMDS', '(gov.usgs.sahm:MergedDataSet:Other)'),
 #                    ('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'),
-#                    ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':False}),
-#                    ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':False}),
-#                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False}),
-#                    ('produceMetrics', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False})]
+#                    ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
+#                    ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
+#                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+#                    ('produceMetrics', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False})]
 #    _output_ports =  [('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'), 
 #                     ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
 #                     ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)'),
@@ -518,9 +518,9 @@ class Model(Module):
     the VisTrails workflow by the user.
     '''
     _input_ports = [('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)'),
-                    ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':False}),
-                    ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':False}),
-                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False}),
+                    ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
+                    ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
+                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                     ]
     _output_ports = [('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'), 
                      ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
@@ -626,10 +626,10 @@ class GLM(Model):
     __doc__ = GenModDoc.construct_module_doc('GLM')
     
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'2', 'optional':False}),
-                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False}),
-                         ('SimplificationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'AIC', 'optional':True}),
-                         ('SquaredTerms', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
+    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':['2'], 'optional':False}),
+                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+                         ('SimplificationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["AIC"]', 'optional':True}),
+                         ('SquaredTerms', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
                          ])
     def __init__(self):
         global models_path
@@ -643,10 +643,10 @@ class RandomForest(Model):
     __doc__ = GenModDoc.construct_module_doc('RandomForest')
     
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'2', 'optional':False}),
-                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False}),
+    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["2"]', 'optional':False}),
+                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                          ('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
-                         ('mTry', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'1', 'optional':True}),
+                         ('mTry', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["1"]', 'optional':True}),
                          ('nTrees', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                          ('nodesize', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                          ('replace', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
@@ -681,10 +681,10 @@ class MARS(Model):
     __doc__ = GenModDoc.construct_module_doc('MARS')
     
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'2', 'optional':False}),
-                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False}),
-                         ('MarsDegree', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'1', 'optional':True}),
-                          ('MarsPenalty', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'2', 'optional':True}),
+    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["2"]', 'optional':False}),
+                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+                         ('MarsDegree', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["1"]', 'optional':True}),
+                          ('MarsPenalty', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["2"]', 'optional':True}),
                           ])
     def __init__(self):
         global models_path        
@@ -732,16 +732,16 @@ class BoostedRegressionTree(Model):
     __doc__ = GenModDoc.construct_module_doc('BoostedRegressionTree')
     
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'2', 'optional':False}),
-                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':False}),
+    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["2"]', 'optional':False}),
+                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                          ('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ('TreeComplexity', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
-                              ('BagFraction', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'0.5', 'optional':True}),
-                              ('NumberOfFolds', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'3', 'optional':True}),
-                              ('Alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'1', 'optional':True}),
-                              ('PrevalenceStratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':True}),
-                              ('ToleranceMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'auto', 'optional':True}),
-                              ('Tolerance', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'0.001', 'optional':True}),
+                              ('BagFraction', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.5"]', 'optional':True}),
+                              ('NumberOfFolds', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["3"]', 'optional':True}),
+                              ('Alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["1"]', 'optional':True}),
+                              ('PrevalenceStratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
+                              ('ToleranceMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["auto"]', 'optional':True}),
+                              ('Tolerance', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.001"]', 'optional':True}),
                               ('LearningRate', '(edu.utah.sci.vistrails.basic:Float)', {'optional':True}),
                               ('MaximumTrees', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ])
@@ -772,10 +772,10 @@ class KDE_generator(Module):
     #A tiff is generated using the header from the template csv which can be used by the MDS builder to generate background points.
     '''
     _input_ports = [('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
-                        ('method', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'KDE', 'optional':True}),
-                        ('bandwidthOptimizationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'adhoc', 'optional':True}),
-                        ('isopleth', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'95', 'optional':True}),
-                        ('bias', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':True})]
+                        ('method', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["KDE"]', 'optional':True}),
+                        ('bandwidthOptimizationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["adhoc"]', 'optional':True}),
+                        ('isopleth', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["95"]', 'optional':True}),
+                        ('bias', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True})]
     _output_ports = [("KDE", "(edu.utah.sci.vistrails.basic:File)")]
                         
     def compute(self):
@@ -816,8 +816,8 @@ class MDSBuilder(Module):
 
     _input_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
-                                 ('backgroundPointType', '(gov.usgs.sahm:RandomPointType:Other)', {'defaults':'Background'}),
-                                 ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
+                                 ('backgroundPointType', '(gov.usgs.sahm:RandomPointType:Other)', {'defaults':'["Background"]'}),
+                                 ('backgroundpointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
                                  ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)'),
                                  ('Seed', '(edu.utah.sci.vistrails.basic:Integer)')]
                             
@@ -834,8 +834,8 @@ class MDSBuilder(Module):
     def compute(self):
         port_map = {'fieldData': ('fieldData', None, False),
                     'backgroundPointType': ('pointtype', None, False),
-                    'backgroundPointCount': ('pointcount', None, False),
-                    'backgroundProbSurf': ('probsurf', None, False),
+                    'backgroundpointCount': ('pointCount', None, False),
+                    'backgroundProbSurf': ('probSurface', None, False),
                     'Seed': ('seed', None, False)}
         
         MDSParams = utils.map_ports(self, port_map)            
@@ -881,8 +881,8 @@ class MDSBuilder_vector(Module):
     _input_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                  ('VectorFieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
                                  ('KeyField', '(edu.utah.sci.vistrails.basic:String)'),
-                                 ('Statistic', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'Mean', 'optional':True}),
-                                 ('ResponseType', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'Binary', 'optional':True})]
+                                 ('Statistic', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["Mean"]', 'optional':True}),
+                                 ('ResponseType', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["Binary"]', 'optional':True})]
                             
     
     _output_ports = [('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)')]
@@ -941,12 +941,12 @@ class FieldDataQuery(Module):
     __doc__ = GenModDoc.construct_module_doc('FieldDataQuery')
          
     _input_ports = [('fieldData_file', '(gov.usgs.sahm:FieldData:DataInput)'),
-                                 ('x_column', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'1'}),
-                                 ('y_column', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'2'}),
-                                 ('Response_column', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'3'}),
-                                 ('Response_Presence_value', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'1'}),
-                                 ('Response_Absence_value', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'0'}),
-                                 ('ResponseType', '(gov.usgs.sahm:ResponseType:Other)', {'defaults':'Presence(Absence)'}),
+                                 ('x_column', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["1"]'}),
+                                 ('y_column', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["2"]'}),
+                                 ('Response_column', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["3"]'}),
+                                 ('Response_Presence_value', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["1"]'}),
+                                 ('Response_Absence_value', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["0"]'}),
+                                 ('ResponseType', '(gov.usgs.sahm:ResponseType:Other)', {'defaults':'["Presence(Absence)"]'}),
                                   ('Query_column', '(edu.utah.sci.vistrails.basic:String)'),
                                   ('Query', '(edu.utah.sci.vistrails.basic:String)')]
     _output_ports = [('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),]
@@ -1076,7 +1076,7 @@ class FieldDataAggregateAndWeight(Module):
     '''
     _input_ports = [('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
-                                 ('PointAggregationOrWeightMethod', '(gov.usgs.sahm:PointAggregationMethod:Other)', {'defaults':'Collapse In Pixel'}),
+                                 ('PointAggregationOrWeightMethod', '(gov.usgs.sahm:PointAggregationMethod:Other)', {'defaults':'["Collapse In Pixel"]'}),
                                  ('FD_EPSG_projection', '(edu.utah.sci.vistrails.basic:Integer)'),
                                  ]
     _output_ports = [('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')]
@@ -1123,8 +1123,8 @@ class PARC(Module):
                                 ('PredictorList', '(gov.usgs.sahm:PredictorList:Other)'),
                                 ('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                 ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
-                                ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':True}),
-                                ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':True})]
+                                ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
+                                ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True})]
 
     _output_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
     
@@ -1221,7 +1221,7 @@ class RasterFormatConverter(Module):
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('inputDir', '(edu.utah.sci.vistrails.basic:Directory)'),
                     ('format', '(edu.utah.sci.vistrails.basic:String)'),
-                    ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':True})]
+                    ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True})]
 
     _output_ports = [('outputDir', '(edu.utah.sci.vistrails.basic:Directory)')]
 
@@ -1275,7 +1275,7 @@ class ModelEvaluationSplit(Module):
 
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('trainingProportion', '(edu.utah.sci.vistrails.basic:Float)', 
-                        {'defaults':'0.7'}),
+                        {'defaults':'["0.7"]'}),
                     ('RatioPresAbs', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
@@ -1408,8 +1408,8 @@ class ModelSelectionCrossValidation(Module):
 
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('nFolds', '(edu.utah.sci.vistrails.basic:Integer)', 
-                        {'defaults':'10'}),
-                    ('Stratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':True}),
+                        {'defaults':'["10"]'}),
+                    ('Stratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
                     ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
 
@@ -1468,11 +1468,11 @@ class CovariateCorrelationAndSelection(Module):
     __doc__ = GenModDoc.construct_module_doc('CovariateCorrelationAndSelection')
     
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
-                    ('selectionName', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'initial'}),
-                    ('ShowGUI', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True'}),
-                    ('numPlots', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'8', 'optional':True}),
-                    ('minCor', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'0.7', 'optional':True}),
-                    ('corsWithHighest', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'False', 'optional':True})]
+                    ('selectionName', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["initial"]'}),
+                    ('ShowGUI', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]'}),
+                    ('numPlots', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["8"]', 'optional':True}),
+                    ('minCor', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.7"]', 'optional':True}),
+                    ('corsWithHighest', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True})]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
 
     @classmethod
@@ -2007,8 +2007,11 @@ _modules = generate_namespaces({'DataInput': [
                                                            'moduleFringe':model_fringe}),
                                            (MAXENT, {'moduleColor':model_color,
                                                            'moduleFringe':model_fringe}),
-                                           (BoostedRegressionTree, {'moduleColor':model_color,
-                                                           'moduleFringe':model_fringe}),],
+                                           (BoostedRegressionTree, 
+                                                {
+#                                                 'moduleColor':model_color,
+                                                           'moduleFringe':model_fringe})
+                                           ],
                                 'Other':  [(Model, {'abstract': True}),
                                            (ResampleMethod, {'abstract': True}),
                                            (AggregationMethod, {'abstract': True}),

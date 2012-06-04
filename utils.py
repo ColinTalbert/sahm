@@ -168,9 +168,9 @@ def map_ports(module, port_map):
             if len(value) > 1:
                 raise ModuleError(module, 'Multiple items found from Port ' + 
                     port + '.  Only single entry handled.  Please remove extraneous items.')
-            elif len(value)  == 0:
+            elif len(value) == 0:
                 try:
-                    value = [item for item in module._input_ports if item[0] == port][0][2]['defaults']
+                    value = eval([item for item in module._input_ports if item[0] == port][0][2]['defaults'])[0]
                 except:
                     raise ModuleError(module, 'No items found from Port ' + 
                         port + '.  Input is required.')
@@ -621,7 +621,6 @@ class InteractiveQGraphicsView(QtGui.QGraphicsView):
         self.view_current() 
 
     def resizeEvent(self, event):
-
         old_width = event.oldSize().width()
         old_height = event.oldSize().height()
        

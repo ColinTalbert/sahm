@@ -99,7 +99,7 @@ Input Ports:
     _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ('ModelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'),
-                    ('InitialModelOutputDisplay', '(gov.usgs.sahm:ModelOutputType:Other)', {'defaults':str(['AUC'])})
+                    ('InitialModelOutputDisplay', '(gov.usgs.sahm:ModelOutputType:Other)', {'defaults':"['AUC']"})
                     ]
     @classmethod
     def provide_input_port_documentation(cls, port_name):
@@ -382,8 +382,15 @@ class SAHMOutputViewerCellWidget(QCellWidget):
     def wheel_event (self, event, id, transform):
         numDegrees = event.delta() / 8 
         numSteps = numDegrees / 15.0 
-        self.zoom(numSteps, self.images[id], transform) 
-        event.accept() 
+#        self.zoom(numSteps, self.images[id], transform) 
+#        event.accept() 
+
+        active_cells = self.get_active_cells()
+        for cell in active_cells:
+#            if cell != self:
+            cell.zoom(numSteps, cell.images[id], transform)
+            cell.view_current() 
+                    
 
     def zoom(self, step, images, transform):
         zoom_step = 0.06
@@ -394,7 +401,10 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         images[1] = images[0].scaled(w, h, 
                                             QtCore.Qt.KeepAspectRatio, 
                                             transform) 
-        self.view_current() 
+        
+        
+
+        
 
     def saveToPNG(self, filename):
         """ saveToPNG(filename: str) -> bool
