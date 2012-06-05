@@ -1,11 +1,5 @@
-#Running R from the command line
-#input.file="I:\\VisTrails\\WorkingFiles\\workspace\\GYA_demo\\test.csv"
-    #output.dir<-"H:\\Desktop\\SAHM\\Rcode\\ExposingModelParameters\\PDFCheck\\"
-    #response.col= "ResponseBinary"
-    #min.cor<-.7
-    #num.plots<-10
-source("I:\\VisTrails\\Central_VisTrails_x32_debug\\Vistrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\PairsExplore.r")
-source("I:\\VisTrails\\Central_VisTrails_x32_debug\\Vistrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\my.panel.smooth.binary.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\PairsExplore.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\my.panel.smooth.binary.r")
 
 
     num.plots <- 10

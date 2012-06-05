@@ -97,8 +97,8 @@
         
         # remove background points or record these as absence for pseudoabsence (Only partially implemented)
         if(any(ma[,r.col]==-9998)) {ma[which(ma[,r.col]==-9998,arr.ind=TRUE),r.col]<-0
-        out$input$PsuedoAbs=TRUE
-        }
+        out$input$PsdoAbs=TRUE
+        } else out$input$PsdoAbs=FALSE
          if(length(which(ma[,r.col]==-9999,arr.ind=TRUE))>0) ma<-ma[-c(which(ma[,r.col]==-9999,arr.ind=TRUE)),]
         # remove evaluation points
         if(any(!is.na(match("EvalSplit",names(ma))))){
