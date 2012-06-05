@@ -118,6 +118,7 @@ if(Model=="rf"){
                     par(oma=c(2,2,4,2),mfrow=c(prow,pcol))
                     }
                 for(i in 1:length(r.curves$names)){
+                browser()
                         assign("i",i,envir=.GlobalEnv)
                                x<-RFResponseCurve(out$mods$final.mod,out$dat$Subset$dat,r.curves$names[i],n.pt=50,plot=T,main="",
                                         xlab=r.curves$names[i])

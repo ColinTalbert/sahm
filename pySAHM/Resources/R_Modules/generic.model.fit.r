@@ -220,6 +220,7 @@ on.exit(detach(out$input))
  }
  
 if(Model=="rf"){
+browser()
           if(out$input$PsdoAbs){
           num.splits<-floor(sum(out$dat$ma$train$dat$response==0)/sum(out$dat$ma$train$dat$response==1))
               #partition the pseudoabsences as evenly as possible to match the number of presence
@@ -265,7 +266,9 @@ if(Model=="rf"){
                                 votes<-apply(do.call("rbind",lapply(lapply(rf.full,predict,type="vote"),"[",1:n.pres,2)),2,mean)           
                                 #these should be oob votes for the absence in a fairly random order       
                                 votes<-c(votes,as.vector(unlist(lapply(lapply(rf.full,predict,type="vote"),"[",-c(1:n.pres),2)))[order(Split)]) 
-                                 #discritizing the votes ta
+                                 	votes[votes==1]<-max(votes[votes<1])
+	                                votes[votes==0]<-min(votes[votes>0]) #from the original SAHM these can't be equal to 0 or 1 otherwise deviance can't be caluclated
+	                                #though I'm not sure deviance makes sense for RF anyway
                                  response<-c(0,1)[factor(votes>.5)]
                                  #response<-apply(do.call("rbind",lapply(lapply(lapply(rf.full,predict,type="response"),"[",1:n.pres),function(lst){as.numeric(as.character(lst))})),2,mean)           
                                 #these should be oob votes for the absence in a fairly random order       

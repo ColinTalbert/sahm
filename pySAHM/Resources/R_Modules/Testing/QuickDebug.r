@@ -63,6 +63,8 @@ FitModels(ma.name=input.file,
 
 set.seed(1)
 proximity=NULL
+input.file="J:\\Projects\\buffelgrass\\suitability\\greaterPhoenixTusconArea\\visTrails\\MergedDataset_1.csv" 
+mes=TRUE o="J:\Projects\buffelgrass\suitability\greaterPhoenixTusconArea\visTrails\rf_4" rc=responseBinary
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,
@@ -71,7 +73,7 @@ FitModels(ma.name=input.file,
 responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
 samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
 localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=proximity,norm.votes=TRUE,
-do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=TRUE,pseudoabsence=TRUE)
+do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=TRUE)
 
 #BRT
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\modelSelection_split_5.csv"
