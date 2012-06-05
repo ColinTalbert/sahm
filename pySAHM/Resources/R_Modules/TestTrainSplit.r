@@ -252,18 +252,15 @@ set.seed(as.numeric(seed))
     	argSplit <- strsplit(arg, "=")
     	argSplit[[1]][1]
     	argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="p") trainProp <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="m") RatioPresAbs <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="p") trainProp <- as.numeric(argSplit[[1]][2])
+    	if(argSplit[[1]][1]=="m") RatioPresAbs <- as.numeric(argSplit[[1]][2])
     	if(argSplit[[1]][1]=="o") output.file <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="i") infil <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="es") Eval.Split <- argSplit[[1]][2]
-   		if(argSplit[[1]][1]=="seed")  seed <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="es") Eval.Split <- as.logical(argSplit[[1]][2])
+   		if(argSplit[[1]][1]=="seed")  seed <- as.numeric(argSplit[[1]][2])
     }
 
-    RatioResAbs<-as.numeric(RatioPresAbs)
-    trainProp<-as.numeric(trainProp)
-    Eval.Split=as.logical(Eval.Split)
 	#Run the Test training split with these parameters
 	TestTrainSplit(input.file=infil,output.file=output.file,response.col=responseCol,
   trainProp=trainProp,RatioPresAbs=RatioPresAbs,Eval.Split=Eval.Split,seed=seed)
