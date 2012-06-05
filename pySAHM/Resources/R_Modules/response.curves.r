@@ -119,7 +119,10 @@ if(Model=="rf"){
                     }
                 for(i in 1:length(r.curves$names)){
                         assign("i",i,envir=.GlobalEnv)
-                                x<-partialPlot(out$mods$final.mod,out$dat$Subset$dat,r.curves$names[i],n.pt=50,plot=T,main="",
+                               x<-RFResponseCurve(out$mods$final.mod,out$dat$Subset$dat,r.curves$names[i],n.pt=50,plot=T,main="",
+                                        xlab=r.curves$names[i])
+                                        
+                                x<-partialPlot(out$mods$final.mod[[1]],out$dat$Subset$dat,r.curves$names[i],n.pt=50,plot=T,main="",
                                         xlab=r.curves$names[i])
                             r.curves$preds[[i]] <- x$x
                             r.curves$resp[[i]] <- x$y

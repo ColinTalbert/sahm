@@ -78,7 +78,7 @@ zlim<-c(min(unlist(lapply(Stats,function(lst){100*lst$Cmx/sum(lst$Cmx)}))),max(u
          mtext(paste("Pct Correctly Classified: ",signif(Stats[[i]]$Pcc,digits=3),
          "          Sensitivity: ",signif(Stats[[i]]$Sens,digits=3),
          "\n                Specificity:   ",signif(Stats[[i]]$Specf,digits=3),
-         "    Cohen's Kappa: ",signif(Stats[[i]]$Kappa,digits=3),sep=""),side=1,line=4,cex=1.1)
+         "    True Skills Stat: ",signif(Stats[[i]]$Tss,digits=3),sep=""),side=1,line=4,cex=1.1)
         box()
     }
   mtext("Observed",1,outer=TRUE,lwd=2,cex=2)
