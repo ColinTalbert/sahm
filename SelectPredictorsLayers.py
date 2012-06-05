@@ -113,6 +113,8 @@ class SelectListDialog(QtGui.QDialog):
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.verticalLayout.addWidget(self.label_2)
         self.treeview = QtGui.QTreeWidget(self.widget)
+        self.treeview.setToolTip(_fromUtf8("Double click to view detailed information for single covariate."))
+        self.treeview.setHeaderLabels(['include', 'covariate'])
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -199,10 +201,8 @@ class SelectListDialog(QtGui.QDialog):
         self.horizontalLayout_5.addWidget(self.btnRunR)
         self.verticalLayout.addLayout(self.horizontalLayout_5)
         
-        self.scene = QtGui.QGraphicsScene() 
-        self.view = QtGui.QGraphicsView(self.scene)
-        #self.view = customGraphicsView(self.scene)
-        self.view.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
+        
+        self.view = utils.InteractiveQGraphicsView(self)
         
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(4)
@@ -260,14 +260,16 @@ class SelectListDialog(QtGui.QDialog):
         self.connect(self.btnCancel, QtCore.SIGNAL('clicked(bool)'),
                      self.cancel)
         self.connect(self.btnRunR, QtCore.SIGNAL('clicked(bool)'),
-                     self.updateROutput)
+                     self.update_pairs_plot)
         self.connect(self.lineEdit, QtCore.SIGNAL('textChanged(QString)'),
                      self.thresholdEdit)
         self.connect(self.numPlots, QtCore.SIGNAL('textChanged(QString)'),
              self.numPlotsEdit)
+        
+        self.connect(self.treeview, QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem*, int)'), self.on_item_doublclick)
 
         
-        self.scene.wheelEvent = self.wheel_event
+        
         #code to populate the treeview with the contents of our MDS
         self.PopulateTreeview()
         
@@ -275,8 +277,31 @@ class SelectListDialog(QtGui.QDialog):
         self.repaint()
 
         #code to add in pictureviewer stuff
-        outputPic = self.runR(self.inputMDS)
-        self.load_picture(outputPic)
+        outputPic = self.make_new_pairs_plot(self.inputMDS)
+        self.view.load_picture(outputPic)
+        
+        
+    def on_item_doublclick(self, item, column):
+        output_dir = os.path.join(self.outputDir, "PredictorInspections")
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+            
+        outputPic = self.make_new_covariate_plot(output_dir, str(item.text(0)))
+        self.popup = QtGui.QDialog()
+#        self.popup.setBaseSize(1200, 1200)
+        size = 800
+        self.popup.resize(size, size)
+        
+        viewWindow = utils.InteractiveQGraphicsView(self.popup)
+        viewWindow.resize(size, size)
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(viewWindow)
+        self.popup.setLayout(layout)
+        viewWindow.load_picture(outputPic)
+        viewWindow.view_current()
+        
+        retVal = self.popup.exec_()
+        
         
     def okTriggered(self):
         self.SaveMDSFromTreeview()
@@ -378,12 +403,12 @@ class SelectListDialog(QtGui.QDialog):
             writer.writerow(row)
         oFile.close
 
-    def updateROutput(self):
+    def update_pairs_plot(self):
         self.SaveMDSFromTreeview()
-        outputPic = self.runR(self.outputMDS)
-        self.load_picture(outputPic)
+        outputPic = self.make_new_pairs_plot(self.outputMDS)
+        self.view.load_picture(outputPic)
         
-    def runR(self, MDSfile):
+    def make_new_pairs_plot(self, MDSfile):
 #        
 #        program = os.path.join(self.rPath, "i386", "Rterm.exe") 
 #        script = os.path.join(utils.getModelsPath(), "PairsExplore.r")
@@ -440,47 +465,40 @@ class SelectListDialog(QtGui.QDialog):
             writetolog("Missing output from R processing: " + self.displayJPEG)
             raise Exception, "Missing output from R processing"
 
-    def load_picture(self, strPicture):
-        self.l_pix = QtGui.QPixmap(strPicture)
-        if self.view.size().width()  <= self.view.size().height(): 
-            self.max_vsize = self.view.size().width() * 0.95
-        else: 
-            self.max_vsize = self.view.size().height() * 0.95
-            
-        self.c_view = self.l_pix.scaled(self.max_vsize, self.max_vsize, 
-                                            QtCore.Qt.KeepAspectRatio, 
-                                            QtCore.Qt.SmoothTransformation) 
-        self.view_current()
-   
-    def view_current(self):
-        size_img = self.c_view.size() 
-        wth, hgt = QtCore.QSize.width(size_img), QtCore.QSize.height(size_img) 
-        self.scene.clear() 
-        self.scene.setSceneRect(0, 0, wth, hgt) 
-        self.scene.addPixmap(self.c_view) 
-        QtCore.QCoreApplication.processEvents() 
+    def make_new_covariate_plot(self, output_dir, covariate):
+        output_fname = os.path.join(output_dir, covariate + ".jpg")
         
-
-    def wheel_event (self, event):
-        numDegrees = event.delta() / 8 
-        numSteps = numDegrees / 15.0 
-        self.zoom(numSteps) 
-        event.accept() 
-
-    def zoom(self, step):
-        zoom_step = 0.06
-        self.scene.clear() 
-        w = self.c_view.size().width() 
-        h = self.c_view.size().height() 
-        w, h = w * (1 + zoom_step*step), h * (1 + zoom_step*step) 
-        self.c_view = self.l_pix.scaled(w, h, 
-                                            QtCore.Qt.KeepAspectRatio, 
-                                            QtCore.Qt.SmoothTransformation) 
-        self.view_current() 
-
+        args = "i=" + '"' + self.inputMDS + '"' 
+        args += " o=" + '"' + output_dir + '"' 
+        args += " rc=" + self.responseCol
+        args += " p=" + covariate
+        
+        if self.chkPresence.checkState() == QtCore.Qt.Checked:
+            args += " pres=TRUE"
+        else:
+            args += " pres=FALSE"
+            
+        if self.chkAbsence.checkState() == QtCore.Qt.Checked:
+            args += " absn=TRUE"
+        else:
+            args += " absn=FALSE"
+            
+        if self.chkBackground.checkState() == QtCore.Qt.Checked:
+            args += " bgd=TRUE"
+        else:
+            args += " bgd=FALSE"
+        
+        if os.path.exists(output_fname):
+            os.remove(output_fname)
+            
+        utils.runRScript('Predictor.inspection.r', args)
+        
+        if os.path.exists(output_fname):
+            return output_fname
+        else:
+            writetolog("Missing output from R processing: " + self.displayJPEG)
+            raise Exception, "Missing output from R processing"
+        
     def closeEvent(self, event):
         self.cancel()
-        
-    def resizeEvent(self, event):
-        self.load_picture(self.displayJPEG)
 

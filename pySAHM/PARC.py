@@ -153,8 +153,13 @@ class PARC:
         # Clip and reproject each source image.
         for image in self.inputs:
             inPath, inFileName = os.path.split(image[0])
-            outFile, ext = os.path.splitext(inFileName) 
-            outFile = os.path.join(self.out_dir, outFile + ".tif")
+                            
+            outFile, ext = os.path.splitext(inFileName)
+            if outFile[0].isdigit():
+                outFile = os.path.join(self.out_dir, "_" + outFile + ".tif")
+            else:
+                outFile = os.path.join(self.out_dir, outFile + ".tif")
+                
             shortname = (os.path.split(outFile)[1])
             
             if os.path.exists(outFile):
@@ -491,7 +496,8 @@ class PARC:
 #                    ans = ndMask.mean()
             
             
-        
+        outBand.FlushCache()
+        outBand.GetStatistics(0, 1)
         
         
         dst_ds = None
@@ -884,6 +890,10 @@ class PARC:
                 row[0] = inputFile
                 input_just_file = os.path.split(inputFile)[1]
                 
+            if input_just_file[0].isdigit():
+                row[0] = os.path.join(os.path.split(inputFile)[0], "_" + input_just_file)
+
+                
             if input_just_file in inputs:
                 strInputFileErrors += "\n  PARC not currently set up to handle identically named inputs."
                 strInputFileErrors += "\n\t" + input_just_file + " used multiple times"
@@ -975,9 +985,13 @@ class PARC:
         tmpOutDataset = None
 
     def calc_stats(self, filename):
-        dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
+        print filename
+        dataset = gdal.Open(filename, gdalconst.GA_Update)
         band = dataset.GetRasterBand(1)
+        band.FlushCache()
         band.GetStatistics(0,1)
+        histogram = band.GetDefaultHistogram()
+        band.SetDefaultHistogram(histogram[0], histogram[1], histogram[3])
         
 
     def generateOutputDS(self, sourceParams, templateParams, 

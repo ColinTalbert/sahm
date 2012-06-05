@@ -54,7 +54,8 @@ class ResponseType(String):
     _input_ports = [('value', '(gov.usgs.sahm:ResponseType:Other)')]
     _output_ports = [('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
     _widget_class = build_enum_widget('ResponseType', 
-                                      ['Presence(Absence)','Count'])
+                                      ['Presence(Absence)',
+                                       'Count'])
 
     @staticmethod
     def get_widget_class():
