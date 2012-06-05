@@ -51,11 +51,9 @@ import shutil
 import numpy as np
 import scipy.stats.stats as stats 
 
-from osgeo import gdalconst
-from osgeo import gdal
-
 from optparse import OptionParser
 import utilities
+import SpatialUtilities
 #from Utilities import self.writetolog
 
 class MDSBuilder(object):
@@ -71,7 +69,8 @@ class MDSBuilder(object):
         self.fieldData = ''
         self.outputMDS = ''
         self.pointType = 'Background'
-        self.probSurface = ''
+        self.probSurfacefName = ''
+        self.probSurface = None
         self.pointCount = 0
         self.ndFlag = 'NA'
         self.seed = None
@@ -104,7 +103,7 @@ class MDSBuilder(object):
             header = reader.next()
             missingFiles = []
             for row in reader:
-                if not self.isRaster(row[0]):
+                if not SpatialUtilities.isRaster(row[0]):
                     missingFiles.append(row[0])
             if not len(missingFiles) ==0:
                 msg = "One or more of the files in the input covariate list CSV could not be identified as rasters by GDAL."
@@ -112,16 +111,18 @@ class MDSBuilder(object):
                 raise RuntimeError, msg
             
         #4) if a propSurface file was supplied it exists
-        if self.probSurface <> '':
-            if not self.isRaster(self.probSurface):
-                raise RuntimeError, "The supplied probability surface, " + self.probSurface + ", does not appear to be a valid raster."
+        if self.probSurfacefName <> '':
+            if not SpatialUtilies.isRaster(self.probSurfacefName):
+                raise RuntimeError, "The supplied probability surface, " + self.probSurfacefName + ", does not appear to be a valid raster."
+            else:
+                self.probSurface = SpatialUtilities.SAHMRaster(self.probSurfacefName)
         
         #5) if point count supplied its an integer greater than 0
         try:
             self.pointCount = int(self.pointCount)
         except:
             raise RuntimeError, "The supplied point count parameter, " + self.pointCount +", does not appear to be an integer "
-        if not self.pointCount > 0:
+        if not self.pointCount >= 0:
             raise RuntimeError, "The supplied point count parameter, " + self.pointCount +", must be greater than 0" 
         
         #6) output directory exists
@@ -143,12 +144,10 @@ class MDSBuilder(object):
         self.writetolog('\nRunning MDSBuilder', True, True)
         # start timing
         startTime = time.time()
-        gdal.UseExceptions()
-        gdal.AllRegister()
         
         self.constructEmptyMDS()
         
-        if self.pointCount <> 0:
+        if self.pointCount > 0:
             self.addBackgroundPoints()
         
         if self.fieldData != '':
@@ -332,17 +331,17 @@ class MDSBuilder(object):
         Each found pixel will be written to a new row in our temp output file 
         as it's found.
         '''
-        if self.probSurface != '':
-            probRaster = SAHMRaster(self.probSurface)
+        if self.probSurface:
+            probRaster = self.probSurface
             useProbSurf = True
         else:
-            probRaster = SAHMRaster(self.inputs[0])
+            probRaster = SpatialUtilities.SAHMRaster(self.inputs[0])
             useProbSurf = False
         
         if self.verbose:
             self.writetolog('    Starting generation of ' + str(self.pointCount) + ' random background points, ')
-            if self.probSurface <> '':
-                self.writetolog('      using ' + self.probSurface + ' as the probability surface.')
+            if not self.probSurface is None:
+                self.writetolog('      using ' + self.probSurfacefName + ' as the probability surface.')
             print "    Percent Done:    ",
         
         triedPixels = set()  #all the pixels we've tried.
@@ -382,9 +381,9 @@ class MDSBuilder(object):
         sample a large proportion of the total number of cells.  
         Either they have a small template or a large number of points.
         """
-        probsurf = SAHMRaster(self.inputs[0])
-        rows = int(probsurf.params["height"])
-        cols = int(probsurf.params["width"])
+        probsurf = SpatialUtilities.SAHMRaster(self.inputs[0])
+        rows = int(probsurf.height)
+        cols = int(probsurf.width)
         
         cellIndices = np.arange(cols * rows)
         
@@ -399,8 +398,8 @@ class MDSBuilder(object):
     def pullBackgroundTiledWithProbSurface(self, fOut, pointVal):
         probRaster = SAHMRaster(self.probSurface)
           
-        rows = int(probRaster.params["height"])
-        cols = int(probRaster.params["width"])
+        rows = int(probRaster.height)
+        cols = int(probRaster.width)
           
 #        outDir = os.path.split(self.outputMDS)[0] 
 #        tmpOutput = os.path.join(outDir,  + "tmp_classified_prob.tif")
@@ -428,7 +427,7 @@ class MDSBuilder(object):
                     numCols = cols - j
                 
                 data = probRaster.band.ReadAsArray(j, i, numCols, numRows)
-                data[data==probRaster.params["NoData"]] = 0
+                data[data==probRaster.NoData] = 0
                 randomVals = np.random.rand(numRows, numCols)*100
                 
                 successes = np.where(data>randomVals)
@@ -451,18 +450,7 @@ class MDSBuilder(object):
         #extracted values to
         badpoints = []
         for input in self.inputs:
-            inputND = self.getND(input)
-            rasterDS = gdal.Open(input, gdalconst.GA_ReadOnly)
-            # get image size
-            rows = rasterDS.RasterYSize
-            cols = rasterDS.RasterXSize
-            band = rasterDS.GetRasterBand(1)
-            # get georeference info
-            transform = rasterDS.GetGeoTransform()
-            xOrigin = transform[0]
-            yOrigin = transform[3]
-            pixelWidth = transform[1]
-            pixelHeight = transform[5]
+            inputRaster = SpatialUtilities.SAHMRaster(input)
             
             if self.verbose:
                 self.writetolog("    Extracting raster values for " + input)
@@ -474,20 +462,15 @@ class MDSBuilder(object):
                 'loop through each of our points'
                 x = float(row[0])
                 y = float(row[1])
-#                if 
-                # compute pixel offset
-                xOffset = int((x - xOrigin) / pixelWidth)
-                yOffset = int((y - yOrigin) / pixelHeight)
-#                try:
-                if xOffset < 0 or yOffset < 0:
+
+                if not inputRaster.pointInExtent(x, y):
                     if row[:3] not in badpoints:
                         badpoints.append(row[:3])
                     row.append(str(self.ndFlag))
                 else:
                     try:
-                        data = band.ReadAsArray(xOffset, yOffset, 1, 1)
-                        value = data[0,0]
-                        if value <> inputND and not np.isnan(value):
+                        value = inputRaster.getPixelValueFromCoords(x, y)
+                        if value <> inputRaster.NoData and not np.isnan(value):
                             row.append(value)
                         else:
                             row.append(str(self.ndFlag))
@@ -501,9 +484,9 @@ class MDSBuilder(object):
                         print str(pcntDone) + "...",
                 i += 1
                 
-            
             if self.verbose:
                 self.writetolog("    Done")
+                
         if len(badpoints) > 0:
                 msg =  "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
                 msg += "\n!!!!!!!!!!!!!!!!!!!!!WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
@@ -520,7 +503,6 @@ class MDSBuilder(object):
         thrownOut = 0
         kept = 0
         for row in outputRows:
-            #remove this if when Marian handles the ND
             if self.hasWeight:
                 #move the weight value to the end of our list
                 weight = row[3]
@@ -545,12 +527,10 @@ class MDSBuilder(object):
         
         #convert the mds csv to a shapefile
         output_shp = self.outputMDS.replace(".csv", "_shapefiles")
-        utilities.mds_to_shape(self.outputMDS, output_shp)
-        
-
+        SpatialUtilities.mds_to_shape(self.outputMDS, output_shp)
         
         if self.deleteTemp:
-            #if this flag is trud the field data we're working with is 
+            #if this flag is true the field data we're working with is 
             # a temporary copy which we created so that we could add
             # background points.  Delete it to clean up our working file.
             os.remove(self.fieldData)
@@ -565,58 +545,17 @@ class MDSBuilder(object):
         rasters = []
         dirList = os.listdir(directory)
         for file in [elem for elem in dirList if elem[-4:].lower() == ".tif"]:
-            if isRaster(os.path.join(directory, file)):
+            if SpatialUtilites.isRaster(os.path.join(directory, file)):
                 rasters.append(os.path.join(directory, file))
         for file in [elem for elem in dirList if elem[-4:].lower() == ".asc"]:
-            if isRaster(os.path.join(directory,file)):
+            if SpatialUtilities.isRaster(os.path.join(directory,file)):
                 rasters.append(os.path.join(directory, file))
         for folder in [name for name in dirList 
                        if os.path.isdir(os.path.join(directory, name)) ]:
-            if isRaster(os.path.join(directory, folder)):
+            if SpatialUtilities.isRaster(os.path.join(directory, folder)):
                 rasters.append(os.path.join(directory, folder))
     
         return rasters
-    
-    def isRaster(self, filePath):
-        '''Verifies that a passed file and path is recognized by
-        GDAL as a raster file.
-        '''
-        try:
-            dataset = gdal.Open(filePath, gdalconst.GA_ReadOnly)
-            if dataset is None:
-                return False
-            else:
-                return True
-                del dataset
-        except:
-            return False
-        
-    def getND(self, raster):
-        dataset = gdal.Open(raster, gdalconst.GA_ReadOnly)
-        ND = dataset.GetRasterBand(1).GetNoDataValue()
-        if ND is None:
-            if dataset.GetRasterBand(1).DataType == 1:
-                print "Warning:  Could not extract NoData value.  Using assumed nodata value of 255"
-                return 255
-            elif dataset.GetRasterBand(1).DataType == 2:
-                print "Warning:  Could not extract NoData value.  Using assumed nodata value of 65536"
-                return 65536
-            elif dataset.GetRasterBand(1).DataType == 3:
-                print "Warning:  Could not extract NoData value.  Using assumed nodata value of 32767"
-                return 32767
-            elif dataset.GetRasterBand(1).DataType == 4:
-                print "Warning:  Could not extract NoData value.  Using assumed nodata value of 2147483647"
-                return 2147483647
-            elif dataset.GetRasterBand(1).DataType == 5:
-                print "Warning:  Could not extract NoData value.  Using assumed nodata value of 2147483647"
-                return 2147483647
-            elif dataset.GetRasterBand(1).DataType == 6:
-                print "Warning:  Could not extract NoData value.  Using assumed nodata value of -3.40282346639e+038"
-                return -3.40282346639e+038
-            else:
-                return None
-        else:
-            return ND
 
     def estimatePointsToCheck(self):
         """calculate the expected number of points we will have 
@@ -624,12 +563,11 @@ class MDSBuilder(object):
         
         return integer 
         """
-        if self.probSurface == '':
+        if not self.probSurface:
             #everypoint is included
             return self.pointCount
         else:
-            probsurfaceDS = gdal.Open(self.probSurface, gdalconst.GA_ReadOnly)
-            ave_prob = self.getMeanProb(probsurfaceDS)
+            ave_prob = self.getMeanProb(self.probSurface)
             #  The 1.1 is a 10% fudge factor.
             return int(1.0/ave_prob * self.pointCount * 1.1) 
 
@@ -641,12 +579,12 @@ class MDSBuilder(object):
         '''
 
         #step2 calculate the expected maximum number of points available
-        if self.probSurface == '':
-            probparams = utilities.getRasterParams(self, self.inputs[0])
+        if self.probSurface is None:
+            probSurface = SpatialUtilities.SAHMRaster(self.inputs[0])
             aveProb = 100
         else:
-            probparams = utilities.getRasterParams(self, self.probSurface)
-            aveProb = self.getMeanProb(self.probSurface)
+            probSurface = self.probSurface
+            aveProb = self.getMeanProb(probSurface)
             
         if aveProb < 1.0:
             msg = "WARNING:  This function expects rasters scaled from 0 to 100.\n"
@@ -660,7 +598,7 @@ class MDSBuilder(object):
             msg += " is greater than 100. This might indicate an input that is not scaled appropriately."
             self.writetolog(msg, True, True)
              
-        max_points = aveProb/100 * probparams["width"] * probparams["height"]
+        max_points = aveProb/100 * probSurface.width * probSurface.height
         
         #Check if our expected number of points is over or approaching
         #the number of available cells
@@ -668,7 +606,7 @@ class MDSBuilder(object):
             msg = "The number of random background points, " + str(self.pointCount)
             msg += " exceeds the expected number of available points given the specified probability surface. "
             msg += "\n" + self.probSurface + " has an average pixel probability of " + str(aveProb) + ".\n"
-            msg += "Which when multiplied by the cell dimensions of " + str(probparams["width"]) + " x " + str(probparams["height"])
+            msg += "Which when multiplied by the cell dimensions of " + str(probSurface.width) + " x " + str(probSurface.height)
             msg += " results in an expected maximum number of available random points of " + str(max_points)
             msg += "\n\nTry either reducing the number of background points or using a less restrictive probability surface\n"
             raise RuntimeError, msg
@@ -677,14 +615,14 @@ class MDSBuilder(object):
             msg += " is greater than 50% the expected number of available points given the specified probability surface. "
             msg += "\n" + self.probSurface + " has an average pixel probability of " + str(aveProb) + ".\n"
             msg += "Which when multiplied by the cell dimensions of " 
-            msg += str(probparams["width"]) + " x " + str(probparams["height"])
+            msg += str(probSurface.width) + " x " + str(probSurface.height)
             msg += " results in an expected maximum number of available random points of " + str(max_points)
             msg += "\n\n processing time and memory use could be excessive and problematic.\n" 
             self.writetolog(msg, True, True)
 
         return self.pointCount / float(max_points)
             
-    def getMeanProb(self, inputRaster):
+    def getMeanProb(self, sRaster):
         """Calculate the mean probability (value) for a raster.
         
         return float.
@@ -692,11 +630,8 @@ class MDSBuilder(object):
         arguments:
         probSurfaceDS    --  GDAL raster dataset
         """
-        DS = gdal.Open(inputRaster, gdalconst.GA_ReadOnly)
-        band = DS.GetRasterBand(1)
-        probParams = utilities.getRasterParams(self, inputRaster)
-        rows = int(probParams["height"])
-        cols = int(probParams["width"])
+        rows = int(sRaster.height)
+        cols = int(sRaster.width)
           
         bSize = 1024 #pixels per block
         fullPixelCount = bSize * bSize  #number of pixels in one block
@@ -718,8 +653,8 @@ class MDSBuilder(object):
                 else:
                     numCols = cols - j
                 
-                data = band.ReadAsArray(j, i, numCols, numRows)
-                data[data==probParams["NoData"]] = 0
+                data = sRaster.band.ReadAsArray(j, i, numCols, numRows)
+                data[data==sRaster.NoData] = 0
                 
                 avs.append(np.average(data))
                 wts.append(data.size / float(fullPixelCount))
@@ -752,40 +687,7 @@ class MDSBuilder(object):
 #            #every possible cell
 #            all_cells = np.arange(xCount * yCount)
 
-class SAHMRaster():
 
-    def __init__(self, rasterFile):
-        self.source = rasterFile
-        self.params = utilities.getRasterParams(self, rasterFile)
-        self.DS = gdal.Open(rasterFile, gdalconst.GA_ReadOnly)
-        self.band = self.DS.GetRasterBand(1)
-        
-    def getRandomPixel(self):
-        col = random.randint(0, self.params["width"] - 1) 
-        row = random.randint(0, self.params["height"] - 1)
-        return col, row
-    
-    def convertColRowToCoords(self, col, row, pixelCenter=True):
-        x = self.params["west"] + col * self.params["xScale"]
-        
-        y = self.params["north"] + row * self.params["yScale"]
-        
-        if pixelCenter:
-            x += self.params["xScale"] / 2.0
-            y += self.params["yScale"] / 2.0
-        return x, y
-        
-    def convertCoordsToColRow(self, x, y):
-        row = x/self.params["xScale"] - self.params["west"]
-        col = y/self.params["yScale"] - self.params["north"]
-        return col, row
-    
-    def getPixelValueFromIndex(self, col, row):
-        return self.band.ReadAsArray(col, row, 1, 1)[0,0]
-    
-    def getPixelValueFromCoords(self, x, y):
-        col, row = self.convertCoordsToColRow(x, y)
-        return self.getPixelValueFromIndex(col, row)
 
          
 def main(argv):

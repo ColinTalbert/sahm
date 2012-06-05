@@ -572,7 +572,7 @@ class Model(Module):
             if not "seed" in self.argsDict.keys():
                 self.argsDict['seed'] = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
             writetolog("    seed used for " + self.ModelAbbrev + " = " + str(self.argsDict['seed']))
-            self.args += " seed=" + str(str(self.argsDict['seed']))
+
         
         for k, v in self.argsDict.iteritems():
             if k == 'c':
@@ -835,7 +835,7 @@ class MDSBuilder(Module):
         port_map = {'fieldData': ('fieldData', None, False),
                     'backgroundPointType': ('pointtype', None, False),
                     'backgroundpointCount': ('pointCount', None, False),
-                    'backgroundProbSurf': ('probSurface', None, False),
+                    'backgroundProbSurf': ('probSurfacefName', None, False),
                     'Seed': ('seed', None, False)}
         
         MDSParams = utils.map_ports(self, port_map)            
@@ -1092,7 +1092,7 @@ class FieldDataAggregateAndWeight(Module):
     
     def compute(self):
         writetolog("\nFieldDataAggregateAndWeight", True)
-        port_map = {'templateLayer': ('template', None, True),
+        port_map = {'templateLayer': ('templatefName', None, True),
             'fieldData': ('csv', None, True),
             'PointAggregationOrWeightMethod': ('aggMethod', None, True),
             'SDofGaussianKernel': ('sd', None, False),
@@ -1341,7 +1341,7 @@ class ModelSelectionSplit(Module):
     
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('trainingProportion', '(edu.utah.sci.vistrails.basic:Float)', 
-                        {'defaults':'0.7'}),
+                        {'defaults':'["0.7"]'}),
                     ('RatioPresAbs', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
@@ -2030,3 +2030,14 @@ _modules = generate_namespaces({'DataInput': [
                                                            'moduleFringe':output_fringe})
                                           ]
                                 })
+
+#from core.upgradeworkflow import UpgradeWorkflowHandler
+#
+#def handle_module_upgrade_request(controller, module_id, pipeline):
+#    module_remap = {'Tools|MDSBuilder':
+#                     [(None, '1.0.1', 'Tools|MDSBuilder', 
+#                          {'dst_port_remap': {'backgroundpointCount': 'backgroundPointCount'} })]}
+#    
+#    return UpgradeWorkflowHandler.remap_module(controller, module_id, 
+#                                               pipeline, module_remap)
+
