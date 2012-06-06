@@ -57,16 +57,15 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
       #adding the option to have a threshold set instead of using just presence/absence
       #this subsamples data to improve running speed this along with weights set in glm/gam to improve output inspection
       #makes the gam/glm only really appropriate for looking at the relationship between the predictor and response
+      #modified to output a csv with % deviance explained so Colin can display in his widget
+      #modified to remove incomplete cases on a pair by pair basis (when calculating correlations) and a pair by pair basis otherwise
+      #no longer removes all incomplete rows
       #Written by Marian Talbert 2011
      
        if(is.na(match("gam",installed.packages()[,1]))) {
              install.packages("gam",repos="http://lib.stat.cmu.edu/R/CRAN")
             }
         library(gam)    
-      absn<-as.logical(absn)
-      pres<-as.logical(pres)
-      bgd<-as.logical(bgd)
-      cors.w.highest<-as.logical(cors.w.highest)
       
    #Read input data and remove any columns to be excluded
     dat<-read.csv(input.file,skip=3,header=FALSE)
@@ -81,36 +80,35 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
           include<-(as.numeric(tif.info[[2]]))
           options(warn=1)
   #Remove coordinates, response column, site.weights
-  #before exploring predictor relationship 
+  #before exploring predictor relationship COLUMNS 
     rm.cols <- as.vector(na.omit(c(match("x",tolower(names(dat))),match("y",tolower(names(dat))),
     match("site.weights",tolower(names(dat))),match(tolower(response.col),tolower(names(dat))),match("Split",names(dat)),match("EvalSplit",names(dat)))))
    
-     #remove testing split
+     #remove testing split ROWS
      if(!is.na(match("EvalSplit",names(dat)))) dat<-dat[-c(which(dat$EvalSplit=="test"),arr.ind=TRUE),]
     if(!is.na(match("Split",names(dat)))) dat<-dat[-c(which(dat$Split=="test"),arr.ind=TRUE),]
     include[is.na(include)]<-0
-    rm.cols<-unique(c(rm.cols,which(include==0,arr.ind=TRUE)))
+    
     response<-dat[,match(tolower(response.col),tolower(names(dat)))]
           if(any(response==-9998)) {
            response[response==-9998]<-0
            }
        dat<-dat[order(response),]
        response<-response[order(response)]
-
+       #the deviance calculation requires even columns which will be removed for the pairs explore
+       #but to get the same answer for the plot I need the same subsample
+       for.dev<-list(dat=dat[-c(rm.cols)],response=response)
+ 
+       rm.cols<-unique(c(rm.cols,which(include==0,arr.ind=TRUE)))
+        
        #for the purpose of the pairs plot, taking all counts greater than 1 and setting them equal to presence
        #this is never exported
       if(response.col=="responseCount") {response[response>=1]<-1
       }
-      
-    #remove any of pres absn or bgd that aren't desired
-     temp<-c(0,1,-9999)
-     temp<-temp[c(absn,pres,bgd)]
-     dat<-dat[response%in%temp,]
-     response<-response[response%in%temp]
-        
-        dat<-dat[-rm.cols]
-     dat[dat==-9999]<-NA
-     missing.summary<-1-apply(apply(dat,2,complete.cases),2,sum)/nrow(dat)
+   
+        dat<-dat[,-rm.cols]
+        dat[dat==-9999]<-NA
+   
 
      response.table<-table(response)
      max.points<-1500
@@ -119,23 +117,34 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
              s<-sample(which(response==i,arr.ind=TRUE),size=(sum(response==i)- max.points))
              dat<-dat[-c(s),]
              response<-response[-c(s)]
+            for.dev[[1]]<-for.dev[[1]][-c(s),] 
+            for.dev[[2]]<-for.dev[[2]][-c(s)] 
        }
      }
+      
+      devExp<-vector()
+      if(any(for.dev$response==-9999)) for.dev$response[for.dev$response==-9999]<-0
+       for(i in (1:ncol(for.dev$dat))){
+            devExp[i]<-my.panel.smooth(for.dev$dat[,i], for.dev$response,plot.it=FALSE)
+           }
+          write.csv(as.data.frame(devExp,row.names=names(for.dev[[1]])), file = paste(dirname(output.file),"devInfo.csv",sep="/"))
 
    if (response.col=="responseCount") {
     TrueResponse<-dat[,match(tolower(response.col),tolower(names(dat)))]
     } else TrueResponse<-response
 
-    #now remove all columns except predictors  
-      response<-response[complete.cases(dat)]
-      TrueResponse<-TrueResponse[complete.cases(dat)]
-     dat<-dat[complete.cases(dat),]
+    #remove any of pres absn or bgd that aren't desired
+     temp<-c(0,1,-9999)
+     temp<-temp[c(absn,pres,bgd)]
+     dat<-dat[response%in%temp,]
+     response<-response[response%in%temp]
+
+  missing.summary<-1-apply(apply(dat,2,complete.cases),2,sum)/nrow(dat)
 
   #Remove columns with only one unique value
-      varr <- function(x) var(x,na.rm=TRUE)
-      
-    dat<-try(dat[,as.vector(apply(dat,2,varr)==0)!=1],silent=TRUE)
+    dat<-try(dat[,as.vector(apply(dat,2,var,na.rm=TRUE)==0)!=1],silent=TRUE)
     if(class(dat)=="try-error") stop("mds file contains nonnumeric columns please remove and continue")
+  
   #record correlations for later plots
 
     cmat<-cor(dat,use="pairwise.complete.obs")
@@ -344,32 +353,30 @@ MyPairs<-function (x,missing.summary,my.labels,labels, panel = points, ..., lowe
             title(main=paste("Total Cor=",my.labels[j],sep=""),line=ifelse(missing.summary[j]>.03,2.2,.04),cex.main=1.1*cex.mult)
             if(missing.summary[j]>.03) mtext(paste(round(missing.summary[j]*100), "% missing",sep=""),side=3,line=.04,cex=cex.mult*.6)
             }
-            #if (i == 1 && (!(j%%2) || !has.upper || !has.lower))
-             #   localAxis(1 + 2 * row1attop, x[, j], x[, i],
-             #   ...)
             if (i == nc)
                 localAxis(3 - 2 * row1attop, x[, j], x[, i],cex.axis=cex.mult*.5,
                   ...)
             if (j == 1 && (i!=1 || !has.upper || !has.lower))
                 localAxis(2, x[, j], x[, i],cex.axis=cex.mult*.5, ...)
-            #if (j == nc && (i%%2 || !has.upper || !has.lower))
-            #    localAxis(4, x[, j], x[, i], ...)
-            mfg <- par("mfg")
-            if (i == j) { 
             
+            mfg <- par("mfg")
+            if (i == j) {
                 if (has.diag)
                   localDiagPanel(as.vector(x[, i]),...)
                 if (has.labs) {
                   par(usr = c(0, 1, 0, 1))
-                  if (is.null(cex.labels)) {
-                    l.wid <- strwidth(labels, "user")
-                    cex.labels <- max(0.8, min(2, 0.9/max(l.wid)))
+                  if(i==1){
+                     for(k in 1:length(labels)){
+                         if((lng<-nchar(labels[k]))>=10) labels[k]<-paste(substr(labels[k],1,10),"\n",substr(labels[k],11,lng),sep="")
+                     }
+                       if (is.null(cex.labels)) {
+                          l.wid <- strwidth(labels, "user")
+                          cex.labels <- max(0.8, min(2, 0.9/max(l.wid)))
+                      }
                   }
-                  if((lng<-nchar(labels[i]))>14)
-                  labels[i]<-paste(substr(labels[i],1,12),"\n",substr(labels[i],13,lng),sep="")
                   text.panel(0.5, label.pos, labels[i], cex = .65*cex.labels*cex.mult,
                     font = font.labels)
-                }
+               }
             }
             else if (i < j)
                   if(length(unique(x[,i])>2)){
