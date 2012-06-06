@@ -57,6 +57,9 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
       #adding the option to have a threshold set instead of using just presence/absence
       #this subsamples data to improve running speed this along with weights set in glm/gam to improve output inspection
       #makes the gam/glm only really appropriate for looking at the relationship between the predictor and response
+      #modified to output a csv with % deviance explained so Colin can display in his widget
+      #modified to remove incomplete cases on a pair by pair basis (when calculating correlations) and a pair by pair basis otherwise
+      #no longer removes all incomplete rows
       #Written by Marian Talbert 2011
      
        if(is.na(match("gam",installed.packages()[,1]))) {
@@ -120,6 +123,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
      }
       
       devExp<-vector()
+      if(any(for.dev$response==-9999)) for.dev$response[for.dev$response==-9999]<-0
        for(i in (1:ncol(for.dev$dat))){
             devExp[i]<-my.panel.smooth(for.dev$dat[,i], for.dev$response,plot.it=FALSE)
            }

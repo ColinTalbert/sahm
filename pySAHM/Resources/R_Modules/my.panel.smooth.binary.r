@@ -5,7 +5,7 @@ my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),
 #similar to a lowess smooth but appropraite for binary response.  Occasionally gam fails or doesn't converge
 #this is indicated by the null deviance being less than the fit deviance.  When this occurs I instead fit a glm
 #Weights have to be set here so that the relationship is clear unfortunately the intercept isn't correct hopefully
-#this won't be needed once weights are accepted
+#this won't be needed once weights are accepted modified to return values for the csv in Colin's widget
 #Written by Marian Talbert 5/22/2012
 
     o<-order(x)
