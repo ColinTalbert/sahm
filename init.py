@@ -763,21 +763,24 @@ class BoostedRegressionTree(Model):
    
 class KDE_generator(Module):
     '''
-    
-    #Written by Marian Talbert 4/5/2012
-    #This function takes a field data file and based on the options specified creates a bias or binary mask for generation of background points
-    #The mask can be based on a KDE function or a minimum convex polygon (method=KDE or MCP) bias specifies that a continuous surface is to be created
-    #This is ignored by method=MCP isopleth specifies the isopleth to be used (a number, generally 95).  It is assumed that the 8th name in the input csv is the name of a template
-    #that can be used.  currently 4 methods are available for optimization of the kde bandwith (bw.otim=adhoc, Hpi,Hscv,Hbcv,Hlscv.
-    #A tiff is generated using the header from the template csv which can be used by the MDS builder to generate background points.
     '''
+    __doc__ = GenModDoc.construct_module_doc('KDE_generator')
+
+    
     _input_ports = [('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
                         ('method', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["KDE"]', 'optional':True}),
                         ('bandwidthOptimizationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["adhoc"]', 'optional':True}),
                         ('isopleth', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["95"]', 'optional':True}),
                         ('bias', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True})]
     _output_ports = [("KDE", "(edu.utah.sci.vistrails.basic:File)")]
-                        
+    
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return GenModDoc.construct_port_doc(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+         return GenModDoc.construct_port_doc(cls, port_name, 'out')
+                         
     def compute(self):
         port_map = {'fieldData': ('fieldData', None, False),
             'method': ('method', None, True),
