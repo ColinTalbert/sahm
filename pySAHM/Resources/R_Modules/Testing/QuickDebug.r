@@ -52,19 +52,19 @@ FitModels(ma.name=input.file,
           tif.dir=NULL,
           output.dir=output.dir,
           response.col=rc,make.p.tif=F,make.binary.tif=F,
-          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=FALSE,PsdoAbs=TRUE)
+          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=FALSE)
 
 FitModels(ma.name=input.file,
           tif.dir=NULL,
           output.dir=output.dir,
           response.col=rc,make.p.tif=F,make.binary.tif=F,
-          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=FALSE,PsdoAbs=FALSE)          
+          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=FALSE)          
 #RF
 
 set.seed(1)
 proximity=NULL
 input.file="J:\\Projects\\buffelgrass\\suitability\\greaterPhoenixTusconArea\\visTrails\\MergedDataset_1.csv" 
-mes=TRUE o="J:\Projects\buffelgrass\suitability\greaterPhoenixTusconArea\visTrails\rf_4" rc=responseBinary
+
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,

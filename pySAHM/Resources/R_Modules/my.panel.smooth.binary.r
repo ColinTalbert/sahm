@@ -1,5 +1,5 @@
 my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),
-    cex = 1, col.smooth = "red", span = 2/3, iter = 3, weights=rep(1,times=length(y)),cex.mult,Ylab,...)
+    cex = 1, col.smooth = "red", span = 2/3, iter = 3, weights=rep(1,times=length(y)),cex.mult,Ylab,plot.it=TRUE,...)
 {
 #This function fits a gam to show the relationship between a binary response and the specified predictor
 #similar to a lowess smooth but appropraite for binary response.  Occasionally gam fails or doesn't converge
@@ -25,9 +25,12 @@ my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),
         y.fit<-predict.gam(g,type="response")
         gam.failed=FALSE
     }
-    points(x, y, pch = pch,bg=c("blue","red")[factor(y,levels=c(0,1))],col=c("blue4","red4")[factor(y,levels=c(0,1))],cex = cex*cex.mult)
-        segments(x0=x[1:(length(x)-1)],y0=y.fit[1:(length(x)-1)],x1=x[2:length(x)],y1=y.fit[2:length(x)],col="red",cex=3*cex.mult,lwd=cex.mult)
-  if(missing(Ylab)) title(ylab =paste("% dev exp ",round(100*(1-g$dev/g$null.deviance),digits=1),sep=""),...)
-    return(gam.failed)
+    if(plot.it){
+          points(x, y, pch = pch,bg=c("blue","red")[factor(y,levels=c(0,1))],col=c("blue4","red4")[factor(y,levels=c(0,1))],cex = cex*cex.mult)
+          segments(x0=x[1:(length(x)-1)],y0=y.fit[1:(length(x)-1)],x1=x[2:length(x)],y1=y.fit[2:length(x)],col="red",cex=3*cex.mult,lwd=cex.mult)
+          if(missing(Ylab)) title(ylab =paste("% dev exp ",round(100*(1-g$dev/g$null.deviance),digits=1),sep=""),...)
+          return(gam.failed)
+    } else return(100*(1-g$dev/g$null.deviance)) 
+    
 }
 
