@@ -91,7 +91,7 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,pred.fct,factor.le
     if(any(out$mods$vnames%in%names(factor.levels))) vnames.final.mod<-vnames.final.mod[!out$mods$vnames%in%names(factor.levels)]
     nvars.final<-length(vnames.final.mod)
 # settup up output raster to match input raster
-filenames<-sub("_categorical","",names(filenames))
+names(filenames)<-sub("_categorical","",names(filenames))
           fullnames <- as.character(filenames[match(vnames,names(filenames))])
           goodfiles <- file.access(fullnames)==0
           if(!all(goodfiles)) stop(paste("ERROR: the following image files are missing:",paste(fullnames[!goodfiles],collapse=", ")))
