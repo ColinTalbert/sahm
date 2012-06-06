@@ -79,7 +79,8 @@ class EnumWidget(QtGui.QComboBox, ConstantWidgetMixin):
         return str(self.itemText(curIdx))
 
     def setContents(self, strValue, silent=True):
-        curIdx = self.findText(contents)
+#        curIdx = self.findText(contents)
+        curIdx = self.findText(strValue)
         self.setCurrentIndex(curIdx)
         if not silent:
             self.update_parent()

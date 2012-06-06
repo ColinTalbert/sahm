@@ -52,32 +52,32 @@ class PredictorListWidget(QtGui.QTreeWidget):
     
     def __init__(self, p_value, available_tree, parent=None):
         
-        self.resamplingMethods = ["nearestneighbor", 
-                                "bilinear",
-                                "cubic", 
-                                "cubicspline",
-                                "lanczos"]
-
-        self.aggregationMethods = ["Min", 
-                        "Mean",
-                        "Max",
-                        "Majority", 
-                        "None"]
+#        self.resamplingMethods = ["nearestneighbor", 
+#                                "bilinear",
+#                                "cubic", 
+#                                "cubicspline",
+#                                "lanczos"]
+#
+#        self.aggregationMethods = ["Min", 
+#                        "Mean",
+#                        "Max",
+#                        "Majority", 
+#                        "None"]
         
         #print "p_value : ", p_value
         QtGui.QTreeWidget.__init__(self, parent)
         self.available_tree = available_tree
-        self.setColumnCount(5)
+        self.setColumnCount(3)
         self.headerItem().setText(0, "Include")
-        self.setColumnWidth(0,100)
+        self.setColumnWidth(0,300)
         self.headerItem().setText(1, "Layer")
-        self.setColumnWidth(1,self.width() - 350)
+        self.setColumnWidth(1, 300)
         self.headerItem().setText(2, "Categorical")
-        self.setColumnWidth(0,90)
-        self.headerItem().setText(3, "Resampling")
-        self.setColumnWidth(2,125)
-        self.headerItem().setText(4, "Aggregation")
-        self.setColumnWidth(0,125)
+        self.setColumnWidth(3, 50)
+#        self.headerItem().setText(3, "Resampling")
+#        self.setColumnWidth(2,125)
+#        self.headerItem().setText(4, "Aggregation")
+#        self.setColumnWidth(0,125)
 #        self.setSelectionBehavior(QtGui.QTreeView.SelectRows)
 
         self.tree_items = {}
@@ -92,26 +92,26 @@ class PredictorListWidget(QtGui.QTreeWidget):
                 child_item.setCheckState(0, QtCore.Qt.Unchecked)
                 source_item.addChild(child_item)
                 
-                resamplingCB = QtGui.QComboBox(self)
-                resamplingCB.addItems(self.resamplingMethods)
-                aggCB = QtGui.QComboBox(self)
-                aggCB.addItems(self.aggregationMethods)
+#                resamplingCB = QtGui.QComboBox(self)
+#                resamplingCB.addItems(self.resamplingMethods)
+#                aggCB = QtGui.QComboBox(self)
+#                aggCB.addItems(self.aggregationMethods)
                 catChk = QtGui.QCheckBox(self)
 #                self.connect(aggCB, QtCore.SIGNAL('currentIndexChanged(QString)'), self.testing)
                 if categorical == "N":
-                    resamplingCB.setCurrentIndex(1)
-                    aggCB.setCurrentIndex(1)
+#                    resamplingCB.setCurrentIndex(1)
+#                    aggCB.setCurrentIndex(1)
                     curVal = (file, "Bilinear", "Mean")
                     catChk.setCheckState(QtCore.Qt.Unchecked)
                 else:
-                    resamplingCB.setCurrentIndex(0)
-                    aggCB.setCurrentIndex(3)
+#                    resamplingCB.setCurrentIndex(0)
+#                    aggCB.setCurrentIndex(3)
                     curVal = (file, "NearestNeighbor", "Majority")
                     catChk.setCheckState(QtCore.Qt.Checked)
-
+#
                 self.setItemWidget(child_item, 2, catChk)
-                self.setItemWidget(child_item, 3, resamplingCB)
-                self.setItemWidget(child_item, 4, aggCB)
+#                self.setItemWidget(child_item, 3, resamplingCB)
+#                self.setItemWidget(child_item, 4, aggCB)
                 
 #                print "The file for dict is ", file
                 self.tree_items[curVal] = child_item
@@ -135,10 +135,10 @@ class PredictorListWidget(QtGui.QTreeWidget):
                         item.setCheckState(QtCore.Qt.Checked)
                     else:
                         item.setCheckState(QtCore.Qt.Unchecked)
-                    item = self.itemWidget(self.tree_items[oldValue], 3)
-                    item.setCurrentIndex(self.resamplingMethods.index(value[2]))
-                    item = self.itemWidget(self.tree_items[oldValue], 4)
-                    item.setCurrentIndex(self.aggregationMethods.index(value[3]))
+#                    item = self.itemWidget(self.tree_items[oldValue], 3)
+#                    item.setCurrentIndex(self.resamplingMethods.index(value[2]))
+#                    item = self.itemWidget(self.tree_items[oldValue], 4)
+#                    item.setCurrentIndex(self.aggregationMethods.index(value[3]))
                 except ValueError:
                     pass
     
@@ -150,10 +150,14 @@ class PredictorListWidget(QtGui.QTreeWidget):
             if item.checkState(0) == QtCore.Qt.Checked:
                 if self.itemWidget(item, 2).checkState() == QtCore.Qt.Checked:
                     categorical = '1'
+                    resampleMethod = 'NearestNeighbor'
+                    aggMethod = 'Majority'
                 else:
                     categorical = '0'
-                resampleMethod = str(self.itemWidget(item, 3).currentText())
-                aggMethod = str(self.itemWidget(item, 4).currentText())
+                    resampleMethod = 'Bilinear'
+                    aggMethod = 'Mean'
+#                resampleMethod = str(self.itemWidget(item, 3).currentText())
+#                aggMethod = str(self.itemWidget(item, 4).currentText())
                    
                 values.append((value[0], categorical, resampleMethod, aggMethod))
 #        print 'get_vals = ', str(values)
@@ -171,17 +175,27 @@ class PredictorListWidget(QtGui.QTreeWidget):
                 self.tree_items[value].setCheckState(0, QtCore.Qt.Checked)
                 
     def query_add(self, query_text):
+        itemsChecked = 0
         for value, item in self.tree_items.iteritems():
             if str(query_text) in value[0]:
                 self.tree_items[value].setCheckState(0, QtCore.Qt.Checked)
+                itemsChecked += 1
 
-
+        msgbox = QtGui.QMessageBox(self)
+        msgbox.setText(str(itemsChecked) + " items selected.")
+        msgbox.exec_()
     
     def query_remove(self, query_text):
+        itemsUnchecked = 0
         for value, item in self.tree_items.iteritems():
             if str(query_text) in value[0]:
                 self.tree_items[value].setCheckState(0, QtCore.Qt.Unchecked)
-
+                itemsUnchecked += 1
+       
+        msgbox = QtGui.QMessageBox(self)
+        msgbox.setText(str(itemsUnchecked) + " items deselected.")
+        msgbox.exec_()         
+        
 class PredictorListConfigurationWidget(PredictorListWidget, 
                                        ConstantWidgetMixin):
     

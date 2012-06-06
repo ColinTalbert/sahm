@@ -164,14 +164,13 @@ def map_ports(module, port_map):
     args = {}
     for port, (flag, access, required) in port_map.iteritems():
         if required or module.hasInputFromPort(port):
-            #breakpoint()
             value = module.forceGetInputListFromPort(port)
             if len(value) > 1:
                 raise ModuleError(module, 'Multiple items found from Port ' + 
                     port + '.  Only single entry handled.  Please remove extraneous items.')
-            elif len(value)  == 0:
+            elif len(value) == 0:
                 try:
-                    value = [item for item in module._input_ports if item[0] == port][0][2]['defaults']
+                    value = eval([item for item in module._input_ports if item[0] == port][0][2]['defaults'])[0]
                 except:
                     raise ModuleError(module, 'No items found from Port ' + 
                         port + '.  Input is required.')
@@ -505,106 +504,144 @@ def dbfreader(f):
             result.append(value)
         yield result
     
+def getRasterParams(rasterFile):
+    """
+    Extracts a series of bits of information from a passed raster
+    All values are stored in a dictionary which is returned.
+    If errors are encountered along the way the error messages will
+    be returned as a list in the Error element.
+    """
+    try:
+        #initialize our params dictionary to have None for all parma
+        params = {}
+        allRasterParams = ["Error", "xScale", "yScale", "width", "height",
+                        "ulx", "uly", "lrx", "lry", "Wkt", 
+                        "tUlx", "tUly", "tLrx", "tLry", 
+                        "srs", "gt", "prj", "NoData", "PixelType"]
+        
+        for param in allRasterParams:
+            params[param] = None
+        params["Error"] = []
+        
+        # Get the PARC parameters from the rasterFile.
+        dataset = gdal.Open(rasterFile, gdalconst.GA_ReadOnly)
+        if dataset is None:
+            params["Error"].append("Unable to open file")
+            #print "Unable to open " + rasterFile
+            #raise Exception, "Unable to open specifed file " + rasterFile
+            
+        
+        xform  = dataset.GetGeoTransform()
+        params["xScale"] = xform[1]
+        params["yScale"] = xform[5]
 
+        params["width"]  = dataset.RasterXSize
+        params["height"] = dataset.RasterYSize
+
+        params["ulx"] = xform[0]
+        params["uly"] = xform[3]
+        params["lrx"] = params["ulx"] + params["width"]  * params["xScale"]
+        params["lry"] = params["uly"] + params["height"] * params["yScale"]
+            
+        
+    except:
+        #print "We ran into problems extracting raster parameters from " + rasterFile
+        params["Error"].append("Some untrapped error was encountered")
+    finally:
+        del dataset
+        return params
+
+
+class InteractiveQGraphicsView(QtGui.QGraphicsView):
+    '''
+    Extends a QGraphicsView to enable wheel zooming and scrolling
+    The main QGraphicsView contains a graphics scene which is dynamically
     
+    l_pix - original picture
+    c_view - scaled picture
+    '''
+    def __init__(self, parent=None):
+        self.scene = QtGui.QGraphicsScene()
+        self.scene.wheelEvent = self.wheel_event
+        QtGui.QGraphicsView.__init__(self, self.scene)
+        
+        self.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
+        
 
+    def load_picture(self, strPicture):
+        '''This loads and zooms to a new picture
+        a new l_pix is created 
+        and a c_view is derived from it.
+        '''
 
+        self.picture_fname = strPicture
+        self.l_pix = QtGui.QPixmap(strPicture)
+        if self.size().width()  <= self.size().height(): 
+            self.max_vsize = self.size().width() * 0.95
+        else: 
+            self.max_vsize = self.size().height() * 0.95
+            
+        self.c_view = self.l_pix.scaled(self.max_vsize, self.max_vsize, 
+                                            QtCore.Qt.KeepAspectRatio, 
+                                            QtCore.Qt.SmoothTransformation) 
+        self.scene.clear()
+        self.scene.setSceneRect(0, 0, self.c_view.size().width(), self.c_view.size().height()) 
+        self.scene.addPixmap(self.c_view)
+        
+        self.view_current()
+        
+   
+    def view_current(self):
 
-#def construct_port_msg(cls, port_name, direction):
-#    #get the po
-#    global nodes
-#    if direction == "in":
-#        ports = nodes[cls.__name__].getElementsByTagName("InputPorts")[0]
-#    else:
-#        ports = nodes[cls.__name__].getElementsByTagName("OutputPorts")[0]
-#    
-#    port_nodes = ports.getElementsByTagName("Port")
-#    for node in port_nodes:
-#        if node.getElementsByTagName("PortName")[0].firstChild.data == port_name:
-#            port_node = node
-#            
-#    indent = " "*0
-#    nl = "\n" + indent
-#    Definition = port_node.getElementsByTagName("Definition")[0].firstChild.data
-#    Definition = cleanupstring(Definition, 0, 0)
-#    
-#    Mandatory = port_node.getElementsByTagName("Manditory")[0].firstChild.data
-#    
-#    Default = port_node.getElementsByTagName("Default")[0].firstChild.data
-#    
-#    Options = port_node.getElementsByTagName("Options")[0].getElementsByTagName("Option")
-#    
-#    Connections = port_node.getElementsByTagName("Connections")[0].getElementsByTagName("Connection")
-#    
-#    msg = port_name + ":  "
-#    if Mandatory.lower() == "true":
-#        msg += "(mandatory)\n"
-#    elif Mandatory.lower() == "false":
-#        msg += "(optional)\n"
-#    ":"
-#    msg += "\n"+ Definition
-#    
-#        
-#    if Default != "NA":
-#        msg += nl +"Default value = " + Default
-#        
-#    if Options:
-#        msg += nl + "\nOptions are:"
-#        for Option in Options:
-#            msg += "\n" + cleanupstring(Option.firstChild.data, 4, 12)
-#            
-#    if Connections:
-#        msg += nl + "\nCommon connections:"
-#        for Connection in Connections:
-#            msg += "\n"+ cleanupstring(Connection.firstChild.data, 4, 12)
-#
-#    return msg
-#
-#def cleanupstring(str, indent1, indent2):
-#    
-#    textwidth = 120
-#    if str is None:
-#        return ""
-#    lines = str.split("\n")
-#    cleanstr = ""
-#    for line in lines:
-#        cleanstr += textwrap.fill(line, initial_indent=' '*indent1, subsequent_indent=' '*indent2, width = textwidth) +"\n"
-##    str = textwrap.dedent(str)
-#    cleanstr = cleanstr[:-1]
-#    return cleanstr
+        self.scene.clear() 
+        self.scene.setSceneRect(0, 0, self.c_view.size().width(), self.c_view.size().height())
+        self.scene.addPixmap(self.c_view) 
+        QtCore.QCoreApplication.processEvents() 
+        
 
+    def wheel_event (self, event):
 
-#
-#
-#def construct_port_msg(cls, port_name, direction):
-#    global doc_tree
-#    
-#    
-#    
-#    
-#    
-#    
-#    key = cls.__name__ + port_name + direction
-#    
-#    
-#    
-#    
-#    kwargs = port_docs.get(key, False)
-#    
-#    if kwargs == False:
-#        return "Not used and/or defined by SAHM package."
-#    
-#    msg = "Definition:\n    " + kwargs['Definition'].replace('\\n', '\n').replace('\\t', '\t') 
-#    if kwargs['Mandatory'] == "TRUE":
-#        msg += "\n\nThis port is Mandatory"
-#    else:
-#        msg += "\n\nThis port is Optional"
-#        
-#    if kwargs["Default"] != "NA":
-#        msg += "\n\nDefault value = " + kwargs["Default"].replace('\\n', '\n').replace('\\t', '\t')
-#        
-#    if kwargs['Options'] != "NA":
-#        msg += "\n\nOptions are:\n    " + kwargs['Options'].replace('\\n', '\n').replace('\\t', '\t') 
-#    msg += "\n\nCommon port connections:\n    " + kwargs['ConnectsTo'].replace('\\n', '\n').replace('\\t', '\t') 
-#    return msg
-#    
+        self.cur_x = self.scene.sceneRect().x()
+        self.cur_y = self.scene.sceneRect().y()
+        numDegrees = event.delta() / 8 
+        numSteps = numDegrees / 15.0 
+        self.zoom(numSteps) 
+        event.accept() 
+
+    def zoom(self, step):
+
+        zoom_step = 0.06
+        self.scene.clear() 
+        w = self.c_view.size().width() 
+        h = self.c_view.size().height() 
+        w, h = w * (1 + zoom_step*step), h * (1 + zoom_step*step) 
+        self.c_view = self.l_pix.scaled(w, h, 
+                                            QtCore.Qt.KeepAspectRatio, 
+                                            QtCore.Qt.SmoothTransformation) 
+        self.view_current() 
+
+    def resizeEvent(self, event):
+        old_width = event.oldSize().width()
+        old_height = event.oldSize().height()
+       
+        width_prop = self.size().width() / float(old_width)
+        height_prop = self.size().height() / float(old_height)
+        
+        scaled_pic_width = self.c_view.size().width() 
+        scaled_pic_height = self.c_view.size().height() 
+        
+        w = scaled_pic_width * width_prop
+        h = scaled_pic_height * height_prop
+        if w < 0:
+            w = self.size().width()
+        if h < 0:
+            h = self.size().height()
+        
+        if self.c_view.size().width() < old_width * 0.9 and \
+            self.c_view.size().height() < old_height * 0.9 :
+            self.c_view = self.l_pix.scaled(w, h, 
+                                                QtCore.Qt.KeepAspectRatio, 
+                                                QtCore.Qt.SmoothTransformation)
+        self.view_current()
+        
+
