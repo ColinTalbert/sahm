@@ -186,7 +186,6 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
                     }
 
             }
-
              if(MESS){
              for(k in 1:nvars.final){
                         pred.range<-out$dat$ma$train$dat[,match(vnames.final.mod[k],names(out$dat$ma$train$dat))]
@@ -197,7 +196,6 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
                 if(length(vnames)==1) names(temp)=vnames
 
     temp[temp==NAval] <- NA # replace missing values #
-    temp[is.na(temp)]<-NA #this seemingly worthless line switches NaNs to NA so they aren't predicted
         if(sum(!is.na(factor.levels))){
             factor.cols <- match(names(factor.levels),names(temp))
             if(sum(!is.na(factor.cols))>0){

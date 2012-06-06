@@ -8,6 +8,7 @@ source("BRT.helper.fcts.r")
 source("RF.helper.fcts.r")
 output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
 rc="responseBinary"
+
 #options(warn=2)
 #options(error=expression(if(interactive()) recover() else dump.calls()))
 #options(error=NULL)
@@ -68,22 +69,22 @@ input.file="J:\\Projects\\buffelgrass\\suitability\\greaterPhoenixTusconArea\\vi
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,
-      response.col=rc,make.p.tif=T,make.binary.tif=T,
+      response.col=rc,make.p.tif=F,make.binary.tif=F,
           debug.mode=T,opt.methods=2,script.name="rf",
 responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
 samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
 localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=proximity,norm.votes=TRUE,
-do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=TRUE)
+do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=FALSE)
 
 #BRT
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\modelSelection_split_5.csv"
 set.seed(1)
-
+input.file<-"I:\\VisTrails\\WorkingFiles\\workspace\\_modelError\\CovariateCorrelationOutputMDS_initial.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,output.dir=output.dir,
           response.col=rc,make.p.tif=F,make.binary.tif=F,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
       family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
-  tolerance = 0.001,seed=NULL,opt.methods=2,
+  tolerance = 0.001,seed=-616264908,opt.methods=2,
           simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
           learning.rate =.000005, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=FALSE)
 

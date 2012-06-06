@@ -79,22 +79,7 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
             par(oma=c(2,2,4,2),mfrow=c(prow,pcol))
             r.curves <-my.termplot(out$mods$final.mod,plot.it=T,terms=term,rug=TRUE)
             mtext(paste("GLM response curves for",basename(ma.name)),outer=T,side=3,cex=1.3)
-           ################### New work
-           #starting by just looking at one element of the list later use an lapply
-           # if(!is.null(out$cv$resp.curves))
-            #        for(i in 1:length(r.curves$names)){
-            #              plot(r.curves$pred[[i]],r.curves$resp[[i]],type="l")
-             #             for(j in 1:length(out$cv$resp)){
-              #             indx<-na.omit(match(r.curves$names[i],names(out$cv$resp[[i]]$pred)))
-              #             lines(out$cv$resp.curves[[j]]$pred[indx][[1]],out$cv$resp.curves[[j]]$resp[indx][[1]],col="grey",lty="dotdash")
-               #            }
-               #          lines(r.curves$pred[[i]],r.curves$resp[[i]],type="l",col="red",lwd=2)
-                #           }
-
-
-                     # plot(r.curves$pred[1][[1]], r.curves$resp[1][[1]])
-                    #      points(out$cv$resp.curves$"1"$pred[1][[1]][1],out$cv$resp.curves$"1"$resp[1][[1]][1])
-
+           
            #############################
             par(mfrow=c(1,1))
             graphics.off()
@@ -117,14 +102,14 @@ if(Model=="rf"){
                     pdf(paste(bname,"_response_curves.pdf",sep=""),width=11,height=8.5,onefile=T)
                     par(oma=c(2,2,4,2),mfrow=c(prow,pcol))
                     }
+                 
                 for(i in 1:length(r.curves$names)){
-                browser()
-                        assign("i",i,envir=.GlobalEnv)
+                               time1<-Sys.time()
                                x<-RFResponseCurve(out$mods$final.mod,out$dat$Subset$dat,r.curves$names[i],n.pt=50,plot=T,main="",
                                         xlab=r.curves$names[i])
-                                        
-                                x<-partialPlot(out$mods$final.mod[[1]],out$dat$Subset$dat,r.curves$names[i],n.pt=50,plot=T,main="",
-                                        xlab=r.curves$names[i])
+                                x2<-partialPlot(out$mods$final.mod[[1]],out$dat$ma$train$dat,r.curves$names[i],n.pt=50,plot=T,main="",
+                                        xlab=r.curves$names[i])        
+                              
                             r.curves$preds[[i]] <- x$x
                             r.curves$resp[[i]] <- x$y
                         cat(paste("Progress:",round(70+i*inc,1),"%\n",sep=""));flush.console()  ### print time
