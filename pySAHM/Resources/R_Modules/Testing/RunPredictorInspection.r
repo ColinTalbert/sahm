@@ -1,9 +1,12 @@
 source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\Predictor.inspection.r")
 source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\my.panel.smooth.binary.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\chk.libs.r")
 infil="C:\\temp\\TestDataSets\\CanadaThistleNewFormat.csv"
 predictor="bio_13"
 
 infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\ModelEvaluation_Split_2.csv"
+infil="J:\\Projects\\buffelgrass\\suitability\\greaterPhoenixTusconArea\\visTrails\\MergedDataset_1.csv" 
+predictor="aspct_cos"
 predictor="bio_08_2000_2009_2km"
 infil="I:\\VisTrails\\WorkingFiles\\secondseason\\secondseason_workfile_2012_02_28b\\ModelEvaluation_Split_10.csv"
 predictor="PRISM_bio_06_1971_2000_800m"
