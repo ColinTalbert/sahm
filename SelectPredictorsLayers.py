@@ -113,8 +113,14 @@ class SelectListDialog(QtGui.QDialog):
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.verticalLayout.addWidget(self.label_2)
         self.treeview = QtGui.QTreeWidget(self.widget)
+        self.treeview.setColumnCount(2)
+        self.treeview.setSortingEnabled(True)
+        self.treeview.headerItem().setText(0, "Include")
+        self.treeview.setColumnWidth(0,200)
+        self.treeview.headerItem().setText(1, "% Deviance Explained")
+        self.treeview.setColumnWidth(1, 125)
         self.treeview.setToolTip(_fromUtf8("Double click to view detailed information for single covariate."))
-        self.treeview.setHeaderLabels(['include', 'covariate'])
+#        self.treeview.setHeaderLabels(['include', 'covariate'])
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -329,12 +335,10 @@ class SelectListDialog(QtGui.QDialog):
         Sets the check state to be the same as the 0/1 include flag.
         '''
         writetolog("    PopulateTreeview inputMDS = " + self.inputMDS, False, False)
-        self.treeview.setColumnCount(1)
+        
+#        self.treeview.setColumnCount(2)
         #If an outputMDS already exists then the user has run this module before.
         #We need to pull and apply their previous selections from that output file
-
-
-            
         csvfile = open(self.inputMDS, "r")
         #print "MDS", self.inputMDS
         reader = csv.reader(csvfile)
@@ -352,7 +356,7 @@ class SelectListDialog(QtGui.QDialog):
         noncovariate_columns = ['Split', 'EvalSplit']
         for item in headerList[3:]:
             if not item[0] in noncovariate_columns:
-                child_item = QtGui.QTreeWidgetItem([item[0],])
+                child_item = QtGui.QTreeWidgetItem([item[0], "0"])
                 child_item.setFlags(QtCore.Qt.ItemIsUserCheckable |
                                 QtCore.Qt.ItemIsEnabled)
                 checked = True
@@ -406,6 +410,7 @@ class SelectListDialog(QtGui.QDialog):
     def update_pairs_plot(self):
         self.SaveMDSFromTreeview()
         outputPic = self.make_new_pairs_plot(self.outputMDS)
+
         self.view.load_picture(outputPic)
         
     def make_new_pairs_plot(self, MDSfile):
@@ -444,26 +449,30 @@ class SelectListDialog(QtGui.QDialog):
             os.remove(os.path.join(self.outputDir, "Predictor_Correlation.jpg"))
             
         utils.runRScript('PairsExplore.r', args)
-
-#        p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-#
-#        writetolog("   Calculating covariate correlation in r R ")
-
-#        ret = p.communicate()
-#        if ret[1]:
-#            msg = "An error was encountered in the R script for this module.  The R error message is below - \n"
-#            msg += ret[1]
-#            writetolog(msg)
-#            raise Exception, msg
-#        else:
-#            writetolog("   Finished in R. ")
-#        del(ret)
+        
+        if os.path.exists(os.path.join(self.outputDir, "devinfo.csv")):
+            self.loadDeviances()
         
         if os.path.exists(os.path.join(self.displayJPEG)):
             return os.path.join(self.displayJPEG)
         else:
             writetolog("Missing output from R processing: " + self.displayJPEG)
             raise Exception, "Missing output from R processing"
+
+    def loadDeviances(self):
+        #store the deviances explained in dev
+        deviances = {}
+        devfname = os.path.join(self.outputDir, "devinfo.csv")
+        devcsv = open(devfname)
+        devreader = csv.reader(devcsv)
+        header = devreader.next()
+        for line in devreader:
+            deviance = "%.1f" %float(line[1])
+            deviance = deviance.rjust(7)
+            item = self.treeview.findItems(QtCore.QString(line[0]), QtCore.Qt.MatchFlags())
+            item[0].setData(1, 0, deviance)
+        del devcsv
+
 
     def make_new_covariate_plot(self, output_dir, covariate):
         output_fname = os.path.join(output_dir, covariate + ".jpg")

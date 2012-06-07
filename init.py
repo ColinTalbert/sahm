@@ -1972,7 +1972,7 @@ _modules = generate_namespaces({'DataInput': [
                                                            'moduleFringe':model_fringe}),
                                            (BoostedRegressionTree, 
                                                 {
-#                                                 'moduleColor':model_color,
+                                                 'moduleColor':model_color,
                                                            'moduleFringe':model_fringe})
                                            ],
                                 'Other':  [(Model, {'abstract': True}),

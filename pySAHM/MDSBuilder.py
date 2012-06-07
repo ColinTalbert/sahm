@@ -295,8 +295,17 @@ class MDSBuilder(object):
         proportionToCheck = self.probSurfaceSanityCheck()
         
         #First we'll create a temp copy of the Field Data to work with.
-        shutil.copy(self.fieldData, self.fieldData + ".tmp.csv")
-        self.fieldData = self.fieldData + ".tmp.csv"
+        if os.path.exists(self.fieldData):
+            shutil.copy(self.fieldData, self.fieldData + ".tmp.csv")
+            self.fieldData = self.fieldData + ".tmp.csv"
+            
+        else:
+            self.fieldData = os.path.join(os.path.split(self.outputMDS)[0], "tmpoutput.csv")
+            oFile = open(self.fieldData, 'wb')
+            fOut = csv.writer(oFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            fOut.writerow(["x", "y", "responseBinary"])
+            oFile.close()
+            del fOut
         self.deleteTemp = True
         
         #Open up and write to an output file
