@@ -112,7 +112,7 @@ class MDSBuilder(object):
             
         #4) if a propSurface file was supplied it exists
         if self.probSurfacefName <> '':
-            if not SpatialUtilies.isRaster(self.probSurfacefName):
+            if not SpatialUtilities.isRaster(self.probSurfacefName):
                 raise RuntimeError, "The supplied probability surface, " + self.probSurfacefName + ", does not appear to be a valid raster."
             else:
                 self.probSurface = SpatialUtilities.SAHMRaster(self.probSurfacefName)
@@ -295,8 +295,17 @@ class MDSBuilder(object):
         proportionToCheck = self.probSurfaceSanityCheck()
         
         #First we'll create a temp copy of the Field Data to work with.
-        shutil.copy(self.fieldData, self.fieldData + ".tmp.csv")
-        self.fieldData = self.fieldData + ".tmp.csv"
+        if os.path.exists(self.fieldData):
+            shutil.copy(self.fieldData, self.fieldData + ".tmp.csv")
+            self.fieldData = self.fieldData + ".tmp.csv"
+            
+        else:
+            self.fieldData = os.path.join(os.path.split(self.outputMDS)[0], "tmpoutput.csv")
+            oFile = open(self.fieldData, 'wb')
+            fOut = csv.writer(oFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            fOut.writerow(["x", "y", "responseBinary"])
+            oFile.close()
+            del fOut
         self.deleteTemp = True
         
         #Open up and write to an output file
@@ -396,10 +405,9 @@ class MDSBuilder(object):
             fOut.writerow(tmpPixel)
         
     def pullBackgroundTiledWithProbSurface(self, fOut, pointVal):
-        probRaster = SAHMRaster(self.probSurface)
-          
-        rows = int(probRaster.height)
-        cols = int(probRaster.width)
+         
+        rows = int(self.probSurface.height)
+        cols = int(self.probSurface.width)
           
 #        outDir = os.path.split(self.outputMDS)[0] 
 #        tmpOutput = os.path.join(outDir,  + "tmp_classified_prob.tif")
@@ -426,8 +434,8 @@ class MDSBuilder(object):
                 else:
                     numCols = cols - j
                 
-                data = probRaster.band.ReadAsArray(j, i, numCols, numRows)
-                data[data==probRaster.NoData] = 0
+                data = self.probSurface.band.ReadAsArray(j, i, numCols, numRows)
+                data[data==self.probSurface.NoData] = 0
                 randomVals = np.random.rand(numRows, numCols)*100
                 
                 successes = np.where(data>randomVals)
@@ -439,7 +447,7 @@ class MDSBuilder(object):
         
         for cell in backgrounds:
             col, row = divmod(cell, rows)
-            x, y = probRaster.convertColRowToCoords(col, row)
+            x, y = self.probSurface.convertColRowToCoords(col, row)
             tmpPixel = [x, y, pointVal]
             fOut.writerow(tmpPixel)
         
@@ -605,7 +613,7 @@ class MDSBuilder(object):
         if  self.pointCount > max_points:
             msg = "The number of random background points, " + str(self.pointCount)
             msg += " exceeds the expected number of available points given the specified probability surface. "
-            msg += "\n" + self.probSurface + " has an average pixel probability of " + str(aveProb) + ".\n"
+            msg += "\n" + self.probSurfacefName + " has an average pixel probability of " + str(aveProb) + ".\n"
             msg += "Which when multiplied by the cell dimensions of " + str(probSurface.width) + " x " + str(probSurface.height)
             msg += " results in an expected maximum number of available random points of " + str(max_points)
             msg += "\n\nTry either reducing the number of background points or using a less restrictive probability surface\n"
@@ -613,7 +621,7 @@ class MDSBuilder(object):
         elif self.pointCount > max_points * 0.5:
             msg = "The number of random background points, " + str(self.pointCount)
             msg += " is greater than 50% the expected number of available points given the specified probability surface. "
-            msg += "\n" + self.probSurface + " has an average pixel probability of " + str(aveProb) + ".\n"
+            msg += "\n" + self.probSurfacefName + " has an average pixel probability of " + str(aveProb) + ".\n"
             msg += "Which when multiplied by the cell dimensions of " 
             msg += str(probSurface.width) + " x " + str(probSurface.height)
             msg += " results in an expected maximum number of available random points of " + str(max_points)
