@@ -381,7 +381,7 @@ MyPairs<-function (x,missing.summary,my.labels,labels, panel = points, ..., lowe
                           cex.labels <- max(0.8, min(2, 0.9/max(l.wid)))
                       }
                   }
-                  text.panel(0.5, label.pos, labels[i], cex = .55*cex.labels*cex.mult,
+                  text.panel(0.5, label.pos, labels[i], cex = .5*cex.labels*cex.mult,
                     font = font.labels)
                }
             }
