@@ -808,7 +808,7 @@ class KDEGenerator(Module):
         args += " o=" + '"' + outputfName + '"'
         args += " mth=" + kde_params["method"]
         args += " bwopt=" + kde_params["bandOptMeth"]
-        args += " ispt=" + kde_params["isopleth"]
+        args += " ispt=" + str(kde_params["isopleth"])
         args += " bias=" + kde_params["bias"]
 
         utils.runRScript("PseudoAbs.r", args, self)
