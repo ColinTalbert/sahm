@@ -12,7 +12,7 @@ cex.mult<-3.2
 
    #Read input data and remove any columns to be excluded
     dat<-read.csv(input.file,skip=3,header=FALSE)
-
+     
           hl<-readLines(input.file,1)
           hl=strsplit(hl,',')
           colnames(dat) = hl[[1]]                                                                

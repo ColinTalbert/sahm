@@ -1951,7 +1951,7 @@ _modules = generate_namespaces({'DataInput': [
                                 'Tools': [FieldDataQuery,
                                           FieldDataAggregateAndWeight,
                                           MDSBuilder,
-                                          MDSBuilder_vector,
+#                                          MDSBuilder_vector,
                                           PARC,
                                           RasterFormatConverter,
                                           ProjectionLayers,
