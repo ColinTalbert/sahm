@@ -150,10 +150,22 @@ for(i in 1:length(input.file)){
 		response.col=responseCol[i],
 		pres=TRUE,
 		absn=TRUE,
-		bgd=FALSE))
+		bgd=TRUE))
 		}
 
+input.file<-"C:\\VisTrails\\mtalbert_20110504T132851\\readMaTests\\CanadaThistleNewFormat.csv"
+for (i in 5:25){ 
+ try(Pairs.Explore(num.plots=i,
+                min.cor=.5,
+                input.file=input.file,
+            		output.file=paste(dir.path,"\\PairsExploreTest\\",i,"NumPlotsTest",".jpg",sep=""),
+            		response.col=responseCol[1],
+            		pres=TRUE,
+            		absn=TRUE,
+            		bgd=TRUE))
+            		}
 ### Apply Model Test
+
 input.workspace=list(
 
 for(i in 1:length(input.workspace){
