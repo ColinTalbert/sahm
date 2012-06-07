@@ -80,19 +80,18 @@ def getrasterminmax(filename):
     dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
     band = dataset.GetRasterBand(1)
     
-    min = band.GetMinimum()
-    max = band.GetMaximum()
+    min, max = band.ComputeRasterMinMax(0)
     
     try:
         #our output rasters have approx nodata values
         #which don't equal the specified nodata.
         #set the specified to equal what is actually used.
-        if (abs(band.GetNoDataValue() - band.GetMinimum()) < 1e-9 and 
-            band.GetNoDataValue() <> band.GetMinimum()):
-            band.SetNoDataValue(band.GetMinimum)
+        if (abs(band.GetNoDataValue() - min) < 1e-9 and 
+            band.GetNoDataValue() <> min) or \
+            band.GetNoDataValue() == band.GetNoDataValue():
+            band.SetNoDataValue(min)
+            (min,max) = band.ComputeRasterMinMax(0)
         
-        if min is None or max is None:
-            (min,max) = band.ComputeRasterMinMax(1)
         
     except:
         pass
@@ -348,7 +347,7 @@ def runRScript(script, args, module=None):
         writetolog(msg)
 
     if 'Warning' in ret[1]:
-        msg = "The R scipt returned the following warning(s).  The R warning message is below - \n"
+        msg = "The R script returned the following warning(s).  The R warning message is below - \n"
         msg += ret[1]
         writetolog(msg)
 

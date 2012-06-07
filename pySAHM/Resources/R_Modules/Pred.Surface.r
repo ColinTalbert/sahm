@@ -90,7 +90,7 @@ Pred.Surface<-function(object, model, filename="", na.rm=TRUE,NAval) {
 				# to change factor to numeric; should keep track of this to return a factor type RasterLayer
 				predv = as.numeric(predv)
 				predrast <- writeValues(predrast, predv, tr$row[i])
-				NAvalue(predrast)<-NAval
+				#NAvalue(predrast)<-NAval
 				print(i)
 			}
 

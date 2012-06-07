@@ -761,7 +761,7 @@ class BoostedRegressionTree(Model):
                          'MaximumTrees':('mt', None, False), #This is a BRT specific port
                          })
    
-class KDE_generator(Module):
+class KDEGenerator(Module):
     '''
     
     #Written by Marian Talbert 4/5/2012
@@ -1960,7 +1960,7 @@ _modules = generate_namespaces({'DataInput': [
                                           ModelSelectionCrossValidation,
                                           CovariateCorrelationAndSelection,
                                           ApplyModel,
-                                          KDE_generator
+                                          KDEGenerator
                                           ],                                          
                                 'Models': [(GLM, {'moduleColor':model_color,
                                                            'moduleFringe':model_fringe}),
