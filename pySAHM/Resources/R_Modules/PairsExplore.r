@@ -66,7 +66,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
              install.packages("gam",repos="http://lib.stat.cmu.edu/R/CRAN")
             }
         library(gam)    
-      
+            
    #Read input data and remove any columns to be excluded
     dat<-read.csv(input.file,skip=3,header=FALSE)
 
@@ -229,13 +229,20 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
 
  options(warn=-1)
  num.plots<-min(ncol(HighToPlot),num.plots)
- if(num.plots<8) wdth=1500
- else if(num.plots<15) wdth=3000
-      else wdth=4500
+ if(num.plots<8) {wdth=1500
+                 cex.mult=3}
+ else if(num.plots<15) {wdth=3000
+                        if(num.plots<12) cex.mult=4
+                        else cex.mult=3
+                          }
+      else {wdth=4500
+      if(num.plots<17) cex.mult=4
+                        else cex.mult=3
+            }
  if(Debug==FALSE) jpeg(output.file,width=wdth,height=wdth,pointsize=13)
     MyPairs(cbind(TrueResponse,HighToPlot),cor.range=cor.range,missing.summary=missing.summary,my.labels=(as.vector(High.cor)[1:num.plots]),
     lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,
-    bg = c("blue","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red")
+    bg = c("blue","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red",cex.mult=cex.mult)
 
  if(Debug==FALSE) graphics.off()
  options(warn=0)
@@ -245,12 +252,12 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
 MyPairs<-function (x,missing.summary,my.labels,labels, panel = points, ..., lower.panel = panel,
     upper.panel = panel,diag.panel = NULL, text.panel = textPanel,
     label.pos = 0.5 + has.diag/3, cex.labels = NULL, font.labels = 1,
-    row1attop = TRUE, gap = 1,Toplabs=NULL)
+    row1attop = TRUE, gap = 1,Toplabs=NULL,cex.mult)
 {
     response<-x[,1]
     response[response==-9999]<-0
     x<-x[,2:dim(x)[2]]
-    cex.mult<-3
+    
     textPanel <- function(x = 0.5, y = 0.5, txt, cex, font) text(x,
         y, txt, cex = cex, font = font)
     localAxis <- function(side, x, y, xpd, bg, col = NULL, main,
