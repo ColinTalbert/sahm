@@ -374,14 +374,14 @@ MyPairs<-function (x,missing.summary,my.labels,labels, panel = points, ..., lowe
                   par(usr = c(0, 1, 0, 1))
                   if(i==1){
                      for(k in 1:length(labels)){
-                         if((lng<-nchar(labels[k]))>=10) labels[k]<-paste(substr(labels[k],1,10),"\n",substr(labels[k],11,lng),sep="")
+                         if((lng<-nchar(labels[k]))>=12) labels[k]<-paste(substr(labels[k],1,10),"\n",substr(labels[k],11,lng),sep="")
                      }
                        if (is.null(cex.labels)) {
                           l.wid <- strwidth(labels, "user")
                           cex.labels <- max(0.8, min(2, 0.9/max(l.wid)))
                       }
                   }
-                  text.panel(0.5, label.pos, labels[i], cex = .65*cex.labels*cex.mult,
+                  text.panel(0.5, label.pos, labels[i], cex = .55*cex.labels*cex.mult,
                     font = font.labels)
                }
             }
