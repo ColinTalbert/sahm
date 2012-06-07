@@ -18,7 +18,11 @@ my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),
     options(warn=2)
     g<-try(gam(y~s(x,2),weights=wgt,family=binomial),silent=TRUE)
     options(warn=-1)
-    if("try-error"%in%class(g) | try((1-g$dev/g$null.deviance)<0,silent=TRUE)){gam.failed=TRUE
+   
+    dev.broke<-try((1-g$dev/g$null.deviance)<0,silent=TRUE)
+        if(class(dev.broke)=="try-error") dev.broke=TRUE
+    if("try-error"%in%class(g) | dev.broke){
+        gam.failed=TRUE
         g<-glm(y~x+x^2,weights=wgt,family=binomial)
         y.fit<-predict(g,type="response")
     }  else {

@@ -88,7 +88,6 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
      if(!is.na(match("EvalSplit",names(dat)))) dat<-dat[-c(which(dat$EvalSplit=="test"),arr.ind=TRUE),]
     if(!is.na(match("Split",names(dat)))) dat<-dat[-c(which(dat$Split=="test"),arr.ind=TRUE),]
     include[is.na(include)]<-0
-    
     response<-dat[,match(tolower(response.col),tolower(names(dat)))]
           if(any(response==-9998)) {
            response[response==-9998]<-0
@@ -102,8 +101,10 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
        rm.cols<-unique(c(rm.cols,which(include==0,arr.ind=TRUE)))
         
        #for the purpose of the pairs plot, taking all counts greater than 1 and setting them equal to presence
-       #this is never exported
-      if(response.col=="responseCount") {response[response>=1]<-1
+       #this is never exported the true responses are also used so we have to distinguish
+      if(response.col=="responseCount") {
+    TrueResponse<-response
+    response[response>=1]<-1
       }
    
         dat<-dat[,-rm.cols]
@@ -119,6 +120,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
              response<-response[-c(s)]
             for.dev[[1]]<-for.dev[[1]][-c(s),] 
             for.dev[[2]]<-for.dev[[2]][-c(s)] 
+             if(tolower(response.col)=="responsecount") TrueResponse<-TrueResponse[-c(s)]
        }
      }
       
@@ -129,16 +131,14 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
            }
           write.csv(as.data.frame(devExp,row.names=names(for.dev[[1]])), file = paste(dirname(output.file),"devInfo.csv",sep="/"))
 
-   if (response.col=="responseCount") {
-    TrueResponse<-dat[,match(tolower(response.col),tolower(names(dat)))]
-    } else TrueResponse<-response
-
     #remove any of pres absn or bgd that aren't desired
      temp<-c(0,1,-9999)
      temp<-temp[c(absn,pres,bgd)]
      dat<-dat[response%in%temp,]
      response<-response[response%in%temp]
-
+     if(tolower(response.col)=="responsecount") TrueResponse<-TrueResponse[response%in%temp]
+     if(tolower(response.col)=="responsebinary") TrueResponse<-response
+            
   missing.summary<-1-apply(apply(dat,2,complete.cases),2,sum)/nrow(dat)
 
   #Remove columns with only one unique value
