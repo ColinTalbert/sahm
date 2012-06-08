@@ -1,5 +1,6 @@
 setwd("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
 ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
+dir.path<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction6.6"
 
 #For Model tests
 source("LoadRequiredCode.r")
@@ -9,16 +10,18 @@ source("BRT.helper.fcts.r")
 source("RF.helper.fcts.r")
 
 #For Apply Model Tests
-source("EvaluateNewData.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\EvaluateNewData.r")
 
 #For PairsExplore and parameter inspection
-source("PairsExplore.r")
-source("Predictor.inspector.r")
-source("my.panel.smooth.binary.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\PairsExplore.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\Predictor.inspection.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\my.panel.smooth.binary.r")
 
 #For Data Splitting
 source("TestTrainSplit.r")
 source("CrossValidationSplit.r")
+
+
 
 rc=c(rep("responseBinary",times=12),rep("responseCount",times=2))
 input.file<-vector()
@@ -38,10 +41,10 @@ input.file[13]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
 input.file[14]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv"
 #add a missing data csv and maybe a couple with pseudo absence
 output.dir<-vector()
-output.dir[1]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction4.11\\rf"
-output.dir[2]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction4.11\\brt"
-output.dir[3]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction4.11\\mars"
-output.dir[4]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction4.11\\glm"
+output.dir[1]<-paste(dir.path,"\\rf",sep="")
+output.dir[2]<-paste(dir.path,"\\brt",sep="")
+output.dir[3]<-paste(dir.path,"\\mars",sep="")
+output.dir[4]<-paste(dir.path,"\\glm",sep="")
 
 
 
@@ -72,8 +75,8 @@ output.dir[4]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction4.
                   try(FitModels(ma.name=input.file[i],
                         tif.dir=NULL,
                         output.dir=output.dir[4],
-                        response.col=rc[i],make.p.tif=T,make.binary.tif=T,
-                        simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=TRUE,opt.methods=2,squared.terms=TRUE))
+                        response.col=rc[i],make.p.tif=F,make.binary.tif=F,
+                        simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=FALSE))
                         }
               
               ### Random Forest
@@ -99,18 +102,18 @@ input.file[2]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitFactor.csv
 input.file[3]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitWeights.csv"
 input.file[4]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
 input.file[5]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
-input.file[6]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistlePseudoAbsenceWeights.csv"
+input.file[6]="C:/temp/TestDataSets/CanadaThistlePseudoAbsenceWeights.csv"
 input.file[7]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
 
-predictor<-c("bio_13_wgs84","bio_15_wgs84_categorical","slopedeg","asp_2k_alb","bio_19","bio_8","dem")
-responseCol<-c(rep("responseBinary",times=6,rep("responseCount",times=1))
+predictor<-c("bio_13_wgs84","bio_15_wgs84_categorical","slopedeg","asp_2k_alb","bio_16_wgs84","bio_8","dem")
+responseCol<-c(rep("responseBinary",times=6),rep("responseCount",times=1))
 
-for(i in 1:6){
+for(i in 1:length(input.file)){
    if(i==1) { 
        try(Pairs.Explore(num.plots=5,
                 min.cor=.5,
                 input.file=input.file[i],
-            		output.file=paste("C:\\temp\\SAHMDebugJunk\\BRTOut1\\PairsExploreTest\\",i,"Par1","\.jpg",sep=""),
+            		output.file=paste(dir.path,"\\PairsExploreTest\\",i,"Par1",".jpg",sep=""),
             		response.col=responseCol[i],
             		pres=TRUE,
             		absn=TRUE,
@@ -118,16 +121,16 @@ for(i in 1:6){
         try(Pairs.Explore(num.plots=10,
                 min.cor=.5,
                 input.file=input.file[i],
-            		output.file=paste("C:\\temp\\SAHMDebugJunk\\BRTOut1\\PairsExploreTest\\",i,"Par2","\.jpg",sep=""),
+            		output.file=paste(dir.path,"\\PairsExploreTest\\",i,"Par2",".jpg",sep=""),
             		response.col=responseCol[i],
             		pres=TRUE,
             		absn=FALSE,
-            		bgd=FALSE
-                cor.w.highest=TRUE))
+            		bgd=FALSE,
+                cors.w.highest=TRUE))
        try(Predictor.inspection(predictor[i],
                 input.file=input.file[i],
-            		output.dir==paste("C:\\temp\\SAHMDebugJunk\\BRTOut1\\PairsExploreTest\\",i,"Par",sep="")
-            		response.col=response.col[i],
+            		output.dir=paste(dir.path,"\\PairsExploreTest",sep=""),
+            		response.col=responseCol[i],
             		pres=TRUE,
             		absn=TRUE,
             		bgd=TRUE))              				
@@ -135,21 +138,37 @@ for(i in 1:6){
  try(Pairs.Explore(num.plots=15,
     min.cor=min.cor,
     input.file=input.file[i],
-		output.file=paste("C:\\temp\\SAHMDebugJunk\\BRTOut1\\PairsExploreTest\\",i,"\.jpg",sep=""),
+		output.file=paste(dir.path,"\\PairsExploreTest\\",i,".jpg",sep=""),
 		response.col=responseCol[i],
 		pres=TRUE,
 		absn=TRUE,
 		bgd=TRUE))
 		
 	try(Predictor.inspection(predictor[i],
-    input.file=input.file[i],
-		output.dir==paste("C:\\temp\\SAHMDebugJunk\\BRTOut1\\PairsExploreTest",sep="")
-		response.col=response.col[i],
+    input.file[i],
+		output.dir=paste(dir.path,"\\PairsExploreTest",sep=""),
+		response.col=responseCol[i],
 		pres=TRUE,
 		absn=TRUE,
 		bgd=TRUE))
 		}
 
+input.file<-"C:\\VisTrails\\mtalbert_20110504T132851\\readMaTests\\CanadaThistleNewFormat.csv"
+for (i in 5:25){ 
+ try(Pairs.Explore(num.plots=i,
+                min.cor=.5,
+                input.file=input.file,
+            		output.file=paste(dir.path,"\\PairsExploreTest\\",i,"NumPlotsTest",".jpg",sep=""),
+            		response.col=responseCol[1],
+            		pres=TRUE,
+            		absn=TRUE,
+            		bgd=TRUE))
+            		}
 ### Apply Model Test
 
+input.workspace=list(
+
+for(i in 1:length(input.workspace){
+EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=TRUE,new.tifs="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\MergedDataset_10.csv",produce.metrics=TRUE)
+}
 ### Data Splitting Tests

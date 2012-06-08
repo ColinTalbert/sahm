@@ -626,7 +626,7 @@ class GLM(Model):
     __doc__ = GenModDoc.construct_module_doc('GLM')
     
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':['2'], 'optional':False}),
+    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':"['2']", 'optional':False}),
                          ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                          ('SimplificationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["AIC"]', 'optional':True}),
                          ('SquaredTerms', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
@@ -761,28 +761,27 @@ class BoostedRegressionTree(Model):
                          'MaximumTrees':('mt', None, False), #This is a BRT specific port
                          })
    
-class KDE_generator(Module):
+class KDEGenerator(Module):
     '''
-    '''
-    __doc__ = GenModDoc.construct_module_doc('KDE_generator')
-
     
-    _input_ports = [('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
+    #Written by Marian Talbert 4/5/2012
+    #This function takes a field data file and based on the options specified creates a bias or binary mask for generation of background points
+    #The mask can be based on a KDE function or a minimum convex polygon (method=KDE or MCP) bias specifies that a continuous surface is to be created
+    #This is ignored by method=MCP isopleth specifies the isopleth to be used (a number, generally 95).  It is assumed that the 8th name in the input csv is the name of a template
+    #that can be used.  currently 4 methods are available for optimization of the kde bandwith (bw.otim=adhoc, Hpi,Hscv,Hbcv,Hlscv.
+    #A tiff is generated using the header from the template csv which can be used by the MDS builder to generate background points.
+    '''
+    _input_ports = [('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
+                    ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
                         ('method', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["KDE"]', 'optional':True}),
                         ('bandwidthOptimizationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["adhoc"]', 'optional':True}),
                         ('isopleth', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["95"]', 'optional':True}),
                         ('bias', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True})]
     _output_ports = [("KDE", "(edu.utah.sci.vistrails.basic:File)")]
-    
-    @classmethod
-    def provide_input_port_documentation(cls, port_name):
-        return GenModDoc.construct_port_doc(cls, port_name, 'in')
-    @classmethod
-    def provide_output_port_documentation(cls, port_name):
-         return GenModDoc.construct_port_doc(cls, port_name, 'out')
-                         
+                        
     def compute(self):
-        port_map = {'fieldData': ('fieldData', None, False),
+        port_map = {'templateLayer': ('templatefName', None, True),
+                    'fieldData': ('fieldData', None, False),
             'method': ('method', None, True),
             'bandwidthOptimizationMethod': ('bandOptMeth', None, True),
             'isopleth': ('isopleth', None, True),
@@ -791,25 +790,37 @@ class KDE_generator(Module):
         kde_params = utils.map_ports(self, port_map)
         
         global models_path
+        outfName = os.path.splitext(os.path.split(kde_params["fieldData"])[1])[0]
+        outfName += "_" + kde_params["method"]
+        if kde_params["method"] == "KDE":
+            outfName += "_" + kde_params["bandOptMeth"]
+            if kde_params["bias"]:
+                outfName += "_bias"
+            else:
+                outfName += "_iso" + str(kde_params["isopleth"])
         
-        args = "i=" + '"' + kde_params["fieldData"] + '"' 
-        args += " o=" + '"' + utils.getrootdir() + '"'
+        outputfName = os.path.join(utils.getrootdir(), outfName + ".tif")
+        if os.path.exists(outputfName):
+            os.unlink(outputfName)
+        
+        args = "tmplt=" + '"' + kde_params["templatefName"] + '"'
+        args += " i=" + '"' + kde_params["fieldData"] + '"' 
+        args += " o=" + '"' + outputfName + '"'
         args += " mth=" + kde_params["method"]
         args += " bwopt=" + kde_params["bandOptMeth"]
-        args += " ispt=" + kde_params["isopleth"]
+        args += " ispt=" + str(kde_params["isopleth"])
         args += " bias=" + kde_params["bias"]
 
         utils.runRScript("PseudoAbs.r", args, self)
         
-        output = os.path.join(outputMDS)
-        if os.path.exists(output):
-            output_file = utils.create_file_module(output)
-            writetolog("Finished Model Selection split ", True)
+        if os.path.exists(outputfName):
+            output_file = utils.create_file_module(outputfName)
+            writetolog("Finished KDE generation ", True)
         else:
-            msg = "Problem encountered generating Model Selection split.  Expected output file not found."
+            msg = "Problem encountered generating KDE.  Expected output file not found."
             writetolog(msg, False)
             raise ModuleError(self, msg)
-        self.setResult("outputMDS", output_file)
+        self.setResult("KDE", output_file)
         
    
 class MDSBuilder(Module):
@@ -1582,67 +1593,18 @@ class ProjectionLayers(Module):
     provided in the directory crosswalk .csv and used as the input to the training process
     for the projected model. The output of the PARC module from the first model iteration
     should be used as the input to this parameter.
-    
-    3. Model (available only to users at the FORT): This parameter allows VisTrail users
-    running the SAHM package on site at the USGS Science Center in Fort Collins (FORT) to
-    specify one of three models to use for the projected model run ("CCCMA," "CSIRO,"
-    or "hadcm3").
-    
-    4. Scenario (available only to users at the FORT): This parameter allows VisTrail
-    users running the SAHM package on site at the USGS Science Center in Fort Collins 
-    FORT) to specify one of two scenarios for the projected model run ("A2a" or "B2b"). 
-    
-    5. Template: This parameter allows a user to specify the new template layer to be used
-    in the projected model run. The template layer is a raster data layer with a defined
-    coordinate system, a known cell size, and an extent that defines the (new) study area.
-    This raster layer serves as the template for all the other inputs in the analysis. All
-    additional raster layers used in the analysis will be resampled and reprojected as
-    needed to match the template, snapped to the template, and clipped to have an extent
-    that matches the template. Users should ensure that all the layers used for the projected
-    analysis have coverage within the extent of the template layer.
-    
-    6. Year (available only to users at the FORT): This parameter allows VisTrail users
-    running the SAHM package on site at the USGS Science Center in Fort Collins (FORT)
-    to specify one of three years to use for the projected model run ("2020," "2050," or "2080").
-
-    '''
+        '''
     _input_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                     ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
-                    ('model', '(edu.utah.sci.vistrails.basic:String)'),
-                    ('scenario', '(edu.utah.sci.vistrails.basic:String)'),
-                    ('year', '(edu.utah.sci.vistrails.basic:String)'),
                     ('directoryCrosswalkCSV', '(edu.utah.sci.vistrails.basic:File)')
                     ]
     _output_ports = [("MDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
 
     def compute(self):
-        models = ['CCCMA', 'CSIRO', 'hadcm3']
-        scenarioss = ['A2a', 'B2b']
-        years = ['2020', '2050', '2080']
-        
+    
         writetolog("\nRunning make Projection Layers", True)
         
         inputCSV = self.forceGetInputFromPort('RastersWithPARCInfoCSV').name
-    
-        if self.hasInputFromPort('templateLayer'):
-            template = self.forceGetInputFromPort('templateLayer').name
-        else:
-            template = '' #we'll get a template below
-            
-        fromto = []
-        climargs = {}
-        
-        for input in ['model', 'scenario', 'year']:
-            if self.hasInputFromPort(input):
-                climargs[input] = self.forceGetInputFromPort(input)
-        if climargs <> {} and climargs.keys() <> ['model', 'scenario', 'year']:
-            #they did not add in one of each, Not going to fly
-            raise ModuleError(self, "All of model, scenario, and year must be supplied if any are used.")
-        elif climargs <> {} and climargs.keys <> ['model', 'scenario', 'year']:
-            #they specified a alt climate scenario add this to our list to search for
-            fromto.append([r'K:\GIS_LIBRARY\Climate\WorldClim\BioclimaticVariables\bio_30s_esri\bio',
-                           os.path.join('I:\WorldClim_Future_Climate\RenamedBILs', 
-                                        climargs['model'], climargs['scenario'], climargs['year'])])
         
         if self.hasInputFromPort('directoryCrosswalkCSV'):
             crosswalkCSV = csv.reader(open(self.forceGetInputFromPort('directoryCrosswalkCSV'), 'r'))
@@ -1652,8 +1614,6 @@ class ProjectionLayers(Module):
             del crosswalkCSV    
             
         #write out the outputs to an empty MDS file (just the header is needed to PARC the outputs)
-            
-        
         inCSV = csv.reader(open(inputCSV, 'r'))
         inCSV.next() #skip header
         workingCSV = utils.mknextfile(prefix='tmpFilesToPARC_', suffix='.csv')
@@ -1991,7 +1951,7 @@ _modules = generate_namespaces({'DataInput': [
                                 'Tools': [FieldDataQuery,
                                           FieldDataAggregateAndWeight,
                                           MDSBuilder,
-                                          MDSBuilder_vector,
+#                                          MDSBuilder_vector,
                                           PARC,
                                           RasterFormatConverter,
                                           ProjectionLayers,
@@ -2000,7 +1960,7 @@ _modules = generate_namespaces({'DataInput': [
                                           ModelSelectionCrossValidation,
                                           CovariateCorrelationAndSelection,
                                           ApplyModel,
-                                          KDE_generator
+                                          KDEGenerator
                                           ],                                          
                                 'Models': [(GLM, {'moduleColor':model_color,
                                                            'moduleFringe':model_fringe}),
@@ -2012,7 +1972,7 @@ _modules = generate_namespaces({'DataInput': [
                                                            'moduleFringe':model_fringe}),
                                            (BoostedRegressionTree, 
                                                 {
-#                                                 'moduleColor':model_color,
+                                                 'moduleColor':model_color,
                                                            'moduleFringe':model_fringe})
                                            ],
                                 'Other':  [(Model, {'abstract': True}),

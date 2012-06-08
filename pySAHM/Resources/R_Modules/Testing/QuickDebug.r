@@ -77,16 +77,19 @@ localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=proximity,norm.votes=TRUE,
 do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=FALSE)
 
 #BRT
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\modelSelection_split_5.csv"
+c="I:\VisTrails\WorkingFiles\workspace\_modelError\CovariateCorrelationOutputMDS_initial.csv" 
+seed=-616264908 
+o="I:\VisTrails\WorkingFiles\workspace\_modelError\brt_8" 
+rc=responseBinary
 set.seed(1)
 input.file<-"I:\\VisTrails\\WorkingFiles\\workspace\\_modelError\\CovariateCorrelationOutputMDS_initial.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,output.dir=output.dir,
-          response.col=rc,make.p.tif=F,make.binary.tif=F,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
+          response.col=rc,make.p.tif=T,make.binary.tif=T,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
       family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
   tolerance = 0.001,seed=-616264908,opt.methods=2,
           simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
-          learning.rate =.000005, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=FALSE)
+          learning.rate =.000005, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=TRUE)
 
 EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=TRUE,new.tifs="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\MergedDataset_10.csv",produce.metrics=TRUE)
 #Now evaluating new data

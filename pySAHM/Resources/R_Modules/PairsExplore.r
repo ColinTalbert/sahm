@@ -66,7 +66,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
              install.packages("gam",repos="http://lib.stat.cmu.edu/R/CRAN")
             }
         library(gam)    
-      
+            
    #Read input data and remove any columns to be excluded
     dat<-read.csv(input.file,skip=3,header=FALSE)
 
@@ -88,7 +88,6 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
      if(!is.na(match("EvalSplit",names(dat)))) dat<-dat[-c(which(dat$EvalSplit=="test"),arr.ind=TRUE),]
     if(!is.na(match("Split",names(dat)))) dat<-dat[-c(which(dat$Split=="test"),arr.ind=TRUE),]
     include[is.na(include)]<-0
-    
     response<-dat[,match(tolower(response.col),tolower(names(dat)))]
           if(any(response==-9998)) {
            response[response==-9998]<-0
@@ -102,8 +101,10 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
        rm.cols<-unique(c(rm.cols,which(include==0,arr.ind=TRUE)))
         
        #for the purpose of the pairs plot, taking all counts greater than 1 and setting them equal to presence
-       #this is never exported
-      if(response.col=="responseCount") {response[response>=1]<-1
+       #this is never exported the true responses are also used so we have to distinguish
+      if(response.col=="responseCount") {
+    TrueResponse<-response
+    response[response>=1]<-1
       }
    
         dat<-dat[,-rm.cols]
@@ -119,6 +120,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
              response<-response[-c(s)]
             for.dev[[1]]<-for.dev[[1]][-c(s),] 
             for.dev[[2]]<-for.dev[[2]][-c(s)] 
+             if(tolower(response.col)=="responsecount") TrueResponse<-TrueResponse[-c(s)]
        }
      }
       
@@ -129,16 +131,14 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
            }
           write.csv(as.data.frame(devExp,row.names=names(for.dev[[1]])), file = paste(dirname(output.file),"devInfo.csv",sep="/"))
 
-   if (response.col=="responseCount") {
-    TrueResponse<-dat[,match(tolower(response.col),tolower(names(dat)))]
-    } else TrueResponse<-response
-
     #remove any of pres absn or bgd that aren't desired
      temp<-c(0,1,-9999)
      temp<-temp[c(absn,pres,bgd)]
      dat<-dat[response%in%temp,]
      response<-response[response%in%temp]
-
+     if(tolower(response.col)=="responsecount") TrueResponse<-TrueResponse[response%in%temp]
+     if(tolower(response.col)=="responsebinary") TrueResponse<-response
+            
   missing.summary<-1-apply(apply(dat,2,complete.cases),2,sum)/nrow(dat)
 
   #Remove columns with only one unique value
@@ -229,13 +229,20 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
 
  options(warn=-1)
  num.plots<-min(ncol(HighToPlot),num.plots)
- if(num.plots<8) wdth=1500
- else if(num.plots<15) wdth=3000
-      else wdth=4500
+ if(num.plots<8) {wdth=1500
+                 cex.mult=3}
+ else if(num.plots<15) {wdth=3000
+                        if(num.plots<12) cex.mult=4
+                        else cex.mult=3
+                          }
+      else {wdth=4500
+      if(num.plots<17) cex.mult=4
+                        else cex.mult=3
+            }
  if(Debug==FALSE) jpeg(output.file,width=wdth,height=wdth,pointsize=13)
     MyPairs(cbind(TrueResponse,HighToPlot),cor.range=cor.range,missing.summary=missing.summary,my.labels=(as.vector(High.cor)[1:num.plots]),
     lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,
-    bg = c("blue","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red")
+    bg = c("blue","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red",cex.mult=cex.mult)
 
  if(Debug==FALSE) graphics.off()
  options(warn=0)
@@ -245,12 +252,12 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
 MyPairs<-function (x,missing.summary,my.labels,labels, panel = points, ..., lower.panel = panel,
     upper.panel = panel,diag.panel = NULL, text.panel = textPanel,
     label.pos = 0.5 + has.diag/3, cex.labels = NULL, font.labels = 1,
-    row1attop = TRUE, gap = 1,Toplabs=NULL)
+    row1attop = TRUE, gap = 1,Toplabs=NULL,cex.mult)
 {
     response<-x[,1]
     response[response==-9999]<-0
     x<-x[,2:dim(x)[2]]
-    cex.mult<-3
+    
     textPanel <- function(x = 0.5, y = 0.5, txt, cex, font) text(x,
         y, txt, cex = cex, font = font)
     localAxis <- function(side, x, y, xpd, bg, col = NULL, main,
@@ -367,14 +374,14 @@ MyPairs<-function (x,missing.summary,my.labels,labels, panel = points, ..., lowe
                   par(usr = c(0, 1, 0, 1))
                   if(i==1){
                      for(k in 1:length(labels)){
-                         if((lng<-nchar(labels[k]))>=10) labels[k]<-paste(substr(labels[k],1,10),"\n",substr(labels[k],11,lng),sep="")
+                         if((lng<-nchar(labels[k]))>=12) labels[k]<-paste(substr(labels[k],1,10),"\n",substr(labels[k],11,lng),sep="")
                      }
                        if (is.null(cex.labels)) {
                           l.wid <- strwidth(labels, "user")
                           cex.labels <- max(0.8, min(2, 0.9/max(l.wid)))
                       }
                   }
-                  text.panel(0.5, label.pos, labels[i], cex = .65*cex.labels*cex.mult,
+                  text.panel(0.5, label.pos, labels[i], cex = .5*cex.labels*cex.mult,
                     font = font.labels)
                }
             }

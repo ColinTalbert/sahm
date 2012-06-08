@@ -8,11 +8,12 @@ cex.mult<-3.2
 #amount of absence data so I weight the absence so that the sum of absences weights is equal to sum of presence weights
 #if the initial presence\abs ratio is >1.2 The gam can still break so if a negaive percent deviance explained is reported
 #I replace the gam with a glm quadratic in the predictor 
+
 #Written by Marian Talbert 5/23/2012
 
    #Read input data and remove any columns to be excluded
     dat<-read.csv(input.file,skip=3,header=FALSE)
-
+     
           hl<-readLines(input.file,1)
           hl=strsplit(hl,',')
           colnames(dat) = hl[[1]]                                                                
