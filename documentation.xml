@@ -1222,7 +1222,7 @@ Row counts start from 1.</Definition>
   </Module>
   <Tools></Tools>
   <Module>
-    <Title>KDE_generator</Title>
+    <Title>KDEGenerator</Title>
     <Description>This function takes a field data file and based on the options specified creates a bias or binary mask for generation of background points either using a Kernel Density (KDE) of the presence points with various options for optimizing bandwidth or a minimum convex polygon (MCP). 
     </Description>
     <InputPorts>
