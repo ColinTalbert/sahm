@@ -67,18 +67,9 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
             }
         library(gam)    
             
-   #Read input data and remove any columns to be excluded
-    dat<-read.csv(input.file,skip=3,header=FALSE)
-
-          hl<-readLines(input.file,1)
-          hl=strsplit(hl,',')
-          colnames(dat) = hl[[1]]
-
-          tif.info<-readLines(input.file,3)
-          tif.info<-strsplit(tif.info,',')
-          options(warn=-1)
-          include<-(as.numeric(tif.info[[2]]))
-          options(warn=1)
+   #Read input data 
+   read.dat(input.file=input.file,response.col=response.col)
+   
   #Remove coordinates, response column, site.weights
   #before exploring predictor relationship COLUMNS 
     rm.cols <- as.vector(na.omit(c(match("x",tolower(names(dat))),match("y",tolower(names(dat))),
@@ -87,8 +78,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
      #remove testing split ROWS
      if(!is.na(match("EvalSplit",names(dat)))) dat<-dat[-c(which(dat$EvalSplit=="test"),arr.ind=TRUE),]
     if(!is.na(match("Split",names(dat)))) dat<-dat[-c(which(dat$Split=="test"),arr.ind=TRUE),]
-    include[is.na(include)]<-0
-    response<-dat[,match(tolower(response.col),tolower(names(dat)))]
+
           if(any(response==-9998)) {
            response[response==-9998]<-0
            }
@@ -105,7 +95,8 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
       if(response.col=="responseCount") {
     TrueResponse<-response
     response[response>=1]<-1
-      }
+    famly=poisson
+      } else famly=binomial
    
         dat<-dat[,-rm.cols]
         dat[dat==-9999]<-NA
@@ -127,7 +118,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
       devExp<-vector()
       if(any(for.dev$response==-9999)) for.dev$response[for.dev$response==-9999]<-0
        for(i in (1:ncol(for.dev$dat))){
-            devExp[i]<-my.panel.smooth(for.dev$dat[,i], for.dev$response,plot.it=FALSE)
+            devExp[i]<-my.panel.smooth(for.dev$dat[,i], for.dev$response,plot.it=FALSE,famly=famly)
            }
           write.csv(as.data.frame(devExp,row.names=names(for.dev[[1]])), file = paste(dirname(output.file),"devInfo.csv",sep="/"))
 
@@ -239,10 +230,11 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
       if(num.plots<17) cex.mult=4
                         else cex.mult=3
             }
+            browser()
  if(Debug==FALSE) jpeg(output.file,width=wdth,height=wdth,pointsize=13)
     MyPairs(cbind(TrueResponse,HighToPlot),cor.range=cor.range,missing.summary=missing.summary,my.labels=(as.vector(High.cor)[1:num.plots]),
     lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,
-    bg = c("blue","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red",cex.mult=cex.mult)
+    bg = c("blue","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red",cex.mult=cex.mult,oma=c(0,2,6,0),famly=famly)
 
  if(Debug==FALSE) graphics.off()
  options(warn=0)
@@ -252,7 +244,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
 MyPairs<-function (x,missing.summary,my.labels,labels, panel = points, ..., lower.panel = panel,
     upper.panel = panel,diag.panel = NULL, text.panel = textPanel,
     label.pos = 0.5 + has.diag/3, cex.labels = NULL, font.labels = 1,
-    row1attop = TRUE, gap = 1,Toplabs=NULL,cex.mult)
+    row1attop = TRUE, gap = 1,cex.mult,famly=binomial)
 {
     response<-x[,1]
     response[response==-9999]<-0
@@ -270,6 +262,7 @@ MyPairs<-function (x,missing.summary,my.labels,labels, panel = points, ..., lowe
     localLowerPanel <- function(..., main, oma, font.main, cex.main) lower.panel(...)
     localUpperPanel <- function(..., main, oma, font.main, cex.main) upper.panel(...)
     localDiagPanel <- function(..., main, oma, font.main, cex.main) diag.panel(...)
+  
     dots <- list(...)
     nmdots <- names(dots)
     if (!is.matrix(x)) {
@@ -323,10 +316,11 @@ MyPairs<-function (x,missing.summary,my.labels,labels, panel = points, ..., lowe
     j.start<-ifelse(length(unique(response))>1,0,1)
     opar <- par(mfrow = c(nc, nCol), mar = rep.int(gap/2, 4))
     on.exit(par(opar))
+    par(oma=oma)
     for (i in if (row1attop)
         1L:(nc)
     else nc:1L) for (j in j.start:(nc)) {
-       top.gap<-c(6*gap,rep(gap/2,times=nc-1))
+       top.gap<-c(rep(gap/2,times=nc))
        bottom.gap<-c(rep(gap/2,times=nc-1),3*gap)
        left.gap<-c(3*gap,3*gap,rep(gap/2,times=nc-1))
        par(mar = c(bottom.gap[i],left.gap[j+1],top.gap[i],gap/2))
@@ -336,18 +330,18 @@ MyPairs<-function (x,missing.summary,my.labels,labels, panel = points, ..., lowe
          if(j==0){
          localPlot(x[, i],response, xlab = "", ylab = "", axes = FALSE,
                 type="n",...)
-          if(i==1) title(main="Response",line=.04,cex.main=1.4*cex.mult)
+          if(i==1) mtext("Response",line=.3,cex=.7*cex.mult)
 
                   box()
                      my.lab<-paste("cor=",round(max(abs(cor(x[,(i)],response,use="pairwise.complete.obs")),abs(cor(x[,(i)],response,method="spearman",use="pairwise.complete.obs")),
                      abs(cor(x[,(i)],response,method="kendall",use="pairwise.complete.obs"))),digits=2),sep="")
-
-                   if(length(unique(response))>2) {panel.smooth(as.vector(x[, (i)]), as.vector(response),...)
+                 browser()
+                   if(famly=gaussian) {panel.smooth(as.vector(x[, (i)]), as.vector(response),famly=famly,...)
                       title(ylab=paste("cor=",round(max(abs(cor(x[,(i)],response,use="pairwise.complete.obs")),
                           abs(cor(x[,(i)],response,method="spearman",use="pairwise.complete.obs")),abs(cor(x[,(i)],response,method="kendall",use="pairwise.complete.obs"))),digits=2),
                           sep=""),line=.02,cex.lab=1.5)
                    }
-                  pct.dev<-try(my.panel.smooth(as.vector(x[, (i)]), as.vector(response),cex.mult=cex.mult,cex.lab=cex.mult,line=.02,...),silent=TRUE)
+                  pct.dev<-try(my.panel.smooth(as.vector(x[, (i)]), as.vector(response),cex.mult=cex.mult,cex.lab=cex.mult,line=1,famly=famly,...),silent=TRUE)
                          
 
                  } else{
@@ -357,8 +351,8 @@ MyPairs<-function (x,missing.summary,my.labels,labels, panel = points, ..., lowe
         if (i == j || (i < j && has.lower) || (i > j && has.upper)) {
             box() 
             if(i==1) {
-            title(main=paste("Total Cor=",my.labels[j],sep=""),line=ifelse(missing.summary[j]>.03,2.2,.04),cex.main=1.1*cex.mult)
-            if(missing.summary[j]>.03) mtext(paste(round(missing.summary[j]*100), "% missing",sep=""),side=3,line=.04,cex=cex.mult*.6)
+            mtext(paste("Total Cor=",my.labels[j],sep=""),side=3,line=ifelse(missing.summary[j]>.03,3,.3),cex=.65*cex.mult)
+            if(missing.summary[j]>.03) mtext(paste(round(missing.summary[j]*100), "% missing",sep=""),side=3,line=.3,cex=cex.mult*.55)
             }
             if (i == nc)
                 localAxis(3 - 2 * row1attop, x[, j], x[, i],cex.axis=cex.mult*.5,
@@ -374,14 +368,14 @@ MyPairs<-function (x,missing.summary,my.labels,labels, panel = points, ..., lowe
                   par(usr = c(0, 1, 0, 1))
                   if(i==1){
                      for(k in 1:length(labels)){
-                         if((lng<-nchar(labels[k]))>=12) labels[k]<-paste(substr(labels[k],1,10),"\n",substr(labels[k],11,lng),sep="")
+                         if((lng<-nchar(labels[k]))>=14) labels[k]<-paste(substr(labels[k],1,12),"\n",substr(labels[k],13,lng),sep="")
                      }
                        if (is.null(cex.labels)) {
                           l.wid <- strwidth(labels, "user")
                           cex.labels <- max(0.8, min(2, 0.9/max(l.wid)))
                       }
                   }
-                  text.panel(0.5, label.pos, labels[i], cex = .5*cex.labels*cex.mult,
+                  text.panel(0.5, label.pos, labels[i], cex = .45*cex.labels*cex.mult,
                     font = font.labels)
                }
             }

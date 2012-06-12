@@ -12,19 +12,8 @@ cex.mult<-3.2
 #Written by Marian Talbert 5/23/2012
 
    #Read input data and remove any columns to be excluded
-    dat<-read.csv(input.file,skip=3,header=FALSE)
-     
-          hl<-readLines(input.file,1)
-          hl=strsplit(hl,',')
-          colnames(dat) = hl[[1]]                                                                
-
-          tif.info<-readLines(input.file,3)
-          tif.info<-strsplit(tif.info,',')
-          options(warn=-1)
-          include<-(as.numeric(tif.info[[2]]))
-          options(warn=1)
-
-    response<-dat[,match(tolower(response.col),tolower(names(dat)))]
+    read.dat(input.file,response.col=response.col)
+    
           if(any(response==-9998)) {
            response[response==-9998]<-0
            abs.lab<-"Avail"
@@ -39,7 +28,9 @@ cex.mult<-3.2
      temp<-temp[c(absn,pres,bgd)]
      dat<-dat[response%in%temp,]
      response<-response[response%in%temp]
-    
+     if(tolower(response.col)=="responsebinary") famly<-binomial
+     else famly=poisson
+     
      if(any(unique(response)==-9999) & !any(unique(response)==0)){
     abs.lab<-"PsedoAbs"
     pres.lab<-"Pres" 
@@ -97,7 +88,7 @@ cex.mult<-3.2
                
          if(length(response.table)>1){
             plot(x,y,ylab="",xlab=predictor,type="n",cex.lab=cex.mult,cex.axis=.7*cex.mult,)
-            gam.failed<-my.panel.smooth(x=x, y=y,cex.mult=cex.mult,pch=21,cex.lab=cex.mult,cex.axis=.7*cex.mult,cex.lab=cex.mult)
+            gam.failed<-my.panel.smooth(x=x, y=y,cex.mult=cex.mult,pch=21,cex.lab=cex.mult,cex.axis=.7*cex.mult,cex.lab=cex.mult,family=famly)
             title(main=paste(ifelse(gam.failed,"GLM","GAM")," showing predictor response relationship",sep=""),cex.main=.8*cex.mult)
         }
     dev.off()    

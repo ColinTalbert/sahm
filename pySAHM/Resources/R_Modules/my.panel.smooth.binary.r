@@ -1,4 +1,4 @@
-my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),
+my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),famly=binomial,
     cex = 1, col.smooth = "red", span = 2/3, iter = 3, weights=rep(1,times=length(y)),cex.mult,Ylab,plot.it=TRUE,...)
 {
 #This function fits a gam to show the relationship between a binary response and the specified predictor
@@ -16,23 +16,25 @@ my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),
       if(sum(y==0)/sum(y==1)>1.2) wgt<-c(sum(y==1)/sum(y==0),1)[factor(y,levels=c(0,1))]
       else wgt<-rep(1,times=length(y))
     options(warn=2)
-    g<-try(gam(y~s(x,2),weights=wgt,family=binomial),silent=TRUE)
+    g<-try(gam(y~s(x,2),weights=wgt,family=famly),silent=TRUE)
     options(warn=-1)
    
     dev.broke<-try((1-g$dev/g$null.deviance)<0,silent=TRUE)
         if(class(dev.broke)=="try-error") dev.broke=TRUE
     if("try-error"%in%class(g) | dev.broke){
         gam.failed=TRUE
-        g<-glm(y~x+x^2,weights=wgt,family=binomial)
+        g<-glm(y~x+x^2,weights=wgt,family=famly)
         y.fit<-predict(g,type="response")
     }  else {
         y.fit<-predict.gam(g,type="response")
         gam.failed=FALSE
     }
     if(plot.it){
-          points(x, y, pch = pch,bg=c("blue","red")[factor(y,levels=c(0,1))],col=c("blue4","red4")[factor(y,levels=c(0,1))],cex = cex*cex.mult)
+          if(famly==poisson) 
+              points(x, y, pch = pch,bg=terrain.colors(max(y),alpha=.5)[y],col=terrain.colors(max(y))[y],cex = cex*cex.mult)
+          else points(x, y, pch = pch,bg=c("blue","red")[factor(y,levels=c(0,1))],col=c("blue4","red4")[factor(y,levels=c(0,1))],cex = cex*cex.mult)
           segments(x0=x[1:(length(x)-1)],y0=y.fit[1:(length(x)-1)],x1=x[2:length(x)],y1=y.fit[2:length(x)],col="red",cex=3*cex.mult,lwd=cex.mult)
-          if(missing(Ylab)) title(ylab =paste("% dev exp ",round(100*(1-g$dev/g$null.deviance),digits=1),sep=""),...)
+          if(missing(Ylab)) mtext(paste("% dev exp ",round(100*(1-g$dev/g$null.deviance),digits=1),sep=""),side=2,line=1,cex=cex.mult*.7)
           return(gam.failed)
     } else return(100*(1-g$dev/g$null.deviance)) 
     
