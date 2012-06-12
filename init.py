@@ -1841,7 +1841,6 @@ def initialize():
     
 def finalize():
     pass
-    #utils.cleantemps()#No longer used  
 
 def generate_namespaces(modules):
     module_list = []
@@ -1885,10 +1884,7 @@ def build_available_trees():
     for row in csv_reader:
         if row[2] not in trees:
             trees[row[2]] = {}
-        available_dict = trees[row[2]]
-#        if 'Daymet' not in available_dict:
-#            available_dict['Daymet'] = []
-#        available_dict['Daymet'].append((row[0], row[1], row[3]))            
+        available_dict = trees[row[2]]          
         if row[3] not in available_dict:
             available_dict[row[3]] = []
         available_dict[row[3]].append((row[0], row[1], row[4]))
