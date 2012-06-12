@@ -1,0 +1,357 @@
+
+
+Session started
+ at: 06/12/2012 10:16
+*******************************************************************************
+Initializing: at: 06/12/2012 10:16
+  Locations of dependencies
+   Layers CSV = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\layers.csv
+   R path = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_R\R-2.14.1\bin
+   GDAL folder = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_GDAL
+   Maxent folder = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_Maxent
+    
+*******************************************************************************
+*******************************************************************************
+ output directory:   I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder
+*******************************************************************************
+*******************************************************************************
+
+Session continued
+ at: 06/12/2012 10:27
+*******************************************************************************
+Initializing: at: 06/12/2012 10:27
+  Locations of dependencies
+   Layers CSV = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\layers.csv
+   R path = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_R\R-2.14.1\bin
+   GDAL folder = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_GDAL
+   Maxent folder = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_Maxent
+    
+*******************************************************************************
+*******************************************************************************
+ output directory:   I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder
+*******************************************************************************
+*******************************************************************************
+
+Session continued
+ at: 06/12/2012 10:28
+*******************************************************************************
+Initializing: at: 06/12/2012 10:28
+  Locations of dependencies
+   Layers CSV = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\layers.csv
+   R path = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_R\R-2.14.1\bin
+   GDAL folder = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_GDAL
+   Maxent folder = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_Maxent
+    
+*******************************************************************************
+*******************************************************************************
+ output directory:   I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder
+*******************************************************************************
+*******************************************************************************
+
+Session continued
+ at: 06/12/2012 10:29
+*******************************************************************************
+Initializing: at: 06/12/2012 10:29
+  Locations of dependencies
+   Layers CSV = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\layers.csv
+   R path = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_R\R-2.14.1\bin
+   GDAL folder = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_GDAL
+   Maxent folder = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_Maxent
+    
+*******************************************************************************
+*******************************************************************************
+ output directory:   I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder
+*******************************************************************************
+*******************************************************************************
+
+Session continued
+ at: 06/12/2012 10:32
+*******************************************************************************
+Initializing: at: 06/12/2012 10:32
+  Locations of dependencies
+   Layers CSV = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\layers.csv
+   R path = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_R\R-2.14.1\bin
+   GDAL folder = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_GDAL
+   Maxent folder = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_Maxent
+    
+*******************************************************************************
+*******************************************************************************
+ output directory:   I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder
+*******************************************************************************
+*******************************************************************************
+
+Session continued
+ at: 06/12/2012 10:42
+*******************************************************************************
+Initializing: at: 06/12/2012 10:42
+  Locations of dependencies
+   Layers CSV = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\layers.csv
+   R path = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_R\R-2.14.1\bin
+   GDAL folder = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_GDAL
+   Maxent folder = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_Maxent
+    
+*******************************************************************************
+*******************************************************************************
+ output directory:   I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder
+*******************************************************************************
+*******************************************************************************
+
+Session continued
+ at: 06/12/2012 10:49
+*******************************************************************************
+Initializing: at: 06/12/2012 10:49
+  Locations of dependencies
+   Layers CSV = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\layers.csv
+   R path = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_R\R-2.14.1\bin
+   GDAL folder = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_GDAL
+   Maxent folder = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_Maxent
+    
+*******************************************************************************
+*******************************************************************************
+ output directory:   I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder
+*******************************************************************************
+*******************************************************************************
+
+Session continued
+ at: 06/12/2012 10:51
+*******************************************************************************
+Initializing: at: 06/12/2012 10:51
+  Locations of dependencies
+   Layers CSV = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\layers.csv
+   R path = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_R\R-2.14.1\bin
+   GDAL folder = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_GDAL
+   Maxent folder = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\Central_Maxent
+    
+*******************************************************************************
+*******************************************************************************
+ output directory:   I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder
+*******************************************************************************
+*******************************************************************************
+
+Session continued
+ at: 06/12/2012 13:17
+*******************************************************************************
+Initializing: at: 06/12/2012 13:17
+  Locations of dependencies
+   Layers CSV = I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\packages\sahm\layers.csv
+   R path = I:\VisTrails\VisTrails_SAHM_x32\Central_R\R-2.14.1\bin
+   GDAL folder = I:\VisTrails\VisTrails_SAHM_x32\Central_GDAL
+   Maxent folder = I:\VisTrails\VisTrails_SAHM_x32\Central_Maxent
+    
+*******************************************************************************
+*******************************************************************************
+ output directory:   I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder
+*******************************************************************************
+*******************************************************************************
+    template layer = ..\examples\SAHM_example\CovariateLayers\PRISM_bio_18_1971_2000_800m.img
+    output_dname=I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m
+    workingCSV=I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\tmpFilesToPARC.csv
+Starting PARC at: 06/12/2012 13:52
+    Arguments validated successfully at: 06/12/2012 13:52
+"I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\Python27\python.exe" "I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\packages\sahm\pySAHM\singlePARC.py" -s "I:\VisTrails\VisTrails_SAHM_x32\vistrails\examples\SAHM_example\CovariateLayers\NDVI_amplitudes1_Average.tif" -c "0" -d "I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\NDVI_amplitudes1_Average.tif" -t "I:\VisTrails\VisTrails_SAHM_x32\vistrails\examples\SAHM_example\CovariateLayers\PRISM_bio_18_1971_2000_800m.img" -r bilinear -a Mean -i  --gt0 -106.062500008 --gt3 40.65416666 --tNorth 40.65416666 --tSouth 40.0541666603 --tEast -105.287500008 --tWest -106.062500008 --tHeight 72 --tWidth 93
+"I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\Python27\python.exe" "I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\packages\sahm\pySAHM\singlePARC.py" -s "I:\VisTrails\VisTrails_SAHM_x32\vistrails\examples\SAHM_example\CovariateLayers\NDVI_seasonlengths1_Average.tif" -c "0" -d "I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\NDVI_seasonlengths1_Average.tif" -t "I:\VisTrails\VisTrails_SAHM_x32\vistrails\examples\SAHM_example\CovariateLayers\PRISM_bio_18_1971_2000_800m.img" -r bilinear -a Mean -i  --gt0 -106.062500008 --gt3 40.65416666 --tNorth 40.65416666 --tSouth 40.0541666603 --tEast -105.287500008 --tWest -106.062500008 --tHeight 72 --tWidth 93
+"I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\Python27\python.exe" "I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\packages\sahm\pySAHM\singlePARC.py" -s "I:\VisTrails\VisTrails_SAHM_x32\vistrails\examples\SAHM_example\CovariateLayers\NDVI_annualMeanValue_Average.tif" -c "0" -d "I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\NDVI_annualMeanValue_Average.tif" -t "I:\VisTrails\VisTrails_SAHM_x32\vistrails\examples\SAHM_example\CovariateLayers\PRISM_bio_18_1971_2000_800m.img" -r bilinear -a Mean -i  --gt0 -106.062500008 --gt3 40.65416666 --tNorth 40.65416666 --tSouth 40.0541666603 --tEast -105.287500008 --tWest -106.062500008 --tHeight 72 --tWidth 93
+"I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\Python27\python.exe" "I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\packages\sahm\pySAHM\singlePARC.py" -s "I:\VisTrails\VisTrails_SAHM_x32\vistrails\examples\SAHM_example\CovariateLayers\PRISM_bio_18_1971_2000_800m.img" -c "0" -d "I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\PRISM_bio_18_1971_2000_800m.tif" -t "I:\VisTrails\VisTrails_SAHM_x32\vistrails\examples\SAHM_example\CovariateLayers\PRISM_bio_18_1971_2000_800m.img" -r bilinear -a Mean -i  --gt0 -106.062500008 --gt3 40.65416666 --tNorth 40.65416666 --tSouth 40.0541666603 --tEast -105.287500008 --tWest -106.062500008 --tHeight 72 --tWidth 93
+"I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\Python27\python.exe" "I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\packages\sahm\pySAHM\singlePARC.py" -s "I:\VisTrails\VisTrails_SAHM_x32\vistrails\examples\SAHM_example\CovariateLayers\PRISM_bio_06_1971_2000_800m.img" -c "0" -d "I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\PRISM_bio_06_1971_2000_800m.tif" -t "I:\VisTrails\VisTrails_SAHM_x32\vistrails\examples\SAHM_example\CovariateLayers\PRISM_bio_18_1971_2000_800m.img" -r bilinear -a Mean -i  --gt0 -106.062500008 --gt3 40.65416666 --tNorth 40.65416666 --tSouth 40.0541666603 --tEast -105.287500008 --tWest -106.062500008 --tHeight 72 --tWidth 93
+"I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\Python27\python.exe" "I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\packages\sahm\pySAHM\singlePARC.py" -s "I:\VisTrails\VisTrails_SAHM_x32\vistrails\examples\SAHM_example\CovariateLayers\PRISM_bio_05_1971_2000_800m.img" -c "0" -d "I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\PRISM_bio_05_1971_2000_800m.tif" -t "I:\VisTrails\VisTrails_SAHM_x32\vistrails\examples\SAHM_example\CovariateLayers\PRISM_bio_18_1971_2000_800m.img" -r bilinear -a Mean -i  --gt0 -106.062500008 --gt3 40.65416666 --tNorth 40.65416666 --tSouth 40.0541666603 --tEast -105.287500008 --tWest -106.062500008 --tHeight 72 --tWidth 93
+"I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\Python27\python.exe" "I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\packages\sahm\pySAHM\singlePARC.py" -s "I:\VisTrails\VisTrails_SAHM_x32\vistrails\examples\SAHM_example\CovariateLayers\PRISM_bio_03_1971_2000_800m.img" -c "0" -d "I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\PRISM_bio_03_1971_2000_800m.tif" -t "I:\VisTrails\VisTrails_SAHM_x32\vistrails\examples\SAHM_example\CovariateLayers\PRISM_bio_18_1971_2000_800m.img" -r bilinear -a Mean -i  --gt0 -106.062500008 --gt3 40.65416666 --tNorth 40.65416666 --tSouth 40.0541666603 --tEast -105.287500008 --tWest -106.062500008 --tHeight 72 --tWidth 93
+"I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\Python27\python.exe" "I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\packages\sahm\pySAHM\singlePARC.py" -s "I:\VisTrails\VisTrails_SAHM_x32\vistrails\examples\SAHM_example\CovariateLayers\PRISM_bio_17_1971_2000_800m.img" -c "0" -d "I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\PRISM_bio_17_1971_2000_800m.tif" -t "I:\VisTrails\VisTrails_SAHM_x32\vistrails\examples\SAHM_example\CovariateLayers\PRISM_bio_18_1971_2000_800m.img" -r bilinear -a Mean -i  --gt0 -106.062500008 --gt3 40.65416666 --tNorth 40.65416666 --tSouth 40.0541666603 --tEast -105.287500008 --tWest -106.062500008 --tHeight 72 --tWidth 93
+"I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\Python27\python.exe" "I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\packages\sahm\pySAHM\singlePARC.py" -s "I:\VisTrails\VisTrails_SAHM_x32\vistrails\examples\SAHM_example\CovariateLayers\PRISM_bio_07_1971_2000_800m.img" -c "0" -d "I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\PRISM_bio_07_1971_2000_800m.tif" -t "I:\VisTrails\VisTrails_SAHM_x32\vistrails\examples\SAHM_example\CovariateLayers\PRISM_bio_18_1971_2000_800m.img" -r bilinear -a Mean -i  --gt0 -106.062500008 --gt3 40.65416666 --tNorth 40.65416666 --tSouth 40.0541666603 --tEast -105.287500008 --tWest -106.062500008 --tHeight 72 --tWidth 93
+"I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\Python27\python.exe" "I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\packages\sahm\pySAHM\singlePARC.py" -s "I:\VisTrails\VisTrails_SAHM_x32\vistrails\examples\SAHM_example\CovariateLayers\PRISM_bio_15_1971_2000_800m.img" -c "0" -d "I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\PRISM_bio_15_1971_2000_800m.tif" -t "I:\VisTrails\VisTrails_SAHM_x32\vistrails\examples\SAHM_example\CovariateLayers\PRISM_bio_18_1971_2000_800m.img" -r bilinear -a Mean -i  --gt0 -106.062500008 --gt3 40.65416666 --tNorth 40.65416666 --tSouth 40.0541666603 --tEast -105.287500008 --tWest -106.062500008 --tHeight 72 --tWidth 93
+"I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\Python27\python.exe" "I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\packages\sahm\pySAHM\singlePARC.py" -s "I:\VisTrails\VisTrails_SAHM_x32\vistrails\examples\SAHM_example\AdditionalLayers\romoveg" -c "1" -d "I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\romoveg.tif" -t "I:\VisTrails\VisTrails_SAHM_x32\vistrails\examples\SAHM_example\CovariateLayers\PRISM_bio_18_1971_2000_800m.img" -r NearestNeighbor -a Majority -i  --gt0 -106.062500008 --gt3 40.65416666 --tNorth 40.65416666 --tSouth 40.0541666603 --tEast -105.287500008 --tWest -106.062500008 --tHeight 72 --tWidth 93
+    PRISM_bio_06_1971_2000_800m.img finished successfully:  1 done out of 11 at: 06/12/2012 13:52
+    PRISM_bio_03_1971_2000_800m.img finished successfully:  2 done out of 11 at: 06/12/2012 13:52
+    PRISM_bio_18_1971_2000_800m.img finished successfully:  3 done out of 11 at: 06/12/2012 13:52
+    PRISM_bio_17_1971_2000_800m.img finished successfully:  4 done out of 11 at: 06/12/2012 13:52
+    PRISM_bio_05_1971_2000_800m.img finished successfully:  5 done out of 11 at: 06/12/2012 13:52
+    PRISM_bio_07_1971_2000_800m.img finished successfully:  6 done out of 11 at: 06/12/2012 13:52
+    PRISM_bio_15_1971_2000_800m.img finished successfully:  7 done out of 11 at: 06/12/2012 13:52
+    NDVI_seasonlengths1_Average.tif finished successfully:  8 done out of 11 at: 06/12/2012 13:52
+    NDVI_annualMeanValue_Average.tif finished successfully:  9 done out of 11 at: 06/12/2012 13:52
+    NDVI_amplitudes1_Average.tif finished successfully:  10 done out of 11 at: 06/12/2012 13:52
+    romoveg finished successfully:  11 done out of 11 at: 06/12/2012 13:52
+Finished PARC at: 06/12/2012 13:52
+
+Running FieldDataQuery at: 06/12/2012 13:52
+
+FieldDataAggregateAndWeight at: 06/12/2012 13:52
+    output_fname=I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\FDAW_1.csv at: 06/12/2012 13:52
+    output_fname=I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\FDAW_1.csv at: 06/12/2012 13:52
+Starting on Field Data Query for FDQ_1.csv
+  using template PRISM_bio_18_1971_2000_800m.img
+Done
+Finished creating field data query output.
+
+Finished running FieldDataQuery at: 06/12/2012 13:52
+    inputsCSV=I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\PARC_Files.csv
+    fieldData=I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\FDAW_1.csv
+    outputMDS=I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\MergedDataset_1.csv
+
+Running MDSBuilder at: 06/12/2012 13:52
+    Extracting raster values for I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\NDVI_amplitudes1_Average.tif
+    Done
+    Extracting raster values for I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\NDVI_annualMeanValue_Average.tif
+    Done
+    Extracting raster values for I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\NDVI_seasonlengths1_Average.tif
+    Done
+    Extracting raster values for I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\PRISM_bio_03_1971_2000_800m.tif
+    Done
+    Extracting raster values for I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\PRISM_bio_05_1971_2000_800m.tif
+    Done
+    Extracting raster values for I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\PRISM_bio_06_1971_2000_800m.tif
+    Done
+    Extracting raster values for I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\PRISM_bio_07_1971_2000_800m.tif
+    Done
+    Extracting raster values for I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\PRISM_bio_15_1971_2000_800m.tif
+    Done
+    Extracting raster values for I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\PRISM_bio_17_1971_2000_800m.tif
+    Done
+    Extracting raster values for I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\PRISM_bio_18_1971_2000_800m.tif
+    Done
+    Extracting raster values for I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\PARC_PRISM_bio_18_1971_2000_800m\romoveg.tif
+    Done
+Finished running MDSBuilder at: 06/12/2012 13:52
+    The process took 0.686000108719 seconds
+
+Generating Model Evaluation split  at: 06/12/2012 13:52
+    seed used for Split = 14704534
+
+Starting R Processing of TestTrainSplit.r at: 06/12/2012 13:52
+    args: i="I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\MergedDataset_1.csv" o="I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\ModelEvaluation_Split_1.csv" rc=responseBinary es=TRUE seed=14704534
+    command: "I:\VisTrails\VisTrails_SAHM_x32\Central_R\R-2.14.1\bin\i386\Rterm.exe" --vanilla -f "I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\packages\sahm\pySAHM\Resources\R_Modules\TestTrainSplit.r" --args i="I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\MergedDataset_1.csv" o="I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\ModelEvaluation_Split_1.csv" rc=responseBinary es=TRUE seed=14704534
+The R script returned the following warning(s).  The R warning message is below - 
+Warning message:
+In TestTrainSplit(input.file = infil, output.file = output.file,  :
+  Some levels for the categorical predictor romoveg_categorical do not have at least 10 observations.
+You might want to consider removing or reclassifying this predictor before continuing.
+Factors with few observations can cause failure in model fitting when the data is split and cannot be reilably used in training a model.
+
+
+Finished R Processing of TestTrainSplit.r at: 06/12/2012 13:52
+Finished Model Evaluation split  at: 06/12/2012 13:52
+
+Generating Model Selection split  at: 06/12/2012 13:52
+    seed used for Split = -1110877326
+
+Starting R Processing of TestTrainSplit.r at: 06/12/2012 13:52
+    args: i="I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\ModelEvaluation_Split_1.csv" o="I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\modelSelection_split_1.csv" rc=responseBinary es=FALSE seed=-1110877326
+    command: "I:\VisTrails\VisTrails_SAHM_x32\Central_R\R-2.14.1\bin\i386\Rterm.exe" --vanilla -f "I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\packages\sahm\pySAHM\Resources\R_Modules\TestTrainSplit.r" --args i="I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\ModelEvaluation_Split_1.csv" o="I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\modelSelection_split_1.csv" rc=responseBinary es=FALSE seed=-1110877326
+The R script returned the following warning(s).  The R warning message is below - 
+Warning message:
+In TestTrainSplit(input.file = infil, output.file = output.file,  :
+  Some levels for the categorical predictor romoveg_categorical do not have at least 10 observations.
+You might want to consider removing or reclassifying this predictor before continuing.
+Factors with few observations can cause failure in model fitting when the data is split and cannot be reilably used in training a model.
+
+
+Finished R Processing of TestTrainSplit.r at: 06/12/2012 13:52
+Finished Model Selection split  at: 06/12/2012 13:52
+
+Opening Select Predictors Layers widget at: 06/12/2012 13:52
+    inputMDS = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\modelSelection_split_1.csv
+    displayJPEG = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\CovariateCorrelationDisplay.jpg
+    outputMDS = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\CovariateCorrelationOutputMDS_initial.csv
+    PopulateTreeview inputMDS = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\modelSelection_split_1.csv
+
+Starting R Processing of PairsExplore.r at: 06/12/2012 13:52
+    args: i="I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\modelSelection_split_1.csv" o="I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\CovariateCorrelationDisplay.jpg" rc=responseBinary pres=TRUE absn=TRUE bgd=TRUE p=8 m=0.7
+    command: "I:\VisTrails\VisTrails_SAHM_x32\Central_R\R-2.14.1\bin\i386\Rterm.exe" --vanilla -f "I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\packages\sahm\pySAHM\Resources\R_Modules\PairsExplore.r" --args i="I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\modelSelection_split_1.csv" o="I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\CovariateCorrelationDisplay.jpg" rc=responseBinary pres=TRUE absn=TRUE bgd=TRUE p=8 m=0.7
+The R script returned the following warning(s).  The R warning message is below - 
+Loading required package: splines
+Loaded gam 1.06.2
+
+Warning message:
+package 'gam' was built under R version 2.14.2 
+
+
+Finished R Processing of PairsExplore.r at: 06/12/2012 13:53
+Finished Select Predictors Layers widget at: 06/12/2012 14:23
+    seed used for brt = 198762938
+
+Starting R Processing of FIT_BRT_pluggable.r at: 06/12/2012 14:23
+    args:  c="I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\CovariateCorrelationOutputMDS_initial.csv" seed=198762938 o="I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\brt_1" rc=responseBinary
+    command: "I:\VisTrails\VisTrails_SAHM_x32\Central_R\R-2.14.1\bin\i386\Rterm.exe" --vanilla -f "I:\VisTrails\VisTrails_SAHM_x32\vistrails\vistrails\packages\sahm\pySAHM\Resources\R_Modules\FIT_BRT_pluggable.r" --args  c="I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\CovariateCorrelationOutputMDS_initial.csv" seed=198762938 o="I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\brt_1" rc=responseBinary
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  An error was encountered in the R script for this module.
+     The R error message is below: 
+Warning in read.ma(out) :
+  Some levels for the categorical predictor romoveg do not have at least 10 observations.
+You might want to consider removing or reclassifying this predictor before continuing.
+Factors with few observations can cause failure in model fitting when the data is split and cannot be reilably used in training a model.
+Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+Warning: glm.fit: algorithm did not converge
+Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+Warning: glm.fit: algorithm did not converge
+Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+Warning: glm.fit: algorithm did not converge
+Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+Warning: glm.fit: algorithm did not converge
+Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+Warning: glm.fit: algorithm did not converge
+Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+Error in matrix(data = NaN, nrow = region.dims[1], ncol = region.dims[2]) : 
+  invalid 'nrow' value (< 0)
+Calls: FitModels -> proc.tiff -> ifelse -> matrix
+Execution halted
+
+The R script returned the following warning(s).  The R warning message is below - 
+Warning in read.ma(out) :
+  Some levels for the categorical predictor romoveg do not have at least 10 observations.
+You might want to consider removing or reclassifying this predictor before continuing.
+Factors with few observations can cause failure in model fitting when the data is split and cannot be reilably used in training a model.
+Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+Warning: glm.fit: algorithm did not converge
+Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+Warning: glm.fit: algorithm did not converge
+Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+Warning: glm.fit: algorithm did not converge
+Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+Warning: glm.fit: algorithm did not converge
+Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+Warning: glm.fit: algorithm did not converge
+Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+Error in matrix(data = NaN, nrow = region.dims[1], ncol = region.dims[2]) : 
+  invalid 'nrow' value (< 0)
+Calls: FitModels -> proc.tiff -> ifelse -> matrix
+Execution halted
+
+
+Session continued
+ at: 06/12/2012 14:32
+*******************************************************************************
+Initializing: at: 06/12/2012 14:32
+  Locations of dependencies
+   Layers CSV = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\layers.csv
+   R path = I:\VisTrails\VisTrails_SAHM_x32_debug\Central_R\R-2.14.1\bin
+   GDAL folder = I:\VisTrails\VisTrails_SAHM_x32_debug\Central_GDAL
+   Maxent folder = I:\VisTrails\VisTrails_SAHM_x32_debug\Central_Maxent
+    
+*******************************************************************************
+*******************************************************************************
+ output directory:   I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder
+*******************************************************************************
+*******************************************************************************
+
+Session continued
+ at: 06/12/2012 15:08
+*******************************************************************************
+Initializing: at: 06/12/2012 15:08
+  Locations of dependencies
+   Layers CSV = I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\layers.csv
+   R path = I:\VisTrails\VisTrails_SAHM_x32_debug\Central_R\R-2.14.1\bin
+   GDAL folder = I:\VisTrails\VisTrails_SAHM_x32_debug\Central_GDAL
+   Maxent folder = I:\VisTrails\VisTrails_SAHM_x32_debug\Central_Maxent
+    
+*******************************************************************************
+*******************************************************************************
+ output directory:   I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder
+*******************************************************************************
+*******************************************************************************

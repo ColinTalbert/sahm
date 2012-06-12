@@ -1,0 +1,107 @@
+
+Boosted Regression Tree Modeling Results
+
+
+Data:
+I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm\Testing\tests\PARC_test\expectedOutputs\Simple MDS Builder\CovariateCorrelationOutputMDS_initial.csv
+
+	n(pres)=44
+	n(abs)=60
+	n covariates considered=11
+
+Settings:
+
+	random seed used =198762938
+	tree complexity=3
+	learning rate=0.0033
+	n(trees)=1500
+	model simplification=cross-validation
+	n folds=3
+	n covariates in final model=2
+Relative influence of predictors in final model:
+
+                          var  rel.inf
+1 PRISM_bio_06_1971_2000_800m 77.49197
+2                     romoveg 22.50803
+
+Important interactions in final model:
+
+NULL
+You have approximately 9.5observations for every predictor
+ consider reducing the number of predictors before continuing
+
+
+============================================================ 
+
+Evaluation Statistics applied to train split:
+
+ 
+	 Correlation Coefficient      :  0.9162754 
+	 NULL Deviance                :  1.362531 
+	 Fit Deviance                 :  0.2632457 
+	 Explained Deviance           :  1.099286 
+	 Percent Deviance Explained   :  80.67966
+
+  Threshold Methods based on Sens=Spec 
+	 Threshold                    :  0.63 
+
+	 Confusion Matrix: 
+
+         observed
+predicted  1  0
+        1 42  3
+        0  2 57
+
+	 AUC                          :  0.993 
+	 Percent Correctly Classified :  95.19231 
+	 Sensitivity                  :  0.9545455 
+	 Specificity                  :  0.95 
+	 Kappa                        :  0.9018127 
+	 True Skill Statistic         :  0.9045455 
+
+
+   Calibration Statistics 
+	 Intercept (general calibration)                            :  -0.8629125 
+	 Slope   (direction and variation in fit)                   :  2.004708 
+	 Testa0b1 (overall reliability of predictors)               :  0.1412087 
+	 Testa0|b1(incorrect calibration given correct refinement)  :  0.9368878 
+	 Testb1|a (refinement given correct calibration)            :  0.04803493 
+
+
+
+============================================================ 
+
+Evaluation Statistics applied to test split:
+
+ 
+	 Correlation Coefficient      :  0.7360623 
+	 NULL Deviance                :  1.359675 
+	 Fit Deviance                 :  0.7962803 
+	 Explained Deviance           :  0.5633949 
+	 Percent Deviance Explained   :  41.43599
+
+  Threshold Methods based on Sens=Spec 
+	 Threshold                    :  0.63 
+
+	 Confusion Matrix: 
+
+         observed
+predicted  1  0
+        1 15  5
+        0  3 20
+
+	 AUC                          :  0.9067 
+	 Percent Correctly Classified :  81.39535 
+	 Sensitivity                  :  0.8333333 
+	 Specificity                  :  0.8 
+	 Kappa                        :  0.6236324 
+	 True Skill Statistic         :  0.6333333 
+
+
+   Calibration Statistics 
+	 Intercept (general calibration)                            :  -0.1025264 
+	 Slope   (direction and variation in fit)                   :  0.598962 
+	 Testa0b1 (overall reliability of predictors)               :  0.1302158 
+	 Testa0|b1(incorrect calibration given correct refinement)  :  0.5043202 
+	 Testb1|a (refinement given correct calibration)            :  0.05670281 
+
