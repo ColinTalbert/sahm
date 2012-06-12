@@ -15,7 +15,7 @@ PseudoAbsGen<-function(input.file,outfile,method="KDE",bw.otim="adhoc",isopleth=
               dat.in<-read.csv(input.file,header=FALSE,as.is=TRUE)
               dat<-as.data.frame(dat.in[4:dim(dat.in)[1],])
                names(dat)<-dat.in[1,]
-            
+                                                                                                                              
                 xy<-data.frame(cbind(as.numeric(as.character(dat$X)),as.numeric(as.character(dat$Y))))
     
     #################################################################
@@ -228,7 +228,7 @@ Args <- commandArgs(trailingOnly=FALSE)
      
     }
 
-
+if(method=="MCP") bias=FALSE
 ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"chk.libs.r",sep="\\"))
 

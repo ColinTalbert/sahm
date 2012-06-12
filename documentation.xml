@@ -1222,6 +1222,101 @@ Row counts start from 1.</Definition>
   </Module>
   <Tools></Tools>
   <Module>
+    <Title>KDEGenerator</Title>
+    <Description>This function takes a field data file and based on the options specified creates a bias or binary mask for generation of background points either using a Kernel Density (KDE) of the presence points with various options for optimizing bandwidth or a minimum convex polygon (MCP). 
+    </Description>
+    <InputPorts>
+      <Port>
+        <PortName>fieldData</PortName>
+        <Definition>an input field dataset with X and Y locations along with a response column.  This will commonly be generated either by the FieldDataQuery or the FieldDataAggregateAndWeight. </Definition>
+        <Mandatory>True</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>
+          <Connection>The mdsFile can be produced by any of MDSBuilder, ModelEvaluationSplit, ModelSelectionCrossValidation, ModelSelectionSplit, or CovariateCorrelationAndSelection.   </Connection>
+        </Connections>
+      </Port>
+      <Port>
+        <PortName>bandwidthOptimizationMethod</PortName>
+        <Definition>if KDE is the selected method this determines how the bandwith will be optimized the adhoc option is usually quite quick other methods can be a bit more time consuming</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>adhoc</Default>
+        <Options>
+          <Option>adhoc: uses ad hoc bandwidth selection from the spatstat package this does not optimize any statistical criterion</Option>
+          <Option>Hpi: The Plug-in bandwidth selector from the R ks library</Option>
+          <Option>Hscv: The smoothed cross-validation bandwidth selector from the R ks library</Option>
+          <Option>Hbcv: The biased cross-validation bandwidth selector from the R ks library</Option>
+          <Option>Hlscv: The least squares cross-validation bandwidth selector from the R ks library</Option>
+        </Options>
+        <Connections>Does not connect to any other module.</Connections>
+      </Port>
+      <Port>
+        <PortName>Bias</PortName>
+        <Definition>Indicate whether a bias (continuous) surface or a binary mask should be created.  If bias is set to TRUE then the isopleth argument will determine where the binary cuttoff is drawn.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>False (Unchecked)</Default>
+        <Options>
+          <Option>True (Checked)</Option>
+          <Option>False (Unchecked)</Option>
+        </Options>
+        <Connections>Does not connect to any other module.</Connections>
+      </Port>
+      <Port>
+        <PortName>isopleth</PortName>
+        <Definition>If bias is selected the isopleth is used to determine where the cuttoff for the binary mask is drawn.  This should be in percent so an isopleth of 95 will include the region that contains 95% of the presence locations.  </Definition>
+        <Mandatory>False</Mandatory>
+        <Default>95 but this is only used if Bias is set False or if method is MCP</Default>
+        <Options>
+          <Option>True (Checked)</Option>
+          <Option>False (Unchecked)</Option>
+        </Options>
+        <Connections>Does not connect to any other module.</Connections>
+      </Port>
+      <Port>
+        <PortName>method</PortName>
+        <Definition>The method used to generate the surface for background point generation.  This should be either KDE (Kernel Density Estimate) or MCP (Minimum Convex Polygon)</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>KDE</Default>
+        <Options>
+          <Option>KDE uses a kernel density estimate of the presence locations</Option>
+          <Option>MCP uses a minimum convex polygon to create a mask of the presence locations</Option>
+        </Options>
+        <Connections>Does not connect to any other module.</Connections>
+      </Port>
+      <Port>
+        <PortName>templateLayer</PortName>
+        <Definition>the TemplateLayer used for writing the background point generation surface to a tiff.  This will generally come directly from the TemplateLayer module</Definition>
+        <Mandatory>TRUE</Mandatory>
+        <Default>NA</Default>
+        <Options>
+          <Option>NA</Option>
+        </Options>
+        <Connections>Does not connect to any other module.</Connections>
+      </Port>
+    </InputPorts>
+    <OutputPorts>
+      <Port>
+        <PortName>backgroundProbSurf</PortName>
+        <Definition>A continuous or binary tiff that can be used to generate background points following the spatial pattern of where samples were taken </Definition>
+        <Mandatory>NA</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>
+          <Connection>'backgroundProbSurf' port of of the MDSBuilder</Connection>
+        </Connections>
+      </Port>
+    </OutputPorts>
+    <References>
+      <Reference>A. Baddeley and R. Turner (2005). Spatstat: an R package for analyzing spatial point
+  patterns. Journal of Statistical Software 12 (6), 1-42. ISSN: 1548-7660. URL:
+  www.jstatsoft.org</Reference>
+      <Reference> Tarn Duong (2012). ks: Kernel smoothing. R package version 1.8.6.
+  http://CRAN.R-project.org/package=ks
+</Reference>
+    </References>
+    <SeeAlso />
+  </Module>
+  <Module>
     <Title>ApplyModel</Title>
     <Description>This is basically linear regression adapted to binary presence-absence or count data.  We used a bidirectional stepwise procedure to select covariates to be used in the model.  That is, we began with a null model and calculated the AIC (Akaike Information Criterion) score for each covariate which could be added to the model.  AIC is a measure of how well the model fits the data with a penalty based on the number of covariates in the model.  In the first step, we add the covariate with the best AIC score.  In the next step we calculate AIC scores for all two-covariate models and again add the covariate that most improves the AIC, and so on.  At each step, we also look at the change in AIC from dropping each covariate currently in the model.  The stepwise procedure ends when no additions or removals result in an improvement in AIC.  
     

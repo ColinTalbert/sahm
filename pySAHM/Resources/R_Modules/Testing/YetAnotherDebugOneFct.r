@@ -100,12 +100,12 @@ input.file<-vector()
 input.file[1]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Split.csv"
 input.file[2]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitFactor.csv"
 input.file[3]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitWeights.csv"
-input.file[4]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
+input.file[4]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleMissingDat.csv"
 input.file[5]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
 input.file[6]="C:/temp/TestDataSets/CanadaThistlePseudoAbsenceWeights.csv"
 input.file[7]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
 
-predictor<-c("bio_13_wgs84","bio_15_wgs84_categorical","slopedeg","asp_2k_alb","bio_16_wgs84","bio_8","dem")
+predictor<-c("bio_13_wgs84","bio_15_wgs84_categorical","bio_7","asp_2k_alb","bio_16_wgs84","bio_8","dem")
 responseCol<-c(rep("responseBinary",times=6),rep("responseCount",times=1))
 
 for(i in 1:length(input.file)){
@@ -150,10 +150,24 @@ for(i in 1:length(input.file)){
 		response.col=responseCol[i],
 		pres=TRUE,
 		absn=TRUE,
-		bgd=FALSE))
+		bgd=TRUE))
 		}
 
+input.file<-"C:\\VisTrails\\mtalbert_20110504T132851\\readMaTests\\CanadaThistleNewFormat.csv"
+input.file<-"C:\\VisTrails\\mtalbert_20110504T132851\\readMaTests\\CanadaThistleMissingDat.csv"
+for (i in 5:25){ 
+ try(Pairs.Explore(num.plots=i,
+                min.cor=.5,
+                input.file=input.file,
+            		output.file=paste(dir.path,"\\PairsExploreTest\\",i,"NumPlotsTest",".jpg",sep=""),
+            		response.col=responseCol[1],
+            		pres=TRUE,
+            		absn=TRUE,
+            		bgd=TRUE
+                ))
+            		}
 ### Apply Model Test
+
 input.workspace=list(
 
 for(i in 1:length(input.workspace){
