@@ -1,4 +1,4 @@
-my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),famly=binomial,
+my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),famly="binomial",
     cex = 1, col.smooth = "red", span = 2/3, iter = 3, weights=rep(1,times=length(y)),cex.mult,Ylab,plot.it=TRUE,...)
 {
 #This function fits a gam to show the relationship between a binary response and the specified predictor
@@ -7,7 +7,9 @@ my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),fam
 #Weights have to be set here so that the relationship is clear unfortunately the intercept isn't correct hopefully
 #this won't be needed once weights are accepted modified to return values for the csv in Colin's widget
 #Written by Marian Talbert 5/22/2012
-
+     family<-switch(famly,
+            "binomial"=binomial,
+            "poisson"=poisson)
     o<-order(x)
     x<-x[o]
     y<-y[o]
@@ -16,21 +18,21 @@ my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),fam
       if(sum(y==0)/sum(y==1)>1.2) wgt<-c(sum(y==1)/sum(y==0),1)[factor(y,levels=c(0,1))]
       else wgt<-rep(1,times=length(y))
     options(warn=2)
-    g<-try(gam(y~s(x,2),weights=wgt,family=famly),silent=TRUE)
+    g<-try(gam(y~s(x,2),weights=wgt,family=family),silent=TRUE)
     options(warn=-1)
    
     dev.broke<-try((1-g$dev/g$null.deviance)<0,silent=TRUE)
         if(class(dev.broke)=="try-error") dev.broke=TRUE
     if("try-error"%in%class(g) | dev.broke){
         gam.failed=TRUE
-        g<-glm(y~x+x^2,weights=wgt,family=famly)
+        g<-glm(y~x+x^2,weights=wgt,family=family)
         y.fit<-predict(g,type="response")
     }  else {
         y.fit<-predict.gam(g,type="response")
         gam.failed=FALSE
     }
     if(plot.it){
-          if(famly==poisson) 
+          if(famly=="poisson") 
               points(x, y, pch = pch,bg=terrain.colors(max(y),alpha=.5)[y],col=terrain.colors(max(y))[y],cex = cex*cex.mult)
           else points(x, y, pch = pch,bg=c("blue","red")[factor(y,levels=c(0,1))],col=c("blue4","red4")[factor(y,levels=c(0,1))],cex = cex*cex.mult)
           segments(x0=x[1:(length(x)-1)],y0=y.fit[1:(length(x)-1)],x1=x[2:length(x)],y1=y.fit[2:length(x)],col="red",cex=3*cex.mult,lwd=cex.mult)
