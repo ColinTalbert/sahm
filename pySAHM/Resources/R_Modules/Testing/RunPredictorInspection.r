@@ -16,6 +16,9 @@ predictor="bio_13_wgs84"
 infil="I:\\VisTrails\\WorkingFiles\\secondseason\\secondseason_workfile_2012_02_28b\\ModelEvaluation_Split_9.csv"
 predictor="bio_17_2009_2km"
 predictor="bio_14_2009_2km"
+infil="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\modelSelection_split_8.csv" 
+output.dir="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode"
+predictor="EVI_baselevels2_2001" 
 Predictor.inspection(predictor,
     input.file=infil,
 		output.dir=output.dir,

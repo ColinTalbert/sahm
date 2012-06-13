@@ -53,11 +53,15 @@ time1<-Sys.time()
 infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
     #infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
     output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPres1.jpg"
-Pairs.Explore(num.plots=4,
-    min.cor=min.cor,
-    input.file=infil,
-		output.file=output.file,
-		response.col=responseCol,
+    
+i="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\modelSelection_split_8.csv" 
+o="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\CovariateCorrelationDisplay.jpg" 
+
+Pairs.Explore(num.plots=8,
+    min.cor=.3,
+    input.file=i,
+		output.file=o,
+		response.col="responseBinary",
 		pres=TRUE,
 		absn=TRUE,
 		bgd=FALSE,

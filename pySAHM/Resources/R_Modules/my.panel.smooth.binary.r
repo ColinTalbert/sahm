@@ -1,5 +1,5 @@
 my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),famly="binomial",
-    cex = 1, col.smooth = "red", span = 2/3, iter = 3, weights=rep(1,times=length(y)),cex.mult,Ylab,plot.it=TRUE,...)
+    cex = 1, col.smooth = "red", span = 2/3, iter = 3, weights=rep(1,times=length(y)),cex.mult,Ylab,plot.it=TRUE,lin=1,...)
 {
 #This function fits a gam to show the relationship between a binary response and the specified predictor
 #similar to a lowess smooth but appropraite for binary response.  Occasionally gam fails or doesn't converge
@@ -23,7 +23,7 @@ my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),fam
    
     dev.broke<-try((1-g$dev/g$null.deviance)<0,silent=TRUE)
         if(class(dev.broke)=="try-error") dev.broke=TRUE
-    if("try-error"%in%class(g) | dev.broke){
+    if("try-error"%in%class(g) | dev.broke){y
         gam.failed=TRUE
         g<-glm(y~x+x^2,weights=wgt,family=family)
         y.fit<-predict(g,type="response")
@@ -36,7 +36,7 @@ my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),fam
               points(x, y, pch = pch,bg=terrain.colors(max(y),alpha=.5)[y],col=terrain.colors(max(y))[y],cex = cex*cex.mult)
           else points(x, y, pch = pch,bg=c("blue","red")[factor(y,levels=c(0,1))],col=c("blue4","red4")[factor(y,levels=c(0,1))],cex = cex*cex.mult)
           segments(x0=x[1:(length(x)-1)],y0=y.fit[1:(length(x)-1)],x1=x[2:length(x)],y1=y.fit[2:length(x)],col="red",cex=3*cex.mult,lwd=cex.mult)
-          if(missing(Ylab)) mtext(paste("% dev exp ",round(100*(1-g$dev/g$null.deviance),digits=1),sep=""),side=2,line=1,cex=cex.mult*.7)
+          if(missing(Ylab)) mtext(paste("% dev exp ",round(100*(1-g$dev/g$null.deviance),digits=1),sep=""),side=2,line=lin,cex=cex.mult*.7)
           return(gam.failed)
     } else return(100*(1-g$dev/g$null.deviance)) 
     

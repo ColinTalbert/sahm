@@ -1,4 +1,4 @@
-read.dat<-function(input.file,hl=NULL,include=NULL,response.col){
+read.dat<-function(input.file,hl=NULL,include=NULL,response.col,is.inspect=FALSE){
 #A small function to read in a csv with three header lines and assign everythinig
 #to the parent environment
 
@@ -14,7 +14,7 @@ read.dat<-function(input.file,hl=NULL,include=NULL,response.col){
           }
           colnames(dat) = hl[[1]]
             assign("hl",hl,envir=parent.frame())
-            assign("dat",dat,envir=parent.frame())
+          
           tif.info<-readLines(input.file,3)
           tif.info<-strsplit(tif.info,',')
              assign("tif.info",tif.info,envir=parent.frame())
@@ -26,6 +26,23 @@ read.dat<-function(input.file,hl=NULL,include=NULL,response.col){
              }
           options(warn=1)
           response<-dat[,match(tolower(response.col),tolower(names(dat)))]
+          dat<-dat[order(response),]
+          response<-response[order(response)]
+
+           #remove testing split ROWS
+          if(is.inspect){
+               if(!is.na(match("EvalSplit",names(dat)))) {
+                    response<-response[-c(which(dat$EvalSplit=="test"),arr.ind=TRUE)]
+                    dat<-dat[-c(which(dat$EvalSplit=="test"),arr.ind=TRUE),]
+                   
+                }
+               if(!is.na(match("Split",names(dat)))){
+                   response<-response[-c(which(dat$Split=="test"),arr.ind=TRUE)] 
+                   dat<-dat[-c(which(dat$Split=="test"),arr.ind=TRUE),]
+                  
+               }
+                    }
             assign("response",response,envir=parent.frame())
+            assign("dat",dat,envir=parent.frame())
  return()
 }

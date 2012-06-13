@@ -68,22 +68,17 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
         library(gam)    
             
    #Read input data 
-   read.dat(input.file=input.file,response.col=response.col)
-   
+   read.dat(input.file=input.file,response.col=response.col,is.inspect=TRUE)
+        
+        if(any(response==-9998)) {
+           response[response==-9998]<-0
+           }
   #Remove coordinates, response column, site.weights
   #before exploring predictor relationship COLUMNS 
     rm.cols <- as.vector(na.omit(c(match("x",tolower(names(dat))),match("y",tolower(names(dat))),
     match("site.weights",tolower(names(dat))),match(tolower(response.col),tolower(names(dat))),match("Split",names(dat)),match("EvalSplit",names(dat)))))
    
-     #remove testing split ROWS
-     if(!is.na(match("EvalSplit",names(dat)))) dat<-dat[-c(which(dat$EvalSplit=="test"),arr.ind=TRUE),]
-    if(!is.na(match("Split",names(dat)))) dat<-dat[-c(which(dat$Split=="test"),arr.ind=TRUE),]
-
-          if(any(response==-9998)) {
-           response[response==-9998]<-0
-           }
-       dat<-dat[order(response),]
-       response<-response[order(response)]
+ 
        #the deviance calculation requires even columns which will be removed for the pairs explore
        #but to get the same answer for the plot I need the same subsample
        for.dev<-list(dat=dat[-c(rm.cols)],response=response)
@@ -101,7 +96,6 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
         dat<-dat[,-rm.cols]
         dat[dat==-9999]<-NA
    
-
      response.table<-table(response)
      max.points<-1500
      if(any(response.table> max.points)){
@@ -114,11 +108,10 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
              if(tolower(response.col)=="responsecount") TrueResponse<-TrueResponse[-c(s)]
        }
      }
-      
       devExp<-vector()
       if(any(for.dev$response==-9999)) for.dev$response[for.dev$response==-9999]<-0
        for(i in (1:ncol(for.dev$dat))){
-            devExp[i]<-my.panel.smooth(for.dev$dat[,i], for.dev$response,plot.it=FALSE,famly=famly)
+            devExp[i]<-try(my.panel.smooth(for.dev$dat[,i], for.dev$response,plot.it=FALSE,famly=famly),silent=TRUE)
            }
           write.csv(as.data.frame(devExp,row.names=names(for.dev[[1]])), file = paste(dirname(output.file),"devInfo.csv",sep="/"))
 
@@ -146,8 +139,9 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
      kmat<-cor(dat[s,],method="kendall",use="pairwise.complete.obs")
     }
     cmat=pmax(abs(cmat),abs(smat),abs(kmat),na.rm=TRUE)
+    cmat[is.na(cmat)]<-0
     High.cor<-sort(apply(abs(cmat)>min.cor,2,sum)-1,decreasing=TRUE)
-         
+
   #take the top num.plots to put in the pairs plot or if the looking at a single
   #predictor and other predictors it's correlated with, take the top num.plots-1
   #of those with which it is correlated
@@ -164,9 +158,10 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
           #predictors that are highly correlated with the Highest predictor
           High.cor<-sort(High.cor[names(CorWHigh)],decreasing=TRUE)
           HighToPlot<-dat[,match(names(High.cor),names(dat))[1:min(num.plots,length(High.cor))]]
-          }}
-              cor.hightoplot<-abs(cor(HighToPlot,use="pairwise.complete.obs"))
-              diag(cor.hightoplot)<-0
+     }}
+    cor.hightoplot<-abs(cor(HighToPlot,use="pairwise.complete.obs"))
+    diag(cor.hightoplot)<-0
+    cor.hightoplot[is.na(cor.hightoplot)]<-0 
     cor.range<-c(quantile(as.vector(cor.hightoplot),probs=c(0,.5,.7,.85)),1)
      
      missing.summary<-missing.summary[match(names(High.cor),names(missing.summary))[1:min(num.plots,length(High.cor))]]
@@ -230,6 +225,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
       if(num.plots<17) cex.mult=4
                         else cex.mult=3
             }
+           
  if(Debug==FALSE) jpeg(output.file,width=wdth,height=wdth,pointsize=13)
     MyPairs(cbind(TrueResponse,HighToPlot),cor.range=cor.range,missing.summary=missing.summary,my.labels=(as.vector(High.cor)[1:num.plots]),
     lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,
