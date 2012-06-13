@@ -95,8 +95,8 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
       if(response.col=="responseCount") {
     TrueResponse<-response
     response[response>=1]<-1
-    famly=poisson
-      } else famly=binomial
+    famly="poisson"
+      } else famly="binomial"
    
         dat<-dat[,-rm.cols]
         dat[dat==-9999]<-NA
@@ -230,7 +230,6 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
       if(num.plots<17) cex.mult=4
                         else cex.mult=3
             }
-            browser()
  if(Debug==FALSE) jpeg(output.file,width=wdth,height=wdth,pointsize=13)
     MyPairs(cbind(TrueResponse,HighToPlot),cor.range=cor.range,missing.summary=missing.summary,my.labels=(as.vector(High.cor)[1:num.plots]),
     lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,
@@ -244,7 +243,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
 MyPairs<-function (x,missing.summary,my.labels,labels, panel = points, ..., lower.panel = panel,
     upper.panel = panel,diag.panel = NULL, text.panel = textPanel,
     label.pos = 0.5 + has.diag/3, cex.labels = NULL, font.labels = 1,
-    row1attop = TRUE, gap = 1,cex.mult,famly=binomial)
+    row1attop = TRUE, gap = 1,cex.mult,famly="binomial")
 {
     response<-x[,1]
     response[response==-9999]<-0
@@ -335,14 +334,11 @@ MyPairs<-function (x,missing.summary,my.labels,labels, panel = points, ..., lowe
                   box()
                      my.lab<-paste("cor=",round(max(abs(cor(x[,(i)],response,use="pairwise.complete.obs")),abs(cor(x[,(i)],response,method="spearman",use="pairwise.complete.obs")),
                      abs(cor(x[,(i)],response,method="kendall",use="pairwise.complete.obs"))),digits=2),sep="")
-                 browser()
-                   if(famly=gaussian) {panel.smooth(as.vector(x[, (i)]), as.vector(response),famly=famly,...)
+                   if(famly=="gaussian") {panel.smooth(as.vector(x[, (i)]), as.vector(response),...)
                       title(ylab=paste("cor=",round(max(abs(cor(x[,(i)],response,use="pairwise.complete.obs")),
                           abs(cor(x[,(i)],response,method="spearman",use="pairwise.complete.obs")),abs(cor(x[,(i)],response,method="kendall",use="pairwise.complete.obs"))),digits=2),
                           sep=""),line=.02,cex.lab=1.5)
-                   }
-                  pct.dev<-try(my.panel.smooth(as.vector(x[, (i)]), as.vector(response),cex.mult=cex.mult,cex.lab=cex.mult,line=1,famly=famly,...),silent=TRUE)
-                         
+                   }  else pct.dev<-try(my.panel.smooth(as.vector(x[, (i)]), as.vector(response),cex.mult=cex.mult,cex.lab=cex.mult,line=1,famly=famly,...),silent=TRUE)          
 
                  } else{
             
@@ -383,7 +379,7 @@ MyPairs<-function (x,missing.summary,my.labels,labels, panel = points, ..., lowe
                   if(length(unique(x[,i])>2)){
                   localLowerPanel(as.vector(x[, j]), as.vector(x[,
                     i]),cex=cex.mult*3,cor.mult=cex.mult,...) } else {
-                      my.panel.smooth(as.vector(x[, j]),as.vector(x[,i]),cex.mult=cex.mult*2,Ylab="")
+                      my.panel.smooth(as.vector(x[, j]),as.vector(x[,i]),cex.mult=cex.mult*2,Ylab="",famly=famly)
                     }    
             else {
             localUpperPanel(as.vector(x[, j]), as.vector(x[,
@@ -442,6 +438,7 @@ Args <- commandArgs(trailingOnly=FALSE)
  
  ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"my.panel.smooth.binary.r",sep="\\"))
+source(paste(ScriptPath,"read.dat.r",sep="\\"))
 	#Run the Pairs Explore function with these parameters
     Pairs.Explore(num.plots=num.plots,
     min.cor=min.cor,
