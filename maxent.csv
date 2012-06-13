@@ -1,5 +1,9 @@
 Flag ,Abbrv ,Type ,Default ,Meaning ,VisTrailsNotes
-projectionlayers ,j ,directory ,,"Location of an alternate set of environmental variables. Maxent models will be projected onto these variables.Can be a .csv file (in SWD format) or a directory containing one file per variable.Multiple projection files/directories can be separated by commas. ",
+environmentallayers,e,directory ,,"If this is not supplied we will create a SWD version of this from the background points generated from sahm, i.e. -9998 or -9999 in the MDS response column.",
+biasfile,,file ,,"Sampling is assumed to be biased according to the sampling distribution given in this grid file.
+Values in this file must not be zero or negative. MaxEnt will factor out the bias.
+Requires environmental data to be in grids, rather than a SWD format file 
+",This will be ignored if environmentallayers is not selected.
 randomtestpoints ,X ,integer ,0,"Percentage of presence localities to be randomly set aside as test points, used to compute AUC, omission etc. ","If the MDS input is from the test training split the will not be used, but instead this file will be generated from the input MDS Split column where it equals 'test'"
 betamultiplier ,b ,double ,1,Multiply all automatic regularization parameters by this number. A higher number gives a more spread-out distribution. ,
 maximumbackground ,MB ,integer ,10000,"If the number of background points / grid cells is larger than this number, then this number of cells is chosen randomly for background points ",
@@ -36,3 +40,4 @@ visible ,z ,boolean ,true ,Make the Maxent user interface visible ,
 warnings ,,boolean ,true ,"Pop up windows to warn about potential problems with input data. Regardless of this setting, warnings are always printed to the log file. ",
 writeclampgrid ,,boolean ,false ,"Write a grid that shows the spatial distribution of clamping. At each point, the value is the absolute difference between prediction values with and without clamping. ",
 plots ,,boolean ,true ,Write various plots for inclusion in .html output ,
+projectionlayers ,j ,directory ,,"Location of an alternate set of environmental variables. Maxent models will be projected onto these variables.Can be a .csv file (in SWD format) or a directory containing one file per variable.Multiple projection files/directories can be separated by commas. ",

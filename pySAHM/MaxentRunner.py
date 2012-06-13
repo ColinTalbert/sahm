@@ -71,6 +71,7 @@ class MAXENTRunner(object):
         self.maxentpath = ''
         self.inputMDS = ''
         self.projectionlayers = ''
+        self.environmentallayers = ''
         self.testCSV = ''
         self.trainingCSV = ''
         self.backgroundCSV = ''
@@ -105,27 +106,31 @@ class MAXENTRunner(object):
         if self.testCSV <> '':
             self.args['testsamplesfile'] = '"' + self.testCSV + '"'
         
-        if self.backgroundCSV <> '':
+
+        if self.args['environmentallayers'] != '':
+            self.args['environmentallayers'] = '"' + self.args['environmentallayers'] + '"'
+            if self.args.has_key('biasfile'):
+                self.args['biasfile'] = '"' + self.args['biasfile'] + '"'
+        elif self.backgroundCSV != '': 
             self.args['environmentallayers'] = '"' + self.backgroundCSV + '"'
-        
-        
+            if self.args.has_key('biasfile'):
+                #without environmentallayers the biasfile has no meaning
+                self.writetolog("The supplied biasfile will be ignored since no environmentallayers were provided", True, True)
+                self.args.pop('biasfile')              
+                   
         self.args['autorun'] = 'true'
-        #self.args['outputgrids'] = 'false'
         
         if ' ' in self.args['species_name']:
             self.args['species_name'] = self.args['species_name'].replace(' ', '_')
         
         #quote out the the output folder and projection layers args with quotes
         self.args["outputdirectory"] = '"' + self.args["outputdirectory"] + '"'
-        self.args["projectionlayers"] = '"' + self.args["projectionlayers"].replace(",", '","') + '"'
             
         strargs = ['='.join((str(k),str(v))) for k,v in self.args.iteritems() 
                     if (k <> "species_name" and k <> "inputMDS")]
         
         for categorical in self.categoricals:
             strargs += ['togglelayertype=' + categorical.replace('_categorical', '')]
-        #strargs = ' '.join(strargs)
-        #print strargs
         
         if not self.maxentpath.endswith('.jar'):
             jar = '"' + os.path.join(self.maxentpath, 'maxent.jar') + '"'
@@ -172,6 +177,13 @@ class MAXENTRunner(object):
         
         if not self.args.has_key('projectionlayers'):
              self.args['projectionlayers'] = ''
+             
+        if not self.args.has_key('environmentallayers'):
+             self.args['environmentallayers'] = ''
+        else:
+            if not os.path.isdir(self.args['environmentallayers']):
+                raise RuntimeError(self, 'Input environmentallayers directory, ' + self.args['environmentallayers'] + ', could not be found on file system')
+                 
              
         if self.args['projectionlayers'] <> '':
              dirs = self.args['projectionlayers'].split(',')
@@ -233,9 +245,13 @@ class MAXENTRunner(object):
         
         #loop through the rows sending each row to the appropriate file
         hasBackground = False
+        absencePointCount = 0
         for row in MDSreader:
             self.convertNA(row)
-            if row[2] == '-9999' or row [2] == '-9998':
+            if row[2] == '0':
+                #this is an absence point, we will throw it away.
+                 absencePointCount += 1
+            elif row[2] == '-9999' or row [2] == '-9998':
                 hasBackground = True
                 vals = self.usedValues(row, covariateIndexes)
                 backgroundWriter.writerow([''] + row[:2] + vals)
@@ -249,14 +265,24 @@ class MAXENTRunner(object):
             elif row[splitcol] == 'train'  and str(row[2]) != '0':
                 vals = self.usedValues(row, covariateIndexes)
                 trainingWriter.writerow([self.args['species_name']] + row[:2] + vals)
-            #any absense points (row[2] == 0) will be ignored for maxent
+
+                
         
-        if not hasBackground:
-            msg = "    No background points were detected in the input file."
-            msg += "\n    This implementation of Maxent does not have access to prepared ASCII environmental layers"
-            msg += " from which to extract values.  Background points must be supplied in the MDS file."
+        if not hasBackground and self.args["environmentallayers"] == '' :
+            msg = "    No environmental layers were provided and "
+            msg += "\n no background points were detected in the input file."
+            msg += "\n    Maxent requires pregenerated background points or environmental layer"
+            msg += "\nfrom which to extract values."
             self.writetolog(msg)
             raise RuntimeError(msg)
+        elif hasBackground and self.args["environmentallayers"] != '':
+            msg = "    Both background points in the MDS file and a "
+            msg += "\n folder of environmental layers were specified."
+            msg += "\n    Either of these could be used by Maxent to specify/create background points.\n\n"
+            msg += "Remove either the background points from the MDSBuilder or the environmental layer."
+            self.writetolog(msg)
+            raise RuntimeError(msg)
+
         
         #del our writers 
         try:
@@ -276,7 +302,8 @@ class MAXENTRunner(object):
         #First we have to figure out what they passed us
         #either a directory, a SWD file, or a csv with a list of files
         
-        if self.args['projectionlayers'] <> '':
+        if self.args['projectionlayers'] != '' or \
+            self.args['environmentallayers'] != '':
             pass
         else:
             self.args['outputgrids'] = 'false'
