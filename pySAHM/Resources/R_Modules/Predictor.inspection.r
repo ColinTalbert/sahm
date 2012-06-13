@@ -1,6 +1,5 @@
 Predictor.inspection<-function(predictor,input.file,output.dir,response.col="ResponseBinary",pres=TRUE,absn=TRUE,bgd=TRUE){
-  chk.libs("Pred.inspect")
-cex.mult<-3.2
+
 
 #This function produces several plots to inspect the relationship between the predictor and response
 #and the spatial relationship between response and the predictor. 
@@ -10,9 +9,11 @@ cex.mult<-3.2
 #I replace the gam with a glm quadratic in the predictor 
 
 #Written by Marian Talbert 5/23/2012
+  chk.libs("Pred.inspect")
+cex.mult<-3.2
 
    #Read input data and remove any columns to be excluded
-    read.dat(input.file,response.col=response.col)
+    read.dat(input.file,response.col=response.col,is.inspect=TRUE)
     
           if(any(response==-9998)) {
            response[response==-9998]<-0
@@ -22,14 +23,13 @@ cex.mult<-3.2
             abs.lab<-"Abs"
             pres.lab<-"Pres"
            }
-       dat<-dat[order(response),]
-       response<-response[order(response)]
+      
      temp<-c(0,1,-9999)
      temp<-temp[c(absn,pres,bgd)]
      dat<-dat[response%in%temp,]
      response<-response[response%in%temp]
-     if(tolower(response.col)=="responsebinary") famly<-binomial
-     else famly=poisson
+     if(tolower(response.col)=="responsebinary") famly<-"binomial"
+     else famly="poisson"
      
      if(any(unique(response)==-9999) & !any(unique(response)==0)){
     abs.lab<-"PsedoAbs"
@@ -44,7 +44,7 @@ cex.mult<-3.2
      output.file<-paste(output.dir,paste(names(dat)[pred.indx],".jpg",sep=""),sep="\\")
      ### Producing some plots
     jpeg(output.file,pointsize=13,height=2000,width=2000,quality=100)
-         par(mfrow=c(2,2),mar=c(5,7,9,6))
+         par(mfrow=c(2,2),mar=c(5,7,9,6),oma=c(6,2,2,2))
              hst<-hist(pred,plot=FALSE)
       ####PLOT 1. new
          hist(pred,col="red",xlab="",main="",cex.lab=cex.mult,cex=cex.mult,cex.main=cex.mult,cex.axis=.7*cex.mult,ylim=c(0,1.5*max(hst$counts)))
@@ -87,9 +87,11 @@ cex.mult<-3.2
                  response.table<-table(response)
                
          if(length(response.table)>1){
-            plot(x,y,ylab="",xlab=predictor,type="n",cex.lab=cex.mult,cex.axis=.7*cex.mult,)
-            gam.failed<-my.panel.smooth(x=x, y=y,cex.mult=cex.mult,pch=21,cex.lab=cex.mult,cex.axis=.7*cex.mult,cex.lab=cex.mult,family=famly)
+         par(mgp=c(4, 1, 0),mar=c(7,7,5,5))
+            plot(x,y,ylab="",xlab="",type="n",cex.axis=.7*cex.mult,)
+            gam.failed<-my.panel.smooth(x=x, y=y,cex.mult=cex.mult,pch=21,cex.lab=cex.mult,cex.axis=.9*cex.mult,cex.lab=cex.mult,family=famly,lin=4)
             title(main=paste(ifelse(gam.failed,"GLM","GAM")," showing predictor response relationship",sep=""),cex.main=.8*cex.mult)
+            title(xlab=predictor,line=5,cex.lab=1.2*cex.mult)
         }
     dev.off()    
 }
