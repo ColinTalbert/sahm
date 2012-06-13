@@ -125,5 +125,5 @@ Args <- commandArgs(trailingOnly=FALSE)
 ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"chk.libs.r",sep="\\"))
 source(paste(ScriptPath,"my.panel.smooth.binary.r",sep="\\"))
-
+source(paste(ScriptPath,"read.dat.r",sep="\\"))
 Predictor.inspection(predictor=predictor,input.file=infile,output.dir=output,response.col=responseCol,pres=TRUE,absn=TRUE,bgd=TRUE)

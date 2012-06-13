@@ -230,7 +230,6 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
       if(num.plots<17) cex.mult=4
                         else cex.mult=3
             }
-            browser()
  if(Debug==FALSE) jpeg(output.file,width=wdth,height=wdth,pointsize=13)
     MyPairs(cbind(TrueResponse,HighToPlot),cor.range=cor.range,missing.summary=missing.summary,my.labels=(as.vector(High.cor)[1:num.plots]),
     lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,
@@ -335,8 +334,8 @@ MyPairs<-function (x,missing.summary,my.labels,labels, panel = points, ..., lowe
                   box()
                      my.lab<-paste("cor=",round(max(abs(cor(x[,(i)],response,use="pairwise.complete.obs")),abs(cor(x[,(i)],response,method="spearman",use="pairwise.complete.obs")),
                      abs(cor(x[,(i)],response,method="kendall",use="pairwise.complete.obs"))),digits=2),sep="")
-                 browser()
-                   if(famly=gaussian) {panel.smooth(as.vector(x[, (i)]), as.vector(response),famly=famly,...)
+                
+                   if(famly==gaussian) {panel.smooth(as.vector(x[, (i)]), as.vector(response),famly=famly,...)
                       title(ylab=paste("cor=",round(max(abs(cor(x[,(i)],response,use="pairwise.complete.obs")),
                           abs(cor(x[,(i)],response,method="spearman",use="pairwise.complete.obs")),abs(cor(x[,(i)],response,method="kendall",use="pairwise.complete.obs"))),digits=2),
                           sep=""),line=.02,cex.lab=1.5)
@@ -442,6 +441,7 @@ Args <- commandArgs(trailingOnly=FALSE)
  
  ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"my.panel.smooth.binary.r",sep="\\"))
+source(paste(ScriptPath,"read.dat.r",sep="\\"))
 	#Run the Pairs Explore function with these parameters
     Pairs.Explore(num.plots=num.plots,
     min.cor=min.cor,
