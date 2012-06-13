@@ -246,7 +246,7 @@ class SelectListDialog(QtGui.QDialog):
         self.verticalLayout_3.addLayout(self.horizontalLayout)
         self.horizontalLayout_4.addLayout(self.verticalLayout_3)
 
-        self.setWindowTitle(_fromUtf8("Covariate Coorelation viewer"))
+        self.setWindowTitle(_fromUtf8("Covariate Correlation viewer"))
         self.label_2.setText(_fromUtf8("Covariates"))
         self.btnRunR.setText(_fromUtf8("Update"))
         self.label.setText(_fromUtf8("Threshold"))
