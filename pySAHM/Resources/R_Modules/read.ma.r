@@ -81,12 +81,13 @@
       if(length(table(dat[r.col]))<2) stop("Response column has only one unique value")
       names(dat)[r.col]<-"response"
       rm.list<-vector()
-        
+      browser()  
         # remove background points or record these as absence for pseudoabsence (Only partially implemented)
+        if(length(which(is.na(dat[,r.col]),arr.ind=TRUE))>0) dat<-dat[-c(which(is.na(dat[,r.col]),arr.ind=TRUE)),]
         if(any(dat[,r.col]==-9998)) {dat[which(dat[,r.col]==-9998,arr.ind=TRUE),r.col]<-0
         out.list$input$PsuedoAbs=TRUE
         }
-         if(length(which(dat[,r.col]==-9999,arr.ind=TRUE))>0) dat<-dat[-c(which(dat[,r.col]==-9999,arr.ind=TRUE)),]
+       
         # remove evaluation points
         if(any(!is.na(match("EvalSplit",names(dat))))){
              EvalIndx<-match("EvalSplit",names(dat))
