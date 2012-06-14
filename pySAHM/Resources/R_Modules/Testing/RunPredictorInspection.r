@@ -26,11 +26,14 @@ predictor="bio_14_2009_2km"
 infil="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\modelSelection_split_8.csv" 
 output.dir="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode"
 predictor="EVI_baselevels2_2001" 
-    
+i="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\modelSelection_split_20.csv" 
+o="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\PredictorInspections" 
+rc="responseBinary" 
+predictor="romoveg_rc_categorical"    
     Predictor.inspection(predictor,
-        input.file=infil,
-    		output.dir=output.dir,
-    		response.col=response.col,
+        input.file=i,
+    		output.dir=o,
+    		response.col=rc,
     		pres=TRUE,
     		absn=TRUE,
-    		bgd=TRUE)
+    		bgd=FALSE)

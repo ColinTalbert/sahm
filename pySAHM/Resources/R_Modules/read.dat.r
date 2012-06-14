@@ -29,7 +29,7 @@ read.dat<-function(input.file,hl=NULL,include=NULL,response.col,is.inspect=FALSE
           dat<-dat[order(response),]
           response<-response[order(response)]
            dat[dat==-9999]<-NA
-           
+             
           if(is.inspect){ #for predictor inspector and pairs explore take some additional steps
                  #remove testing split ROWS
                  if(!is.na(match("EvalSplit",names(dat)))) {
@@ -64,9 +64,9 @@ read.dat<-function(input.file,hl=NULL,include=NULL,response.col,is.inspect=FALSE
                  temp<-c(0,1,-9999)
                  temp<-temp[c(absn,pres,bgd)]
                  dat<-dat[response%in%temp,]
+                 TrueResponse<-TrueResponse[response%in%temp]
                  response<-response[response%in%temp]
-                 if(tolower(response.col)=="responsecount") TrueResponse<-TrueResponse[response%in%temp]
-                 if(tolower(response.col)=="responsebinary") TrueResponse<-response
+                 
                 
                  assign("TrueResponse",TrueResponse,envir=parent.frame())     
            }

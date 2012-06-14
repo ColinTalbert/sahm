@@ -28,6 +28,7 @@ Predictor.inspection<-function(predictor,input.file,output.dir,response.col="Res
      
      output.file<-paste(output.dir,paste(names(dat)[pred.indx],".jpg",sep=""),sep="\\")
      ### Producing some plots
+    
     jpeg(output.file,pointsize=13,height=2000,width=2000,quality=100)
          par(mfrow=c(2,2),mar=c(5,7,9,6),oma=c(6,2,2,2))
              hst<-hist(pred,plot=FALSE)

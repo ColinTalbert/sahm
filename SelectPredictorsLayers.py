@@ -448,7 +448,7 @@ class SelectListDialog(QtGui.QDialog):
             writetolog("Missing output from R processing: " + self.displayJPEG)
             raise Exception, "Missing output from R processing"
     
-    def saveExploreOptions(self):
+    def saveExploreOptions(self,args):
         if self.chkPresence.checkState() == QtCore.Qt.Checked:
             args = " pres=TRUE"
         else:
