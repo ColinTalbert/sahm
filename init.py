@@ -849,7 +849,7 @@ class MDSBuilder(Module):
 
     def compute(self):
         port_map = {'fieldData': ('fieldData', None, False),
-                    'backgroundPointType': ('pointtype', None, False),
+                    'backgroundPointType': ('pointType', None, False),
                     'backgroundpointCount': ('pointCount', None, False),
                     'backgroundProbSurf': ('probSurfacefName', None, False),
                     'Seed': ('seed', None, False)}
@@ -1708,7 +1708,8 @@ class MAXENT(Module):
                     if port[1] == "(edu.utah.sci.vistrails.basic:Boolean)":
                         port_val = str(port_val).lower()
                     elif (port[1] == "(edu.utah.sci.vistrails.basic:Path)" or \
-                        port[1] == "(edu.utah.sci.vistrails.basic:File)"):
+                        port[1] == "(edu.utah.sci.vistrails.basic:File)" or \
+                        port[1] == "(edu.utah.sci.vistrails.basic:Directory)"):
                         port_val = port_val.name
                     argWriter.writerow([port[0], port_val])
                 else:
@@ -1724,7 +1725,7 @@ class MAXENT(Module):
                         pass
         if self.hasInputFromPort('projectionlayers'):
             value = self.forceGetInputListFromPort('projectionlayers')
-            projlayers = ','.join([path.name for path in value])
+            projlayers = ','.join(['"' + path.name + '"' for path in value])
             argWriter.writerow(['projectionlayers', projlayers])
             
         argWriter.writerow(['inputMDS', ourMaxent.inputMDS])
@@ -1843,7 +1844,6 @@ def initialize():
     
 def finalize():
     pass
-    #utils.cleantemps()#No longer used  
 
 def generate_namespaces(modules):
     module_list = []
@@ -1887,10 +1887,7 @@ def build_available_trees():
     for row in csv_reader:
         if row[2] not in trees:
             trees[row[2]] = {}
-        available_dict = trees[row[2]]
-#        if 'Daymet' not in available_dict:
-#            available_dict['Daymet'] = []
-#        available_dict['Daymet'].append((row[0], row[1], row[3]))            
+        available_dict = trees[row[2]]          
         if row[3] not in available_dict:
             available_dict[row[3]] = []
         available_dict[row[3]].append((row[0], row[1], row[4]))
