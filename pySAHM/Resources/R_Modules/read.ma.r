@@ -119,7 +119,7 @@
       ######################### REMOVING INCOMPLETE CASES ###############
         #remove incomplete cases but only for include variables
        all.cases<-nrow(dat)
-          dat[dat==-9999]<-NA
+          
           dat<-dat[complete.cases(dat[,-c(rm.list)]),]
           comp.cases<-nrow(dat)
           if(comp.cases/all.cases<.9) warning(paste(round((1-comp.cases/all.cases)*100,digits=2),"% of cases were removed because of missing values",sep=""))

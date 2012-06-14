@@ -1,4 +1,4 @@
-read.dat<-function(input.file,hl=NULL,include=NULL,response.col,is.inspect=FALSE){
+read.dat<-function(input.file,hl=NULL,include=NULL,response.col,is.inspect=FALSE,pres=TRUE,absn=TRUE,bgd=TRUE){
 #A small function to read in a csv with three header lines and assign everythinig
 #to the parent environment
 
@@ -28,20 +28,48 @@ read.dat<-function(input.file,hl=NULL,include=NULL,response.col,is.inspect=FALSE
           response<-dat[,match(tolower(response.col),tolower(names(dat)))]
           dat<-dat[order(response),]
           response<-response[order(response)]
-
-           #remove testing split ROWS
-          if(is.inspect){
-               if(!is.na(match("EvalSplit",names(dat)))) {
-                    response<-response[-c(which(dat$EvalSplit=="test"),arr.ind=TRUE)]
-                    dat<-dat[-c(which(dat$EvalSplit=="test"),arr.ind=TRUE),]
-                   
-                }
-               if(!is.na(match("Split",names(dat)))){
-                   response<-response[-c(which(dat$Split=="test"),arr.ind=TRUE)] 
-                   dat<-dat[-c(which(dat$Split=="test"),arr.ind=TRUE),]
-                  
-               }
-                    }
+           dat[dat==-9999]<-NA
+           
+          if(is.inspect){ #for predictor inspector and pairs explore take some additional steps
+                 #remove testing split ROWS
+                 if(!is.na(match("EvalSplit",names(dat)))) {
+                      response<-response[-c(which(dat$EvalSplit=="test"),arr.ind=TRUE)]
+                      dat<-dat[-c(which(dat$EvalSplit=="test"),arr.ind=TRUE),]  
+                  }
+                 if(!is.na(match("Split",names(dat)))){
+                     response<-response[-c(which(dat$Split=="test"),arr.ind=TRUE)] 
+                     dat<-dat[-c(which(dat$Split=="test"),arr.ind=TRUE),]
+                 }
+                   #for the purpose of the pairs plot, taking all counts greater than 1 and setting them equal to presence
+                   #this is never exported the true responses are also used so we have to distinguish
+                  if(response.col=="responseCount") {
+                        TrueResponse<-response
+                        response[response>=1]<-1
+                        famly="poisson"
+                  } else {famly="binomial"
+                          TrueResponse<-response
+                          }
+                          TrueResponse[TrueResponse%in%c(-9999,-9998)]<-0
+                      assign("famly",famly,envir=parent.frame())
+                  if(any(response==-9998)) {
+                       response[response==-9998]<-0
+                         assign("abs.lab","Avail",envir=parent.frame())
+                         assign("pres.lab","Used",envir=parent.frame())
+                       } else {
+                          assign("abs.lab","Abs",envir=parent.frame())
+                          assign("pres.lab","Pres",envir=parent.frame())
+                       }
+                 
+                 #remove any of pres absn or bgd that aren't desired
+                 temp<-c(0,1,-9999)
+                 temp<-temp[c(absn,pres,bgd)]
+                 dat<-dat[response%in%temp,]
+                 response<-response[response%in%temp]
+                 if(tolower(response.col)=="responsecount") TrueResponse<-TrueResponse[response%in%temp]
+                 if(tolower(response.col)=="responsebinary") TrueResponse<-response
+                
+                 assign("TrueResponse",TrueResponse,envir=parent.frame())     
+           }
             assign("response",response,envir=parent.frame())
             assign("dat",dat,envir=parent.frame())
  return()
