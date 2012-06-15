@@ -46,7 +46,7 @@ chk.libs <- function(Model){
 #Checks libraries for many functions I should probably pass just the list of libs to check but this helps me update 
 #documentation on all libraries required by SAHM 
 #Written by Marian Talbert 2/2012
-
+     if(Model=="PairsExplore") libs=list("gam")
      if(Model=="Pred.inspect") libs=list("raster","gam")
      if(Model=="mars")        libs<-list("PresenceAbsence","rgdal","sp","survival","mda","raster","tcltk2","foreign","ade4","ROCR","ncf")
      if(Model=="glm")         libs<-list("PresenceAbsence","rgdal","sp","survival","tools","raster","tcltk2","foreign","ade4","ROCR","ncf")

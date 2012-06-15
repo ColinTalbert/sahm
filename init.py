@@ -763,14 +763,9 @@ class BoostedRegressionTree(Model):
    
 class KDEGenerator(Module):
     '''
-    
-    #Written by Marian Talbert 4/5/2012
-    #This function takes a field data file and based on the options specified creates a bias or binary mask for generation of background points
-    #The mask can be based on a KDE function or a minimum convex polygon (method=KDE or MCP) bias specifies that a continuous surface is to be created
-    #This is ignored by method=MCP isopleth specifies the isopleth to be used (a number, generally 95).  It is assumed that the 8th name in the input csv is the name of a template
-    #that can be used.  currently 4 methods are available for optimization of the kde bandwith (bw.otim=adhoc, Hpi,Hscv,Hbcv,Hlscv.
-    #A tiff is generated using the header from the template csv which can be used by the MDS builder to generate background points.
     '''
+    __doc__ = GenModDoc.construct_module_doc('KDEGenerator')
+     
     _input_ports = [('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                     ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
                         ('method', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["KDE"]', 'optional':True}),
@@ -778,7 +773,14 @@ class KDEGenerator(Module):
                         ('isopleth', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["95"]', 'optional':True}),
                         ('bias', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True})]
     _output_ports = [("KDE", "(edu.utah.sci.vistrails.basic:File)")]
-                        
+    
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return GenModDoc.construct_port_doc(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+         return GenModDoc.construct_port_doc(cls, port_name, 'out') 
+                         
     def compute(self):
         port_map = {'templateLayer': ('templatefName', None, True),
                     'fieldData': ('fieldData', None, False),
@@ -847,7 +849,7 @@ class MDSBuilder(Module):
 
     def compute(self):
         port_map = {'fieldData': ('fieldData', None, False),
-                    'backgroundPointType': ('pointtype', None, False),
+                    'backgroundPointType': ('pointType', None, False),
                     'backgroundpointCount': ('pointCount', None, False),
                     'backgroundProbSurf': ('probSurfacefName', None, False),
                     'Seed': ('seed', None, False)}
@@ -1706,7 +1708,8 @@ class MAXENT(Module):
                     if port[1] == "(edu.utah.sci.vistrails.basic:Boolean)":
                         port_val = str(port_val).lower()
                     elif (port[1] == "(edu.utah.sci.vistrails.basic:Path)" or \
-                        port[1] == "(edu.utah.sci.vistrails.basic:File)"):
+                        port[1] == "(edu.utah.sci.vistrails.basic:File)" or \
+                        port[1] == "(edu.utah.sci.vistrails.basic:Directory)"):
                         port_val = port_val.name
                     argWriter.writerow([port[0], port_val])
                 else:
@@ -1722,7 +1725,7 @@ class MAXENT(Module):
                         pass
         if self.hasInputFromPort('projectionlayers'):
             value = self.forceGetInputListFromPort('projectionlayers')
-            projlayers = ','.join([path.name for path in value])
+            projlayers = ','.join(['"' + path.name + '"' for path in value])
             argWriter.writerow(['projectionlayers', projlayers])
             
         argWriter.writerow(['inputMDS', ourMaxent.inputMDS])
@@ -1841,7 +1844,6 @@ def initialize():
     
 def finalize():
     pass
-    #utils.cleantemps()#No longer used  
 
 def generate_namespaces(modules):
     module_list = []
@@ -1885,10 +1887,7 @@ def build_available_trees():
     for row in csv_reader:
         if row[2] not in trees:
             trees[row[2]] = {}
-        available_dict = trees[row[2]]
-#        if 'Daymet' not in available_dict:
-#            available_dict['Daymet'] = []
-#        available_dict['Daymet'].append((row[0], row[1], row[3]))            
+        available_dict = trees[row[2]]          
         if row[3] not in available_dict:
             available_dict[row[3]] = []
         available_dict[row[3]].append((row[0], row[1], row[4]))

@@ -1,0 +1,236 @@
+
+
+Session started
+ at: 06/11/2012 13:29
+    Starting processing of K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_3.tif
+  ratio of source cell size to template cell size = 10.0040989277    template cell size = 100.0    bio_3 cell size = 1000.40989277
+  cell ratio > .5: reprojecting and resampling to template parameters only
+    Starting intermediate reprojection of: bio_3
+
+Session continued
+ at: 06/11/2012 13:29
+    Starting processing of K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_1.tif
+  ratio of source cell size to template cell size = 10.0040989277    template cell size = 100.0    bio_1 cell size = 1000.40989277
+  cell ratio > .5: reprojecting and resampling to template parameters only
+
+Session continued
+ at: 06/11/2012 13:29
+    Starting intermediate reprojection of: bio_1
+    Starting processing of K:\GIS_LIBRARY\Climate\WorldClim\BioclimaticVariables\bio_30s_esri\bio\bio_9
+
+Session continued
+ at: 06/11/2012 13:29
+  ratio of source cell size to template cell size = 7.0545177484    template cell size = 100.0    bio_9 cell size = 705.45177484
+  cell ratio > .5: reprojecting and resampling to template parameters only
+    Starting processing of \\IGSKBACBVMFS002\InvasivesNAS$\Phenology Share\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals2\EVI_smallintegrals2_Average.tif
+    Starting intermediate reprojection of: bio_9
+  ratio of source cell size to template cell size = 2.31568488738    template cell size = 100.0    EVI_smallintegrals2_Average cell size = 231.568488738
+  cell ratio > .5: reprojecting and resampling to template parameters only
+    Starting intermediate reprojection of: EVI_smallintegrals2_Average
+    Finished reprojection bio_3
+    Finished reprojection bio_1
+    Finished reprojection bio_9
+
+Session continued
+ at: 06/11/2012 13:29
+    Starting processing of K:\GIS_LIBRARY\Climate\WorldClim\MaxTempAvg1950-2000\tmax_30s_esri\tmax\tmax_1
+
+Session continued
+ at: 06/11/2012 13:29
+    Starting processing of K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMonthlyPrecip\ppt12.tif
+  ratio of source cell size to template cell size = 7.0545177484    template cell size = 100.0    tmax_1 cell size = 705.45177484
+  cell ratio > .5: reprojecting and resampling to template parameters only
+  ratio of source cell size to template cell size = 10.0040989277    template cell size = 100.0    ppt12 cell size = 1000.40989277
+    Starting intermediate reprojection of: tmax_1
+  cell ratio > .5: reprojecting and resampling to template parameters only
+    Starting intermediate reprojection of: ppt12
+    Finished reprojection EVI_smallintegrals2_Average
+
+Session continued
+ at: 06/11/2012 13:29
+    Starting processing of K:\GIS_LIBRARY\Elevation\EDNA\cti\cti
+
+Session continued
+ at: 06/11/2012 13:29
+    Starting processing of \\IGSKBACBVMFS002\InvasivesNAS$\Phenology Share\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\amplitudes1\NDVI_amplitudes1_2000.tif
+  ratio of source cell size to template cell size = 0.301169039848    template cell size = 100.0    cti cell size = 30.1169039848
+  cell ratio <= .5: reprojecting and resampling to template parameters    then aggregating the reprojected raster to match template parameters
+    Finished reprojection tmax_1
+    Starting intermediate reprojection of: cti
+  ratio of source cell size to template cell size = 2.31568488738    template cell size = 100.0    NDVI_amplitudes1_2000 cell size = 231.568488738
+  cell ratio > .5: reprojecting and resampling to template parameters only
+    Starting intermediate reprojection of: NDVI_amplitudes1_2000
+    Finished reprojection ppt12
+
+Session continued
+ at: 06/11/2012 13:29
+    Starting processing of K:\GIS_LIBRARY\Elevation\EDNA\dem\dem
+  ratio of source cell size to template cell size = 0.301169039848    template cell size = 100.0    dem cell size = 30.1169039848
+  cell ratio <= .5: reprojecting and resampling to template parameters    then aggregating the reprojected raster to match template parameters
+    Starting intermediate reprojection of: dem
+    Finished reprojection NDVI_amplitudes1_2000
+
+Session continued
+ at: 06/11/2012 13:29
+    Starting processing of K:\GIS_LIBRARY\Elevation\EDNA\slopedeg\slopedeg
+
+Session continued
+ at: 06/11/2012 13:29
+  ratio of source cell size to template cell size = 0.301169039848    template cell size = 100.0    slopedeg cell size = 30.1169039848
+  cell ratio <= .5: reprojecting and resampling to template parameters    then aggregating the reprojected raster to match template parameters
+    Starting processing of K:\GIS_LIBRARY\Elevation\EDNA\facc\facc
+    Starting intermediate reprojection of: slopedeg
+  ratio of source cell size to template cell size = 0.301169039848    template cell size = 100.0    facc cell size = 30.1169039848
+  cell ratio <= .5: reprojecting and resampling to template parameters    then aggregating the reprojected raster to match template parameters
+    Starting intermediate reprojection of: facc
+
+Session continued
+ at: 06/11/2012 13:29
+    Starting processing of K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2004\bio_01_2004_4km.img
+  ratio of source cell size to template cell size = 35.2728213448    template cell size = 100.0    bio_01_2004_4km cell size = 3527.28213448
+  cell ratio > .5: reprojecting and resampling to template parameters only
+    Starting intermediate reprojection of: bio_01_2004_4km
+
+Session continued
+ at: 06/11/2012 13:29
+
+Session continued
+ at: 06/11/2012 13:29
+
+Session continued
+ at: 06/11/2012 13:29
+    Starting processing of K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1971_2009_2km\BioClim_1971_2009\BioClim_2002\bio_11_2002_2km.img
+    Starting processing of K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_01_800m.img
+  ratio of source cell size to template cell size = 17.636274207    template cell size = 100.0    bio_11_2002_2km cell size = 1763.6274207
+  cell ratio > .5: reprojecting and resampling to template parameters onlyate cell size = 100.0    ppt_1971_2000_01_800m cell size = 705.450928301
+    Starting processing of \\IGSKBACBVMFS002\InvasivesNAS$\Phenology Share\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\baselevels1\EVI_baselevels1_2006.tif
+  cell ratio > .5: reprojecting and resampling to template parameters only
+
+Session continued
+ at: 06/11/2012 13:29
+    Starting intermediate reprojection of: bio_11_2002_2km
+    Starting intermediate reprojection of: ppt_1971_2000_01_800m
+
+Session continued
+ at: 06/11/2012 13:29
+
+Session continued
+ at: 06/11/2012 13:29
+    Starting processing of K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_19_1971_2000_800m.img
+  ratio of source cell size to template cell size = 2.31568488738    template cell size = 100.0    EVI_baselevels1_2006 cell size = 231.568488738
+  cell ratio > .5: reprojecting and resampling to template parameters only
+    Starting processing of \\IGSKBACBVMFS002\InvasivesNAS$\Phenology Share\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\amplitudes1\EVI_amplitudes1_2000.tif
+    Starting intermediate reprojection of: EVI_baselevels1_2006
+
+Session continued
+ at: 06/11/2012 13:29Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2007\bio_19_2007_4km.img
+  ratio of source cell size to template cell size = 7.05450928301    template cell size = 100.0    bio_19_1971_2000_800m cell size = 705.450928301
+  cell ratio > .5: reprojecting and resampling to template parameters only
+    Starting intermediate reprojection of: bio_19_1971_2000_800m
+  ratio of source cell size to template cell size = 35.2725419866    template cell size = 100.0    bio_19_2007_4km cell size = 3527.25419866
+  cell ratio > .5: reprojecting and resampling to template parameters only
+  ratio of source cell size to template cell size = 2.31568488738    template cell size = 100.0    EVI_amplitudes1_2000 cell size = 231.568488738
+    Starting processing of \\IGSKBACBVMFS002\InvasivesNAS$\Phenology Share\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\landcover\NDVI_landcover_2007.tif
+    Starting intermediate reprojection of: EVI_amplitudes1_2000
+    Starting intermediate reprojection of: bio_19_2007_4km
+  ratio of source cell size to template cell size = 2.31568488738    template cell size = 100.0    NDVI_landcover_2007 cell size = 231.568488738
+  cell ratio > .5: reprojecting and resampling to template parameters only
+    Finished reprojection bio_11_2002_2km
+    Starting intermediate reprojection of: NDVI_landcover_2007
+    Finished reprojection ppt_1971_2000_01_800m
+
+Session continued
+ at: 06/11/2012 13:29
+    Starting processing of K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1971_2009_2km\BioClim_1971_2009\BioClim_2009\bio_19_2009_2km.img
+    Finished reprojection bio_19_2007_4km
+    Finished reprojection bio_19_1971_2000_800m
+  ratio of source cell size to template cell size = 17.636274207    template cell size = 100.0    bio_19_2009_2km cell size = 1763.6274207
+  cell ratio > .5: reprojecting and resampling to template parameters only
+    Starting intermediate reprojection of: bio_19_2009_2km
+    Finished reprojection EVI_amplitudes1_2000
+    Finished reprojection EVI_baselevels1_2006
+    Finished reprojection NDVI_landcover_2007
+    Finished reprojection bio_19_2009_2km
+
+Session continued
+ at: 06/11/2012 13:29
+
+Session continued
+ at: 06/11/2012 13:29
+    Starting processing of K:\GIS_LIBRARY\Veg_LandCover\MODIS\LatLon.NA.2001.tree.tif
+    Starting processing of K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2000\bio_02_2000_4km.img
+  ratio of source cell size to template cell size = 3.80656779016    template cell size = 100.0    LatLon.NA.2001.tree cell size = 380.656779016
+  cell ratio > .5: reprojecting and resampling to template parameters only
+    Starting intermediate reprojection of: LatLon.NA.2001.tree
+  ratio of source cell size to template cell size = 35.2728213448    template cell size = 100.0    bio_02_2000_4km cell size = 3527.28213448
+  cell ratio > .5: reprojecting and resampling to template parameters only
+    Starting intermediate reprojection of: bio_02_2000_4km
+
+Session continued
+ at: 06/11/2012 13:29
+
+Session continued
+ at: 06/11/2012 13:29
+    Starting processing of \\IGSKBACBVMFS002\InvasivesNAS$\Phenology Share\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\largeintegrals2\EVI_largeintegrals2_Average.tif
+
+Session continued
+ at: 06/11/2012 13:29
+
+Session continued
+ at: 06/11/2012 13:29
+    Starting processing of K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_17_1971_2000_800m.img
+    Starting processing of K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2000\bio_01_2000_4km.img
+
+Session continued
+ at: 06/11/2012 13:29
+    Starting processing of K:\GIS_LIBRARY\Climate\WorldClim\BioclimaticVariables\bio_30s_esri\bio\bio_19
+    Starting processing of K:\GIS_LIBRARY\Veg_LandCover\MODIS\LatLon.NA.2001.bare.tif
+  ratio of source cell size to template cell size = 7.05450928301    template cell size = 100.0    bio_17_1971_2000_800m cell size = 705.450928301
+  cell ratio > .5: reprojecting and resampling to template parameters only
+  cell ratio > .5: reprojecting and resampling to template parameters only
+    Starting intermediate reprojection of: bio_01_2000_4km
+    Starting intermediate reprojection of: bio_17_1971_2000_800m
+  ratio of source cell size to template cell size = 2.31568488738    template cell size = 100.0    EVI_largeintegrals2_Average cell size = 231.568488738
+  cell ratio > .5: reprojecting and resampling to template parameters only
+
+Session continued
+ at: 06/11/2012 13:29
+    Starting intermediate reprojection of: EVI_largeintegrals2_Average
+  ratio of source cell size to template cell size = 3.80656779016    template cell size = 100.0    LatLon.NA.2001.bare cell size = 380.656779016
+  cell ratio > .5: reprojecting and resampling to template parameters only
+    Starting intermediate reprojection of: LatLon.NA.2001.bare
+    Starting processing of K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1971_2009_2km\BioClim_1971_2009\BioClim_2000\bio_01_2000_2km.img
+  ratio of source cell size to template cell size = 7.0545177484    template cell size = 100.0    bio_19 cell size = 705.45177484
+  cell ratio > .5: reprojecting and resampling to template parameters only
+    Finished reprojection bio_02_2000_4km
+    Starting intermediate reprojection of: bio_19
+  ratio of source cell size to template cell size = 17.636274207    template cell size = 100.0    bio_01_2000_2km cell size = 1763.6274207
+  cell ratio > .5: reprojecting and resampling to template parameters only
+    Starting intermediate reprojection of: bio_01_2000_2km
+
+Session continued
+ at: 06/11/2012 13:29
+    Starting processing of \\IGSKBACBVMFS002\InvasivesNAS$\Phenology Share\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_NDVI\smallintegrals2\NDVI_smallintegrals2_Average.tif
+    Finished reprojection LatLon.NA.2001.tree
+    Finished reprojection bio_01_2000_4km
+  ratio of source cell size to template cell size = 2.31568488738    template cell size = 100.0    NDVI_smallintegrals2_Average cell size = 231.568488738
+  cell ratio > .5: reprojecting and resampling to template parameters only
+    Starting intermediate reprojection of: NDVI_smallintegrals2_Average
+    Finished reprojection bio_17_1971_2000_800m
+    Finished reprojection bio_01_2000_2km
+    Finished reprojection EVI_largeintegrals2_Average
+    Finished reprojection LatLon.NA.2001.bare
+    Finished reprojection bio_19
+    Finished reprojection NDVI_smallintegrals2_Average
+    Finished reprojection dem
+   Starting on Aggregating: dem
+    Finished reprojection facc
+   Starting on Aggregating: facc
+   Finished Aggregating: dem
+   Finished Aggregating: facc
+    Finished reprojection cti
+   Starting on Aggregating: cti
+    Finished reprojection slopedeg
+   Starting on Aggregating: slopedeg
+   Finished Aggregating: cti
+   Finished Aggregating: slopedeg
