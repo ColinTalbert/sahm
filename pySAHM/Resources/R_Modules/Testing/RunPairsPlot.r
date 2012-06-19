@@ -1,5 +1,6 @@
 
 source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\PairsExplore.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\PairsExploreHelperFcts.r")
 source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\read.dat.r")
 source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\chk.libs.r")
 source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\read.dat.r")
@@ -31,37 +32,17 @@ Pairs.Explore(num.plots=15,
     Debug=TRUE)
 Sys.time()-time1
 
-time1<-Sys.time() 
-infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
-    #infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
-    output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPres17.jpg"
-Pairs.Explore(num.plots=5,
-    min.cor=min.cor,
-    input.file=infil,
-		output.file=output.file,
-		response.col=responseCol,
-		pres=TRUE,
-		absn=TRUE,
-		bgd=FALSE,
-    Debug=FALSE)
-Sys.time()-time1
 
-time1<-Sys.time() 
-infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
-    #infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
-    output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPres1.jpg"
-    
-i="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\modelSelection_split_8.csv" 
-o="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\CovariateCorrelationDisplay.jpg" 
-
+i="J:\\Projects\\tam_paper\\VisTrails_Output\\modelSelection_split_1.csv" 
+o="J:\\Projects\\tam_paper\\VisTrails_Output\\CovariateCorrelationDisplay.jpg"
 Pairs.Explore(num.plots=8,
-    min.cor=.3,
+    min.cor=.7,
     input.file=i,
 		output.file=o,
 		response.col="responseBinary",
 		pres=TRUE,
 		absn=TRUE,
-		bgd=FALSE,
+		bgd=TRUE,
     Debug=FALSE)
 Sys.time()-time1
 
@@ -158,57 +139,7 @@ Pairs.Explore(num.plots=num.plots,
     Debug=TRUE)
 
 
-#count
-input.file="I:\\NPS_NPMP_data\\ModelingSession_June\\EAME_MDS.csv"
-input.file="I:\\NPS_NPMP_data\\ModelingSession_June\\DICK_MDS.csv"
-input.file="I:\\NPS_NPMP_data\\ModelingSession_June\\HESP_MDS.csv"
-input.file="I:\\NPS_NPMP_data\\ModelingSession_June\\GRSP_MDS.csv"
-input.file="N:\\Active\\FORT_RAM\\VisTrails\\workspace\\talbertc_20110621T083827\\MergedDataset_1.csv"
 
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\talbertc_test\\TestTrainingSplit_1.csv"
-responseCol="responseBinary"
-output.file="c:\\temp\\output.jpg"
-Pairs.Explore(num.plots=num.plots,
-    min.cor=min.cor,
-    input.file=input.file,
-		output.file=output.file,
-		response.col=responseCol,
-		pres=TRUE,
-		absn=TRUE,
-		bgd=TRUE,
-    Debug=TRUE)
-
-print(getwd())
-source_pathname  = get("PairsExplore",envir = parent.frame())
-source_dirname = dirname(source_pathname )
-setwd(source_dirname)
-print(getwd())
-
-
-frame_files <- lapply(sys.frames(), function(x) x$ofile)
-frame_files <- Filter(Negate(is.null), frame_files)
-PATH <- dirname(frame_files[[length(frame_files)]])
-
-
-as.double.foo <- function(x)
-{
-    str(sys.calls())
-    print(sys.frames())
-    print(sys.parents())
-    print(sys.frame(-1)); print(parent.frame())
-    x
-}
-t2 <- function(x) as.double(x)
-a <- structure(pi, class = "foo")
-t2(a)
-
-library(R.utils)
-print(getAbsolutePath("Pairs.Explore"))
-
-
-Pairs.Explore(num.plots=10,min.cor=.7,input.file="I:\\VisTrails\\WorkingFiles\\workspace\\GYA_demo\\test.csv",
-output.dir="H:\\Desktop\\SAHM\\Rcode\\ExposingModelParameters\\PDFCheck\\",
-response.col="ResponseBinary",cors.w.highest=TRUE)
 
 # The BRT Function
 C:\R-2.12.1\bin\i386\Rterm.exe --vanilla -f I:\VisTrails\Central_VisTrailsInstall_debug\vistrails\packages\sahm\pySAHM\Resources\R_Modules\FIT_BRT_pluggable.r --args c=I:\VisTrails\WorkingFiles\workspace\GYA_demo\test.csv o=C:\temp rc=ResponseBinary

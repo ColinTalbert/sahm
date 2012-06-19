@@ -111,7 +111,7 @@ on.exit(detach(out$input))
            }
           mymodel.glm.step <- step(glm(as.formula(paste("response","~1")),family=out$input$model.family,data=out$dat$ma$train$dat,weights=out$dat$ma$train$weight,na.action="na.exclude"),
           direction='both',scope=scope.glm,k=penalty,trace=1)
-          browser()
+         
           out$mods$final.mod<-mymodel.glm.step
             txt0 <- paste("Generalized Linear Results\n",out$input$run.time,"\n\n","Data:\n\t ",ma.name,"\n\t ","n(pres)=",
         out$dat$nPresAbs$train[2],"\n\t n(abs)=",out$dat$nPresAbs$train[1],"\n\t number of covariates considered=",length(out$dat$used.covs),
@@ -224,10 +224,10 @@ if(Model=="rf"){
                 num.splits<-floor(sum(out$dat$ma$train$dat$response==0)/sum(out$dat$ma$train$dat$response==1))
                 #partition the pseudoabsences as evenly as possible to match the number of presence
                 #this will always give more absence in a split than presence maybe use round instead of floor
-                 Split<-c(rep(seq(from=1,to=num.splits),each=min(out$dat$ma$train$dat$response==1)),
+                 Split<-c(rep(seq(from=1,to=num.splits),each=sum(out$dat$ma$train$dat$response==1)),
                   sample(1:num.splits,size=sum(out$dat$ma$train$dat$response==0)-num.splits*sum(out$dat$ma$train$dat$response==1),replace=FALSE))
-                 #this randomly permutes the split membership
-                 Split<-sample(Split,size=length(Split),replace=FALSE) 
+                 #this randomly permutes the split membership and ensures it is the same length as the number of absences
+                 Split<-sample(Split,size=length(Split),replace=FALSE)[1:min(out$dat$nPresAbs$train[1],length(Split))] 
           } else {
                  Split<-rep(1,times=sum(out$dat$ma$train$dat$response==0))
                  num.splits<-1

@@ -84,8 +84,8 @@
         # remove background points or record these as absence for pseudoabsence (Only partially implemented)
         if(length(which(is.na(dat[,r.col]),arr.ind=TRUE))>0) dat<-dat[-c(which(is.na(dat[,r.col]),arr.ind=TRUE)),]
         if(any(dat[,r.col]==-9998)) {dat[which(dat[,r.col]==-9998,arr.ind=TRUE),r.col]<-0
-        out.list$input$PsuedoAbs=TRUE
-        }
+        out$input$PsdoAbs=TRUE
+        } else out$input$PsdoAbs=FALSE
        
         # remove evaluation points
         if(any(!is.na(match("EvalSplit",names(dat))))){
@@ -96,8 +96,9 @@
 
       # find and save xy columns#
       xy.cols <- na.omit(c(match("x",tolower(names(dat))),match("y",tolower(names(dat)))))
-      if(length(xy.cols)>0)  rm.list<-c(rm.list,xy.cols)
-
+      if(length(xy.cols)>0)  {rm.list<-c(rm.list,xy.cols)
+                              out$input$ResidMaps=TRUE
+                              }
        # remove weight column except for Random Forest
        site.weights<-c(match("weights",tolower(names(dat))),c(match("site.weights",tolower(names(dat)))))
         if(any(!is.na(site.weights))) {rm.list<-c(rm.list,na.omit(site.weights))
@@ -234,7 +235,8 @@
       if(out$input$script.name%in%c("brt","rf")){
       #brt uses a subsample for quicker estimation of learning rate and model simplificaiton
       #random forest uses a subsample only for producing response curves
-      samp.size<-ifelse(out$input$script.name=="brt",500,50)
+      browser()
+      samp.size<-ifelse(out$input$script.name=="brt",500,500)
        model.fitting.subset=c(n.pres=samp.size,n.abs=samp.size)
         out.list$Subset$ratio <- min(sum(model.fitting.subset)/out.list$dims[1],1)
             pres.sample <- sample(c(1:nrow(dat.out$train$dat))[dat.out$train$dat[,1]>=1],min(out.list$nPresAbs$train[2],out$input$model.fitting.subset[1]))

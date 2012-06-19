@@ -87,7 +87,7 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
 
      }
 if(Model=="rf"){
-
+             
                 r.curves <- list(names=row.names(out$mods$summary),preds=list(),resp=list())
                 inc <- 10/length(r.curves$names)
                 assign("r.curves",r.curves,envir=.GlobalEnv)
@@ -102,14 +102,11 @@ if(Model=="rf"){
                     pdf(paste(bname,"_response_curves.pdf",sep=""),width=11,height=8.5,onefile=T)
                     par(oma=c(2,2,4,2),mfrow=c(prow,pcol))
                     }
-                 
+              browser()   
                 for(i in 1:length(r.curves$names)){
                                time1<-Sys.time()
-                               x<-RFResponseCurve(out$mods$final.mod,out$dat$Subset$dat,r.curves$names[i],n.pt=50,plot=T,main="",
+                               x<-RFResponseCurve(all.splits=out$mods$final.mod,pred.data=out$dat$Subset$dat,x.var=r.curves$names[i],n.pt=50,plot=T,main="",
                                         xlab=r.curves$names[i])
-                                x2<-partialPlot(out$mods$final.mod[[1]],out$dat$ma$train$dat,r.curves$names[i],n.pt=50,plot=T,main="",
-                                        xlab=r.curves$names[i])        
-                              
                             r.curves$preds[[i]] <- x$x
                             r.curves$resp[[i]] <- x$y
                         cat(paste("Progress:",round(70+i*inc,1),"%\n",sep=""));flush.console()  ### print time

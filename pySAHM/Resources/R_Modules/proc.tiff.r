@@ -164,7 +164,7 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
         }
     }
 
-  if(!(out$input$NoResidMaps)) Pred.Surface(object=RasterInfo,model=out$mods$auc.output$residual.smooth.fct,filename=sub("prob_map.tif","resid_map.tif",outfile.p),NAval=NAval)
+  if((out$input$ResidMaps)) Pred.Surface(object=RasterInfo,model=out$mods$auc.output$residual.smooth.fct,filename=sub("prob_map.tif","resid_map.tif",outfile.p),NAval=NAval)
 
   min.pred<-1
   max.pred<-0

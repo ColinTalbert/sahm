@@ -37,34 +37,24 @@ input.file="C:\\temp\\TestDataSets\\CanadaThistlePseudoAbsenceWeights.csv"
 input.file="C:\\temp\\TestDataSets\\CanadaThistleWeights.csv"
 input.file="C:\\temp\\SAHM_workspace\\MergedDataset_10.csv"
 ##MARS
-EvaluateNewData(workspace="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\brt_1\\modelWorkspace",out.dir="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\ApplyModel_1",b.tif=TRUE,p.tif=TRUE,mess=TRUE,new.tifs="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\MergedDataset_2.csv",produce.metrics=FALSE)
-EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess=FALSE,new.tifs=NULL,produce.metrics=TRUE)
-EvaluateNewData(produce.metrics=TRUE, new.tifs="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\MergedDataset_10.csv", workspace="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\brt_4\\modelWorkspace", out.dir="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\ApplyModel_12")
+
 FitModels(ma.name=input.file,
             output.dir=output.dir,
             response.col=rc,make.p.tif=T,make.binary.tif=T,
-            mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars",opt.methods=2,MESS=F,pseudoabsence=TRUE)
-
-EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,make.binary.tif=TRUE,make.p.tif=TRUE,MESS=TRUE)
+            mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars",opt.methods=2,MESS=F)
 
 ##GLM
-input.file="C:\\temp\\TestDataSets\\CanadaAbsenceWeights.csv"
+
 FitModels(ma.name=input.file,
           tif.dir=NULL,
           output.dir=output.dir,
           response.col=rc,make.p.tif=F,make.binary.tif=F,
           simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=FALSE)
-
-FitModels(ma.name=input.file,
-          tif.dir=NULL,
-          output.dir=output.dir,
-          response.col=rc,make.p.tif=F,make.binary.tif=F,
-          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=FALSE)          
+    
 #RF
 
 set.seed(1)
 proximity=NULL
-input.file="J:\\Projects\\buffelgrass\\suitability\\greaterPhoenixTusconArea\\visTrails\\MergedDataset_1.csv" 
 
 FitModels(ma.name=input.file,
       tif.dir=NULL,
@@ -77,9 +67,6 @@ localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=proximity,norm.votes=TRUE,
 do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=FALSE)
 
 #BRT
-c="I:\VisTrails\WorkingFiles\workspace\_modelError\CovariateCorrelationOutputMDS_initial.csv" 
-seed=-616264908 
-o="I:\VisTrails\WorkingFiles\workspace\_modelError\brt_8" 
 rc=responseBinary
 set.seed(1)
 input.file<-"I:\\VisTrails\\WorkingFiles\\workspace\\_modelError\\CovariateCorrelationOutputMDS_initial.csv"
@@ -91,16 +78,13 @@ FitModels(ma.name=input.file,
           simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
           learning.rate =.000005, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=TRUE)
 
-EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=TRUE,new.tifs="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\MergedDataset_10.csv",produce.metrics=TRUE)
+
 #Now evaluating new data
-workspace="I:\\VisTrails\\WorkingFiles\\workspace\\_TutorialTesting\\brt_1"
+EvaluateNewData(workspace="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\brt_1\\modelWorkspace",out.dir="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\ApplyModel_1",b.tif=TRUE,p.tif=TRUE,mess=TRUE,new.tifs="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\MergedDataset_2.csv",produce.metrics=FALSE)
+EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess=FALSE,new.tifs=NULL,produce.metrics=TRUE)
+EvaluateNewData(produce.metrics=TRUE, new.tifs="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\MergedDataset_10.csv", workspace="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\brt_4\\modelWorkspace", out.dir="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\ApplyModel_12")
 
-EvaluateNewData(workspace=paste(workspace,"modelWorkspace",sep="\\"),outDir=output.dir,binary.tif=TRUE,p.tif=TRUE,mes=TRUE)
-  logname<-NULL
-  sink(logname)
-  sink(logname, type="message")
 
- PredictModel(workspace=,out.dir=output.dir)
 
 
 ## Command line C:\temp\SAHM_workspace\mtalbert_20111014T113851\TestTrainingSplit_1.csv
