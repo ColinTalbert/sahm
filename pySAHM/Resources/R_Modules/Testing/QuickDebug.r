@@ -36,6 +36,8 @@ input.file<-"C:/VisTrails/mtalbert_20110504T132851/readMaTests/UsedAvailable.csv
 input.file="C:\\temp\\TestDataSets\\CanadaThistlePseudoAbsenceWeights.csv"
 input.file="C:\\temp\\TestDataSets\\CanadaThistleWeights.csv"
 input.file="C:\\temp\\SAHM_workspace\\MergedDataset_10.csv"
+input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\SyntheticSp1.csv"
+input.file="I:\\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\TestingRCode\SyntheticSp2.csv"
 ##MARS
 EvaluateNewData(workspace="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\brt_1\\modelWorkspace",out.dir="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\ApplyModel_1",b.tif=TRUE,p.tif=TRUE,mess=TRUE,new.tifs="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\MergedDataset_2.csv",produce.metrics=FALSE)
 EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess=FALSE,new.tifs=NULL,produce.metrics=TRUE)
@@ -49,11 +51,12 @@ EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=ou
 
 ##GLM
 input.file="C:\\temp\\TestDataSets\\CanadaAbsenceWeights.csv"
+input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\modelSelection_split_28.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,
           output.dir=output.dir,
           response.col=rc,make.p.tif=F,make.binary.tif=F,
-          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=FALSE)
+          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=TRUE)
 
 FitModels(ma.name=input.file,
           tif.dir=NULL,
