@@ -87,12 +87,16 @@ write.table(Sp1FDQ[Sp1FDQ[,3]==1,],file="I:\\VisTrails\\VisTrails_SAHM_x32_debug
 write.table(Sp2FDQ[Sp2FDQ[,3]==1,],file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\SyntheticSp2PresOnly.csv",row.names=FALSE,col.names=TRUE,sep=",",quote=FALSE)
 ##For used\available set the threshold use bernoulli trials to calculate pres and randomly sample the background
 
-Sp1PredSurface<-overlay(bio_6,NDVI,fun=function(x,y){(x*y)})*(1/max(Sp1NDVI*Sp1bio6))
+Sp1PredSurface<-overlay(bio_6,NDVI,fun=function(x,y){(dnorm(x, mean = -150, sd = 15, log = FALSE)*dnorm(y, mean = 6500, sd = 100, log = FALSE))})*(1/max(Sp1NDVI*Sp1bio6))
+glm.out<-raster("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\glm_11\\glm_prob_map.tif")
+rf.out<-raster("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\rf_4\\rf_prob_map.tif")
+mars.out<-("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\mars_5\\glm_prob_map.tif")
 
-
-
-
-
+plot(Sp1PredSurface)
+plot(glm.out)
+plot(rf.out)
+plot(Sp1PredSurface)
+points(xys[Sp1PresAbs==1,],col="red",cex=.5,pch=19)
 
 
 
