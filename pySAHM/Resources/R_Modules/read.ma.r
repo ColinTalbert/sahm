@@ -86,7 +86,7 @@
         if(any(dat[,r.col]==-9998)) {dat[which(dat[,r.col]==-9998,arr.ind=TRUE),r.col]<-0
         out.list$input$PsuedoAbs=TRUE
         }
-       
+   
         # remove evaluation points
         if(any(!is.na(match("EvalSplit",names(dat))))){
              EvalIndx<-match("EvalSplit",names(dat))
@@ -111,7 +111,7 @@
         # and index as well
        split.indx<-match("split",tolower(names(dat)))
         if(length(na.omit(split.indx))>0) rm.list<-c(rm.list,split.indx)
-
+      
        #complete the list of columns to include
           rm.list<-c(rm.list,(which(include!=1,arr.ind=TRUE)))
           rm.list<-unique(rm.list[!is.na(rm.list)])
@@ -124,11 +124,12 @@
           comp.cases<-nrow(dat)
           if(comp.cases/all.cases<.9) warning(paste(round((1-comp.cases/all.cases)*100,digits=2),"% of cases were removed because of missing values",sep=""))
       #########################################################################
-        #split out the weights,response, and xy.columns after removing incomplete cases
-         
+        #split out the weights,response, and xy.columns after removing incomplete cases 
       dat.names<-names(dat)
+      
       # tagging factors and looking at their levels
          factor.cols <- grep("categorical",names(dat))
+         factor.cols<-factor.cols[!factor.cols%in%rm.list]
       factor.cols <- factor.cols[!is.na(factor.cols)]
       out.list$bad.factor.cols=NULL
       if(length(factor.cols)==0){
@@ -191,7 +192,7 @@
                         dat.out[[i]]<-list(resp=dat.out[[i]][r.col],XY=dat.out[[i]][,xy.cols],dat=dat.out[[i]][,-c(rm.list)],weight=dat.out[[i]][,site.weights])
                         names(dat.out[[i]]$XY)<-toupper(names(dat.out[[i]]$XY))
                      }
-                
+                   
                      if(nrow(dat.out$train$dat)/(ncol(dat.out$train$dat)-1)<3) stop("You have less than 3 observations for every predictor\n consider reducing the number of predictors before continuing")
 
                    temp.fct<-function(l){table(l$resp)}

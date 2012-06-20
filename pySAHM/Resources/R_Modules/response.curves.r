@@ -58,8 +58,8 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
            responseCurveForm<-0}
 
           if(debug.mode | responseCurveForm=="pdf"){
-
-            nvar <- out$mods$n.vars.final-length(grep(":", attr(terms(formula(out$mods$final.mod)),"term.labels")))
+          
+            nvar <- nrow(out$mods$summary)
             pcol <- min(ceiling(sqrt(nvar)),4)
             prow <- min(ceiling(nvar/pcol),3)
 
