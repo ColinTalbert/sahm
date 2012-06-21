@@ -32,19 +32,10 @@ input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Spat.Weights.csv"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/LargeDataset.csv"
 input.file<-"C:/VisTrails/mtalbert_20110504T132851/readMaTests/UsedAvailable.csv"
 #######################################################################
-
-input.file="C:\\temp\\TestDataSets\\CanadaThistlePseudoAbsenceWeights.csv"
-input.file="C:\\temp\\TestDataSets\\CanadaThistleWeights.csv"
-input.file="C:\\temp\\SAHM_workspace\\MergedDataset_10.csv"
-input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\SyntheticSp1.csv"
-input.file="I:\\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\TestingRCode\SyntheticSp2.csv"
-input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\CovariateCorrelationOutputMDS_initial.csv"
 #Sp 1 synthetic presence only data
 input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\CovariateCorrelationOutputMDS_initial.csv"
+input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\RFtest.csv"
 ##MARS
-EvaluateNewData(workspace="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\brt_1\\modelWorkspace",out.dir="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\ApplyModel_1",b.tif=TRUE,p.tif=TRUE,mess=TRUE,new.tifs="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\MergedDataset_2.csv",produce.metrics=FALSE)
-EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess=FALSE,new.tifs=NULL,produce.metrics=TRUE)
-EvaluateNewData(produce.metrics=TRUE, new.tifs="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\MergedDataset_10.csv", workspace="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\brt_4\\modelWorkspace", out.dir="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\ApplyModel_12")
 FitModels(ma.name=input.file,
             output.dir=output.dir,
             response.col=rc,make.p.tif=T,make.binary.tif=T,
@@ -53,9 +44,6 @@ FitModels(ma.name=input.file,
 EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,make.binary.tif=TRUE,make.p.tif=TRUE,MESS=TRUE)
 
 ##GLM
-input.file="C:\\temp\\TestDataSets\\CanadaAbsenceWeights.csv"
-input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\modelSelection_split_28.csv"
-input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\CovariateCorrelationOutputMDS_new.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,
           output.dir=output.dir,
@@ -68,15 +56,10 @@ FitModels(ma.name=input.file,
           response.col=rc,make.p.tif=F,make.binary.tif=F,
           simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=FALSE)          
 #RF
-
-set.seed(1)
-proximity=NULL
-input.file="J:\\Projects\\buffelgrass\\suitability\\greaterPhoenixTusconArea\\visTrails\\MergedDataset_1.csv" 
-
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,
-      response.col=rc,make.p.tif=F,make.binary.tif=F,
+      response.col=rc,make.p.tif=T,make.binary.tif=T,
           debug.mode=T,opt.methods=2,script.name="rf",
 responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
 samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,

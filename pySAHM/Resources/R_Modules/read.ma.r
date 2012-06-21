@@ -235,12 +235,12 @@
       if(out$input$script.name%in%c("brt","rf")){
       #brt uses a subsample for quicker estimation of learning rate and model simplificaiton
       #random forest uses a subsample only for producing response curves
-      browser()
+    
       samp.size<-ifelse(out$input$script.name=="brt",500,500)
        model.fitting.subset=c(n.pres=samp.size,n.abs=samp.size)
         out.list$Subset$ratio <- min(sum(model.fitting.subset)/out.list$dims[1],1)
-            pres.sample <- sample(c(1:nrow(dat.out$train$dat))[dat.out$train$dat[,1]>=1],min(out.list$nPresAbs$train[2],out$input$model.fitting.subset[1]))
-            abs.sample <- sample(c(1:nrow(dat.out$train$dat))[dat.out$train$dat[,1]==0],min(out.list$nPresAbs$train[1],out$input$model.fitting.subset[2]))
+            pres.sample <- sample(c(1:nrow(dat.out$train$dat))[dat.out$train$dat[,1]>=1],min(out.list$nPresAbs$train[2],model.fitting.subset[1]))
+            abs.sample <- sample(c(1:nrow(dat.out$train$dat))[dat.out$train$dat[,1]==0],min(out.list$nPresAbs$train[1],model.fitting.subset[2]))
             out.list$Subset$dat <- dat.out$train$dat[c(pres.sample,abs.sample),]
             out.list$Subset$weight<-dat.out$train$weight[c(pres.sample,abs.sample)]
             out.list$Subset$nPresAbs <-table(dat.out$train$dat[1,])

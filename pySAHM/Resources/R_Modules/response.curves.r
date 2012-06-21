@@ -103,8 +103,7 @@ if(Model=="rf"){
                     prow <- min(ceiling(nvar/pcol),3)
                     pdf(paste(bname,"_response_curves.pdf",sep=""),width=11,height=8.5,onefile=T)
                     par(oma=c(2,2,4,2),mfrow=c(prow,pcol))
-                    }
-              browser()   
+                    }  
                 for(i in 1:length(r.curves$names)){
                                time1<-Sys.time()
                                x<-RFResponseCurve(all.splits=out$mods$final.mod,pred.data=out$dat$Subset$dat,x.var=r.curves$names[i],n.pt=50,plot=T,main="",

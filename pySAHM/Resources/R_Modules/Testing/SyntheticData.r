@@ -94,7 +94,16 @@ plot(glm.out,main="GLM")
 plot(brt.out,main="BRT")
 plot(mars.out,main="MARS")
 
-
+Sp1PredSurface<-overlay(Pred1,Pred2,fun=function(x,y){(dnorm(x, mean = -150, sd = 15, log = FALSE)*dnorm(y, mean = 6500, sd = 100, log = FALSE))})*(1/max(Sp1NDVI*Sp1bio6))
+glm.out<-raster("C:\\temp\\SAHMDebugJunk\\BRTOut1\\glm_28_prob_map.tif")
+rf.out<-raster("C:\\temp\\SAHMDebugJunk\\BRTOut1\\rf_24_prob_map.tif")
+rf2.out<-raster("C:\\temp\\SAHMDebugJunk\\BRTOut1\\rf_26_prob_map.tif")
+par(mfrow=c(2,2))
+plot(Sp1PredSurface,main="TRUE")
+points(xys[Sp1PresAbs==1,],col="red",cex=.5,pch=19)
+plot(glm.out,main="GLM")
+plot(rf.out,main="RF")
+plot(rf2.out,main="RF2")
 
 
 
