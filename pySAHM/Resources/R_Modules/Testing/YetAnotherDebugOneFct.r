@@ -95,6 +95,14 @@ output.dir[4]<-paste(dir.path,"\\glm",sep="")
  
 
 ### Pairs Explore Tests  #####
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\PairsExplore.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\read.dat.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\chk.libs.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\read.dat.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\my.panel.smooth.binary.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\Predictor.inspection.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\Predictor.inspection.r")
+dir.path<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction6.6"
 input.file<-vector()
 
 input.file[1]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Split.csv"
@@ -105,7 +113,7 @@ input.file[5]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.c
 input.file[6]="C:/temp/TestDataSets/CanadaThistlePseudoAbsenceWeights.csv"
 input.file[7]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
 
-predictor<-c("bio_13_wgs84","bio_15_wgs84_categorical","bio_7","asp_2k_alb","bio_16_wgs84","bio_8","dem")
+predictor<-c("bio_13_wgs84","bio_15_wgs84_categorical","bio_7_wgs84","asp_2k_alb","bio_16_wgs84","bio_8","dem")
 responseCol<-c(rep("responseBinary",times=6),rep("responseCount",times=1))
 
 for(i in 1:length(input.file)){
@@ -113,7 +121,7 @@ for(i in 1:length(input.file)){
        try(Pairs.Explore(num.plots=5,
                 min.cor=.5,
                 input.file=input.file[i],
-            		output.file=paste(dir.path,"\\PairsExploreTest\\",i,"Par1",".jpg",sep=""),
+            		output.file=paste(dir.path,"\\PairsExploreTest2\\",i,"Par1",".jpg",sep=""),
             		response.col=responseCol[i],
             		pres=TRUE,
             		absn=TRUE,
@@ -121,7 +129,7 @@ for(i in 1:length(input.file)){
         try(Pairs.Explore(num.plots=10,
                 min.cor=.5,
                 input.file=input.file[i],
-            		output.file=paste(dir.path,"\\PairsExploreTest\\",i,"Par2",".jpg",sep=""),
+            		output.file=paste(dir.path,"\\PairsExploreTest2\\",i,"Par2",".jpg",sep=""),
             		response.col=responseCol[i],
             		pres=TRUE,
             		absn=FALSE,
@@ -129,7 +137,7 @@ for(i in 1:length(input.file)){
                 cors.w.highest=TRUE))
        try(Predictor.inspection(predictor[i],
                 input.file=input.file[i],
-            		output.dir=paste(dir.path,"\\PairsExploreTest",sep=""),
+            		output.dir=paste(dir.path,"\\PairsExploreTest2",sep=""),
             		response.col=responseCol[i],
             		pres=TRUE,
             		absn=TRUE,
@@ -138,7 +146,7 @@ for(i in 1:length(input.file)){
  try(Pairs.Explore(num.plots=15,
     min.cor=min.cor,
     input.file=input.file[i],
-		output.file=paste(dir.path,"\\PairsExploreTest\\",i,".jpg",sep=""),
+		output.file=paste(dir.path,"\\PairsExploreTest2\\",i,".jpg",sep=""),
 		response.col=responseCol[i],
 		pres=TRUE,
 		absn=TRUE,
@@ -146,7 +154,7 @@ for(i in 1:length(input.file)){
 		
 	try(Predictor.inspection(predictor[i],
     input.file[i],
-		output.dir=paste(dir.path,"\\PairsExploreTest",sep=""),
+		output.dir=paste(dir.path,"\\PairsExploreTest2",sep=""),
 		response.col=responseCol[i],
 		pres=TRUE,
 		absn=TRUE,
@@ -159,7 +167,7 @@ for (i in 5:25){
  try(Pairs.Explore(num.plots=i,
                 min.cor=.5,
                 input.file=input.file,
-            		output.file=paste(dir.path,"\\PairsExploreTest\\",i,"NumPlotsTest",".jpg",sep=""),
+            		output.file=paste(dir.path,"\\PairsExploreTest2\\",i,"NumPlotsTest",".jpg",sep=""),
             		response.col=responseCol[1],
             		pres=TRUE,
             		absn=TRUE,

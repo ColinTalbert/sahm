@@ -1,6 +1,5 @@
 Predictor.inspection<-function(predictor,input.file,output.dir,response.col="ResponseBinary",pres=TRUE,absn=TRUE,bgd=TRUE){
-  chk.libs("Pred.inspect")
-cex.mult<-3.2
+
 
 #This function produces several plots to inspect the relationship between the predictor and response
 #and the spatial relationship between response and the predictor. 
@@ -10,27 +9,12 @@ cex.mult<-3.2
 #I replace the gam with a glm quadratic in the predictor 
 
 #Written by Marian Talbert 5/23/2012
+    chk.libs("Pred.inspect")
+    cex.mult<-3.2
 
    #Read input data and remove any columns to be excluded
-    read.dat(input.file,response.col=response.col)
-    
-          if(any(response==-9998)) {
-           response[response==-9998]<-0
-           abs.lab<-"Avail"
-           pres.lab<-"Used"
-           } else {
-            abs.lab<-"Abs"
-            pres.lab<-"Pres"
-           }
-       dat<-dat[order(response),]
-       response<-response[order(response)]
-     temp<-c(0,1,-9999)
-     temp<-temp[c(absn,pres,bgd)]
-     dat<-dat[response%in%temp,]
-     response<-response[response%in%temp]
-     if(tolower(response.col)=="responsebinary") famly<-binomial
-     else famly=poisson
-     
+    read.dat(input.file,response.col=response.col,is.inspect=TRUE,,pres=pres,absn=absn,bgd=bgd)
+
      if(any(unique(response)==-9999) & !any(unique(response)==0)){
     abs.lab<-"PsedoAbs"
     pres.lab<-"Pres" 
@@ -38,13 +22,15 @@ cex.mult<-3.2
      if(any(response==-9999)) response[response==-9999]<-0
         xy<-dat[,c(match("x",tolower(names(dat))),match("y",tolower(names(dat))))]
         names(xy)<-c("x","y")
-     dat[dat==-9999]<-NA
+    
      pred.indx<-match(predictor,tif.info[[1]])
      pred<-dat[,pred.indx]
+     
      output.file<-paste(output.dir,paste(names(dat)[pred.indx],".jpg",sep=""),sep="\\")
      ### Producing some plots
+    
     jpeg(output.file,pointsize=13,height=2000,width=2000,quality=100)
-         par(mfrow=c(2,2),mar=c(5,7,9,6))
+         par(mfrow=c(2,2),mar=c(5,7,9,6),oma=c(6,2,2,2))
              hst<-hist(pred,plot=FALSE)
       ####PLOT 1. new
          hist(pred,col="red",xlab="",main="",cex.lab=cex.mult,cex=cex.mult,cex.main=cex.mult,cex.axis=.7*cex.mult,ylim=c(0,1.5*max(hst$counts)))
@@ -80,16 +66,18 @@ cex.mult<-3.2
                    ncol = 2,cex=cex.mult*.9,bg="white")
                   #
        ####PLOT 4. 
-                response<-as.numeric(response[complete.cases(pred)])
+                y<-as.numeric(TrueResponse[complete.cases(pred)])
                 pred<-as.numeric(pred[complete.cases(pred)])
                  x<-pred[complete.cases(pred)]
-                 y<-response[complete.cases(pred)] 
-                 response.table<-table(response)
-               
+                 y<-y[complete.cases(pred)] 
+                 response.table<-table(y)
+             
          if(length(response.table)>1){
-            plot(x,y,ylab="",xlab=predictor,type="n",cex.lab=cex.mult,cex.axis=.7*cex.mult,)
-            gam.failed<-my.panel.smooth(x=x, y=y,cex.mult=cex.mult,pch=21,cex.lab=cex.mult,cex.axis=.7*cex.mult,cex.lab=cex.mult,family=famly)
+         par(mgp=c(4, 1, 0),mar=c(7,7,5,5))
+            plot(x,y,ylab="",xlab="",type="n",cex.axis=.7*cex.mult)
+            gam.failed<-my.panel.smooth(x=x, y=y,cex.mult=cex.mult,pch=21,cex.lab=cex.mult,cex.axis=.9*cex.mult,cex.lab=cex.mult,famly=famly,lin=4)
             title(main=paste(ifelse(gam.failed,"GLM","GAM")," showing predictor response relationship",sep=""),cex.main=.8*cex.mult)
+            title(xlab=predictor,line=5,cex.lab=1.2*cex.mult)
         }
     dev.off()    
 }
@@ -126,4 +114,4 @@ ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"chk.libs.r",sep="\\"))
 source(paste(ScriptPath,"my.panel.smooth.binary.r",sep="\\"))
 source(paste(ScriptPath,"read.dat.r",sep="\\"))
-Predictor.inspection(predictor=predictor,input.file=infile,output.dir=output,response.col=responseCol,pres=TRUE,absn=TRUE,bgd=TRUE)
+Predictor.inspection(predictor=predictor,input.file=infile,output.dir=output,response.col=responseCol,pres=pres,absn=absn,bgd=bgd)

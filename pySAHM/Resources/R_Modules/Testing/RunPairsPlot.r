@@ -1,13 +1,10 @@
-#Running R from the command line
-#input.file="I:\\VisTrails\\WorkingFiles\\workspace\\GYA_demo\\test.csv"
-    #output.dir<-"H:\\Desktop\\SAHM\\Rcode\\ExposingModelParameters\\PDFCheck\\"
-    #response.col= "ResponseBinary"
-    #min.cor<-.7
-    #num.plots<-10
-source("I:\\VisTrails\\Central_VisTrails_x32_debug\\Vistrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\PairsExplore.r")
 
-
-
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\PairsExplore.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\read.dat.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\chk.libs.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\read.dat.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\my.panel.smooth.binary.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\Predictor.inspection.r")
     num.plots <- 10
     min.cor <- .7
     responseCol <- "responseBinary"
@@ -31,7 +28,7 @@ Pairs.Explore(num.plots=15,
 		pres=TRUE,
 		absn=TRUE,
 		bgd=TRUE,
-    Debug=FALSE)
+    Debug=TRUE)
 Sys.time()-time1
 
 time1<-Sys.time() 
@@ -53,11 +50,15 @@ time1<-Sys.time()
 infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
     #infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
     output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPres1.jpg"
-Pairs.Explore(num.plots=4,
-    min.cor=min.cor,
-    input.file=infil,
-		output.file=output.file,
-		response.col=responseCol,
+    
+i="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\modelSelection_split_8.csv" 
+o="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\CovariateCorrelationDisplay.jpg" 
+
+Pairs.Explore(num.plots=8,
+    min.cor=.3,
+    input.file=i,
+		output.file=o,
+		response.col="responseBinary",
 		pres=TRUE,
 		absn=TRUE,
 		bgd=FALSE,

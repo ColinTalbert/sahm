@@ -292,7 +292,7 @@ class SelectListDialog(QtGui.QDialog):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
             
-        outputPic = self.make_new_covariate_plot(output_dir, str(item.text(0)))
+        outputPic = self.makeNewCovariatePlot(output_dir, str(item.text(0)))
         self.popup = QtGui.QDialog()
 #        self.popup.setBaseSize(1200, 1200)
         size = 800
@@ -421,18 +421,7 @@ class SelectListDialog(QtGui.QDialog):
         args = "i=" + '"' + MDSfile + '"' + " o=" + '"' + self.displayJPEG + '"' 
         args += " rc=" + self.responseCol
         
-        if self.chkPresence.checkState() == QtCore.Qt.Checked:
-            args += " pres=TRUE"
-        else:
-            args += " pres=FALSE"
-        if self.chkAbsence.checkState() == QtCore.Qt.Checked:
-            args += " absn=TRUE"
-        else:
-            args += " absn=FALSE"
-        if self.chkBackground.checkState() == QtCore.Qt.Checked:
-            args += " bgd=TRUE"
-        else:
-            args += " bgd=FALSE"
+        args += self.saveExploreOptions(args)
             
         if self.kwargs.has_key('numPlots'):
             args += " p=" + str(self.kwargs['numPlots'])
@@ -458,7 +447,22 @@ class SelectListDialog(QtGui.QDialog):
         else:
             writetolog("Missing output from R processing: " + self.displayJPEG)
             raise Exception, "Missing output from R processing"
-
+    
+    def saveExploreOptions(self,args):
+        if self.chkPresence.checkState() == QtCore.Qt.Checked:
+            args = " pres=TRUE"
+        else:
+            args = " pres=FALSE"
+        if self.chkAbsence.checkState() == QtCore.Qt.Checked:
+            args += " absn=TRUE"
+        else:
+            args += " absn=FALSE"
+        if self.chkBackground.checkState() == QtCore.Qt.Checked:
+            args += " bgd=TRUE"
+        else:
+            args += " bgd=FALSE"
+        return args
+        
     def loadDeviances(self):
         #store the deviances explained in dev
         deviances = {}
@@ -474,29 +478,15 @@ class SelectListDialog(QtGui.QDialog):
         del devcsv
 
 
-    def make_new_covariate_plot(self, output_dir, covariate):
+    def makeNewCovariatePlot(self, output_dir, covariate):
         output_fname = os.path.join(output_dir, covariate + ".jpg")
         
         args = "i=" + '"' + self.inputMDS + '"' 
         args += " o=" + '"' + output_dir + '"' 
         args += " rc=" + self.responseCol
         args += " p=" + covariate
-        
-        if self.chkPresence.checkState() == QtCore.Qt.Checked:
-            args += " pres=TRUE"
-        else:
-            args += " pres=FALSE"
+        args += self.saveExploreOptions(args)
             
-        if self.chkAbsence.checkState() == QtCore.Qt.Checked:
-            args += " absn=TRUE"
-        else:
-            args += " absn=FALSE"
-            
-        if self.chkBackground.checkState() == QtCore.Qt.Checked:
-            args += " bgd=TRUE"
-        else:
-            args += " bgd=FALSE"
-        
         if os.path.exists(output_fname):
             os.remove(output_fname)
             

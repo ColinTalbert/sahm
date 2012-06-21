@@ -1,3 +1,10 @@
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\PairsExplore.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\read.dat.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\chk.libs.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\read.dat.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\my.panel.smooth.binary.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\Predictor.inspection.r")
+
 infil="C:\\temp\\TestDataSets\\CanadaThistleNewFormat.csv"
 predictor="bio_13"
 
@@ -16,10 +23,17 @@ predictor="bio_13_wgs84"
 infil="I:\\VisTrails\\WorkingFiles\\secondseason\\secondseason_workfile_2012_02_28b\\ModelEvaluation_Split_9.csv"
 predictor="bio_17_2009_2km"
 predictor="bio_14_2009_2km"
-Predictor.inspection(predictor,
-    input.file=infil,
-		output.dir=output.dir,
-		response.col=response.col,
-		pres=TRUE,
-		absn=TRUE,
-		bgd=TRUE)
+infil="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\modelSelection_split_8.csv" 
+output.dir="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode"
+predictor="EVI_baselevels2_2001" 
+i="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\modelSelection_split_20.csv" 
+o="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\PredictorInspections" 
+rc="responseBinary" 
+predictor="romoveg_rc_categorical"    
+    Predictor.inspection(predictor,
+        input.file=i,
+    		output.dir=o,
+    		response.col=rc,
+    		pres=TRUE,
+    		absn=TRUE,
+    		bgd=FALSE)

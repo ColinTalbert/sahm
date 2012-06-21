@@ -81,12 +81,12 @@
       if(length(table(dat[r.col]))<2) stop("Response column has only one unique value")
       names(dat)[r.col]<-"response"
       rm.list<-vector()
-        
         # remove background points or record these as absence for pseudoabsence (Only partially implemented)
+        if(length(which(is.na(dat[,r.col]),arr.ind=TRUE))>0) dat<-dat[-c(which(is.na(dat[,r.col]),arr.ind=TRUE)),]
         if(any(dat[,r.col]==-9998)) {dat[which(dat[,r.col]==-9998,arr.ind=TRUE),r.col]<-0
         out.list$input$PsuedoAbs=TRUE
         }
-         if(length(which(dat[,r.col]==-9999,arr.ind=TRUE))>0) dat<-dat[-c(which(dat[,r.col]==-9999,arr.ind=TRUE)),]
+       
         # remove evaluation points
         if(any(!is.na(match("EvalSplit",names(dat))))){
              EvalIndx<-match("EvalSplit",names(dat))
@@ -119,7 +119,7 @@
       ######################### REMOVING INCOMPLETE CASES ###############
         #remove incomplete cases but only for include variables
        all.cases<-nrow(dat)
-          dat[dat==-9999]<-NA
+          
           dat<-dat[complete.cases(dat[,-c(rm.list)]),]
           comp.cases<-nrow(dat)
           if(comp.cases/all.cases<.9) warning(paste(round((1-comp.cases/all.cases)*100,digits=2),"% of cases were removed because of missing values",sep=""))
