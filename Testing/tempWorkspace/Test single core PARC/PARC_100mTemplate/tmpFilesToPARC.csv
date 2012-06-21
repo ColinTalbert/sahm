@@ -1,7 +1,0 @@
-FilePath,Categorical,Resampling,Aggregation
-K:\GIS_LIBRARY\Climate\DAYMET\SourceData\AvgMonthlyMonthlyPrecip\ppt12.tif,0,Bilinear,Mean
-K:\GIS_LIBRARY\Climate\WorldClim\BioclimaticVariables\bio_30s_esri\bio\bio_9,0,Bilinear,Mean
-K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_3.tif,0,Bilinear,Mean
-K:\GIS_LIBRARY\Climate\WorldClim\BioclimaticVariables\bio_30s_esri\bio\bio_19,0,Bilinear,Mean
-K:\GIS_LIBRARY\Climate\WorldClim\MaxTempAvg1950-2000\tmax_30s_esri\tmax\tmax_1,0,Bilinear,Mean
-K:\GIS_LIBRARY\Climate\DAYMET\DerivedData\bio_1.tif,0,Bilinear,Mean
