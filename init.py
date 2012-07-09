@@ -80,7 +80,8 @@ import packages.sahm.pySAHM.MDSBuilder_vector as MDSB_V
 import packages.sahm.pySAHM.PARC as parc
 import packages.sahm.pySAHM.RasterFormatConverter as RFC
 import packages.sahm.pySAHM.MaxentRunner as MaxentRunner
-from packages.sahm.SahmOutputViewer import SAHMModelOutputViewerCell
+#from packages.sahm.SahmOutputViewer import SAHMModelOutputViewerCell
+from SahmOutputViewer import SAHMModelOutputViewerCell
 from packages.sahm.SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
 from packages.sahm.sahm_picklists import ResponseType, AggregationMethod, \
         ResampleMethod, PointAggregationMethod, ModelOutputType, RandomPointType, \
