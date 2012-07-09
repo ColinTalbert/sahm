@@ -1019,9 +1019,6 @@ class FieldDataQuery(Module):
         else:
             query_col_key = None
         
-        
-        
-        
         for row in csvReader:
             if not use_query:
                 include_row = True
@@ -1032,9 +1029,9 @@ class FieldDataQuery(Module):
                 
             if include_row:
                 response = row[res_key]
-                if response.lower() in ["1", "true", "t", "present", "presence", FDQParams['res_pres_val']]:
+                if response.lower() in ["1", "true", "t", "present", "presence", FDQParams['res_pres_val'].lower()]:
                     response = 1
-                elif response.lower() in ["0", "false", "f", "absent", "absense", FDQParams['res_abs_val']]:
+                elif response.lower() in ["0", "false", "f", "absent", "absense", FDQParams['res_abs_val'].lower()]:
                     response = 0
                 else:
                     response = row[res_key]
