@@ -1723,7 +1723,7 @@ class MAXENT(Module):
                         pass
         if self.hasInputFromPort('projectionlayers'):
             value = self.forceGetInputListFromPort('projectionlayers')
-            projlayers = ','.join(['"' + path.name + '"' for path in value])
+            projlayers = ','.join([path.name for path in value])
             argWriter.writerow(['projectionlayers', projlayers])
             
         argWriter.writerow(['inputMDS', ourMaxent.inputMDS])
