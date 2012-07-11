@@ -43,16 +43,13 @@
 ###############################################################################
 
 response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
-     attach(out$input)
+      attach(out$input)
       on.exit(detach(out$input))
       bname<-out$dat$bname
  
-if(Model%in%c("brt","mars")){
-
-        if(is.null(responseCurveForm)) responseCurveForm<-0
-      
-        if(responseCurveForm=="pdf"){
-            nvar <- nrow(out$mods$summary)
+      if(Model%in%c("brt","mars"))  nvar <- nrow(out$mods$summary)
+      if(Model=="glm")              nvar <- out$mods$n.vars.final-length(grep(":", attr(terms(formula(out$mods$final.mod)),"term.labels")))
+      if(Model=="rf")               nvar <- nrow(out$mods$summary)           
             pcol <- min(ceiling(sqrt(nvar)),4)
             prow <- min(ceiling(nvar/pcol),3)
 
@@ -97,14 +94,10 @@ if(Model%in%c("brt","mars")){
                     }
                 }
             graphics.off()
-            } else {
-                r.curves <- gbm.plot(out$mods$final.mod,plotit=F)
-            }
+           
     }
  
- if(Model=="glm") {if(debug.mode | responseCurveForm=="pdf"){
-       
-        nvar <- out$mods$n.vars.final-length(grep(":", attr(terms(formula(out$mods$final.mod)),"term.labels")))
+ 
         pcol <- min(ceiling(sqrt(nvar)),4)
         prow <- min(ceiling(nvar/pcol),3)
                     term=seq(1:length(attr(terms(formula(out$mods$final.mod)),"term.labels")))

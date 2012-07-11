@@ -42,7 +42,7 @@
 ## and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
-proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,pred.fct,factor.levels=NA,make.binary.tif=F,make.p.tif=T,
+proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,make.binary.tif=F,make.p.tif=T,
    thresh=0.5,outfile.p="brt.prob.map.tif",outfile.bin="brt.bin.map.tif",tsize=2.0,NAval=-3000,fnames=NULL,out,Model){
 
     # vnames,fpath,myfun,make.binary.tif=F,outfile=NA,outfile.bin=NA,output.dir=NA,tsize=10.0,NAval=NA,fnames=NA
@@ -81,8 +81,7 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,pred.fct,factor.le
     #
 
     # Start of function #
-    library(rgdal)
-    library(raster)
+    
     if(is.null(factor.levels)) factor.levels<-NA
     MESS=out$input$MESS
     if(is.null(thresh)) thresh<-.5
@@ -153,21 +152,26 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
       MessRaster <- writeStart(MessRaster, filename=sub("bin","mess",outfile.bin), overwrite=TRUE)
       ModRaster <- writeStart(ModRaster, filename=sub("bin","MoD",outfile.bin), overwrite=TRUE)
       pred.rng<-temp[,names(temp)%in%vnames.final.mod]
-        CalcMESS<-function(tiff.entry,pred.vect){
-              f<-sum(pred.vect<tiff.entry)/length(pred.vect)*100
-              if(is.na(f)) return(NA)
-              if(f==0) return((tiff.entry-min(pred.vect))/(max(pred.vect)-min(pred.vect))*100)
-              if(0<f & f<=50) return(2*f)
-              if(50<=f & f<100) return(2*(100-f))
-              if(f==100) return((max(pred.vect)-tiff.entry)/(max(pred.vect)-min(pred.vect))*100)
-              else return(NA)
-        }
+      
     }
 
   if((out$input$ResidMaps)) Pred.Surface(object=RasterInfo,model=out$mods$auc.output$residual.smooth.fct,filename=sub("prob_map.tif","resid_map.tif",outfile.p),NAval=NAval)
-
+   if(Model=="maxlike"){
+   #this is a bit ugly to copy these sections of code but I'm hoping maxlike will eventually be able to predict to a vector instead of a raster in which case
+   #this will all be deleted anyway
+         model$call$formula<-eval(model$call$formula)
+        y <- predict(model,rasters=stack(model$rast.lst))
+         writeRaster(y,outfile.p)
+         if(make.binary.tif) {
+           y<-y>thresh
+           writeRaster(y,outfile.bin)
+           }
+         if(MESS) warning("Maxlike mess option currently nonfuctional") 
+         return(0) 
+    }
   min.pred<-1
   max.pred<-0
+ 
   for (i in 1:tr$n) {
     strt <- c((i-1)*nrows,0)
      region.dims <- c(min(dims[1]-strt[1],nrows),dims[2])
@@ -187,6 +191,7 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
                     }
 
             }
+
              if(MESS){
              for(k in 1:nvars.final){
                         pred.range<-out$dat$ma$train$dat[,match(vnames.final.mod[k],names(out$dat$ma$train$dat))]
@@ -253,3 +258,12 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
 
    return(0)
    }
+CalcMESS<-function(tiff.entry,pred.vect){
+              f<-sum(pred.vect<tiff.entry)/length(pred.vect)*100
+              if(is.na(f)) return(NA)
+              if(f==0) return((tiff.entry-min(pred.vect))/(max(pred.vect)-min(pred.vect))*100)
+              if(0<f & f<=50) return(2*f)
+              if(50<=f & f<100) return(2*(100-f))
+              if(f==100) return((max(pred.vect)-tiff.entry)/(max(pred.vect)-min(pred.vect))*100)
+              else return(NA)
+}

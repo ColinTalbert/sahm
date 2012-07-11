@@ -145,7 +145,10 @@ Input Ports:
             text_output = window.file_pool.make_local_copy(text_output_path)
             
             response_path = os.path.join(model_dir_full, model_name + '_response_curves.pdf')
-            response_curves = window.file_pool.make_local_copy(response_path)
+            if os.path.exists(response_path):
+                response_curves = window.file_pool.make_local_copy(response_path)
+            else:
+                response_curves = ""
             
             calibration_graph_path = os.path.join(model_dir_full, model_name + '_CalibrationPlot.jpg')
             calibration_graph = window.file_pool.make_local_copy(calibration_graph_path)
@@ -333,8 +336,12 @@ class SAHMOutputViewerCellWidget(QCellWidget):
             self.text_browser.dynamicCall('Navigate(const QString&)', self.text_urlSrc.toString())
         else:
             self.text_browser.dynamicCall('Navigate(const QString&)', QtCore.QString('about:blank'))
-
-        self.response_urlSrc = QtCore.QUrl.fromLocalFile(response_curves.name)
+        
+        if response_curves:
+            self.response_urlSrc = QtCore.QUrl.fromLocalFile(response_curves.name)
+        else:
+            self.response_urlSrc = None
+        
         if self.response_urlSrc!=None:
             self.response_browser.dynamicCall('Navigate(const QString&)', self.response_urlSrc.toString())
         else:

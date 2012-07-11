@@ -52,6 +52,7 @@ chk.libs <- function(Model){
      if(Model=="glm")         libs<-list("PresenceAbsence","rgdal","sp","survival","tools","raster","tcltk2","foreign","ade4","ROCR","ncf")
      if(Model=="rf")          libs<-list("randomForest","PresenceAbsence","rgdal","sp","raster","tcltk2","foreign","ade4","ROCR","ncf")
      if(Model=="brt")         libs<-list("PresenceAbsence","rgdal","sp","survival","lattice","raster","tcltk2","foreign","ade4","gbm","ROCR","ncf")
+     if(Model=="maxlike")         libs<-list("PresenceAbsence","rgdal","sp","survival","lattice","raster","tcltk2","foreign","ade4","maxlike","ROCR","ncf")
      if(Model=="GenPsdAbs")   libs<-list("adehabitatHR","ks","raster","rgdal","sp","spatstat")
       lib.mssg <- unlist(suppressMessages(suppressWarnings(lapply(libs,require,quietly = T, warn.conflicts=F,character.only=T))))
       if(any(!lib.mssg)){

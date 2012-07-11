@@ -33,7 +33,8 @@ input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/LargeDataset.csv"
 input.file<-"C:/VisTrails/mtalbert_20110504T132851/readMaTests/UsedAvailable.csv"
 #######################################################################
 #Sp 1 synthetic presence only data
-input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\CovariateCorrelationOutputMDS_initial.csv"
+input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\UsedAvailableSp1CV.csv"
+input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\UsedAvailableSp1NoCV.csv"
 input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\RFtest.csv"
 ##MARS
 FitModels(ma.name=input.file,
@@ -60,28 +61,42 @@ FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,
       response.col=rc,make.p.tif=T,make.binary.tif=T,
-          debug.mode=T,opt.methods=2,script.name="rf",
+          debug.mode=F,opt.methods=2,script.name="rf",
 responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
 samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
 localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=NULL,norm.votes=TRUE,
 do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=FALSE)
 
 #BRT
-c="I:\VisTrails\WorkingFiles\workspace\_modelError\CovariateCorrelationOutputMDS_initial.csv" 
-seed=-616264908 
-o="I:\VisTrails\WorkingFiles\workspace\_modelError\brt_8" 
-rc=responseBinary
-set.seed(1)
-input.file<-"I:\\VisTrails\\WorkingFiles\\workspace\\_modelError\\CovariateCorrelationOutputMDS_initial.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,output.dir=output.dir,
           response.col=rc,make.p.tif=T,make.binary.tif=T,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
       family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
   tolerance = 0.001,seed=-616264908,opt.methods=2,
-          simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
-          learning.rate =.000005, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=TRUE)
+          simp.method="cross-validation",debug.mode=F,responseCurveForm="pdf",script.name="brt",
+          bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=TRUE)
 
 EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=TRUE,new.tifs="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\MergedDataset_10.csv",produce.metrics=TRUE)
+
+#Maxlike
+input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\CovariateCorrelationOutputMDS_initial.csv"
+Formula="~bio_06_2000_2km + bio_14_2000_4km + NDVI_annualMaximumValue_2009 + NDVI_greenuprates1_2003 + NDVI_peakdates1_2003"
+"I:\VisTrails\VisTrails_SAHM_x32_debug\Central_R\R-2.14.1\bin\i386\Rterm.exe" --vanilla -f "I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm_MarianDev\pySAHM\Resources\R_Modules\FIT_MaxLike_pluggable.r" --args  om=2 c="I:/VisTrails/VisTrails_SAHM_x32_debug/VisTrails/vistrails/packages/TestingRCode/CovariateCorrelationOutputMDS_initial.csv" fmla="~bio_06_2000_2km + bio_14_2000_4km + NDVI_annualMaximumValue_2009 + NDVI_greenuprates1_2003 + NDVI_peakdates1_2003" o="C:\temp\SAHM_workspace\maxlike_4" rc=responseBinary
+
+c="I:/VisTrails/VisTrails_SAHM_x32_debug/VisTrails/vistrails/packages/TestingRCode/CovariateCorrelationOutputMDS_initial.csv" 
+fmla=~bio_06_2000_2km + bio_14_2000_4km + NDVI_annualMaximumValue_2009 + NDVI_greenuprates1_2003 + NDVI_peakdates1_2003 
+o="C:\temp\SAHM_workspace\maxlike_1" 
+rc=responseBinary
+
+FitModels(ma.name=input.file,
+		tif.dir=NULL,
+		output.dir=output.dir,
+		response.col=rc,
+		make.p.tif=T,make.binary.tif=T,
+		debug.mode=F,responseCurveForm="pdf",script.name="maxlike",
+		opt.methods=2,MESS=T,Formula=Formula,UseTiffs=FALSE)
+
+
 #Now evaluating new data
 workspace="I:\\VisTrails\\WorkingFiles\\workspace\\_TutorialTesting\\brt_1"
 

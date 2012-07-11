@@ -47,9 +47,7 @@ est.lr <- function(out){
     # the learning rate that produces closest to 1000 trees is selected #
     # in addition, variables with >1% influence are identified by column number in
     # the original dataframe
-    # written by AKS early 2009
-
-    suppressMessages(require(gbm))
+    # written by AKS early 2009 modified by Marian Talbert
    attach(out$input)
    on.exit(detach(out$input))
     t0 <- unclass(Sys.time())
@@ -111,28 +109,13 @@ est.lr <- function(out){
     good.vars <- good.vars$var[good.vars$rel.inf>ifelse(out$input$simp.method!="none",1,0)]
     good.cols <- c(1:ncol(dat))[names(dat)  %in%  good.vars]
     out$mods$simp.mod <- list(good.cols=good.cols,good.vars=good.vars)
-    out$mods$lr.mod <- list(tc=out$mods$parms$tc.sub,lr=lr.full,lr0=lr0,lr.out=lr.out,ab=ab,gbm.fit=gbm.fit,good.cols=good.cols,t.elapsed=c(unclass(Sys.time())-t0))
+    out$mods$lr.mod <- list(tc=out$mods$parms$tc.sub,lr=lr.full,lr0=lr0,lr.out=lr.out,ab=ab,good.cols=good.cols)
     if(!is.null(out$input$learning.rate)) {out$mods$lr.mod$lr0=out$input$learning.rate
        out$mods$lr.mod$lr=out$input$learning.rate
     }
     
-    return(out)
+    return(out$mods)
     }
-
-
-check.dir <- function(dname){
-    if(is.null(dname)) dname <- getwd()
-    dname <- gsub("[\\]","/",dname)
-    end.char <- substr(dname,nchar(dname),nchar(dname))
-    if(end.char == "/") dname <- substr(dname,1,nchar(dname)-1)
-    exist <- suppressWarnings(as.numeric(file.access(dname,mode=0))==0) # -1 if bad, 0 if ok #
-    if(exist) dname <- file_path_as_absolute(dname)
-    readable <- suppressWarnings(as.numeric(file.access(dname,mode=4))==0) # -1 if bad, 0 if ok #
-    writable <- suppressWarnings(as.numeric(file.access(dname,mode=2))==0) # -1 if bad, 0 if ok #
-    return(list(dname=dname,exist=exist,readable=readable,writable=writable))
-    }
-
-
 
 gbm.step.fast <- function(
   dat,                             # the input dataframe
@@ -243,8 +226,7 @@ gbm.step.fast <- function(
   assign("y.data", y.data, env = globalenv())
   offset.name <- deparse(substitute(offset))   # get the dataframe name
   offset = eval(offset)
-
-
+  browser()
   n.cases <- nrow(dat)
   n.preds <- length(gbm.x)
 
@@ -550,7 +532,7 @@ if(abs(target.trees-1000) >= 600 & superfast==T){         # AKS
 
   fitted.matrix <- matrix(NA, nrow = n.cases, ncol = n.folds)   #used to calculate se's
   fold.fit <- rep(0,n.cases)
-
+    
   for (i in 1:n.folds) {
 
     pred.mask <- selector == i   #used to identify the with-held subset
@@ -788,14 +770,14 @@ function(gbm.object,                # a gbm object - could be one from gbm.step
 
 require(gbm)
 
-
 gbm.call <- gbm.object$gbm.call
 gbm.x <- gbm.call$gbm.x
 pred.names <- gbm.call$predictor.names
 out.names <- rep("",length(pred.names))
 response.name <- gbm.call$response.name
 dataframe.name <- gbm.call$dataframe
-data <- eval.parent(parse(text = dataframe.name))
+data <- try(eval.parent(parse(text = dataframe.name)),silent=TRUE)
+if(class(data)=="try-error") data<-eval.parent(dat)
 
 max.plots <- plot.layout[1] * plot.layout[2]
 plot.count <- 0
@@ -815,7 +797,6 @@ if (n.plots > max.vars) {
 
 predictors <- list(rep(NA,n.plots)) # matrix(0,ncol=n.plots,nrow=100)
 responses <- list(rep(NA,n.plots)) # matrix(0,ncol=n.plots,nrow=100)
-
 for (j in c(1:n.plots)) {  #cycle through the first time and get the range of the functions
   if (n.plots == 1) {
     k <- variable.no
@@ -929,7 +910,7 @@ function(gbm.object,
      mask = FALSE,         # controls masking using a sample intensity model
      perspective = TRUE,   # controls whether a contour or perspective plot is drawn
      verbose=F,            # AKS
-     ...)                  # allows the passing of additional arguments to plotting routine
+     pas.data,...)                  # allows the passing of additional arguments to plotting routine
                            # useful options include shade, ltheta, lphi for controlling illumination
                            # and cex for controlling text size - cex.axis and cex.lab have no effect
 {
@@ -966,7 +947,8 @@ function(gbm.object,
   if (is.null(y.label)) {
     y.label <- gbm.call$predictor.names[y]}
 
-  data <- eval.parent(parse(text=gbm.call$dataframe))[,gbm.x]   #AKS
+  data <- try(eval.parent(parse(text=gbm.call$dataframe))[,gbm.x])   #AKS
+  if(class(data)=="try-error") data<-pas.data$dat[,gbm.x]
   n.trees <- gbm.call$best.trees
 
   if (is.null(x.range)) {

@@ -47,31 +47,36 @@ make.auc.plot.jpg<-function(out=out){
   plotname<-paste(out$dat$bname,"_modelEvalPlot.jpg",sep="")
   calib.plot<-paste(out$dat$bname,"_CalibrationPlot.jpg",sep="")
   modelname<-toupper(out$input$model)
-  input.list<-out$dat$ma
+  inlst<-out$dat$ma
  
 ########################################################################
 ######################### Calc threshold on train split #################
+
  if(out$input$model.family!="poisson"){
-            input.list$train$thresh<-out$dat$ma$train$thresh<- as.numeric(optimal.thresholds(data.frame(ID=1:nrow(input.list$train$dat),pres.abs=input.list$train$dat[,1],
-                pred=input.list$train$pred),opt.methods=out$input$opt.methods))[2]
-              if(out$dat$split.type%in%c("test","eval"))  input.list$test$thresh<-out$dat$ma$test$thresh<-input.list$train$thresh
+            inlst$train$thresh<-out$dat$ma$train$thresh<- as.numeric(optimal.thresholds(data.frame(ID=1:length(inlst$train$resp),pres.abs=inlst$train$resp,
+                pred=inlst$train$pred),opt.methods=out$input$opt.methods))[2]
+              if(out$dat$split.type%in%c("test","eval"))  inlst$test$thresh<-out$dat$ma$test$thresh<-inlst$train$thresh
             }
-            else input.list$train$thresh=NULL
+            else inlst$train$thresh=NULL
 
 ##################################################################
 ### Standard residual analysis plots for glm
-    if(out$input$script.name%in%c("glm","mars") & out$dat$split.type!="eval"){
+    if(out$input$script.name%in%c("glm","mars") & out$dat$split.type!="eval" & !(out$input$script.name=="mars" & out$input$PsdoAbs==TRUE)){
           jpeg(paste(out$dat$bname,"_stand.resid.plots.jpeg",sep=""),height=1000,width=1000)
           par(mfrow=c(2,2))
           if(out$input$script.name=="glm") plot(out$mods$final.mod,cex=1.5,lwd=1.5,cex.main=1.5,cex.lab=1.5)
-          if(out$input$script.name=="mars") plot(out$mods$final.mod$model.glm,cex=1.5,lwd=1.5,cex.main=1.5,cex.lab=1.5)
+          if(out$input$script.name=="mars") plot(out$mods$final.mod[[1]]$model.glm,cex=1.5,lwd=1.5,cex.main=1.5,cex.lab=1.5)
           par(mfrow=c(1,1))
           graphics.off()
     }
 
-
+#################### Variable importance plots #####################
+    jpeg(paste(out$dat$bname,"_variable.importance.jpeg",sep=""),height=1000,width=1000) 
+      VariableImportance(Modelout$input$script.name,out=out) 
+    graphics.off()    
 ################# Calculate all statistics on test\train or train\cv splits
-  Stats<-lapply(input.list,calcStat,family=out$input$model.family)
+
+  Stats<-lapply(inlst,calcStat,family=out$input$model.family)
 
  ##### lst doesn't contain the training portion of the data
    train.mask<-seq(1:length(Stats))[names(Stats)=="train"]
@@ -94,14 +99,15 @@ make.auc.plot.jpg<-function(out=out){
    }
 ########################## PLOTS ################################
 #########  Residual surface of input data  ##########
+
   if(out$input$ResidMaps){
         if(out$dat$split.label!="eval"){
-        residual.smooth.fct<-resid.image(calc.dev(input.list$train$dat$response, input.list$train$pred, input.list$train$weight, family=out$input$model.family)$dev.cont,input.list$train$pred,
-                input.list$train$dat$response,input.list$train$XY$X,input.list$train$XY$Y,out$input$model.family,out$input$output.dir,label=out$dat$split.label,out)
+        residual.smooth.fct<-resid.image(calc.dev(inlst$train$dat$response, inlst$train$pred, inlst$train$weight, family=out$input$model.family)$dev.cont,inlst$train$pred,
+                inlst$train$dat$response,inlst$train$XY$X,inlst$train$XY$Y,out$input$model.family,out$input$output.dir,label=out$dat$split.label,out)
             }
         else{
-             residual.smooth.fct<-resid.image(calc.dev(input.list$test$dat$response, input.list$test$pred, input.list$test$weight, family=out$input$model.family)$dev.cont,input.list$test$pred,
-                input.list$test$dat$response,input.list$test$XY$X,input.list$test$XY$Y,out$input$model.family,out$input$output.dir,label=out$dat$split.label,out)
+             residual.smooth.fct<-resid.image(calc.dev(inlst$test$dat$response, inlst$test$pred, inlst$test$weight, family=out$input$model.family)$dev.cont,inlst$test$pred,
+                inlst$test$dat$response,inlst$test$XY$X,inlst$test$XY$Y,out$input$model.family,out$input$output.dir,label=out$dat$split.label,out)
              }
       }
 ########## AUC and Calibration plot for binomial data #######################
@@ -109,7 +115,7 @@ make.auc.plot.jpg<-function(out=out){
     if(out$input$model.family%in%c("binomial","bernoulli")){
             jpeg(file=plotname,height=1000,width=1000,pointsize=20,quality=100)
 ## ROC AUC plots
-            TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=input.list$train$thresh,add.legend=FALSE,lwd=2)
+            TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=inlst$train$thresh,add.legend=FALSE,lwd=2)
                  if(out$dat$split.type=="none") legend(x=.8,y=.15,paste("AUC=",round(Stats$train$auc.fit,digits=3),sep=""))
             if(out$dat$split.type!="none") {
             #so here we have to extract a sublist and apply a function to the sublist but if it has length 2 the structure of the list changes when the sublist is extracted
@@ -122,7 +128,7 @@ make.auc.plot.jpg<-function(out=out){
               perf <- performance(pred,"tpr","fpr")
               plot(perf,col="grey82",lty=3,xlab="1-Specificity (False Positive)",ylab="Sensitivity (True Positive)",main="ROC Plot for Cross-Validation")
               plot(perf,lwd=1,avg="vertical",spread.estimate="boxplot",add=TRUE)
-              TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=input.list$train$thresh,add.legend=FALSE,lwd=1.5,add.roc=TRUE,line.type=1,col="red")
+              TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=inlst$train$thresh,add.legend=FALSE,lwd=1.5,add.roc=TRUE,line.type=1,col="red")
               points(1-Stats$train$Specf,Stats$train$Sens,pch=21,cex=2.5,bg="red")
                segments(x0=0,y0=0,x1=1,y1=1,col="blue")
               text(x=(.96-Stats$train$Specf),y=Stats$train$Sens+.03,label=round(Stats$train$thresh,digits=2))
@@ -141,9 +147,22 @@ make.auc.plot.jpg<-function(out=out){
 ## Calibration plot
             a<-do.call("rbind",lapply(lst,function(lst){lst$auc.data}))
             if(out$input$PsdoAbs==TRUE) {
-                pocplot(a$pred[a$pres.abs==1], a$pred[a$pres.abs==0], 
+              
+                #I'm not at all sure this is right but it would seem you can't change the ratio of pres to background between the test
+                #and train split so we can downsample abs or weight the predictions for the absence I'm not sure either of these are 
+                #appropriate
+                if(!(out$input$script.name%in%c("glm","maxlike"))){
+                    absn<-which(a$pres.abs==0,arr.ind=TRUE)
+                    samp<-sample(absn,size=sum(a$pres.abs==1),replace=FALSE) 
+                }
+                p.plt<-try(pocplot(a$pred[a$pres.abs==1], a$pred[a$pres.abs==0], 
                 title=paste("Presence Only Calibration Plot for \n",switch(out$dat$split.type,none="Training Data",test="Test Split",
-                eval="Test Split",crossValidation="Cross Validation Split"),sep=""))
+                eval="Test Split",crossValidation="Cross Validation Split"),sep="")),silent=TRUE)
+                if(class(p.plt)=="try-error"){
+                             par(mfrow=c(2,1))
+                             hist(a$pred[a$pres.abs==1],freq=TRUE,col="red",xlim=range(a$pred),xlab="Predicted Probability",main="Presence")
+                             hist(a$pred[a$pres.abs==0],freq=TRUE,col="blue",xlim=range(a$pred),xlab="Predicted Probability",main="Available")
+                }
             } else{ 
             pacplot(a$pred,a$pres.abs,title=paste("Calibration Plot for ",switch(out$dat$split.type,none="Training Data",test="Test Split",eval="Test Split",crossValidation="Cross Validation Split"),sep=""))
                 legend(x=0,y=1,c(as.expression(substitute(Int~~alpha==val, list(Int="Intercept:",val=signif(cal.results[1],digits=3)))),
@@ -213,7 +232,8 @@ make.auc.plot.jpg<-function(out=out){
                             out$dat$input$OrigFieldData,out$dat$input$FieldDataTemp,out$dat$input$ParcOutputFolder,
                             out$dat$input$ParcTemplate,ifelse(length(out$dat$input$CovSelectName)==0,"NONE",out$dat$input$CovSelectName),""))
                         assign("Evaluation.Metrics.List",list(x=x,Header=Header,Parm.Len=length(stat.names),parent=parent),envir=.GlobalEnv)
-                      AppendOut(compile.out=out$input$Append.Dir,Header,x,out,Parm.Len=length(stat.names),parent=parent,split.type=out$dat$split.type)
+                     if(out$input$script.name!="maxlike") 
+                        AppendOut(compile.out=out$input$Append.Dir,Header,x,out,Parm.Len=length(stat.names),parent=parent,split.type=out$dat$split.type)
 
     return(list(thresh=train.stats$train$thresh,residual.smooth.fct=residual.smooth.fct))
 }

@@ -52,7 +52,6 @@ function(obs, preds, family = "binomial")
 # a conditional test for the latter will catch most failures to specify
 # the family
 #
-
 if (family == "bernoulli") family <- "binomial"
 pred.range <- max(preds) - min(preds)
 if(pred.range > 1.2 & family == "binomial") {

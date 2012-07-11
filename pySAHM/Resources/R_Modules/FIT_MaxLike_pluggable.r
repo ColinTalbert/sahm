@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-## Copyright (C) 2010-2012, USGS Fort Collins Science Center. 
+## Copyright (C) 20010-2012, USGS Fort Collins Science Center. 
 ## All rights reserved.
 ## Contact: talbertc@usgs.gov
 ##
@@ -42,46 +42,52 @@
 ## and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
-#Reading data and checking libraries
-source(paste(ScriptPath,"read.dat.r",sep="\\")) 
-source(paste(ScriptPath,"path.check.r",sep="\\")) 
-source(paste(ScriptPath,"read.ma.r",sep="\\"))
-source(paste(ScriptPath,"chk.libs.r",sep="\\"))
+make.p.tif=T
+make.binary.tif=T
+MESS=F
+Formula=NULL
+UseTiffs<-TRUE
+RemoveDuplicates<-TRUE
+starts<-NULL
+fixed<-NULL
+opt.methods=2
+# Interpret command line argurments #
+# Make Function Call #
+Args <- commandArgs(trailingOnly=FALSE)
+
+    for (i in 1:length(Args)){
+     if(Args[i]=="-f") ScriptPath<-Args[i+1]
+     }
+
+    for (arg in Args) {
+    	argSplit <- strsplit(arg, "=")
+    	argSplit[[1]][1]
+    	argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="c") csv <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="o") output <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
+   		if(argSplit[[1]][1]=="mpt") make.p.tif <- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="om")  opt.methods <- as.numeric(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="fmla")  Formula <- as.character(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="ut")   UseTiffs<- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="rd")   RemoveDuplicates<- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="sts")  starts <- argSplit[[1]][2]
+      if(argSplit[[1]][1]=="fxd")  fixed <- argSplit[[1]][2]
+    }
+
+ScriptPath<-dirname(ScriptPath)
+source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
+source(paste(ScriptPath,"BRT.helper.fcts.r",sep="\\"))
 
 
-#Fitting Models and making predictions
-source(paste(ScriptPath,"generic.model.fitNew.r",sep="\\"))
-source(paste(ScriptPath,"FitModels.r",sep="\\"))
-source(paste(ScriptPath,"model.fit.r",sep="\\"))
-source(paste(ScriptPath,"pred.fct.r",sep="\\"))
+    FitModels(ma.name=csv,
+		tif.dir=NULL,
+		output.dir=output,
+		response.col=responseCol,
+		make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
+		debug.mode=F,responseCurveForm="pdf",script.name="maxlike",
+		opt.methods=opt.methods,MESS=MESS,Formula=Formula,UseTiffs=UseTiffs,RemoveDuplicates=RemoveDuplicates)
 
-#Calculating Evaluation Metrics and producing plots
-source(paste(ScriptPath,"make.auc.r",sep="\\"))
-source(paste(ScriptPath,"EvalStats.r",sep="\\"))
-source(paste(ScriptPath,"ResidualImage.r",sep="\\"))
-source(paste(ScriptPath,"Pred.Surface.r",sep="\\"))
-source(paste(ScriptPath,"calc.deviance.r",sep="\\"))
-source(paste(ScriptPath,"calibration.r",sep="\\"))
-source(paste(ScriptPath,"roc.r",sep="\\"))
-source(paste(ScriptPath,"CalcStats.r",sep="\\"))
-source(paste(ScriptPath,"EvalStatsHelperFcts.r",sep="\\"))
-source(paste(ScriptPath,"TestTrainRocPlot.r",sep="\\"))
-source(paste(ScriptPath,"ConfusionMatrix.r",sep="\\"))
-source(paste(ScriptPath,"PresenceOnlyCalibration.r",sep="\\"))
-source(paste(ScriptPath,"response.curves.r",sep="\\"))
-source(paste(ScriptPath,"VariableImportance.r",sep="\\"))
 
-#Writing output metrics
-source(paste(ScriptPath,"capture.stats.r",sep="\\"))
-source(paste(ScriptPath,"write.txt.r",sep="\\"))
-source(paste(ScriptPath,"AppendOut.r",sep="\\"))
-source(paste(ScriptPath,"modalDialog.r",sep="\\"))
-
-#Making maps
-source(paste(ScriptPath,"proc.tiff.r",sep="\\"))
-
-#Other utility functions
-source(paste(ScriptPath,"cv.fctNew.r",sep="\\"))
-source(paste(ScriptPath,"place.save.r",sep="\\"))
-source(paste(ScriptPath,"SplitBackground.r",sep="\\"))
 
