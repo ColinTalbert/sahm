@@ -64,16 +64,19 @@ make.auc.plot.jpg<-function(out=out){
     if(out$input$script.name%in%c("glm","mars") & out$dat$split.type!="eval" & !(out$input$script.name=="mars" & out$input$PsdoAbs==TRUE)){
           jpeg(paste(out$dat$bname,"_stand.resid.plots.jpeg",sep=""),height=1000,width=1000)
           par(mfrow=c(2,2))
-          if(out$input$script.name=="glm") plot(out$mods$final.mod,cex=1.5,lwd=1.5,cex.main=1.5,cex.lab=1.5)
+          if(out$input$script.name=="glm") plot(out$mods$final.mod[[1]],cex=1.5,lwd=1.5,cex.main=1.5,cex.lab=1.5)
           if(out$input$script.name=="mars") plot(out$mods$final.mod[[1]]$model.glm,cex=1.5,lwd=1.5,cex.main=1.5,cex.lab=1.5)
           par(mfrow=c(1,1))
           graphics.off()
     }
 
 #################### Variable importance plots #####################
-    jpeg(paste(out$dat$bname,"_variable.importance.jpeg",sep=""),height=1000,width=1000) 
-      VariableImportance(Modelout$input$script.name,out=out) 
-    graphics.off()    
+   
+    if(tolower(out$input$script.name)!="maxlike"){
+      jpeg(paste(out$dat$bname,"_variable.importance.jpeg",sep=""),height=1000,width=1000) 
+        VariableImportance(Modelout$input$script.name,out=out) 
+      graphics.off()
+    }    
 ################# Calculate all statistics on test\train or train\cv splits
 
   Stats<-lapply(inlst,calcStat,family=out$input$model.family)
@@ -165,7 +168,7 @@ make.auc.plot.jpg<-function(out=out){
                 }
             } else{ 
             pacplot(a$pred,a$pres.abs,title=paste("Calibration Plot for ",switch(out$dat$split.type,none="Training Data",test="Test Split",eval="Test Split",crossValidation="Cross Validation Split"),sep=""))
-                legend(x=0,y=1,c(as.expression(substitute(Int~~alpha==val, list(Int="Intercept:",val=signif(cal.results[1],digits=3)))),
+                legend("topleft",c(as.expression(substitute(Int~~alpha==val, list(Int="Intercept:",val=signif(cal.results[1],digits=3)))),
                  as.expression(substitute(Slope~~beta==val, list(Slope="Slope:",val=signif(cal.results[2],digits=3)))),
                  as.expression(substitute(P(alpha==0, beta==1)==Prob,list(Prob=signif(cal.results[3],digits=3)))),
                  as.expression(substitute(P(alpha==0~a~beta==1)==Prob,list(Prob=signif(cal.results[4],digits=3),a="|"))),
@@ -173,6 +176,7 @@ make.auc.plot.jpg<-function(out=out){
              }
             dev.off()
             }
+          
 #Some residual plots for poisson data
     if(out$input$model.family%in%c("poisson")){
             jpeg(file=plotname)
@@ -185,11 +189,11 @@ make.auc.plot.jpg<-function(out=out){
               (Stats$train$auc.data$pres.abs[Stats$train$auc.data$pred!=0]-Stats$train$auc.data$pred[Stats$train$auc.data$pred!=0]))
                if(out$input$script.name!="rf"){
                     #this is the residual plot from glm but I don't think it will work for anything else
-                    qqnorm(residuals(out$mods$final.mod),ylab="Std. deviance residuals")
-                    qqline(residuals(out$mods$final.mod))
+                    qqnorm(residuals(out$mods$final.mod[[1]]),ylab="Std. deviance residuals")
+                    qqline(residuals(out$mods$final.mod[[1]]))
                      yl <- as.expression(substitute(sqrt(abs(YL)), list(YL = as.name("Std. Deviance Resid"))))
                     plot(log(Stats$train$auc.data$pred[Stats$train$auc.data$pred!=0]),
-                       sqrt((abs(residuals(out$mods$final.mod,type="deviance")[Stats$train$auc.data$pred!=0]))),
+                       sqrt((abs(residuals(out$mods$final.mod[[1]],type="deviance")[Stats$train$auc.data$pred!=0]))),
                        xlab="Predicted Values (log Scale)",ylab=yl)
               }
             graphics.off()}

@@ -1,12 +1,12 @@
 ##These functions are all from the POC paper by Philips and Elith
 
-calibplot <- function(pred, negrug, posrug, ideal, ylim=c(0,1), xlim=c(0,1), capuci=TRUE, xlabel = "Predicted probability of presence", filename=NULL, title="Calibration plot", ...) {
+calibplot <- function(pred, negrug, posrug, ideal, ylim=c(0,1),capuci=TRUE, xlabel = "Predicted probability of presence", filename=NULL, title="Calibration plot", ...) {
   if (!is.null(filename)) png(filename)
   ylow <- pred$y - 2 * pred$se
   ylow[ylow<0] <- 0
   yhigh <- pred$y + 2 * pred$se
   if (capuci) yhigh[yhigh>1] <- 1
-  plot(pred$x, ylow, type="l", col="orange", ylim=ylim, xlim=xlim,
+  plot(pred$x, ylow, type="l", col="orange", ylim=ylim, xlim=range(pred$x),
     xlab=xlabel, lwd=2, ...)
   lines(pred$x, yhigh, lwd=2, col="orange")
   lines(pred$x, sapply(pred$x, ideal), lty="dashed")

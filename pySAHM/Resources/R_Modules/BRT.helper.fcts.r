@@ -226,7 +226,7 @@ gbm.step.fast <- function(
   assign("y.data", y.data, env = globalenv())
   offset.name <- deparse(substitute(offset))   # get the dataframe name
   offset = eval(offset)
-  browser()
+  
   n.cases <- nrow(dat)
   n.preds <- length(gbm.x)
 

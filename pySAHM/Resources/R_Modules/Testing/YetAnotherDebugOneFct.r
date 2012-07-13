@@ -1,7 +1,12 @@
+#debug branch
 setwd("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
 ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
-dir.path<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction7.6"
+dir.path<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction7.12"
 
+#master branch
+setwd("I:\\VisTrails\\VisTrails_SAHM_x32\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x32\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
+dir.path<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\MasterBranch7.12"
 #For Model tests
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
@@ -26,7 +31,7 @@ source("CrossValidationSplit.r")
 rc=c(rep("responseBinary",times=11),rep("responseCount",times=2))
 input.file<-vector()
 input.file=c(#used/available
-      "I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\CrossValidationSp1test.csv",
+      "C:\\temp\\SAHM_workspace\\Species1PresOnlyCV.csv",
       "I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\UsedAvailableSp1NoCV.csv",
         #pres/abs
       "C:/VisTrails/mtalbert_20110504T132851/readMaTests/BadPath.csv",
@@ -37,22 +42,22 @@ input.file=c(#used/available
       "C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitFactor2.csv",
       "C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitWeights.csv",  
       "C:/VisTrails/mtalbert_20110504T132851/readMaTests/NoSplit.csv",
-      "C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv",
+      "C:\\temp\\SAHM_workspace\\PresAbsCrossVal.csv",
        #count
       "C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv",
       "C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv")
 
 #I'm cutting these out of the standard test suite because they take a long time to run
 #and only test whether we run well on large datasets or big tiffs
-"C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
-"C:/VisTrails/mtalbert_20110504T132851/readMaTests/LargeSplit.csv"
+#"C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
+#"C:/VisTrails/mtalbert_20110504T132851/readMaTests/LargeSplit.csv"
 #add a missing data csv and maybe a couple with pseudo absence
 output.dir<-vector()
 output.dir[1]<-paste(dir.path,"\\rf",sep="")
 output.dir[2]<-paste(dir.path,"\\brt",sep="")
 output.dir[3]<-paste(dir.path,"\\mars",sep="")
 output.dir[4]<-paste(dir.path,"\\glm",sep="")
-
+output.dir[5]<-paste(dir.path,"\\maxlike",sep="")
 
 
 ########   Model Fit Test  ###########
@@ -60,11 +65,11 @@ output.dir[4]<-paste(dir.path,"\\glm",sep="")
          for(i in 1:length(input.file)){
               try(FitModels(ma.name=input.file[i],
                         tif.dir=NULL,output.dir=output.dir[2],
-                        response.col=rc[i],make.p.tif=T,make.binary.tif=T,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
+                        response.col=rc[i],make.p.tif=T,make.binary.tif=F,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
                     family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
                 tolerance = 0.001,seed=1,opt.methods=2,
                         simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
-                        learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=TRUE))
+                        learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=F))
                       }
               
               
@@ -82,7 +87,7 @@ output.dir[4]<-paste(dir.path,"\\glm",sep="")
                   try(FitModels(ma.name=input.file[i],
                         tif.dir=NULL,
                         output.dir=output.dir[4],
-                        response.col=rc[i],make.p.tif=F,make.binary.tif=F,
+                        response.col=rc[i],make.p.tif=T,make.binary.tif=F,
                         simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=FALSE))
                         }
               
@@ -92,12 +97,12 @@ output.dir[4]<-paste(dir.path,"\\glm",sep="")
               try(FitModels(ma.name=input.file[i],
                     tif.dir=NULL,
                     output.dir=output.dir[1],
-                    response.col=rc[i],make.p.tif=T,make.binary.tif=T,
+                    response.col=rc[i],make.p.tif=T,make.binary.tif=F,
                         debug.mode=T,opt.methods=2,script.name="rf",
               responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
               samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
               localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=proximity,norm.votes=TRUE,
-              do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=TRUE,seed=1))
+              do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=F,seed=1))
                  }
  
               ### Maxlike
@@ -106,10 +111,10 @@ output.dir[4]<-paste(dir.path,"\\glm",sep="")
                for(i in 1:2){
                 try(FitModels(ma.name=input.file[i],
                 		tif.dir=NULL,
-                		output.dir=output.dir,
-                		response.col=rc,
+                		output.dir=output.dir[5],
+                		response.col=rc[i],
                 		make.p.tif=T,make.binary.tif=T,
-                		debug.mode=F,responseCurveForm="pdf",script.name="maxlike",
+                		debug.mode=T,responseCurveForm="pdf",script.name="maxlike",
                 		opt.methods=2,MESS=T,Formula=Formula,UseTiffs=FALSE))
               }
               		

@@ -1,10 +1,14 @@
-setwd("I:\\VisTrails\\Central_VisTrails_x32\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
-ScriptPath="I:\\VisTrails\\Central_VisTrails_x32\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
+setwd("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
 
 #The idea here is to run this code then change above directories then rerun with the new code and compare (using append output and possible comparing maps)
+ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
 source("FIT_BRT_pluggable.r")
+ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
 source("FIT_MARS_pluggable.r")
+ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
 source("FIT_RF_pluggable.r")
+ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
 source("FIT_GLM_pluggable.r")
 source("LoadRequiredCode.r")
 source("RF.helper.fcts.r")
@@ -14,7 +18,7 @@ source("MARS.helper.fcts.r")
 rc=c(rep("responseBinary",times=11),rep("responseCount",times=2))
 input.file<-vector()
 input.file[1]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/BadPath.csv"
-input.file[2]="I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\TestingRCode\CrossValidationSp1test.csv"
+input.file[2]="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\CrossValidationSp1test.csv"
 input.file[3]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Split.csv"
 input.file[4]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitBadFactor.csv"
 input.file[5]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitFactor.csv"
@@ -29,8 +33,8 @@ input.file[13]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv
 
 #I'm cutting these out of the standard test suite because they take a long time to run
 #and only test whether we run well on large datasets or big tiffs
-"C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
-"C:/VisTrails/mtalbert_20110504T132851/readMaTests/LargeSplit.csv"
+#"C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
+#"C:/VisTrails/mtalbert_20110504T132851/readMaTests/LargeSplit.csv"
 
 output.dir<-vector()
 output.dir[1]<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\NewMasterBranch2.10\\rf"

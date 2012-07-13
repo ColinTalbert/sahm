@@ -59,22 +59,23 @@ on.exit(detach(out$input))
   if(Model=="glm") {
       #fitting the actual model takes place elsewhere  
           out<-model.fit(dat,out,Model,weight=weight,full.fit=TRUE)
-       
+          
       #post processing to get a common output for all model fits
-            txt0<-paste("\n\n","Settings:\n","\n\t model family=",model.family,
-            "\n\n","Results:\n\t ","number covariates in final model=",length(attr(terms(formula(out$mods$final.mod)),"term.labels")),sep="")
-            print(out$mods$final.mod$summary <- summary(out$mods$final.mod))
+            txt0<-paste("\n\n","Settings:\n","\n\t model family =          ",model.family,
+                                             "\n\t simplification method = ",simp.method,
+            "\n\n\n","Results:\n\t ","number covariates in final model=",length(attr(terms(formula(out$mods$final.mod[[1]])),"term.labels")),"\n",sep="")
+            print(out$mods$final.mod[[1]]$summary <- summary(out$mods$final.mod[[1]]))
             write.txt(out,t0) 
              
-            capture.output(txt0,out$mods$final.mod$summary,file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
+            capture.output(cat(txt0),out$mods$final.mod[[1]]$summary,file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
             cat("\n","Finished with stepwise GLM","\n")
             cat("Summary of Model:","\n")
 
-                if(length(coef(out$mods$final.mod))==1) stop("Null model was selected.  \nEvaluation metrics and plots will not be produced")
+                if(length(coef(out$mods$final.mod[[1]]))==1) stop("Null model was selected.  \nEvaluation metrics and plots will not be produced")
 
               #storing number of variables in final model
-              out$mods$n.vars.final<-length(attr(terms(formula(out$mods$final.mod)),"term.labels"))
-              out$mods$vnames<-attr(terms(formula(out$mods$final.mod)),"term.labels")
+              out$mods$n.vars.final<-length(attr(terms(formula(out$mods$final.mod[[1]])),"term.labels"))
+              out$mods$vnames<-attr(terms(formula(out$mods$final.mod[[1]])),"term.labels")
               #have to remove all the junk with powsers and interactions for mess map production to work
               out$mods$vnames<-unique(unlist(strsplit(gsub("I\\(","",gsub("\\^2)","",out$mods$vnames)),":")))
                }
@@ -122,14 +123,14 @@ on.exit(detach(out$input))
  if(Model=="brt"){
        #fitting for each split (if there is a background split)
           out<-model.fit(dat,out,Model,full.fit=TRUE)
-            
+        
           write.txt(out,t0)
            txt0 <- paste("\n\n","Settings:\n",
                       if(out$input$PsdoAbs) "(Averaged across available splits)\n", 
                       "\n\trandom seed used =            ",seed,
                       "\n\ttree complexity =             ",out$mods$parms$tc.full,
                       "\n\tlearning rate =               ",round(out$mods$lr.mod$lr,4),
-                      "\n\tn(trees) =                    ",mean(unlist(lapply(out$mods$final.mod,"[",39))),
+                      "\n\tn(trees) =                    ",mean(unlist(lapply(out$mods$final.mod,function(lst){lst$n.trees}))),
                       "\n\tmodel simplification =        ",simp.method,
                       "\n\tn folds =                     ",n.folds,
                       "\n\tn covariates in final model = ",out$mods$n.vars.final,

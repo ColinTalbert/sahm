@@ -2,6 +2,7 @@ VariableImportance<-function(Model,out){
 
     attach(out$dat$ma$train)
     on.exit(detach(out$dat$ma$train))
+   
     auc.vect<-vector()
     dat<-dat[,-1] #remove the response col
 

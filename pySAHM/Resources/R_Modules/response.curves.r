@@ -43,97 +43,22 @@
 ###############################################################################
 
 response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
-     attach(out$input)
+      attach(out$input)
       on.exit(detach(out$input))
       bname<-out$dat$bname
- 
-if(Model%in%c("brt","mars")){
-
-        if(is.null(responseCurveForm)) responseCurveForm<-0
-      
-        if(responseCurveForm=="pdf"){
-            nvar <- nrow(out$mods$summary)
+  
+      if(Model%in%c("brt","mars"))  nvar <- nrow(out$mods$summary)
+      if(Model=="glm")              nvar <- out$mods$n.vars.final-length(grep(":", attr(terms(formula(out$mods$final.mod[[1]])),"term.labels")))
+      if(Model=="rf")               nvar <- nrow(out$mods$summary)           
             pcol <- min(ceiling(sqrt(nvar)),4)
             prow <- min(ceiling(nvar/pcol),3)
 
             pdf(paste(bname,"_response_curves.pdf",sep=""),width=11,height=8.5,onefile=T)
-                par(oma=c(2,2,4,2))
-                for(i in 1:length(out$mods$final.mod)){
-                    if(Model=="brt") out$mods$r.curves[[i]] <- gbm.plot(out$mods$final.mod[[i]],plotit=F,plot.layout=c(prow,pcol))
-                    if(Model=="mars"){
-                         out$mods$r.curves[[i]] <- mars.plot(out$mods$final.mod[[i]],plot.it=F)
-                         out$mods$summary$Var<- rownames(out$mods$summary)
-                    }     
-                 } 
-                 
-                 col.scale<-rainbow(length(out$mods$final.mod)) 
-                  
-                for (i in 1:nrow(out$mods$summary)){
-                     resp.indx<-lapply(out$mods$r.curves,function(lst,x){match(x,lst$names)},x=out$mods$summary$Var[i])
-                     extract.rsp<-function(a,b){if(!is.na(b)) range(a$resp[[b]])}
-                     resp.rng<-mapply(extract.rsp,a=out$mods$r.curve,b=resp.indx)
-                       #
-                     x.lims<-range(dat[,match(out$mods$summary$Var[i],names(dat))])
-                     y.lims<-range(resp.rng)
-                     if(Model=="brt") 
-                         plot(x.lims,y.lims,type="n",xlab=paste(out$mods$summary$Var[i],"  (",round(out$mods$summary$x[i],digits=2),"%)",sep=""),
-                         ylab="fitted function")
-                     else plot(x.lims,y.lims,type="n",xlab=out$mods$summary$Var[i],ylab="fitted function")   
-                        for(j in 1:length(out$mods$final.mod)){
-                           k<-match(out$mods$summary$Var[i],out$mods$r.curves[[j]]$names)
-                           if(!is.na(k)){
-                               lines(x=out$mods$r.curves[[j]]$preds[[k]],y=out$mods$r.curves[[j]]$resp[[k]],type="l",col=col.scale[j],lwd=1.3)
-                           }
-                     }
-                 }
-                par(mfrow=c(1,1))
-                #for(i in 1:min(nrow(int),2)) gbm.perspec(fit,int$var1.index[i],int$var2.index[i])
-                if(!out$input$PsdoAbs & Model=="brt") {
-                    if(!is.null(out$mods$interactions)){
-                        for(i in 1:ifelse(is.null(nrow(out$mods$interactions)),1,nrow(out$mods$interactions))){
-                            gbm.perspec(out$mods$final.mod[[1]],out$mods$interactions[[1]]$v1[i],out$mods$interactions[[1]]$v2[i],pas.data=out$dat$ma$train)
-                               mtext(paste("BRT interaction plots for",basename(ma.name)),outer=T,side=3,cex=1.5) 
-                        }
-                    }
-                }
-            graphics.off()
-            } else {
-                r.curves <- gbm.plot(out$mods$final.mod,plotit=F)
-            }
-    }
- 
- if(Model=="glm") {if(debug.mode | responseCurveForm=="pdf"){
-       
-        nvar <- out$mods$n.vars.final-length(grep(":", attr(terms(formula(out$mods$final.mod)),"term.labels")))
-        pcol <- min(ceiling(sqrt(nvar)),4)
-        prow <- min(ceiling(nvar/pcol),3)
-                    term=seq(1:length(attr(terms(formula(out$mods$final.mod)),"term.labels")))
-                  if(length(grep(":", attr(terms(formula(out$mods$final.mod)),"term.labels")))>0) term<-term[-c((grep(":", attr(terms(formula(out$mods$final.mod)),"term.labels"))))]
-                 
-        pdf(paste(bname,"_response_curves.pdf",sep=""),width=11,height=8.5,onefile=T)
-          #svg(paste(bname,"_response_curves.svg",sep=""),width=11,height=8.5,onefile=T)
-            par(oma=c(2,2,4,2),mfrow=c(prow,pcol))
-            r.curves <-my.termplot(out$mods$final.mod,plot.it=T,terms=term,rug=TRUE)
-            mtext(paste("GLM response curves for",basename(ma.name)),outer=T,side=3,cex=1.3)
-           
-           #############################
-            par(mfrow=c(1,1))
-            graphics.off()
-        } else r.curves<-my.termplot(out$mods$final.mod,plot.it=F)
-
-     }
-if(Model=="rf"){
- if(responseCurveForm=="pdf"){
-                    nvar <- nrow(out$mods$summary)
-                    pcol <- min(ceiling(sqrt(nvar)),4)
-                    prow <- min(ceiling(nvar/pcol),3)
-                    pdf(paste(bname,"_response_curves.pdf",sep=""),width=11,height=8.5,onefile=T)
-                    par(oma=c(2,2,4,2),mfrow=c(prow,pcol))
-                    } 
-                    
-#this little section is borrowed from BIOMOD because rf partial plot 
-#does something odd with the y axis
-dat<-out$dat$ma$train$dat[,-1]
+                par(oma=c(2,2,4,2),mfrow=c(prow,pcol))
+                     
+        #this little section is borrowed from BIOMOD because rf partial plot 
+        #does something odd with the y axis
+        dat<-out$dat$ma$train$dat[,-1]
         Xp <- as.data.frame(matrix(NA, nc = ncol(dat), nr = nrow(dat),
         dimnames = list(NULL, colnames(dat))))
         for (i in 1:ncol(dat)) {
@@ -146,7 +71,8 @@ dat<-out$dat$ma$train$dat[,-1]
                 levels(Xp[, i]) <- levels(dat[, i])
             }
     }
-     for (i in 1:ncol(dat)) {
+  
+     for (i in sort(match(out$mods$vnames,names(dat)))) {
             if (!is.factor(dat[, i])) {
                 xr <- range(dat[, i])
                 Xp1 <- Xp
@@ -162,13 +88,36 @@ dat<-out$dat$ma$train$dat[,-1]
             }
             Xf<-matrix(nrow=nrow(Xp1),ncol=length(out$mods$final.mod))
             for(j in 1:length(out$mods$final.mod)){
-                  Xf[,j] <- predict(out$mods$final.mod[[j]], as.data.frame(Xp1), type = "prob")[,2]
+                  Xf[,j] <- pred.fct(out$mods$final.mod[[j]], as.data.frame(Xp1),Model)
              }
-                   plot(Xp1[, i],apply(Xf,1,mean), ylim = c(0, 1), xlab = "",
+                  y.lim<-c(0,1)
+                  if(out$input$model.family=="poisson") y.lim=range(apply(Xf,1,mean))
+                   plot(Xp1[, i],apply(Xf,1,mean), ylim = y.lim, xlab = "",
                   ylab = "", type = "l", main = names(dat)[i])       
            } 
-            graphics.off()
-
-    }
-    
-}
+            graphics.off()     
+       }         
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+      

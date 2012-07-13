@@ -9,6 +9,7 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,...){
     on.exit(detach(out$input))
    
     if(Model=="glm") {
+    mymodel.glm.step<-list()
             penalty <- if(simp.method=="AIC") 2 else
                          log(nrow(dat))
 
@@ -25,7 +26,7 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,...){
                    paste("(",paste(out$dat$used.covs[cont.mask],collapse=" + "),")^2",sep=""),
                    paste("I(",out$dat$used.covs[cont.mask],"^2)",sep="")),collapse=" + "),sep="")))
              }
-            mymodel.glm.step <- step(glm(as.formula(paste("response","~1")),family=model.family,data=dat,weights=weight,na.action="na.exclude"),
+            mymodel.glm.step[[1]] <- step(glm(as.formula(paste("response","~1")),family=model.family,data=dat,weights=weight,na.action="na.exclude"),
             direction='both',scope=scope.glm,k=penalty,trace=1)
             out$mods$final.mod<-mymodel.glm.step
             if(full.fit) return(out)
@@ -43,6 +44,7 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,...){
   #   it's fitting to a different data set than everything else so append output should
   #   be blank
   #
+  
   if(is.null(Formula)){
         scope.maxlike <- list(lower=as.formula("~1"),
                     upper=as.formula(paste("~",paste(out$dat$used.covs,collapse='+'))))
@@ -110,7 +112,7 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,...){
 
           if(model.family=="binomial")  out$input$model.family<-model.family<-"bernoulli"
             if(!is.null(tc)) out$mods$parms$tc.full<-out$mods$parms$tc.sub<-tc
-
+        
            #going to try to estimate learning rate and predictors to use in final model not just on the subset but by calculating for
            #several of the splits (if the used was split)
            lr.samp<-sample(1:num.splits,size=min(num.splits,5),replace=FALSE)
@@ -152,7 +154,7 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,...){
                               out$mods$simp.mod$good.vars <- names(dat)[out$mods$simp.mod$good.cols]
                              {cat("\n");cat("50%\n")}
                 }
-                  browser()
+              
             final.mod<-list()
             for(i in 1:num.splits){
                  if(out$mods$lr.mod$lr==0) out$mods$lr.mod$lr<-out$mods$lr.mod$lr0
@@ -170,7 +172,7 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,...){
                   row.names(int)<-NULL
                   if(nrow(int)>0) out$mods$interactions[[i]] <- int else out$mods$interactions <- NULL     
           }
-        
+       
           if(full.fit) {
           #post processing steps
           out$mods$final.mod<-final.mod
@@ -182,7 +184,7 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,...){
           #can't take mean here because we need to account for when the variable didn't show up in the model
           out$mods$summary<-aggregate(var.contrib,list(Var=var.name),FUN=sum)
           out$mods$summary[,2]<-out$mods$summary[,2]/num.splits
-          
+          names(out$mods$summary)[2]<-"rel.inf"
           out$mods$n.vars.final<-length(var.final)
          
           if(!is.null(unlist(lapply(out$mods$interactions,is.null)))){
@@ -200,12 +202,12 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,...){
           psd.abs<-dat[dat$response==0,]
           rf.full<-list()
           mtry.vect<-vector()
-              
+             
                for(i in 1:length(table(Split))){
                     # tune the mtry parameter - this controls the number of covariates randomly subset for each split #
                   cat("\ntuning mtry parameter\n")
-                  x=rbind(psd.abs[i==Split,-1],dat[dat$response==1,-1])
-                   y=factor(c(psd.abs[i==Split,1],dat[dat$response==1,1]))
+                  x=rbind(psd.abs[i==Split,-1],dat[dat$response>=1,-1])
+                   y=factor(c(psd.abs[i==Split,1],dat[dat$response>=1,1]))
                   #x=rbind(dat[dat$response==1,-1],psd.abs[i==Split,-1])
                   #y=c(dat[dat$response==1,1],psd.abs[i==Split,1])
                   if(is.null(mtry)){
