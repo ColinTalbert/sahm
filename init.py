@@ -227,7 +227,7 @@ class Predictor(Constant):
         
         if (self.hasInputFromPort("AggregationMethod")):
             aggregationMethod = self.getInputFromPort("AggregationMethod")
-            if self.getInputFromPort("AggregationMethod").lower() not in ['mean', 'max', 'min', 'majority', 'none']:
+            if self.getInputFromPort("AggregationMethod").lower() not in ['mean', 'max', 'min', 'std', 'majority', 'none']:
                 raise ModuleError(self, "No Aggregation Method specified")
         else:
             aggregationMethod = "Mean"
@@ -1942,7 +1942,7 @@ _modules = generate_namespaces({'DataInput': [
                                                            'moduleFringe':input_fringe}),
                                               (FieldData, {'moduleColor':input_color,
                                                            'moduleFringe':input_fringe}),
-                                              (TemplateLayer, {'moduleColor':input_color,
+                                               (TemplateLayer, {'moduleColor':input_color,
                                                            'moduleFringe':input_fringe}),] + \
                                               build_predictor_modules(),
                                 'Tools': [FieldDataQuery,

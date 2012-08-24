@@ -121,7 +121,7 @@ class PARC:
         self.out_dir = ""
         self.inputs_CSV = ''
         self.inputs = []
-        self.agg_methods = ['Min', 'Mean', 'Max', 'Majority']
+        self.agg_methods = ['Min', 'Mean', 'Max', 'Majority', 'STD']
         self.resample_methods = ['NearestNeighbor', 'Bilinear', 'Cubic', 'CubicSpline', 'Lanczos']
         self.logger = None
         self.multicores = True
@@ -438,7 +438,7 @@ class PARC:
         #the above algorithm is terribly inefficient.
         #todo replace the cell by cell analysis with a
         #loop of 'blocks' of data maybe.  
-        bSize = 1024 #source pixels
+        bSize = 2048 #source pixels
         #convert this to the nearest whole number of target pixels
         bSize = int(round(bSize / numSourcePerTarget) * numSourcePerTarget)
         if bSize == 0:
@@ -461,7 +461,7 @@ class PARC:
                 ndMask = ma.masked_array(data, mask=(data==sourceParams["NoData"]))
                 if method == None:
                     method = "Mean"
-                if method in ["Mean", "Max", "Min"]:
+                if method in ["Mean", "Max", "Min", "STD"]:
                     ans = self.rebin(ndMask, (numRows/numSourcePerTarget, numCols/numSourcePerTarget), method)
                 else:
                     X, Y = ndMask.shape
@@ -511,6 +511,10 @@ class PARC:
             return a.reshape(sh).min(-1).min(1)
         elif method == "Max":
             return a.reshape(sh).max(-1).max(1)
+        elif method == "STD":
+            sh2 = sh[0], sh[2], sh[1] * sh[3] 
+            return np.rollaxis(a.reshape(sh), 1, -1).reshape(sh2).std(-1)
+
         
     def getRasterParams(self, rasterFile):
         """
