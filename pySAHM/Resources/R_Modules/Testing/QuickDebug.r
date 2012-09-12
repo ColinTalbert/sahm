@@ -38,6 +38,8 @@ input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packa
 input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\RFtest.csv"
 input.file="C:\\temp\\TestDataSets\\CanadaThistlePseudoAbsence.csv"
 input.file="C:\\temp\\SAHM_workspace\\Species1PresOnlyCV.csv"
+## new file for checking pseudoabs
+input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\ElithPsdoAbs.csv"
 ##MARS
 FitModels(ma.name=input.file,
             output.dir=output.dir,

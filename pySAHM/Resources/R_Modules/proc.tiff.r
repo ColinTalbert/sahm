@@ -211,11 +211,11 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
                 }
             }
                    }}
-
+        
     ifelse(sum(complete.cases(temp))==0,  # does not calculate predictions if all predictors in the region are na
         preds<-matrix(data=NaN,nrow=region.dims[1],ncol=region.dims[2]),
         preds <- t(matrix(pred.fct(model,temp,Model),ncol=dims[2],byrow=T)))
-
+        a<-pred.fct(model,temp,Model)
         min.pred<-min(na.omit(preds),min.pred)
         max.pred<-max(na.omit(preds),max.pred)
         preds[is.na(preds)]<-NAval

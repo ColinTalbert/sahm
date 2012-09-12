@@ -59,11 +59,12 @@ pred.fct<-function(model,x,Model){
      
   if(Model=="mars"){
         # retrieve key items from the global environment #
-        # make predictionss.
+        # make predictions.
          if(class(model[[1]])=="list") {
          prd<-function(model,x){
                               preds <- rep(NA,nrow(x))
-                              preds<-mars.predict(model,new.data=x)$prediction[,1]
+                              preds[complete.cases(x)]<-mars.predict(model,new.data=x[complete.cases(x),])$prediction[,1]
+                              return(preds)
                               }          
            lst.preds<-lapply(model,FUN=prd,x=x)
            y<-try(apply(do.call("rbind",lst.preds),2,mean))
@@ -78,7 +79,8 @@ pred.fct<-function(model,x,Model){
           if(class(model[[1]])=="gbm"){
                            prd<-function(model,x){
                               preds <- rep(NA,nrow(x))
-                              preds<-predict.gbm(model,newdata=x,n.trees=model$target.trees,type="response") 
+                              preds[complete.cases(x)]<-predict.gbm(model,newdata=x[complete.cases(x),],n.trees=model$target.trees,type="response")
+                              return(preds) 
                            }         
                   #getting the predictions from each split of the data then taking out one column and getting the average
                           lst.preds<-try(lapply(model,FUN=prd,x=x))

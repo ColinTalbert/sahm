@@ -1,7 +1,7 @@
 write.txt<-function(out,t0){
   model.label<-switch(out$input$script.name,
     mars="\nMARS Model Results\n",
-    glm="Generalized Linear Results\n",
+    glm="Generalized Linear Model Results\n",
     rf="Random Forest Modeling Results\n",
     brt="\nBoosted Regression Tree Modeling Results\n")
 

@@ -84,7 +84,8 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,...){
  }
      
    SplitBackground(out,dat)
-    
+   out$dat$ma$train$Split<-c(Split,rep(0,times=sum(dat$response>0)))
+ 
     if(Model=="mars") {
           fit_contribs<-list()
           mars.model<-list()
@@ -119,6 +120,7 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,...){
            for(i in 1:length(lr.samp)){
                if(length(lr.samp)>1) {out$dat$Subset$dat<-dat[c(Split,rep(lr.samp[i],times=sum(dat$response>0)))==lr.samp[i],]
                                       out$dat$Subset$weight<-weight[c(Split,rep(lr.samp[i],times=sum(dat$response>0)))==lr.samp[i]]
+                                      if(is.null(out$dat$Subset$weight))  out$dat$Subset$weight<-rep(1,times=nrow(out$dat$Subset$dat))
                                       out$dat$Subset$ratio=.5
                                       }
                 lr.list[[i]]<-est.lr(out)
@@ -156,6 +158,7 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,...){
                 }
               
             final.mod<-list()
+           
             for(i in 1:num.splits){
                  if(out$mods$lr.mod$lr==0) out$mods$lr.mod$lr<-out$mods$lr.mod$lr0
                  final.mod[[i]] <- gbm.step.fast(dat=dat[c(Split,rep(i,times=sum(dat$response>0)))==i,],gbm.x=out$mods$simp.mod$good.cols,gbm.y = 1,family=model.family,
@@ -192,7 +195,7 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,...){
                #taking out the names of predictors from interactions and then ordering them so we can aggregate
                interaction.list<-apply(cbind(do.call("rbind",lapply(interaction.lst,"[",2)),do.call("rbind",lapply(interaction.lst,"[",4))),1,sort)
                out$mods$interactions<-interaction.lst[!duplicated(interaction.list,MARGIN=2)]
-              } else(out$mods$interactions)<-NULL
+              } else out$mods$interactions=NULL
               return(out)
           }
           else return(final.mod)

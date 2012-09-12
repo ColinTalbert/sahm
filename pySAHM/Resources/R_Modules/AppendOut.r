@@ -46,7 +46,7 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
     Header.Length<-nrow(Header)
 
 ################ Writing to the csv  ############################
-
+   
  input<-read.table(compile.out,fill=TRUE,sep=",")
   if(ncol(input)<=2){ #if very first time through little
 

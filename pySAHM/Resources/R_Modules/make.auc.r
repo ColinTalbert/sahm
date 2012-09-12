@@ -51,7 +51,7 @@ make.auc.plot.jpg<-function(out=out){
  
 ########################################################################
 ######################### Calc threshold on train split #################
-
+   
  if(out$input$model.family!="poisson"){
             inlst$train$thresh<-out$dat$ma$train$thresh<- as.numeric(optimal.thresholds(data.frame(ID=1:length(inlst$train$resp),pres.abs=inlst$train$resp,
                 pred=inlst$train$pred),opt.methods=out$input$opt.methods))[2]
@@ -71,15 +71,16 @@ make.auc.plot.jpg<-function(out=out){
     }
 
 #################### Variable importance plots #####################
-   
-    if(tolower(out$input$script.name)!="maxlike"){
+    browser()
+    if(tolower(out$input$script.name)!="maxlike" & length(out$mods$vnames)>1){
       jpeg(paste(out$dat$bname,"_variable.importance.jpeg",sep=""),height=1000,width=1000) 
         VariableImportance(Modelout$input$script.name,out=out) 
       graphics.off()
     }    
 ################# Calculate all statistics on test\train or train\cv splits
 
-  Stats<-lapply(inlst,calcStat,family=out$input$model.family)
+   out$input$has.split<-(!is.null(inlst$train$Split) & !out$input$script.name%in%c("glm","maxlike"))
+  Stats<-lapply(inlst,calcStat,family=out$input$model.family,has.split=out$input$has.split)
 
  ##### lst doesn't contain the training portion of the data
    train.mask<-seq(1:length(Stats))[names(Stats)=="train"]
@@ -219,8 +220,8 @@ make.auc.plot.jpg<-function(out=out){
                         
                        if(out$input$model.family%in%c("binomial","bernoulli")){
                            csv.stats<-lapply(Stats,function(lst){
-                               return(c("","",lst$correlation,lst$pct.dev.exp,lst$Pcc,lst$Sens,lst$Specf))})
-                            stat.names<-c("Correlation Coefficient","Percent Deviance Explained","Percent Correctly Classified","Sensitivity","Specificity")
+                               return(c("","",lst$correlation,lst$pct.dev.exp,lst$Pcc,lst$auc.fit,lst$Tss))})
+                            stat.names<-c("Correlation Coefficient","Percent Deviance Explained","Percent Correctly Classified","AUC","True Skill Stat")
                         } else{
                         csv.stats<-lapply(Stats,function(lst){
                             return(c("","",lst$correlation,lst$pct.dev.exp,lst$prediction.error/100))})

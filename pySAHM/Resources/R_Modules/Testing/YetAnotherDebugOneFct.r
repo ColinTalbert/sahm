@@ -1,7 +1,7 @@
 #debug branch
 setwd("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
 ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
-dir.path<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction7.12"
+dir.path<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\Debug7.13"
 
 #master branch
 setwd("I:\\VisTrails\\VisTrails_SAHM_x32\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
@@ -88,7 +88,7 @@ output.dir[5]<-paste(dir.path,"\\maxlike",sep="")
                         tif.dir=NULL,
                         output.dir=output.dir[4],
                         response.col=rc[i],make.p.tif=T,make.binary.tif=F,
-                        simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=FALSE))
+                        simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=TRUE))
                         }
               
               ### Random Forest

@@ -640,7 +640,7 @@ class GLM(Model):
                          'SquaredTerms':('sqt', utils.R_boolean, False), #This is a GLM specific port
                          })
 class Maxlike(Model):
-#    __doc__ = GenModDoc.construct_module_doc('Maxlike')
+    __doc__ = GenModDoc.construct_module_doc('Maxlike')
     
     _input_ports = list(Model._input_ports)
     _input_ports.extend([('Formula', '(edu.utah.sci.vistrails.basic:String)'),

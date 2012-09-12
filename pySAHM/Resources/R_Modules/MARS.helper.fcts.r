@@ -730,7 +730,7 @@ function (mars.glm.object,new.data)
 # common set of mars basis functions with results returned as a list
 #
 # takes as input a dataset and args selecting x and y variables, and degree of interaction
-# along with site and species weights, the CV penalty, and the glm family argument
+# along with site and species weights, the CV penalty, and the glm family arguments
 # the latter would normally be one of "binomial" or "poisson" - "gaussian" could be used
 # but in this case the model shouldn't differ from that fitted using mars on its own
 #
