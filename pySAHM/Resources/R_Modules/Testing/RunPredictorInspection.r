@@ -8,6 +8,22 @@ source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\
 infil="C:\\temp\\TestDataSets\\CanadaThistleNewFormat.csv"
 predictor="bio_13"
 
+## Nonspatial data should work through SAHM
+i="C:\\temp\\SAHM_workspace\\NonSpatialData.csv"
+predictor="PrecipitatoinRast"
+
+## Used available should work as well
+i="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\ElithPsdoAbs.csv"
+o="C:\\temp\\SAHMDebugJunk\\BRTOut1" 
+predictor="Temperature"  
+   Predictor.inspection(predictor,
+        input.file=i,
+    		output.dir=o,
+    		response.col=rc,
+    		pres=TRUE,
+    		absn=TRUE,
+    		bgd=FALSE)
+    		
 infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\ModelEvaluation_Split_2.csv"
 predictor="bio_08_2000_2009_2km"
 infil="I:\\VisTrails\\WorkingFiles\\secondseason\\secondseason_workfile_2012_02_28b\\ModelEvaluation_Split_10.csv"

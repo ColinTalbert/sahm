@@ -96,9 +96,16 @@
 
       # find and save xy columns#
       xy.cols <- na.omit(c(match("x",tolower(names(dat))),match("y",tolower(names(dat)))))
-      if(length(xy.cols)>0)  {rm.list<-c(rm.list,xy.cols)
-                              out$input$ResidMaps=TRUE
-                              }
+      if(length(xy.cols)>0)  {
+          rm.list<-c(rm.list,xy.cols)
+          out$input$ResidMaps=TRUE
+      } else {  #turn off all maps in case the user didn't
+          out$input$make.p.tif=FALSE
+          out$input$make.binary.tif=FALSE
+          out$input$MESS=FALSE
+          out$input$ResidMaps=FALSE
+      }
+                              
        # remove weight column except for Random Forest
        site.weights<-c(match("weights",tolower(names(dat))),c(match("site.weights",tolower(names(dat)))))
         if(any(!is.na(site.weights))) {rm.list<-c(rm.list,na.omit(site.weights))

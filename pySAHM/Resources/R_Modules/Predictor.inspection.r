@@ -11,26 +11,34 @@ Predictor.inspection<-function(predictor,input.file,output.dir,response.col="Res
 #Written by Marian Talbert 5/23/2012
     chk.libs("Pred.inspect")
     cex.mult<-3.2
-
+    
    #Read input data and remove any columns to be excluded
     read.dat(input.file,response.col=response.col,is.inspect=TRUE,,pres=pres,absn=absn,bgd=bgd)
 
-     if(any(unique(response)==-9999) & !any(unique(response)==0)){
-    abs.lab<-"PsedoAbs"
-    pres.lab<-"Pres" 
+     abs.lab<-"Abs"
+     pres.lab<-"Pres" 
+     if(any(unique(response)%in%c(-9999,-9998)) & !any(unique(response)==0)){
+          abs.lab<-"PsedoAbs"
+          response[response%in%c(-9999,-9998)]<-0
      }
-     if(any(response==-9999)) response[response==-9999]<-0
-        xy<-dat[,c(match("x",tolower(names(dat))),match("y",tolower(names(dat))))]
-        names(xy)<-c("x","y")
-    
+     
+        xy<-na.omit(c(match("x",tolower(names(dat))),match("y",tolower(names(dat)))))
+        if(length(xy)>0) {
+            xy<-dat[,xy]
+            names(xy)<-c("x","y")
+            spatialDat=TRUE 
+        }else spatialDat=FALSE 
+              
      pred.indx<-match(predictor,tif.info[[1]])
      pred<-dat[,pred.indx]
-     
+     a<-try(raster(tif.info[[3]][pred.indx]),silent=TRUE) 
+     if(class(a)=="try-error") spatialDat=FALSE
      output.file<-paste(output.dir,paste(names(dat)[pred.indx],".jpg",sep=""),sep="\\")
      ### Producing some plots
     
     jpeg(output.file,pointsize=13,height=2000,width=2000,quality=100)
-         par(mfrow=c(2,2),mar=c(5,7,9,6),oma=c(6,2,2,2))
+         if(spatialDat) par(mfrow=c(2,2),mar=c(5,7,9,6),oma=c(6,2,2,2))
+         else par(mfrow=c(2,1),mar=c(15,25,9,25))
              hst<-hist(pred,plot=FALSE)
       ####PLOT 1. new
          hist(pred,col="red",xlab="",main="",cex.lab=cex.mult,cex=cex.mult,cex.main=cex.mult,cex.axis=.7*cex.mult,ylim=c(0,1.5*max(hst$counts)))
@@ -49,36 +57,41 @@ Predictor.inspection<-function(predictor,input.file,output.dir,response.col="Res
                    text("Missing By Response",x=xloc[1],y=1.5*max(hst$counts),pos=4,cex=.9*cex.mult)
                }
        ####PLOT 2.
-              a<-raster(tif.info[[3]][pred.indx])
-         plot(a,maxpixels=5000,main="",cex.lab=cex.mult,cex=cex.mult,
-              cex.axis=.7*cex.mult,cex.main=cex.mult,legend.shrink = cex.mult*.3, legend.width = cex.mult*.5)
+           if(spatialDat){  
+                  plot(a,maxpixels=5000,main="",cex.lab=cex.mult,cex=cex.mult,
+                    cex.axis=.7*cex.mult,cex.main=cex.mult,legend.shrink = cex.mult*.3, legend.width = cex.mult*.5)
+              }
        ####PLOT 3.
-          par(mar=c(5,7,5,5))
-          plot(a,alpha=.5,maxpixels=5000,main=paste("Spatial distribution of missing data\n",ifelse(pres.lab=="Pres","presence and absence","used and available"),sep=""),xlab="",ylab="",cex.lab=cex.mult,
-                   cex.axis=.7*cex.mult,cex=cex.mult,cex.main=cex.mult*.8,legend=FALSE)
-             #points(xy$x,xy$y,col=c("black","red")[complete.cases(pred)+1],pch=16,cex=.5*cex.mult)
-             points(x=xy$x[complete.cases(pred)],y=xy$y[complete.cases(pred)],col=c("red4","blue4")[(response[complete.cases(pred)]==0)+1],
-                   bg=c("red","steelblue")[(response[complete.cases(pred)]==0)+1],pch=21,cex=c(.6*cex.mult,.4*cex.mult)[(response[complete.cases(pred)]==0)+1])       
-              points(x=xy$x[(!complete.cases(pred))],y=xy$y[(!complete.cases(pred))],col=c("black","gold")[(response[!complete.cases(pred)]==1)+1],
-                   bg=c("grey18","gold")[(response[!complete.cases(pred)]==1)+1],pch=21,cex=.5*cex.mult)
-              legend("topleft",legend=c(if(any(is.na(pred))) paste(pres.lab,"Missing",sep=" "), if(any(is.na(pred))) paste(abs.lab," Missing",sep=""), paste(pres.lab,"(not missing)",sep=" "),paste(abs.lab," (not missing)",sep="")),
-                   fill=c(if(any(is.na(pred))) "yellow",if(any(is.na(pred))) "black","red","blue"),xjust=0,yjust=1,
-                   ncol = 2,cex=cex.mult*.9,bg="white")
-                  #
-       ####PLOT 4. 
-                y<-as.numeric(TrueResponse[complete.cases(pred)])
-                pred<-as.numeric(pred[complete.cases(pred)])
-                 x<-pred[complete.cases(pred)]
-                 y<-y[complete.cases(pred)] 
-                 response.table<-table(y)
-             
-         if(length(response.table)>1){
-         par(mgp=c(4, 1, 0),mar=c(7,7,5,5))
-            plot(x,y,ylab="",xlab="",type="n",cex.axis=.7*cex.mult)
-            gam.failed<-my.panel.smooth(x=x, y=y,cex.mult=cex.mult,pch=21,cex.lab=cex.mult,cex.axis=.9*cex.mult,cex.lab=cex.mult,famly=famly,lin=4)
-            title(main=paste(ifelse(gam.failed,"GLM","GAM")," showing predictor response relationship",sep=""),cex.main=.8*cex.mult)
-            title(xlab=predictor,line=5,cex.lab=1.2*cex.mult)
-        }
+        if(spatialDat){ 
+            par(mar=c(5,7,5,5))
+            plot(a,alpha=.5,maxpixels=5000,main=paste("Spatial distribution of missing data\n",ifelse(pres.lab=="Pres","presence and absence","used and available"),sep=""),xlab="",ylab="",cex.lab=cex.mult,
+                     cex.axis=.7*cex.mult,cex=cex.mult,cex.main=cex.mult*.8,legend=FALSE)
+               #points(xy$x,xy$y,col=c("black","red")[complete.cases(pred)+1],pch=16,cex=.5*cex.mult)
+               points(x=xy$x[complete.cases(pred)],y=xy$y[complete.cases(pred)],col=c("red4","blue4")[(response[complete.cases(pred)]==0)+1],
+                     bg=c("red","steelblue")[(response[complete.cases(pred)]==0)+1],pch=21,cex=c(.6*cex.mult,.4*cex.mult)[(response[complete.cases(pred)]==0)+1])       
+               points(x=xy$x[(!complete.cases(pred))],y=xy$y[(!complete.cases(pred))],col=c("black","gold")[(response[!complete.cases(pred)]==1)+1],
+                     bg=c("grey18","gold")[(response[!complete.cases(pred)]==1)+1],pch=21,cex=.5*cex.mult)
+               legend("topleft",legend=c(if(any(is.na(pred))) paste(pres.lab,"Missing",sep=" "), if(any(is.na(pred))) paste(abs.lab," Missing",sep=""), paste(pres.lab,"(not missing)",sep=" "),paste(abs.lab," (not missing)",sep="")),
+                     fill=c(if(any(is.na(pred))) "yellow",if(any(is.na(pred))) "black","red","blue"),xjust=0,yjust=1,
+                     ncol = 2,cex=cex.mult*.9,bg="white")
+        }           
+                 
+       ####PLOT 4.
+      
+          y<-as.numeric(TrueResponse[complete.cases(pred)])
+            pred<-as.numeric(pred[complete.cases(pred)])
+             x<-pred[complete.cases(pred)]
+             y<-y[complete.cases(pred)] 
+             response.table<-table(y)
+         
+     if(length(response.table)>1){
+     if(spatialDat) par(mgp=c(4, 1, 0),mar=c(7,7,5,5))
+        plot(x,y,ylab="",xlab="",type="n",cex.axis=.7*cex.mult)
+        gam.failed<-my.panel.smooth(x=x, y=y,cex.mult=cex.mult,pch=21,cex.lab=cex.mult,cex.axis=.9*cex.mult,cex.lab=cex.mult,famly=famly,lin=4)
+        title(main=paste(ifelse(gam.failed,"GLM","GAM")," showing predictor response relationship",sep=""),cex.main=.8*cex.mult)
+        title(xlab=predictor,line=5,cex.lab=1.2*cex.mult)
+    }
+ 
     dev.off()    
 }
 
