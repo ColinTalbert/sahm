@@ -69,18 +69,18 @@ make.auc.plot.jpg<-function(out=out){
           par(mfrow=c(1,1))
           graphics.off()
     }
+################# Calculate all statistics on test\train or train\cv splits
+    
+   out$input$has.split<-(out$input$PsdoAbs & !out$input$script.name%in%c("glm","maxlike"))
+  Stats<-lapply(inlst,calcStat,family=out$input$model.family,has.split=out$input$has.split)
 
 #################### Variable importance plots #####################
-    browser()
+  
     if(tolower(out$input$script.name)!="maxlike" & length(out$mods$vnames)>1){
-      jpeg(paste(out$dat$bname,"_variable.importance.jpeg",sep=""),height=1000,width=1000) 
-        VariableImportance(Modelout$input$script.name,out=out) 
+      jpeg(paste(out$dat$bname,"_variable.importance.jpeg",sep=""),height=1000,width=1000)  
+        VariableImportance(Modelout$input$script.name,out=out,auc=lapply(Stats,"[",9)) 
       graphics.off()
     }    
-################# Calculate all statistics on test\train or train\cv splits
-
-   out$input$has.split<-(!is.null(inlst$train$Split) & !out$input$script.name%in%c("glm","maxlike"))
-  Stats<-lapply(inlst,calcStat,family=out$input$model.family,has.split=out$input$has.split)
 
  ##### lst doesn't contain the training portion of the data
    train.mask<-seq(1:length(Stats))[names(Stats)=="train"]
@@ -113,7 +113,7 @@ make.auc.plot.jpg<-function(out=out){
              residual.smooth.fct<-resid.image(calc.dev(inlst$test$dat$response, inlst$test$pred, inlst$test$weight, family=out$input$model.family)$dev.cont,inlst$test$pred,
                 inlst$test$dat$response,inlst$test$XY$X,inlst$test$XY$Y,out$input$model.family,out$input$output.dir,label=out$dat$split.label,out)
              }
-      }
+      } else residual.smooth.fct=NULL
 ########## AUC and Calibration plot for binomial data #######################
 
     if(out$input$model.family%in%c("binomial","bernoulli")){

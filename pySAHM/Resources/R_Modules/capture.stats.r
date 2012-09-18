@@ -135,7 +135,7 @@ capture.output(cat(" applied to",label, "split:\n",sep=" "),
                            file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
                        }
 
-    capture.output(cat( "\n\n   Calibration Statistics",
+    if(!out$input$PsdoAbs) capture.output(cat( "\n\n   Calibration Statistics",
                           "\n\t Intercept (general calibration)                            : ",mean(unlist(lapply(Stats.lst,function(lst){lst$calibration.stats[1]}))),
                           if(label=="crossValidation"){paste(" (sd ",
                               signif(sd(unlist(lapply(Stats.lst,function(lst){lst$calibration.stats[1]}))),digits=5),

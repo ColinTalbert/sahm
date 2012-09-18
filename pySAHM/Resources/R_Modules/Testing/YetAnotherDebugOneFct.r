@@ -1,7 +1,7 @@
 #debug branch
 setwd("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
 ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
-dir.path<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\Debug7.13"
+dir.path<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\Debug9.18"
 
 #master branch
 setwd("I:\\VisTrails\\VisTrails_SAHM_x32\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
@@ -28,11 +28,18 @@ source("CrossValidationSplit.r")
 
 
 
-rc=c(rep("responseBinary",times=11),rep("responseCount",times=2))
+rc=c(rep("responseBinary",times=14),rep("responseCount",times=2))
 input.file<-vector()
 input.file=c(#used/available
       "C:\\temp\\SAHM_workspace\\Species1PresOnlyCV.csv",
       "I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\UsedAvailableSp1NoCV.csv",
+      ## new file for checking pseudoabs
+      "I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\ElithPsdoAbs.csv",
+      ##elith synthetic surface presence absence
+      "C:\\temp\\SAHM_workspace\\modelSelection_split_20.csv",
+      ## Nonspatial data should work through SAHM
+      "C:\\temp\\SAHM_workspace\\NonSpatialData.csv",      
+      
         #pres/abs
       "C:/VisTrails/mtalbert_20110504T132851/readMaTests/BadPath.csv",
       "C:/VisTrails/mtalbert_20110504T132851/readMaTests/Split.csv",
@@ -136,8 +143,11 @@ input.file[4]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleMi
 input.file[5]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
 input.file[6]="C:/temp/TestDataSets/CanadaThistlePseudoAbsenceWeights.csv"
 input.file[7]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
-
-predictor<-c("bio_13_wgs84","bio_15_wgs84_categorical","bio_7_wgs84","asp_2k_alb","bio_16_wgs84","bio_8","dem")
+##pseudoabs
+input.file[8]="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\ElithPsdoAbs.csv"
+      ## Nonspatial data should work through SAHM
+input.file[9]="C:\\temp\\SAHM_workspace\\NonSpatialData.csv"   
+predictor<-c("bio_13_wgs84","bio_15_wgs84_categorical","bio_7_wgs84","asp_2k_alb","bio_16_wgs84","bio_8","dem","Temperature","Noise2Rast")
 responseCol<-c(rep("responseBinary",times=6),rep("responseCount",times=1))
 
 for(i in 1:length(input.file)){

@@ -40,6 +40,8 @@ input.file="C:\\temp\\TestDataSets\\CanadaThistlePseudoAbsence.csv"
 input.file="C:\\temp\\SAHM_workspace\\Species1PresOnlyCV.csv"
 ## new file for checking pseudoabs
 input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\ElithPsdoAbs.csv"
+##elith synthetic surface presence absence
+input.file="C:\\temp\\SAHM_workspace\\modelSelection_split_20.csv"
 ##MARS
 FitModels(ma.name=input.file,
             output.dir=output.dir,
@@ -74,10 +76,10 @@ do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=FALSE)
 #BRT
 FitModels(ma.name=input.file,
           tif.dir=NULL,output.dir=output.dir,
-          response.col=rc,make.p.tif=T,make.binary.tif=F,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
+          response.col=rc,make.p.tif=T,make.binary.tif=T,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
       family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
   tolerance = 0.001,seed=-616264908,opt.methods=2,
-          simp.method="cross-validation",debug.mode=F,responseCurveForm="pdf",script.name="brt",
+          simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
           bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=F)
 
 EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=TRUE,new.tifs="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\MergedDataset_10.csv",produce.metrics=TRUE)

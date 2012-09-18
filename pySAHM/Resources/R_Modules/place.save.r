@@ -49,8 +49,9 @@ last.dir<-strsplit(out$input$output.dir,split="\\\\")
                          compile.out<-paste(parent,
                               paste(ifelse(missing(Final.Model),"AcrossModel","FinalEvaluation"),
                                switch(out$dat$split.type,"crossValidation"="CrossVal","test"="TestTrain","none"="NoSplit"),
-                               switch(out$input$model.family,"binomial"="Binom","bernoulli"="Binom","poisson"="Count"),".csv"
-                              ,sep=""),sep="/")
+                               switch(out$input$model.family,"binomial"="Binom","bernoulli"="Binom","poisson"="Count"),if(out$input$PsdoAbs)"PsdoAbs",
+                               ".csv",
+                              sep=""),sep="/")
                               
  Header<-cbind(c("","Original Field Data","Field Data Template","PARC Output Folder","PARC Template","Covariate Selection Name",""),
                             c(last.dir[[1]][length(last.dir[[1]])],
