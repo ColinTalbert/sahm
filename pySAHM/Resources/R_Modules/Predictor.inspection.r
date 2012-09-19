@@ -11,9 +11,9 @@ Predictor.inspection<-function(predictor,input.file,output.dir,response.col="Res
 #Written by Marian Talbert 5/23/2012
     chk.libs("Pred.inspect")
     cex.mult<-3.2
-    
+  
    #Read input data and remove any columns to be excluded
-    read.dat(input.file,response.col=response.col,is.inspect=TRUE,,pres=pres,absn=absn,bgd=bgd)
+    read.dat(input.file,response.col=response.col,is.inspect=TRUE,pres=pres,absn=absn,bgd=bgd)
 
      abs.lab<-"Abs"
      pres.lab<-"Pres" 
@@ -31,6 +31,7 @@ Predictor.inspection<-function(predictor,input.file,output.dir,response.col="Res
               
      pred.indx<-match(predictor,tif.info[[1]])
      pred<-dat[,pred.indx]
+     
      a<-try(raster(tif.info[[3]][pred.indx]),silent=TRUE) 
      if(class(a)=="try-error") spatialDat=FALSE
      output.file<-paste(output.dir,paste(names(dat)[pred.indx],".jpg",sep=""),sep="\\")
@@ -77,18 +78,15 @@ Predictor.inspection<-function(predictor,input.file,output.dir,response.col="Res
         }           
                  
        ####PLOT 4.
-      
           y<-as.numeric(TrueResponse[complete.cases(pred)])
             pred<-as.numeric(pred[complete.cases(pred)])
              x<-pred[complete.cases(pred)]
              y<-y[complete.cases(pred)] 
              response.table<-table(y)
-         
+             if(length(grep("categorical",predictor))>0) x=as.factor(x)
      if(length(response.table)>1){
-     if(spatialDat) par(mgp=c(4, 1, 0),mar=c(7,7,5,5))
-        plot(x,y,ylab="",xlab="",type="n",cex.axis=.7*cex.mult)
-        gam.failed<-my.panel.smooth(x=x, y=y,cex.mult=cex.mult,pch=21,cex.lab=cex.mult,cex.axis=.9*cex.mult,cex.lab=cex.mult,famly=famly,lin=4)
-        title(main=paste(ifelse(gam.failed,"GLM","GAM")," showing predictor response relationship",sep=""),cex.main=.8*cex.mult)
+     if(spatialDat) par(mgp=c(4, 1, 0),mar=c(7,7,5,5))  
+        gam.failed<-my.panel.smooth(x=x, y=y,cex.mult=cex.mult,pch=21,cex.lab=cex.mult,cex.axis=.9*cex.mult,cex.lab=cex.mult,cex.main=cex.mult,cex.names=cex.mult,famly=famly,lin=4)
         title(xlab=predictor,line=5,cex.lab=1.2*cex.mult)
     }
  

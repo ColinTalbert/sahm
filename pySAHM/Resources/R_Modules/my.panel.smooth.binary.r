@@ -18,22 +18,35 @@ my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),fam
     bg<-bg[o]
       if(sum(y==0)/sum(y==1)>1.2) wgt<-c(sum(y==1)/sum(y==0),1)[factor(y,levels=c(0,1))]
       else wgt<-rep(1,times=length(y))
-    options(warn=2)
-    g<-try(gam(y~s(x,2),weights=wgt,family=family),silent=TRUE)
-    options(warn=-1)
-   
-    dev.broke<-try((1-g$dev/g$null.deviance)<0,silent=TRUE)
-        if(class(dev.broke)=="try-error") dev.broke=TRUE
-    if("try-error"%in%class(g) | dev.broke){
-        gam.failed=TRUE
-        g<-glm(y~x+x^2,weights=wgt,family=family)
-        y.fit<-predict(g,type="response")
-    }  else {
-        y.fit<-predict.gam(g,type="response")
-        gam.failed=FALSE
-    }
-  
+    
+    if(!is.factor(x)) {
+         options(warn=2)
+          g<-try(gam(y~s(x,2),weights=wgt,family=family),silent=TRUE)
+          options(warn=-1)
+          dev.broke<-try((1-g$dev/g$null.deviance)<0,silent=TRUE)
+              if(class(dev.broke)=="try-error") dev.broke=TRUE
+          if("try-error"%in%class(g) | dev.broke){
+              gam.failed=TRUE
+              g<-glm(y~x+x^2,weights=wgt,family=family)
+              y.fit<-predict(g,type="response")
+          }  else {
+              y.fit<-predict.gam(g,type="response")
+              gam.failed=FALSE
+          }
+     } else{
+        g<-glm(y~x,weights=wgt,family=family)
+              y.fit<-predict(g,type="response")
+            
+             if(plot.it){
+             barplot(prop.table(table(y,x),margin=2),main="Proportion of Absence by Category",col=c("blue","red"),...)
+              mtext(paste("% dev exp ",round(100*(1-g$dev/g$null.deviance),digits=1),sep=""),side=2,line=lin,cex=cex.mult*.7)
+              }
+             return(100*(1-g$dev/g$null.deviance)) 
+     } 
+ 
     if(plot.it){
+    plot(x,y,ylab="",xlab="",type="n",cex.axis=.7*cex.mult)
+    title(main=paste(ifelse(gam.failed,"GLM","GAM")," showing predictor response relationship",sep=""),cex.main=.8*cex.mult)
           if(famly=="poisson") 
               points(x, y, pch = pch,bg="black",col="black",cex = cex*cex.mult)
           else points(x, y, pch = pch,bg=c("blue","red")[factor(y,levels=c(0,1))],col=c("blue4","red4")[factor(y,levels=c(0,1))],cex = cex*cex.mult)
