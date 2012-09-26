@@ -92,6 +92,7 @@ MyPairs<-function(x,missing.summary,my.labels,labels, panel = points, ..., lower
         has.lower <- has.upper
         has.upper <- tmp
     }
+    
     nc <- ncol(x)
     if (nc < 2)
         stop("only one column in the argument to 'pairs'")
@@ -122,6 +123,7 @@ MyPairs<-function(x,missing.summary,my.labels,labels, panel = points, ..., lower
     for (i in if (row1attop)
         1L:(nc)
     else nc:1L) for (j in j.start:(nc)) {
+   
        top.gap<-c(rep(gap/2,times=nc))
        bottom.gap<-c(rep(gap/2,times=nc-1),3*gap)
        left.gap<-c(3*gap,3*gap,rep(gap/2,times=nc-1))
@@ -133,7 +135,6 @@ MyPairs<-function(x,missing.summary,my.labels,labels, panel = points, ..., lower
          localPlot(x[, i],response, xlab = "", ylab = "", axes = FALSE,
                 type="n",...)
           if(i==1) mtext("Response",line=.3,cex=.7*cex.mult)
-
                   box()
                      my.lab<-paste("cor=",round(max(abs(cor(x[,(i)],response,use="pairwise.complete.obs")),abs(cor(x[,(i)],response,method="spearman",use="pairwise.complete.obs")),
                      abs(cor(x[,(i)],response,method="kendall",use="pairwise.complete.obs"))),digits=2),sep="")
@@ -143,6 +144,7 @@ MyPairs<-function(x,missing.summary,my.labels,labels, panel = points, ..., lower
                           sep=""),line=.02,cex.lab=1.5)
                    }  else if(missing(for.dev)) pct.dev<-try(my.panel.smooth(as.vector(x[, (i)]), response,cex.mult=cex.mult,cex.lab=cex.mult,line=1,famly=famly,...),silent=TRUE)
                               else  pct.dev<-try(my.panel.smooth(as.vector(for.dev$dat[, (i)]), as.vector(for.dev$response),cex.mult=cex.mult,cex.lab=cex.mult,line=1,famly=famly,...),silent=TRUE)
+              
                  } else{
 
              localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE,

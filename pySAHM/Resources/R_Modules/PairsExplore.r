@@ -80,13 +80,19 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
        
        rm.cols<-unique(c(rm.cols,which(include==0,arr.ind=TRUE)))
         dat<-dat[,-rm.cols]
-        
+        ##Marking factor colums as such after calculating deviance these will be removed
+        if(length(grep("categorical",names(dat)))>0){
+               fact.cols<-grep("categorical",names(dat))
+               for(i in fact.cols) dat[,i]<-factor(dat[,i])
+            }
       devExp<-vector()
       if(any(for.dev$response==-9999)) for.dev$response[for.dev$response==-9999]<-0
        for(i in (1:ncol(for.dev$dat))){
             devExp[i]<-try(my.panel.smooth(for.dev$dat[,i], for.dev$response,plot.it=FALSE,famly=famly),silent=TRUE)
            }
           write.csv(as.data.frame(devExp,row.names=names(for.dev[[1]])), file = paste(dirname(output.file),"devInfo.csv",sep="/"))
+          #now removing factor columns
+          if(length(grep("categorical",names(dat)))>0) dat<-dat[,-c(fact.cols)]
 
           #after calculating the deviance for all predictors we have to remove the excluded predictors for the following plots
       for.dev$dat=dat 
@@ -162,7 +168,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
  if(Debug==FALSE) jpeg(output.file,width=wdth,height=wdth,pointsize=13)
     MyPairs(cbind(TrueResponse,HighToPlot),cor.range=cor.range,missing.summary=missing.summary,my.labels=(as.vector(High.cor)[1:num.plots]),
     lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,
-    bg = c("blue","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red",cex.mult=cex.mult,oma=c(0,2,6,0),famly=famly,for.dev=for.dev)
+    bg = c("blue","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red",cex.mult=cex.mult,oma=c(0,2,6,0),famly=famly)
 
  if(Debug==FALSE) graphics.off()
  options(warn=0)

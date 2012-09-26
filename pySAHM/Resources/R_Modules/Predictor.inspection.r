@@ -21,7 +21,9 @@ Predictor.inspection<-function(predictor,input.file,output.dir,response.col="Res
           abs.lab<-"PsedoAbs"
           response[response%in%c(-9999,-9998)]<-0
      }
-     
+     if(famly=="poisson") {pres.lab="1+"
+                           abs.lab="0 count"
+                           }
         xy<-na.omit(c(match("x",tolower(names(dat))),match("y",tolower(names(dat)))))
         if(length(xy)>0) {
             xy<-dat[,xy]
@@ -85,8 +87,14 @@ Predictor.inspection<-function(predictor,input.file,output.dir,response.col="Res
              response.table<-table(y)
              if(length(grep("categorical",predictor))>0) x=as.factor(x)
      if(length(response.table)>1){
-     if(spatialDat) par(mgp=c(4, 1, 0),mar=c(7,7,5,5))  
-        gam.failed<-my.panel.smooth(x=x, y=y,cex.mult=cex.mult,pch=21,cex.lab=cex.mult,cex.axis=.9*cex.mult,cex.lab=cex.mult,cex.main=cex.mult,cex.names=cex.mult,famly=famly,lin=4)
+     if(spatialDat) par(mgp=c(4, 1, 0),mar=c(7,7,5,5)) 
+        if(is.factor(x)) 
+           plot(c(0,length(unique(x))+1),y=c(0,1),ylab="",xlab="",type="n",cex.axis=.7*cex.mult,xaxt="n",yaxt="n",bty="n")    
+        else 
+          plot(x,y,ylab="",xlab="",type="n",cex.axis=.7*cex.mult)
+          
+         gam.failed<-my.panel.smooth(x=x, y=y,cex.mult=cex.mult,pch=21,cex.lab=cex.mult,cex.axis=.9*cex.mult,cex.lab=cex.mult,cex.main=cex.mult,cex.names=cex.mult,cex=cex.mult,famly=famly,lin=4)
+          if(!is.factor(x)) title(main=paste(ifelse(gam.failed,"GLM","GAM")," showing predictor response relationship",sep=""),cex.main=.8*cex.mult)
         title(xlab=predictor,line=5,cex.lab=1.2*cex.mult)
     }
  
