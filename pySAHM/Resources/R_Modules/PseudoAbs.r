@@ -7,7 +7,7 @@ PseudoAbsGen<-function(input.file,outfile,method="KDE",bw.otim="adhoc",isopleth=
     #that can be used.  currently 4 methods are available for optimization of the kde bandwith (bw.otim=adhoc, Hpi,Hscv,Hbcv,Hlscv.
     #A tiff is generated using the header from the template csv which can be used by the MDS builder to generate background points.
     
-    
+          if(method=="KDE" & isopleth==100) stop("Isopleth must be set to less than 100 when the KDE method is used")
     #make sure all libraries are available and loaded
         chk.libs("GenPsdAbs")
               
@@ -25,7 +25,7 @@ PseudoAbsGen<-function(input.file,outfile,method="KDE",bw.otim="adhoc",isopleth=
              
               names(xy)<-c("X","Y")
               xy<-SpatialPoints(xy)
-              
+             
               if(method=="KDE"){
                   ud=kernelUD(xy,extent=.5,grid=150)
                    #take the 95% home range contour
