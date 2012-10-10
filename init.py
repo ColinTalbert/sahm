@@ -71,6 +71,7 @@ from widgets import get_predictor_widget, get_predictor_config
 from SelectPredictorsLayers import SelectListDialog
 from SelectAndTestFinalModel import SelectAndTestFinalModel
 
+
 import utils
 import GenerateModuleDoc as GenModDoc
 #import our python SAHM Processing files
@@ -83,6 +84,7 @@ import packages.sahm.pySAHM.MaxentRunner as MaxentRunner
 #from packages.sahm.SahmOutputViewer import SAHMModelOutputViewerCell
 from SahmOutputViewer import SAHMModelOutputViewerCell
 from packages.sahm.SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
+from packages.sahm.GeneralSpatialViewer import GeneralSpatialViewer
 from packages.sahm.sahm_picklists import ResponseType, AggregationMethod, \
         ResampleMethod, PointAggregationMethod, ModelOutputType, RandomPointType, \
         OutputRaster
@@ -1812,7 +1814,8 @@ def initialize():
     if not os.path.exists(session_dir):
         os.makedirs(session_dir)
         
-    utils.setrootdir(session_dir) 
+    utils.setrootdir(session_dir)
+    utils.importOSGEO() 
     utils.createLogger(session_dir, configuration.verbose)
 
     color_breaks_csv = os.path.abspath(os.path.join(os.path.dirname(__file__),  "ColorBreaks.csv"))
@@ -1914,8 +1917,8 @@ def build_predictor_modules():
         modules.append((module, {'configureWidgetType': config_class, 
                                  'moduleColor':input_color,
                                  'moduleFringe':input_fringe}))
-        for module in modules:
-            module[0]._output_ports.append(('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True))
+    for module in modules:
+        module[0]._output_ports.append(('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True))
             
     return modules
 
@@ -1987,6 +1990,8 @@ _modules = generate_namespaces({'DataInput': [
                                 'Output': [(SAHMModelOutputViewerCell, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe}),
                                           (SAHMSpatialOutputViewerCell, {'moduleColor':output_color,
+                                                           'moduleFringe':output_fringe}),
+                                           (GeneralSpatialViewer, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe})
                                           ]
                                 })

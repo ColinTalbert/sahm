@@ -171,7 +171,7 @@ class MDSBuilder(object):
             fieldDataCSV = csv.reader(open(self.fieldData, "r"))
             origHeader = fieldDataCSV.next()
             fullHeader = ["X", "Y"]
-            if origHeader[2].lower not in ["responsebinary", "responsecount"]:
+            if origHeader[2].lower() not in ["responsebinary", "responsecount"]:
                 #inputs not conforming to our expected format will be assumed
                 #to be binary data
                 fullHeader.append("responseBinary")

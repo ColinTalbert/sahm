@@ -59,9 +59,9 @@ from PyQt4 import QtCore, QtGui
 from core.modules.basic_modules import File, Path, Directory, new_constant, Constant
 from core.modules.vistrails_module import ModuleError
 
-from osgeo import gdalconst
-from osgeo import gdal
-from osgeo import osr
+#from osgeo import gdalconst
+#from osgeo import gdal
+#from osgeo import osr
 import numpy
 
 import packages.sahm.pySAHM.utilities as utilities
@@ -70,6 +70,18 @@ import getpass
 _roottempdir = ""
 _logger = None
 r_path = None
+
+gdalconst = None
+gdal = None
+osr = None
+
+def importOSGEO():
+    global gdalconst
+    from osgeo import gdalconst as gdalconst
+    global gdal
+    from osgeo import gdal as gdal
+    global osr
+    from osgeo import osr as osr
 
 def getpixelsize(filename):
     dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
@@ -80,23 +92,65 @@ def getrasterminmax(filename):
     dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
     band = dataset.GetRasterBand(1)
     
-    min, max = band.ComputeRasterMinMax(0)
+    min = band.GetMinimum()
+    max = band.GetMaximum()
+    if min is None or max is None or min == band.GetNoDataValue():
+            (min,max) = band.ComputeRasterMinMax(1)
+
     
     try:
         #our output rasters have approx nodata values
         #which don't equal the specified nodata.
         #set the specified to equal what is actually used.
-        if (abs(band.GetNoDataValue() - min) < 1e-9 and 
-            band.GetNoDataValue() <> min) or \
-            band.GetNoDataValue() == band.GetNoDataValue():
-            band.SetNoDataValue(min)
-            (min,max) = band.ComputeRasterMinMax(0)
+#        if (abs(band.GetNoDataValue() - min) < 1e-9 and 
+#            band.GetNoDataValue() <> min) or \
+#            ( min == band.GetNoDataValue()):
+#            min, max = band.ComputeRasterMinMax(0)
+#            band.SetNoDataValue(min)
+#            (min,max) = band.ComputeRasterMinMax(0)
         
+        
+        if min == band.GetNoDataValue():
+            min = 0
         
     except:
         pass
     return (min, max)
     dataset = None
+    
+def getNDVal(filename):
+    dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
+    band = dataset.GetRasterBand(1)
+    
+    NDValue = band.GetNoDataValue()
+    
+    min = band.GetMinimum()
+    if min is None or min == band.GetNoDataValue():
+            min = band.ComputeRasterMinMax(0)[0]
+
+    
+    try:
+        #our output rasters have approx nodata values
+        #which don't equal the specified nodata.
+        #set the specified to equal what is actually used.
+#        if (abs(band.GetNoDataValue() - min) < 1e-9 and 
+#            band.GetNoDataValue() <> min) or \
+#            ( min == band.GetNoDataValue()):
+#            min, max = band.ComputeRasterMinMax(0)
+#            band.SetNoDataValue(min)
+#            (min,max) = band.ComputeRasterMinMax(0)
+        
+        
+        if band.GetNoDataValue() - min < 0.000000001:
+            NDValue = min
+        
+    except:
+        pass
+    
+    
+    dataset = None
+    return NDValue
+    
 
 def mknextfile(prefix, suffix="", directory=""):
     global _roottempdir
@@ -327,10 +381,9 @@ def getModelsPath():
     return os.path.join(os.path.dirname(__file__), "pySAHM", "Resources", "R_Modules")
 
 def runRScript(script, args, module=None):
-    global r_path
-    program = '"' + os.path.join(r_path, "i386", "Rterm.exe") + '"' #-q prevents program from running
-    scriptFile = '"' + os.path.join(getModelsPath(), script) + '"' 
-    
+     
+    program = getR_folder()
+    scriptFile = '"' + os.path.join(getModelsPath(), script) + '"'
     command = program + " --vanilla -f " + scriptFile + " --args " + args
     
     writetolog("\nStarting R Processing of "  + script , True)
@@ -365,6 +418,31 @@ def runRScript(script, args, module=None):
 
     del(ret)
     writetolog("\nFinished R Processing of " + script, True)
+
+def getR_folder():
+    global r_path
+    
+    #are we in 64 or 32 bit?  If 64 use the 64 bit install of R otherwise 32 bit.
+    #if we don't have the matching version and the other exists use it.
+    version_dirs = ["i386", "x64"]
+    possible_exes = [os.path.join(r_path, version_dir, "Rterm.exe") for version_dir in version_dirs]
+    if sys.maxsize > 2**32 and os.path.exists(possible_exes[1]):
+        program = possible_exes[1]
+    elif os.path.exists(possible_exes[0]):
+        program = possible_exes[0]
+    elif os.path.exists(possible_exes[1]):
+        program = possible_exes[1]
+    else:
+        #no R exe found we can't go on
+        msg = "No R executable found.\nPlease check the install folder:  "
+        msg += r_path + "\nfor either a ..\i386\Rterm.exe or a ..\x64\Rterm.exe"
+        if module:
+            raise ModuleError(module, msg)
+        else:
+            raise RuntimeError , msg
+        
+    return program
+    
 
 def writeRErrorsToLog(args, ret):
     #first check that this is a model run, or has a o= in the args.
