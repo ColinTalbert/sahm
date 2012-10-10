@@ -43,48 +43,66 @@
 ###############################################################################
 
 pred.fct<-function(model,x,Model){
+#Written by Marian Talbert to predict given a dataframe of input (with the expeption of maxlike which works on full rasters)
+  y <- rep(NA,nrow(x))
 
   if(Model=="glm"){
-
-          y <- try(as.vector(predict(model,x,type="response")),silent=TRUE)
-          if(class(y)=="try-error") stop("Predicting the response for the new values failed.  One probable cause is that you are trying to predict to factor levels that were not present during model fitting.")
-          # encode missing values as -1.
-          y[is.na(y)]<- NaN
+   if("list"%in%class(model)) y[complete.cases(x)] <- try(as.vector(predict(model[[1]],x[complete.cases(x),],type="response")),silent=TRUE)
+        else  y[complete.cases(x)] <- try(as.vector(predict(model,x[complete.cases(x),],type="response")),silent=TRUE)
      }
-
+     
+  if(Model=="maxlike"){
+          model$call$formula<-eval(model$call$formula)
+          y <- try(predict(model,rasters=stack(model$rast.lst)),silent=TRUE)
+          y<-as.vector(getValues(y))
+     }
+     
   if(Model=="mars"){
         # retrieve key items from the global environment #
-        # make predictionss.
-        y <- rep(NA,nrow(x))
-        y[complete.cases(x)] <- try(as.vector(mars.predict(model,x[complete.cases(x),])$prediction[,1]),silent=true)
-
-      #which(is.na(y)
-        # encode missing values as -1.
-        y[is.na(y)]<- NaN
-  }
+        # make predictions.
+         if(class(model[[1]])=="list") {
+         prd<-function(model,x){
+                              preds <- rep(NA,nrow(x))
+                              preds[complete.cases(x)]<-mars.predict(model,new.data=x[complete.cases(x),])$prediction[,1]
+                              return(preds)
+                              }          
+           lst.preds<-lapply(model,FUN=prd,x=x)
+           y<-try(apply(do.call("rbind",lst.preds),2,mean))
+         } else y[complete.cases(x)] <- try(as.vector(mars.predict(model,x[complete.cases(x),])$prediction[,1]),silent=TRUE)
+         
+  }          
   if(Model=="brt"){
          # retrieve key items from the global environment #
           # make predictions from complete data only #
           #y <- rep(NA,nrow(x))
           #y[complete.cases(x)] <- predict.gbm(model, x[complete.cases(x),],model$target.trees,type="response")
-
-          # make predictions from full data #
-          y <- try(predict.gbm(model,x,model$target.trees,type="response"),silent=TRUE)
-          # encode missing values as -1.
-           a<-complete.cases(x)
-          y[!(a)]<- NaN
-      }
-
+          if(class(model[[1]])=="gbm"){
+                           prd<-function(model,x){
+                              preds <- rep(NA,nrow(x))
+                              preds[complete.cases(x)]<-predict.gbm(model,newdata=x[complete.cases(x),],n.trees=model$target.trees,type="response")
+                              return(preds) 
+                           }         
+                  #getting the predictions from each split of the data then taking out one column and getting the average
+                          lst.preds<-try(lapply(model,FUN=prd,x=x))
+                         y<-try(apply(do.call("rbind",lst.preds),2,mean))
+          }  else{
+                  # make predictions from full data #
+                  y[complete.cases(x)] <- try(predict.gbm(model,x[complete.cases(x),],model$target.trees,type="response"),silent=TRUE)        
+          }
+  }
   if(Model=="rf"){
+ 
        # retrieve key items from the global environment #
           # make predictions from complete data only #
-          y <- rep(NA,nrow(x))
-          y[complete.cases(x)] <- try(as.vector(predict(model,newdata=x[complete.cases(x),],type="prob")[,2]),silent=TRUE)
-
-          # make predictions from full data #
-
-          # encode missing values as -1.
-          y[is.na(y)]<- NaN
+           if(class(model[[1]])=="randomForest"){
+                  #getting the predictions from each split of the data then taking out one column and getting the average
+                          lst.preds<-try(lapply(lapply(model,FUN=predict,newdata=x[complete.cases(x),],type="prob"),"[",,2))
+                         y[complete.cases(x)]<-try(apply(do.call("rbind",lst.preds),2,mean))
+                         	y[y==1]<-max(y[y<1])
+	                        y[y==0]<-min(y[y>0])
+                         }  else{
+                y[complete.cases(x)] <- try(as.vector(predict(model,newdata=x[complete.cases(x),],type="prob")[,2]),silent=TRUE)
+              }  
    }
     if(class(y)=="try-error") stop("Predicting the response for the new values failed.  One probable cause is that you are trying to predict to factor levels that were not present during model fitting.")
 return(y)

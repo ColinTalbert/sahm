@@ -1,24 +1,14 @@
-file.list<-c("J:\\Projects\\Climate_RS_Comparison\\backgroundPoint_sensitivityAnalysis\\withoutPresAbs2\\PointFiles\\95MCP\\pts_320000\\MergedDataset_1.csv",
-"J:\\Projects\\Climate_RS_Comparison\\backgroundPoint_sensitivityAnalysis\\withoutPresAbs2\\PointFiles\\95HpiKDE\\pts_320000\\MergedDataset_1.csv",
-"J:\\Projects\\Climate_RS_Comparison\\backgroundPoint_sensitivityAnalysis\\withoutPresAbs2\\PointFiles\\95HpiContKDE\\pts_320000\\MergedDataset_1.csv",
-"J:\\Projects\\Climate_RS_Comparison\\backgroundPoint_sensitivityAnalysis\\withoutPresAbs2\\PointFiles\\95AdHocIsoplethKDE\\pts_320000\\MergedDataset_1.csv",
-"J:\\Projects\\Climate_RS_Comparison\\backgroundPoint_sensitivityAnalysis\\withoutPresAbs2\\PointFiles\\95AdHocContKDE\\pts_320000\\MergedDataset_1.csv")
-num.reps=10
-num.pts<-c(500,1000,2000,4000,8000,16000,32000)
-
-
-file.list<-c("J:\\Projects\\Climate_RS_Comparison\\backgroundPoint_sensitivityAnalysis\\withoutPresAbs3\\95MCP\\pts_320000\\MergedDataset_1.csv",
-"J:\\Projects\\Climate_RS_Comparison\\backgroundPoint_sensitivityAnalysis\\withoutPresAbs3\\95MCP\\pts_32\\MergedDataset_1.csv")
-num.reps=10
-num.pts<-c(500,1000,2000,4000,8000,16000,32000)
-
 CompareBkgdDists<-function(file.list,num.reps,num.pts){
     #Written by Marian Talbert 4/11/2012
     #This function takes list of MDS files generated using different background point generation surfaces and splits them randomply into smaller samples
     #overlays histograms of the distributions for each predictor and produces boxplots of the distribution of the means of each set and their variances
     #so that the user can determine when the distribution for each predictor has stabilized and specify the proper number of background points and 
     #compare the distribution of different predictors for different point generations surfaces.  The output is a very long pdf. 
-    
+    #num.reps should be the number of times to subsample the data in order to produce the histograms
+    #num.pts is the number of points that should be subsampled for each rep in a vector format ex. 
+    #num.pts<-c(500,1000,2000,4000,8000,16000,32000)
+    #Command prompt junk is just junk right now.  I'll have to experiment with how to pass a numeric vector
+    #and a list of mds files if it's ever decided that anyone wants to use this function
 
         last.dir<-strsplit(file.list[1],split="\\\\")
          parent<-sub(paste("\\\\",last.dir[[1]][length(last.dir[[1]])],sep=""),"",file.list[1])
@@ -131,3 +121,38 @@ CompareBkgdDists<-function(file.list,num.reps,num.pts){
         }
             dev.off()
 }
+
+# Interpret command line argurments #
+# Make Function Call #
+Args <- commandArgs(trailingOnly=FALSE)
+
+    for (i in 1:length(Args)){
+     if(Args[i]=="-f") ScriptPath<-Args[i+1]
+     }
+   
+    #assign default values
+   
+    responseCol <- "ResponseBinary"
+    pres=TRUE
+    absn=TRUE
+    bgd=TRUE
+    #replace the defaults with passed values
+    for (arg in Args) {
+    	argSplit <- strsplit(arg, "=")
+    	argSplit[[1]][1]
+    	argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="p") predictor <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="o") output <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="i") infile <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
+      if(argSplit[[1]][1]=="pres") pres <- as.logical(argSplit[[1]][2])
+      if(argSplit[[1]][1]=="absn") absn <- as.logical(argSplit[[1]][2])
+      if(argSplit[[1]][1]=="bgd") bgd <- as.logical(argSplit[[1]][2])
+    }
+
+ScriptPath<-dirname(ScriptPath)
+source(paste(ScriptPath,"chk.libs.r",sep="\\"))
+source(paste(ScriptPath,"my.panel.smooth.binary.r",sep="\\"))
+
+CompareBkgdDists(file.list,num.reps,num.pts)
+Predictor.inspection(predictor=predictor,input.file=infile,output.dir=output,response.col=responseCol,pres=TRUE,absn=TRUE,bgd=TRUE)

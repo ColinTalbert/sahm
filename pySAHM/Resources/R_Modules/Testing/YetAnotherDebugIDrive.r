@@ -1,12 +1,12 @@
 #debug branch
 setwd("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
 ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
-dir.path<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\Debug9.18"
+dir.path<-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\AcrossModelPerformance\\Debug9.24"
 
 #master branch
-setwd("I:\\VisTrails\\VisTrails_SAHM_x32\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
-ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x32\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
-dir.path<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\MasterBranch7.12"
+#setwd("I:\\VisTrails\\VisTrails_SAHM_x32\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
+#ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x32\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
+#dir.path<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\MasterBranch9.19"
 #For Model tests
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
@@ -27,32 +27,26 @@ source("TestTrainSplit.r")
 source("CrossValidationSplit.r")
 
 
+file.list<-list.files("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite")
+rc=c(rep("responseCount",times=3),rep("responseBinary",times=10))
+input.file<-vector() 
+input.file=c("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\CountFactorCVEvaluation.csv",
+"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\CountFactorEvaluation.csv",
+"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\CountFactorSplit.csv",
+"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\ElithPsdoAbs.csv",
+"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\ElithSyntheticPresAbsLargeDat.csv",
+"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\ElithSynthPresAbsTestTrainEval.csv",
+"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\PresAbsEval.csv",
+"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\PresAbsFactorCVEvaluation.csv",
+"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\PresAbsNonSpatial.csv",
+"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\PresAbsNoSplit.csv",
+"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\PresAbsSelectionEval.csv",
+"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\UsedAvailableSp1CV.csv",
+"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\UsedAvailableSp1NoCV.csv")
 
-rc=c(rep("responseBinary",times=14),rep("responseCount",times=2))
-input.file<-vector()
-input.file=c(#used/available
-      "C:\\temp\\SAHM_workspace\\Species1PresOnlyCV.csv",
-      "I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\UsedAvailableSp1NoCV.csv",
-      ## new file for checking pseudoabs
-      "I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\ElithPsdoAbs.csv",
-      ##elith synthetic surface presence absence
-      "C:\\temp\\SAHM_workspace\\modelSelection_split_20.csv",
-      ## Nonspatial data should work through SAHM
-      "C:\\temp\\SAHM_workspace\\NonSpatialData.csv",      
-      
-        #pres/abs
-      "C:/VisTrails/mtalbert_20110504T132851/readMaTests/BadPath.csv",
-      "C:/VisTrails/mtalbert_20110504T132851/readMaTests/Split.csv",
-      "C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitBadFactor.csv",
-      "C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitFactor.csv",
-      "C:/VisTrails/mtalbert_20110504T132851/readMaTests/Factor.csv",
-      "C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitFactor2.csv",
-      "C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitWeights.csv",  
-      "C:/VisTrails/mtalbert_20110504T132851/readMaTests/NoSplit.csv",
-      "C:\\temp\\SAHM_workspace\\PresAbsCrossVal.csv",
-       #count
-      "C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv",
-      "C:/VisTrails/mtalbert_20110504T132851/readMaTests/CountSplit.csv")
+predictor<-c("NDVI_annualMinimumValue_2005","NDVI_browndownrates1_2009","romoveg_rc_categorical","Temperature","Noise2Rast","NDVI_amplitudes1_2006","ppt_1971_2000_06_800m",
+"NDVI_annualMeanValue_2006","NDVI_greenuprates1_2003")
+responseCol<-c(rep("responseBinary",times=6),rep("responseCount",times=1))
 
 #I'm cutting these out of the standard test suite because they take a long time to run
 #and only test whether we run well on large datasets or big tiffs
@@ -64,7 +58,7 @@ output.dir[1]<-paste(dir.path,"\\rf",sep="")
 output.dir[2]<-paste(dir.path,"\\brt",sep="")
 output.dir[3]<-paste(dir.path,"\\mars",sep="")
 output.dir[4]<-paste(dir.path,"\\glm",sep="")
-output.dir[5]<-paste(dir.path,"\\maxlike",sep="")
+output.dir[5]<-paste(dir.path,"\\maxlike",sep="")                                                                                          
 
 
 ########   Model Fit Test  ###########
@@ -133,24 +127,10 @@ source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\
 source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\my.panel.smooth.binary.r")
 source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\Predictor.inspection.r")
 source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\Predictor.inspection.r")
-dir.path<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\OneFunction6.6"
-input.file<-vector()
+ 
 
-input.file[1]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Split.csv"
-input.file[2]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitFactor.csv"
-input.file[3]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitWeights.csv"
-input.file[4]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleMissingDat.csv"
-input.file[5]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
-input.file[6]="C:/temp/TestDataSets/CanadaThistlePseudoAbsenceWeights.csv"
-input.file[7]="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
-##pseudoabs
-input.file[8]="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\ElithPsdoAbs.csv"
-      ## Nonspatial data should work through SAHM
-input.file[9]="C:\\temp\\SAHM_workspace\\NonSpatialData.csv"   
-predictor<-c("bio_13_wgs84","bio_15_wgs84_categorical","bio_7_wgs84","asp_2k_alb","bio_16_wgs84","bio_8","dem","Temperature","Noise2Rast")
-responseCol<-c(rep("responseBinary",times=6),rep("responseCount",times=1))
 
-for(i in 1:length(input.file)){
+for(i in 1:length(predictor)){
    if(i==1) { 
        try(Pairs.Explore(num.plots=5,
                 min.cor=.5,
@@ -195,8 +175,8 @@ for(i in 1:length(input.file)){
 		bgd=TRUE))
 		}
 
-input.file<-"C:\\VisTrails\\mtalbert_20110504T132851\\readMaTests\\CanadaThistleNewFormat.csv"
-input.file<-"C:\\VisTrails\\mtalbert_20110504T132851\\readMaTests\\CanadaThistleMissingDat.csv"
+
+input.file<-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\PairsExploreManyPredictors.csv"
 for (i in 5:25){ 
  try(Pairs.Explore(num.plots=i,
                 min.cor=.5,

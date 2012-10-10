@@ -8,6 +8,32 @@ source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\
 infil="C:\\temp\\TestDataSets\\CanadaThistleNewFormat.csv"
 predictor="bio_13"
 
+## Nonspatial data should work through SAHM
+i="C:\\temp\\SAHM_workspace\\NonSpatialData.csv"
+predictor="PrecipitatoinRast"
+
+## testing factors
+i="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\PresAbsFactorCVEvaluation.csv"
+predictor="romoveg_rc_categorical"
+predictor="NDVI_browndownrates1_2009"
+o="C:\\temp\\SAHMDebugJunk\\BRTOut1" 
+rc="responseBinary"
+
+## testing count
+#i="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\CountFactorSplit.csv"
+i="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\VistrailsSessions\\MergedDataset_Split.csv"
+predictor="TemperatureRastPois"
+o="I:\\VisTrails\\WorkingFiles\\workspace\\NewOutput\\SyntheticCountData"
+rc="responseCount"
+
+   Predictor.inspection(predictor,
+        input.file=i,
+    		output.dir=o,
+    		response.col=rc,
+    		pres=TRUE,
+    		absn=TRUE,
+    		bgd=FALSE)
+    		
 infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\ModelEvaluation_Split_2.csv"
 predictor="bio_08_2000_2009_2km"
 infil="I:\\VisTrails\\WorkingFiles\\secondseason\\secondseason_workfile_2012_02_28b\\ModelEvaluation_Split_10.csv"

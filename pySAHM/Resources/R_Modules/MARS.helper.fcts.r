@@ -449,6 +449,7 @@ function (mars.glm.object,  #the input mars object
   if (class(mars.glm.object) == "mars") {  #then we have a mars object
     mars.binomial = FALSE
     model <- mars.glm.object
+   
     xdat <- eval(model$call$x)
     Y <- as.data.frame(eval(model$call$y))
     n.env <- ncol(xdat)
@@ -458,8 +459,10 @@ function (mars.glm.object,  #the input mars object
     mars.binomial = TRUE
 
     dat <- mars.glm.object$mars.call$dataframe
+     xdat <- try(as.data.frame(eval(parse(text = dat))),silent=TRUE)
+   if(class(xdat)=="try-error") xdat<-mars.glm.object$fit.dat
+   
     mars.x <- mars.glm.object$mars.call$mars.x
-    xdat <- as.data.frame(eval(parse(text=dat)))
     xdat <- xdat[,mars.x]
 
     m.table <- mars.glm.object[[1]]
@@ -727,7 +730,7 @@ function (mars.glm.object,new.data)
 # common set of mars basis functions with results returned as a list
 #
 # takes as input a dataset and args selecting x and y variables, and degree of interaction
-# along with site and species weights, the CV penalty, and the glm family argument
+# along with site and species weights, the CV penalty, and the glm family arguments
 # the latter would normally be one of "binomial" or "poisson" - "gaussian" could be used
 # but in this case the model shouldn't differ from that fitted using mars on its own
 #
@@ -738,7 +741,7 @@ function (mars.glm.object,new.data)
   require(mda)
 
 # first recreate both the original mars model and the glm model
-
+    
 # setup input data and create original temporary data
   dataframe.name <- mars.glm.object$mars.call$dataframe  # get the dataframe name
   mars.x <- mars.glm.object$mars.call$mars.x
@@ -749,10 +752,11 @@ function (mars.glm.object,new.data)
   penalty <- mars.glm.object$mars.call$penalty
   site.weights <- mars.glm.object$weights[[1]]
   spp.weights <- mars.glm.object$weights[[2]]
-
+ 
   print("creating original data frame...",quote=FALSE)
-  base.data <- as.data.frame(eval(parse(text = dataframe.name),envir=parent.frame()))
-
+  base.data <- try(as.data.frame(eval(parse(text = dataframe.name),envir=parent.frame())),silent=TRUE)
+   if(class(base.data)=="try-error") base.data<-mars.glm.object$fit.dat
+  
   x.temp <- eval(base.data[, mars.x])                 #form the temporary datasets
   base.names <- names(x.temp)
 

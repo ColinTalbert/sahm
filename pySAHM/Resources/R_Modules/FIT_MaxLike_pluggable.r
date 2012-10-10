@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-## Copyright (C) 2010-2012, USGS Fort Collins Science Center. 
+## Copyright (C) 20010-2012, USGS Fort Collins Science Center. 
 ## All rights reserved.
 ## Contact: talbertc@usgs.gov
 ##
@@ -42,35 +42,52 @@
 ## and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
-place.save<-function(out,Final.Model){
+make.p.tif=T
+make.binary.tif=T
+MESS=F
+Formula=NULL
+UseTiffs<-TRUE
+RemoveDuplicates<-TRUE
+starts<-NULL
+fixed<-NULL
+opt.methods=2
+# Interpret command line argurments #
+# Make Function Call #
+Args <- commandArgs(trailingOnly=FALSE)
 
-last.dir<-strsplit(out$input$output.dir,split="\\\\")
-                        parent<-sub(paste("\\\\",last.dir[[1]][length(last.dir[[1]])],sep=""),"",out$input$output.dir)
-                         compile.out<-paste(parent,
-                              paste(ifelse(missing(Final.Model),"AcrossModel","FinalEvaluation"),
-                               switch(out$dat$split.type,"crossValidation"="CrossVal","test"="TestTrain","none"="NoSplit"),
-                               switch(out$input$model.family,"binomial"="Binom","bernoulli"="Binom","poisson"="Count"),if(out$input$PsdoAbs)"PsdoAbs",
-                               ".csv",
-                              sep=""),sep="/")
-                              
- Header<-cbind(c("","Original Field Data","Field Data Template","PARC Output Folder","PARC Template","Covariate Selection Name",""),
-                            c(last.dir[[1]][length(last.dir[[1]])],
-                            out$dat$input$OrigFieldData,out$dat$input$FieldDataTemp,out$dat$input$ParcOutputFolder,
-                            out$dat$input$ParcTemplate,ifelse(length(out$dat$input$CovSelectName)==0,"NONE",out$dat$input$CovSelectName),""))
+    for (i in 1:length(Args)){
+     if(Args[i]=="-f") ScriptPath<-Args[i+1]
+     }
 
-if(file.access(compile.out,mode=0)==-1){ #if very first time through little
-          write.table(Header,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=",")
+    for (arg in Args) {
+    	argSplit <- strsplit(arg, "=")
+    	argSplit[[1]][1]
+    	argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="c") csv <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="o") output <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
+   		if(argSplit[[1]][1]=="mpt") make.p.tif <- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="om")  opt.methods <- as.numeric(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="fmla")  Formula <- as.character(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="ut")   UseTiffs<- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="rd")   RemoveDuplicates<- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="sts")  starts <- argSplit[[1]][2]
+      if(argSplit[[1]][1]=="fxd")  fixed <- argSplit[[1]][2]
+    }
 
-  } else { #this else (not the first time through) read current csv first
-          input<-read.table(compile.out,fill=TRUE,sep=",")
-          output<-cbind(input,c(Header[,2],rep("",times=(nrow(input)-nrow(Header)))))
-              temp=try(write.table(output,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=","),silent=TRUE)
-           while(class(temp)=="try-error"){
-                      modalDialog("","Please Close the AppendedOutput.exe\ so that R can write to it then press ok to continue ","")
-                      temp<-try(write.table(output,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=","),silent=TRUE)
-                      }
-          }
+ScriptPath<-dirname(ScriptPath)
+source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
+source(paste(ScriptPath,"BRT.helper.fcts.r",sep="\\"))
 
- out$input$Append.Dir<-compile.out
- return(out)
- }
+
+    FitModels(ma.name=csv,
+		tif.dir=NULL,
+		output.dir=output,
+		response.col=responseCol,
+		make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
+		debug.mode=F,responseCurveForm="pdf",script.name="maxlike",
+		opt.methods=opt.methods,MESS=MESS,Formula=Formula,UseTiffs=UseTiffs,RemoveDuplicates=RemoveDuplicates)
+
+
+

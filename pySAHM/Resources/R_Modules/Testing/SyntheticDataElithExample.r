@@ -1,13 +1,80 @@
 library(raster)
-#start with two uncorrelated rasters
-Pred1<-raster("C:\\temp\\SAHM_workspace\\SimulationTiffs\\bio_06_2000_2km.tif")
-Pred2<-raster("C:\\temp\\SAHM_workspace\\SimulationTiffs\\NDVI_annualMaximumValue_2009.tif")
+a<-raster("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\PARC_100mTemplate\\bio_17_1971_2000_800m.tif")
+#start with creating two rasters for predictoin and some noise over the same extent
+Temp<-Precip<-Rand1<-Rand2<-raster(a)
+values(Temp)<-rep(seq(from=0,to=1,length=435),times=472)
+values(Rand1)<-runif(205320)
+values(Rand2)<-runif(205320)
+values(Precip)<-rep(seq(from=0,to=1,length=435),each=472)
+
+#Temp and Precip are independent
+Surf1<-(.5*(Temp+Precip))^3
+Surf2<-.5*(Temp+Precip)
+par(mfrow=c(2,2))
+plot(Temp)
+plot(Precip)
+plot(Surf1)
+plot(Surf2)
+
+
+################################################################
+############ Presence Absence Surface #########################
+#creating a binary sample for surface 1 elith actually used only surface 2
+#but I've created the cubed surface as well. 
+
+SampLocs<-sampleRandom(Surf1,10000,cells=TRUE)
+xys<-xyFromCell(Surf1,SampLocs[,1])
+response1<-rbinom(nrow(SampLocs),1,prob=SampLocs[,2])
+plot(x=xys[,1],y=xys[,2],col=response1+1,pch=19,cex=.4)
+CubeSurf<-cbind(xys,response1)
+
+#creating a binary sample for surface 2 
+response2<-rbinom(nrow(SampLocs),1,prob=extract(Surf2,SampLocs[,1]))
+plot(x=xys[,1],y=xys[,2],col=response2+1,pch=19,cex=.4)
+ElithSurf<-cbind(xys,response2)
+
+colnames(CubeSurf)<-colnames(ElithSurf)<-c("X","Y","responseBinary")
+write.table(CubeSurf,file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\ElithCube.csv",row.names=FALSE,col.names=TRUE,sep=",",quote=FALSE)
+write.table(ElithSurf,file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\ElithSurf.csv",row.names=FALSE,col.names=TRUE,sep=",",quote=FALSE)
+writeRaster(Temp,filename="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\TemperatureRastBin.tif",overwrite=TRUE)
+writeRaster(Precip,filename="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\PrecipitatoinRastBin.tif",overwrite=TRUE)
+writeRaster(Rand1,filename="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\Noise1RastBin.tif",overwrite=TRUE)
+writeRaster(Rand2,filename="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\Noise2RastBin.tif",overwrite=TRUE)
+
+################################################################
+########## Now creating presence only surfaces #################
+PresSamp<-sampleRandom(Surf2,10000,cells=TRUE)
+xys<-xyFromCell(Surf2,PresSamp[,1])
+response1<-rbinom(nrow(PresSamp),1,prob=PresSamp[,2])
+samp<-sample(which(response1==1,arr.ind=TRUE),size=1000,replace=TRUE)
+xys<-xys[samp,]
+response1<-response1[samp]
+dat<-cbind(xys,response1)
+plot(dat[,1],dat[,2],col=factor(dat[,3]))
+
+bgd<-sampleRandom(Surf2,20000,cells=TRUE)
+xys<-xyFromCell(Surf2,bgd[,1])
+response2<-rbinom(nrow(bgd),1,prob=bgd[,2])
+samp<-sample(1:20000,size=10000)
+xys<-xys[samp,]
+
+dat<-rbind(dat,cbind(xys,rep(-9998,times=length(samp))))
+colnames(dat)<-c("X","Y","responseBinary")
+Temperature<-extract(Temp,dat[,1:2])
+Precipitation<-extract(Precip,dat[,1:2])
+Noise1<-extract(Rand1,dat[,1:2])
+Noise2<-extract(Rand2,dat[,1:2])
+dat<-cbind(dat,Temperature,Precipitation,Noise1,Noise2)
+write.table(dat,file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\ElithPsdoAbs.csv",row.names=FALSE,col.names=TRUE,sep=",",quote=FALSE)
+
+
+##################### The end of Elith's synthetic data
 
 mean(sampleRegular(Pred2,10000))
 sd(sampleRegular(Pred2,10000))
 mean(sampleRegular(Pred1,10000))
 sd(sampleRegular(Pred1,10000))
-
+SampLocs<-sampleRandom(Pred2,10000,cells=TRUE)
 hist(Pred1)
 hist(Pred2)
 ## Sample the Pred2 raster and calculate probabililities assuming a gaussian response curve

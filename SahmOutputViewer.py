@@ -1,44 +1,44 @@
 ###############################################################################
 ##
-## Copyright (C) 2010-2012, USGS Fort Collins Science Center.
+## Copyright (C) 2010-2012, USGS Fort Collins Science Center. 
 ## All rights reserved.
 ## Contact: talbertc@usgs.gov
 ##
 ## This file is part of the Software for Assisted Habitat Modeling package
 ## for VisTrails.
 ##
-## "Redistribution and use in source and binary forms, with or without
+## "Redistribution and use in source and binary forms, with or without 
 ## modification, are permitted provided that the following conditions are met:
 ##
-##  - Redistributions of source code must retain the above copyright notice,
+##  - Redistributions of source code must retain the above copyright notice, 
 ##    this list of conditions and the following disclaimer.
-##  - Redistributions in binary form must reproduce the above copyright
-##    notice, this list of conditions and the following disclaimer in the
+##  - Redistributions in binary form must reproduce the above copyright 
+##    notice, this list of conditions and the following disclaimer in the 
 ##    documentation and/or other materials provided with the distribution.
-##  - Neither the name of the University of Utah nor the names of its
-##    contributors may be used to endorse or promote products derived from
+##  - Neither the name of the University of Utah nor the names of its 
+##    contributors may be used to endorse or promote products derived from 
 ##    this software without specific prior written permission.
 ##
-## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-## AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-## THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-## PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
-## CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-## EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-## PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
-## OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-## WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-## OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+## AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, 
+## THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
+## PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
+## CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+## EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+## PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
+## OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+## WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
+## OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
 ## ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
 ##
-## Although this program has been used by the U.S. Geological Survey (USGS),
-## no warranty, expressed or implied, is made by the USGS or the
-## U.S. Government as to the accuracy and functioning of the program and
-## related program material nor shall the fact of distribution constitute
-## any such warranty, and no responsibility is assumed by the USGS
+## Although this program has been used by the U.S. Geological Survey (USGS), 
+## no warranty, expressed or implied, is made by the USGS or the 
+## U.S. Government as to the accuracy and functioning of the program and 
+## related program material nor shall the fact of distribution constitute 
+## any such warranty, and no responsibility is assumed by the USGS 
 ## in connection therewith.
 ##
-## Any use of trade, firm, or product names is for descriptive purposes only
+## Any use of trade, firm, or product names is for descriptive purposes only 
 ## and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
@@ -106,79 +106,67 @@ Input Ports:
         return utils.construct_port_msg(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-         return utils.construct_port_msg(cls, port_name, 'out')
-
+         return utils.construct_port_msg(cls, port_name, 'out') 
+     
     def compute(self):
         """ compute() -> None
         Dispatch the display event to the spreadsheet with images and labels
-
+        
         """
         if self.hasInputFromPort("ModelWorkspace"):
             window = spreadsheetController.findSpreadsheetWindow()
             model_workspace = self.getInputFromPort("ModelWorkspace").name
 
-#            pm = get_package_manager()
-#            hasVisWall = pm.has_package('gov.usgs..VisWallServer')
-#            if hasVisWall:
-#                row = self.forceGetInputFromPort("row", -1)
-#                col = self.forceGetInputFromPort("column", -1)
-#
-#                initial_display = self.forceGetInputFromPort('InitialModelOutputDisplay', 'AUC')
-#
-#                from packages.VisWallServer import display_sahm_output
-#                display_sahm_output(row, col,
-#                                    {"ModelWorkspace": model_workspace,
-#                                     "InitialModelOutputDisplay": initial_display},
-#                                    'ModelOutput')
-#                return
-
-
             model_dir_full = os.path.normcase(model_workspace)
             model_dir = os.path.split(model_dir_full)[1]
             model_name = model_dir[:model_dir.index('_')]
-
-
             auc_graph_path = os.path.join(model_dir_full, model_name + '_modelEvalPlot.jpg')
             auc_graph = window.file_pool.make_local_copy(auc_graph_path)
-
+            
             text_output_path = os.path.join(model_dir_full, model_name + '_output.txt')
             text_output = window.file_pool.make_local_copy(text_output_path)
-
-            response_path = os.path.join(model_dir_full, model_name + '_response_curves.pdf')
-            response_curves = window.file_pool.make_local_copy(response_path)
-
+            
+            response_directory = os.path.join(model_dir_full,'responseCurves')
+            if os.path.exists(response_directory):
+                responseCurveFiles = os.listdir(response_directory)
+                response_curves = []
+                for response_curve in responseCurveFiles:
+                    response_curves.append(os.path.join(response_directory, response_curve))
+            else:
+                response_curves = []
+            
             calibration_graph_path = os.path.join(model_dir_full, model_name + '_CalibrationPlot.jpg')
             calibration_graph = window.file_pool.make_local_copy(calibration_graph_path)
-
+            
             confusion_graph_path = os.path.join(model_dir_full, model_name + '.confusion.matrix.jpg')
             confusion_graph = window.file_pool.make_local_copy(confusion_graph_path)
-
+            
             residuals_graph_path = os.path.join(model_dir_full, model_name + '.resid.plot.jpg')
             residuals_graph = window.file_pool.make_local_copy(residuals_graph_path)
-
+            
             model_label = model_dir.capitalize().replace('output', 'Output')
-
-
+            
+            
             if self.hasInputFromPort("row"):
                 if not self.location:
                     self.location = CellLocation()
                 self.location.row = self.getInputFromPort('row') - 1
-
+            
             if self.hasInputFromPort("column"):
                 if not self.location:
                     self.location = CellLocation()
                 self.location.col = self.getInputFromPort('column') - 1
-
+                
             if self.hasInputFromPort('InitialModelOutputDisplay'):
                 initial_display = self.getInputFromPort('InitialModelOutputDisplay')
             else:
                 initial_display = 'AUC'
-
+            
         else:
             fileValue = None
-
-
-        self.cellWidget = self.displayAndWait(SAHMOutputViewerCellWidget, (auc_graph,
+            
+            
+        self.cellWidget = self.displayAndWait(SAHMOutputViewerCellWidget, (auc_graph, 
                                                                       text_output,
                                                                       response_curves,
                                                                       calibration_graph,
@@ -194,108 +182,120 @@ class SAHMOutputViewerCellWidget(QCellWidget):
     """
     def __init__(self, parent=None):
         QCellWidget.__init__(self, parent)
-
+        
         self.sync_changes = "all"
-
+        
         centralLayout = QtGui.QVBoxLayout()
         self.setLayout(centralLayout)
         centralLayout.setMargin(0)
         centralLayout.setSpacing(0)
 
-
+        
 #        self.setAnimationEnabled(True)
-
+        
         self.Frame = QtGui.QFrame()
         self.ui = Ui_Frame()
         self.ui.setupUi(self.Frame)
-
+        
 #        #add scenes to our graphicViews
 #        self.gs_prob_map = QtGui.QGraphicsScene()
 #        self.ui.gv_prob_map.setScene(self.gs_prob_map)
 #        self.gs_prob_map.wheelEvent = self.wheel_event_prob
-
+        
         self.gs_auc_graph = QtGui.QGraphicsScene()
         self.ui.gv_auc.setScene(self.gs_auc_graph)
         self.gs_auc_graph.wheelEvent = self.wheel_event_auc
-
+        
+        self.gs_response_graph = QtGui.QGraphicsScene()
+        self.ui.gv_response.setScene(self.gs_response_graph)
+        self.gs_response_graph.wheelEvent = self.wheel_event_response
+        
         self.gs_calibration_graph = QtGui.QGraphicsScene()
         self.ui.gv_calibration.setScene(self.gs_calibration_graph)
         self.gs_calibration_graph.wheelEvent = self.wheel_event_calibration
-
+        
         self.gs_confusion_graph = QtGui.QGraphicsScene()
         self.ui.gv_confusion.setScene(self.gs_confusion_graph)
         self.gs_confusion_graph.wheelEvent = self.wheel_event_confusion
-
+        
         self.gs_residuals_graph = QtGui.QGraphicsScene()
         self.ui.gv_residuals.setScene(self.gs_residuals_graph)
         self.gs_residuals_graph.wheelEvent = self.wheel_event_residuals
-
+        
         #add in ie browsers for the text and response
         self.text_browser = QAxContainer.QAxWidget(self)
         self.text_browser.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.text_browser.setControl("{8856F961-340A-11D0-A96B-00C04FD705A2}")
         self.ui.text_output_layout.addWidget(self.text_browser)
         self.text_urlSrc = None
-
-        self.response_browser = QAxContainer.QAxWidget(self)
-        self.response_browser.setFocusPolicy(QtCore.Qt.StrongFocus)
-        self.response_browser.setControl("{8856F961-340A-11D0-A96B-00C04FD705A2}")
-        self.ui.response_curves_layout.addWidget(self.response_browser)
-        self.response_urlSrc = None
-
+        
+        layout = QtGui.QVBoxLayout()
+        self.response_frame = QtGui.QFrame(self)
+        self.response_graph = QtGui.QGraphicsScene()
+        self.ui.gv_response.setScene(self.response_graph)
+        self.response_graph.wheelEvent = self.wheel_event_response
+        
+        
+        
+#        self.response_browser = QAxContainer.QAxWidget(self)
+#        self.response_browser.setFocusPolicy(QtCore.Qt.StrongFocus)
+#        self.response_browser.setControl("{8856F961-340A-11D0-A96B-00C04FD705A2}")
+#        self.ui.response_curves_layout.addWidget(self.response_browser)
+#        self.response_urlSrc = None
+        
         self.connect(self.ui.tabWidget,QtCore.SIGNAL('currentChanged(int)'), self.tabChanged)
-
+        
         self.layout().addWidget(self.Frame)
 
     def tabChanged(self):
         active_cells = self.get_active_cells()
-
-        for cell in active_cells:
+        
+        for cell in active_cells: 
             cell.ui.tabWidget.setCurrentIndex(self.ui.tabWidget.currentIndex())
 
     def updateContents(self, inputPorts):
         """ updateContents(inputPorts: tuple) -> None
         Update the widget contents based on the input data
-
+        
         """
-        (auc_graph, text_output, response_curves, calibration_graph, confusion_graph,
+        (auc_graph, text_output, response_curves, calibration_graph, confusion_graph, 
          residuals_graph, model_label, inital_display) = inputPorts
-
+        
         self.images = {}
 #        if prob_map:
 #            #Value = (full image, sized image, scene, view, max_height)
 #            pixmap = QtGui.QPixmap(prob_map.name)
 #            max_size = self.getMaxSize(self.ui.gv_prob_map)
-#            scaled_pixmap = pixmap.scaled(max_size, max_size,
-#                                            QtCore.Qt.KeepAspectRatio,
+#            scaled_pixmap = pixmap.scaled(max_size, max_size, 
+#                                            QtCore.Qt.KeepAspectRatio, 
 #                                            QtCore.Qt.FastTransformation)
-#
+#            
 #            self.images['prob_map'] = [pixmap,
 #                                       scaled_pixmap,
 #                                       self.gs_prob_map,
 #                                       self.ui.gv_prob_map,
 #                                       max_size]
-
+        
         if auc_graph:
             pixmap = QtGui.QPixmap(auc_graph.name)
-            max_size = self.getMinSize(self.ui.gv_auc)
-            scaled_pixmap = pixmap.scaled(max_size, max_size,
-                                            QtCore.Qt.KeepAspectRatio,
+            max_size = self.getMaxSize(self.ui.gv_auc)
+            scaled_pixmap = pixmap.scaled(max_size, max_size, 
+                                            QtCore.Qt.KeepAspectRatio, 
                                             QtCore.Qt.SmoothTransformation)
-
+            
             self.images['auc_graph'] = [pixmap,
                                        scaled_pixmap,
                                        self.gs_auc_graph,
                                        self.ui.gv_auc,
                                        max_size]
-
+        
         if calibration_graph:
             pixmap_cal = QtGui.QPixmap(calibration_graph.name)
-            max_size = self.getMinSize(self.ui.gv_calibration)
-            scaled_pixmap_cal = pixmap_cal.scaled(max_size, max_size,
-                                            QtCore.Qt.KeepAspectRatio,
+            max_size = self.getMaxSize(self.ui.gv_calibration)
+            scaled_pixmap_cal = pixmap_cal.scaled(max_size, max_size, 
+                                            QtCore.Qt.KeepAspectRatio, 
                                             QtCore.Qt.SmoothTransformation)
-
+            
             self.images['calibration_graph'] = [pixmap_cal,
                                        scaled_pixmap_cal,
                                        self.gs_calibration_graph,
@@ -303,43 +303,57 @@ class SAHMOutputViewerCellWidget(QCellWidget):
                                        max_size]
         if confusion_graph:
             pixmap_con = QtGui.QPixmap(confusion_graph.name)
-            max_size = self.getMinSize(self.ui.gv_confusion)
-            scaled_pixmap_con = pixmap_con.scaled(max_size, max_size,
-                                            QtCore.Qt.KeepAspectRatio,
+            max_size = self.getMaxSize(self.ui.gv_confusion)
+            scaled_pixmap_con = pixmap_con.scaled(max_size, max_size, 
+                                            QtCore.Qt.KeepAspectRatio, 
                                             QtCore.Qt.SmoothTransformation)
-
+            
             self.images['confusion_graph'] = [pixmap_con,
                                        scaled_pixmap_con,
                                        self.gs_confusion_graph,
                                        self.ui.gv_confusion,
                                        max_size]
-
+            
         if residuals_graph:
             pixmap_res = QtGui.QPixmap(residuals_graph.name)
-            max_size = self.getMinSize(self.ui.gv_residuals)
-            scaled_pixmap_res = pixmap_res.scaled(max_size, max_size,
-                                            QtCore.Qt.KeepAspectRatio,
+            max_size = self.getMaxSize(self.ui.gv_residuals)
+            scaled_pixmap_res = pixmap_res.scaled(max_size, max_size, 
+                                            QtCore.Qt.KeepAspectRatio, 
                                             QtCore.Qt.SmoothTransformation)
-
+            
             self.images['residuals_graph'] = [pixmap_res,
                                        scaled_pixmap_res,
                                        self.gs_residuals_graph,
                                        self.ui.gv_residuals,
                                        max_size]
-
+        
 
         self.text_urlSrc = QtCore.QUrl.fromLocalFile(text_output.name)
         if self.text_urlSrc!=None:
             self.text_browser.dynamicCall('Navigate(const QString&)', self.text_urlSrc.toString())
         else:
             self.text_browser.dynamicCall('Navigate(const QString&)', QtCore.QString('about:blank'))
+        
+        if response_curves:
+            for response_curve in response_curves:
+                shortName = os.path.split(response_curve)[1]
+                shortName = os.path.splitext(shortName)[0]
+                if shortName != "Thumbs": 
+                    self.ui.response_combobox.addItem(shortName)
+                
+            pixmap_response = QtGui.QPixmap(response_curves[0])
+            max_size = self.getMaxSize(self.ui.gv_response)
+            scaled_pixmap_response = pixmap_response.scaled(max_size, max_size, 
+                                            QtCore.Qt.KeepAspectRatio, 
+                                            QtCore.Qt.SmoothTransformation)
+            
+            self.images['response_graph'] = [pixmap_response,
+                                       scaled_pixmap_response,
+                                       self.gs_response_graph,
+                                       self.ui.gv_response,
+                                       max_size]
 
-        self.response_urlSrc = QtCore.QUrl.fromLocalFile(response_curves.name)
-        if self.response_urlSrc!=None:
-            self.response_browser.dynamicCall('Navigate(const QString&)', self.response_urlSrc.toString())
-        else:
-            self.response_browser.dynamicCall('Navigate(const QString&)', QtCore.QString('about:blank'))
-
+        
         choices = ['Text', 'Response Curves', 'AUC', 'Calibration', 'Confusion', 'Residuals']
         selected_index = choices.index(inital_display)
         self.ui.tabWidget.setCurrentIndex(selected_index)
@@ -350,22 +364,19 @@ class SAHMOutputViewerCellWidget(QCellWidget):
 
     def getMaxSize(self, view):
         return self.Frame.size().width() - 10
-#        if view.size().width()  <= view.size().height():
+#        if view.size().width()  <= view.size().height(): 
 #            return view.size().width() * 0.95
-#        else:
+#        else: 
 #            return view.size().height() * 0.95
-
-    def getMinSize(self, view):
-        return min([self.Frame.size().width(), self.Frame.size().height()]) - 10
-
+    
     def view_current(self):
         for k,v in self.images.iteritems():
-            size_img = v[1].size()
-            wth, hgt = QtCore.QSize.width(size_img), QtCore.QSize.height(size_img)
-            v[2].clear()
-            v[2].setSceneRect(0, 0, wth, hgt)
-            v[2].addPixmap(v[1])
-        QtCore.QCoreApplication.processEvents()
+            size_img = v[1].size() 
+            wth, hgt = QtCore.QSize.width(size_img), QtCore.QSize.height(size_img) 
+            v[2].clear() 
+            v[2].setSceneRect(0, 0, wth, hgt) 
+            v[2].addPixmap(v[1]) 
+        QtCore.QCoreApplication.processEvents() 
 
     def wheel_event_prob(self, event):
         self.wheel_event(event, 'prob_map', QtCore.Qt.FastTransformation)
@@ -373,64 +384,67 @@ class SAHMOutputViewerCellWidget(QCellWidget):
     def wheel_event_auc(self, event):
         self.wheel_event(event, 'auc_graph', QtCore.Qt.SmoothTransformation)
 
+    def wheel_event_response(self, event):
+        self.wheel_event(event, 'response_graph', QtCore.Qt.SmoothTransformation)
+
     def wheel_event_calibration(self, event):
         self.wheel_event(event, 'calibration_graph', QtCore.Qt.SmoothTransformation)
-
+    
     def wheel_event_confusion(self, event):
         self.wheel_event(event, 'confusion_graph', QtCore.Qt.SmoothTransformation)
-
+        
     def wheel_event_residuals(self, event):
         self.wheel_event(event, 'residuals_graph', QtCore.Qt.SmoothTransformation)
-
+       
     def wheel_event (self, event, id, transform):
-        numDegrees = event.delta() / 8
-        numSteps = numDegrees / 15.0
-#        self.zoom(numSteps, self.images[id], transform)
-#        event.accept()
+        numDegrees = event.delta() / 8 
+        numSteps = numDegrees / 15.0 
+#        self.zoom(numSteps, self.images[id], transform) 
+#        event.accept() 
 
         active_cells = self.get_active_cells()
         for cell in active_cells:
 #            if cell != self:
             cell.zoom(numSteps, cell.images[id], transform)
-            cell.view_current()
-
+            cell.view_current() 
+                    
 
     def zoom(self, step, images, transform):
         zoom_step = 0.06
-        images[2].clear()
-        w = images[1].size().width()
-        h = images[1].size().height()
-        w, h = w * (1 + zoom_step*step), h * (1 + zoom_step*step)
-        images[1] = images[0].scaled(w, h,
-                                            QtCore.Qt.KeepAspectRatio,
-                                            transform)
+        images[2].clear() 
+        w = images[1].size().width() 
+        h = images[1].size().height() 
+        w, h = w * (1 + zoom_step*step), h * (1 + zoom_step*step) 
+        images[1] = images[0].scaled(w, h, 
+                                            QtCore.Qt.KeepAspectRatio, 
+                                            transform) 
+        
+        
 
-
-
-
+        
 
     def saveToPNG(self, filename):
         """ saveToPNG(filename: str) -> bool
         Save the current widget contents to an image file
-
+        
         """
 
         pixmap = QtGui.QPixmap(self.Frame.size())
         painter = QtGui.QPainter(pixmap)
         self.Frame.render(painter)
         painter.end()
-
+        
         if pixmap and (not pixmap.isNull()):
             return pixmap.save(filename)
         return False
-
+    
     def saveToPDF(self, filename):
         """ saveToPDF(filename: str) -> bool
         Save the current widget contents to a pdf file
-
+        
         """
         printer = QtGui.QPrinter()
-
+        
         printer.setOutputFormat(QtGui.QPrinter.PdfFormat)
         printer.setOutputFileName(filename)
         painter = QtGui.QPainter()
@@ -448,7 +462,7 @@ class SAHMOutputViewerCellWidget(QCellWidget):
     def findSheetTabWidget(self):
         """ findSheetTabWidget() -> QTabWidget
         Find and return the sheet tab widget
-
+        
         """
         p = self.parent()
         while p:
@@ -475,7 +489,7 @@ class SAHMOutputViewerCellWidget(QCellWidget):
             selected_cells = sheet.getSelectedLocations()
             return self.getSAHMOutputsInCellList(sheet, selected_cells)
         return []
-
+    
     def get_allCellWidgets(self):
         sheet = self.findSheetTabWidget()
         if sheet:
@@ -489,19 +503,19 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         elif self.sync_changes == "sel":
             return self.getSelectedCellWidgets()
         else:
-            retn [self]
+            retn [self]    
 
 class ImageViewerFitToCellAction(QtGui.QAction):
     """
     ImageViewerFitToCellAction is the action to stretch the image to
     fit inside a cell
-
+    
     """
     def __init__(self, parent=None):
         """ ImageViewerFitToCellAction(parent: QWidget)
                                        -> ImageViewerFitToCellAction
         Setup the image, status tip, etc. of the action
-
+        
         """
         QtGui.QAction.__init__(self,
                                QtGui.QIcon(":/images/fittocell.png"),
@@ -514,7 +528,7 @@ class ImageViewerFitToCellAction(QtGui.QAction):
     def toggledSlot(self, checked):
         """ toggledSlot(checked: boolean) -> None
         Execute the action when the button is toggled
-
+        
         """
         cellWidget = self.toolBar.getSnappedWidget()
         cellWidget.label.setScaledContents(checked)
@@ -522,11 +536,11 @@ class ImageViewerFitToCellAction(QtGui.QAction):
                                           self.toolBar.row,
                                           self.toolBar.col,
                                           cellWidget))
-
+        
     def updateStatus(self, info):
         """ updateStatus(info: tuple) -> None
         Updates the status of the button based on the input info
-
+        
         """
         (sheet, row, col, cellWidget) = info
         self.setChecked(cellWidget.label.hasScaledContents())
@@ -534,23 +548,23 @@ class ImageViewerFitToCellAction(QtGui.QAction):
 class ImageViewerSaveAction(QtGui.QAction):
     """
     ImageViewerSaveAction is the action to save the image to file
-
+    
     """
     def __init__(self, parent=None):
         """ ImageViewerSaveAction(parent: QWidget) -> ImageViewerSaveAction
         Setup the image, status tip, etc. of the action
-
+        
         """
         QtGui.QAction.__init__(self,
                                QtGui.QIcon(":/images/save.png"),
                                "&Save image as...",
                                parent)
         self.setStatusTip("Save image to file")
-
+        
     def triggeredSlot(self, checked=False):
         """ toggledSlot(checked: boolean) -> None
         Execute the action when the button is clicked
-
+        
         """
         cellWidget = self.toolBar.getSnappedWidget()
         if not cellWidget.label.pixmap() or cellWidget.label.pixmap().isNull():
@@ -585,7 +599,7 @@ class Ui_Frame(object):
         self.tabWidget.setEnabled(True)
         self.tabWidget.setTabPosition(QtGui.QTabWidget.North)
         self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
-
+        
         self.text_output = QtGui.QWidget()
         self.text_output.setObjectName(_fromUtf8("text_output"))
         self.text_output_layout = QtGui.QHBoxLayout(self.text_output)
@@ -594,16 +608,24 @@ class Ui_Frame(object):
         self.text_output_layout.setObjectName(_fromUtf8("text_output_layout"))
         self.tabWidget.addTab(self.text_output, _fromUtf8(""))
         self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.text_output), QtGui.QApplication.translate("Frame", "Textual model output ", None, QtGui.QApplication.UnicodeUTF8))
-
+        
         self.response_curves = QtGui.QWidget()
         self.response_curves.setObjectName(_fromUtf8("response_curves"))
-        self.response_curves_layout = QtGui.QHBoxLayout(self.response_curves)
+        self.response_curves_layout = QtGui.QVBoxLayout(self.response_curves)
         self.response_curves_layout.setSpacing(0)
         self.response_curves_layout.setMargin(0)
         self.response_curves_layout.setObjectName(_fromUtf8("response_curves_layout"))
+        self.response_combobox = QtGui.QComboBox(self.response_curves)
+        self.response_curves_layout.addWidget(self.response_combobox)
+        self.gv_response = QtGui.QGraphicsView(self.response_curves)
+        self.gv_response.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
+        self.gv_response.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        self.gv_response.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        self.gv_response.setObjectName(_fromUtf8("gv_response"))
+        self.response_curves_layout.addWidget(self.gv_response)
         self.tabWidget.addTab(self.response_curves, _fromUtf8(""))
-        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.response_curves), QtGui.QApplication.translate("Frame", "Response curves", None, QtGui.QApplication.UnicodeUTF8))
-
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.response_curves), QtGui.QApplication.translate("Frame", "Response curves", None, QtGui.QApplication.UnicodeUTF8))        
+        
         self.auc = QtGui.QWidget()
         self.auc.setObjectName(_fromUtf8("auc"))
         self.horizontalLayout_4 = QtGui.QHBoxLayout(self.auc)
@@ -618,7 +640,7 @@ class Ui_Frame(object):
         self.horizontalLayout_4.addWidget(self.gv_auc)
         self.tabWidget.addTab(self.auc, _fromUtf8(""))
         self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.auc), QtGui.QApplication.translate("Frame", "Area under the curve (AUC)", None, QtGui.QApplication.UnicodeUTF8))
-
+        
         self.calibration = QtGui.QWidget()
         self.calibration.setObjectName(_fromUtf8("calibration"))
         self.horizontalLayout_5 = QtGui.QHBoxLayout(self.calibration)
@@ -633,7 +655,7 @@ class Ui_Frame(object):
         self.horizontalLayout_5.addWidget(self.gv_calibration)
         self.tabWidget.addTab(self.calibration, _fromUtf8(""))
         self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.calibration), QtGui.QApplication.translate("Frame", "Calibration plot", None, QtGui.QApplication.UnicodeUTF8))
-
+        
         self.confusion = QtGui.QWidget()
         self.confusion.setObjectName(_fromUtf8("confusion"))
         self.horizontalLayout_6 = QtGui.QHBoxLayout(self.confusion)
@@ -648,7 +670,7 @@ class Ui_Frame(object):
         self.horizontalLayout_6.addWidget(self.gv_confusion)
         self.tabWidget.addTab(self.confusion, _fromUtf8(""))
         self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.confusion), QtGui.QApplication.translate("Frame", "Confusion matrix", None, QtGui.QApplication.UnicodeUTF8))
-
+        
         self.residuals = QtGui.QWidget()
         self.residuals.setObjectName(_fromUtf8("residuals"))
         self.horizontalLayout_7 = QtGui.QHBoxLayout(self.residuals)
@@ -662,8 +684,8 @@ class Ui_Frame(object):
         self.gv_residuals.setObjectName(_fromUtf8("gv_residuals"))
         self.horizontalLayout_7.addWidget(self.gv_residuals)
         self.tabWidget.addTab(self.residuals, _fromUtf8(""))
-        self.tabWidget
 
+        
         self.horizontalLayout.addWidget(self.tabWidget)
         self.retranslateUi(Frame)
         self.tabWidget.setCurrentIndex(2)

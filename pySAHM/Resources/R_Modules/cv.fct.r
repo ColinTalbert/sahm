@@ -209,12 +209,9 @@ for (i in 1:nk) {
                                 tolerance.method=out$input$tolerance.method,tolerance=out$input$tolerance, n.folds=out$input$n.folds,tree.complexity=out$mods$parms$tc.sub,
                                 learning.rate=out$mods$lr.mod$lr0,bag.fraction=out$input$bag.fraction,site.weights=site.weights[model.mask],autostop=T,debug.mode=F,silent=!debug.mode,
                                 plot.main=F,superfast=F)
-                                if(debug.mode) assign("m0",m0,envir=.GlobalEnv)
-
-                                t1b <- unclass(Sys.time())
 
                           simp.mod<- gbm.simplify(m0,n.folds=out$input$n.folds,plot=F,verbose=F,alpha=out$input$alpha) # this step is very slow #
-                                if(debug.mode) assign("out",out,envir=.GlobalEnv)
+                          
 
                            cv.final.mod <- gbm.step.fast(dat=cbind(species.subset,predictor.subset),gbm.x=simp.mod$pred.list[[length(simp.mod$pred.list)]],gbm.y = 1,family=out$input$model.family,
                             n.trees = c(300,600,700,800,900,1000,1200,1500,1800,2200,2600,3000,3500,4000,4500,5000),n.folds=out$input$n.folds,

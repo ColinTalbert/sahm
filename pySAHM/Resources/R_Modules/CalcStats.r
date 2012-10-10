@@ -42,16 +42,35 @@
 ## and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
-calcStat<-function(x,family){
+calcStat<-function(x,family,has.split){
 
+#Written by Marian Talbert 2011
     auc.data<-data.frame(ID=1:nrow(x$dat),pres.abs=x$dat[,1],pred=x$pred)
     p.bar <- sum(auc.data$pres.abs * x$weight) / sum(x$weight)
        n.pres=sum(auc.data$pres.abs>=1)
         n.abs=nrow(auc.data)-n.pres
+        if(has.split & !is.null(x$Split)){ #we're in the train split here for pseudoabs
+              dev.vect<-vector()
+              null.dev<-vector()
+               for(i in 1:(length(unique(x$Split))-1)){
+                 dev.vect[i]<-calc.dev(c(rep(0,times=sum(x$Split==i)),x$resp[x$resp==1]),
+                          c(x$pred[x$Split==i],x$pred[x$resp==1]))$deviance
+                 null.dev[i]<-calc.dev(c(rep(0,times=sum(x$Split==i)),x$resp[x$resp==1]),
+                          rep(mean(c(rep(1,times=sum(x$resp==1)),rep(0,times=sum(x$Split==i)))),times=(sum(x$resp==1)+sum(x$Split==i))))$deviance
+               }
+               null.dev<-mean(null.dev)
+               dev.fit<-mean(dev.vect)
+        }
+        else if(has.split & is.null(x$Split)){ #in the test split for pseudoabs deviance shouldn't be calculated because calibration is wrong
+              null.dev=NA
+              dev.fit=NA
+        }
+        else{     
         null.dev=calc.dev(auc.data$pres.abs, rep(p.bar,times=length(auc.data$pres.abs)), x$weight, family=out$input$model.family)$deviance #*nrow(x$dat)
                                              if(is.nan(null.dev)) null.dev=NA
         dev.fit=calc.dev(auc.data$pres.abs, x$pred, x$weight, family=family)$deviance #*nrow(x$dat) Elith does not include this it might cause a weighting issue when averaging I'm not sure if I should include it
                                             if(is.nan(dev.fit)) dev.fit=NA
+        }                                    
         dev.exp=null.dev - dev.fit
         pct.dev.exp=dev.exp/null.dev*100
         correlation=cor(auc.data$pres.abs,x$pred)

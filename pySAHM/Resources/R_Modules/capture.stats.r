@@ -45,29 +45,38 @@
 capture.stats<-function(Stats.lst,file.name,label,family,opt.methods,out){
 if(label=="eval") label="Final evaluation"
 
+# Written by Marian Talbert 2012 
+
 capture.output(cat(" applied to",label, "split:\n",sep=" "),
                         file=file.name,append=TRUE)
     capture.output(cat( "\n",
-                       "\n\t Correlation Coefficient      : ",mean(unlist(lapply(Stats.lst,function(lst){lst$correlation}))),
+                       "\n\t Correlation Coefficient      :",mean(unlist(lapply(Stats.lst,function(lst){lst$correlation}))),
                              if(label=="crossValidation"){paste(" (sd ",
                               signif(sd(unlist(lapply(Stats.lst,function(lst){lst$correlation}))),digits=5),
                               ")",sep="")},
-                       "\n\t NULL Deviance                : ",mean(unlist(lapply(Stats.lst,function(lst){lst$null.dev}))),
+                        if(!out$input$has.split |(out$input$has.split & label=="train")) {paste(
+                        "\n\t NULL Deviance                : ",
+                            signif(mean(unlist(lapply(Stats.lst,function(lst){lst$null.dev}))),digits=5),
+                              if(out$input$has.split & label=="train") " (Averaged over background splits)",
                               if(label=="crossValidation"){paste(" (sd ",
                                  signif(sd(unlist(lapply(Stats.lst,function(lst){lst$null.dev}))),digits=5),
                                 ")",sep="")},
-                       "\n\t Fit Deviance                 : ",mean(unlist(lapply(Stats.lst,function(lst){lst$dev.fit}))),
+                       "\n\t Fit Deviance                 : ",
+                        signif(mean(unlist(lapply(Stats.lst,function(lst){lst$dev.fit}))),digits=5),
+                             if(out$input$has.split & label=="train") " (Averaged over background splits)",  
                              if(label=="crossValidation"){paste(" (sd ",
                               signif(sd(unlist(lapply(Stats.lst,function(lst){lst$dev.fit}))),digits=5),
                               ")",sep="")},
-                       "\n\t Explained Deviance           : ",mean(unlist(lapply(Stats.lst,function(lst){lst$dev.exp}))),
+                       "\n\t Explained Deviance           : ",
+                          signif(mean(unlist(lapply(Stats.lst,function(lst){lst$dev.exp}))),digits=5),
                               if(label=="crossValidation"){paste(" (sd ",
                               signif(sd(unlist(lapply(Stats.lst,function(lst){lst$dev.exp}))),digits=5),
                               ")",sep="")},
-                       "\n\t Percent Deviance Explained   : ",mean(unlist(lapply(Stats.lst,function(lst){lst$pct.dev.exp}))),
+                       "\n\t Percent Deviance Explained   : ",
+                          signif(mean(unlist(lapply(Stats.lst,function(lst){lst$pct.dev.exp}))),digits=5),
                              if(label=="crossValidation"){paste(" (sd ",
                               signif(sd(unlist(lapply(Stats.lst,function(lst){lst$pct.dev.exp}))),5),
-                              ")",sep="")},
+                              ")",sep="")},sep="")},
                        file=file.name,append=TRUE))
 
                         if(family%in%c("binomial","bernoulli")){
@@ -126,7 +135,7 @@ capture.output(cat(" applied to",label, "split:\n",sep=" "),
                            file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
                        }
 
-    capture.output(cat( "\n\n   Calibration Statistics",
+    if(!out$input$PsdoAbs) capture.output(cat( "\n\n   Calibration Statistics",
                           "\n\t Intercept (general calibration)                            : ",mean(unlist(lapply(Stats.lst,function(lst){lst$calibration.stats[1]}))),
                           if(label=="crossValidation"){paste(" (sd ",
                               signif(sd(unlist(lapply(Stats.lst,function(lst){lst$calibration.stats[1]}))),digits=5),

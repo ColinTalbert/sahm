@@ -532,7 +532,7 @@ class Model(Module):
                      ('MessMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('MoDMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('modelEvalPlot', '(edu.utah.sci.vistrails.basic:File)'),
-                     ('ResponseCurves', '(edu.utah.sci.vistrails.basic:File)'),
+#                     ('ResponseCurves', '(edu.utah.sci.vistrails.basic:File)'),
                      ('Text_Output', '(edu.utah.sci.vistrails.basic:File)')]
 
     port_map = {'mdsFile':('c', None, True),#These ports are for all Models
@@ -597,7 +597,7 @@ class Model(Module):
         self.setModelResult("_MoD_map.tif", 'MoDMap', 'mes')
         self.setModelResult("_output.txt", 'Text_Output')
         self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot') 
-        self.setModelResult("response_curves.pdf", 'ResponseCurves')
+#        self.setModelResult("response_curves.pdf", 'ResponseCurves')
         
         modelWorkspace = utils.create_dir_module(self.output_dname)
         self.setResult("modelWorkspace", modelWorkspace)

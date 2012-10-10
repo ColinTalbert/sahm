@@ -76,9 +76,8 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
                     interactions=NULL,  # not used #
                     summary=NULL))
 
-             out$input$NoResidMaps=FALSE
-if(is.null(out$input$seed)) out$input$seed<-round(runif(1,min=-((2^32)/2-1),max=((2^32)/2-1)))
-set.seed(as.numeric(out$input$seed))
+    if(is.null(out$input$seed)) out$input$seed<-round(runif(1,min=-((2^32)/2-1),max=((2^32)/2-1)))
+    set.seed(as.numeric(out$input$seed))
    #print warnings as they occur
         options(warn=1)
     
@@ -96,10 +95,12 @@ set.seed(as.numeric(out$input$seed))
    #Read in data, perform several checks and store all of the information in the out list
              out <- read.ma(out)
              out$dat$bname <- bname
+             if(out$input$script.name=="rf" & out$input$model.family=="poisson") stop("Random Forest not implemented for count data")
+            
    #writing out the header info to the CSV so in case of a break we know what broke
              out<-place.save(out)
               out$dat$split.label<-out$dat$split.type
-    # check output dir #
+   #check output dir #
               if(file.access(out$input$output.dir,mode=2)!=0) stop(paste("output directory",output.dir,"is not writable"))
 
               cat("\nbegin processing of model array:",out$input$ma.name,"\n")
@@ -108,26 +109,26 @@ set.seed(as.numeric(out$input$seed))
               cat("Progress:20%\n");flush.console();
              cat("\n","Fitting",toupper(Model),"model","\n")
              flush.console()
-             
-    # Fit the desired model#
+      
+    #Fit the desired model#
                out<-generic.model.fit(out,Model,t0)
-
-    # Making Predictions
+          
+    #Making Predictions
                pred.vals<-function(x,model,Model){
               x$pred<-pred.fct(model,x$dat[,2:ncol(x$dat)],Model)
               return(x)}
-
+       
               #getting the predictions for the test/train or cross validation splits into the object at the correct list location
-
-              if(out$dat$split.type!="crossValidation") out$dat$ma<-(lapply(X=out$dat$ma,FUN=pred.vals,model=out$mods$final.mod,Model=Model))
-                 else out$dat$ma$train$pred<-pred.vals(out$dat$ma$train,out$mods$final.mod,Model=Model)$pred  #produces the same thing as pred.mars(out$mods$final.mod,out$dat$ma$train$dat[2:ncol(out$dat$ma$train$dat)])
-
-              #Just for the training set for Random Forest we have to take out of bag predictions rather than the regular predictions
-              if(Model=="rf") out$dat$ma$train$pred<-tweak.p(as.vector(predict(out$mods$final.mod,type="prob")[,2]))
-
+                  if(out$dat$split.type!="crossValidation") out$dat$ma<-(lapply(X=out$dat$ma,FUN=pred.vals,model=out$mods$final.mod,Model=Model))
+                     else out$dat$ma$train$pred<-pred.vals(out$dat$ma$train,out$mods$final.mod,Model=Model)$pred  
+                   #Maxlike needs to remove incomplete cases which are removed in read.ma if there's a data.frame to work with
+                   if(Model=="maxlike") out$dat$ma$train$pred<-out$dat$ma$train$pred[out$dat$ma$train$compl]
+                  #Just for the training set for Random Forest we have to take out of bag predictions rather than the regular predictions
+                  if(Model=="rf" & !out$input$PsdoAbs) out$dat$ma$train$pred<-tweak.p(as.vector(predict(out$mods$final.mod[[1]],type="prob")[,2])) 
+                                                  
     #Run Cross Validation if specified might need separate cv functions for each model
             if(out$dat$split.type=="crossValidation") out<-cv.fct(out$mods$final.mod, out=out, sp.no = 1, prev.stratify = F,Model=Model)
-
+            
                   assign("out",out,envir=.GlobalEnv)
                   t3 <- unclass(Sys.time())
 
@@ -138,19 +139,19 @@ set.seed(as.numeric(out$input$seed))
                       }
 
                     if(nrow(out$dat$ma$train$dat)/(ncol(out$dat$ma$train$dat)-1)<10){
-                    capture.output(cat(paste("You have approximately ", round(nrow(out$dat$ma$train$dat)/(ncol(out$dat$ma$train$dat)-1),digits=1),
-                    "observations for every predictor\n consider reducing the number of predictors before continuing\n",sep="")),
+                    capture.output(cat(paste("\n Warning: You have approximately ", round(nrow(out$dat$ma$train$dat)/(ncol(out$dat$ma$train$dat)-1),digits=1),
+                    " observations for every predictor\n consider reducing the number of predictors before continuing\n",sep="")),
                           file=paste(bname,"_output.txt",sep=""),append=T)
                     }
                   cat("40%\n")
-
+                  
     #producing auc and residual plots model summary information and accross model evaluation metric
           out$mods$auc.output<-make.auc.plot.jpg(out=out)
 
               cat("Progress:70%\n");flush.console()
 
-  # Response curves #
-      response.curves(out,Model)
+  #Response curves #
+     if(Model!="maxlike") response.curves(out,Model)
 
      assign("out",out,envir=.GlobalEnv)
 
@@ -159,16 +160,15 @@ set.seed(as.numeric(out$input$seed))
           t4 <- unclass(Sys.time())
           cat("\nfinished with final model summarization, t=",round(t4-t3,2),"sec\n");flush.console()
          cat("Progress:80%\n");flush.console()
-      
+    
     # Make .tif of predictions #
     if(out$input$make.p.tif==T | out$input$make.binary.tif==T){
         if((n.var <- out$mods$n.vars.final)<1){
             stop("Error producing geotiff output:  null model selected by stepwise procedure - pointless to make maps")
             } else {
             cat("\nproducing prediction maps...","\n","\n");flush.console()
-
                               proc.tiff(model=out$mods$final.mod,vnames=names(out$dat$ma$train$dat)[-1],
-                tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=pred.fct,factor.levels=out$dat$factor.levels,make.binary.tif=make.binary.tif,
+                tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,factor.levels=out$dat$factor.levels,make.binary.tif=make.binary.tif,
                 thresh=out$mods$auc.output$thresh,make.p.tif=make.p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
                 outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50.0,NAval=-3000,
                 fnames=out$dat$tif.names,out=out,Model=Model)
@@ -192,4 +192,4 @@ set.seed(as.numeric(out$input$seed))
     cat("Progress:100%\n");flush.console()
     if(debug.mode) assign("fit",out$mods$final.mod,envir=.GlobalEnv)
     invisible(out)
-    }
+}

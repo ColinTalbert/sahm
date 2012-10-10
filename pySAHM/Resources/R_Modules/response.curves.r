@@ -43,118 +43,84 @@
 ###############################################################################
 
 response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
-
- if(cv==TRUE){ #avoid producing pdfs here we just want the values for later
-  debug.mode=FALSE
-  responseCurveForm="no"
-  }  else{
-     attach(out$input)
+      attach(out$input)
       on.exit(detach(out$input))
       bname<-out$dat$bname
-  }
-
- if(Model=="mars"){
-        if(is.null(responseCurveForm)){
-           responseCurveForm<-0}
-
-          if(debug.mode | responseCurveForm=="pdf"){
-
-            nvar <- nrow(out$mods$summary)
+  
+      if(Model%in%c("brt","mars","rf"))  nvar <- nrow(out$mods$summary)
+      if(Model=="glm")              nvar <- out$mods$n.vars.final-length(grep(":", attr(terms(formula(out$mods$final.mod[[1]])),"term.labels")))
+               
             pcol <- min(ceiling(sqrt(nvar)),4)
             prow <- min(ceiling(nvar/pcol),3)
-
-            r.curves <- mars.plot(out$mods$final.mod,plot.layout=c(prow,pcol),file.name=paste(bname,"_response_curves.pdf",sep=""))
-
-             } else r.curves<-mars.plot(out$mods$final.mod,plot.it=F)
-     }
-
- if(Model=="glm") {if(debug.mode | responseCurveForm=="pdf"){
-        nvar <- length(coef(out$mods$final.mod))-1
-        pcol <- min(ceiling(sqrt(nvar)),4)
-        prow <- min(ceiling(nvar/pcol),3)
-                    term=seq(1:(length(coef(out$mods$final.mod))-1))
-                  if(length(grep(":", names(coef(out$mods$final.mod))))>0) term<-term[-c((grep(":", names(coef(out$mods$final.mod)))-1))]
-        pdf(paste(bname,"_response_curves.pdf",sep=""),width=11,height=8.5,onefile=T)
-        #svg(paste(bname,"_response_curves.svg",sep=""),width=11,height=8.5,onefile=T)
-            par(oma=c(2,2,4,2),mfrow=c(prow,pcol))
-            r.curves <-my.termplot(out$mods$final.mod,plot.it=T,terms=term,rug=TRUE)
-            mtext(paste("GLM response curves for",basename(ma.name)),outer=T,side=3,cex=1.3)
-           ################### New work
-           #starting by just looking at one element of the list later use an lapply
-           # if(!is.null(out$cv$resp.curves))
-            #        for(i in 1:length(r.curves$names)){
-            #              plot(r.curves$pred[[i]],r.curves$resp[[i]],type="l")
-             #             for(j in 1:length(out$cv$resp)){
-              #             indx<-na.omit(match(r.curves$names[i],names(out$cv$resp[[i]]$pred)))
-              #             lines(out$cv$resp.curves[[j]]$pred[indx][[1]],out$cv$resp.curves[[j]]$resp[indx][[1]],col="grey",lty="dotdash")
-               #            }
-               #          lines(r.curves$pred[[i]],r.curves$resp[[i]],type="l",col="red",lwd=2)
-                #           }
-
-
-                     # plot(r.curves$pred[1][[1]], r.curves$resp[1][[1]])
-                    #      points(out$cv$resp.curves$"1"$pred[1][[1]][1],out$cv$resp.curves$"1"$resp[1][[1]][1])
-
-           #############################
-            par(mfrow=c(1,1))
-            graphics.off()
-        } else r.curves<-my.termplot(out$mods$final.mod,plot.it=F)
-
-     }
-if(Model=="rf"){
-
-                r.curves <- list(names=row.names(out$mods$summary),preds=list(),resp=list())
-                inc <- 10/length(r.curves$names)
-                assign("r.curves",r.curves,envir=.GlobalEnv)
-
-            if(is.null(responseCurveForm)){
-              responseCurveForm<-0}
-
-         if(debug.mode | responseCurveForm=="pdf"){
-                    nvar <- nrow(out$mods$summary)
-                    pcol <- min(ceiling(sqrt(nvar)),4)
-                    prow <- min(ceiling(nvar/pcol),3)
-                    pdf(paste(bname,"_response_curves.pdf",sep=""),width=11,height=8.5,onefile=T)
-                    par(oma=c(2,2,4,2),mfrow=c(prow,pcol))
-                    }
-                for(i in 1:length(r.curves$names)){
-                        assign("i",i,envir=.GlobalEnv)
-                                x<-partialPlot(out$mods$final.mod,out$dat$Subset$dat,r.curves$names[i],n.pt=50,plot=T,main="",
-                                        xlab=r.curves$names[i])
-                            r.curves$preds[[i]] <- x$x
-                            r.curves$resp[[i]] <- x$y
-                        cat(paste("Progress:",round(70+i*inc,1),"%\n",sep=""));flush.console()  ### print time
-                        }
-                if(debug.mode) graphics.off()
-
-
-    }
-if(Model=="brt"){
-        if(is.null(responseCurveForm)){
-        responseCurveForm<-0}
-
-        if(debug.mode | responseCurveForm=="pdf"){
-            nvar <- nrow(out$mods$final.mod$contributions)
-            pcol <- min(ceiling(sqrt(nvar)),4)
-            prow <- min(ceiling(nvar/pcol),3)
-
-            pdf(paste(bname,"_response_curves.pdf",sep=""),width=11,height=8.5,onefile=T)
-                par(oma=c(2,2,4,2))
-                out$mods$r.curves <- gbm.plot(out$mods$final.mod,plotit=T,plot.layout=c(prow,pcol))
-                mtext(paste("BRT response curves for",basename(ma.name)),outer=T,side=3,cex=1.3)
-
-                par(mfrow=c(1,1))
-                #for(i in 1:min(nrow(int),2)) gbm.perspec(fit,int$var1.index[i],int$var2.index[i])
-                if(!is.null(out$mods$interactions)){
-                    for(i in 1:nrow(out$mods$interactions)) {gbm.perspec(out$mods$final.mod,out$mods$interactions$v1[i],out$mods$interactions$v2[i])
-                    mtext(paste("BRT interaction plots for",basename(ma.name)),outer=T,side=3,cex=1.5) }
-                    }
-            graphics.off()
-            } else {
-                r.curves <- gbm.plot(out$mods$final.mod,plotit=F)
+      
+                     
+        #this little section is borrowed from BIOMOD because rf partial plot 
+        #does something odd with the y axis
+        dat<-out$dat$ma$train$dat[,-1]
+        Xp <- as.data.frame(matrix(NA, nc = ncol(dat), nr = nrow(dat),
+        dimnames = list(NULL, colnames(dat))))
+        for (i in 1:ncol(dat)) {
+            if (is.numeric(dat[, i])) {
+                Xp[, i] <- mean(dat[, i])
+            }
+            else {
+                Xp[, i] <- as.factor(rep(names(which.max(summary(dat[,
+                    i]))), nrow(dat)))
+                levels(Xp[, i]) <- levels(dat[, i])
             }
     }
-    if(cv==FALSE) r.curves<-NULL
-    return(r.curves)
-    
-}
+     dir.create(paste(out$input$output.dir,"\\responseCurves",sep=""))
+      for (k in c(1,2)){
+          if(k==1){ jpeg(paste(out$input$output.dir,"\\responseCurves\\","all_response_curves.jpg",sep=""),width=480,height=480)
+                    par(oma=c(2,2,4,2),mfrow=c(prow,pcol))}                   
+         for (i in sort(match(out$mods$vnames,names(dat)))) {
+                if (k==2) jpeg(filename=paste(out$input$output.dir,"\\responseCurves\\",names(dat)[i],".jpg",sep=""))
+                if (!is.factor(dat[, i])) {
+                    xr <- range(dat[, i])
+                    Xp1 <- Xp
+                    Xp1[, i] <- seq(xr[1], xr[2], len = nrow(dat))
+                }
+                else {
+                    Xp1 <- Xp
+                    Nrepcat <- floor(nrow(dat)/length(levels(dat[,
+                      i])))
+                    Xp1[, i] <- as.factor(c(rep(levels(dat[, i])[1],
+                      nrow(dat) - (Nrepcat * length(levels(dat[,
+                        i])))), rep(levels(dat[, i]), each = Nrepcat)))
+                }
+                Xf<-matrix(nrow=nrow(Xp1),ncol=length(out$mods$final.mod))
+                for(j in 1:length(out$mods$final.mod)){
+                      Xf[,j] <- pred.fct(out$mods$final.mod[[j]], as.data.frame(Xp1),Model)
+                 }
+                      y.lim<-c(0,1)
+                     y.lim=range(apply(Xf,1,mean))
+                       plot(Xp1[, i],apply(Xf,1,mean), ylim = y.lim, xlab = "",
+                      ylab = "", type = "l", main = names(dat)[i])
+               if(k==2) graphics.off()              
+               } 
+         if(k==1) graphics.off()     
+       }         
+  }         
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+      
