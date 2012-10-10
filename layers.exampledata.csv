@@ -1,6 +1,11 @@
 FileName,LayerName,Group,Source,Categorical
-..\examples\SAHM_example\PredictorLayers\Climate\DAYMET_WGS84\bio_1_wgs84.tif,Annual mean temperature,Climate,"Daymet (1980-1997) Normals, 1km.",N
-..\examples\SAHM_example\PredictorLayers\Climate\DAYMET_WGS84\bio_2_wgs84.tif,Mean diurnal range,Climate,"Daymet (1980-1997) Normals, 1km.",N
-..\examples\SAHM_example\PredictorLayers\Climate\PRISM\ppt_1971_2000_011.img,Average Jan. Precipitation,Climate,"PRISM (1971-2000) Normals, 800 m.",N
-..\examples\SAHM_example\PredictorLayers\NLCD\nlcd01_11.tif,NLCD Landcover,Remote Sensing,NLCD,Y
-..\examples\SAHM_example\PredictorLayers\Elevation\dem.tif,30m EDNA Elevation resampled to 90m,Elevation / Topography,"EDNA, NED",N
+..\examples\SAHM_example\CovariateLayers\bio_03_1971_2000_800m.img,Isothermality,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+..\examples\SAHM_example\CovariateLayers\bio_05_1971_2000_800m.img,Max. temperature of warmest month,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+..\examples\SAHM_example\CovariateLayers\bio_06_1971_2000_800m.img,Min. temperature of coldest month,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+..\examples\SAHM_example\CovariateLayers\bio_07_1971_2000_800m.img,Temperature annual range,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+..\examples\SAHM_example\CovariateLayers\bio_15_1971_2000_800m.img,Precipitation seasonality,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+..\examples\SAHM_example\CovariateLayers\bio_17_1971_2000_800m.img,Precipitation of driest quarter,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+..\examples\SAHM_example\CovariateLayers\bio_18_1971_2000_800m.img,Precipitiation of warmest quarter,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+..\examples\SAHM_example\CovariateLayers\NDVI_amplitudes1_Average.tif,NDVI_amplitudes1_Average,MODIS Phenology,NDVI (230 m),N
+..\examples\SAHM_example\CovariateLayers\NDVI_annualMeanValue_Average.tif,NDVI_annualMeanValue_Average,MODIS Phenology,NDVI (230 m),N
+..\examples\SAHM_example\CovariateLayers\NDVI_seasonlengths1_Average.tif,NDVI_seasonlengths1_Average,MODIS Phenology,NDVI (230 m),N

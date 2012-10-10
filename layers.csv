@@ -763,400 +763,476 @@ K:\GIS_LIBRARY\Elevation\EDNA\cti\cti,DEM Derivative: CTI/Steady State Wetness,H
 \\IGSKBACBVMFS002\InvasivesNAS$\Phenology Share\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals2\EVI_smallintegrals2_2008.tif,smallintegrals2_2008,MODIS Phenology,EVI (230 m),N
 \\IGSKBACBVMFS002\InvasivesNAS$\Phenology Share\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals2\EVI_smallintegrals2_2009.tif,smallintegrals2_2009,MODIS Phenology,EVI (230 m),N
 \\IGSKBACBVMFS002\InvasivesNAS$\Phenology Share\FinalMosaics_WGS84Sinusoidal\MOD09Q1P_EVI\smallintegrals2\EVI_smallintegrals2_Average.tif,smallintegrals2_Average,MODIS Phenology,EVI (230 m),N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_01.img,Average Jan. Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_02.img,Average Feb. Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_03.img,Average March Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_04.img,Average April Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_05.img,Average May Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_06.img,Average June Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_07.img,Average July Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_08.img,Average Aug. Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_09.img,Average Sept. Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_10.img,Average Oct. Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_11.img,Average Nov. Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\ppt_1971_2000_12.img,Average Dec. Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_01.img,Average Jan. Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_02.img,Average Feb. Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_03.img,Average March Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_04.img,Average April Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_05.img,Average May Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_06.img,Average June Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_07.img,Average July Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_08.img,Average Aug. Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_09.img,Average Sept. Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_10.img,Average Oct. Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_11.img,Average Nov. Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmax_1971_2000_12.img,Average Dec. Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_01.img,Average Jan. Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_02.img,Average Feb. Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_03.img,Average March Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_04.img,Average April Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_05.img,Average May Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_06.img,Average June Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_07.img,Average July Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_08.img,Average Aug. Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_09.img,Average Sept. Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_10.img,Average Oct. Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_11.img,Average Nov. Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\Input_1971_2000\tmin_1971_2000_12.img,Average Dec. Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_01_1971_2000.img,Annual mean temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_02_1971_2000.img,Mean diurnal range,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_03_1971_2000.img,Isothermality,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_04_1971_2000.img,Temperature seasonality,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_05_1971_2000.img,Max. temperature of warmest month,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_06_1971_2000.img,Min. temperature of coldest month,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_07_1971_2000.img,Temperature annual range,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_08_1971_2000.img,Mean temperature of wettest quarter,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_09_1971_2000.img,Mean temperature of driest quarter,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_10_1971_2000.img,Mean temperature of warmest quarter,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_11_1971_2000.img,Mean temperature of coldest quarter,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_12_1971_2000.img,Annual precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_13_1971_2000.img,Precipitation of wettest month,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_14_1971_2000.img,Precipitation of driest month,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_15_1971_2000.img,Precipitation seasonality,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_16_1971_2000.img,Precipitation of wettest quarter,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_17_1971_2000.img,Precipitation of driest quarter,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_18_1971_2000.img,Precipitiation of warmest quarter,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_Normal_1971_2000_800m\BioClim_1971_2000\bio_19_1971_2000.img,Precipitation of coldest quarter,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2000\bio_01_2000.img,Annual mean temperature,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2000\bio_02_2000.img,Mean diurnal range,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2000\bio_03_2000.img,Isothermality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2000\bio_04_2000.img,Temperature seasonality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2000\bio_05_2000.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2000\bio_06_2000.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2000\bio_07_2000.img,Temperature annual range,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2000\bio_08_2000.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2000\bio_09_2000.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2000\bio_10_2000.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2000\bio_11_2000.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2000\bio_12_2000.img,Annual precipitation,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2000\bio_13_2000.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2000\bio_14_2000.img,Precipitation of driest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2000\bio_15_2000.img,Precipitation seasonality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2000\bio_16_2000.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2000\bio_17_2000.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2000\bio_18_2000.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2000\bio_19_2000.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2001\bio_01_2001.img,Annual mean temperature,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2001\bio_02_2001.img,Mean diurnal range,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2001\bio_03_2001.img,Isothermality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2001\bio_04_2001.img,Temperature seasonality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2001\bio_05_2001.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2001\bio_06_2001.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2001\bio_07_2001.img,Temperature annual range,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2001\bio_08_2001.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2001\bio_09_2001.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2001\bio_10_2001.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2001\bio_11_2001.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2001\bio_12_2001.img,Annual precipitation,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2001\bio_13_2001.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2001\bio_14_2001.img,Precipitation of driest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2001\bio_15_2001.img,Precipitation seasonality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2001\bio_16_2001.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2001\bio_17_2001.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2001\bio_18_2001.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2001\bio_19_2001.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2002\bio_01_2002.img,Annual mean temperature,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2002\bio_02_2002.img,Mean diurnal range,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2002\bio_03_2002.img,Isothermality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2002\bio_04_2002.img,Temperature seasonality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2002\bio_05_2002.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2002\bio_06_2002.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2002\bio_07_2002.img,Temperature annual range,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2002\bio_08_2002.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2002\bio_09_2002.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2002\bio_10_2002.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2002\bio_11_2002.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2002\bio_12_2002.img,Annual precipitation,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2002\bio_13_2002.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2002\bio_14_2002.img,Precipitation of driest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2002\bio_15_2002.img,Precipitation seasonality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2002\bio_16_2002.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2002\bio_17_2002.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2002\bio_18_2002.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2002\bio_19_2002.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2003\bio_01_2003.img,Annual mean temperature,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2003\bio_02_2003.img,Mean diurnal range,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2003\bio_03_2003.img,Isothermality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2003\bio_04_2003.img,Temperature seasonality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2003\bio_05_2003.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2003\bio_06_2003.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2003\bio_07_2003.img,Temperature annual range,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2003\bio_08_2003.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2003\bio_09_2003.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2003\bio_10_2003.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2003\bio_11_2003.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2003\bio_12_2003.img,Annual precipitation,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2003\bio_13_2003.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2003\bio_14_2003.img,Precipitation of driest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2003\bio_15_2003.img,Precipitation seasonality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2003\bio_16_2003.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2003\bio_17_2003.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2003\bio_18_2003.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2003\bio_19_2003.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2004\bio_01_2004.img,Annual mean temperature,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2004\bio_02_2004.img,Mean diurnal range,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2004\bio_03_2004.img,Isothermality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2004\bio_04_2004.img,Temperature seasonality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2004\bio_05_2004.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2004\bio_06_2004.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2004\bio_07_2004.img,Temperature annual range,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2004\bio_08_2004.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2004\bio_09_2004.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2004\bio_10_2004.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2004\bio_11_2004.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2004\bio_12_2004.img,Annual precipitation,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2004\bio_13_2004.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2004\bio_14_2004.img,Precipitation of driest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2004\bio_15_2004.img,Precipitation seasonality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2004\bio_16_2004.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2004\bio_17_2004.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2004\bio_18_2004.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2004\bio_19_2004.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2005\bio_01_2005.img,Annual mean temperature,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2005\bio_02_2005.img,Mean diurnal range,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2005\bio_03_2005.img,Isothermality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2005\bio_04_2005.img,Temperature seasonality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2005\bio_05_2005.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2005\bio_06_2005.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2005\bio_07_2005.img,Temperature annual range,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2005\bio_08_2005.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2005\bio_09_2005.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2005\bio_10_2005.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2005\bio_11_2005.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2005\bio_12_2005.img,Annual precipitation,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2005\bio_13_2005.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2005\bio_14_2005.img,Precipitation of driest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2005\bio_15_2005.img,Precipitation seasonality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2005\bio_16_2005.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2005\bio_17_2005.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2005\bio_18_2005.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2005\bio_19_2005.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2006\bio_01_2006.img,Annual mean temperature,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2006\bio_02_2006.img,Mean diurnal range,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2006\bio_03_2006.img,Isothermality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2006\bio_04_2006.img,Temperature seasonality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2006\bio_05_2006.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2006\bio_06_2006.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2006\bio_07_2006.img,Temperature annual range,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2006\bio_08_2006.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2006\bio_09_2006.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2006\bio_10_2006.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2006\bio_11_2006.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2006\bio_12_2006.img,Annual precipitation,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2006\bio_13_2006.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2006\bio_14_2006.img,Precipitation of driest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2006\bio_15_2006.img,Precipitation seasonality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2006\bio_16_2006.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2006\bio_17_2006.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2006\bio_18_2006.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2006\bio_19_2006.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2007\bio_01_2007.img,Annual mean temperature,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2007\bio_02_2007.img,Mean diurnal range,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2007\bio_03_2007.img,Isothermality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2007\bio_04_2007.img,Temperature seasonality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2007\bio_05_2007.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2007\bio_06_2007.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2007\bio_07_2007.img,Temperature annual range,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2007\bio_08_2007.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2007\bio_09_2007.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2007\bio_10_2007.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2007\bio_11_2007.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2007\bio_12_2007.img,Annual precipitation,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2007\bio_13_2007.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2007\bio_14_2007.img,Precipitation of driest month,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2007\bio_15_2007.img,Precipitation seasonality,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2007\bio_16_2007.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2007\bio_17_2007.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2007\bio_18_2007.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\OregonStateUniversity_TimeSeries_1895_2008_4km\BioClim_1895_2008\BioClim_2007\bio_19_2007.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2000\bio_01_2000.img,Annual mean temperature,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2000\bio_02_2000.img,Mean diurnal range,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2000\bio_03_2000.img,Isothermality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2000\bio_04_2000.img,Temperature seasonality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2000\bio_05_2000.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2000\bio_06_2000.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2000\bio_07_2000.img,Temperature annual range,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2000\bio_08_2000.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2000\bio_09_2000.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2000\bio_10_2000.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2000\bio_11_2000.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2000\bio_12_2000.img,Annual precipitation,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2000\bio_13_2000.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2000\bio_14_2000.img,Precipitation of driest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2000\bio_15_2000.img,Precipitation seasonality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2000\bio_16_2000.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2000\bio_17_2000.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2000\bio_18_2000.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2000\bio_19_2000.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2001\bio_01_2001.img,Annual mean temperature,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2001\bio_02_2001.img,Mean diurnal range,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2001\bio_03_2001.img,Isothermality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2001\bio_04_2001.img,Temperature seasonality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2001\bio_05_2001.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2001\bio_06_2001.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2001\bio_07_2001.img,Temperature annual range,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2001\bio_08_2001.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2001\bio_09_2001.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2001\bio_10_2001.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2001\bio_11_2001.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2001\bio_12_2001.img,Annual precipitation,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2001\bio_13_2001.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2001\bio_14_2001.img,Precipitation of driest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2001\bio_15_2001.img,Precipitation seasonality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2001\bio_16_2001.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2001\bio_17_2001.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2001\bio_18_2001.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2001\bio_19_2001.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2002\bio_01_2002.img,Annual mean temperature,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2002\bio_02_2002.img,Mean diurnal range,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2002\bio_03_2002.img,Isothermality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2002\bio_04_2002.img,Temperature seasonality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2002\bio_05_2002.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2002\bio_06_2002.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2002\bio_07_2002.img,Temperature annual range,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2002\bio_08_2002.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2002\bio_09_2002.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2002\bio_10_2002.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2002\bio_11_2002.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2002\bio_12_2002.img,Annual precipitation,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2002\bio_13_2002.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2002\bio_14_2002.img,Precipitation of driest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2002\bio_15_2002.img,Precipitation seasonality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2002\bio_16_2002.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2002\bio_17_2002.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2002\bio_18_2002.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2002\bio_19_2002.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2003\bio_01_2003.img,Annual mean temperature,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2003\bio_02_2003.img,Mean diurnal range,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2003\bio_03_2003.img,Isothermality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2003\bio_04_2003.img,Temperature seasonality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2003\bio_05_2003.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2003\bio_06_2003.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2003\bio_07_2003.img,Temperature annual range,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2003\bio_08_2003.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2003\bio_09_2003.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2003\bio_10_2003.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2003\bio_11_2003.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2003\bio_12_2003.img,Annual precipitation,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2003\bio_13_2003.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2003\bio_14_2003.img,Precipitation of driest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2003\bio_15_2003.img,Precipitation seasonality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2003\bio_16_2003.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2003\bio_17_2003.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2003\bio_18_2003.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2003\bio_19_2003.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2004\bio_01_2004.img,Annual mean temperature,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2004\bio_02_2004.img,Mean diurnal range,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2004\bio_03_2004.img,Isothermality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2004\bio_04_2004.img,Temperature seasonality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2004\bio_05_2004.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2004\bio_06_2004.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2004\bio_07_2004.img,Temperature annual range,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2004\bio_08_2004.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2004\bio_09_2004.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2004\bio_10_2004.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2004\bio_11_2004.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2004\bio_12_2004.img,Annual precipitation,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2004\bio_13_2004.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2004\bio_14_2004.img,Precipitation of driest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2004\bio_15_2004.img,Precipitation seasonality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2004\bio_16_2004.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2004\bio_17_2004.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2004\bio_18_2004.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2004\bio_19_2004.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2005\bio_01_2005.img,Annual mean temperature,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2005\bio_02_2005.img,Mean diurnal range,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2005\bio_03_2005.img,Isothermality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2005\bio_04_2005.img,Temperature seasonality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2005\bio_05_2005.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2005\bio_06_2005.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2005\bio_07_2005.img,Temperature annual range,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2005\bio_08_2005.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2005\bio_09_2005.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2005\bio_10_2005.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2005\bio_11_2005.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2005\bio_12_2005.img,Annual precipitation,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2005\bio_13_2005.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2005\bio_14_2005.img,Precipitation of driest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2005\bio_15_2005.img,Precipitation seasonality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2005\bio_16_2005.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2005\bio_17_2005.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2005\bio_18_2005.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2005\bio_19_2005.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2006\bio_01_2006.img,Annual mean temperature,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2006\bio_02_2006.img,Mean diurnal range,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2006\bio_03_2006.img,Isothermality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2006\bio_04_2006.img,Temperature seasonality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2006\bio_05_2006.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2006\bio_06_2006.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2006\bio_07_2006.img,Temperature annual range,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2006\bio_08_2006.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2006\bio_09_2006.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2006\bio_10_2006.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2006\bio_11_2006.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2006\bio_12_2006.img,Annual precipitation,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2006\bio_13_2006.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2006\bio_14_2006.img,Precipitation of driest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2006\bio_15_2006.img,Precipitation seasonality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2006\bio_16_2006.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2006\bio_17_2006.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2006\bio_18_2006.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2006\bio_19_2006.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2007\bio_01_2007.img,Annual mean temperature,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2007\bio_02_2007.img,Mean diurnal range,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2007\bio_03_2007.img,Isothermality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2007\bio_04_2007.img,Temperature seasonality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2007\bio_05_2007.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2007\bio_06_2007.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2007\bio_07_2007.img,Temperature annual range,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2007\bio_08_2007.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2007\bio_09_2007.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2007\bio_10_2007.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2007\bio_11_2007.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2007\bio_12_2007.img,Annual precipitation,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2007\bio_13_2007.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2007\bio_14_2007.img,Precipitation of driest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2007\bio_15_2007.img,Precipitation seasonality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2007\bio_16_2007.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2007\bio_17_2007.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2007\bio_18_2007.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2007\bio_19_2007.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2008\bio_01_2008.img,Annual mean temperature,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2008\bio_02_2008.img,Mean diurnal range,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2008\bio_03_2008.img,Isothermality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2008\bio_04_2008.img,Temperature seasonality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2008\bio_05_2008.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2008\bio_06_2008.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2008\bio_07_2008.img,Temperature annual range,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2008\bio_08_2008.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2008\bio_09_2008.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2008\bio_10_2008.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2008\bio_11_2008.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2008\bio_12_2008.img,Annual precipitation,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2008\bio_13_2008.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2008\bio_14_2008.img,Precipitation of driest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2008\bio_15_2008.img,Precipitation seasonality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2008\bio_16_2008.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2008\bio_17_2008.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2008\bio_18_2008.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2008\bio_19_2008.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2009\bio_01_2009.img,Annual mean temperature,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2009\bio_02_2009.img,Mean diurnal range,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2009\bio_03_2009.img,Isothermality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2009\bio_04_2009.img,Temperature seasonality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2009\bio_05_2009.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2009\bio_06_2009.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2009\bio_07_2009.img,Temperature annual range,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2009\bio_08_2009.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2009\bio_09_2009.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2009\bio_10_2009.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2009\bio_11_2009.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2009\bio_12_2009.img,Annual precipitation,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2009\bio_13_2009.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2009\bio_14_2009.img,Precipitation of driest month,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2009\bio_15_2009.img,Precipitation seasonality,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2009\bio_16_2009.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2009\bio_17_2009.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2009\bio_18_2009.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
-K:\GIS_LIBRARY\Climate\PRISM\ClimateSource_TimeSeries_1980_2009_2km\BioClim_1980_2009\BioClim_2009\bio_19_2009.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\ppt_1971_2000_01_800m.img,Average Jan. Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\ppt_1971_2000_02_800m.img,Average Feb. Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\ppt_1971_2000_03_800m.img,Average March Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\ppt_1971_2000_04_800m.img,Average April Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\ppt_1971_2000_05_800m.img,Average May Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\ppt_1971_2000_06_800m.img,Average June Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\ppt_1971_2000_07_800m.img,Average July Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\ppt_1971_2000_08_800m.img,Average Aug. Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\ppt_1971_2000_09_800m.img,Average Sept. Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\ppt_1971_2000_10_800m.img,Average Oct. Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\ppt_1971_2000_11_800m.img,Average Nov. Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\ppt_1971_2000_12_800m.img,Average Dec. Precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmax_1971_2000_01_800m.img,Average Jan. Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmax_1971_2000_02_800m.img,Average Feb. Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmax_1971_2000_03_800m.img,Average March Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmax_1971_2000_04_800m.img,Average April Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmax_1971_2000_05_800m.img,Average May Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmax_1971_2000_06_800m.img,Average June Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmax_1971_2000_07_800m.img,Average July Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmax_1971_2000_08_800m.img,Average Aug. Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmax_1971_2000_09_800m.img,Average Sept. Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmax_1971_2000_10_800m.img,Average Oct. Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmax_1971_2000_11_800m.img,Average Nov. Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmax_1971_2000_12_800m.img,Average Dec. Max. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmin_1971_2000_01_800m.img,Average Jan. Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmin_1971_2000_02_800m.img,Average Feb. Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmin_1971_2000_03_800m.img,Average March Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmin_1971_2000_04_800m.img,Average April Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmin_1971_2000_05_800m.img,Average May Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmin_1971_2000_06_800m.img,Average June Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmin_1971_2000_07_800m.img,Average July Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmin_1971_2000_08_800m.img,Average Aug. Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmin_1971_2000_09_800m.img,Average Sept. Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmin_1971_2000_10_800m.img,Average Oct. Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmin_1971_2000_11_800m.img,Average Nov. Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\Input_1971_2000\tmin_1971_2000_12_800m.img,Average Dec. Min. Temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\BioClim_1971_2000\bio_01_1971_2000_800m.img,Annual mean temperature,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\BioClim_1971_2000\bio_02_1971_2000_800m.img,Mean diurnal range,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\BioClim_1971_2000\bio_03_1971_2000_800m.img,Isothermality,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\BioClim_1971_2000\bio_04_1971_2000_800m.img,Temperature seasonality,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\BioClim_1971_2000\bio_05_1971_2000_800m.img,Max. temperature of warmest month,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\BioClim_1971_2000\bio_06_1971_2000_800m.img,Min. temperature of coldest month,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\BioClim_1971_2000\bio_07_1971_2000_800m.img,Temperature annual range,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\BioClim_1971_2000\bio_08_1971_2000_800m.img,Mean temperature of wettest quarter,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\BioClim_1971_2000\bio_09_1971_2000_800m.img,Mean temperature of driest quarter,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\BioClim_1971_2000\bio_10_1971_2000_800m.img,Mean temperature of warmest quarter,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\BioClim_1971_2000\bio_11_1971_2000_800m.img,Mean temperature of coldest quarter,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\BioClim_1971_2000\bio_12_1971_2000_800m.img,Annual precipitation,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\BioClim_1971_2000\bio_13_1971_2000_800m.img,Precipitation of wettest month,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\BioClim_1971_2000\bio_14_1971_2000_800m.img,Precipitation of driest month,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\BioClim_1971_2000\bio_15_1971_2000_800m.img,Precipitation seasonality,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\BioClim_1971_2000\bio_16_1971_2000_800m.img,Precipitation of wettest quarter,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\BioClim_1971_2000\bio_17_1971_2000_800m.img,Precipitation of driest quarter,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\BioClim_1971_2000\bio_18_1971_2000_800m.img,Precipitiation of warmest quarter,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_Normals_1971_2000_800m\BioClim_1971_2000\bio_19_1971_2000_800m.img,Precipitation of coldest quarter,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_400m\BioClim_1971_2000\bio_01_1971_2000_400m.img,Annual mean temperature,PRISM,"PRISM (1971-2000) Normals, 400 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_400m\BioClim_1971_2000\bio_02_1971_2000_400m.img,Mean diurnal range,PRISM,"PRISM (1971-2000) Normals, 400 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_400m\BioClim_1971_2000\bio_03_1971_2000_400m.img,Isothermality,PRISM,"PRISM (1971-2000) Normals, 400 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_400m\BioClim_1971_2000\bio_04_1971_2000_400m.img,Temperature seasonality,PRISM,"PRISM (1971-2000) Normals, 400 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_400m\BioClim_1971_2000\bio_05_1971_2000_400m.img,Max. temperature of warmest month,PRISM,"PRISM (1971-2000) Normals, 400 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_400m\BioClim_1971_2000\bio_06_1971_2000_400m.img,Min. temperature of coldest month,PRISM,"PRISM (1971-2000) Normals, 400 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_400m\BioClim_1971_2000\bio_07_1971_2000_400m.img,Temperature annual range,PRISM,"PRISM (1971-2000) Normals, 400 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_400m\BioClim_1971_2000\bio_08_1971_2000_400m.img,Mean temperature of wettest quarter,PRISM,"PRISM (1971-2000) Normals, 400 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_400m\BioClim_1971_2000\bio_09_1971_2000_400m.img,Mean temperature of driest quarter,PRISM,"PRISM (1971-2000) Normals, 400 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_400m\BioClim_1971_2000\bio_10_1971_2000_400m.img,Mean temperature of warmest quarter,PRISM,"PRISM (1971-2000) Normals, 400 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_400m\BioClim_1971_2000\bio_11_1971_2000_400m.img,Mean temperature of coldest quarter,PRISM,"PRISM (1971-2000) Normals, 400 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_400m\BioClim_1971_2000\bio_12_1971_2000_400m.img,Annual precipitation,PRISM,"PRISM (1971-2000) Normals, 400 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_400m\BioClim_1971_2000\bio_13_1971_2000_400m.img,Precipitation of wettest month,PRISM,"PRISM (1971-2000) Normals, 400 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_400m\BioClim_1971_2000\bio_14_1971_2000_400m.img,Precipitation of driest month,PRISM,"PRISM (1971-2000) Normals, 400 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_400m\BioClim_1971_2000\bio_15_1971_2000_400m.img,Precipitation seasonality,PRISM,"PRISM (1971-2000) Normals, 400 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_400m\BioClim_1971_2000\bio_16_1971_2000_400m.img,Precipitation of wettest quarter,PRISM,"PRISM (1971-2000) Normals, 400 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_400m\BioClim_1971_2000\bio_17_1971_2000_400m.img,Precipitation of driest quarter,PRISM,"PRISM (1971-2000) Normals, 400 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_400m\BioClim_1971_2000\bio_18_1971_2000_400m.img,Precipitiation of warmest quarter,PRISM,"PRISM (1971-2000) Normals, 400 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_400m\BioClim_1971_2000\bio_19_1971_2000_400m.img,Precipitation of coldest quarter,PRISM,"PRISM (1971-2000) Normals, 400 m.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2000\bio_01_2000_4km.img,Annual mean temperature,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2000\bio_02_2000_4km.img,Mean diurnal range,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2000\bio_03_2000_4km.img,Isothermality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2000\bio_04_2000_4km.img,Temperature seasonality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2000\bio_05_2000_4km.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2000\bio_06_2000_4km.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2000\bio_07_2000_4km.img,Temperature annual range,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2000\bio_08_2000_4km.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2000\bio_09_2000_4km.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2000\bio_10_2000_4km.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2000\bio_11_2000_4km.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2000\bio_12_2000_4km.img,Annual precipitation,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2000\bio_13_2000_4km.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2000\bio_14_2000_4km.img,Precipitation of driest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2000\bio_15_2000_4km.img,Precipitation seasonality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2000\bio_16_2000_4km.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2000\bio_17_2000_4km.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2000\bio_18_2000_4km.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2000\bio_19_2000_4km.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2001\bio_01_2001_4km.img,Annual mean temperature,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2001\bio_02_2001_4km.img,Mean diurnal range,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2001\bio_03_2001_4km.img,Isothermality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2001\bio_04_2001_4km.img,Temperature seasonality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2001\bio_05_2001_4km.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2001\bio_06_2001_4km.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2001\bio_07_2001_4km.img,Temperature annual range,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2001\bio_08_2001_4km.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2001\bio_09_2001_4km.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2001\bio_10_2001_4km.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2001\bio_11_2001_4km.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2001\bio_12_2001_4km.img,Annual precipitation,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2001\bio_13_2001_4km.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2001\bio_14_2001_4km.img,Precipitation of driest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2001\bio_15_2001_4km.img,Precipitation seasonality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2001\bio_16_2001_4km.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2001\bio_17_2001_4km.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2001\bio_18_2001_4km.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2001\bio_19_2001_4km.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2002\bio_01_2002_4km.img,Annual mean temperature,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2002\bio_02_2002_4km.img,Mean diurnal range,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2002\bio_03_2002_4km.img,Isothermality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2002\bio_04_2002_4km.img,Temperature seasonality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2002\bio_05_2002_4km.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2002\bio_06_2002_4km.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2002\bio_07_2002_4km.img,Temperature annual range,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2002\bio_08_2002_4km.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2002\bio_09_2002_4km.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2002\bio_10_2002_4km.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2002\bio_11_2002_4km.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2002\bio_12_2002_4km.img,Annual precipitation,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2002\bio_13_2002_4km.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2002\bio_14_2002_4km.img,Precipitation of driest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2002\bio_15_2002_4km.img,Precipitation seasonality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2002\bio_16_2002_4km.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2002\bio_17_2002_4km.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2002\bio_18_2002_4km.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2002\bio_19_2002_4km.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2003\bio_01_2003_4km.img,Annual mean temperature,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2003\bio_02_2003_4km.img,Mean diurnal range,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2003\bio_03_2003_4km.img,Isothermality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2003\bio_04_2003_4km.img,Temperature seasonality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2003\bio_05_2003_4km.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2003\bio_06_2003_4km.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2003\bio_07_2003_4km.img,Temperature annual range,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2003\bio_08_2003_4km.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2003\bio_09_2003_4km.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2003\bio_10_2003_4km.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2003\bio_11_2003_4km.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2003\bio_12_2003_4km.img,Annual precipitation,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2003\bio_13_2003_4km.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2003\bio_14_2003_4km.img,Precipitation of driest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2003\bio_15_2003_4km.img,Precipitation seasonality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2003\bio_16_2003_4km.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2003\bio_17_2003_4km.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2003\bio_18_2003_4km.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2003\bio_19_2003_4km.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2004\bio_01_2004_4km.img,Annual mean temperature,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2004\bio_02_2004_4km.img,Mean diurnal range,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2004\bio_03_2004_4km.img,Isothermality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2004\bio_04_2004_4km.img,Temperature seasonality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2004\bio_05_2004_4km.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2004\bio_06_2004_4km.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2004\bio_07_2004_4km.img,Temperature annual range,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2004\bio_08_2004_4km.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2004\bio_09_2004_4km.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2004\bio_10_2004_4km.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2004\bio_11_2004_4km.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2004\bio_12_2004_4km.img,Annual precipitation,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2004\bio_13_2004_4km.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2004\bio_14_2004_4km.img,Precipitation of driest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2004\bio_15_2004_4km.img,Precipitation seasonality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2004\bio_16_2004_4km.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2004\bio_17_2004_4km.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2004\bio_18_2004_4km.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2004\bio_19_2004_4km.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2005\bio_01_2005_4km.img,Annual mean temperature,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2005\bio_02_2005_4km.img,Mean diurnal range,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2005\bio_03_2005_4km.img,Isothermality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2005\bio_04_2005_4km.img,Temperature seasonality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2005\bio_05_2005_4km.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2005\bio_06_2005_4km.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2005\bio_07_2005_4km.img,Temperature annual range,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2005\bio_08_2005_4km.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2005\bio_09_2005_4km.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2005\bio_10_2005_4km.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2005\bio_11_2005_4km.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2005\bio_12_2005_4km.img,Annual precipitation,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2005\bio_13_2005_4km.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2005\bio_14_2005_4km.img,Precipitation of driest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2005\bio_15_2005_4km.img,Precipitation seasonality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2005\bio_16_2005_4km.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2005\bio_17_2005_4km.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2005\bio_18_2005_4km.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2005\bio_19_2005_4km.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2006\bio_01_2006_4km.img,Annual mean temperature,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2006\bio_02_2006_4km.img,Mean diurnal range,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2006\bio_03_2006_4km.img,Isothermality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2006\bio_04_2006_4km.img,Temperature seasonality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2006\bio_05_2006_4km.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2006\bio_06_2006_4km.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2006\bio_07_2006_4km.img,Temperature annual range,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2006\bio_08_2006_4km.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2006\bio_09_2006_4km.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2006\bio_10_2006_4km.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2006\bio_11_2006_4km.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2006\bio_12_2006_4km.img,Annual precipitation,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2006\bio_13_2006_4km.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2006\bio_14_2006_4km.img,Precipitation of driest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2006\bio_15_2006_4km.img,Precipitation seasonality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2006\bio_16_2006_4km.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2006\bio_17_2006_4km.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2006\bio_18_2006_4km.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2006\bio_19_2006_4km.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2007\bio_01_2007_4km.img,Annual mean temperature,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2007\bio_02_2007_4km.img,Mean diurnal range,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2007\bio_03_2007_4km.img,Isothermality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2007\bio_04_2007_4km.img,Temperature seasonality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2007\bio_05_2007_4km.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2007\bio_06_2007_4km.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2007\bio_07_2007_4km.img,Temperature annual range,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2007\bio_08_2007_4km.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2007\bio_09_2007_4km.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2007\bio_10_2007_4km.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2007\bio_11_2007_4km.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2007\bio_12_2007_4km.img,Annual precipitation,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2007\bio_13_2007_4km.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2007\bio_14_2007_4km.img,Precipitation of driest month,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2007\bio_15_2007_4km.img,Precipitation seasonality,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2007\bio_16_2007_4km.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2007\bio_17_2007_4km.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2007\bio_18_2007_4km.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\OSU_TimeSeries_1895_2008_4km\BioClim_2007\bio_19_2007_4km.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 4 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2000\bio_01_2000_2km.img,Annual mean temperature,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2000\bio_02_2000_2km.img,Mean diurnal range,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2000\bio_03_2000_2km.img,Isothermality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2000\bio_04_2000_2km.img,Temperature seasonality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2000\bio_05_2000_2km.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2000\bio_06_2000_2km.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2000\bio_07_2000_2km.img,Temperature annual range,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2000\bio_08_2000_2km.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2000\bio_09_2000_2km.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2000\bio_10_2000_2km.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2000\bio_11_2000_2km.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2000\bio_12_2000_2km.img,Annual precipitation,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2000\bio_13_2000_2km.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2000\bio_14_2000_2km.img,Precipitation of driest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2000\bio_15_2000_2km.img,Precipitation seasonality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2000\bio_16_2000_2km.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2000\bio_17_2000_2km.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2000\bio_18_2000_2km.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2000\bio_19_2000_2km.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2001\bio_01_2001_2km.img,Annual mean temperature,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2001\bio_02_2001_2km.img,Mean diurnal range,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2001\bio_03_2001_2km.img,Isothermality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2001\bio_04_2001_2km.img,Temperature seasonality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2001\bio_05_2001_2km.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2001\bio_06_2001_2km.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2001\bio_07_2001_2km.img,Temperature annual range,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2001\bio_08_2001_2km.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2001\bio_09_2001_2km.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2001\bio_10_2001_2km.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2001\bio_11_2001_2km.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2001\bio_12_2001_2km.img,Annual precipitation,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2001\bio_13_2001_2km.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2001\bio_14_2001_2km.img,Precipitation of driest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2001\bio_15_2001_2km.img,Precipitation seasonality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2001\bio_16_2001_2km.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2001\bio_17_2001_2km.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2001\bio_18_2001_2km.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2001\bio_19_2001_2km.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2002\bio_01_2002_2km.img,Annual mean temperature,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2002\bio_02_2002_2km.img,Mean diurnal range,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2002\bio_03_2002_2km.img,Isothermality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2002\bio_04_2002_2km.img,Temperature seasonality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2002\bio_05_2002_2km.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2002\bio_06_2002_2km.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2002\bio_07_2002_2km.img,Temperature annual range,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2002\bio_08_2002_2km.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2002\bio_09_2002_2km.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2002\bio_10_2002_2km.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2002\bio_11_2002_2km.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2002\bio_12_2002_2km.img,Annual precipitation,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2002\bio_13_2002_2km.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2002\bio_14_2002_2km.img,Precipitation of driest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2002\bio_15_2002_2km.img,Precipitation seasonality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2002\bio_16_2002_2km.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2002\bio_17_2002_2km.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2002\bio_18_2002_2km.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2002\bio_19_2002_2km.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2003\bio_01_2003_2km.img,Annual mean temperature,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2003\bio_02_2003_2km.img,Mean diurnal range,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2003\bio_03_2003_2km.img,Isothermality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2003\bio_04_2003_2km.img,Temperature seasonality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2003\bio_05_2003_2km.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2003\bio_06_2003_2km.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2003\bio_07_2003_2km.img,Temperature annual range,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2003\bio_08_2003_2km.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2003\bio_09_2003_2km.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2003\bio_10_2003_2km.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2003\bio_11_2003_2km.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2003\bio_12_2003_2km.img,Annual precipitation,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2003\bio_13_2003_2km.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2003\bio_14_2003_2km.img,Precipitation of driest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2003\bio_15_2003_2km.img,Precipitation seasonality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2003\bio_16_2003_2km.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2003\bio_17_2003_2km.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2003\bio_18_2003_2km.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2003\bio_19_2003_2km.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2004\bio_01_2004_2km.img,Annual mean temperature,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2004\bio_02_2004_2km.img,Mean diurnal range,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2004\bio_03_2004_2km.img,Isothermality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2004\bio_04_2004_2km.img,Temperature seasonality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2004\bio_05_2004_2km.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2004\bio_06_2004_2km.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2004\bio_07_2004_2km.img,Temperature annual range,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2004\bio_08_2004_2km.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2004\bio_09_2004_2km.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2004\bio_10_2004_2km.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2004\bio_11_2004_2km.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2004\bio_12_2004_2km.img,Annual precipitation,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2004\bio_13_2004_2km.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2004\bio_14_2004_2km.img,Precipitation of driest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2004\bio_15_2004_2km.img,Precipitation seasonality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2004\bio_16_2004_2km.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2004\bio_17_2004_2km.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2004\bio_18_2004_2km.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2004\bio_19_2004_2km.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2005\bio_01_2005_2km.img,Annual mean temperature,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2005\bio_02_2005_2km.img,Mean diurnal range,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2005\bio_03_2005_2km.img,Isothermality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2005\bio_04_2005_2km.img,Temperature seasonality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2005\bio_05_2005_2km.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2005\bio_06_2005_2km.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2005\bio_07_2005_2km.img,Temperature annual range,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2005\bio_08_2005_2km.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2005\bio_09_2005_2km.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2005\bio_10_2005_2km.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2005\bio_11_2005_2km.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2005\bio_12_2005_2km.img,Annual precipitation,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2005\bio_13_2005_2km.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2005\bio_14_2005_2km.img,Precipitation of driest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2005\bio_15_2005_2km.img,Precipitation seasonality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2005\bio_16_2005_2km.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2005\bio_17_2005_2km.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2005\bio_18_2005_2km.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2005\bio_19_2005_2km.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2006\bio_01_2006_2km.img,Annual mean temperature,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2006\bio_02_2006_2km.img,Mean diurnal range,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2006\bio_03_2006_2km.img,Isothermality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2006\bio_04_2006_2km.img,Temperature seasonality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2006\bio_05_2006_2km.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2006\bio_06_2006_2km.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2006\bio_07_2006_2km.img,Temperature annual range,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2006\bio_08_2006_2km.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2006\bio_09_2006_2km.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2006\bio_10_2006_2km.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2006\bio_11_2006_2km.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2006\bio_12_2006_2km.img,Annual precipitation,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2006\bio_13_2006_2km.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2006\bio_14_2006_2km.img,Precipitation of driest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2006\bio_15_2006_2km.img,Precipitation seasonality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2006\bio_16_2006_2km.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2006\bio_17_2006_2km.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2006\bio_18_2006_2km.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2006\bio_19_2006_2km.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2007\bio_01_2007_2km.img,Annual mean temperature,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2007\bio_02_2007_2km.img,Mean diurnal range,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2007\bio_03_2007_2km.img,Isothermality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2007\bio_04_2007_2km.img,Temperature seasonality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2007\bio_05_2007_2km.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2007\bio_06_2007_2km.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2007\bio_07_2007_2km.img,Temperature annual range,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2007\bio_08_2007_2km.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2007\bio_09_2007_2km.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2007\bio_10_2007_2km.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2007\bio_11_2007_2km.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2007\bio_12_2007_2km.img,Annual precipitation,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2007\bio_13_2007_2km.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2007\bio_14_2007_2km.img,Precipitation of driest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2007\bio_15_2007_2km.img,Precipitation seasonality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2007\bio_16_2007_2km.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2007\bio_17_2007_2km.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2007\bio_18_2007_2km.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2007\bio_19_2007_2km.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2008\bio_01_2008_2km.img,Annual mean temperature,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2008\bio_02_2008_2km.img,Mean diurnal range,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2008\bio_03_2008_2km.img,Isothermality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2008\bio_04_2008_2km.img,Temperature seasonality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2008\bio_05_2008_2km.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2008\bio_06_2008_2km.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2008\bio_07_2008_2km.img,Temperature annual range,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2008\bio_08_2008_2km.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2008\bio_09_2008_2km.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2008\bio_10_2008_2km.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2008\bio_11_2008_2km.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2008\bio_12_2008_2km.img,Annual precipitation,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2008\bio_13_2008_2km.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2008\bio_14_2008_2km.img,Precipitation of driest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2008\bio_15_2008_2km.img,Precipitation seasonality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2008\bio_16_2008_2km.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2008\bio_17_2008_2km.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2008\bio_18_2008_2km.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2008\bio_19_2008_2km.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2009\bio_01_2009_2km.img,Annual mean temperature,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2009\bio_02_2009_2km.img,Mean diurnal range,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2009\bio_03_2009_2km.img,Isothermality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2009\bio_04_2009_2km.img,Temperature seasonality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2009\bio_05_2009_2km.img,Max. temperature of warmest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2009\bio_06_2009_2km.img,Min. temperature of coldest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2009\bio_07_2009_2km.img,Temperature annual range,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2009\bio_08_2009_2km.img,Mean temperature of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2009\bio_09_2009_2km.img,Mean temperature of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2009\bio_10_2009_2km.img,Mean temperature of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2009\bio_11_2009_2km.img,Mean temperature of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2009\bio_12_2009_2km.img,Annual precipitation,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2009\bio_13_2009_2km.img,Precipitation of wettest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2009\bio_14_2009_2km.img,Precipitation of driest month,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2009\bio_15_2009_2km.img,Precipitation seasonality,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2009\bio_16_2009_2km.img,Precipitation of wettest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2009\bio_17_2009_2km.img,Precipitation of driest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2009\bio_18_2009_2km.img,Precipitiation of warmest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_TimeSeries_1971_2009_2km\BioClim_2009\bio_19_2009_2km.img,Precipitation of coldest quarter,PRISM,"PRISM Time Series, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_2km\BioClim_1971_2000\bio_01_1971_2000_2km.img,Annual mean temperature,PRISM (Custom Time Interval),"PRISM (1971-2000) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_2km\BioClim_1971_2000\bio_02_1971_2000_2km.img,Mean diurnal range,PRISM (Custom Time Interval),"PRISM (1971-2000) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_2km\BioClim_1971_2000\bio_03_1971_2000_2km.img,Isothermality,PRISM (Custom Time Interval),"PRISM (1971-2000) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_2km\BioClim_1971_2000\bio_04_1971_2000_2km.img,Temperature seasonality,PRISM (Custom Time Interval),"PRISM (1971-2000) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_2km\BioClim_1971_2000\bio_05_1971_2000_2km.img,Max. temperature of warmest month,PRISM (Custom Time Interval),"PRISM (1971-2000) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_2km\BioClim_1971_2000\bio_06_1971_2000_2km.img,Min. temperature of coldest month,PRISM (Custom Time Interval),"PRISM (1971-2000) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_2km\BioClim_1971_2000\bio_07_1971_2000_2km.img,Temperature annual range,PRISM (Custom Time Interval),"PRISM (1971-2000) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_2km\BioClim_1971_2000\bio_08_1971_2000_2km.img,Mean temperature of wettest quarter,PRISM (Custom Time Interval),"PRISM (1971-2000) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_2km\BioClim_1971_2000\bio_09_1971_2000_2km.img,Mean temperature of driest quarter,PRISM (Custom Time Interval),"PRISM (1971-2000) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_2km\BioClim_1971_2000\bio_10_1971_2000_2km.img,Mean temperature of warmest quarter,PRISM (Custom Time Interval),"PRISM (1971-2000) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_2km\BioClim_1971_2000\bio_11_1971_2000_2km.img,Mean temperature of coldest quarter,PRISM (Custom Time Interval),"PRISM (1971-2000) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_2km\BioClim_1971_2000\bio_12_1971_2000_2km.img,Annual precipitation,PRISM (Custom Time Interval),"PRISM (1971-2000) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_2km\BioClim_1971_2000\bio_13_1971_2000_2km.img,Precipitation of wettest month,PRISM (Custom Time Interval),"PRISM (1971-2000) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_2km\BioClim_1971_2000\bio_14_1971_2000_2km.img,Precipitation of driest month,PRISM (Custom Time Interval),"PRISM (1971-2000) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_2km\BioClim_1971_2000\bio_15_1971_2000_2km.img,Precipitation seasonality,PRISM (Custom Time Interval),"PRISM (1971-2000) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_2km\BioClim_1971_2000\bio_16_1971_2000_2km.img,Precipitation of wettest quarter,PRISM (Custom Time Interval),"PRISM (1971-2000) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_2km\BioClim_1971_2000\bio_17_1971_2000_2km.img,Precipitation of driest quarter,PRISM (Custom Time Interval),"PRISM (1971-2000) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_2km\BioClim_1971_2000\bio_18_1971_2000_2km.img,Precipitiation of warmest quarter,PRISM (Custom Time Interval),"PRISM (1971-2000) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1971_2000_2km\BioClim_1971_2000\bio_19_1971_2000_2km.img,Precipitation of coldest quarter,PRISM (Custom Time Interval),"PRISM (1971-2000) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1980_2009_2km\BioClim_1980_2009\bio_01_1980_2009_2km.img,Annual mean temperature,PRISM (Custom Time Interval),"PRISM (1980-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1980_2009_2km\BioClim_1980_2009\bio_02_1980_2009_2km.img,Mean diurnal range,PRISM (Custom Time Interval),"PRISM (1980-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1980_2009_2km\BioClim_1980_2009\bio_03_1980_2009_2km.img,Isothermality,PRISM (Custom Time Interval),"PRISM (1980-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1980_2009_2km\BioClim_1980_2009\bio_04_1980_2009_2km.img,Temperature seasonality,PRISM (Custom Time Interval),"PRISM (1980-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1980_2009_2km\BioClim_1980_2009\bio_05_1980_2009_2km.img,Max. temperature of warmest month,PRISM (Custom Time Interval),"PRISM (1980-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1980_2009_2km\BioClim_1980_2009\bio_06_1980_2009_2km.img,Min. temperature of coldest month,PRISM (Custom Time Interval),"PRISM (1980-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1980_2009_2km\BioClim_1980_2009\bio_07_1980_2009_2km.img,Temperature annual range,PRISM (Custom Time Interval),"PRISM (1980-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1980_2009_2km\BioClim_1980_2009\bio_08_1980_2009_2km.img,Mean temperature of wettest quarter,PRISM (Custom Time Interval),"PRISM (1980-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1980_2009_2km\BioClim_1980_2009\bio_09_1980_2009_2km.img,Mean temperature of driest quarter,PRISM (Custom Time Interval),"PRISM (1980-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1980_2009_2km\BioClim_1980_2009\bio_10_1980_2009_2km.img,Mean temperature of warmest quarter,PRISM (Custom Time Interval),"PRISM (1980-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1980_2009_2km\BioClim_1980_2009\bio_11_1980_2009_2km.img,Mean temperature of coldest quarter,PRISM (Custom Time Interval),"PRISM (1980-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1980_2009_2km\BioClim_1980_2009\bio_12_1980_2009_2km.img,Annual precipitation,PRISM (Custom Time Interval),"PRISM (1980-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1980_2009_2km\BioClim_1980_2009\bio_13_1980_2009_2km.img,Precipitation of wettest month,PRISM (Custom Time Interval),"PRISM (1980-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1980_2009_2km\BioClim_1980_2009\bio_14_1980_2009_2km.img,Precipitation of driest month,PRISM (Custom Time Interval),"PRISM (1980-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1980_2009_2km\BioClim_1980_2009\bio_15_1980_2009_2km.img,Precipitation seasonality,PRISM (Custom Time Interval),"PRISM (1980-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1980_2009_2km\BioClim_1980_2009\bio_16_1980_2009_2km.img,Precipitation of wettest quarter,PRISM (Custom Time Interval),"PRISM (1980-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1980_2009_2km\BioClim_1980_2009\bio_17_1980_2009_2km.img,Precipitation of driest quarter,PRISM (Custom Time Interval),"PRISM (1980-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1980_2009_2km\BioClim_1980_2009\bio_18_1980_2009_2km.img,Precipitiation of warmest quarter,PRISM (Custom Time Interval),"PRISM (1980-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_1980_2009_2km\BioClim_1980_2009\bio_19_1980_2009_2km.img,Precipitation of coldest quarter,PRISM (Custom Time Interval),"PRISM (1980-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_01_2000_2009_2km.img,Annual mean temperature,PRISM (Custom Time Interval),"PRISM (2000-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_02_2000_2009_2km.img,Mean diurnal range,PRISM (Custom Time Interval),"PRISM (2000-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_03_2000_2009_2km.img,Isothermality,PRISM (Custom Time Interval),"PRISM (2000-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_04_2000_2009_2km.img,Temperature seasonality,PRISM (Custom Time Interval),"PRISM (2000-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_05_2000_2009_2km.img,Max. temperature of warmest month,PRISM (Custom Time Interval),"PRISM (2000-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_06_2000_2009_2km.img,Min. temperature of coldest month,PRISM (Custom Time Interval),"PRISM (2000-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_07_2000_2009_2km.img,Temperature annual range,PRISM (Custom Time Interval),"PRISM (2000-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_08_2000_2009_2km.img,Mean temperature of wettest quarter,PRISM (Custom Time Interval),"PRISM (2000-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_09_2000_2009_2km.img,Mean temperature of driest quarter,PRISM (Custom Time Interval),"PRISM (2000-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_10_2000_2009_2km.img,Mean temperature of warmest quarter,PRISM (Custom Time Interval),"PRISM (2000-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_11_2000_2009_2km.img,Mean temperature of coldest quarter,PRISM (Custom Time Interval),"PRISM (2000-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_12_2000_2009_2km.img,Annual precipitation,PRISM (Custom Time Interval),"PRISM (2000-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_13_2000_2009_2km.img,Precipitation of wettest month,PRISM (Custom Time Interval),"PRISM (2000-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_14_2000_2009_2km.img,Precipitation of driest month,PRISM (Custom Time Interval),"PRISM (2000-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_15_2000_2009_2km.img,Precipitation seasonality,PRISM (Custom Time Interval),"PRISM (2000-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_16_2000_2009_2km.img,Precipitation of wettest quarter,PRISM (Custom Time Interval),"PRISM (2000-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_17_2000_2009_2km.img,Precipitation of driest quarter,PRISM (Custom Time Interval),"PRISM (2000-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_18_2000_2009_2km.img,Precipitiation of warmest quarter,PRISM (Custom Time Interval),"PRISM (2000-2009) CUSTOM Normals, 2 km.",N
+K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_19_2000_2009_2km.img,Precipitation of coldest quarter,PRISM (Custom Time Interval),"PRISM (2000-2009) CUSTOM Normals, 2 km.",N

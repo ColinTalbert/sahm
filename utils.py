@@ -1,11 +1,47 @@
-'''
-These are utilites used by the VisTrails 
-wrappers of the SAHM command line applications
+###############################################################################
+##
+## Copyright (C) 2010-2012, USGS Fort Collins Science Center. 
+## All rights reserved.
+## Contact: talbertc@usgs.gov
+##
+## This file is part of the Software for Assisted Habitat Modeling package
+## for VisTrails.
+##
+## "Redistribution and use in source and binary forms, with or without 
+## modification, are permitted provided that the following conditions are met:
+##
+##  - Redistributions of source code must retain the above copyright notice, 
+##    this list of conditions and the following disclaimer.
+##  - Redistributions in binary form must reproduce the above copyright 
+##    notice, this list of conditions and the following disclaimer in the 
+##    documentation and/or other materials provided with the distribution.
+##  - Neither the name of the University of Utah nor the names of its 
+##    contributors may be used to endorse or promote products derived from 
+##    this software without specific prior written permission.
+##
+## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+## AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, 
+## THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
+## PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
+## CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+## EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+## PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
+## OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+## WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
+## OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+## ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+##
+## Although this program has been used by the U.S. Geological Survey (USGS), 
+## no warranty, expressed or implied, is made by the USGS or the 
+## U.S. Government as to the accuracy and functioning of the program and 
+## related program material nor shall the fact of distribution constitute 
+## any such warranty, and no responsibility is assumed by the USGS 
+## in connection therewith.
+##
+## Any use of trade, firm, or product names is for descriptive purposes only 
+## and does not imply endorsement by the U.S. Government.
+###############################################################################
 
-@author: talbertc
-test
-
-'''
 import os, sys, shutil
 import traceback
 import csv
@@ -15,16 +51,17 @@ import subprocess
 
 import struct, datetime, decimal, itertools
 
-
+import xml.dom.minidom
+import textwrap
 
 from PyQt4 import QtCore, QtGui
 
 from core.modules.basic_modules import File, Path, Directory, new_constant, Constant
 from core.modules.vistrails_module import ModuleError
 
-from osgeo import gdalconst
-from osgeo import gdal
-from osgeo import osr
+#from osgeo import gdalconst
+#from osgeo import gdal
+#from osgeo import osr
 import numpy
 
 import packages.sahm.pySAHM.utilities as utilities
@@ -34,28 +71,86 @@ _roottempdir = ""
 _logger = None
 r_path = None
 
+gdalconst = None
+gdal = None
+osr = None
+
+def importOSGEO():
+    global gdalconst
+    from osgeo import gdalconst as gdalconst
+    global gdal
+    from osgeo import gdal as gdal
+    global osr
+    from osgeo import osr as osr
+
+def getpixelsize(filename):
+    dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
+    xform  = dataset.GetGeoTransform()
+    return xform[1]
+
 def getrasterminmax(filename):
     dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
     band = dataset.GetRasterBand(1)
     
     min = band.GetMinimum()
     max = band.GetMaximum()
+    if min is None or max is None or min == band.GetNoDataValue():
+            (min,max) = band.ComputeRasterMinMax(1)
+
     
     try:
         #our output rasters have approx nodata values
         #which don't equal the specified nodata.
         #set the specified to equal what is actually used.
-        if (abs(band.GetNoDataValue() - band.GetMinimum()) < 1e-9 and 
-            band.GetNoDataValue() <> band.GetMinimum()):
-            band.SetNoDataValue(band.GetMinimum)
+#        if (abs(band.GetNoDataValue() - min) < 1e-9 and 
+#            band.GetNoDataValue() <> min) or \
+#            ( min == band.GetNoDataValue()):
+#            min, max = band.ComputeRasterMinMax(0)
+#            band.SetNoDataValue(min)
+#            (min,max) = band.ComputeRasterMinMax(0)
         
-        if min is None or max is None:
-            (min,max) = band.ComputeRasterMinMax(1)
+        
+        if min == band.GetNoDataValue():
+            min = 0
         
     except:
         pass
     return (min, max)
     dataset = None
+    
+def getNDVal(filename):
+    dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
+    band = dataset.GetRasterBand(1)
+    
+    NDValue = band.GetNoDataValue()
+    
+    min = band.GetMinimum()
+    if min is None or min == band.GetNoDataValue():
+            min = band.ComputeRasterMinMax(0)[0]
+
+    
+    try:
+        #our output rasters have approx nodata values
+        #which don't equal the specified nodata.
+        #set the specified to equal what is actually used.
+#        if (abs(band.GetNoDataValue() - min) < 1e-9 and 
+#            band.GetNoDataValue() <> min) or \
+#            ( min == band.GetNoDataValue()):
+#            min, max = band.ComputeRasterMinMax(0)
+#            band.SetNoDataValue(min)
+#            (min,max) = band.ComputeRasterMinMax(0)
+        
+        
+        if band.GetNoDataValue() - min < 0.000000001:
+            NDValue = min
+        
+    except:
+        pass
+    
+    
+    dataset = None
+    return NDValue
+    
 
 def mknextfile(prefix, suffix="", directory=""):
     global _roottempdir
@@ -84,9 +179,13 @@ def mknextdir(prefix, directory=""):
     for f in files:
         if (f.startswith(prefix) and
             not os.path.isfile(f)):
-            f_seq = int(f.replace(prefix, ''))
-            if f_seq > seq:
-                seq = f_seq
+            try:
+                f_seq = int(f.replace(prefix, ''))
+                if f_seq > seq:
+                    seq = f_seq
+            except ValueError:
+                #someone has renamed a folder to a non-numeric string
+                pass 
     seq += 1
     dirname = prefix + str(seq)
     os.mkdir(os.path.join(directory, dirname))
@@ -95,6 +194,7 @@ def mknextdir(prefix, directory=""):
 def setrootdir(session_dir):
     global _roottempdir
     _roottempdir = session_dir
+    
 
 def getrootdir():
     global _roottempdir
@@ -117,14 +217,13 @@ def map_ports(module, port_map):
     args = {}
     for port, (flag, access, required) in port_map.iteritems():
         if required or module.hasInputFromPort(port):
-            #breakpoint()
             value = module.forceGetInputListFromPort(port)
             if len(value) > 1:
                 raise ModuleError(module, 'Multiple items found from Port ' + 
                     port + '.  Only single entry handled.  Please remove extraneous items.')
-            elif len(value)  == 0:
+            elif len(value) == 0:
                 try:
-                    value = [item for item in module._input_ports if item[0] == port][0][2]['defaults']
+                    value = eval([item for item in module._input_ports if item[0] == port][0][2]['defaults'])[0]
                 except:
                     raise ModuleError(module, 'No items found from Port ' + 
                         port + '.  Input is required.')
@@ -171,7 +270,7 @@ def dir_path_value(value):
     val = value.name
     sep = os.path.sep
     return val.replace("/", sep)
-    
+
 def create_file_module(fname, f=None):
     if f is None:
         f = File()
@@ -185,120 +284,6 @@ def create_dir_module(dname, d=None):
     d.name = dname
     d.upToDate = True
     return d
-
-#No longer used
-#def collapse_dictionary(dict):
-#    list = []
-#    for k,v in dict.items():
-#        list.append(k)
-#        list.append(v)
-#    return list
-
-#def tif_to_color_jpeg(input, output, colorBreaksCSV):
-#    writetolog("    running  tif_to_color_jpeg()", True, False)
-#    writetolog("        input=" + input, False, False)
-#    writetolog("        output=" + output, False, False)
-#    writetolog("        colorBreaksCSV=" + colorBreaksCSV, False, False)
-#    out_bands = 3
-#    #output_tmp = mktempfile(prefix='intermediateJpegPic', suffix='.tif')
-#    output_tmp = output + ".tmp.tif"
-#    # Print some info
-#    #print "Creating %s" % (output)
-#    
-#    #populate the color breaks dictionary 
-#    #  from the colorBreaks CSV
-#
-#    csvfile = open(colorBreaksCSV, "r")
-#    #dialect = csv.Sniffer().sniff(csvfile.read(1024))
-#    reader = csv.reader(csvfile)
-#    usedPixels = {}
-#    header = reader.next() #skip the header
-#    
-#    color_dict = {}
-#    maxVal = -9999
-#    for row in reader:
-#        color_dict[float(row[1])] = [row[3], row[4], row[5]]
-#        if row[2] > maxVal: maxVal = row[2]
-#        
-#    #print color_dict
-#    # Open source file
-#    src_ds = gdal.Open( input )
-#    src_band = src_ds.GetRasterBand(1)
-#    
-#    # create destination file
-#    dst_driver = gdal.GetDriverByName('GTiff')
-#    dst_ds = dst_driver.Create(output_tmp, src_ds.RasterXSize,
-#                               src_ds.RasterYSize, out_bands, gdal.GDT_Byte)
-#    
-#    # create output bands
-#    band1 = numpy.zeros([src_ds.RasterYSize, src_ds.RasterXSize])
-#    band2 = numpy.zeros([src_ds.RasterYSize, src_ds.RasterXSize])
-#    band3 = numpy.zeros([src_ds.RasterYSize, src_ds.RasterXSize])
-#    
-#    # set the projection and georeferencing info
-#    dst_ds.SetProjection( src_ds.GetProjection() )
-#    dst_ds.SetGeoTransform( src_ds.GetGeoTransform() )
-#    
-#    # read the source file
-#    #gdal.TermProgress( 0.0 )
-#    for iY in range(src_ds.RasterYSize):
-#        src_data = src_band.ReadAsArray(0,iY,src_ds.RasterXSize,1)
-#        col_values = src_data[0] # array of z_values, one per row in source data
-#        for iX in range(src_ds.RasterXSize):
-#            z_value = col_values[iX]
-#            [R,G,B] = MakeColor(z_value, color_dict, maxVal)
-#            band1[iY][iX] = R
-#            band2[iY][iX] = G
-#            band3[iY][iX] = B
-#    #gdal.TermProgress( (iY+1.0) / src_ds.RasterYSize )
-#    
-#    # write each band out
-#    dst_ds.GetRasterBand(1).WriteArray(band1)
-#    dst_ds.GetRasterBand(2).WriteArray(band2)
-#    dst_ds.GetRasterBand(3).WriteArray(band3)
-#
-#    # Create jpeg or rename tmp file
-#    jpg_driver = gdal.GetDriverByName("JPEG") 
-#    jpg_driver.CreateCopy(output, dst_ds, 0 ) 
-#    
-#    try:
-#        os.remove(output_tmp)
-#    except:
-#        pass
-#    
-#    try:
-#        GDALClose(output_tmp)
-#    except:
-#        pass
-#    
-#    try:
-#        os.remove(output_tmp)
-#    except:
-#        pass
-#    
-#    dst_ds = None
-#    writetolog("    finished running  tif_to_color_jpeg()", True, False)
-#    return True
-#
-#def MakeColor(z_value, color_dict, maxVal):
-#
-#    
-#    key_list = color_dict.keys()
-#    key_list.sort()
-#    while len(key_list) > 0:
-#        last_val = key_list[-1]
-#        #print "lastVal =   ",last_val
-#        #print "ZVal =   ",z_value
-#        if z_value >= last_val and z_value <= maxVal:
-#            #"print color for ", z_value, " is ", last_val, " = ", color_dict[last_val]
-#            return color_dict[last_val]
-#            break
-#        else:
-#            key_list.remove(last_val)
-#
-#    #if we get here something is wrong return black
-#    #print "Value not found defaulting to black"
-#    return [255, 255, 255]
     
 def MDSresponseCol(MDSFile):
     csvfile = open(MDSFile, "r")
@@ -396,13 +381,12 @@ def getModelsPath():
     return os.path.join(os.path.dirname(__file__), "pySAHM", "Resources", "R_Modules")
 
 def runRScript(script, args, module=None):
-    global r_path
-    program = os.path.join(r_path, "i386", "Rterm.exe") #-q prevents program from running
-    scriptFile = os.path.join(getModelsPath(), script)
-    
+     
+    program = getR_folder()
+    scriptFile = '"' + os.path.join(getModelsPath(), script) + '"'
     command = program + " --vanilla -f " + scriptFile + " --args " + args
     
-    writetolog("\nStarting R Processing of " + script, True)
+    writetolog("\nStarting R Processing of "  + script , True)
     writetolog("    args: " + args, False, False)
     writetolog("    command: " + command, False, False)
     p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -414,18 +398,71 @@ def runRScript(script, args, module=None):
         msg += "\n     The R error message is below: \n"
         msg += ret[1]
         writetolog(msg)
+
+    if 'Warning' in ret[1]:
+        msg = "The R script returned the following warning(s).  The R warning message is below - \n"
+        msg += ret[1]
+        writetolog(msg)
+
+    if 'Error' in ret[1]:
+        #also write the errors to a model specific log file in the model output dir
+        #then raise an error
+        writeRErrorsToLog(args, ret)
         if module:
             raise ModuleError(module, msg)
         else:
             raise RuntimeError , msg
-
-    if 'Warning' in ret[1]:
-        msg = "The R scipt returned the following warning(s).  The R warning message is below - \n"
-        msg += ret[1]
-        writetolog(msg)
+    elif 'Warning' in ret[1]:
+        writeRErrorsToLog(args, ret)
+        
 
     del(ret)
     writetolog("\nFinished R Processing of " + script, True)
+
+def getR_folder():
+    global r_path
+    
+    #are we in 64 or 32 bit?  If 64 use the 64 bit install of R otherwise 32 bit.
+    #if we don't have the matching version and the other exists use it.
+    version_dirs = ["i386", "x64"]
+    possible_exes = [os.path.join(r_path, version_dir, "Rterm.exe") for version_dir in version_dirs]
+    if sys.maxsize > 2**32 and os.path.exists(possible_exes[1]):
+        program = possible_exes[1]
+    elif os.path.exists(possible_exes[0]):
+        program = possible_exes[0]
+    elif os.path.exists(possible_exes[1]):
+        program = possible_exes[1]
+    else:
+        #no R exe found we can't go on
+        msg = "No R executable found.\nPlease check the install folder:  "
+        msg += r_path + "\nfor either a ..\i386\Rterm.exe or a ..\x64\Rterm.exe"
+        if module:
+            raise ModuleError(module, msg)
+        else:
+            raise RuntimeError , msg
+        
+    return program
+    
+
+def writeRErrorsToLog(args, ret):
+    #first check that this is a model run, or has a o= in the args.
+    #If so write the output log file in the directory
+    argsSplit = args.split()
+    output = [val.split("=")[1] for val in argsSplit if val.startswith("o=")][0][1:-1]
+    if os.path.isdir(output):
+        pass
+    elif os.path.isdir(os.path.split(output)[0]):
+        output = os.path.split(output)[0]
+    else:
+        return False
+    
+    outFileN = os.path.join(output, "errorLogFile.txt")
+    outFile = open(outFileN, "w")
+    outFile.write("standard out:\n\n")
+    outFile.write(ret[0] + "\n\n\n")
+    outFile.write("standard error:\n\n")
+    outFile.write(ret[1])
+    outFile.close()
 
 def merge_inputs_csvs(inputCSVs_list, outputFile):
     oFile = open(outputFile, "wb")
@@ -543,8 +580,145 @@ def dbfreader(f):
                 value = float(value)
             result.append(value)
         yield result
-
-
     
+def getRasterParams(rasterFile):
+    """
+    Extracts a series of bits of information from a passed raster
+    All values are stored in a dictionary which is returned.
+    If errors are encountered along the way the error messages will
+    be returned as a list in the Error element.
+    """
+    try:
+        #initialize our params dictionary to have None for all parma
+        params = {}
+        allRasterParams = ["Error", "xScale", "yScale", "width", "height",
+                        "ulx", "uly", "lrx", "lry", "Wkt", 
+                        "tUlx", "tUly", "tLrx", "tLry", 
+                        "srs", "gt", "prj", "NoData", "PixelType"]
+        
+        for param in allRasterParams:
+            params[param] = None
+        params["Error"] = []
+        
+        # Get the PARC parameters from the rasterFile.
+        dataset = gdal.Open(rasterFile, gdalconst.GA_ReadOnly)
+        if dataset is None:
+            params["Error"].append("Unable to open file")
+            #print "Unable to open " + rasterFile
+            #raise Exception, "Unable to open specifed file " + rasterFile
+            
+        
+        xform  = dataset.GetGeoTransform()
+        params["xScale"] = xform[1]
+        params["yScale"] = xform[5]
 
+        params["width"]  = dataset.RasterXSize
+        params["height"] = dataset.RasterYSize
+
+        params["ulx"] = xform[0]
+        params["uly"] = xform[3]
+        params["lrx"] = params["ulx"] + params["width"]  * params["xScale"]
+        params["lry"] = params["uly"] + params["height"] * params["yScale"]
+            
+        
+    except:
+        #print "We ran into problems extracting raster parameters from " + rasterFile
+        params["Error"].append("Some untrapped error was encountered")
+    finally:
+        del dataset
+        return params
+
+
+class InteractiveQGraphicsView(QtGui.QGraphicsView):
+    '''
+    Extends a QGraphicsView to enable wheel zooming and scrolling
+    The main QGraphicsView contains a graphics scene which is dynamically
     
+    l_pix - original picture
+    c_view - scaled picture
+    '''
+    def __init__(self, parent=None):
+        self.scene = QtGui.QGraphicsScene()
+        self.scene.wheelEvent = self.wheel_event
+        QtGui.QGraphicsView.__init__(self, self.scene)
+        
+        self.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
+        
+
+    def load_picture(self, strPicture):
+        '''This loads and zooms to a new picture
+        a new l_pix is created 
+        and a c_view is derived from it.
+        '''
+
+        self.picture_fname = strPicture
+        self.l_pix = QtGui.QPixmap(strPicture)
+        if self.size().width()  <= self.size().height(): 
+            self.max_vsize = self.size().width() * 0.95
+        else: 
+            self.max_vsize = self.size().height() * 0.95
+            
+        self.c_view = self.l_pix.scaled(self.max_vsize, self.max_vsize, 
+                                            QtCore.Qt.KeepAspectRatio, 
+                                            QtCore.Qt.SmoothTransformation) 
+        self.scene.clear()
+        self.scene.setSceneRect(0, 0, self.c_view.size().width(), self.c_view.size().height()) 
+        self.scene.addPixmap(self.c_view)
+        
+        self.view_current()
+        
+   
+    def view_current(self):
+
+        self.scene.clear() 
+        self.scene.setSceneRect(0, 0, self.c_view.size().width(), self.c_view.size().height())
+        self.scene.addPixmap(self.c_view) 
+        QtCore.QCoreApplication.processEvents() 
+        
+
+    def wheel_event (self, event):
+
+        self.cur_x = self.scene.sceneRect().x()
+        self.cur_y = self.scene.sceneRect().y()
+        numDegrees = event.delta() / 8 
+        numSteps = numDegrees / 15.0 
+        self.zoom(numSteps) 
+        event.accept() 
+
+    def zoom(self, step):
+
+        zoom_step = 0.06
+        self.scene.clear() 
+        w = self.c_view.size().width() 
+        h = self.c_view.size().height() 
+        w, h = w * (1 + zoom_step*step), h * (1 + zoom_step*step) 
+        self.c_view = self.l_pix.scaled(w, h, 
+                                            QtCore.Qt.KeepAspectRatio, 
+                                            QtCore.Qt.SmoothTransformation) 
+        self.view_current() 
+
+    def resizeEvent(self, event):
+        old_width = event.oldSize().width()
+        old_height = event.oldSize().height()
+       
+        width_prop = self.size().width() / float(old_width)
+        height_prop = self.size().height() / float(old_height)
+        
+        scaled_pic_width = self.c_view.size().width() 
+        scaled_pic_height = self.c_view.size().height() 
+        
+        w = scaled_pic_width * width_prop
+        h = scaled_pic_height * height_prop
+        if w < 0:
+            w = self.size().width()
+        if h < 0:
+            h = self.size().height()
+        
+        if self.c_view.size().width() < old_width * 0.9 and \
+            self.c_view.size().height() < old_height * 0.9 :
+            self.c_view = self.l_pix.scaled(w, h, 
+                                                QtCore.Qt.KeepAspectRatio, 
+                                                QtCore.Qt.SmoothTransformation)
+        self.view_current()
+        
+

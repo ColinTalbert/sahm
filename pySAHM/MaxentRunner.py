@@ -1,8 +1,46 @@
-'''
-Created on Sep 17, 2010
-
-@author: talbertc
-'''
+###############################################################################
+##
+## Copyright (C) 2010-2012, USGS Fort Collins Science Center. 
+## All rights reserved.
+## Contact: talbertc@usgs.gov
+##
+## This file is part of the Software for Assisted Habitat Modeling package
+## for VisTrails.
+##
+## "Redistribution and use in source and binary forms, with or without 
+## modification, are permitted provided that the following conditions are met:
+##
+##  - Redistributions of source code must retain the above copyright notice, 
+##    this list of conditions and the following disclaimer.
+##  - Redistributions in binary form must reproduce the above copyright 
+##    notice, this list of conditions and the following disclaimer in the 
+##    documentation and/or other materials provided with the distribution.
+##  - Neither the name of the University of Utah nor the names of its 
+##    contributors may be used to endorse or promote products derived from 
+##    this software without specific prior written permission.
+##
+## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+## AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, 
+## THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
+## PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
+## CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+## EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+## PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
+## OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+## WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
+## OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+## ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+##
+## Although this program has been used by the U.S. Geological Survey (USGS), 
+## no warranty, expressed or implied, is made by the USGS or the 
+## U.S. Government as to the accuracy and functioning of the program and 
+## related program material nor shall the fact of distribution constitute 
+## any such warranty, and no responsibility is assumed by the USGS 
+## in connection therewith.
+##
+## Any use of trade, firm, or product names is for descriptive purposes only 
+## and does not imply endorsement by the U.S. Government.
+###############################################################################
 
 import time
 import os, sys
@@ -33,6 +71,7 @@ class MAXENTRunner(object):
         self.maxentpath = ''
         self.inputMDS = ''
         self.projectionlayers = ''
+        self.environmentallayers = ''
         self.testCSV = ''
         self.trainingCSV = ''
         self.backgroundCSV = ''
@@ -60,33 +99,44 @@ class MAXENTRunner(object):
             self.args['projectionlayers'] = ''
 
         if self.trainingCSV <> '':
-            self.args['samplesfile'] = self.trainingCSV
+            self.args['samplesfile'] = '"' + self.trainingCSV + '"'
         else:
             raise Exception, "No Samples file supplied"
         
         if self.testCSV <> '':
-            self.args['testsamplesfile'] = self.testCSV
+            self.args['testsamplesfile'] = '"' + self.testCSV + '"'
         
-        if self.backgroundCSV <> '':
-            self.args['environmentallayers'] = self.backgroundCSV
-        
-        
+
+        if self.args['environmentallayers'] != '':
+            self.args['environmentallayers'] = '"' + self.args['environmentallayers'] + '"'
+            if self.args.has_key('biasfile'):
+                self.args['biasfile'] = '"' + self.args['biasfile'] + '"'
+        elif self.backgroundCSV != '': 
+            self.args['environmentallayers'] = '"' + self.backgroundCSV + '"'
+            if self.args.has_key('biasfile'):
+                #without environmentallayers the biasfile has no meaning
+                self.writetolog("The supplied biasfile will be ignored since no environmentallayers were provided", True, True)
+                self.args.pop('biasfile')              
+                   
         self.args['autorun'] = 'true'
-        #self.args['outputgrids'] = 'false'
         
         if ' ' in self.args['species_name']:
             self.args['species_name'] = self.args['species_name'].replace(' ', '_')
         
-        strargs = ['='.join((str(k),str(v))) for k,v in self.args.iteritems() if k <> "species_name"]
+        #quote out the the output folder and projection layers args with quotes
+        self.args["outputdirectory"] = '"' + self.args["outputdirectory"] + '"'
+        self.args["projectionlayers"] = '"' + self.args["projectionlayers"] + '"' 
+            
+        strargs = ['='.join((str(k),str(v))) for k,v in self.args.iteritems() 
+                    if (k <> "species_name" and k <> "inputMDS")]
+        
         for categorical in self.categoricals:
             strargs += ['togglelayertype=' + categorical.replace('_categorical', '')]
-        #strargs = ' '.join(strargs)
-        #print strargs
         
         if not self.maxentpath.endswith('.jar'):
-            jar = os.path.join(self.maxentpath, 'maxent.jar')
+            jar = '"' + os.path.join(self.maxentpath, 'maxent.jar') + '"'
         else:
-            jar = self.maxentpath
+            jar = '"' + self.maxentpath + '"' 
             
         self.run_cmd_line_jar(jar, strargs)
         
@@ -128,6 +178,13 @@ class MAXENTRunner(object):
         
         if not self.args.has_key('projectionlayers'):
              self.args['projectionlayers'] = ''
+             
+        if not self.args.has_key('environmentallayers'):
+             self.args['environmentallayers'] = ''
+        else:
+            if not os.path.isdir(self.args['environmentallayers']):
+                raise RuntimeError(self, 'Input environmentallayers directory, ' + self.args['environmentallayers'] + ', could not be found on file system')
+                 
              
         if self.args['projectionlayers'] <> '':
              dirs = self.args['projectionlayers'].split(',')
@@ -189,29 +246,44 @@ class MAXENTRunner(object):
         
         #loop through the rows sending each row to the appropriate file
         hasBackground = False
+        absencePointCount = 0
         for row in MDSreader:
-            if row[2] == '-9999':
+            self.convertNA(row)
+            if row[2] == '0':
+                #this is an absence point, we will throw it away.
+                 absencePointCount += 1
+            elif row[2] == '-9999' or row [2] == '-9998':
                 hasBackground = True
                 vals = self.usedValues(row, covariateIndexes)
                 backgroundWriter.writerow([''] + row[:2] + vals)
-            elif splitcol is None and row[2] <> 0:
+            elif splitcol is None and str(row[2]) != '0':
                 vals = self.usedValues(row, covariateIndexes)
                 trainingWriter.writerow([self.args['species_name']] + row[:2] + vals)
-            elif (row[splitcol] == 'test' and row[2] <> 0) or \
+            elif (row[splitcol] == 'test' and str(row[2]) != '0') or \
                 self.testCSV == '':
                 vals = self.usedValues(row, covariateIndexes)
                 testWriter.writerow([self.args['species_name']] + row[:2] + vals)
-            elif row[splitcol] == 'train'  and row[2] <> 0:
+            elif row[splitcol] == 'train'  and str(row[2]) != '0':
                 vals = self.usedValues(row, covariateIndexes)
                 trainingWriter.writerow([self.args['species_name']] + row[:2] + vals)
-            #any absense points (row[2] == 0) will be ignored for maxent
+
+                
         
-        if not hasBackground:
-            msg = "    No background points were detected in the input file."
-            msg += "\n    This implementation of Maxent does not have access to prepared ASCII environmental layers"
-            msg += " from which to extract values.  Background points must be supplied in the MDS file."
+        if not hasBackground and self.args["environmentallayers"] == '' :
+            msg = "    No environmental layers were provided and "
+            msg += "\n no background points were detected in the input file."
+            msg += "\n    Maxent requires pregenerated background points or environmental layer"
+            msg += "\nfrom which to extract values."
             self.writetolog(msg)
             raise RuntimeError(msg)
+        elif hasBackground and self.args["environmentallayers"] != '':
+            msg = "    Both background points in the MDS file and a "
+            msg += "\n folder of environmental layers were specified."
+            msg += "\n    Either of these could be used by Maxent to specify/create background points.\n\n"
+            msg += "Remove either the background points from the MDSBuilder or the environmental layer."
+            self.writetolog(msg)
+            raise RuntimeError(msg)
+
         
         #del our writers 
         try:
@@ -231,15 +303,24 @@ class MAXENTRunner(object):
         #First we have to figure out what they passed us
         #either a directory, a SWD file, or a csv with a list of files
         
-        if self.args['projectionlayers'] <> '':
+        if self.args['projectionlayers'] != '' or \
+            self.args['environmentallayers'] != '':
             pass
         else:
             self.args['outputgrids'] = 'false'
+    
+    def convertNA(self, vals):
+        """Switches the NA value used in our R models
+        to the value expected by Maxent
+        """
+        for index, item in enumerate(vals):     
+            if (item == "NA"):         
+                vals[index] = "-9999"
 
     def usedIndexes(self, header1, header2):
         covariateIndexes = []
         for i in range(len(header1)):
-            if header2[i] == '1' and header1[i] <> 'Split':
+            if header2[i] == '1' and header1[i] not in ['Weights', 'Split', 'EvalSplit']:
                 covariateIndexes.append(i)
         return covariateIndexes
       

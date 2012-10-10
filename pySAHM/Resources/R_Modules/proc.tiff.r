@@ -1,5 +1,49 @@
+###############################################################################
+##
+## Copyright (C) 2010-2012, USGS Fort Collins Science Center. 
+## All rights reserved.
+## Contact: talbertc@usgs.gov
+##
+## This file is part of the Software for Assisted Habitat Modeling package
+## for VisTrails.
+##
+## "Redistribution and use in source and binary forms, with or without 
+## modification, are permitted provided that the following conditions are met:
+##
+##  - Redistributions of source code must retain the above copyright notice, 
+##    this list of conditions and the following disclaimer.
+##  - Redistributions in binary form must reproduce the above copyright 
+##    notice, this list of conditions and the following disclaimer in the 
+##    documentation and/or other materials provided with the distribution.
+##  - Neither the name of the University of Utah nor the names of its 
+##    contributors may be used to endorse or promote products derived from 
+##    this software without specific prior written permission.
+##
+## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+## AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, 
+## THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
+## PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
+## CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+## EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+## PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
+## OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+## WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
+## OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+## ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+##
+## Although this program has been used by the U.S. Geological Survey (USGS), 
+## no warranty, expressed or implied, is made by the USGS or the 
+## U.S. Government as to the accuracy and functioning of the program and 
+## related program material nor shall the fact of distribution constitute 
+## any such warranty, and no responsibility is assumed by the USGS 
+## in connection therewith.
+##
+## Any use of trade, firm, or product names is for descriptive purposes only 
+## and does not imply endorsement by the U.S. Government.
+###############################################################################
+
 proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,pred.fct,factor.levels=NA,make.binary.tif=F,make.p.tif=T,
-    thresh=0.5,outfile.p="brt.prob.map.tif",outfile.bin="brt.bin.map.tif",tsize=2.0,NAval=-3000,fnames=NULL,logname=NULL,out){
+   thresh=0.5,outfile.p="brt.prob.map.tif",outfile.bin="brt.bin.map.tif",tsize=2.0,NAval=-3000,fnames=NULL,out,Model){
 
     # vnames,fpath,myfun,make.binary.tif=F,outfile=NA,outfile.bin=NA,output.dir=NA,tsize=10.0,NAval=NA,fnames=NA
     # Written by Alan Swanson, YERC, 6-11-08
@@ -21,7 +65,7 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,pred.fct,factor.le
     # NAval: this is the NAvalue used in the input files.
     # fnames: if the filenames of input files are different from the variable names used in the
     #   prediction model.
-    #
+   #
     # Modification history:
     # Fixed problem with NA values causing crash 10/2010
     # Included code to produce MESS map and Mod map  8/2011
@@ -35,28 +79,29 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,pred.fct,factor.le
     # the same directory as the input files.  Geographic information from the input images
     # is retained.
     #
-    #HELLO!!!
-    #ColinTEST
+
     # Start of function #
     library(rgdal)
     library(raster)
-
+    if(is.null(factor.levels)) factor.levels<-NA
     MESS=out$input$MESS
     if(is.null(thresh)) thresh<-.5
     nvars<-length(vnames)
-
+    vnames.final.mod<-out$mods$vnames
+    if(any(out$mods$vnames%in%names(factor.levels))) vnames.final.mod<-vnames.final.mod[!out$mods$vnames%in%names(factor.levels)]
+    nvars.final<-length(vnames.final.mod)
 # settup up output raster to match input raster
-
-          fullnames <- as.character(filenames[match(vnames,basename(sub(".tif","",filenames)))])
+names(filenames)<-sub("_categorical","",names(filenames))
+          fullnames <- as.character(filenames[match(vnames,names(filenames))])
           goodfiles <- file.access(fullnames)==0
           if(!all(goodfiles)) stop(paste("ERROR: the following image files are missing:",paste(fullnames[!goodfiles],collapse=", ")))
 
-if(nvars<=1) MESS=FALSE
+if(nvars.final<=1) MESS=FALSE
  ######################################
  # get spatial reference info from existing image file
-options(warn=-1)
+ options(warn=-1)
     gi <- GDALinfo(fullnames[1])
-options(warn=0)
+options(warn=1)
     dims <- as.vector(gi)[1:2]
     ps <- as.vector(gi)[6:7]
     ll <- as.vector(gi)[4:5]
@@ -97,19 +142,17 @@ ymax(RasterInfo) <- ymax(RasterInfo) + 0.5 * rs[2]
     if(make.binary.tif) {
      binaryRaster<-raster(RasterInfo)
       binaryRaster <- writeStart(binaryRaster, filename=outfile.bin, overwrite=TRUE)}
-    if(MESS) {
-     MessRaster<-raster(RasterInfo)
-     ModRaster<-raster(RasterInfo)
-      MessRaster <- writeStart(MessRaster, filename=sub("bin","mess",outfile.bin), overwrite=TRUE)
-      ModRaster <- writeStart(ModRaster, filename=sub("bin","MoD",outfile.bin), overwrite=TRUE)
-      }
-
+    
 temp <- data.frame(matrix(ncol=nvars,nrow=tr$nrows[1]*ncol(RasterInfo))) # temp data.frame.
 names(temp) <- vnames
 FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
   if((nvars-length(FactorInd))==0) MESS<-FALSE #turn this off if only one factor column was selected
-    if(MESS) {
-      pred.rng<-temp
+  if(MESS) {
+     MessRaster<-raster(RasterInfo)
+     ModRaster<-raster(RasterInfo)
+      MessRaster <- writeStart(MessRaster, filename=sub("bin","mess",outfile.bin), overwrite=TRUE)
+      ModRaster <- writeStart(ModRaster, filename=sub("bin","MoD",outfile.bin), overwrite=TRUE)
+      pred.rng<-temp[,names(temp)%in%vnames.final.mod]
         CalcMESS<-function(tiff.entry,pred.vect){
               f<-sum(pred.vect<tiff.entry)/length(pred.vect)*100
               if(is.na(f)) return(NA)
@@ -121,16 +164,17 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
         }
     }
 
- Pred.Surface(object=RasterInfo,model=out$mods$auc.output$residual.smooth.fct,filename=sub("prob_map.tif","resid_map.tif",outfile.p),NAval=NAval)
+  if(!(out$input$NoResidMaps)) Pred.Surface(object=RasterInfo,model=out$mods$auc.output$residual.smooth.fct,filename=sub("prob_map.tif","resid_map.tif",outfile.p),NAval=NAval)
 
   min.pred<-1
   max.pred<-0
   for (i in 1:tr$n) {
     strt <- c((i-1)*nrows,0)
      region.dims <- c(min(dims[1]-strt[1],nrows),dims[2])
+
         if (i==tr$n) if(is.null(dim(temp))) { temp <- temp[1:(tr$nrows[i]*dims[2])]
                                               if(MESS) pred.rng<-pred.rng[1:(tr$nrows[i]*dims[2])]
-        } else {temp <- temp[1:(tr$nrows[i]*dims[2]),]
+        } else {temp <- as.data.frame(temp[1:(tr$nrows[i]*dims[2]),])
                       if(MESS) pred.rng<-pred.rng[1:(tr$nrows[i]*dims[2]),]
                 }
 
@@ -138,15 +182,21 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
       for(k in 1:nvars) { # fill temp data frame
             if(is.null(dim(temp))){
               temp<- getValuesBlock(raster(fullnames[k]), row=tr$row[i], nrows=tr$nrows[i])
+               temp<-as.data.frame(as.matrix(x=temp,nrow=(tr$nrows[i]*dims[2]),ncol=1))
             } else {temp[,k]<- getValuesBlock(raster(fullnames[k]), row=tr$row[i], nrows=tr$nrows[i])
                     }
-                  if(MESS & !k%in%FactorInd){
-                        pred.range<-out$dat$ma$ma[,c(match(sub(".tif","",basename(fullnames[k])),names(out$dat$ma$ma)))]
-                        if(nvars>1) pred.rng[,k]<-mapply(CalcMESS,tiff.entry=temp[,k],MoreArgs=list(pred.vect=pred.range))
+
+            }
+
+             if(MESS){
+             for(k in 1:nvars.final){
+                        pred.range<-out$dat$ma$train$dat[,match(vnames.final.mod[k],names(out$dat$ma$train$dat))]
+                        if(nvars.final>1) pred.rng[,k]<-mapply(CalcMESS,tiff.entry=temp[,match(vnames.final.mod[k],names(temp))],MoreArgs=list(pred.vect=pred.range))
                         else pred.rng<-mapply(CalcMESS,tiff.entry=temp,MoreArgs=list(pred.vect=pred.range))
                          }
-            }
-            if(MESS & length(FactorInd)>0) pred.rng<-pred.rng[,-c(FactorInd)]
+                      }
+                if(length(vnames)==1) names(temp)=vnames
+
     temp[temp==NAval] <- NA # replace missing values #
     temp[is.na(temp)]<-NA #this seemingly worthless line switches NaNs to NA so they aren't predicted
         if(sum(!is.na(factor.levels))){
@@ -158,9 +208,10 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
                 }
             }
                    }}
+
     ifelse(sum(complete.cases(temp))==0,  # does not calculate predictions if all predictors in the region are na
         preds<-matrix(data=NaN,nrow=region.dims[1],ncol=region.dims[2]),
-        preds <- t(matrix(pred.fct(model,temp),ncol=dims[2],byrow=T)))
+        preds <- t(matrix(pred.fct(model,temp,Model),ncol=dims[2],byrow=T)))
 
         min.pred<-min(na.omit(preds),min.pred)
         max.pred<-max(na.omit(preds),max.pred)
@@ -171,7 +222,7 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
      a<-which(x==min(x),arr.ind=TRUE)
      if(length(a>1)) a<-sample(a,size=1)
      return(a)
-     }
+    }
     if(MESS) {
     MessRaster<-writeValues(MessRaster,apply(pred.rng,1,min), tr$row[i])
     if(!is.null(dim(pred.rng)[2])) a<-apply(as.matrix(pred.rng),1,f)

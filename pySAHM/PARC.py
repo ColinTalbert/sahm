@@ -1,4 +1,47 @@
 #!/usr/bin/python
+###############################################################################
+##
+## Copyright (C) 2010-2012, USGS Fort Collins Science Center. 
+## All rights reserved.
+## Contact: talbertc@usgs.gov
+##
+## This file is part of the Software for Assisted Habitat Modeling package
+## for VisTrails.
+##
+## "Redistribution and use in source and binary forms, with or without 
+## modification, are permitted provided that the following conditions are met:
+##
+##  - Redistributions of source code must retain the above copyright notice, 
+##    this list of conditions and the following disclaimer.
+##  - Redistributions in binary form must reproduce the above copyright 
+##    notice, this list of conditions and the following disclaimer in the 
+##    documentation and/or other materials provided with the distribution.
+##  - Neither the name of the University of Utah nor the names of its 
+##    contributors may be used to endorse or promote products derived from 
+##    this software without specific prior written permission.
+##
+## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+## AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, 
+## THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
+## PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
+## CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+## EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+## PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
+## OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+## WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
+## OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+## ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+##
+## Although this program has been used by the U.S. Geological Survey (USGS), 
+## no warranty, expressed or implied, is made by the USGS or the 
+## U.S. Government as to the accuracy and functioning of the program and 
+## related program material nor shall the fact of distribution constitute 
+## any such warranty, and no responsibility is assumed by the USGS 
+## in connection therewith.
+##
+## Any use of trade, firm, or product names is for descriptive purposes only 
+## and does not imply endorsement by the U.S. Government.
+###############################################################################
 
 import glob
 import math
@@ -20,6 +63,7 @@ from osgeo import osr
 
 from numpy import *
 import numpy as np
+import scipy.stats.stats as stats
 
 import utilities
 
@@ -39,8 +83,8 @@ def main(args_in):
     parser.add_option("-v", dest="verbose", default=False, action="store_true", help="the verbose flag causes diagnostic output to print")
     parser.add_option("-t", dest="templateRaster", help="The template raster used for projection, origin, cell size and extent")
     parser.add_option("-i", dest="inputs_CSV", help="The CSV containing the list of files to process.  Format is 'FilePath, Categorical, Resampling, Aggreagtion")
-    parser.add_option("-m", dest="multicore", default=True, action="store_true", help="Flag indicating to use multiple cores")
-    parser.add_option("-i", dest="ignoreNonOverlap", default=False, action="store_true", help="Flag indicating to use ignore non-overlapping area")
+    parser.add_option("-m", dest="multicore", default=False, action="store_true", help="Flag indicating to use multiple cores")
+    parser.add_option("-n", dest="ignoreNonOverlap", default=False, action="store_true", help="Flag indicating to use ignore non-overlapping area")
     
     (options, args) = parser.parse_args(args_in)
     
@@ -51,6 +95,7 @@ def main(args_in):
     ourPARC.inputs_CSV = options.inputs_CSV
     ourPARC.multicores = options.multicore
     ourPARC.ignoreNonOverlap = options.ignoreNonOverlap
+    ourPARC.logger = utilities.logger(os.path.join(ourPARC.out_dir, "logfile.txt"), True)
     ourPARC.parcFiles()
 
 class PARC:
@@ -76,7 +121,7 @@ class PARC:
         self.out_dir = ""
         self.inputs_CSV = ''
         self.inputs = []
-        self.agg_methods = ['Min', 'Mean', 'Max', 'Majority']
+        self.agg_methods = ['Min', 'Mean', 'Max', 'Majority', 'STD']
         self.resample_methods = ['NearestNeighbor', 'Bilinear', 'Cubic', 'CubicSpline', 'Lanczos']
         self.logger = None
         self.multicores = True
@@ -108,8 +153,13 @@ class PARC:
         # Clip and reproject each source image.
         for image in self.inputs:
             inPath, inFileName = os.path.split(image[0])
-            outFile, ext = os.path.splitext(inFileName) 
-            outFile = os.path.join(self.out_dir, outFile + ".tif")
+                            
+            outFile, ext = os.path.splitext(inFileName)
+            if outFile[0].isdigit():
+                outFile = os.path.join(self.out_dir, "_" + outFile + ".tif")
+            else:
+                outFile = os.path.join(self.out_dir, outFile + ".tif")
+                
             shortname = (os.path.split(outFile)[1])
             
             if os.path.exists(outFile):
@@ -123,16 +173,16 @@ class PARC:
                     pass
                 
             else:    
-                if os.path.abspath(self.template) != os.path.abspath(image[0]):
-                    if self.multicores:
-                        self.gen_singlePARC_thread(image, outFile, results)
-                        process_count += 1
-                    else:
-                        self.parcFile(image, outFile)
-                elif os.path.abspath(self.template) == os.path.abspath(image[0]): 
-                    msg = shortname + " is the same as our template. \tOnly copying this file."
-                    self.logger.writetolog(msg, True, True)
-                    shutil.copyfile(self.template, outFile)
+#                if os.path.abspath(self.template) != os.path.abspath(image[0]):
+                if self.multicores:
+                    self.gen_singlePARC_thread(image, outFile, results)
+                    process_count += 1
+                else:
+                    self.parcFile(image, outFile)
+#                elif os.path.abspath(self.template) == os.path.abspath(image[0]): 
+#                    msg = shortname + " is the same as our template. \tOnly copying this file."
+#                    self.logger.writetolog(msg, True, True)
+#                    shutil.copyfile(self.template, outFile)
                     
         if self.multicores:
             self.manage_singlePARC_threads(results, process_count)
@@ -157,9 +207,9 @@ class PARC:
                 args += ' --tWidth ' + str(self.template_params['width'])
     
             execDir = os.path.split(__file__)[0]
-            executable = os.path.join(execDir, 'singlePARC.py')
+            executable = '"' + os.path.join(execDir, 'singlePARC.py')  + '"'
             
-            pyEx = sys.executable
+            pyEx = '"' + sys.executable + '"'
             command = ' '.join([pyEx, executable, args])
             self.logger.writetolog(command, False, False)
             proc = subprocess.Popen( command )
@@ -248,12 +298,12 @@ class PARC:
                         sourceParams, self.template_params,
                         source[3], numSourcePerTarget)
             
+            self.writetolog("   Finished Aggregating: " + shortName)
             try:
                 os.remove(tmpOutput2)
             except WindowsError:
                 pass
             
-    
     def getTemplateSRSCellSize(self, sourceParams):
         """
         Calculate what size our source image pixels would be in the template SRS
@@ -299,6 +349,8 @@ class PARC:
         
         
     def Aggregate(self, inFile, outFile, sourceParams, templateParams, method=None, numSourcePerTarget=10):
+       
+        
         sourceDs = gdal.Open(inFile, gdalconst.GA_ReadOnly)
         sourceBand  = sourceDs.GetRasterBand(1)
         
@@ -306,88 +358,163 @@ class PARC:
         tmpOutDataset = self.generateOutputDS(sourceParams, templateParams, tmpOutput)
         outBand = tmpOutDataset.GetRasterBand(1)
         
-        rows = int(sourceParams["height"])
-        cols = int(sourceParams["width"])
-
-        row = 0
-        col = 0
+        tmpParams = self.getRasterParams(inFile)
         
-        
-        pcntDone = 0.0
-        if self.verbose:
-            print "    % Done:    0.0",
-            
-        while row < templateParams["width"]:
-            while col < templateParams["height"]:
-                sourceRow = row * numSourcePerTarget
-                sourceCol = col * numSourcePerTarget
+        rows = int(tmpParams["height"])
+        cols = int(tmpParams["width"])
 
-                #kernel = self.getKernel(sourceRow, sourceCol, numSourcePerTarget, sourceDs)
-                kernel = sourceDs.GetRasterBand(1).ReadAsArray(int(sourceRow), 
-                                                    int(sourceCol), 
-                                                    int(numSourcePerTarget),
-                                                    int(numSourcePerTarget))
-                #convert kernel values of our nodata to nan
-                ndMask = ma.masked_array(kernel, mask=(kernel==sourceParams["NoData"]))
-                #print kernel
-                if method == "Min":
-                    ans = ndMask.min()
-                elif method == "Max":
-                    ans = ndMask.max()
-                elif method == "Majority":
-#                    ndMask = ndMask.flatten()
-                    uniques = np.unique(ndMask)
-                    curMajority = -3.40282346639e+038
-                    for val in uniques:
-                        numOccurances = (array(ndMask)==val).sum()
-                        if numOccurances > curMajority:
-                            ans = val
-                            curMajority = numOccurances
-                            
-#                    histogram = np.histogram(ndMask, uniques)
-#                    ans = histogram[1][histogram[0].argmax()]
-                else:
-                    ans = ndMask.mean()
-                
-#                print ndMask
-#                print ans
-                #special case real ugly
-                if ans < 0 and sourceParams["signedByte"]:
-                    ans = ans + 255
-                
-                ansArray = empty([1, 1])
-                if type(ans) == ma.core.MaskedArray:
-                    ansArray[0, 0] = sourceParams["NoData"]
-                else:
-                    ansArray[0, 0] = ans
-
-                outBand.WriteArray(ansArray, row, col)
-                
-                col += 1
-                
-            row += 1
-            col  = 0
-            if self.verbose:
-                if float(row)/templateParams["width"] > float(pcntDone)/100:
-                    pcntDone += 2.5
-                    if int(pcntDone) % 10 == 0:
-                        print str(pcntDone),
-                    else:
-                        print ".",
-        if self.verbose:
-            print "Done"
-#        if self.verbose:
-#            print "Done\nSaving to ASCII format"
-#                            
-#        driver = gdal.GetDriverByName("AAIGrid")
-#        driver.Register()
+#        row = 0
+#        col = 0
 #        
-#        dst_ds = driver.CreateCopy(outFile, tmpOutDataset, 0)
+#        
+#        pcntDone = 0.0
 #        if self.verbose:
-#            print "    Finished Saving ", self.shortName
+#            print "    % Done:    0.0",
+#            
+#            
+#        while row < templateParams["width"]:
+#            while col < templateParams["height"]:
+#                sourceRow = row * numSourcePerTarget
+#                sourceCol = col * numSourcePerTarget
+#
+#                #kernel = self.getKernel(sourceRow, sourceCol, numSourcePerTarget, sourceDs)
+#                kernel = sourceDs.GetRasterBand(1).ReadAsArray(int(sourceRow), 
+#                                                    int(sourceCol), 
+#                                                    int(numSourcePerTarget),
+#                                                    int(numSourcePerTarget))
+#                #convert kernel values of our nodata to nan
+#                ndMask = ma.masked_array(kernel, mask=(kernel==sourceParams["NoData"]))
+#                #print kernel
+#                if method == "Min":
+#                    ans = ndMask.min()
+#                elif method == "Max":
+#                    ans = ndMask.max()
+#                elif method == "Majority":
+##                    ndMask = ndMask.flatten()
+#                    uniques = np.unique(ndMask)
+#                    curMajority = -3.40282346639e+038
+#                    ans = sourceParams["NoData"] # our default
+#                    for val in uniques:
+#                        numOccurances = (array(ndMask)==val).sum()
+#                        if numOccurances > curMajority:
+#                            ans = val
+#                            curMajority = numOccurances
+#                            
+##                    histogram = np.histogram(ndMask, uniques)
+##                    ans = histogram[1][histogram[0].argmax()]
+#                else:
+#                    ans = ndMask.mean()
+#                
+##                print ndMask
+##                print ans
+#                #special case real ugly
+#                if ans < 0 and sourceParams["signedByte"]:
+#                    ans = ans + 255
+#                
+#                ansArray = empty([1, 1])
+#                if isinstance(ans, ma.core.MaskedArray):
+#                    ansArray[0, 0] = sourceParams["NoData"]
+#                else:
+#                    ansArray[0, 0] = ans
+#
+#                outBand.WriteArray(ansArray, row, col)
+#                
+#                col += 1
+#                
+#            row += 1
+#            col  = 0
+#            if self.verbose:
+#                if float(row)/templateParams["width"] > float(pcntDone)/100:
+#                    pcntDone += 2.5
+#                    if int(pcntDone) % 10 == 0:
+#                        print str(pcntDone),
+#                    else:
+#                        print ".",
+#        
+#        if self.verbose:
+#            print "Done"
+
+
+        #the above algorithm is terribly inefficient.
+        #todo replace the cell by cell analysis with a
+        #loop of 'blocks' of data maybe.  
+        bSize = 2048 #source pixels
+        #convert this to the nearest whole number of target pixels
+        bSize = int(round(bSize / numSourcePerTarget) * numSourcePerTarget)
+        if bSize == 0:
+            bSize = int(numSourcePerTarget)
+            
+
+        for i in range(0, rows, bSize):
+            if i + bSize  < rows:
+                numRows = bSize
+            else:
+                numRows = rows - i
+                
+            for j in range(0, cols, bSize):
+                if j + bSize < cols:
+                    numCols = bSize
+                else:
+                    numCols = cols - j
+                    
+                data = sourceDs.GetRasterBand(1).ReadAsArray(j, i, numCols, numRows)
+                ndMask = ma.masked_array(data, mask=(data==sourceParams["NoData"]))
+                if method == None:
+                    method = "Mean"
+                if method in ["Mean", "Max", "Min", "STD"]:
+                    ans = self.rebin(ndMask, (numRows/numSourcePerTarget, numCols/numSourcePerTarget), method)
+                else:
+                    X, Y = ndMask.shape
+                    x = X // numSourcePerTarget
+                    y = Y // numSourcePerTarget
+                    ndMask = ndMask.reshape( (x, numSourcePerTarget, y, numSourcePerTarget) )
+                    ndMask = ndMask.transpose( [0, 2, 1, 3] )
+                    ndMask = ndMask.reshape( (x*y, numSourcePerTarget*numSourcePerTarget) )
+                    ans =  np.array(stats.mode(ndMask, 1)[0]).reshape(x, y)
+            
+            
+                outBand.WriteArray(ans, int(j / numSourcePerTarget), int(i / numSourcePerTarget))
+            
+                
+#                    ans = ndMask.min()
+#                elif method == "Max":
+#                    ans = ndMask.max()
+#                elif method == "Majority":
+##                    ndMask = ndMask.flatten()
+#                    uniques = np.unique(ndMask)
+#                    curMajority = -3.40282346639e+038
+#                    ans = sourceParams["NoData"] # our default
+#                    for val in uniques:
+#                        numOccurances = (array(ndMask)==val).sum()
+#                        if numOccurances > curMajority:
+#                            ans = val
+#                            curMajority = numOccurances
+#                            
+##                    histogram = np.histogram(ndMask, uniques)
+##                    ans = histogram[1][histogram[0].argmax()]
+#                else:
+#                    ans = ndMask.mean()
+            
+            
+        outBand.FlushCache()
+        outBand.GetStatistics(0, 1)
+        
         
         dst_ds = None
-        tmpOutDataset=None
+        tmpOutDataset = None
+        
+    def rebin(self, a, shape, method): 
+        sh = shape[0],a.shape[0]//shape[0],shape[1],a.shape[1]//shape[1] 
+        if method =="Mean":
+            return a.reshape(sh).mean(-1).mean(1)
+        elif method == "Min":
+            return a.reshape(sh).min(-1).min(1)
+        elif method == "Max":
+            return a.reshape(sh).max(-1).max(1)
+        elif method == "STD":
+            sh2 = sh[0], sh[2], sh[1] * sh[3] 
+            return np.rollaxis(a.reshape(sh), 1, -1).reshape(sh2).std(-1)
+
         
     def getRasterParams(self, rasterFile):
         """
@@ -407,9 +534,14 @@ class PARC:
             
             for param in allRasterParams:
                 params[param] = None
+                
             params["Error"] = []
+            
+            
             params["file_name"] = rasterFile
-
+            if not os.path.exists(rasterFile):
+                params["Error"].append("The input file (" + rasterFile + ") does not exist on the file system.")
+                return params
             
             # Get the PARC parameters from the rasterFile.
             dataset = gdal.Open(rasterFile, gdalconst.GA_ReadOnly)
@@ -502,7 +634,10 @@ class PARC:
             #print "We ran into problems extracting raster parameters from " + rasterFile
             params["Error"].append("Some untrapped error was encountered")
         finally:
-            del dataset
+            try:
+                del dataset
+            except NameError:
+                pass
             return params
 
     def transformPoint(self, x, y, from_srs, to_srs):
@@ -576,49 +711,132 @@ class PARC:
         an individual source layer if the layer has a smaller extent
         This results in the intersection of the grids being used.
         '''
-        gt = list(self.template_params["gt"])
-        
-        #The four corners of the sourceGrid
-        nw = self.transformPoint(sourceParams['west'], sourceParams['north'], 
-                    sourceParams["srs"], self.template_params["srs"])
-        ne = self.transformPoint(sourceParams['east'], sourceParams['north'], 
-                    sourceParams["srs"], self.template_params["srs"])
-        sw = self.transformPoint(sourceParams['west'], sourceParams['south'], 
-                    sourceParams["srs"], self.template_params["srs"])
-        se = self.transformPoint(sourceParams['east'], sourceParams['south'], 
-                    sourceParams["srs"], self.template_params["srs"])
-        #because the translation of a rectangle between crs's results 
-        #in a paralellogram (or worse) I'm taking the four corner points in 
-        #source projection and transforming these to template crs and then 
-        #using the maximum/minimum for each extent.
-        largest_north = max(nw[1], ne[1])
-        smallest_south = min(sw[1], se[1])
-        largest_east = max(ne[0], se[0])
-        smallest_west =min(nw[0], sw[0])
-        
-        #Now for each direction step through the pixels until we have one smaller
-        #or larger than our min/max source extent.
-        while self.template_params['tNorth'] > largest_north:
-            #yScale is negative
-            self.template_params['tNorth'] += self.template_params['yScale']
-            self.template_params['height'] -= 1
+        if self.ImageCoversTemplate(sourceParams):
+            #the template is already smaller than the image in question
+            #Do nothing
+            return False
+        else:
+            gt = list(self.template_params["gt"])
             
-        while self.template_params['tSouth'] < smallest_south:
-            self.template_params['tSouth'] -= self.template_params['yScale']
-            self.template_params['height'] -= 1
-        gt[3] = self.template_params['tNorth']
-        
-        while self.template_params['tWest'] < smallest_west:
-            #yScale is negative
-            self.template_params['tWest'] += self.template_params['xScale']
-            self.template_params['width'] -= 1
+            #because the translation of a rectangle between crs's results 
+            #in a paralellogram (or worse) I'm taking the four corner points in 
+            #source projection and transforming these to template crs and then 
+            #using the maximum/minimum for each extent.          
+            largest_north = self.maxNorth(sourceParams)
+            smallest_south = self.minSouth(sourceParams)
+            largest_east = self.maxEast(sourceParams)
+            smallest_west = self.minWest(sourceParams)
             
-        while self.template_params['tEast'] > largest_east:
-            self.template_params['tEast'] -= self.template_params['xScale']
-            self.template_params['width'] -= 1
-        gt[0] = self.template_params['tWest']
-        #set the template geotransform to be our modified one.
-        self.template_params["gt"] = tuple(gt)
+            #Now for each direction step through the pixels until we have one smaller
+            #or larger than our min/max source extent.
+            orig_tNorth = self.template_params['tNorth']
+            shrinkN = 0
+            while self.template_params['tNorth'] > largest_north:
+                #yScale is negative
+                self.template_params['tNorth'] += self.template_params['yScale']
+                self.template_params['height'] -= 1
+                shrinkN += 1
+            if orig_tNorth <> self.template_params['tNorth']:
+                msg = "Northern edge of template reduced " + str(shrinkN) + " pixels due to, "
+                msg += "the extent of " + sourceParams["file_name"]
+                self.writetolog(msg) 
+            
+            orig_tSouth = self.template_params['tSouth']
+            shrinkN = 0    
+            while self.template_params['tSouth'] < smallest_south:
+                self.template_params['tSouth'] -= self.template_params['yScale']
+                self.template_params['height'] -= 1
+                shrinkN += 1
+            if orig_tSouth <> self.template_params['tSouth']:
+                msg = "NSouthern edge of template reduced " + str(shrinkN) + " pixels due to, "
+                msg += "the extent of " + sourceParams["file_name"] 
+                self.writetolog(msg)
+            
+            gt[3] = self.template_params['tNorth']
+            
+            
+            orig_tWest = self.template_params['tWest']
+            shrinkN = 0
+            while self.template_params['tWest'] < smallest_west:
+                #yScale is negative
+                self.template_params['tWest'] += self.template_params['xScale']
+                self.template_params['width'] -= 1
+                shrinkN += 1
+            if orig_tWest <> self.template_params['tWest']:
+                msg = "Western edge of template reduced " + str(shrinkN) + " pixels due to, "
+                msg += "the extent of " + sourceParams["file_name"]   
+                self.writetolog(msg)
+            
+            orig_tEast = self.template_params['tEast']
+            shrinkN = 0
+            while self.template_params['tEast'] > largest_east:
+                self.template_params['tEast'] -= self.template_params['xScale']
+                self.template_params['width'] -= 1
+                shrinkN += 1
+            gt[0] = self.template_params['tWest']
+            if orig_tEast <> self.template_params['tEast']:
+                msg = "Eastern edge of template reduced " + str(shrinkN) + " pixels due to, "
+                msg += "the extent of " + sourceParams["file_name"]
+                self.writetolog(msg)
+            
+            #set the template geotransform to be our modified one.
+            self.template_params["gt"] = tuple(gt)
+
+    def maxNorth(self, sourceParams):
+        northWidth = sourceParams['east'] - sourceParams['west']
+        curW = sourceParams['west']
+        steps = 10
+        maxNorth = -999999
+        for step in range(steps + 1):
+            curWest = sourceParams['west'] + step*(northWidth/steps)
+            transPoint = self.transformPoint(curWest, sourceParams['north'], 
+                        sourceParams["srs"], self.template_params["srs"])
+#            print curWest, sourceParams['north'], " = ", transPoint
+            if transPoint[1] > maxNorth:
+                maxNorth = transPoint[1]
+        return maxNorth
+    
+    def minSouth(self, sourceParams):
+        southWidth = sourceParams['east'] - sourceParams['west']
+        curW = sourceParams['west']
+        steps = 10
+        minSouth = 999999
+        for step in range(steps + 1):
+            curWest = sourceParams['west'] + step*(southWidth/steps)
+            transPoint = self.transformPoint(curWest, sourceParams['south'], 
+                        sourceParams["srs"], self.template_params["srs"])
+#            print curWest, sourceParams['south'], " = ", transPoint
+            if transPoint[1] < minSouth:
+                minSouth = transPoint[1]
+        return minSouth
+    
+    def maxEast(self, sourceParams):
+        eastHeight = sourceParams['north'] - sourceParams['south']
+        curN = sourceParams['north']
+        steps = 10
+        maxEast = -999999
+        for step in range(steps + 1):
+            curNorth = sourceParams['south'] + step*(eastHeight/steps)
+            transPoint = self.transformPoint(sourceParams["east"], curNorth,
+                        sourceParams["srs"], self.template_params["srs"])
+#            print curWest, sourceParams['south'], " = ", transPoint
+            if transPoint[0] > maxEast:
+                maxEast = transPoint[0]
+        return maxEast
+    
+    def minWest(self, sourceParams):
+        westHeight = sourceParams['north'] - sourceParams['south']
+        curN = sourceParams['north']
+        steps = 10
+        minWest = 999999
+        for step in range(steps + 1):
+            curNorth = sourceParams['south'] + step*(westHeight/steps)
+            transPoint = self.transformPoint(sourceParams["west"], curNorth,
+                        sourceParams["srs"], self.template_params["srs"])
+#            print curWest, sourceParams['south'], " = ", transPoint
+            if transPoint[0] < minWest:
+                minWest = transPoint[0]
+        return minWest
 
     def validateArgs(self):
         """
@@ -670,20 +888,32 @@ class PARC:
         for row in inputsCSV:
             inputFile = row[0]
             input_just_file = os.path.splitext(os.path.split(inputFile)[1])[0]
+            
+            if input_just_file == "hdr":
+                inputFile = os.path.split(inputFile)[0]
+                row[0] = inputFile
+                input_just_file = os.path.split(inputFile)[1]
+                
+            if input_just_file[0].isdigit():
+                row[0] = os.path.join(os.path.split(inputFile)[0], "_" + input_just_file)
+
+                
             if input_just_file in inputs:
                 strInputFileErrors += "\n  PARC not currently set up to handle identically named inputs."
                 strInputFileErrors += "\n\t" + input_just_file + " used multiple times"
             else:
                 inputs.append(input_just_file)
                 
-            sourceParams = self.getRasterParams(inputFile)
+                
+            sourceParams = self.getRasterParams(inputFile)                
+                
             if len(sourceParams["Error"]) > 0:
                 strInputFileErrors += ("  " + os.path.split(inputFile)[1] + " had the following errors:\n" + 
                                     "    " + "\n    ".join(sourceParams["Error"])) + "\n"
             else:
                 pass
                 if not self.ignoreNonOverlap and not self.ImageCoversTemplate(sourceParams):
-                    strInputFileErrors += ("\n  Some part of the template image falls outside of " + os.path.split(inputFile)[1])
+                    strInputFileErrors += "\n  Some part of the template image falls outside of " + input_just_file
                     strInputFileErrors += "\n        template upper left  = (" + str(self.template_params["gWest"]) + ", " + str(self.template_params["gNorth"]) + ")"
                     strInputFileErrors += "\n        template lower right = (" + str(self.template_params["gEast"]) + ", " + str(self.template_params["gSouth"]) + ")"
                     strInputFileErrors += "\n        image    upper left  = (" + str(sourceParams["gWest"]) + ", " + str(sourceParams["gNorth"]) + ")"
@@ -691,8 +921,8 @@ class PARC:
 
                 if self.ignoreNonOverlap:
                    #if this input is smaller in any of the dimensions
-                   self.shrink_template_extent(sourceParams)
-
+#                   self.shrink_template_extent(sourceParams)
+                    pass
 
             if len(row) < 2 or not row[1] in ['0', '1']:
                 self.writetolog("  " + os.path.split(inputFile)[1] + " categorical either missing or not 0 or 1:\n   Defaulting to 0 (continuous)")
@@ -759,9 +989,13 @@ class PARC:
         tmpOutDataset = None
 
     def calc_stats(self, filename):
-        dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
+        print filename
+        dataset = gdal.Open(filename, gdalconst.GA_Update)
         band = dataset.GetRasterBand(1)
+        band.FlushCache()
         band.GetStatistics(0,1)
+        histogram = band.GetDefaultHistogram()
+        band.SetDefaultHistogram(histogram[0], histogram[1], histogram[3])
         
 
     def generateOutputDS(self, sourceParams, templateParams, 
@@ -834,6 +1068,7 @@ class PARC:
     
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
+    #cleanup
 #    try:
 ##        PARC().testing()
 #        sys.exit(PARC().main(sys.argv[1:]))
