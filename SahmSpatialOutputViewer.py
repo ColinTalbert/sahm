@@ -553,6 +553,16 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
                     rmin = min
 
             norm = colors.normalize(rmin, rmax)
+            print raster_array
+            print "raster_array is None:", raster_array is None
+            print "raster_array.size:", raster_array.size
+            print "type(raster_array):", type(raster_array)
+            for m in dir(raster_array):
+                print "\t\t", m
+            if raster_array.size == 1:
+                print "raster_array is None!!!/n/n"
+                raster_array = np.empty([1960, 1080])
+                print raster_array
             raster_plot = self.axes.imshow(raster_array,interpolation="nearest", cmap=kwargs['cmap'], norm=norm, origin='upper', extent=self.getDataExtent())
             
 
