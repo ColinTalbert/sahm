@@ -241,7 +241,8 @@ def mds_to_shape(MDSFile, outputfolder):
             abslayer.CreateFeature(feature)
         elif response > 0:
             preslayer.CreateFeature(feature)
-        elif abs(response - -9999.0) < 1e-9:
+        elif abs(response - -9999.0) < 1e-9 or \
+            abs(response - -9998.0) < 1e-9:
             backslayer.CreateFeature(feature)
 
     # close the data sources

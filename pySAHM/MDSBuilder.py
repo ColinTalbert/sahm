@@ -323,7 +323,7 @@ class MDSBuilder(object):
             #randomly assign each pixel to it's include/remove status
             #and store a list of the pixels to include.  
             #A random sample of this list will be used as our background points.
-            if self.probSurface == '':
+            if self.probSurface == '' or self.probSurface is None:
                 self.pullBackgroundTiledNoProbSurface(fOut, pointval)
             else: 
                 self.pullBackgroundTiledWithProbSurface(fOut, pointval)
