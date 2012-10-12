@@ -1818,6 +1818,11 @@ def initialize():
     utils.importOSGEO() 
     utils.createLogger(session_dir, configuration.verbose)
 
+    gdal_data = os.path.join(os.path.dirname(__file__), "GDAL_Resources", "gdal-data")
+    os.environ['GDAL_DATA'] = gdal_data
+    projlib = os.path.join(os.path.dirname(__file__), "GDAL_Resources", "projlib")
+    os.environ['PROJ_LIB'] = projlib
+
     color_breaks_csv = os.path.abspath(os.path.join(os.path.dirname(__file__),  "ColorBreaks.csv"))
     
     load_max_ent_params()

@@ -540,7 +540,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 #        rmax = np.amax(raster_array)
 
         if kwargs['categorical']:
-            raster_plot = self.axes.imshow(raster_array, interpolation="nearest", cmap=kwargs['cmap'], origin='upper', extent=self.getMaxExtent())
+            raster_plot = self.axes.imshow(raster_array, interpolation="nearest", cmap=kwargs['cmap'], origin='upper', extent=self.getDataExtent())
         else:
             rmin = kwargs['min']
             rmax = kwargs['max']
@@ -772,9 +772,9 @@ class RasterDisplay(object):
         if xend > (xform[0] + (ds.RasterXSize * xform[1])):
             xend = (xform[0] + (ds.RasterXSize * xform[1]))
         if ystart < (xform[3] + (ds.RasterYSize * xform[5])):
-            ystart = xform[3]
+            ystart = (xform[3] + (ds.RasterYSize * xform[5]))
         if yend > xform[3]:
-            xend = xform[3]
+            yend = xform[3]
         
 
         ncols = int((xend - xstart) / xform[1])
@@ -1130,18 +1130,6 @@ class SAHMSpatialViewerToolBar(QCellToolBar):
                 #disenable all action refering to data we don't have
                 action.setEnabled(sw.all_layers[action.tag]['enabled'])
 
-#        #Strip out the unused actions
-#        keep_actions = ['Zoom', 'Save', 'Back', 'Forward']
-#        for action in sw.mpl_toolbar.actions():
-#            if not action.text() in keep_actions and action.text():
-#                continue
-#            if action.text() == 'Zoom':
-#                icon = os.path.abspath(os.path.join(
-#                    os.path.dirname(__file__), "Images", "zoom.png"))
-#                action.setIcon(QtGui.QIcon(icon))
-#            if action.text()  == 'Pan':
-#                action.setChecked(True)
-#            self.appendAction(action)
 
         sw.popMenu = self.gen_popup_menu()
 
@@ -1174,33 +1162,3 @@ class AnchoredText(AnchoredOffsetbox):
                                            child=self.txt,
                                            prop=prop,
                                            frameon=frameon)
-
-#class popup_menu(QtGui.QMenu):
-#    def __init__(self, parent=None, mpl_toolbar=None):
-#
-#        QtGui.QMenu.__init__(self, parent)
-#
-#        toolbar = QtGui.QToolBar()
-#        for action in mpl_toolbar.actions():
-#            action.setIconVisibleInMenu(True)
-#            self.addAction(action)
-#
-#        # Actions
-#        icon = os.path.abspath(os.path.join(os.path.dirname(__file__), "Images", "RedPoints.png"))
-#        self.actionPresence = QtGui.QAction(QtGui.QIcon(icon), "Presence points", self)
-#        self.actionPresence.setStatusTip("Display/hide presence points")
-#        self.connect(self.actionPresence, QtCore.SIGNAL("triggered()"), self.on_pointsclick)
-#        self.actionPresence.setIconVisibleInMenu(True)
-#
-#        self.actionAbsence = QtGui.QAction(QtGui.QIcon("GreenPoints.png"), "Presence points", self)
-#        self.actionAbsence.setStatusTip("Display/hide absence points")
-#
-#
-#        # create context menu
-#        self.addAction(self.actionPresence)
-#        self.addAction(self.actionAbsence)
-#        self.addSeparator()
-#
-#
-#    def on_pointsclick(self):
-#        QtGui.QMessageBox.about(self, "I do nothing", "no really")
