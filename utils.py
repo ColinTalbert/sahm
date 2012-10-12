@@ -419,7 +419,7 @@ def runRScript(script, args, module=None):
     del(ret)
     writetolog("\nFinished R Processing of " + script, True)
 
-def getR_folder():
+def getR_folder(module=None):
     global r_path
     
     #are we in 64 or 32 bit?  If 64 use the 64 bit install of R otherwise 32 bit.
