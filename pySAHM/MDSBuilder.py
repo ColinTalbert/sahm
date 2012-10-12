@@ -147,6 +147,8 @@ class MDSBuilder(object):
         
         self.constructEmptyMDS()
         
+        self.findTemplate()
+        
         if self.pointCount > 0:
             self.addBackgroundPoints()
         
@@ -251,6 +253,15 @@ class MDSBuilder(object):
         oFile.close()
         del fOut
     
+    def findTemplate(self):
+        #identify template if there is one.
+        fieldDataCSV = csv.reader(open(self.fieldData, "r"))
+        origHeader = fieldDataCSV.next()
+        if SpatialUtilities.isRaster(origHeader[-2]):
+            self.template = origHeader[-2]
+        else:
+            self.template = self.inputs[0]
+    
     def readInPoints(self):
         '''Loop through each row in our field data and add the X, Y, response
         to our in memory list of rows to write to our output MDS file
@@ -344,7 +355,7 @@ class MDSBuilder(object):
             probRaster = self.probSurface
             useProbSurf = True
         else:
-            probRaster = SpatialUtilities.SAHMRaster(self.inputs[0])
+            probRaster = SpatialUtilities.SAHMRaster(self.template)
             useProbSurf = False
         
         if self.verbose:
@@ -371,7 +382,8 @@ class MDSBuilder(object):
                 if useProbSurf:
                     pixelProb = probRaster.getPixelValueFromIndex(col, row)
                 keep = pixelProb >= random.randint(1,100)
-                if keep:
+                if keep and \
+                    not self.floatEquality(probRaster.getPixelValueFromIndex(col, row), probRaster.NoData):
                     #convert our outValues for row, col to coordinates
                     x, y = probRaster.convertColRowToCoords(col, row)
                     tmpPixel = [x, y, pointVal]
@@ -390,7 +402,7 @@ class MDSBuilder(object):
         sample a large proportion of the total number of cells.  
         Either they have a small template or a large number of points.
         """
-        probsurf = SpatialUtilities.SAHMRaster(self.inputs[0])
+        probsurf = SpatialUtilities.SAHMRaster(self.template)
         rows = int(probsurf.height)
         cols = int(probsurf.width)
         
@@ -401,8 +413,9 @@ class MDSBuilder(object):
         for cell in backgrounds:
             col, row = divmod(cell, rows)
             x, y = probsurf.convertColRowToCoords(col, row)
-            tmpPixel = [x, y, pointVal]
-            fOut.writerow(tmpPixel)
+            if not self.floatEquality(probsurf.getPixelValueFromIndex(col, row), probRaster.NoData):
+                tmpPixel = [x, y, pointVal]
+                fOut.writerow(tmpPixel)
         
     def pullBackgroundTiledWithProbSurface(self, fOut, pointVal):
          
@@ -448,8 +461,9 @@ class MDSBuilder(object):
         for cell in backgrounds:
             col, row = divmod(cell, rows)
             x, y = self.probSurface.convertColRowToCoords(col, row)
-            tmpPixel = [x, y, pointVal]
-            fOut.writerow(tmpPixel)
+            if not self.floatEquality(self.probSurface.getPixelValueFromIndex(col, row), self.probSurface.NoData):
+                tmpPixel = [x, y, pointVal]
+                fOut.writerow(tmpPixel)
         
     def pullFieldDataValues(self):
         outputRows = self.readInPoints()
