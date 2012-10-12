@@ -131,7 +131,8 @@ Input Ports:
                 responseCurveFiles = os.listdir(response_directory)
                 response_curves = []
                 for response_curve in responseCurveFiles:
-                    response_curves.append(os.path.join(response_directory, response_curve))
+                    if response_curve != "Thumbs.db":  #Windows grief
+                        response_curves.append(os.path.join(response_directory, response_curve))
             else:
                 response_curves = []
             
@@ -202,13 +203,19 @@ class SAHMOutputViewerCellWidget(QCellWidget):
 #        self.ui.gv_prob_map.setScene(self.gs_prob_map)
 #        self.gs_prob_map.wheelEvent = self.wheel_event_prob
         
+        self.gs_crv_graph = QtGui.QGraphicsScene()
+        self.ui.gv_crv.setScene(self.gs_crv_graph)
+        QtCore.QObject.connect(self.ui.crv_combobox, QtCore.SIGNAL("currentIndexChanged(QString)"), self.changeResponseCurve)
+#        self.ui.crv_combobox.currentIndexChanged = self.changeResponseCurve
+        self.gs_crv_graph.wheelEvent = self.wheel_event_crv
+        
         self.gs_auc_graph = QtGui.QGraphicsScene()
         self.ui.gv_auc.setScene(self.gs_auc_graph)
         self.gs_auc_graph.wheelEvent = self.wheel_event_auc
         
-        self.gs_response_graph = QtGui.QGraphicsScene()
-        self.ui.gv_response.setScene(self.gs_response_graph)
-        self.gs_response_graph.wheelEvent = self.wheel_event_response
+#        self.gs_response_graph = QtGui.QGraphicsScene()
+#        self.ui.gv_response.setScene(self.gs_response_graph)
+#        self.gs_response_graph.wheelEvent = self.wheel_event_response
         
         self.gs_calibration_graph = QtGui.QGraphicsScene()
         self.ui.gv_calibration.setScene(self.gs_calibration_graph)
@@ -229,11 +236,11 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         self.ui.text_output_layout.addWidget(self.text_browser)
         self.text_urlSrc = None
         
-        layout = QtGui.QVBoxLayout()
-        self.response_frame = QtGui.QFrame(self)
-        self.response_graph = QtGui.QGraphicsScene()
-        self.ui.gv_response.setScene(self.response_graph)
-        self.response_graph.wheelEvent = self.wheel_event_response
+#        layout = QtGui.QVBoxLayout()
+#        self.response_frame = QtGui.QFrame(self)
+#        self.response_graph = QtGui.QGraphicsScene()
+#        self.ui.gv_response.setScene(self.response_graph)
+#        self.response_graph.wheelEvent = self.wheel_event_response
         
         
         
@@ -247,6 +254,39 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         
         self.layout().addWidget(self.Frame)
 
+    def changeResponseCurve(self, event):
+        active_cells = self.get_active_cells()
+        for cell in active_cells:
+            try:
+                responseCurve = [rc for rc in cell.response_curves if os.path.splitext(os.path.split(rc)[1])[0]==event][0]
+                pixmap_crv = QtGui.QPixmap(responseCurve)
+                max_size = self.getMaxSize(cell.ui.gv_crv)
+                scaled_pixmap_crv = pixmap_crv.scaled(max_size, max_size, 
+                                            QtCore.Qt.KeepAspectRatio, 
+                                            QtCore.Qt.SmoothTransformation)
+            
+                cell.images['crv_graph'] = [pixmap_crv,
+                                       scaled_pixmap_crv,
+                                       cell.gs_crv_graph,
+                                       cell.ui.gv_crv,
+                                       max_size]
+                cell.ui.crv_combobox.blockSignals(True)
+                curIndex = [i for i in range(cell.ui.crv_combobox.count()) if cell.ui.crv_combobox.itemText(i)==event][0]
+                cell.ui.crv_combobox.setCurrentIndex(curIndex)
+                cell.ui.crv_combobox.blockSignals(False)
+            except IndexError:
+                cell.images['crv_graph'] = [QtGui.QPixmap(),
+                                       QtGui.QPixmap(),
+                                       cell.gs_crv_graph,
+                                       cell.ui.gv_crv,
+                                       100]
+                
+                cell.ui.crv_combobox.blockSignals(True)
+                cell.ui.crv_combobox.setCurrentIndex(-1)
+                cell.ui.crv_combobox.blockSignals(False)
+            cell.view_current()
+        
+
     def tabChanged(self):
         active_cells = self.get_active_cells()
         
@@ -258,23 +298,10 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         Update the widget contents based on the input data
         
         """
-        (auc_graph, text_output, response_curves, calibration_graph, confusion_graph, 
+        (auc_graph, text_output, self.response_curves, calibration_graph, confusion_graph, 
          residuals_graph, model_label, inital_display) = inputPorts
         
         self.images = {}
-#        if prob_map:
-#            #Value = (full image, sized image, scene, view, max_height)
-#            pixmap = QtGui.QPixmap(prob_map.name)
-#            max_size = self.getMaxSize(self.ui.gv_prob_map)
-#            scaled_pixmap = pixmap.scaled(max_size, max_size, 
-#                                            QtCore.Qt.KeepAspectRatio, 
-#                                            QtCore.Qt.FastTransformation)
-#            
-#            self.images['prob_map'] = [pixmap,
-#                                       scaled_pixmap,
-#                                       self.gs_prob_map,
-#                                       self.ui.gv_prob_map,
-#                                       max_size]
         
         if auc_graph:
             pixmap = QtGui.QPixmap(auc_graph.name)
@@ -288,6 +315,32 @@ class SAHMOutputViewerCellWidget(QCellWidget):
                                        self.gs_auc_graph,
                                        self.ui.gv_auc,
                                        max_size]
+#        if response_curves:
+#            for response_curve in response_curves:
+#                shortName = os.path.split(response_curve)[1]
+#                shortName = os.path.splitext(shortName)[0]
+##                if shortName != "Thumbs": 
+##                    self.ui.response_combobox.addItem(shortName)
+#                
+#            pixmap_response = QtGui.QPixmap(response_curves[0])
+#            max_size = self.getMaxSize(self.ui.gv_response)
+#            scaled_pixmap_response = pixmap_response.scaled(max_size, max_size, 
+#                                            QtCore.Qt.KeepAspectRatio, 
+#                                            QtCore.Qt.SmoothTransformation)
+#            
+#            self.images['response_graph'] = [pixmap_response,
+#                                       scaled_pixmap_response,
+#                                       self.gs_response_graph,
+#                                       self.ui.gv_response,
+#                                       max_size]
+        if self.response_curves:
+            for response_curve in self.response_curves:
+                shortName = os.path.split(response_curve)[1]
+                shortName = os.path.splitext(shortName)[0]
+                if shortName != "Thumbs": 
+                    self.ui.crv_combobox.addItem(shortName)
+                
+
         
         if calibration_graph:
             pixmap_cal = QtGui.QPixmap(calibration_graph.name)
@@ -334,26 +387,7 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         else:
             self.text_browser.dynamicCall('Navigate(const QString&)', QtCore.QString('about:blank'))
         
-        if response_curves:
-            for response_curve in response_curves:
-                shortName = os.path.split(response_curve)[1]
-                shortName = os.path.splitext(shortName)[0]
-                if shortName != "Thumbs": 
-                    self.ui.response_combobox.addItem(shortName)
-                
-            pixmap_response = QtGui.QPixmap(response_curves[0])
-            max_size = self.getMaxSize(self.ui.gv_response)
-            scaled_pixmap_response = pixmap_response.scaled(max_size, max_size, 
-                                            QtCore.Qt.KeepAspectRatio, 
-                                            QtCore.Qt.SmoothTransformation)
-            
-            self.images['response_graph'] = [pixmap_response,
-                                       scaled_pixmap_response,
-                                       self.gs_response_graph,
-                                       self.ui.gv_response,
-                                       max_size]
-
-        
+       
         choices = ['Text', 'Response Curves', 'AUC', 'Calibration', 'Confusion', 'Residuals']
         selected_index = choices.index(inital_display)
         self.ui.tabWidget.setCurrentIndex(selected_index)
@@ -371,11 +405,11 @@ class SAHMOutputViewerCellWidget(QCellWidget):
     
     def view_current(self):
         for k,v in self.images.iteritems():
-            size_img = v[1].size() 
+            size_img = v[1].size()
             wth, hgt = QtCore.QSize.width(size_img), QtCore.QSize.height(size_img) 
             v[2].clear() 
             v[2].setSceneRect(0, 0, wth, hgt) 
-            v[2].addPixmap(v[1]) 
+            v[2].addPixmap(v[1])
         QtCore.QCoreApplication.processEvents() 
 
     def wheel_event_prob(self, event):
@@ -384,8 +418,8 @@ class SAHMOutputViewerCellWidget(QCellWidget):
     def wheel_event_auc(self, event):
         self.wheel_event(event, 'auc_graph', QtCore.Qt.SmoothTransformation)
 
-    def wheel_event_response(self, event):
-        self.wheel_event(event, 'response_graph', QtCore.Qt.SmoothTransformation)
+    def wheel_event_crv(self, event):
+        self.wheel_event(event, 'crv_graph', QtCore.Qt.SmoothTransformation)
 
     def wheel_event_calibration(self, event):
         self.wheel_event(event, 'calibration_graph', QtCore.Qt.SmoothTransformation)
@@ -609,22 +643,38 @@ class Ui_Frame(object):
         self.tabWidget.addTab(self.text_output, _fromUtf8(""))
         self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.text_output), QtGui.QApplication.translate("Frame", "Textual model output ", None, QtGui.QApplication.UnicodeUTF8))
         
-        self.response_curves = QtGui.QWidget()
-        self.response_curves.setObjectName(_fromUtf8("response_curves"))
-        self.response_curves_layout = QtGui.QVBoxLayout(self.response_curves)
-        self.response_curves_layout.setSpacing(0)
-        self.response_curves_layout.setMargin(0)
-        self.response_curves_layout.setObjectName(_fromUtf8("response_curves_layout"))
-        self.response_combobox = QtGui.QComboBox(self.response_curves)
-        self.response_curves_layout.addWidget(self.response_combobox)
-        self.gv_response = QtGui.QGraphicsView(self.response_curves)
-        self.gv_response.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
-        self.gv_response.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
-        self.gv_response.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
-        self.gv_response.setObjectName(_fromUtf8("gv_response"))
-        self.response_curves_layout.addWidget(self.gv_response)
-        self.tabWidget.addTab(self.response_curves, _fromUtf8(""))
-        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.response_curves), QtGui.QApplication.translate("Frame", "Response curves", None, QtGui.QApplication.UnicodeUTF8))        
+#        self.response_curves = QtGui.QWidget()
+#        self.response_curves.setObjectName(_fromUtf8("response_curves"))
+#        self.response_curves_layout = QtGui.QHBoxLayout(self.response_curves)
+#        self.response_curves_layout.setSpacing(0)
+#        self.response_curves_layout.setMargin(0)
+#        self.response_curves_layout.setObjectName(_fromUtf8("response_curves_layout"))
+##        self.response_combobox = QtGui.QComboBox(self.response_curves)
+##        self.response_curves_layout.addWidget(self.response_combobox)
+#        self.gv_response = QtGui.QGraphicsView(self.response_curves)
+#        self.gv_response.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
+#        self.gv_response.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+#        self.gv_response.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+#        self.gv_response.setObjectName(_fromUtf8("gv_response"))
+#        self.response_curves_layout.addWidget(self.gv_response)
+#        self.tabWidget.addTab(self.response_curves, _fromUtf8(""))
+#        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.response_curves), QtGui.QApplication.translate("Frame", "Response curves", None, QtGui.QApplication.UnicodeUTF8))        
+        
+        self.crv = QtGui.QWidget()
+        self.crv.setObjectName(_fromUtf8("crv"))
+        self.horizontalLayout_4crv = QtGui.QVBoxLayout(self.crv)
+        self.horizontalLayout_4crv.setSpacing(0)
+        self.horizontalLayout_4crv.setMargin(0)
+        self.horizontalLayout_4crv.setObjectName(_fromUtf8("horizontalLayout_4crv"))
+        self.crv_combobox = QtGui.QComboBox(self.crv)
+        self.horizontalLayout_4crv.addWidget(self.crv_combobox)
+        self.gv_crv = QtGui.QGraphicsView(self.crv)
+        self.gv_crv.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
+        self.gv_crv.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        self.gv_crv.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        self.gv_crv.setObjectName(_fromUtf8("gv_crv"))
+        self.horizontalLayout_4crv.addWidget(self.gv_crv)
+        self.tabWidget.addTab(self.crv, _fromUtf8(""))
         
         self.auc = QtGui.QWidget()
         self.auc.setObjectName(_fromUtf8("auc"))
@@ -693,7 +743,8 @@ class Ui_Frame(object):
 
     def retranslateUi(self, Frame):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.text_output), QtGui.QApplication.translate("Frame", "Text Results", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.response_curves), QtGui.QApplication.translate("Frame", "Response", None, QtGui.QApplication.UnicodeUTF8))
+#        self.tabWidget.setTabText(self.tabWidget.indexOf(self.response_curves), QtGui.QApplication.translate("Frame", "Response", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.crv), QtGui.QApplication.translate("Frame", "Response Curves", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.auc), QtGui.QApplication.translate("Frame", "AUC", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.calibration), QtGui.QApplication.translate("Frame", "Calibration", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.confusion), QtGui.QApplication.translate("Frame", "Confusion", None, QtGui.QApplication.UnicodeUTF8))
