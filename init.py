@@ -1835,8 +1835,6 @@ def initialize():
 #    writetolog("   Layers CSV = " + os.path.join(os.path.dirname(__file__), 'layers.csv'))
     writetolog("   Layers CSV = " + layers_csv_fname)
     writetolog("   R path = " + r_path)
-    writetolog("   GDAL folder = " + os.path.abspath(configuration.gdal_path))
-#    writetolog("        Must contain subfolders proj, gdal-data, GDAL")
     writetolog("   Maxent folder = " + maxent_path)
 #    writetolog("   QGIS folder = " + os.path.abspath(configuration.qgis_path))
 #    writetolog("        Must contain subfolders qgis1.7.0, OSGeo4W")
