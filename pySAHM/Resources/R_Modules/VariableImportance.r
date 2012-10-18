@@ -8,7 +8,7 @@ VariableImportance<-function(Model,out,auc){
     resp<-lapply(out$dat$ma,"[",1)
     auc<-unlist(auc,recursive=TRUE)
      
-      for(j in 1:length(dat)){
+    for(j in 1:length(dat)){
       for (i in 1:length(out$mods$vnames)){
        indx<-match(out$mods$vnames[i],names(dat[[j]]))
        Dat<-dat[[j]]
@@ -16,7 +16,7 @@ VariableImportance<-function(Model,out,auc){
        new.pred<-as.vector(pred.fct(model=out$mods$final,x=Dat,Model=out$input$script.name))
        auc.mat[i,j]<-auc[j]-auc(data.frame(cbind(seq(1:nrow(dat[[j]])),resp[[j]][1]$resp,new.pred)))[1,1]
     }
-    auc.mat[,j]<-auc.mat[,j]/sum(auc.mat[,j])
+   #auc.mat[,j]<-auc.mat[,j]/sum(auc.mat[,j])
    }
     
     rownames(auc.mat)<-out$mods$vnames
@@ -25,28 +25,30 @@ VariableImportance<-function(Model,out,auc){
                      }
    #if cross validation we need to avg across folds otherwise plot for each
    #order by the best in the train split
-   xright<-pmax(auc.mat,0)[order(auc.mat[,ncol(auc.mat)],decreasing=FALSE),]
-   ymiddle=seq(from=0,to=(length(out$mods$vnames)),length=nrow(xright))
-  offSet<-.5
+  
+   xright<-as.matrix(auc.mat[order(apply(auc.mat,1,mean),decreasing=FALSE),])
+   ymiddle=seq(from=0,to=length(out$mods$vnames),length=nrow(xright))
+  offSet<-.5 
+
 ######################## copied from append out
   par(mar=c(5,17,4,2))
-    plot(c(0,(max(auc.mat)+.1)),y=c(-.5,(length(out$mods$vnames)+.5)),type="n",xlab="Importance",main="Relative Importance \n based on AUC drop when permuted",ylab="",yaxt="n",cex.lab=1.4)
+    plot(c(min(0,min(auc.mat)),(max(auc.mat)+.1)),y=c(-.5,(length(out$mods$vnames)+.5)),type="n",xlab="Importance",main="Relative Importance \n based on AUC drop when permuted",ylab="",yaxt="n",cex.lab=1.4)
     grid()
       if(out$dat$split.type!="crossValidation"){
          rect(xleft=0,ybottom=ymiddle,xright=xright[,ncol(xright)],ytop=ymiddle+offSet,col="blue",lwd=2)
       }                         
      if(out$dat$split.type=="test"){
         rect(xleft=0,ybottom=ymiddle-offSet,xright=xright[,1],ytop=ymiddle,col="lightblue",lwd=2)
-        legend(y=.25,x=(max(auc.mat)-.1),legend=c("train","test"),fill=c("blue","lightblue"),bg="white",cex=2)
-      } 
-                              
+        legend("bottomright" ,legend=c("train","test"),fill=c("blue","lightblue"),bg="white",cex=2)
+      }                         
       if(out$dat$split.type=="crossValidation"){ 
         auc.mat<-auc.mat[order(auc.mat[,ncol(auc.mat)],decreasing=FALSE),]
         boxplot(t(auc.mat[,1:(ncol(auc.mat)-1)]),horizontal =TRUE,add=TRUE,at=ymiddle,yaxt="n",col="lightblue")
         points(y=ymiddle,x=auc.mat[,ncol(auc.mat)],cex=3,pch=8,lwd=3,col="darkslateblue")
-        legend(x=(max(auc.mat)-.15),y=.2,legend=c("CV","Train"),pch=c(22,8),pt.cex=c(3,3.5),pt.lwd=c(2,3),pt.bg=c("lightblue","darkslateblue"),col=c("black","darkslateblue"),cex=1.8)
+        legend(x="bottomright",legend=c("CV","Train"),pch=c(22,8),pt.cex=c(3,3.5),pt.lwd=c(2,3),pt.bg=c("lightblue","darkslateblue"),col=c("black","darkslateblue"),cex=1.5)
       }
  ############################### copied from appendOut 
-    axis(2,at=seq(from=0,to=length(out$mods$vnames),length=length(out$mods$vnames)),labels=rownames(xright),las=2,cex=.7)
+    Offset=ifelse(out$dat$split.type=="none",.25,0)
+    axis(2,at=seq(from=0,to=length(out$mods$vnames),length=length(out$mods$vnames))+Offset,labels=rownames(xright),las=2,cex=.7)
     title(ylab="Variables",line=15,cex.lab=1.4,font.lab=2)
 }
