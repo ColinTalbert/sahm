@@ -12,10 +12,20 @@ predictor="bio_13"
 i="C:\\temp\\SAHM_workspace\\NonSpatialData.csv"
 predictor="PrecipitatoinRast"
 
-## Used available should work as well
-i="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\ElithPsdoAbs.csv"
+## testing factors
+i="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\PresAbsFactorCVEvaluation.csv"
+predictor="romoveg_rc_categorical"
+predictor="NDVI_browndownrates1_2009"
 o="C:\\temp\\SAHMDebugJunk\\BRTOut1" 
-predictor="Temperature"  
+rc="responseBinary"
+
+## testing count
+#i="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\CountFactorSplit.csv"
+i="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\VistrailsSessions\\MergedDataset_Split.csv"
+predictor="TemperatureRastPois"
+o="I:\\VisTrails\\WorkingFiles\\workspace\\NewOutput\\SyntheticCountData"
+rc="responseCount"
+
    Predictor.inspection(predictor,
         input.file=i,
     		output.dir=o,

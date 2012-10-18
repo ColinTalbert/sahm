@@ -8,7 +8,7 @@ source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\
 source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\Predictor.inspection.r")
     num.plots <- 10
     min.cor <- .7
-    responseCol <- "responseBinary"
+    responseCol <- "responseCount"
     cors.w.highest <- FALSE
     pres=FALSE
     absn=TRUE
@@ -16,12 +16,16 @@ source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\
     #infile="I:\\VisTrails\\WorkingFiles\\workspace\\talbertc_20110510T100421\\TestTrainingSplit_1.csv"
     infil="C:\\temp\\SAHM_workspace\\mtalbert_20120123T110745\\modelSelection_split_2.csv"
 
-time1<-Sys.time() 
+time1<-Sys.time()
+infil<-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\VistrailsSessions\\MergedDataset_Split.csv"
+output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairCountTesting.jpg"
+
+infil="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\PresAbsFactorCVEvaluation.csv" 
 infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection_cv_1.csv"   
     #infil="I:\\VisTrails\\WorkingFiles\\workspace\\_PseudoAbs\\MergedDataset_EvalSplit.csv"
 #infil="C:\\temp\\TestDataSets\\TestTrainingSplit_8.csv"
 output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPresTesting.jpg"
-Pairs.Explore(num.plots=15,
+Pairs.Explore(num.plots=15,                                
     min.cor=min.cor,
     input.file=infil,
 		output.file=output.file,
@@ -29,7 +33,7 @@ Pairs.Explore(num.plots=15,
 		pres=TRUE,
 		absn=TRUE,
 		bgd=TRUE,
-    Debug=TRUE)
+    Debug=FALSE)
 Sys.time()-time1
 
 

@@ -36,10 +36,10 @@ ElithSurf<-cbind(xys,response2)
 colnames(CubeSurf)<-colnames(ElithSurf)<-c("X","Y","responseBinary")
 write.table(CubeSurf,file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\ElithCube.csv",row.names=FALSE,col.names=TRUE,sep=",",quote=FALSE)
 write.table(ElithSurf,file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\ElithSurf.csv",row.names=FALSE,col.names=TRUE,sep=",",quote=FALSE)
-writeRaster(Temp,filename="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\TemperatureRast.tif",overwrite=TRUE)
-writeRaster(Precip,filename="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\PrecipitatoinRast.tif",overwrite=TRUE)
-writeRaster(Rand1,filename="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\Noise1Rast.tif",overwrite=TRUE)
-writeRaster(Rand2,filename="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\Noise2Rast.tif",overwrite=TRUE)
+writeRaster(Temp,filename="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\TemperatureRastBin.tif",overwrite=TRUE)
+writeRaster(Precip,filename="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\PrecipitatoinRastBin.tif",overwrite=TRUE)
+writeRaster(Rand1,filename="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\Noise1RastBin.tif",overwrite=TRUE)
+writeRaster(Rand2,filename="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\Noise2RastBin.tif",overwrite=TRUE)
 
 ################################################################
 ########## Now creating presence only surfaces #################
