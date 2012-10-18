@@ -86,7 +86,7 @@ source(paste(ScriptPath,"BRT.helper.fcts.r",sep="\\"))
 		output.dir=output,
 		response.col=responseCol,
 		make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
-		debug.mode=F,responseCurveForm="pdf",script.name="maxlike",
+		debug.mode=F,script.name="maxlike",
 		opt.methods=opt.methods,MESS=MESS,Formula=Formula,UseTiffs=UseTiffs,RemoveDuplicates=RemoveDuplicates)
 
 

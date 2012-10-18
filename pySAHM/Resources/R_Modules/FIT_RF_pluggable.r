@@ -67,7 +67,6 @@ keep.inbag=FALSE
 make.r.curves=T
 seed=NULL
 opt.methods=2
-save.model=TRUE
 seed=NULL
 MESS=FALSE
 xtest=NULL
@@ -105,7 +104,6 @@ Args <- commandArgs(trailingOnly=FALSE)
  			if(argSplit[[1]][1]=="Kbag")  keep.inbag <-  as.logical(argSplit[[1]][2])
  		  if(argSplit[[1]][1]=="curves")  make.r.curves <-  as.logical(argSplit[[1]][2])
  		  if(argSplit[[1]][1]=="om")  opt.methods <- as.numeric(argSplit[[1]][2])
-      if(argSplit[[1]][1]=="savm")  save.model <- as.logical(argSplit[[1]][2])
       if(argSplit[[1]][1]=="mes")  MESS <- as.logical(argSplit[[1]][2])
       if(argSplit[[1]][1]=="seed")  seed <- as.numeric(argSplit[[1]][2])
 
@@ -116,13 +114,11 @@ ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"RF.helper.fcts.r",sep="\\"))
 source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
 
-save.model<-make.p.tif | make.binary.tif
-
 FitModels(ma.name=csv,tif.dir=NULL,output.dir=output,response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
-      debug.mode=F,responseCurveForm="pdf",xtest=xtest,ytest=ytest,n.trees=n.trees,mtry=mtry,samp.replace=samp.replace, sampsize=sampsize,
+      debug.mode=F,xtest=xtest,ytest=ytest,n.trees=n.trees,mtry=mtry,samp.replace=samp.replace, sampsize=sampsize,
       nodesize=nodesize,maxnodes=maxnodes,importance=importance,
       localImp=localImp,nPerm=nPerm,proximity=proximity,oob.prox=oob.prox,norm.votes=norm.votes,do.trace=do.trace,keep.forest=keep.forest,
       keep.inbag=keep.inbag,make.r.curves=make.r.curves,
-      seed=seed,script.name="rf",opt.methods=opt.methods,save.model=save.model,MESS=MESS)
+      seed=seed,script.name="rf",opt.methods=opt.methods,MESS=MESS)
 
  

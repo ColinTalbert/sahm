@@ -49,7 +49,6 @@ make.binary.tif=T
 mars.degree=1
 mars.penalty=2
 opt.methods=2
-save.model=TRUE
 MESS=FALSE
 
 # Interpret command line argurments #
@@ -73,7 +72,6 @@ Args <- commandArgs(trailingOnly=FALSE)
     	if(argSplit[[1]][1]=="deg") mars.degree <- as.numeric(argSplit[[1]][2])
     	if(argSplit[[1]][1]=="pen") mars.penalty <- as.numeric(argSplit[[1]][2])
     	if(argSplit[[1]][1]=="om")  opt.methods <- as.numeric(argSplit[[1]][2])
-    	if(argSplit[[1]][1]=="savm")  save.model <- as.logical(argSplit[[1]][2])
     	if(argSplit[[1]][1]=="mes")  MESS <- as.logical(argSplit[[1]][2])
     }
 
@@ -81,10 +79,8 @@ ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
 source(paste(ScriptPath,"MARS.helper.fcts.r",sep="\\"))
 
-save.model<-make.p.tif | make.binary.tif
-
 FitModels(ma.name=csv,
         tif.dir=NULL,output.dir=output,
         response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
-            mars.degree=mars.degree,mars.penalty=mars.penalty,debug.mode=F,responseCurveForm="pdf",
-            script.name="mars",save.model=save.model,opt.methods=as.numeric(opt.methods),MESS=MESS)
+            mars.degree=mars.degree,mars.penalty=mars.penalty,debug.mode=F,
+            script.name="mars",opt.methods=opt.methods,MESS=MESS)
