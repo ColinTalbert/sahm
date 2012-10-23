@@ -121,13 +121,13 @@ output.dir[5]<-paste(dir.path,"\\maxlike",sep="")
               		
 ### Pairs Explore Tests  #####
 source("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\PairsExplore.r")
+source("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\PairsExploreHelperFcts.r")
 source("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\read.dat.r")
 source("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\chk.libs.r")
 source("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\read.dat.r")
 source("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\my.panel.smooth.binary.r")
 source("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\Predictor.inspection.r")
-source("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\Predictor.inspection.r")
- 
+
 
 
 for(i in 1:length(predictor)){
@@ -135,7 +135,7 @@ for(i in 1:length(predictor)){
        try(Pairs.Explore(num.plots=5,
                 min.cor=.5,
                 input.file=input.file[i],
-            		output.file=paste(dir.path,"\\PairsExploreTest2\\",i,"Par1",".jpg",sep=""),
+            		output.file=paste(dir.path,"\\",i,"Par1",".jpg",sep=""),
             		response.col=responseCol[i],
             		pres=TRUE,
             		absn=TRUE,
@@ -143,7 +143,7 @@ for(i in 1:length(predictor)){
         try(Pairs.Explore(num.plots=10,
                 min.cor=.5,
                 input.file=input.file[i],
-            		output.file=paste(dir.path,"\\PairsExploreTest2\\",i,"Par2",".jpg",sep=""),
+            		output.file=paste(dir.path,"\\",i,"Par2",".jpg",sep=""),
             		response.col=responseCol[i],
             		pres=TRUE,
             		absn=FALSE,
@@ -151,7 +151,7 @@ for(i in 1:length(predictor)){
                 cors.w.highest=TRUE))
        try(Predictor.inspection(predictor[i],
                 input.file=input.file[i],
-            		output.dir=paste(dir.path,"\\PairsExploreTest2",sep=""),
+            		output.dir=dir.path,
             		response.col=responseCol[i],
             		pres=TRUE,
             		absn=TRUE,
@@ -160,7 +160,7 @@ for(i in 1:length(predictor)){
  try(Pairs.Explore(num.plots=15,
     min.cor=min.cor,
     input.file=input.file[i],
-		output.file=paste(dir.path,"\\PairsExploreTest2\\",i,".jpg",sep=""),
+		output.file=paste(dir.path,"\\",i,".jpg",sep=""),
 		response.col=responseCol[i],
 		pres=TRUE,
 		absn=TRUE,
@@ -168,7 +168,7 @@ for(i in 1:length(predictor)){
 		
 	try(Predictor.inspection(predictor[i],
     input.file[i],
-		output.dir=paste(dir.path,"\\PairsExploreTest2",sep=""),
+		output.dir=paste(dir.path,"\\",sep=""),
 		response.col=responseCol[i],
 		pres=TRUE,
 		absn=TRUE,
@@ -181,7 +181,7 @@ for (i in 5:25){
  try(Pairs.Explore(num.plots=i,
                 min.cor=.5,
                 input.file=input.file,
-            		output.file=paste(dir.path,"\\PairsExploreTest2\\",i,"NumPlotsTest",".jpg",sep=""),
+            		output.file=paste(dir.path,"\\",i,"NumPlotsTest",".jpg",sep=""),
             		response.col=responseCol[1],
             		pres=TRUE,
             		absn=TRUE,

@@ -117,38 +117,21 @@ Input Ports:
             window = spreadsheetController.findSpreadsheetWindow()
             model_workspace = self.getInputFromPort("ModelWorkspace").name
 
-            pm = get_package_manager()
-            hasIVis = pm.has_package('edu.utah.sci.vistrails.iVisServer')
-            if hasIVis:
-                row = self.forceGetInputFromPort("row", -1)
-                col = self.forceGetInputFromPort("column", -1)
-
-                initial_display = self.forceGetInputFromPort('InitialModelOutputDisplay', 'AUC')
-
-                from packages.iVisServer import display_sahm_output
-                display_sahm_output(row, col, 
-                                    {"ModelWorkspace": model_workspace,
-                                     "InitialModelOutputDisplay": initial_display}, 
-                                    'ModelOutput')
-                return
-
-
             model_dir_full = os.path.normcase(model_workspace)
             model_dir = os.path.split(model_dir_full)[1]
             model_name = model_dir[:model_dir.index('_')]
-            
-            
             auc_graph_path = os.path.join(model_dir_full, model_name + '_modelEvalPlot.jpg')
             auc_graph = window.file_pool.make_local_copy(auc_graph_path)
             
             text_output_path = os.path.join(model_dir_full, model_name + '_output.txt')
             text_output = window.file_pool.make_local_copy(text_output_path)
             
-            response_path = os.path.join(model_dir_full, model_name + '_response_curves.pdf')
-            if os.path.exists(response_path):
-                response_curves = window.file_pool.make_local_copy(response_path)
+            response_directory = os.path.join(model_dir_full, model_name + 'responseCurves')
+            if os.path.exists(response_directory):
+                response_curves = os.listdir(response_directory)
+                response_curves = [os.path.join(response_dirctory, fname) for fname in response_curves]
             else:
-                response_curves = ""
+                response_curves = []
             
             calibration_graph_path = os.path.join(model_dir_full, model_name + '_CalibrationPlot.jpg')
             calibration_graph = window.file_pool.make_local_copy(calibration_graph_path)
@@ -221,6 +204,10 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         self.ui.gv_auc.setScene(self.gs_auc_graph)
         self.gs_auc_graph.wheelEvent = self.wheel_event_auc
         
+        self.gs_response_graph = QtGui.QGraphicsScene()
+        self.ui.gv_auc.setScene(self.gs_response_graph)
+        self.gs_response_graph.wheelEvent = self.wheel_event_response
+        
         self.gs_calibration_graph = QtGui.QGraphicsScene()
         self.ui.gv_calibration.setScene(self.gs_calibration_graph)
         self.gs_calibration_graph.wheelEvent = self.wheel_event_calibration
@@ -240,11 +227,21 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         self.ui.text_output_layout.addWidget(self.text_browser)
         self.text_urlSrc = None
         
-        self.response_browser = QAxContainer.QAxWidget(self)
-        self.response_browser.setFocusPolicy(QtCore.Qt.StrongFocus)
-        self.response_browser.setControl("{8856F961-340A-11D0-A96B-00C04FD705A2}")
-        self.ui.response_curves_layout.addWidget(self.response_browser)
-        self.response_urlSrc = None
+        layout = QtGui.QVBoxLayout()
+        self.response_frame = QtGui.QFrame(self)
+        self.response_combobox = QtGui.QComboBox(self.response_frame)
+        self.ui.response_curves_layout.addWidget(self.response_combobox)
+        self.response_graph = QtGui.QGraphicsScene()
+        self.ui.response_graph.setScene(self.response_graph)
+        self.response_graph.wheelEvent = self.wheel_event_response
+        
+        
+        
+#        self.response_browser = QAxContainer.QAxWidget(self)
+#        self.response_browser.setFocusPolicy(QtCore.Qt.StrongFocus)
+#        self.response_browser.setControl("{8856F961-340A-11D0-A96B-00C04FD705A2}")
+#        self.ui.response_curves_layout.addWidget(self.response_browser)
+#        self.response_urlSrc = None
         
         self.connect(self.ui.tabWidget,QtCore.SIGNAL('currentChanged(int)'), self.tabChanged)
         
@@ -606,7 +603,7 @@ class Ui_Frame(object):
         self.response_curves_layout.setMargin(0)
         self.response_curves_layout.setObjectName(_fromUtf8("response_curves_layout"))
         self.tabWidget.addTab(self.response_curves, _fromUtf8(""))
-        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.response_curves), QtGui.QApplication.translate("Frame", "Response curves", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.response_curves), QtGui.QApplication.translate("Frame", "Response curves", None, QtGui.QApplication.UnicodeUTF8))        
         
         self.auc = QtGui.QWidget()
         self.auc.setObjectName(_fromUtf8("auc"))
