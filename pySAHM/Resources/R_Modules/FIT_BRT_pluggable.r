@@ -92,10 +92,9 @@ Args <- commandArgs(trailingOnly=FALSE)
     }
 
 ScriptPath<-dirname(ScriptPath)
-source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
-source(paste(ScriptPath,"BRT.helper.fcts.r",sep="\\"))
+source(file.path(ScriptPath,"LoadRequiredCode.r"))
+source(file.path(ScriptPath,"BRT.helper.fcts.r))
 
-save.model<-make.p.tif | make.binary.tif
 
 
     FitModels(ma.name=csv,

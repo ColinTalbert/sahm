@@ -76,8 +76,8 @@ Args <- commandArgs(trailingOnly=FALSE)
     }
 
 ScriptPath<-dirname(ScriptPath)
-source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
-source(paste(ScriptPath,"MARS.helper.fcts.r",sep="\\"))
+source(file.path(ScriptPath,"LoadRequiredCode.r"))
+source(file.path(ScriptPath,"MARS.helper.fcts.r"))
 
 FitModels(ma.name=csv,
         tif.dir=NULL,output.dir=output,

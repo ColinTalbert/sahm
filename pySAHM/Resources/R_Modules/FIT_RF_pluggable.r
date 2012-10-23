@@ -111,8 +111,8 @@ Args <- commandArgs(trailingOnly=FALSE)
     }
 
 ScriptPath<-dirname(ScriptPath)
-source(paste(ScriptPath,"RF.helper.fcts.r",sep="\\"))
-source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
+source(file.path(ScriptPath,"RF.helper.fcts.r"))
+source(file.path(ScriptPath,"LoadRequiredCode.r"))
 
 FitModels(ma.name=csv,tif.dir=NULL,output.dir=output,response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
       debug.mode=F,xtest=xtest,ytest=ytest,n.trees=n.trees,mtry=mtry,samp.replace=samp.replace, sampsize=sampsize,
