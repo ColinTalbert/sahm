@@ -125,6 +125,7 @@ class MAXENTRunner(object):
         
         #quote out the the output folder and projection layers args with quotes
         self.args["outputdirectory"] = '"' + self.args["outputdirectory"] + '"'
+        self.args["projectionlayers"] = '"' + self.args["projectionlayers"] + '"' 
             
         strargs = ['='.join((str(k),str(v))) for k,v in self.args.iteritems() 
                     if (k <> "species_name" and k <> "inputMDS")]

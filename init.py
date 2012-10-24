@@ -71,6 +71,7 @@ from widgets import get_predictor_widget, get_predictor_config
 from SelectPredictorsLayers import SelectListDialog
 from SelectAndTestFinalModel import SelectAndTestFinalModel
 
+
 import utils
 import GenerateModuleDoc as GenModDoc
 #import our python SAHM Processing files
@@ -80,8 +81,10 @@ import packages.sahm.pySAHM.MDSBuilder_vector as MDSB_V
 import packages.sahm.pySAHM.PARC as parc
 import packages.sahm.pySAHM.RasterFormatConverter as RFC
 import packages.sahm.pySAHM.MaxentRunner as MaxentRunner
+#from packages.sahm.SahmOutputViewer import SAHMModelOutputViewerCell
 from SahmOutputViewer import SAHMModelOutputViewerCell
-from SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
+from packages.sahm.SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
+from packages.sahm.GeneralSpatialViewer import GeneralSpatialViewer
 from packages.sahm.sahm_picklists import ResponseType, AggregationMethod, \
         ResampleMethod, PointAggregationMethod, ModelOutputType, RandomPointType, \
         OutputRaster
@@ -226,7 +229,7 @@ class Predictor(Constant):
         
         if (self.hasInputFromPort("AggregationMethod")):
             aggregationMethod = self.getInputFromPort("AggregationMethod")
-            if self.getInputFromPort("AggregationMethod").lower() not in ['mean', 'max', 'min', 'majority', 'none']:
+            if self.getInputFromPort("AggregationMethod").lower() not in ['mean', 'max', 'min', 'std', 'majority', 'none']:
                 raise ModuleError(self, "No Aggregation Method specified")
         else:
             aggregationMethod = "Mean"
@@ -521,8 +524,7 @@ class Model(Module):
                     ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
-                    ('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["2"]', 'optional':False}),
-                    ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),]
+                    ]
     _output_ports = [('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'), 
                      ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
                      ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)'),
@@ -530,7 +532,7 @@ class Model(Module):
                      ('MessMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('MoDMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('modelEvalPlot', '(edu.utah.sci.vistrails.basic:File)'),
-                     ('ResponseCurves', '(edu.utah.sci.vistrails.basic:File)'),
+#                     ('ResponseCurves', '(edu.utah.sci.vistrails.basic:File)'),
                      ('Text_Output', '(edu.utah.sci.vistrails.basic:File)')]
 
     port_map = {'mdsFile':('c', None, True),#These ports are for all Models
@@ -538,7 +540,7 @@ class Model(Module):
                          'makeBinMap':('mbt', utils.R_boolean, False),
                          'makeMESMap':('mes', utils.R_boolean, False),
                          'ThresholdOptimizationMethod':('om', None, False),
-                         'UsePseudoAbs':('psa', utils.R_boolean, False),
+#                         'UsePseudoAbs':('psa', utils.R_boolean, False)
                     }
 
     @classmethod
@@ -553,7 +555,6 @@ class Model(Module):
         
         ModelOutput = {"FIT_BRT_pluggable.r":"brt",
                        "FIT_GLM_pluggable.r":"glm",
-                       "FIT_MaxLike_pluggable.r":"maxlike",
                        "FIT_RF_pluggable.r":"rf",
                        "FIT_MARS_pluggable.r":"mars",
                        "EvaluateNewData.r":"ApplyModel"}
@@ -596,7 +597,7 @@ class Model(Module):
         self.setModelResult("_MoD_map.tif", 'MoDMap', 'mes')
         self.setModelResult("_output.txt", 'Text_Output')
         self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot') 
-        self.setModelResult("response_curves.pdf", 'ResponseCurves')
+#        self.setModelResult("response_curves.pdf", 'ResponseCurves')
         
         modelWorkspace = utils.create_dir_module(self.output_dname)
         self.setResult("modelWorkspace", modelWorkspace)
@@ -609,8 +610,7 @@ class Model(Module):
                         self.argsDict[arg_key].lower() == 'false')
         
         if (self.ModelAbbrev == "ApplyModel" and portname == "ResidualsMap") \
-            or (self.ModelAbbrev == "ApplyModel" and arg_key is None) \
-            or (self.ModelAbbrev == "maxlike" and portname == "ResponseCurves"):
+            or (self.ModelAbbrev == "ApplyModel" and arg_key is None):
             required = False
         
         outfile_exists = len(glob.glob(outFileName)) > 0
@@ -629,7 +629,9 @@ class GLM(Model):
     __doc__ = GenModDoc.construct_module_doc('GLM')
     
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('SimplificationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["AIC"]', 'optional':True}),
+    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':"['2']", 'optional':False}),
+                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+                         ('SimplificationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["AIC"]', 'optional':True}),
                          ('SquaredTerms', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
                          ])
     def __init__(self):
@@ -639,28 +641,14 @@ class GLM(Model):
         self.port_map.update({'SimplificationMethod':('sm', None, False), #This is a GLM specific port
                          'SquaredTerms':('sqt', utils.R_boolean, False), #This is a GLM specific port
                          })
-class Maxlike(Model):
-    __doc__ = GenModDoc.construct_module_doc('Maxlike')
-    
-    _input_ports = list(Model._input_ports)
-    _input_ports.extend([('Formula', '(edu.utah.sci.vistrails.basic:String)'),
-                         ('RemoveDuplicates', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
-                         ('Starts', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["NULL"]', 'optional':True}),
-                         ('Fixed', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["NULL"]', 'optional':True}),])
-    def __init__(self):
-        global models_path
-        Model.__init__(self) 
-        self.name = 'FIT_MaxLike_pluggable.r'
-        self.port_map.update({'Formula':('fmla', None, True), #This is a MaxLike specific port
-                         'RemoveDuplicates':('rd', utils.R_boolean, False), #This is a MaxLike specific port
-                         'Starts':('sts', None, False), #This is a MaxLike specific port
-                         'Fixed':('fxd', None, False), #This is a MaxLike specific port
-                         })
+
 class RandomForest(Model):
     __doc__ = GenModDoc.construct_module_doc('RandomForest')
     
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
+    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["2"]', 'optional':False}),
+                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+                         ('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                          ('mTry', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["1"]', 'optional':True}),
                          ('nTrees', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                          ('nodesize', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
@@ -696,7 +684,9 @@ class MARS(Model):
     __doc__ = GenModDoc.construct_module_doc('MARS')
     
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('MarsDegree', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["1"]', 'optional':True}),
+    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["2"]', 'optional':False}),
+                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+                         ('MarsDegree', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["1"]', 'optional':True}),
                           ('MarsPenalty', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["2"]', 'optional':True}),
                           ])
     def __init__(self):
@@ -774,10 +764,10 @@ class BoostedRegressionTree(Model):
                          'MaximumTrees':('mt', None, False), #This is a BRT specific port
                          })
    
-class BackgroundSurfaceGenerator(Module):
+class KDEGenerator(Module):
     '''
     '''
-    __doc__ = GenModDoc.construct_module_doc('BackgroundSurfaceGenerator')
+    __doc__ = GenModDoc.construct_module_doc('KDEGenerator')
      
     _input_ports = [('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                     ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
@@ -1031,9 +1021,6 @@ class FieldDataQuery(Module):
         else:
             query_col_key = None
         
-        
-        
-        
         for row in csvReader:
             if not use_query:
                 include_row = True
@@ -1044,9 +1031,9 @@ class FieldDataQuery(Module):
                 
             if include_row:
                 response = row[res_key]
-                if response.lower() in ["1", "true", "t", "present", "presence", FDQParams['res_pres_val']]:
+                if response.lower() in ["1", "true", "t", "present", "presence", FDQParams['res_pres_val'].lower()]:
                     response = 1
-                elif response.lower() in ["0", "false", "f", "absent", "absense", FDQParams['res_abs_val']]:
+                elif response.lower() in ["0", "false", "f", "absent", "absense", FDQParams['res_abs_val'].lower()]:
                     response = 0
                 else:
                     response = row[res_key]
@@ -1738,7 +1725,7 @@ class MAXENT(Module):
                         pass
         if self.hasInputFromPort('projectionlayers'):
             value = self.forceGetInputListFromPort('projectionlayers')
-            projlayers = ','.join(['"' + path.name + '"' for path in value])
+            projlayers = ','.join([path.name for path in value])
             argWriter.writerow(['projectionlayers', projlayers])
             
         argWriter.writerow(['inputMDS', ourMaxent.inputMDS])
@@ -1827,8 +1814,14 @@ def initialize():
     if not os.path.exists(session_dir):
         os.makedirs(session_dir)
         
-    utils.setrootdir(session_dir) 
+    utils.setrootdir(session_dir)
+    utils.importOSGEO() 
     utils.createLogger(session_dir, configuration.verbose)
+
+    gdal_data = os.path.join(os.path.dirname(__file__), "GDAL_Resources", "gdal-data")
+    os.environ['GDAL_DATA'] = gdal_data
+    projlib = os.path.join(os.path.dirname(__file__), "GDAL_Resources", "projlib")
+    os.environ['PROJ_LIB'] = projlib
 
     color_breaks_csv = os.path.abspath(os.path.join(os.path.dirname(__file__),  "ColorBreaks.csv"))
     
@@ -1842,8 +1835,6 @@ def initialize():
 #    writetolog("   Layers CSV = " + os.path.join(os.path.dirname(__file__), 'layers.csv'))
     writetolog("   Layers CSV = " + layers_csv_fname)
     writetolog("   R path = " + r_path)
-    writetolog("   GDAL folder = " + os.path.abspath(configuration.gdal_path))
-#    writetolog("        Must contain subfolders proj, gdal-data, GDAL")
     writetolog("   Maxent folder = " + maxent_path)
 #    writetolog("   QGIS folder = " + os.path.abspath(configuration.qgis_path))
 #    writetolog("        Must contain subfolders qgis1.7.0, OSGeo4W")
@@ -1929,8 +1920,8 @@ def build_predictor_modules():
         modules.append((module, {'configureWidgetType': config_class, 
                                  'moduleColor':input_color,
                                  'moduleFringe':input_fringe}))
-        for module in modules:
-            module[0]._output_ports.append(('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True))
+    for module in modules:
+        module[0]._output_ports.append(('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True))
             
     return modules
 
@@ -1957,7 +1948,7 @@ _modules = generate_namespaces({'DataInput': [
                                                            'moduleFringe':input_fringe}),
                                               (FieldData, {'moduleColor':input_color,
                                                            'moduleFringe':input_fringe}),
-                                              (TemplateLayer, {'moduleColor':input_color,
+                                               (TemplateLayer, {'moduleColor':input_color,
                                                            'moduleFringe':input_fringe}),] + \
                                               build_predictor_modules(),
                                 'Tools': [FieldDataQuery,
@@ -1972,11 +1963,9 @@ _modules = generate_namespaces({'DataInput': [
                                           ModelSelectionCrossValidation,
                                           CovariateCorrelationAndSelection,
                                           ApplyModel,
-                                          BackgroundSurfaceGenerator
+                                          KDEGenerator
                                           ],                                          
                                 'Models': [(GLM, {'moduleColor':model_color,
-                                                           'moduleFringe':model_fringe}),
-                                           (Maxlike, {'moduleColor':model_color,
                                                            'moduleFringe':model_fringe}),
                                            (RandomForest, {'moduleColor':model_color,
                                                            'moduleFringe':model_fringe}),
@@ -2004,6 +1993,8 @@ _modules = generate_namespaces({'DataInput': [
                                 'Output': [(SAHMModelOutputViewerCell, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe}),
                                           (SAHMSpatialOutputViewerCell, {'moduleColor':output_color,
+                                                           'moduleFringe':output_fringe}),
+                                           (GeneralSpatialViewer, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe})
                                           ]
                                 })

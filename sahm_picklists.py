@@ -71,7 +71,7 @@ class AggregationMethod(String):
     _input_ports = [('value', '(gov.usgs.sahm:AggregationMethod:Other)')]
     _output_ports = [('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
     _widget_class = build_enum_widget('AggregationMethod', 
-                                      ['Mean', 'Max', 'Min', 'Majority', 'None'])
+                                      ['Mean', 'Max', 'Min', 'STD', 'Majority', 'None'])
 
     @staticmethod
     def get_widget_class():
