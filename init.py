@@ -774,10 +774,10 @@ class BoostedRegressionTree(Model):
                          'MaximumTrees':('mt', None, False), #This is a BRT specific port
                          })
    
-class KDEGenerator(Module):
+class BackgroundSurfaceGenerator(Module):
     '''
     '''
-    __doc__ = GenModDoc.construct_module_doc('KDEGenerator')
+    __doc__ = GenModDoc.construct_module_doc('BackgroundSurfaceGenerator')
      
     _input_ports = [('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                     ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
@@ -1972,7 +1972,7 @@ _modules = generate_namespaces({'DataInput': [
                                           ModelSelectionCrossValidation,
                                           CovariateCorrelationAndSelection,
                                           ApplyModel,
-                                          KDEGenerator
+                                          BackgroundSurfaceGenerator
                                           ],                                          
                                 'Models': [(GLM, {'moduleColor':model_color,
                                                            'moduleFringe':model_fringe}),

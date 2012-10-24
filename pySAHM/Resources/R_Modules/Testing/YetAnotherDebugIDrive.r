@@ -136,7 +136,7 @@ for(i in 1:length(predictor)){
                 min.cor=.5,
                 input.file=input.file[i],
             		output.file=paste(dir.path,"\\",i,"Par1",".jpg",sep=""),
-            		response.col=responseCol[i],
+            		response.col=rc[i],
             		pres=TRUE,
             		absn=TRUE,
             		bgd=TRUE))
@@ -144,7 +144,7 @@ for(i in 1:length(predictor)){
                 min.cor=.5,
                 input.file=input.file[i],
             		output.file=paste(dir.path,"\\",i,"Par2",".jpg",sep=""),
-            		response.col=responseCol[i],
+            		response.col=rc[i],
             		pres=TRUE,
             		absn=FALSE,
             		bgd=FALSE,
@@ -152,7 +152,7 @@ for(i in 1:length(predictor)){
        try(Predictor.inspection(predictor[i],
                 input.file=input.file[i],
             		output.dir=dir.path,
-            		response.col=responseCol[i],
+            		response.col=rc[i],
             		pres=TRUE,
             		absn=TRUE,
             		bgd=TRUE))              				
@@ -161,7 +161,7 @@ for(i in 1:length(predictor)){
     min.cor=min.cor,
     input.file=input.file[i],
 		output.file=paste(dir.path,"\\",i,".jpg",sep=""),
-		response.col=responseCol[i],
+		response.col=rc[i],
 		pres=TRUE,
 		absn=TRUE,
 		bgd=TRUE))
@@ -169,7 +169,7 @@ for(i in 1:length(predictor)){
 	try(Predictor.inspection(predictor[i],
     input.file[i],
 		output.dir=paste(dir.path,"\\",sep=""),
-		response.col=responseCol[i],
+		response.col=rc[i],
 		pres=TRUE,
 		absn=TRUE,
 		bgd=TRUE))
@@ -182,7 +182,7 @@ for (i in 5:25){
                 min.cor=.5,
                 input.file=input.file,
             		output.file=paste(dir.path,"\\",i,"NumPlotsTest",".jpg",sep=""),
-            		response.col=responseCol[1],
+            		response.col=rc[1],
             		pres=TRUE,
             		absn=TRUE,
             		bgd=TRUE
