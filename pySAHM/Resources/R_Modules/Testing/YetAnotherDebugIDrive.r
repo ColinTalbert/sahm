@@ -182,7 +182,7 @@ for (i in 5:25){
                 min.cor=.5,
                 input.file=input.file,
             		output.file=paste(dir.path,"\\",i,"NumPlotsTest",".jpg",sep=""),
-            		response.col=rc[1],
+            		response.col=rc[4],
             		pres=TRUE,
             		absn=TRUE,
             		bgd=TRUE
