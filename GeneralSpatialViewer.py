@@ -61,12 +61,16 @@ from packages.spreadsheet.spreadsheet_controller import spreadsheetController
 
 from packages.sahm.sahm_picklists import OutputRaster
 from packages.sahm.utils import map_ports
-
+from packages.sahm.SahmSpatialOutputViewer import AnchoredText, MyMapCanvas, \
+    RasterDisplay, fullExtent, viewTitleLegend, sync_changes, MPL_action 
 from utils import dbfreader, getRasterParams
 
 import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+#from matplotlib.backends.backend_qt4 import FigureCanvasQT as FigureCanvas
+#from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
+
 from matplotlib.figure import Figure
 from matplotlib.offsetbox import AnchoredOffsetbox, TextArea
 import matplotlib.colors as colors
@@ -90,7 +94,10 @@ class GeneralSpatialViewer(SpreadsheetCell):
                     ("rasterFile", '(edu.utah.sci.vistrails.basic:Path)'),
                     ("colorRamp", '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["jet"]'}),
                     ('categorical', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
-                    ('threeBand', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),]
+                    ('threeBand', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+                    ('dataMin', '(edu.utah.sci.vistrails.basic:Float)'),
+                    ('dataMax', '(edu.utah.sci.vistrails.basic:Float)'),
+                    ('NoDataValue', '(edu.utah.sci.vistrails.basic:Float)'),]
 
 
     def __init__(self):
@@ -99,14 +106,16 @@ class GeneralSpatialViewer(SpreadsheetCell):
         self.port_map = {'rasterFile': ("rasterFile", None, True),
             'colorRamp': ("colorRamp", None, True),
             'categorical': ("categorical", None, True),
-            'threeBand': ("threeBand", None, True),}
+            'threeBand': ("threeBand", None, True),
+            'dataMin': ("dataMin", None, False),
+            'dataMax': ("dataMax", None, False),
+            'NoDataValue': ("NoDataValue", None, False),
+            }
 
     def compute(self):
         inputs = {}
 
         inputs = map_ports(self, self.port_map)
-
-
 
         if self.hasInputFromPort("row"):
             if not self.location:
@@ -151,6 +160,9 @@ class SpatialViewerCellWidget(QCellWidget):
         self.cmap = matplotlib.cm.jet
         self.categorical = False
         self.threeBand = False
+        self.dataMin = "ExtractFromFile"
+        self.dataMax = "ExtractFromFile"
+        self.NoDataValue = "ExtractFromFile"
 
     def updateContents(self, inputs):
         """ updateContents(inputs: dictionary) -> None
@@ -160,15 +172,22 @@ class SpatialViewerCellWidget(QCellWidget):
         self.controlBarType = GeneralSpatialViewerToolBar
         self.rasterFile = inputs["rasterFile"]
         self.cmap = eval("matplotlib.cm." + inputs["colorRamp"])
-        if type(inputs["categorical"]) is str:
-            self.categorical = eval(inputs["categorical"])
-        else:
-            self.categorical = inputs["categorical"]
 
-        if type(inputs["threeBand"]) is str:
-            self.threeBand = eval(inputs["threeBand"])
-        else:
-            self.threeBand = inputs["threeBand"]
+        for input in ['categorical' , 'threeBand']:
+            if type(inputs[input]) is str:
+                self.__dict__[input] = eval(inputs[input])
+            else:
+                self.__dict__[input] = inputs[input]
+
+        for input in ['dataMin' , 'dataMax', 'NoDataValue']:
+            if inputs.has_key(input) and \
+            type(inputs[input]) is str and \
+            inputs[input] != "ExtractFromFile":
+                self.__dict__[input] = eval(inputs[input])
+            elif inputs.has_key(input):
+                self.__dict__[input] = inputs[input]
+            else:
+                self.__dict__[input] = "ExtractFromFile"  
 
         self.load_layers()
         self.on_draw(UseMaxExt=True)
@@ -259,10 +278,6 @@ class SpatialViewerCellWidget(QCellWidget):
 
         self.sync_extents()
 
-
-    def sync_extents(self):
-        self.pull_pixels()
-        self.map_canvas.draw()
 
     def button_up(self, event):
         if event.button == 1:
@@ -364,7 +379,7 @@ class SpatialViewerCellWidget(QCellWidget):
             
 
     def add_raster(self, curExtents):
-        self.rasterlayer = RasterDisplay(self.threeBand)
+        self.rasterlayer = RasterDisplay(self.threeBand, self.NoDataValue)
         self.rasterlayer.setDims(self.axes)
         self.rasterlayer.switch_raster(self.rasterFile)
 
@@ -372,16 +387,21 @@ class SpatialViewerCellWidget(QCellWidget):
         raster_array = self.rasterlayer(*curExtents)
 
         if self.categorical and not self.threeBand:
-            raster_plot = self.axes.imshow(raster_array, interpolation="nearest", cmap=self.cmap, origin='upper', extent=self.getMaxExtent())
+            raster_plot = self.axes.imshow(raster_array, interpolation="nearest", cmap=self.cmap, origin='upper', extent=self.getDataExtent())
         elif self.threeBand:
-            raster_plot = self.axes.imshow(raster_array, origin='lower', extent=self.getMaxExtent())
+            raster_plot = self.axes.imshow(raster_array, origin='lower', extent=self.getDataExtent())
         else:
             min, max = utils.getrasterminmax(self.rasterFile)
+            if not self.dataMin == "ExtractFromFile":
+                min = float(self.dataMin)
+            if not self.dataMax == "ExtractFromFile":
+                max = float(self.dataMax)
+                
             rmax = max
             rmin = min
 
             norm = colors.normalize(rmin, rmax)
-            raster_plot = self.axes.imshow(raster_array,interpolation="nearest", cmap=self.cmap, norm=norm, origin='upper', extent=self.getMaxExtent())
+            raster_plot = self.axes.imshow(raster_array,interpolation="nearest", cmap=self.cmap, norm=norm, origin='upper', extent=self.getDataExtent())
             
 
 #        if self.displayTL:
@@ -488,238 +508,246 @@ class SpatialViewerCellWidget(QCellWidget):
     def getMaxExtent(self):
         return self.maxExtent
 
+    def getDataExtent(self):
+        return self.maxExtent
+
     def getMaxDisplayExtent(self):
-        xlim = self.maxExtent[:2]
-        ylim = self.maxExtent[2:]
-        return xlim, ylim
+        return self.axes.get_xlim(), self.axes.get_ylim()
     
     def zoomFull(self):
         self.axes.set_xlim(self.maxXlim)
         self.axes.set_ylim(self.maxYlim)
         self.sync_extents()
-
-class AnchoredText(AnchoredOffsetbox):
-    def __init__(self, s, loc, pad=0.4, borderpad=0.5, prop=None, frameon=True):
-
-        self.txt = TextArea(s, minimumdescent=False)
-
-        super(AnchoredText, self).__init__(loc, pad=pad, borderpad=borderpad,
-                                           child=self.txt,
-                                           prop=prop,
-                                           frameon=frameon)
-
-class MyMapCanvas(FigureCanvas):
-    def __init__(self, fig):
-        FigureCanvas.__init__(self, fig)
-        self._cursor = None
-
-    def resizeEvent(self, event):
-        if not event.size().height() == 0:
-            FigureCanvas.resizeEvent(self, event)
-
-    def enterEvent(self, event):
-        if (self._cursor is not None and
-            QtGui.QApplication.overrideCursor() is None):
-            QtGui.QApplication.setOverrideCursor(self._cursor)
-        FigureCanvas.enterEvent(self, event)
-
-    def leaveEvent(self, event):
-        self._cursor = QtGui.QCursor(QtGui.QApplication.overrideCursor())
-        QtGui.QApplication.restoreOverrideCursor()
-        FigureCanvas.leaveEvent(self, event)
-
-class RasterDisplay(object):
-    '''The idea behind this is from
-    http://matplotlib.sourceforge.net/examples/event_handling/viewlims.py
-    basically we want to only query as much data as we have screen pixels for.
-    When the user zooms, pans, resizes we'll go back to the original display
-    and get another set of pixels.
-
-    This object has a pointer to the original raster and functions
-    for switching the input file or getting an array of pixel values
-    '''
-    def __init__(self, threeBand=False, width=300, height=300):
-        self.height = height
-        self.width = width
-        self.threeBand = threeBand
-
-    def switch_raster(self, rasterfile):
-        self.rasterfile = rasterfile
-        self.rasterparams = getRasterParams(rasterfile)
-
-
-    def __call__(self, xstart, xend, ystart, yend):
-        print "RasterDisplay __call__"
-        self.x = np.linspace(xstart, xend, self.width)
-        self.y = np.linspace(ystart, yend, self.height).reshape(-1,1)
-
-         #pull the pixels we need, no more
-        ds = gdal.Open(self.rasterfile, gdal.GA_ReadOnly)
-
-        xform  = ds.GetGeoTransform()
-
-        if xstart < xform[0]:
-            xstart = xform[0]
-        if xend > (xform[0] + (ds.RasterXSize * xform[1])):
-            xend = (xform[0] + (ds.RasterXSize * xform[1]))
-        if ystart < (xform[3] + (ds.RasterYSize * xform[5])):
-            ystart = xform[3]
-        if yend > xform[3]:
-            xend = xform[3]
         
+    def sync_extents(self):
+        print "_sync_extents"
+        for spatialViewer in self.get_active_cells():
+            spatialViewer.set_extent(self.axes.get_ylim(), self.axes.get_xlim())
+            spatialViewer.pull_pixels()
+            spatialViewer.map_canvas.draw()
 
-        ncols = int((xend - xstart) / xform[1])
-        nrows = int((yend - ystart) / abs(xform[5]))
+#class AnchoredText(AnchoredOffsetbox):
+#    def __init__(self, s, loc, pad=0.4, borderpad=0.5, prop=None, frameon=True):
+#
+#        self.txt = TextArea(s, minimumdescent=False)
+#
+#        super(AnchoredText, self).__init__(loc, pad=pad, borderpad=borderpad,
+#                                           child=self.txt,
+#                                           prop=prop,
+#                                           frameon=frameon)
 
-        xOffset = int((xstart - xform[0]) / xform[1])
-        yOffset = int((yend- xform[3]) / xform[5])
+#class MyMapCanvas(FigureCanvas):
+#    def __init__(self, fig):
+#        FigureCanvas.__init__(self, fig)
+#        self._cursor = None
+#
+#    def resizeEvent(self, event):
+#        if not event.size().height() == 0:
+#            FigureCanvas.resizeEvent(self, event)
+#
+#    def enterEvent(self, event):
+#        if (self._cursor is not None and
+#            QtGui.QApplication.overrideCursor() is None):
+#            QtGui.QApplication.setOverrideCursor(self._cursor)
+#        FigureCanvas.enterEvent(self, event)
+#
+#    def leaveEvent(self, event):
+#        self._cursor = QtGui.QCursor(QtGui.QApplication.overrideCursor())
+#        QtGui.QApplication.restoreOverrideCursor()
+#        FigureCanvas.leaveEvent(self, event)
 
-        if xOffset + ncols > ds.RasterXSize:
-            xOffset = max(0, ds.RasterXSize - xOffset)
-        if xOffset < 0:
-            xOffset = 0
-
-        if yOffset + nrows > ds.RasterYSize:
-            yOffset = 0
-        if yOffset < 0:
-            yOffset = 0
-
-        if ncols + xOffset > ds.RasterXSize:
-            ncols = ds.RasterXSize - xOffset
-        if ncols < 0:
-            ncols = ds.RasterXSize
-
-        if nrows + yOffset > ds.RasterYSize:
-            nrows = ds.RasterYSize - yOffset
-        if nrows < 0:
-            nrows = ds.RasterYSize
-
-        print "rows, cols:  ", ncols, nrows
-        print "pixelspulled: ", self.height, self.width
-
-        ary = ds.GetRasterBand(1).ReadAsArray(xoff=xOffset, yoff=yOffset,
-                                              win_xsize=ncols, win_ysize=nrows,
-                                              buf_ysize=self.height, buf_xsize=self.width)
-        
-        ndval = ds.GetRasterBand(1).GetNoDataValue()
-
-        return np.ma.masked_array(ary, mask=(ary==ndval))
-
-    def setDims(self, ax):
-        #Get the number of points from the number of pixels in the window
-        dims = ax.axesPatch.get_window_extent().bounds
-        print "RasterDisplay setDims:   ", dims
-        self.width = int(dims[2] + 0.5)
-        self.height = int(dims[3] + 0.5)
-
-    def ax_update(self, ax):
-        ax.set_autoscale_on(False) # Otherwise, infinite loop
-        self.setDims(ax)
-        print "RasterDisplay ax_update"
-
-        #Get the range for the new area
-        xstart,ystart,xdelta,ydelta = ax.axes.viewLim.bounds
-        xend = xstart + xdelta
-        yend = ystart + ydelta
-
-        factor = 0.1 #we want to pull more pixels than we absolutely need
-        #so that we don't get white edges
-        xBuff = (xend - xstart) * factor
-        yBuff = (yend - ystart) * factor
-        xstart = xstart - xBuff
-        ystart = ystart - yBuff
-        xend = xend + xBuff
-        yend = yend + yBuff
-
-        print "   Before: "
-        print "     xlim: ", int(xstart), int(xend)
-        print "     ylim: ", int(ystart), int(yend)
-
-        #reel these values in if they are outside our bounds
-        for bound in ['xstart', 'xend']:
-            if eval(bound) < self.rasterparams["ulx"]:
-                exec(bound + " = " + str(self.rasterparams["ulx"]))
-            if eval(bound) > self.rasterparams["lrx"]:
-                exec(bound + " = " + str(self.rasterparams["lrx"]))
-            
-        for bound in ['ystart', 'yend']:
-            if eval(bound) < self.rasterparams["lry"]:
-                exec(bound + " = " + str(self.rasterparams["lry"]))
-            if eval(bound) > self.rasterparams["uly"]:
-                exec(bound + " = " + str(self.rasterparams["uly"]))
-
-        # Update the image object with our new data and extent
-        im = ax.images[-1]
-        print "   After: "
-        print "     xlim: ", int(xstart), int(xend)
-        print "     ylim: ", int(ystart), int(yend)
-        im.set_data(self.__call__(xstart, xend, ystart, yend))
-        im.set_extent((xstart, xend, ystart, yend))
-        ax.figure.canvas.draw_idle()
-
-class fullExtent(QtGui.QAction):
-    def __init__(self, parent=None):
-        icon = os.path.abspath(os.path.join(
-                    os.path.dirname(__file__), "Images", "world.png"))
-        QtGui.QAction.__init__(self,
-                               QtGui.QIcon(icon),
-                               "Full Extent",
-                               parent)
-        self.setCheckable(False)
-
-    def triggeredSlot(self):
-        cellWidget = self.toolBar.getSnappedWidget()
-        cellWidget.zoomFull()
-
-class viewTitleLegend(QtGui.QAction):
-    def __init__(self, parent=None):
-        icon = os.path.abspath(os.path.join(
-                    os.path.dirname(__file__), "Images", "titlelegend.png"))
-        QtGui.QAction.__init__(self,
-                               QtGui.QIcon(icon),
-                               "Show/Hide Title and Legend",
-                               parent)
-        self.setCheckable(True)
-        self.setChecked(True)
-
-    def triggeredSlot(self):
-        cellWidget = self.toolBar.getSnappedWidget()
-
-        active_cells = cellWidget.get_active_cells()
-        for cell in active_cells:
-
-            xlim = cell.axes.get_xlim()
-            ylim = cell.axes.get_ylim()
-            cell.displayTL = self.isChecked()
-            cell.on_draw()
-            cell.fig.canvas.draw()
-            cell.update()
-            cell.axes.set_xlim(xlim)
-            cell.axes.set_ylim(ylim)
-
-class sync_changes(QtGui.QAction):
-
-    def __init__(self, parent=None):
-        self.sync_options = itertools.cycle(["all", "sel", "one"])
-
-        QtGui.QAction.__init__(self,
-                               self.getIcon(self.sync_options.next()),
-                               r"Apply changes to all / selected / single cell",
-                               parent)
-        self.setCheckable(True)
-        self.setChecked(True)
-
-
-    def getIcon(self, tag):
-        icon = os.path.abspath(os.path.join(
-                    os.path.dirname(__file__), "Images", tag + ".png"))
-        return QtGui.QIcon(icon)
-
-    def triggeredSlot(self):
-        cellWidget = self.toolBar.getSnappedWidget()
-        next_option = self.sync_options.next()
-        self.setIcon(self.getIcon(next_option))
-        cellWidget.sync_changes = next_option
+#class RasterDisplay(object):
+#    '''The idea behind this is from
+#    http://matplotlib.sourceforge.net/examples/event_handling/viewlims.py
+#    basically we want to only query as much data as we have screen pixels for.
+#    When the user zooms, pans, resizes we'll go back to the original display
+#    and get another set of pixels.
+#
+#    This object has a pointer to the original raster and functions
+#    for switching the input file or getting an array of pixel values
+#    '''
+#    def __init__(self, threeBand=False, width=300, height=300):
+#        self.height = height
+#        self.width = width
+#        self.threeBand = threeBand
+#
+#    def switch_raster(self, rasterfile):
+#        self.rasterfile = rasterfile
+#        self.rasterparams = getRasterParams(rasterfile)
+#
+#
+#    def __call__(self, xstart, xend, ystart, yend):
+#        print "RasterDisplay __call__"
+#        self.x = np.linspace(xstart, xend, self.width)
+#        self.y = np.linspace(ystart, yend, self.height).reshape(-1,1)
+#
+#         #pull the pixels we need, no more
+#        ds = gdal.Open(self.rasterfile, gdal.GA_ReadOnly)
+#
+#        xform  = ds.GetGeoTransform()
+#
+#        if xstart < xform[0]:
+#            xstart = xform[0]
+#        if xend > (xform[0] + (ds.RasterXSize * xform[1])):
+#            xend = (xform[0] + (ds.RasterXSize * xform[1]))
+#        if ystart < (xform[3] + (ds.RasterYSize * xform[5])):
+#            ystart = xform[3]
+#        if yend > xform[3]:
+#            xend = xform[3]
+#        
+#
+#        ncols = int((xend - xstart) / xform[1])
+#        nrows = int((yend - ystart) / abs(xform[5]))
+#
+#        xOffset = int((xstart - xform[0]) / xform[1])
+#        yOffset = int((yend- xform[3]) / xform[5])
+#
+#        if xOffset + ncols > ds.RasterXSize:
+#            xOffset = max(0, ds.RasterXSize - xOffset)
+#        if xOffset < 0:
+#            xOffset = 0
+#
+#        if yOffset + nrows > ds.RasterYSize:
+#            yOffset = 0
+#        if yOffset < 0:
+#            yOffset = 0
+#
+#        if ncols + xOffset > ds.RasterXSize:
+#            ncols = ds.RasterXSize - xOffset
+#        if ncols < 0:
+#            ncols = ds.RasterXSize
+#
+#        if nrows + yOffset > ds.RasterYSize:
+#            nrows = ds.RasterYSize - yOffset
+#        if nrows < 0:
+#            nrows = ds.RasterYSize
+#
+#        print "rows, cols:  ", ncols, nrows
+#        print "pixelspulled: ", self.height, self.width
+#
+#        ary = ds.GetRasterBand(1).ReadAsArray(xoff=xOffset, yoff=yOffset,
+#                                              win_xsize=ncols, win_ysize=nrows,
+#                                              buf_ysize=self.height, buf_xsize=self.width)
+#        
+#        ndval = ds.GetRasterBand(1).GetNoDataValue()
+#
+#        return np.ma.masked_array(ary, mask=(ary==ndval))
+#
+#    def setDims(self, ax):
+#        #Get the number of points from the number of pixels in the window
+#        dims = ax.axesPatch.get_window_extent().bounds
+#        print "RasterDisplay setDims:   ", dims
+#        self.width = int(dims[2] + 0.5)
+#        self.height = int(dims[3] + 0.5)
+#
+#    def ax_update(self, ax):
+#        ax.set_autoscale_on(False) # Otherwise, infinite loop
+#        self.setDims(ax)
+#        print "RasterDisplay ax_update"
+#
+#        #Get the range for the new area
+#        xstart,ystart,xdelta,ydelta = ax.axes.viewLim.bounds
+#        xend = xstart + xdelta
+#        yend = ystart + ydelta
+#
+#        factor = 0.1 #we want to pull more pixels than we absolutely need
+#        #so that we don't get white edges
+#        xBuff = (xend - xstart) * factor
+#        yBuff = (yend - ystart) * factor
+#        xstart = xstart - xBuff
+#        ystart = ystart - yBuff
+#        xend = xend + xBuff
+#        yend = yend + yBuff
+#
+#        print "   Before: "
+#        print "     xlim: ", int(xstart), int(xend)
+#        print "     ylim: ", int(ystart), int(yend)
+#
+#        #reel these values in if they are outside our bounds
+#        for bound in ['xstart', 'xend']:
+#            if eval(bound) < self.rasterparams["ulx"]:
+#                exec(bound + " = " + str(self.rasterparams["ulx"]))
+#            if eval(bound) > self.rasterparams["lrx"]:
+#                exec(bound + " = " + str(self.rasterparams["lrx"]))
+#            
+#        for bound in ['ystart', 'yend']:
+#            if eval(bound) < self.rasterparams["lry"]:
+#                exec(bound + " = " + str(self.rasterparams["lry"]))
+#            if eval(bound) > self.rasterparams["uly"]:
+#                exec(bound + " = " + str(self.rasterparams["uly"]))
+#
+#        # Update the image object with our new data and extent
+#        im = ax.images[-1]
+#        print "   After: "
+#        print "     xlim: ", int(xstart), int(xend)
+#        print "     ylim: ", int(ystart), int(yend)
+#        im.set_data(self.__call__(xstart, xend, ystart, yend))
+#        im.set_extent((xstart, xend, ystart, yend))
+#        ax.figure.canvas.draw_idle()
+#
+##class fullExtent(QtGui.QAction):
+##    def __init__(self, parent=None):
+##        icon = os.path.abspath(os.path.join(
+##                    os.path.dirname(__file__), "Images", "world.png"))
+##        QtGui.QAction.__init__(self,
+##                               QtGui.QIcon(icon),
+##                               "Full Extent",
+##                               parent)
+##        self.setCheckable(False)
+##
+##    def triggeredSlot(self):
+##        cellWidget = self.toolBar.getSnappedWidget()
+##        cellWidget.zoomFull()
+#
+#class viewTitleLegend(QtGui.QAction):
+#    def __init__(self, parent=None):
+#        icon = os.path.abspath(os.path.join(
+#                    os.path.dirname(__file__), "Images", "titlelegend.png"))
+#        QtGui.QAction.__init__(self,
+#                               QtGui.QIcon(icon),
+#                               "Show/Hide Title and Legend",
+#                               parent)
+#        self.setCheckable(True)
+#        self.setChecked(True)
+#
+#    def triggeredSlot(self):
+#        cellWidget = self.toolBar.getSnappedWidget()
+#
+#        active_cells = cellWidget.get_active_cells()
+#        for cell in active_cells:
+#
+#            xlim = cell.axes.get_xlim()
+#            ylim = cell.axes.get_ylim()
+#            cell.displayTL = self.isChecked()
+#            cell.on_draw()
+#            cell.fig.canvas.draw()
+#            cell.update()
+#            cell.axes.set_xlim(xlim)
+#            cell.axes.set_ylim(ylim)
+#
+#class sync_changes(QtGui.QAction):
+#
+#    def __init__(self, parent=None):
+#        self.sync_options = itertools.cycle(["all", "sel", "one"])
+#
+#        QtGui.QAction.__init__(self,
+#                               self.getIcon(self.sync_options.next()),
+#                               r"Apply changes to all / selected / single cell",
+#                               parent)
+#        self.setCheckable(True)
+#        self.setChecked(True)
+#
+#
+#    def getIcon(self, tag):
+#        icon = os.path.abspath(os.path.join(
+#                    os.path.dirname(__file__), "Images", tag + ".png"))
+#        return QtGui.QIcon(icon)
+#
+#    def triggeredSlot(self):
+#        cellWidget = self.toolBar.getSnappedWidget()
+#        next_option = self.sync_options.next()
+#        self.setIcon(self.getIcon(next_option))
+#        cellWidget.sync_changes = next_option
 
 class ViewLayerAction(QtGui.QAction):
     def __init__(self, action_dict, parent=None):
@@ -779,60 +807,60 @@ class ViewLayerAction(QtGui.QAction):
 
             cell.update()
 
-class MPL_action(QtGui.QAction):
-
-    def __init__(self, action_dict, parent=None):
-        icon = os.path.abspath(os.path.join(
-                    os.path.dirname(__file__), "Images", action_dict["icon"]))
-        QtGui.QAction.__init__(self,
-                               QtGui.QIcon(icon),
-                               action_dict["label"],
-                               parent)
-        self.setToolTip(action_dict["tooltip"])
-        self.setCheckable(action_dict["checkable"])
-        self.setChecked(action_dict["checked"])
-        self.actionfunc = action_dict["actionfunc"]
-        self.tag = action_dict["label"]
-
-    def triggeredSlot(self, checked=False):
-
-        cellWidget = self.toolBar.getSnappedWidget()
-
-        if self.tag in self.tag in ["Pan", "Zoom"]:
-            if self.isChecked():
-                cursor = self.tag
-            elif self.tag == 'Pan':
-                cursor = "Zoom"
-            elif self.tag == 'Zoom':
-                cursor = "Pan"
-
-        active_cells = cellWidget.get_active_cells()
-        for cell in active_cells:
-
-            if self.tag in ["Pan", "Zoom"]:
-                zoomaction = cell.getActionByTag("Zoom")
-                panaction = cell.getActionByTag("Pan")
-
-                if cursor == "Zoom" and \
-                    (not zoomaction.isChecked() or cellWidget is cell):
-                    cell.mpl_toolbar.zoom()
-                elif cursor == "Pan" and \
-                    (not panaction.isChecked() or cellWidget is cell):
-                    cell.mpl_toolbar.pan()
-
-                zoomaction.setChecked(cursor=="Zoom")
-                panaction.setChecked(cursor=="Pan")
-
-            else:
-                eval("cell.mpl_toolbar." + self.actionfunc + "()")
-                cell.pull_pixels()
-
-    def getAction(self, name):
-        for action in self.parent().actions():
-            if hasattr(action, "actionfunc") and \
-                action.actionfunc == name:
-                return action
-        return None
+#class MPL_action(QtGui.QAction):
+#
+#    def __init__(self, action_dict, parent=None):
+#        icon = os.path.abspath(os.path.join(
+#                    os.path.dirname(__file__), "Images", action_dict["icon"]))
+#        QtGui.QAction.__init__(self,
+#                               QtGui.QIcon(icon),
+#                               action_dict["label"],
+#                               parent)
+#        self.setToolTip(action_dict["tooltip"])
+#        self.setCheckable(action_dict["checkable"])
+#        self.setChecked(action_dict["checked"])
+#        self.actionfunc = action_dict["actionfunc"]
+#        self.tag = action_dict["label"]
+#
+#    def triggeredSlot(self, checked=False):
+#
+#        cellWidget = self.toolBar.getSnappedWidget()
+#
+#        if self.tag in self.tag in ["Pan", "Zoom"]:
+#            if self.isChecked():
+#                cursor = self.tag
+#            elif self.tag == 'Pan':
+#                cursor = "Zoom"
+#            elif self.tag == 'Zoom':
+#                cursor = "Pan"
+#
+#        active_cells = cellWidget.get_active_cells()
+#        for cell in active_cells:
+#
+#            if self.tag in ["Pan", "Zoom"]:
+#                zoomaction = cell.getActionByTag("Zoom")
+#                panaction = cell.getActionByTag("Pan")
+#
+#                if cursor == "Zoom" and \
+#                    (not zoomaction.isChecked() or cellWidget is cell):
+#                    cell.mpl_toolbar.zoom()
+#                elif cursor == "Pan" and \
+#                    (not panaction.isChecked() or cellWidget is cell):
+#                    cell.mpl_toolbar.pan()
+#
+#                zoomaction.setChecked(cursor=="Zoom")
+#                panaction.setChecked(cursor=="Pan")
+#
+#            else:
+#                eval("cell.mpl_toolbar." + self.actionfunc + "()")
+#                cell.pull_pixels()
+#
+#    def getAction(self, name):
+#        for action in self.parent().actions():
+#            if hasattr(action, "actionfunc") and \
+#                action.actionfunc == name:
+#                return action
+#        return None
 
 
 class GeneralSpatialViewerToolBar(QCellToolBar):
