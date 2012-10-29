@@ -104,7 +104,7 @@ source(file.path(ScriptPath,"BRT.helper.fcts.r))
 		make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
 		simp.method="cross-validation",debug.mode=F,tc=tc,n.folds=n.folds,alpha=alpha,script.name="brt",
 		learning.rate =learning.rate, bag.fraction = bag.fraction,prev.stratify = prev.stratify,max.trees = max.trees,seed=seed,
-    save.model=save.model,opt.methods=opt.methods,MESS=MESS,tolerance.method = tolerance.method,tolerance=tolerance)
+    opt.methods=opt.methods,MESS=MESS,tolerance.method = tolerance.method,tolerance=tolerance)
 
 
 
