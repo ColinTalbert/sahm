@@ -4,9 +4,9 @@ ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packa
 dir.path<-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\AcrossModelPerformance\\Debug10.15"
 
 #master branch
-#setwd("I:\\VisTrails\\VisTrails_SAHM_x32\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
-#ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x32\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
-#dir.path<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\MasterBranch9.19"
+setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
+dir.path<-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\AcrossModelPerformance\\Master10.15"
 #For Model tests
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
@@ -15,12 +15,12 @@ source("BRT.helper.fcts.r")
 source("RF.helper.fcts.r")
 
 #For Apply Model Tests
-source("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\EvaluateNewData.r")
+source("EvaluateNewData.r")
 
 #For PairsExplore and parameter inspection
-source("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\PairsExplore.r")
-source("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\Predictor.inspection.r")
-source("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\my.panel.smooth.binary.r")
+source("PairsExplore.r")
+source("Predictor.inspection.r")
+source("my.panel.smooth.binary.r")
 
 #For Data Splitting
 source("TestTrainSplit.r")
@@ -120,13 +120,13 @@ output.dir[5]<-paste(dir.path,"\\maxlike",sep="")
               }
               		
 ### Pairs Explore Tests  #####
-source("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\PairsExplore.r")
-source("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\PairsExploreHelperFcts.r")
-source("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\read.dat.r")
-source("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\chk.libs.r")
-source("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\read.dat.r")
-source("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\my.panel.smooth.binary.r")
-source("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\Predictor.inspection.r")
+source("PairsExplore.r")
+source("PairsExploreHelperFcts.r")
+source("read.dat.r")
+source("chk.libs.r")
+source("read.dat.r")
+source("my.panel.smooth.binary.r")
+source("Predictor.inspection.r")
 
 
 
@@ -177,7 +177,7 @@ for(i in 1:length(predictor)){
 
 
 input.file<-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\PairsExploreManyPredictors.csv"
-for (i in 5:25){ 
+for (i in 1:25){ 
  try(Pairs.Explore(num.plots=i,
                 min.cor=.5,
                 input.file=input.file,
