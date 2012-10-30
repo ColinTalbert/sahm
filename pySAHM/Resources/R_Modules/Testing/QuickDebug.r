@@ -19,7 +19,7 @@ rc="responseBinary"
 
 rc="responseCount"
 input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
-
+input.file="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\WUS\\OCT2012\\modelSelection_cv_2.csv"
 
 ###########################################################################
 ############### Quick debug  ##############################################

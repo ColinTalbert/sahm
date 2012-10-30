@@ -158,7 +158,7 @@ make.auc.plot.jpg<-function(out=out){
                 #appropriate
                 if(!(out$input$script.name%in%c("glm","maxlike"))){
                     absn<-which(a$pres.abs==0,arr.ind=TRUE)
-                    samp<-sample(absn,size=sum(a$pres.abs==1),replace=FALSE) 
+                    samp<-sample(absn,size=min(table(a$pres.abs)),replace=FALSE) 
                 }
                 p.plt<-try(pocplot(a$pred[a$pres.abs==1], a$pred[a$pres.abs==0], 
                 title=paste("Presence Only Calibration Plot for \n",switch(out$dat$split.type,none="Training Data",test="Test Split",
