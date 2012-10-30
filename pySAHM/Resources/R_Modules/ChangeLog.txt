@@ -1,0 +1,6 @@
+CHANGE LOG
+
+10/30/2012 
+
+	Moving session folders: changed the path check to switch the tiff paths relative to the mds path if such paths exist so that a session folder can be moved while still allowing users to create their own mds files outside of vistrails and game the system 
+

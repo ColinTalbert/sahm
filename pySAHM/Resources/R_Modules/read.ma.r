@@ -215,7 +215,7 @@
           if(length(out.list$nPresAbs$train)==1)
           stop("response column (#",r.col,") in ",input.file," does not have at least two unique values in the train split",sep="")
           }
-                    browser()
+
                     paths<-paths[-c(r.col,rm.list),]
                     #paths are now relative to the MDS so that a session folder can be moved without breaking everything
                     include<-include[-c(r.col,rm.list)]
@@ -225,7 +225,7 @@
       # if producing geotiff output, check to make sure geotiffs are available for each column of the model array #
         if(out$input$make.binary.tif==T | out$input$make.p.tif==T){
                 #Check that tiffs to be used exist
-         path.check(paths)
+         path.check(paths,newBasepath=dirname(out$input$ma.name))
 
                  } else out.list$tif.names <- dat.names[-1]
 

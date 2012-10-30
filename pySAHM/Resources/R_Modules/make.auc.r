@@ -216,9 +216,7 @@ make.auc.plot.jpg<-function(out=out){
     }
 
         ############ getting statistics along with appropriate names into a data frame for creating the appended output
-                       browser()
-                        last.dir<-strsplit(out$input$output.dir,split="\\\\")
-                        parent<-sub(paste("\\\\",last.dir[[1]][length(last.dir[[1]])],sep=""),"",out$input$output.dir)
+                        parent<-dirname(out$input$output.dir) 
                         
                        if(out$input$model.family%in%c("binomial","bernoulli")){
                            csv.stats<-lapply(Stats,function(lst){
@@ -235,10 +233,10 @@ make.auc.plot.jpg<-function(out=out){
                              csv.vect),row.names=NULL)
 
                         Header<-cbind(c("","Original Field Data","Field Data Template","PARC Output Folder","PARC Template","Covariate Selection Name",""),
-                            c(last.dir[[1]][length(last.dir[[1]])],
+                            c(basename(out$input$output.dir),
                             out$dat$input$OrigFieldData,out$dat$input$FieldDataTemp,out$dat$input$ParcOutputFolder,
                             out$dat$input$ParcTemplate,ifelse(length(out$dat$input$CovSelectName)==0,"NONE",out$dat$input$CovSelectName),""))
-                        assign("Evaluation.Metrics.List",list(x=x,Header=Header,Parm.Len=length(stat.names),parent=parent),envir=.GlobalEnv)
+                      
                      if(out$input$script.name!="maxlike") 
                         AppendOut(compile.out=out$input$Append.Dir,Header,x,out,Parm.Len=length(stat.names),parent=parent,split.type=out$dat$split.type)
 
