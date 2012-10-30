@@ -43,18 +43,17 @@
 ###############################################################################
 
 place.save<-function(out,Final.Model){
-
-last.dir<-strsplit(out$input$output.dir,split="\\\\")
-                        parent<-sub(paste("\\\\",last.dir[[1]][length(last.dir[[1]])],sep=""),"",out$input$output.dir)
-                         compile.out<-paste(parent,
-                              paste(ifelse(missing(Final.Model),"AcrossModel","FinalEvaluation"),
-                               switch(out$dat$split.type,"crossValidation"="CrossVal","test"="TestTrain","none"="NoSplit"),
-                               switch(out$input$model.family,"binomial"="Binom","bernoulli"="Binom","poisson"="Count"),if(out$input$PsdoAbs)"PsdoAbs",
-                               ".csv",
-                              sep=""),sep="/")
+                        parent<-dirname(out$input$output.dir)
+                         compile.out<-file.path(parent,
+                                    paste(ifelse(missing(Final.Model),"AcrossModel","FinalEvaluation"),
+                                       switch(out$dat$split.type,"crossValidation"="CrossVal","test"="TestTrain","none"="NoSplit"),
+                                       switch(out$input$model.family,"binomial"="Binom","bernoulli"="Binom","poisson"="Count"),if(out$input$PsdoAbs)"PsdoAbs",
+                                       ".csv",
+                                      sep="")
+                                )
                               
  Header<-cbind(c("","Original Field Data","Field Data Template","PARC Output Folder","PARC Template","Covariate Selection Name",""),
-                            c(last.dir[[1]][length(last.dir[[1]])],
+                            c(basename(out$input$output.dir),
                             out$dat$input$OrigFieldData,out$dat$input$FieldDataTemp,out$dat$input$ParcOutputFolder,
                             out$dat$input$ParcTemplate,ifelse(length(out$dat$input$CovSelectName)==0,"NONE",out$dat$input$CovSelectName),""))
 
