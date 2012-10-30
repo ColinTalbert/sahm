@@ -48,31 +48,18 @@
        r.name <- out$input$response.col
       out.list <- list()
       read.dat(input.file,hl=hl,include=include,response.col=r.name)
-
-          paths<-matrix(as.character(tif.info[[3]]))
+           
+          paths<-matrix(file.path(tif.info[[3]]))
           rownames(paths) <-tif.info[[1]][1:length(paths)]
-
+            
           #reading some info on the other steps in the workflow to be used in
           #appended output
-              temp<-strsplit(tif.info[[2]][1],split="\\\\")[[1]]
-            out.list$input$FieldDataTemp<-temp[length(temp)]
-
-                temp<-strsplit(tif.info[[2]][2],split="\\\\")[[1]]
-            out.list$input$OrigFieldData<-temp[length(temp)]
-
-               temp<-strsplit(tif.info[[2]][3],split="\\\\")[[1]]
-            out.list$input$CovSelectName<-temp[length(temp)]
-
-                temp<-strsplit(tif.info[[3]][1],split="\\\\")[[1]]
-            out.list$input$ParcTemplate<-temp[length(temp)]
-
-            temp<-strsplit(tif.info[[3]][2],split="\\\\")[[1]]
-            out.list$input$ParcOutputFolder<-temp[length(temp)]
-
-            temp<-strsplit(tif.info[[2]][2],split="\\\\")[[1]]
-            out.list$input$OrigFieldData<-temp[length(temp)]
-
-         
+            out.list$input$FieldDataTemp<-basename(tif.info[[2]][1])
+            out.list$input$OrigFieldData<-basename(tif.info[[2]][2])
+            out.list$input$CovSelectName<-basename(tif.info[[2]][3])
+            out.list$input$ParcTemplate<-basename(tif.info[[3]][1])
+            out.list$input$ParcOutputFolder<-basename(tif.info[[3]][2])
+  
           if(r.name=="responseCount") out$input$model.family="poisson"
      
       r.col <- grep(r.name,names(dat))
@@ -228,7 +215,9 @@
           if(length(out.list$nPresAbs$train)==1)
           stop("response column (#",r.col,") in ",input.file," does not have at least two unique values in the train split",sep="")
           }
+                    browser()
                     paths<-paths[-c(r.col,rm.list),]
+                    #paths are now relative to the MDS so that a session folder can be moved without breaking everything
                     include<-include[-c(r.col,rm.list)]
                     
          dat.names<-names(dat)

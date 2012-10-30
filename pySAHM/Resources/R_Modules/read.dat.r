@@ -4,7 +4,7 @@ read.dat<-function(input.file,hl=NULL,include=NULL,response.col,is.inspect=FALSE
 
 #Written by Marian Talbert 6/8/2012
           if(file.access(input.file,mode=0)!=0) stop(paste("input file supplied", input.file, "does not exist",sep=" "))
-          
+           
           dat<-try(read.csv(input.file,skip=3,header=FALSE))
           if(class(dat)=="try-error") stop("Error reading MDS")
           

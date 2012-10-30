@@ -216,6 +216,7 @@ make.auc.plot.jpg<-function(out=out){
     }
 
         ############ getting statistics along with appropriate names into a data frame for creating the appended output
+                       browser()
                         last.dir<-strsplit(out$input$output.dir,split="\\\\")
                         parent<-sub(paste("\\\\",last.dir[[1]][length(last.dir[[1]])],sep=""),"",out$input$output.dir)
                         
