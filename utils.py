@@ -58,13 +58,14 @@ from PyQt4 import QtCore, QtGui
 
 from core.modules.basic_modules import File, Path, Directory, new_constant, Constant
 from core.modules.vistrails_module import ModuleError
+import core.system
 
 #from osgeo import gdalconst
 #from osgeo import gdal
 #from osgeo import osr
 import numpy
 
-import packages.sahm.pySAHM.utilities as utilities
+import pySAHM.utilities as utilities
 import getpass
 
 _roottempdir = ""
@@ -125,32 +126,96 @@ def getNDVal(filename):
     NDValue = band.GetNoDataValue()
     
     min = band.GetMinimum()
-    if min is None or min == band.GetNoDataValue():
-            min = band.ComputeRasterMinMax(0)[0]
+    if approx_equal(NDValue, min):
+        upperLeftPixVal = band.ReadAsArray(0, 0, 1, 1, 1, 1)[0][0]
+        if approx_equal(NDValue, upperLeftPixVal):
+            NDValue = band.ReadAsArray(0, 0, 1, 1, 1, 1)[0][0]
+    
+#    if min is None or min == band.GetNoDataValue():
+#            min = band.ComputeRasterMinMax(0)[0]
 
     
-    try:
-        #our output rasters have approx nodata values
-        #which don't equal the specified nodata.
-        #set the specified to equal what is actually used.
-#        if (abs(band.GetNoDataValue() - min) < 1e-9 and 
-#            band.GetNoDataValue() <> min) or \
-#            ( min == band.GetNoDataValue()):
-#            min, max = band.ComputeRasterMinMax(0)
-#            band.SetNoDataValue(min)
-#            (min,max) = band.ComputeRasterMinMax(0)
-        
-        
-        if band.GetNoDataValue() - min < 0.000000001:
-            NDValue = min
-        
-    except:
-        pass
+#    try:
+#        #our output rasters have approx nodata values
+#        #which don't equal the specified nodata.
+#        #set the specified to equal what is actually used.
+##        if (abs(band.GetNoDataValue() - min) < 1e-9 and 
+##            band.GetNoDataValue() <> min) or \
+##            ( min == band.GetNoDataValue()):
+##            min, max = band.ComputeRasterMinMax(0)
+##            band.SetNoDataValue(min)
+##            (min,max) = band.ComputeRasterMinMax(0)
+#        
+#        
+#        if approx_equal(NDValue, min):
+#            NDValue = min
+#        
+#    except:
+#        pass
     
     
     dataset = None
     return NDValue
-    
+   
+#these two functions were pulled from: http://code.activestate.com/recipes/577124-approximately-equal/
+def _float_approx_equal(x, y, tol=1e-18, rel=1e-7):
+    if tol is rel is None:
+        raise TypeError('cannot specify both absolute and relative errors are None')
+    tests = []
+    if tol is not None: tests.append(tol)
+    if rel is not None: tests.append(rel*abs(x))
+    assert tests
+    return abs(x - y) <= max(tests)
+
+
+def approx_equal(x, y, *args, **kwargs):
+    """approx_equal(float1, float2[, tol=1e-18, rel=1e-7]) -> True|False
+    approx_equal(obj1, obj2[, *args, **kwargs]) -> True|False
+
+    Return True if x and y are approximately equal, otherwise False.
+
+    If x and y are floats, return True if y is within either absolute error
+    tol or relative error rel of x. You can disable either the absolute or
+    relative check by passing None as tol or rel (but not both).
+
+    For any other objects, x and y are checked in that order for a method
+    __approx_equal__, and the result of that is returned as a bool. Any
+    optional arguments are passed to the __approx_equal__ method.
+
+    __approx_equal__ can return NotImplemented to signal that it doesn't know
+    how to perform that specific comparison, in which case the other object is
+    checked instead. If neither object have the method, or both defer by
+    returning NotImplemented, approx_equal falls back on the same numeric
+    comparison used for floats.
+
+    >>> almost_equal(1.2345678, 1.2345677)
+    True
+    >>> almost_equal(1.234, 1.235)
+    False
+
+    """
+    if not (type(x) is type(y) is float):
+        # Skip checking for __approx_equal__ in the common case of two floats.
+        methodname = '__approx_equal__'
+        # Allow the objects to specify what they consider "approximately equal",
+        # giving precedence to x. If either object has the appropriate method, we
+        # pass on any optional arguments untouched.
+        for a,b in ((x, y), (y, x)):
+            try:
+                method = getattr(a, methodname)
+            except AttributeError:
+                continue
+            else:
+                result = method(b, *args, **kwargs)
+                if result is NotImplemented:
+                    continue
+                return bool(result)
+    # If we get here without returning, then neither x nor y knows how to do an
+    # approximate equal comparison (or are both floats). Fall back to a numeric
+    # comparison.
+    return _float_approx_equal(x, y, *args, **kwargs)
+ 
+ 
 
 def mknextfile(prefix, suffix="", directory=""):
     global _roottempdir
@@ -722,3 +787,14 @@ class InteractiveQGraphicsView(QtGui.QGraphicsView):
         self.view_current()
         
 
+def print_timing(func):
+    def wrapper(*args, **kwargs):
+        t1 = time.time()
+        res = func(*args, **kwargs)
+        t2 = time.time()
+#        print "len(traceback.extract_stack())", len(traceback.extract_stack())
+        tabs = "  ...  " * (len(traceback.extract_stack()) - 20)
+#        print 'tabs', tabs, "end"
+        print tabs,'%s took %0.3f ms' % (func.func_name, (t2-t1)*1000.0)
+        return res
+    return wrapper

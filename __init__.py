@@ -48,6 +48,9 @@ name = "SAHM"
 identifier = "gov.usgs.sahm"
 version = '1.0.0'
 
+def package_dependencies():
+   return ['edu.utah.sci.vistrails.matplotlib']
+
 configuration = \
     ConfigurationObject(output_dir= r'C:\temp\SAHM_workspace',
                         r_path = r'..\\..\\Central_R\R-2.14.1\bin',

@@ -63,10 +63,13 @@ from packages.sahm.sahm_picklists import OutputRaster
 from packages.sahm.utils import map_ports
 
 from utils import dbfreader, getRasterParams
+from utils import print_timing
 
 import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+#from matplotlib.backends.backend_qt4 import FigureCanvasQT as FigureCanvas
+#from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 from matplotlib.offsetbox import AnchoredOffsetbox, TextArea
 import matplotlib.colors as colors
@@ -101,6 +104,7 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
             'initial_raster_display': ("initial_raster", None, True),
             "model_workspace": ("model_workspace", None, True)}
 
+    @print_timing
     def compute(self):
         inputs = {}
 
@@ -156,6 +160,7 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
 
         self.local_displayAndWait(inputs)
 
+    @print_timing
     def local_displayAndWait(self, inputs):
         self.displayAndWait(SAHMSpatialOutputViewerCellWidget,
                             inputs)       
@@ -219,11 +224,12 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         self.displayTL = True
         self.pointsLoaded = False
 
+    @print_timing
     def updateContents(self, inputs):
         """ updateContents(inputs: dictionary) -> None
         Update the widget contents based on the input data
         """
-        print "SAHMSpatialOutputViewerCellWidget updateContents"
+#        print "SAHMSpatialOutputViewerCellWidget updateContents"
         self.toolBarType = SAHMSpatialViewerToolBar
         self.controlBarType = SAHMSpatialViewerToolBar
         self.inputs = inputs
@@ -239,6 +245,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         self.fig.canvas.draw()
         self.update()
 
+    @print_timing
     def create_main_frame(self):
         self.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.dpi = 100
@@ -283,6 +290,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
     def getRasterParams(self, rasterfile):
         return getRasterParams(rasterfile)
 
+    @print_timing
     def wheel_zoom(self, event):
         #zoom in or out centered on the current cursor position
 
@@ -324,13 +332,16 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 #            self.pull_pixels()
             self.sync_extents()
 
+    @print_timing
     def resize(self):
         self.pull_pixels()
 
+    @print_timing
     def pull_pixels(self):
-        print "SAHMSpatialOutputViewerCellWidget _pull_pixels"
+#        print "SAHMSpatialOutputViewerCellWidget _pull_pixels"
         self.rasterlayer.ax_update(self.axes)
 
+    @print_timing
     def keyPressEvent(self, event):
         if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_T:
             active_cells = self.getSelectedCellWidgets()
@@ -353,8 +364,9 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 
         QCellWidget.deleteLater(self)
 
+    @print_timing
     def load_layers(self):
-        print "SAHMSpatialOutputViewerCellWidget load_layers"
+#        print "SAHMSpatialOutputViewerCellWidget load_layers"
         self.all_layers = {"prob_map":{"type":"raster", "title":"Probability" ,"categorical":False, "min":0, "max":1, 'cmap':matplotlib.cm.jet, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
                          "bin_map":{"type":"raster", "title":"Binary probability" , "categorical":False, "min":0, "max":1, 'cmap':matplotlib.cm.Greys, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
                          "resid_map":{"type":"raster", "title":"Residuals" , "categorical":False, "min":"pullfromdata", "max":"pullfromdata", 'cmap':matplotlib.cm.Accent, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
@@ -402,21 +414,31 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 #        
 #        self.maxExtent = [ulx, lrx, lry, uly]
 
+    @print_timing
     def loadPoints(self):
-        try:
-            points = np.genfromtxt(self.inputs["mds"], delimiter=",", skip_header=3)
-            for name, val in {"abs_points":0, "pres_points":1, "backs_points":-9999}.items():
-               #parse out the x, y s for the points in each of our categories
-               self.all_layers[name]['x'] = np.delete(points, np.argwhere(points[:,2]<>val), 0)[:,0]
-               self.all_layers[name]['y'] = np.delete(points, np.argwhere(points[:,2]<>val), 0)[:,1]
-               if len(self.all_layers[name]['x']) == 0:
-                   self.all_layers[name]["enabled"] = False
-               else:
-                   self.all_layers[name]["enabled"] = True
-        except IOError:
-            #this is the case when the model has been applied to a novel area
-            for name, val in {"abs_points":0, "pres_points":1, "backs_points":-9999}.items():
-                self.all_layers[name]["enabled"] = False
+        #initialize our arrays
+        for pointType in ['abs_points', 'pres_points', 'backs_points']:
+            self.all_layers[pointType]['x'] = []
+            self.all_layers[pointType]['y'] = []
+        
+        mdsReader = csv.reader(open(self.inputs["mds"], 'r'))
+        header = mdsReader.next()
+        header2 = mdsReader.next()
+        header3 = mdsReader.next()
+        
+        for row in mdsReader:
+            if int(row[2]) > 0:
+                self.all_layers['pres_points']['x'].append(float(row[0]))
+                self.all_layers['pres_points']['y'].append(float(row[1]))
+            elif int(row[2]) == 0:
+                self.all_layers['abs_points']['x'].append(float(row[0]))
+                self.all_layers['abs_points']['y'].append(float(row[1]))
+            else:
+                self.all_layers['backs_points']['x'].append(float(row[0]))
+                self.all_layers['backs_points']['y'].append(float(row[1]))
+                
+        for pointType in ['abs_points', 'pres_points', 'backs_points']:
+            self.all_layers[pointType]["enabled"] = len(self.all_layers[pointType]['x']) > 0
 
     def add_axis(self):
         self.axes = self.fig.add_subplot(111, aspect='equal', adjustable='datalim')
@@ -475,12 +497,13 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         kwargs['cbar_ticks'] = uniques
         kwargs['cbar_labels'] = labels
         return matplotlib.cm.get_cmap('Accent', len(uniques))
-
+    
+    @print_timing
     def on_draw(self, UseMaxExt=False, passedExtent=None):
         """ Completely clears then redraws the figure
         There's probably a more efficient way to do this.
         """
-        print "SAHMSpatialOutputViewerCellWidget _on_draw"
+#        print "SAHMSpatialOutputViewerCellWidget _on_draw"
         if passedExtent is not None:
             curExtent = passedExtent
         elif UseMaxExt:
@@ -488,7 +511,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         else:
             curExtents = self.get_extent()
             
-        print "curExtents: ", curExtents
+#        print "curExtents: ", curExtents
 
         self.fig.clear()
         self.add_axis()
@@ -509,7 +532,8 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 
         if self.displayTL:
             self.add_title(title)
-
+    
+    @print_timing
     def add_vector(self, layername):
         if not self.pointsLoaded:
             self.loadPoints()
@@ -517,7 +541,8 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         kwargs = self.all_layers[layername]
         if self.all_layers[layername]['enabled']:
             self.axes.scatter(kwargs['x'], kwargs['y'], s=10, c=kwargs['color'], linewidth=0.5, antialiased=True)
-
+    
+    @print_timing
     def add_raster(self, kwargs, curExtents):
         rasterfile = kwargs['file']
 
@@ -533,7 +558,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 #        curXLim = self.axes.get_xlim()
 #        curYLim = self.axes.get_ylim()
 #        raster_array = self.rasterlayer(rasterparams["ulx"], rasterparams["lrx"], rasterparams["lry"], rasterparams["uly"])
-        print "\n_addraster"
+#        print "\n_addraster"
         raster_array = self.rasterlayer(*curExtents)
 #
 #        rmin = np.amin(raster_array)
@@ -553,13 +578,14 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
                     rmin = min
 
             norm = colors.normalize(rmin, rmax)
-            print "raster_array is None:", raster_array is None
-            print "raster_array.size:", raster_array.size
-            print "type(raster_array):", type(raster_array)
+#            print "raster_array is None:", raster_array is None
+#            print "raster_array.size:", raster_array.size
+#            print "type(raster_array):", type(raster_array)
+#            print raster_array
             if raster_array.size == 1:
                 print "raster_array is None!!!/n/n"
                 raster_array = np.empty([1960, 1080])
-                print raster_array
+#                print raster_array
             raster_plot = self.axes.imshow(raster_array,interpolation="nearest", cmap=kwargs['cmap'], norm=norm, origin='upper', extent=self.getDataExtent())
             
 
@@ -683,8 +709,9 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         return None
     
     #Functions dealing with managing extents
+    @print_timing
     def set_extent(self, ylim, xlim):
-        print "_set_extent"
+#        print "_set_extent"
         self.axes.set_ylim(ylim, emit=False)
         self.axes.set_xlim(xlim, emit=False)
 
@@ -692,8 +719,9 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         self.fig.canvas.draw()
         self.update()
         
+    @print_timing        
     def get_extent(self):
-        print "_get_extent"
+#        print "_get_extent"
         return list(self.axes.get_xlim()) + list(self.axes.get_ylim())
 
     def getMaxExtent(self):
@@ -711,7 +739,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         self.sync_extents()
         
     def sync_extents(self):
-        print "_sync_extents"
+#        print "_sync_extents"
         for spatialViewer in self.get_active_cells():
             spatialViewer.set_extent(self.axes.get_ylim(), self.axes.get_xlim())
             spatialViewer.pull_pixels()
@@ -723,6 +751,7 @@ class MyMapCanvas(FigureCanvas):
         FigureCanvas.__init__(self, fig)
         self._cursor = None
 
+    @print_timing
     def resizeEvent(self, event):
         if not event.size().height() == 0:
             FigureCanvas.resizeEvent(self, event)
@@ -748,17 +777,20 @@ class RasterDisplay(object):
     This object has a pointer to the original raster and functions
     for switching the input file or getting an array of pixel values
     '''
-    def __init__(self, width=300, height=300):
+    def __init__(self, threeBand=False, NoDataValue="ExtractFromFile", width=300, height=300):
         self.height = height
         self.width = width
+        self.threeBand = threeBand
+        self.NoDataValue = NoDataValue
 
+    @print_timing
     def switch_raster(self, rasterfile):
         self.rasterfile = rasterfile
         self.rasterparams = getRasterParams(rasterfile)
 
-
+    @print_timing
     def __call__(self, xstart, xend, ystart, yend):
-        print "RasterDisplay __call__"
+#        print "RasterDisplay __call__"
         self.x = np.linspace(xstart, xend, self.width)
         self.y = np.linspace(ystart, yend, self.height).reshape(-1,1)
 
@@ -803,28 +835,37 @@ class RasterDisplay(object):
         if nrows < 0:
             nrows = ds.RasterYSize
 
-        print "rows, cols:  ", ncols, nrows
-        print "pixelspulled: ", self.height, self.width
+#        print "rows, cols:  ", ncols, nrows
+#        print "pixelspulled: ", self.height, self.width
 
         ary = ds.GetRasterBand(1).ReadAsArray(xoff=xOffset, yoff=yOffset,
                                               win_xsize=ncols, win_ysize=nrows,
                                               buf_ysize=self.height, buf_xsize=self.width)
         
-        ndval = utils.getNDVal(self.rasterfile)
+        if self.NoDataValue == "ExtractFromFile":
+            ndval = utils.getNDVal(self.rasterfile)
+        else:
+            ndval = float(self.NoDataValue)
 
-        return np.ma.masked_array(ary, mask=(ary==ndval))
-
+        if ary is None or ary.size == 1:
+                print "raster_array is None!!!/n/n"
+                return np.empty([1960, 1080])
+        else:
+                return np.ma.masked_array(ary, mask=(ary==ndval))
+            
+    @print_timing
     def setDims(self, ax):
         #Get the number of points from the number of pixels in the window
         dims = ax.axesPatch.get_window_extent().bounds
-        print "RasterDisplay setDims:   ", dims
+#        print "RasterDisplay setDims:   ", dims
         self.width = int(dims[2] + 0.5)
         self.height = int(dims[3] + 0.5)
 
+    @print_timing
     def ax_update(self, ax):
         ax.set_autoscale_on(False) # Otherwise, infinite loop
         self.setDims(ax)
-        print "RasterDisplay ax_update"
+#        print "RasterDisplay ax_update"
 
         #Get the range for the new area
         xstart,ystart,xdelta,ydelta = ax.axes.viewLim.bounds
@@ -840,9 +881,9 @@ class RasterDisplay(object):
         xend = xend + xBuff
         yend = yend + yBuff
 
-        print "   Before: "
-        print "     xlim: ", int(xstart), int(xend)
-        print "     ylim: ", int(ystart), int(yend)
+#        print "   Before: "
+#        print "     xlim: ", int(xstart), int(xend)
+#        print "     ylim: ", int(ystart), int(yend)
 
         #reel these values in if they are outside our bounds
         for bound in ['xstart', 'xend']:
@@ -859,9 +900,9 @@ class RasterDisplay(object):
 
         # Update the image object with our new data and extent
         im = ax.images[-1]
-        print "   After: "
-        print "     xlim: ", int(xstart), int(xend)
-        print "     ylim: ", int(ystart), int(yend)
+#        print "   After: "
+#        print "     xlim: ", int(xstart), int(xend)
+#        print "     ylim: ", int(ystart), int(yend)
         im.set_data(self.__call__(xstart, xend, ystart, yend))
         im.set_extent((xstart, xend, ystart, yend))
         ax.figure.canvas.draw_idle()
