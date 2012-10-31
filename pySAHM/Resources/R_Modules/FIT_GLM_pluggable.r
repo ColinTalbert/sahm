@@ -50,7 +50,6 @@ make.p.tif=T
 make.binary.tif=T
 simp.method="AIC"
 opt.methods=2
-save.model=FALSE
 MESS=FALSE
 squared.terms=FALSE
 
@@ -72,20 +71,16 @@ Args <- commandArgs(trailingOnly=FALSE)
     	if(argSplit[[1]][1]=="mpt") make.p.tif <- as.logical(argSplit[[1]][2])
  			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- as.logical(argSplit[[1]][2])
  			if(argSplit[[1]][1]=="om")  opt.methods <- as.numeric(argSplit[[1]][2])
- 			if(argSplit[[1]][1]=="savm")  save.model <- as.logical(argSplit[[1]][2])
  			if(argSplit[[1]][1]=="sm")  simp.method <- argSplit[[1]][2]
  			if(argSplit[[1]][1]=="mes")  MESS <- as.logical(argSplit[[1]][2])
     }
 
 ScriptPath<-dirname(ScriptPath)
-source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
-source(paste(ScriptPath,"GLM.helper.fcts.r",sep="\\"))
-
-save.model<-make.p.tif | make.binary.tif
-
+source(file.path(ScriptPath,"LoadRequiredCode.r"))
+source(file.path(ScriptPath,"GLM.helper.fcts.r"))
 
 FitModels(ma.name=csv,
       tif.dir=NULL,output.dir=output,
       response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
-      simp.method=simp.method,debug.mode=F,responseCurveForm="pdf",script.name="glm",opt.methods=opt.methods,save.model=save.model,
+      simp.method=simp.method,debug.mode=F,script.name="glm",opt.methods=opt.methods,
       MESS=MESS,squared.terms=squared.terms)

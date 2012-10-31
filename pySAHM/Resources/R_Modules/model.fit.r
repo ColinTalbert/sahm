@@ -89,7 +89,7 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,...){
     if(Model=="mars") {
           fit_contribs<-list()
           mars.model<-list()
-           
+        
           for(i in 1:num.splits){
                 mars.model[[i]]<-mars.glm(data=dat[c(Split,rep(i,times=sum(dat$response>0)))==i,], mars.x=c(2:ncol(dat)), mars.y=1, mars.degree=mars.degree, family=model.family,
                                        penalty=mars.penalty)

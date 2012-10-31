@@ -36,7 +36,7 @@ Predictor.inspection<-function(predictor,input.file,output.dir,response.col="Res
      
      a<-try(raster(tif.info[[3]][pred.indx]),silent=TRUE) 
      if(class(a)=="try-error") spatialDat=FALSE
-     output.file<-paste(output.dir,paste(names(dat)[pred.indx],".jpg",sep=""),sep="\\")
+     output.file<-file.path(output.dir,paste(names(dat)[pred.indx],".jpg",sep=""))
      ### Producing some plots
     
     jpeg(output.file,pointsize=13,height=2000,width=2000,quality=100)
@@ -44,21 +44,27 @@ Predictor.inspection<-function(predictor,input.file,output.dir,response.col="Res
          else par(mfrow=c(2,1),mar=c(15,25,9,25))
              hst<-hist(pred,plot=FALSE)
       ####PLOT 1. new
-         hist(pred,col="red",xlab="",main="",cex.lab=cex.mult,cex=cex.mult,cex.main=cex.mult,cex.axis=.7*cex.mult,ylim=c(0,1.5*max(hst$counts)))
-             hist(pred[response==0],breaks=hst$breaks,add=TRUE,col="blue")
-             legend("topright",xjust=1,yjust=1,legend=c(pres.lab,abs.lab),fill=c("red","blue"),cex=cex.mult)
-              mtext(paste(names(dat[pred.indx]),"  (",round(100*(1-sum(complete.cases(pred))/length(pred)),digits=1),"% missing)",sep=""), side = 3,outer=TRUE,line=-4,cex=1.2*cex.mult)
-             if(sum(is.na(pred))/length(pred)>.003){ #a table of missing values but only if we have missing data
-                  rect(1*min(hst$breaks),1.1*max(hst$counts),quantile(hst$breaks,prob=.55),ytop=1.45*max(hst$counts),lwd=cex.mult)
-                   xloc<-rep(as.vector(quantile(hst$breaks,probs=c(0,.2,.4))),c(2,3,3))
-                   yloc<-rep(c(1.4,1.3,1.2)*max(hst$counts),times=3)
-                   yloc<-yloc[-1]
-                   my.table<-table(complete.cases(pred),response)
-                   text(labels=c("Missing","Not Mssg",abs.lab,paste(round(100*my.table[,1]/sum(my.table[,1]),digits=1),"%",sep=""),
-                   pres.lab,paste(round(100*my.table[,2]/sum(my.table[,2]),digits=1),"%",sep="")),x=xloc,
-                        y=yloc,pos=4,cex=.7*cex.mult)
-                   text("Missing By Response",x=xloc[1],y=1.5*max(hst$counts),pos=4,cex=.9*cex.mult)
-               }
+         if(length(grep("categorical",predictor))>0){ 
+             col.palatte<-c("blue",heat.colors(length(unique(y))))
+             barplot(tab<-table(TrueResponse[complete.cases(pred)],pred[complete.cases(pred)]),col=col.palatte,cex.lab=cex.mult,cex=cex.mult,cex.main=cex.mult,cex.axis=.5*cex.mult)
+             legend("topright",fill=c("blue","red"),legend=c("0",ifelse(nrow(tab)>2,"1+","1")),cex=cex.mult)
+         } else{
+           hist(pred,col="red",xlab="",main="",cex.lab=cex.mult,cex=cex.mult,cex.main=cex.mult,cex.axis=.7*cex.mult,ylim=c(0,1.5*max(hst$counts)))
+               hist(pred[response==0],breaks=hst$breaks,add=TRUE,col="blue")
+               legend("topright",xjust=1,yjust=1,legend=c(pres.lab,abs.lab),fill=c("red","blue"),cex=cex.mult)
+                mtext(paste(names(dat[pred.indx]),"  (",round(100*(1-sum(complete.cases(pred))/length(pred)),digits=1),"% missing)",sep=""), side = 3,outer=TRUE,line=-4,cex=1.2*cex.mult)
+               if(sum(is.na(pred))/length(pred)>.003){ #a table of missing values but only if we have missing data
+                    rect(1*min(hst$breaks),1.1*max(hst$counts),quantile(hst$breaks,prob=.55),ytop=1.45*max(hst$counts),lwd=cex.mult)
+                     xloc<-rep(as.vector(quantile(hst$breaks,probs=c(0,.2,.4))),c(2,3,3))
+                     yloc<-rep(c(1.4,1.3,1.2)*max(hst$counts),times=3)
+                     yloc<-yloc[-1]
+                     my.table<-table(complete.cases(pred),response)
+                     text(labels=c("Missing","Not Mssg",abs.lab,paste(round(100*my.table[,1]/sum(my.table[,1]),digits=1),"%",sep=""),
+                     pres.lab,paste(round(100*my.table[,2]/sum(my.table[,2]),digits=1),"%",sep="")),x=xloc,
+                          y=yloc,pos=4,cex=.7*cex.mult)
+                     text("Missing By Response",x=xloc[1],y=1.5*max(hst$counts),pos=4,cex=.9*cex.mult)
+                 }
+           }    
        ####PLOT 2.
            if(spatialDat){  
                   plot(a,maxpixels=5000,main="",cex.lab=cex.mult,cex=cex.mult,
@@ -130,7 +136,7 @@ Args <- commandArgs(trailingOnly=FALSE)
     }
 
 ScriptPath<-dirname(ScriptPath)
-source(paste(ScriptPath,"chk.libs.r",sep="\\"))
-source(paste(ScriptPath,"my.panel.smooth.binary.r",sep="\\"))
-source(paste(ScriptPath,"read.dat.r",sep="\\"))
+source(file.path(ScriptPath,"chk.libs.r"))
+source(file.path(ScriptPath,"my.panel.smooth.binary.r"))
+source(file.path(ScriptPath,"read.dat.r"))
 Predictor.inspection(predictor=predictor,input.file=infile,output.dir=output,response.col=responseCol,pres=pres,absn=absn,bgd=bgd)

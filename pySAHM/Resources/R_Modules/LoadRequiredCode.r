@@ -50,7 +50,7 @@ source(paste(ScriptPath,"chk.libs.r",sep="\\"))
 
 
 #Fitting Models and making predictions
-source(paste(ScriptPath,"generic.model.fitNew.r",sep="\\"))
+source(paste(ScriptPath,"generic.model.fit.r",sep="\\"))
 source(paste(ScriptPath,"FitModels.r",sep="\\"))
 source(paste(ScriptPath,"model.fit.r",sep="\\"))
 source(paste(ScriptPath,"pred.fct.r",sep="\\"))

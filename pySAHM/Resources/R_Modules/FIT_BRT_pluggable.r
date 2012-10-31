@@ -57,7 +57,6 @@ tolerance.method = "auto"
 tolerance = 0.001
 seed=NULL
 opt.methods=2
-save.model=TRUE
 MESS=FALSE
 
 # Interpret command line argurments #
@@ -86,7 +85,6 @@ Args <- commandArgs(trailingOnly=FALSE)
  			if(argSplit[[1]][1]=="mt")  max.trees <- as.numeric(argSplit[[1]][2])
  			if(argSplit[[1]][1]=="om")  opt.methods <- as.numeric(argSplit[[1]][2])
  			if(argSplit[[1]][1]=="seed")  seed <- as.numeric(argSplit[[1]][2])
- 		  if(argSplit[[1]][1]=="savm")  save.model <- as.logical(argSplit[[1]][2])
  		  if(argSplit[[1]][1]=="tolm")  tolerance.method <- argSplit[[1]][2]
  		  if(argSplit[[1]][1]=="tol")  tolerance <- as.numeric(argSplit[[1]][2])
  		  if(argSplit[[1]][1]=="mes")  MESS <-as.logical(argSplit[[1]][2])
@@ -94,10 +92,9 @@ Args <- commandArgs(trailingOnly=FALSE)
     }
 
 ScriptPath<-dirname(ScriptPath)
-source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
-source(paste(ScriptPath,"BRT.helper.fcts.r",sep="\\"))
+source(file.path(ScriptPath,"LoadRequiredCode.r"))
+source(file.path(ScriptPath,"BRT.helper.fcts.r))
 
-save.model<-make.p.tif | make.binary.tif
 
 
     FitModels(ma.name=csv,
@@ -105,9 +102,9 @@ save.model<-make.p.tif | make.binary.tif
 		output.dir=output,
 		response.col=responseCol,
 		make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
-		simp.method="cross-validation",debug.mode=F,responseCurveForm="pdf",tc=tc,n.folds=n.folds,alpha=alpha,script.name="brt",
+		simp.method="cross-validation",debug.mode=F,tc=tc,n.folds=n.folds,alpha=alpha,script.name="brt",
 		learning.rate =learning.rate, bag.fraction = bag.fraction,prev.stratify = prev.stratify,max.trees = max.trees,seed=seed,
-    save.model=save.model,opt.methods=opt.methods,MESS=MESS,tolerance.method = tolerance.method,tolerance=tolerance)
+    opt.methods=opt.methods,MESS=MESS,tolerance.method = tolerance.method,tolerance=tolerance)
 
 
 

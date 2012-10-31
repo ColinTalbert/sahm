@@ -75,7 +75,7 @@ make.auc.plot.jpg<-function(out=out){
   Stats<-lapply(inlst,calcStat,family=out$input$model.family,has.split=out$input$has.split)
 
 #################### Variable importance plots #####################
-   
+  
     if(tolower(out$input$script.name)!="maxlike" & length(out$mods$vnames)>1 & out$input$model.family!="poisson"){
       jpeg(paste(out$dat$bname,"_variable.importance.jpeg",sep=""),height=1000,width=1000)  
         VariableImportance(Modelout$input$script.name,out=out,auc=lapply(Stats,"[",9)) 
@@ -96,7 +96,7 @@ make.auc.plot.jpg<-function(out=out){
  ############### Confusion Matrix Plot ###########
 
   if(out$input$model.family!="poisson"){
-
+ 
    jpeg(file=paste(out$dat$bname,"confusion.matrix.jpg",sep="."),width=1000,height=1000,pointsize=13,quality=100)
     confusion.matrix(Stats,out$dat$split.type)
     graphics.off()
@@ -158,7 +158,7 @@ make.auc.plot.jpg<-function(out=out){
                 #appropriate
                 if(!(out$input$script.name%in%c("glm","maxlike"))){
                     absn<-which(a$pres.abs==0,arr.ind=TRUE)
-                    samp<-sample(absn,size=sum(a$pres.abs==1),replace=FALSE) 
+                    samp<-sample(absn,size=min(table(a$pres.abs)),replace=FALSE) 
                 }
                 p.plt<-try(pocplot(a$pred[a$pres.abs==1], a$pred[a$pres.abs==0], 
                 title=paste("Presence Only Calibration Plot for \n",switch(out$dat$split.type,none="Training Data",test="Test Split",

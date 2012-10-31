@@ -84,7 +84,7 @@ PseudoAbsGen<-function(input.file,outfile,method="KDE",bw.otim="adhoc",isopleth=
                y.cut<-a$eval.points[[2]]
           }
         }
-        
+       
         #if(bias==TRUE) {
             #I extend the range a little bit on each side of the kde.matrix and insert a boundary of zero values so anything 
             #outside the range of the input data gets a kde estmate of 0

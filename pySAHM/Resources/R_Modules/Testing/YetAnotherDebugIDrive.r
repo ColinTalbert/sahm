@@ -1,12 +1,12 @@
 #debug branch
-setwd("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
-ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
-dir.path<-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\AcrossModelPerformance\\Debug9.24"
+setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
+dir.path<-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\AcrossModelPerformance\\Debug10.15"
 
 #master branch
-#setwd("I:\\VisTrails\\VisTrails_SAHM_x32\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
-#ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x32\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
-#dir.path<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\MasterBranch9.19"
+setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
+dir.path<-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\AcrossModelPerformance\\Master10.15"
 #For Model tests
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
@@ -15,12 +15,12 @@ source("BRT.helper.fcts.r")
 source("RF.helper.fcts.r")
 
 #For Apply Model Tests
-source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\EvaluateNewData.r")
+source("EvaluateNewData.r")
 
 #For PairsExplore and parameter inspection
-source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\PairsExplore.r")
-source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\Predictor.inspection.r")
-source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\my.panel.smooth.binary.r")
+source("PairsExplore.r")
+source("Predictor.inspection.r")
+source("my.panel.smooth.binary.r")
 
 #For Data Splitting
 source("TestTrainSplit.r")
@@ -70,7 +70,7 @@ output.dir[5]<-paste(dir.path,"\\maxlike",sep="")
                     family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
                 tolerance = 0.001,seed=1,opt.methods=2,
                         simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
-                        learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=F))
+                        learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,MESS=F))
                       }
               
               
@@ -103,7 +103,7 @@ output.dir[5]<-paste(dir.path,"\\maxlike",sep="")
               responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
               samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
               localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=proximity,norm.votes=TRUE,
-              do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,save.model=TRUE,MESS=F,seed=1))
+              do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,MESS=F,seed=1))
                  }
  
               ### Maxlike
@@ -120,14 +120,14 @@ output.dir[5]<-paste(dir.path,"\\maxlike",sep="")
               }
               		
 ### Pairs Explore Tests  #####
-source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\PairsExplore.r")
-source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\read.dat.r")
-source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\chk.libs.r")
-source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\read.dat.r")
-source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\my.panel.smooth.binary.r")
-source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\Predictor.inspection.r")
-source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\Predictor.inspection.r")
- 
+source("PairsExplore.r")
+source("PairsExploreHelperFcts.r")
+source("read.dat.r")
+source("chk.libs.r")
+source("read.dat.r")
+source("my.panel.smooth.binary.r")
+source("Predictor.inspection.r")
+
 
 
 for(i in 1:length(predictor)){
@@ -135,24 +135,24 @@ for(i in 1:length(predictor)){
        try(Pairs.Explore(num.plots=5,
                 min.cor=.5,
                 input.file=input.file[i],
-            		output.file=paste(dir.path,"\\PairsExploreTest2\\",i,"Par1",".jpg",sep=""),
-            		response.col=responseCol[i],
+            		output.file=paste(dir.path,"\\",i,"Par1",".jpg",sep=""),
+            		response.col=rc[i],
             		pres=TRUE,
             		absn=TRUE,
             		bgd=TRUE))
         try(Pairs.Explore(num.plots=10,
                 min.cor=.5,
                 input.file=input.file[i],
-            		output.file=paste(dir.path,"\\PairsExploreTest2\\",i,"Par2",".jpg",sep=""),
-            		response.col=responseCol[i],
+            		output.file=paste(dir.path,"\\",i,"Par2",".jpg",sep=""),
+            		response.col=rc[i],
             		pres=TRUE,
             		absn=FALSE,
             		bgd=FALSE,
                 cors.w.highest=TRUE))
        try(Predictor.inspection(predictor[i],
                 input.file=input.file[i],
-            		output.dir=paste(dir.path,"\\PairsExploreTest2",sep=""),
-            		response.col=responseCol[i],
+            		output.dir=dir.path,
+            		response.col=rc[i],
             		pres=TRUE,
             		absn=TRUE,
             		bgd=TRUE))              				
@@ -160,16 +160,16 @@ for(i in 1:length(predictor)){
  try(Pairs.Explore(num.plots=15,
     min.cor=min.cor,
     input.file=input.file[i],
-		output.file=paste(dir.path,"\\PairsExploreTest2\\",i,".jpg",sep=""),
-		response.col=responseCol[i],
+		output.file=paste(dir.path,"\\",i,".jpg",sep=""),
+		response.col=rc[i],
 		pres=TRUE,
 		absn=TRUE,
 		bgd=TRUE))
 		
 	try(Predictor.inspection(predictor[i],
     input.file[i],
-		output.dir=paste(dir.path,"\\PairsExploreTest2",sep=""),
-		response.col=responseCol[i],
+		output.dir=paste(dir.path,"\\",sep=""),
+		response.col=rc[i],
 		pres=TRUE,
 		absn=TRUE,
 		bgd=TRUE))
@@ -177,12 +177,12 @@ for(i in 1:length(predictor)){
 
 
 input.file<-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\PairsExploreManyPredictors.csv"
-for (i in 5:25){ 
+for (i in 1:25){ 
  try(Pairs.Explore(num.plots=i,
                 min.cor=.5,
                 input.file=input.file,
-            		output.file=paste(dir.path,"\\PairsExploreTest2\\",i,"NumPlotsTest",".jpg",sep=""),
-            		response.col=responseCol[1],
+            		output.file=paste(dir.path,"\\",i,"NumPlotsTest",".jpg",sep=""),
+            		response.col=rc[4],
             		pres=TRUE,
             		absn=TRUE,
             		bgd=TRUE

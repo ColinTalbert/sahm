@@ -1,7 +1,7 @@
 SplitBackground<-function(out,dat){
 #this splits the background points but only if we're using pseudoabs data otherwise the split
 #is into one group so the list structure can persist making the downstream coding easier
-       
+      
         if(out$input$PsdoAbs & floor(table(dat$response)[1]/table(dat$response)[2])>1){
                 num.splits<-floor(sum(dat$response==0)/sum(dat$response==1))
                      #partition the pseudoabsences as evenly as possible to match the number of presence

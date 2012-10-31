@@ -88,7 +88,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
                 outfile <- paste(bname<-paste(out$input$output.dir,paste("/",Model,"_",sep=""),n<-1,sep=""),"_output.txt",sep="")
                 while(file.access(outfile)==0) outfile<-paste(bname<-paste(out$input$output.dir,paste("/",Model,"_",sep=""),n<-n+1,sep=""),"_output.txt",sep="")
                 capture.output(paste(toupper(Model),"Results"),file=outfile) # reserve the new basename #
-                } else bname<-paste(out$input$output.dir,paste("/",Model,sep=""),sep="")
+                } else bname<-file.path(out$input$output.dir,Model)
 
    #Load Libraries
               chk.libs(Model)
@@ -156,7 +156,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
      assign("out",out,envir=.GlobalEnv)
 
    #Save Workspace
-   save.image(paste(output.dir,"modelWorkspace",sep="\\"))
+   save.image(file.path(output.dir,"modelWorkspace"))
           t4 <- unclass(Sys.time())
           cat("\nfinished with final model summarization, t=",round(t4-t3,2),"sec\n");flush.console()
          cat("Progress:80%\n");flush.console()

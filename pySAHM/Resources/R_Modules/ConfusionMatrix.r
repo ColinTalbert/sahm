@@ -44,7 +44,7 @@
 
 confusion.matrix<-function(Stats,split.type){
 
-     par(oma=c(5,3,5,3),mar=c(10,5,5,2))
+     par(oma=c(5,3,5,3),mar=c(13,5,5,2))
   if(split.type=="none") lo<-layout(matrix(data=c(1,2), nrow=1, ncol=2), c(4.5,1), 1)
    else {lo<-layout(matrix(data=c(1,2,3), nrow=1, ncol=3), c(4.5,4.5,1), 1)
     
@@ -76,10 +76,14 @@ zlim<-c(min(unlist(lapply(Stats,function(lst){100*lst$Cmx/sum(lst$Cmx)}))),max(u
                    paste(signif(100*Stats[[i]]$Cmx[3]/sum(Stats[[i]]$Cmx),digits=3),"%\n(",Stats[[i]]$Cmx[3],")",sep="")),cex=2)
               abline(h=3,lwd=5)
               abline(v=1.5,lwd=5)
-         mtext(paste("Pct Correctly Classified: ",signif(Stats[[i]]$Pcc,digits=3),
-         "          Sensitivity: ",signif(Stats[[i]]$Sens,digits=3),
-         "\n                Specificity:   ",signif(Stats[[i]]$Specf,digits=3),
-         "    True Skills Stat: ",signif(Stats[[i]]$Tss,digits=3),sep=""),side=1,line=4,cex=1.1)
+         mtext(paste(
+                 "Pct Correctly Classified: ",signif(Stats[[i]]$Pcc,digits=3),
+                 "          Sensitivity: ",signif(Stats[[i]]$Sens,digits=3),
+                 "\n                Specificity:   ",signif(Stats[[i]]$Specf,digits=3),
+                 "    True Skills Stat: ",signif(Stats[[i]]$Tss,digits=3),
+                 "\n                Cohen's Kappa: ",signif(Stats[[i]]$Kappa,digits=3),
+              sep=""),
+         side=1,line=7,cex=1.1)
         box()
     }
   mtext("Observed",1,outer=TRUE,lwd=2,cex=2)
