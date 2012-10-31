@@ -93,7 +93,7 @@ Args <- commandArgs(trailingOnly=FALSE)
 
 ScriptPath<-dirname(ScriptPath)
 source(file.path(ScriptPath,"LoadRequiredCode.r"))
-source(file.path(ScriptPath,"BRT.helper.fcts.r))
+source(file.path(ScriptPath,"BRT.helper.fcts.r"))
 
 
 
