@@ -754,8 +754,11 @@ function (mars.glm.object,new.data)
   spp.weights <- mars.glm.object$weights[[2]]
  
   print("creating original data frame...",quote=FALSE)
-  base.data <- try(as.data.frame(eval(parse(text = dataframe.name),envir=parent.frame())),silent=TRUE)
-   if(class(base.data)=="try-error") base.data<-mars.glm.object$fit.dat
+  print(dataframe.name)
+  
+  #base.data <-try(as.data.frame(eval(parse(text = dataframe.name),envir=parent.frame())),silent=TRUE)
+   #if(class(base.data)=="try-error") 
+   base.data<-mars.glm.object$fit.dat
   
   x.temp <- eval(base.data[, mars.x])                 #form the temporary datasets
   base.names <- names(x.temp)
