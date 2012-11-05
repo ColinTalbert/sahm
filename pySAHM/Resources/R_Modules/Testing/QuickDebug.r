@@ -49,11 +49,11 @@ input.file="C:\\temp\\SAHM_workspace\\modelSelection_split_20.csv"
 ## Nonspatial data should work through SAHM
 input.file="C:\\temp\\SAHM_workspace\\NonSpatialData.csv"
 
-input.file<-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\VistrailsSessions\\MergedDataset_Split.csv"
+
 ##MARS
-input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\ElithSynthPresAbsTestTrainEval.csv"
-input.file="J:\\Projects\\NormalsComparison\\SAHM\\BachSparrow_output\\modelSelection_cv_1.csv"
+
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_FinalTest\\CovariateCorrelationOutputMDS_initial.csv"
+
 FitModels(ma.name=input.file,
             output.dir=output.dir,
             response.col=rc,make.p.tif=T,make.binary.tif=T,
@@ -84,15 +84,10 @@ samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
 localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=NULL,norm.votes=TRUE,
 do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,MESS=FALSE)
 
-input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\PresAbsEval.csv"
-input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\UsedAvailableSp1CV.csv"
 
-
-
-input.file="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\WUS\\modelSelection_cv_1.csv" 
-output.dir="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\WUS\\brt_1" 
 rc="responseBinary"
 #BRT
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_FinalTest\\CovariateCorrelationOutputMDS_initial.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,output.dir=output.dir,
           response.col=rc,make.p.tif=T,make.binary.tif=T,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
