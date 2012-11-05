@@ -113,7 +113,7 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,...){
 
           if(model.family=="binomial")  out$input$model.family<-model.family<-"bernoulli"
             if(!is.null(tc)) out$mods$parms$tc.full<-out$mods$parms$tc.sub<-tc
-        
+             
            #going to try to estimate learning rate and predictors to use in final model not just on the subset but by calculating for
            #several of the splits (if the used was split)
            lr.samp<-sample(1:num.splits,size=min(num.splits,5),replace=FALSE)
@@ -158,12 +158,12 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,...){
                 }
               
             final.mod<-list()
-           
+               
             for(i in 1:num.splits){
                  if(out$mods$lr.mod$lr==0) out$mods$lr.mod$lr<-out$mods$lr.mod$lr0
                  final.mod[[i]] <- gbm.step.fast(dat=dat[c(Split,rep(i,times=sum(dat$response>0)))==i,],gbm.x=out$mods$simp.mod$good.cols,gbm.y = 1,family=model.family,
                                 n.trees = c(300,600,700,800,900,1000,1200,1500,1800,2200,2600,3000,3500,4000,4500,5000),n.folds=n.folds,max.trees,
-                                tree.complexity=out$mods$parms$tc.full,learning.rate=out$mods$lr.mod$lr,bag.fraction=bag.fraction,site.weights=weight[c(Split,rep(i,times=sum(dat$response>0)))==i],
+                                tree.complexity=out$mods$parms$tc.full,learning.rate=out$mods$lr.mod$lr,bag.fraction=bag.fraction,site.weights=rep(1,times=nrow(dat[c(Split,rep(i,times=sum(dat$response>0)))==i,])),
                                 autostop=T,debug.mode=F,silent=!debug.mode,plot.main=F,superfast=F)
                   #             
                   y <- gbm.interactions(final.mod[[i]])
@@ -188,8 +188,9 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,...){
           out$mods$summary<-aggregate(var.contrib,list(Var=var.name),FUN=sum)
           out$mods$summary[,2]<-out$mods$summary[,2]/num.splits
           names(out$mods$summary)[2]<-"rel.inf"
+          out$mods$summary<-out$mods$summary[order(out$mods$summary$rel.inf,decreasing=TRUE),]
           out$mods$n.vars.final<-length(var.final)
-         
+             
           if(!is.null(unlist(lapply(out$mods$interactions,is.null)))){
                interaction.lst<-out$mods$interactions[!unlist(lapply(out$mods$interactions,is.null))]
                #taking out the names of predictors from interactions and then ordering them so we can aggregate

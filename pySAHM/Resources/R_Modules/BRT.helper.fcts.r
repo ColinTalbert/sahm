@@ -53,7 +53,7 @@ est.lr <- function(out){
     t0 <- unclass(Sys.time())
     # set tree complexity for full-data run #
     a<-2.69; b<-0.0012174
-  
+   
     if(is.null(out$mods$parms$tc.full)) out$mods$parms$tc.full<-min(round(a+b*nrow(out$dat$ma$train$dat)),20) # this gives 3 for n=250
     if(is.null(out$mods$parms$tc.sub)){
         n <- nrow(out$dat$Subset$dat)  # this gives 3 for n=250
