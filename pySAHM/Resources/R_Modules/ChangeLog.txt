@@ -1,5 +1,8 @@
 CHANGE LOG
 
+1/1/2012
+        MARS predict was evaluating an expression in the parent frame this doesn't work in Rterm for some reason even in a trycatch() it crashes.  It turned out this line was never hit anyway so I commented it out but I do believe it was put in for some reason and requres futher investigation to ensure that everything is working correctly. 
+
 10/30/2012 
 
 	Moving session folders: changed the path check to switch the tiff paths relative to the mds path if such paths exist so that a session folder can be moved while still allowing users to create their own mds files outside of vistrails and game the system 

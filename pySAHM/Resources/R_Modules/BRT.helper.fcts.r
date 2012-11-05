@@ -53,18 +53,19 @@ est.lr <- function(out){
     t0 <- unclass(Sys.time())
     # set tree complexity for full-data run #
     a<-2.69; b<-0.0012174
-    if(is.null(out$mods$parms$tc.full)) out$mods$parms$tc.full<-min(round(a+b*out$dat$ma$train$dat[1]),15) # this gives 3 for n=250
+  
+    if(is.null(out$mods$parms$tc.full)) out$mods$parms$tc.full<-min(round(a+b*nrow(out$dat$ma$train$dat)),20) # this gives 3 for n=250
     if(is.null(out$mods$parms$tc.sub)){
         n <- nrow(out$dat$Subset$dat)  # this gives 3 for n=250
        if(is.na(n)) (n=length(out$dat$Subset$weight))
-        out$mods$parms$tc.sub <- min(round(a+b*n),4) # don't let tree complexity be greater than 4
+        out$mods$parms$tc.sub <- min(round(a+b*n),20) # don't let there be more than 20 nodes in a tree
     }
 
     cat("\n");cat("tree complexity set to",out$mods$parms$tc.sub,"\n")
 
-    n.trees <- c(100,200,400,800,900,1000,1100,1200,1500,1800,2400)
-    lrs <- c(.1,.06,.05,.04,.03,.02,.01,.005,.0025,.001,.0005,.0001)
-    lr.out <- data.frame(lrs=lrs,max.trees=0)
+    n.trees <- c(100,400,800,900,1000,1100,1200,1500,1800,2400)
+    lrs <- c(.1,.05,.02,.01,.005,.0025,.001,.0005,.0001)
+    lr.out <- data.frame(lrs=lrs,max.trees=0,cv.dev=0)
     dat <- out$dat$Subset$dat
     gbm.y <- 1
     gbm.x <- 2:ncol(dat)
@@ -85,6 +86,7 @@ est.lr <- function(out){
           site.weights=out$dat$Subset$weight,
           autostop=T,verbose=F,silent=T,plot.main=F)
           print(gbm.fit$target.trees)
+       lr.out$cv.dev[i]<-gbm.fit$cv.statistics$deviance.mean   
        lr.out$max.trees[i] <- max.trees <- gbm.fit$target.trees
        assign(paste("gbm.fit",i,sep="_"),gbm.fit)
        cat("lr =",lrs[i],"  optimal n trees =",max.trees,"\n");flush.console()
