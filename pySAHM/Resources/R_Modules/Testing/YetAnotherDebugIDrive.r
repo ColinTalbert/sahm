@@ -1,7 +1,7 @@
 #debug branch
 setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
 ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
-dir.path<-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\AcrossModelPerformance\\Debug10.15"
+dir.path<-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\AcrossModelPerformance\\Debug10.29"
 
 #master branch
 setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
@@ -71,6 +71,7 @@ output.dir[5]<-paste(dir.path,"\\maxlike",sep="")
                 tolerance = 0.001,seed=1,opt.methods=2,
                         simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
                         learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,MESS=F))
+                        try(rm(out),silent=TRUE)
                       }
               
               
