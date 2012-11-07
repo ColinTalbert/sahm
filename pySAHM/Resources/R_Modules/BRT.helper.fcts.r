@@ -72,7 +72,7 @@ est.lr <- function(out){
 
     max.trees <- 0
     i=1
-
+    
     while(max.trees<800 & i<=nrow(lr.out)){
       gbm.fit <- gbm.step.fast(dat=dat,
           gbm.x = gbm.x,
@@ -437,12 +437,12 @@ gbm.step.fast <- function(
           training.loss.matrix[i,j] <- calc.deviance(y_i, u_i, weight.fitted, family = family)
 
     # calc holdout deviance
-
+        
           u_i <- pred.values[pred.mask]
           y_i <- y.data[pred.mask]
           weight.preds <- site.weights[pred.mask]
           cv.loss.matrix[i,j] <- calc.deviance(y_i, u_i, weight.preds, family = family)
-
+            if(any(u_i==1)) browser()
         }  # end of inner loop
 
         cv.loss.values <- apply(cv.loss.matrix,2,mean)
