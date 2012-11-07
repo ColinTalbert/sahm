@@ -442,7 +442,7 @@ gbm.step.fast <- function(
           y_i <- y.data[pred.mask]
           weight.preds <- site.weights[pred.mask]
           cv.loss.matrix[i,j] <- calc.deviance(y_i, u_i, weight.preds, family = family)
-            if(any(u_i==1)) browser()
+           
         }  # end of inner loop
 
         cv.loss.values <- apply(cv.loss.matrix,2,mean)
