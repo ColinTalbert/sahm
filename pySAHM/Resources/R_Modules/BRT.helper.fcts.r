@@ -63,7 +63,7 @@ est.lr <- function(out){
 
     cat("\n");cat("tree complexity set to",out$mods$parms$tc.sub,"\n")
 
-    n.trees <- c(100,400,800,900,1000,1100,1200,1500,1800,2400)
+    n.trees <- c(100,200,400,800,900,1000,1100,1200,1500,1800,2400)
     lrs <- c(.1,.05,.02,.01,.005,.0025,.001,.0005,.0001)
     lr.out <- data.frame(lrs=lrs,max.trees=0,cv.dev=0)
     dat <- out$dat$Subset$dat
