@@ -45,13 +45,16 @@
 ################################################################################
 # ImageViewer widgets/toolbar implementation
 ################################################################################
-from PyQt4 import QtCore, QtGui, QAxContainer
+from PyQt4 import QtCore, QtGui
+from core.system import systemType
+if systemType in ['Microsoft', 'Windows']:
+    from PyQt4 import QAxContainer
 from core.modules.vistrails_module import Module
 from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
 from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
 from packages.spreadsheet.spreadsheet_controller import spreadsheetController
 
-from packages.sahm.sahm_picklists import ModelOutputType
+from sahm_picklists import ModelOutputType
 
 from core.packagemanager import get_package_manager
 
