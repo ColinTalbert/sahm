@@ -242,7 +242,8 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,...){
                   votes[dat$response==1]<-apply(do.call("rbind",lapply(lapply(rf.full,predict,type="vote"),"[",1:n.pres,2)),2,mean)
 
                   #these should be oob votes for the absence in a fairly random order
-                  for(i in 1:num.splits){
+                  if(num.splits==1) votes[dat$response==0]<-apply(do.call("rbind",lapply(lapply(rf.full,predict,type="vote"),"[",(n.pres+1):nrow(dat),2)),2,mean)
+                  else for(i in 1:num.splits){
                        votes[which(i==Split,arr.ind=TRUE)]<-as.vector(apply(do.call("rbind",lapply(lapply(rf.full[-c(i)],predict,newdata=psd.abs[i==Split,-1],type="vote"),"[",,2)),2,mean))
                    }
 

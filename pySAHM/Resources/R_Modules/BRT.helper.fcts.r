@@ -63,7 +63,7 @@ est.lr <- function(out){
 
     cat("\n");cat("tree complexity set to",out$mods$parms$tc.sub,"\n")
 
-    n.trees <- c(100,400,800,900,1000,1100,1200,1500,1800,2400)
+    n.trees <- c(100,200,400,800,900,1000,1100,1200,1500,1800,2400)
     lrs <- c(.1,.05,.02,.01,.005,.0025,.001,.0005,.0001)
     lr.out <- data.frame(lrs=lrs,max.trees=0,cv.dev=0)
     dat <- out$dat$Subset$dat
@@ -72,7 +72,7 @@ est.lr <- function(out){
 
     max.trees <- 0
     i=1
-
+    
     while(max.trees<800 & i<=nrow(lr.out)){
       gbm.fit <- gbm.step.fast(dat=dat,
           gbm.x = gbm.x,
@@ -437,12 +437,12 @@ gbm.step.fast <- function(
           training.loss.matrix[i,j] <- calc.deviance(y_i, u_i, weight.fitted, family = family)
 
     # calc holdout deviance
-
+        
           u_i <- pred.values[pred.mask]
           y_i <- y.data[pred.mask]
           weight.preds <- site.weights[pred.mask]
           cv.loss.matrix[i,j] <- calc.deviance(y_i, u_i, weight.preds, family = family)
-
+           
         }  # end of inner loop
 
         cv.loss.values <- apply(cv.loss.matrix,2,mean)
