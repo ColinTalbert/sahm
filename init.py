@@ -1456,7 +1456,7 @@ class ModelSelectionCrossValidation(Module):
         else:
             seed = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
         writetolog("    seed used for Split = " + str(seed))
-        argsDict["seed="] = str(seed)
+        argsDict["seed"] = str(seed)
 
         utils.runRScript("CrossValidationSplit.r", argsDict, self)
         
