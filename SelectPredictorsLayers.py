@@ -288,11 +288,13 @@ class SelectListDialog(QtGui.QDialog):
         
         
     def on_item_doublclick(self, item, column):
+        QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
         output_dir = os.path.join(self.outputDir, "PredictorInspections")
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
             
         outputPic = self.makeNewCovariatePlot(output_dir, str(item.text(0)))
+        QtGui.QApplication.restoreOverrideCursor()
         self.popup = QtGui.QDialog()
 #        self.popup.setBaseSize(1200, 1200)
         size = 800
@@ -474,8 +476,8 @@ class SelectListDialog(QtGui.QDialog):
     def makeNewCovariatePlot(self, output_dir, covariate):
         output_fname = os.path.join(output_dir, covariate + ".jpg")
         
-        args = {i:'"' + self.inputMDS + '"', 
-            "o":'"' + output_dir + '"', 
+        args = {"i":self.inputMDS, 
+            "o":output_dir, 
             "rc":self.responseCol,
             "p":covariate}
         self.saveExploreOptions(args)
