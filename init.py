@@ -1682,6 +1682,8 @@ class MAXENT(Module):
     def compute(self):
         global maxent_path
 
+        writetolog("\nRunning Maxent Widget", True)
+
         ourMaxent = MaxentRunner.MAXENTRunner()
         ourMaxent.outputDir = utils.mknextdir(prefix='maxentFiles_')
         
