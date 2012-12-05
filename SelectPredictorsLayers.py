@@ -288,11 +288,13 @@ class SelectListDialog(QtGui.QDialog):
         
         
     def on_item_doublclick(self, item, column):
+        QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
         output_dir = os.path.join(self.outputDir, "PredictorInspections")
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
             
         outputPic = self.makeNewCovariatePlot(output_dir, str(item.text(0)))
+        QtGui.QApplication.restoreOverrideCursor()
         self.popup = QtGui.QDialog()
 #        self.popup.setBaseSize(1200, 1200)
         size = 800
@@ -414,26 +416,24 @@ class SelectListDialog(QtGui.QDialog):
         self.view.load_picture(outputPic)
         
     def make_new_pairs_plot(self, MDSfile):
-#        
-#        program = os.path.join(self.rPath, "i386", "Rterm.exe") 
-#        script = os.path.join(utils.getModelsPath(), "PairsExplore.r")
 
-        args = "i=" + '"' + MDSfile + '"' + " o=" + '"' + self.displayJPEG + '"' 
-        args += " rc=" + self.responseCol
+        args = {'i':  MDSfile,
+                'o': self.displayJPEG,
+                'rc': self.responseCol}
         
-        args += self.saveExploreOptions(args)
-            
-        if self.kwargs.has_key('numPlots'):
-            args += " p=" + str(self.kwargs['numPlots'])
+        checkboxes = [('pres', self.chkPresence),
+                      ('absn', self.chkAbsence),
+                      ('bgd', self.chkBackground)]
+        for arg, checkbox in checkboxes:
+            args[arg] = str(checkbox.checkState() == QtCore.Qt.Checked).upper()
         
-        if self.kwargs.has_key('minCor'):
-            args += " m=" + str(self.kwargs['minCor'])
-            
-        if self.kwargs.has_key('corsWithHighest'):
-            args += " core=" + str(self.kwargs['corsWithHighest'])
-
-#        command = program + " --vanilla -f " + script + " --args " + args
-#        writetolog("    " + command, False, False)
+        kwarg_args = [('p', 'numPlots'),
+                      ('m', 'minCor'),
+                      ('core', 'corsWithHighest')]
+        for arg, kwarg_key in kwarg_args:
+            if kwarg_key in self.kwargs:
+                args[arg] = str(self.kwargs[kwarg_key])
+                
         if os.path.exists(os.path.join(self.outputDir, "Predictor_Correlation.jpg")):
             os.remove(os.path.join(self.outputDir, "Predictor_Correlation.jpg"))
             
@@ -448,20 +448,12 @@ class SelectListDialog(QtGui.QDialog):
             writetolog("Missing output from R processing: " + self.displayJPEG)
             raise Exception, "Missing output from R processing"
     
-    def saveExploreOptions(self,args):
-        if self.chkPresence.checkState() == QtCore.Qt.Checked:
-            args = " pres=TRUE"
-        else:
-            args = " pres=FALSE"
-        if self.chkAbsence.checkState() == QtCore.Qt.Checked:
-            args += " absn=TRUE"
-        else:
-            args += " absn=FALSE"
-        if self.chkBackground.checkState() == QtCore.Qt.Checked:
-            args += " bgd=TRUE"
-        else:
-            args += " bgd=FALSE"
-        return args
+    def saveExploreOptions(self, args):
+        checkboxes = [('pres', self.chkPresence),
+                      ('absn', self.chkAbsence),
+                      ('bgd', self.chkBackground)]
+        for arg, checkbox in checkboxes:
+            args[arg] = str(checkbox.checkState() == QtCore.Qt.Checked).upper()
         
     def loadDeviances(self):
         #store the deviances explained in dev
@@ -484,11 +476,11 @@ class SelectListDialog(QtGui.QDialog):
     def makeNewCovariatePlot(self, output_dir, covariate):
         output_fname = os.path.join(output_dir, covariate + ".jpg")
         
-        args = "i=" + '"' + self.inputMDS + '"' 
-        args += " o=" + '"' + output_dir + '"' 
-        args += " rc=" + self.responseCol
-        args += " p=" + covariate
-        args += self.saveExploreOptions(args)
+        args = {"i":self.inputMDS, 
+            "o":output_dir, 
+            "rc":self.responseCol,
+            "p":covariate}
+        self.saveExploreOptions(args)
             
         if os.path.exists(output_fname):
             os.remove(output_fname)

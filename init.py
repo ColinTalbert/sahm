@@ -75,17 +75,16 @@ from SelectAndTestFinalModel import SelectAndTestFinalModel
 import utils
 import GenerateModuleDoc as GenModDoc
 #import our python SAHM Processing files
-import packages.sahm.pySAHM.FieldDataAggreagateAndWeight as FDAW
-import packages.sahm.pySAHM.MDSBuilder as MDSB
-import packages.sahm.pySAHM.MDSBuilder_vector as MDSB_V
-import packages.sahm.pySAHM.PARC as parc
-import packages.sahm.pySAHM.RasterFormatConverter as RFC
-import packages.sahm.pySAHM.MaxentRunner as MaxentRunner
-#from packages.sahm.SahmOutputViewer import SAHMModelOutputViewerCell
+import pySAHM.FieldDataAggreagateAndWeight as FDAW
+import pySAHM.MDSBuilder as MDSB
+import pySAHM.MDSBuilder_vector as MDSB_V
+import pySAHM.PARC as parc
+import pySAHM.RasterFormatConverter as RFC
+import pySAHM.MaxentRunner as MaxentRunner
 from SahmOutputViewer import SAHMModelOutputViewerCell
-from packages.sahm.SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
-from packages.sahm.GeneralSpatialViewer import GeneralSpatialViewer
-from packages.sahm.sahm_picklists import ResponseType, AggregationMethod, \
+from SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
+from GeneralSpatialViewer import GeneralSpatialViewer
+from sahm_picklists import ResponseType, AggregationMethod, \
         ResampleMethod, PointAggregationMethod, ModelOutputType, RandomPointType, \
         OutputRaster
 
@@ -532,7 +531,6 @@ class Model(Module):
                      ('MessMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('MoDMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('modelEvalPlot', '(edu.utah.sci.vistrails.basic:File)'),
-#                     ('ResponseCurves', '(edu.utah.sci.vistrails.basic:File)'),
                      ('Text_Output', '(edu.utah.sci.vistrails.basic:File)')]
 
     port_map = {'mdsFile':('c', None, True),#These ports are for all Models
@@ -560,11 +558,6 @@ class Model(Module):
                        "EvaluateNewData.r":"ApplyModel"}
         self.ModelAbbrev = ModelOutput[self.name]
         
-        try:
-            self.args
-        except AttributeError:
-            self.args = ''
-        
         self.output_dname = utils.mknextdir(prefix=self.ModelAbbrev + '_')
         self.argsDict = utils.map_ports(self, self.port_map)
 
@@ -575,18 +568,11 @@ class Model(Module):
             if not "seed" in self.argsDict.keys():
                 self.argsDict['seed'] = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
             writetolog("    seed used for " + self.ModelAbbrev + " = " + str(self.argsDict['seed']))
-
-        
-        for k, v in self.argsDict.iteritems():
-            if k == 'c':
-                self.args += ' ' + '='.join([str(k),'"' + str(v) + '"'])
-            else:
-                self.args += ' ' + '='.join([str(k),str(v)])
-        self.args += " o=" + '"' + self.output_dname + '"'
-        self.args += " rc=" + utils.MDSresponseCol(mdsFile)
-
-                
-        utils.runRScript(self.name, self.args, self)
+      
+        self.argsDict['o'] = self.output_dname
+        self.argsDict['rc'] = utils.MDSresponseCol(mdsFile)
+      
+        utils.runRScript(self.name, self.argsDict, self)
         
         if not self.argsDict.has_key('mes'):
             self.argsDict['mes'] = 'FALSE'
@@ -597,7 +583,6 @@ class Model(Module):
         self.setModelResult("_MoD_map.tif", 'MoDMap', 'mes')
         self.setModelResult("_output.txt", 'Text_Output')
         self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot') 
-#        self.setModelResult("response_curves.pdf", 'ResponseCurves')
         
         modelWorkspace = utils.create_dir_module(self.output_dname)
         self.setResult("modelWorkspace", modelWorkspace)
@@ -709,7 +694,7 @@ class ApplyModel(Model):
         self.name = 'EvaluateNewData.r'
         self.port_map = copy.deepcopy(self.port_map)
         self.port_map.update({'modelWorkspace':('ws', 
-                lambda x: '"' + os.path.join(utils.dir_path_value(x), "modelWorkspace" + '"'), True),})
+                lambda x: os.path.join(utils.dir_path_value(x), "modelWorkspace"), True),})
         
     def compute(self):
         #if the suplied mds has rows, observations then 
@@ -808,13 +793,13 @@ class BackgroundSurfaceGenerator(Module):
         if os.path.exists(outputfName):
             os.unlink(outputfName)
         
-        args = "tmplt=" + '"' + kde_params["templatefName"] + '"'
-        args += " i=" + '"' + kde_params["fieldData"] + '"' 
-        args += " o=" + '"' + outputfName + '"'
-        args += " mth=" + kde_params["method"]
-        args += " bwopt=" + kde_params["bandOptMeth"]
-        args += " ispt=" + str(kde_params["isopleth"])
-        args += " bias=" + kde_params["bias"]
+        args = {"tmplt":kde_params["templatefName"],
+                "i":kde_params["fieldData"],
+                "o":outputfName,
+                "mth":kde_params["method"],
+                "bwopt":kde_params["bandOptMeth"],
+                "ispt":str(kde_params["isopleth"]),
+                "bias":kde_params["bias"]}
 
         utils.runRScript("PseudoAbs.r", args, self)
         
@@ -1291,7 +1276,7 @@ class ModelEvaluationSplit(Module):
 
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('trainingProportion', '(edu.utah.sci.vistrails.basic:Float)', 
-                        {'defaults':'["0.7"]'}),
+                        {'defaults':'0.7'}),
                     ('RatioPresAbs', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
@@ -1310,14 +1295,18 @@ class ModelEvaluationSplit(Module):
 
         global models_path
         
-        args = "i=" + '"' + inputMDS + '"' + " o=" + '"' + outputMDS + '"'
-        args += " rc=" + utils.MDSresponseCol(inputMDS) 
+        # args = "i=" + '"' + inputMDS + '"' + " o=" + '"' + outputMDS + '"'
+        # args += " rc=" + utils.MDSresponseCol(inputMDS) 
+        args = {'i': inputMDS,
+                'o': outputMDS,
+                'rc': utils.MDSresponseCol(inputMDS)}
         if (self.hasInputFromPort("trainingProportion")):
             try:
                 trainingProportion = float(self.getInputFromPort("trainingProportion"))
                 if trainingProportion <= 0 or trainingProportion > 1:
                     raise ModuleError(self, "Train Proportion (trainProp) must be a number between 0 and 1 excluding 0")
-                args += " p=" + str(trainingProportion)
+                # args += " p=" + str(trainingProportion)
+                args['p'] = str(trainingProportion)
             except:
                 raise ModuleError(self, "Train Proportion (trainProp) must be a number between 0 and 1 excluding 0")
         if (self.hasInputFromPort("RatioPresAbs")):
@@ -1325,18 +1314,19 @@ class ModelEvaluationSplit(Module):
                 RatioPresAbs = float(self.getInputFromPort("RatioPresAbs"))
                 if RatioPresAbs <= 0:
                     raise ModuleError(self, "The ratio of presence to absence (RatioPresAbs) must be a number greater than 0") 
-                args += " m=" + str(trainingProportion) 
+                # args += " m=" + str(trainingProportion) 
+                args['m'] = str(trainingProportion)
             except:
                 raise ModuleError(self, "The ratio of presence to absence (RatioPresAbs) must be a number greater than 0") 
 
-        args += " es=TRUE"
+        args['es'] = "TRUE"
 
         if self.hasInputFromPort("Seed"):
             seed = str(self.getInputFromPort("Seed"))
         else:
             seed = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
         writetolog("    seed used for Split = " + str(seed))
-        args += " seed=" + str(seed)
+        args['seed'] = str(seed)
 
         utils.runRScript("TestTrainSplit.r", args, self)
         
@@ -1352,12 +1342,13 @@ class ModelEvaluationSplit(Module):
         
 class ModelSelectionSplit(Module):
     '''
+    ToDo: Marian to write
     '''        
     __doc__ = GenModDoc.construct_module_doc('ModelSelectionSplit')
     
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('trainingProportion', '(edu.utah.sci.vistrails.basic:Float)', 
-                        {'defaults':'["0.7"]'}),
+                        {'defaults':'0.7'}),
                     ('RatioPresAbs', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
@@ -1376,14 +1367,18 @@ class ModelSelectionSplit(Module):
 
         global models_path
         
-        args = "i=" + '"' + inputMDS + '"' + " o=" + '"' + outputMDS + '"'
-        args += " rc=" + utils.MDSresponseCol(inputMDS) 
+        # args = "i=" + '"' + inputMDS + '"' + " o=" + '"' + outputMDS + '"'
+        # args += " rc=" + utils.MDSresponseCol(inputMDS) 
+        args = {'i': inputMDS,
+                'o': outputMDS,
+                'rc': utils.MDSresponseCol(inputMDS)}
         if (self.hasInputFromPort("trainingProportion")):
             try:
                 trainingProportion = float(self.getInputFromPort("trainingProportion"))
                 if trainingProportion <= 0 or trainingProportion > 1:
                     raise ModuleError(self, "Train Proportion (trainProp) must be a number between 0 and 1 excluding 0")
-                args += " p=" + str(trainingProportion)
+                # args += " p=" + str(trainingProportion)
+                args['p'] = str(trainingProportion)
             except:
                 raise ModuleError(self, "Train Proportion (trainProp) must be a number between 0 and 1 excluding 0")
         if (self.hasInputFromPort("RatioPresAbs")):
@@ -1391,18 +1386,21 @@ class ModelSelectionSplit(Module):
                 RatioPresAbs = float(self.getInputFromPort("RatioPresAbs"))
                 if RatioPresAbs <= 0:
                     raise ModuleError(self, "The ratio of presence to absence (RatioPresAbs) must be a number greater than 0") 
-                args += " m=" + str(trainingProportion) 
+                # args += " m=" + str(trainingProportion) 
+                args['m'] = trainingProportion
             except:
                 raise ModuleError(self, "The ratio of presence to absence (RatioPresAbs) must be a number greater than 0") 
 
-        args += " es=FALSE"
+        # args += " es=FALSE"
+        args['es'] = "FALSE"
 
         if self.hasInputFromPort("Seed"):
             seed = str(self.getInputFromPort("Seed"))
         else:
             seed = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
         writetolog("    seed used for Split = " + str(seed))
-        args += " seed=" + str(seed)
+        # args += " seed=" + str(seed)
+        args['seed'] = str(seed)
 
         utils.runRScript("TestTrainSplit.r", args, self)
         
@@ -1424,8 +1422,8 @@ class ModelSelectionCrossValidation(Module):
 
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('nFolds', '(edu.utah.sci.vistrails.basic:Integer)', 
-                        {'defaults':'["10"]'}),
-                    ('Stratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
+                        {'defaults':'10'}),
+                    ('Stratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':True}),
                     ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
 
@@ -1446,26 +1444,21 @@ class ModelSelectionCrossValidation(Module):
 
         outputMDS = utils.mknextfile(prefix='modelSelection_cv_', suffix='.csv')
 
-        args = "i=" + '"' + argsDict["i"] + '"'
-        args += " o=" + '"' + outputMDS + '"'
-        args += " rc=" + utils.MDSresponseCol(argsDict["i"]) 
+        argsDict["o"] = outputMDS
+        argsDict["rc"] = utils.MDSresponseCol(argsDict["i"]) 
 
         if argsDict["nf"] <= 0:
             raise ModuleError(self, "Number of Folds must be greater than 0")
-        args += " nf=" + str(argsDict["nf"])
-
-        args += " stra=" + argsDict["stra"]
-        
-        args += " es=TRUE"
+        argsDict["es"] = "TRUE"
 
         if self.hasInputFromPort("Seed"):
             seed = str(self.getInputFromPort("Seed"))
         else:
             seed = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
         writetolog("    seed used for Split = " + str(seed))
-        args += " seed=" + str(seed)
+        argsDict["seed"] = str(seed)
 
-        utils.runRScript("CrossValidationSplit.r", args, self)
+        utils.runRScript("CrossValidationSplit.r", argsDict, self)
         
         output = os.path.join(outputMDS)
         if os.path.exists(output):
@@ -1689,6 +1682,8 @@ class MAXENT(Module):
     def compute(self):
         global maxent_path
 
+        writetolog("\nRunning Maxent Widget", True)
+
         ourMaxent = MaxentRunner.MAXENTRunner()
         ourMaxent.outputDir = utils.mknextdir(prefix='maxentFiles_')
         
@@ -1801,14 +1796,13 @@ def load_max_ent_params():
     MAXENT.provide_input_port_documentation = \
         classmethod(provide_input_port_documentation)
 
-
-def initialize():    
+def initialize():
+       
     global maxent_path, color_breaks_csv
     global session_dir 
     
-    r_path = os.path.abspath(configuration.r_path)
-    maxent_path = os.path.abspath(configuration.maxent_path)
-    utils.r_path = r_path    
+    utils.r_path = os.path.abspath(configuration.r_path)
+    maxent_path = os.path.abspath(configuration.maxent_path)   
     
     session_dir = configuration.cur_session_folder
     if not os.path.exists(session_dir):
@@ -1834,7 +1828,7 @@ def initialize():
     writetolog("  Locations of dependencies")
 #    writetolog("   Layers CSV = " + os.path.join(os.path.dirname(__file__), 'layers.csv'))
     writetolog("   Layers CSV = " + layers_csv_fname)
-    writetolog("   R path = " + r_path)
+    writetolog("   R path = " + utils.r_path)
     writetolog("   Maxent folder = " + maxent_path)
 #    writetolog("   QGIS folder = " + os.path.abspath(configuration.qgis_path))
 #    writetolog("        Must contain subfolders qgis1.7.0, OSGeo4W")

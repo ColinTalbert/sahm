@@ -53,14 +53,17 @@ import itertools
 import utils
 import math
 
-from PyQt4 import QtCore, QtGui, QAxContainer
+from PyQt4 import QtCore, QtGui
+from core.system import systemType
+if systemType in ['Microsoft', 'Windows']:
+    from PyQt4 import QAxContainer
 from core.modules.vistrails_module import Module
 from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
 from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
 from packages.spreadsheet.spreadsheet_controller import spreadsheetController
 
-from packages.sahm.sahm_picklists import OutputRaster
-from packages.sahm.utils import map_ports
+from sahm_picklists import OutputRaster
+from utils import map_ports
 
 from utils import dbfreader, getRasterParams
 from utils import print_timing
@@ -385,7 +388,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         self.all_layers[initial_map_dict[self.inputs['initial_raster']]]["displayed"] = True
 
         for k,v in self.all_layers.items():
-            if k in self.inputs.keys():
+            if k in self.inputs:
                 if os.path.exists(self.inputs[k]):
                     self.all_layers[k]["file"] = self.inputs[k]
                     self.all_layers[k]["enabled"] = True

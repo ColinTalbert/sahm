@@ -99,10 +99,10 @@ def getrasterminmax(filename):
             (min,max) = band.ComputeRasterMinMax(1)
 
     
-    try:
-        #our output rasters have approx nodata values
-        #which don't equal the specified nodata.
-        #set the specified to equal what is actually used.
+
+#        our output rasters have approx nodata values
+#        which don't equal the specified nodata.
+#        set the specified to equal what is actually used.
 #        if (abs(band.GetNoDataValue() - min) < 1e-9 and 
 #            band.GetNoDataValue() <> min) or \
 #            ( min == band.GetNoDataValue()):
@@ -110,12 +110,9 @@ def getrasterminmax(filename):
 #            band.SetNoDataValue(min)
 #            (min,max) = band.ComputeRasterMinMax(0)
         
-        
-        if min == band.GetNoDataValue():
-            min = 0
-        
-    except:
-        pass
+    if min == band.GetNoDataValue():
+        min = 0
+            
     return (min, max)
     dataset = None
     
@@ -445,16 +442,27 @@ def getRasterName(fullPathName):
 def getModelsPath():
     return os.path.join(os.path.dirname(__file__), "pySAHM", "Resources", "R_Modules")
 
-def runRScript(script, args, module=None):
-     
-    program = getR_folder()
-    scriptFile = '"' + os.path.join(getModelsPath(), script) + '"'
-    command = program + " --vanilla -f " + scriptFile + " --args " + args
+def runRScript(script, args_dict, module=None):
+    global r_path
+        
+    if core.system.systemType in ['Microsoft', 'Windows']:
+        program = getR_application()  #-q prevents program from running
+    else:
+        program = r_path
+    scriptFile = os.path.join(getModelsPath(), script)
+
+    args = ["%s=%s" % pair for pair in args_dict.iteritems()]
+    args_str = ' '.join(args)
+    
+    command_arr = [program, '--vanilla', '-f', scriptFile, "--args"] + args
+    # command = program + " --vanilla -f " + scriptFile + " --args " + args
+    command = ' '.join(command_arr)
     
     writetolog("\nStarting R Processing of "  + script , True)
-    writetolog("    args: " + args, False, False)
+    writetolog("    args: " + args_str, False, False)
     writetolog("    command: " + command, False, False)
-    p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    #print "RUNNING COMMAND:", command_arr
+    p = subprocess.Popen(command_arr, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     ret = p.communicate()
     
     if 'Error' in ret[1]:
@@ -465,26 +473,26 @@ def runRScript(script, args, module=None):
         writetolog(msg)
 
     if 'Warning' in ret[1]:
-        msg = "The R script returned the following warning(s).  The R warning message is below - \n"
+        msg = "The R scipt returned the following warning(s).  The R warning message is below - \n"
         msg += ret[1]
         writetolog(msg)
 
     if 'Error' in ret[1]:
         #also write the errors to a model specific log file in the model output dir
         #then raise an error
-        writeRErrorsToLog(args, ret)
+        writeRErrorsToLog(args_dict, ret)
         if module:
             raise ModuleError(module, msg)
         else:
             raise RuntimeError , msg
     elif 'Warning' in ret[1]:
-        writeRErrorsToLog(args, ret)
+        writeRErrorsToLog(args_dict, ret)
         
 
     del(ret)
     writetolog("\nFinished R Processing of " + script, True)
 
-def getR_folder(module=None):
+def getR_application(module=None):
     global r_path
     
     #are we in 64 or 32 bit?  If 64 use the 64 bit install of R otherwise 32 bit.
@@ -512,16 +520,14 @@ def getR_folder(module=None):
 def writeRErrorsToLog(args, ret):
     #first check that this is a model run, or has a o= in the args.
     #If so write the output log file in the directory
-    argsSplit = args.split()
-    output = [val.split("=")[1] for val in argsSplit if val.startswith("o=")][0][1:-1]
-    if os.path.isdir(output):
+    if os.path.isdir(args["o"]):
         pass
-    elif os.path.isdir(os.path.split(output)[0]):
-        output = os.path.split(output)[0]
+    elif os.path.isdir(os.path.split(args["o"])[0]):
+        output = os.path.split(args["o"])[0]
     else:
         return False
     
-    outFileN = os.path.join(output, "errorLogFile.txt")
+    outFileN = os.path.join(args["o"], "errorLogFile.txt")
     outFile = open(outFileN, "w")
     outFile.write("standard out:\n\n")
     outFile.write(ret[0] + "\n\n\n")
