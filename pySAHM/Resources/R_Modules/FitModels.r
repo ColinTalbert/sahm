@@ -64,8 +64,8 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
     #    showing the effects of interactions deemed important.  if F, output is diverted to a text file and the console is kept clear 
     #    in either case, a set of standard output files are created in the output directory.
     # 
-    t0 <- unclass(Sys.time())
-
+   
+    t0 <- unclass(Sys.time()) 
     # Setting up the list that holds everything.  This is quite different for each model
         out <- list(
           input=lapply(as.list(Call[2:length(Call)]),eval), #with optional args this definition might be a problem but since called from the command line it works
@@ -75,22 +75,19 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
                     auc.output=NULL,
                     interactions=NULL,  # not used #
                     summary=NULL))
-
+    
     if(is.null(out$input$seed)) out$input$seed<-round(runif(1,min=-((2^32)/2-1),max=((2^32)/2-1)))
     set.seed(as.numeric(out$input$seed))
    #print warnings as they occur
         options(warn=1)
     
         Model=script.name
-
+          
          # generate a filename for output #
-   
-              if(debug.mode==T){
-                outfile <- paste(bname<-paste(out$input$output.dir,paste("/",Model,"_",sep=""),n<-1,sep=""),"_output.txt",sep="")
-                while(file.access(outfile)==0) outfile<-paste(bname<-paste(out$input$output.dir,paste("/",Model,"_",sep=""),n<-n+1,sep=""),"_output.txt",sep="")
-                capture.output(paste(toupper(Model),"Results"),file=outfile) # reserve the new basename #
-                } else bname<-file.path(out$input$output.dir,Model)
-
+                 out$dat$bname<-bname<-file.path(out$input$output.dir,Model)
+                 capture.output(paste(toupper(Model),"Results"),file=paste(bname,"_output.txt",sep="")) # reserve the new basename #
+            on.exit(capture.output(cat("Model Failed"),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE))  
+              
    #Load Libraries
               chk.libs(Model)
    #Read in data, perform several checks and store all of the information in the out list
@@ -186,11 +183,12 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
     if(debug.mode) assign("out",out,envir=.GlobalEnv)
 
     
-    cat(paste("\ntotal time=",round((unclass(Sys.time())-t0)/60,2),"min\n\n\n",sep=""))
+     
     if(!debug.mode) {
         sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))
         }
     cat("Progress:100%\n");flush.console()
+    on.exit(capture.output(cat(paste("\nTotal time = ",round((unclass(Sys.time())-t0)/60,2)," min\n\n",sep="")),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)) 
     if(debug.mode) assign("fit",out$mods$final.mod,envir=.GlobalEnv)
     invisible(out)
 }
