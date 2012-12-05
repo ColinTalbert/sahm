@@ -161,6 +161,7 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
 #        else:
 #            inputs["max_cells_dimension"] = [item for item in self._input_ports if item[0] == 'max_cells_dimension'][0][2]['defaults']
 
+        if os.path.exists(os.path.join(inputs["model_dir"]))
         self.local_displayAndWait(inputs)
 
     @print_timing
@@ -202,6 +203,9 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
             return result
         else:
             raise RuntimeError('Valid input MDS file not found in Model text output.')
+    
+    def checkIfModelFinished(self):
+        pass
 
 class SAHMSpatialOutputViewerCellWidget(QCellWidget):
     """
@@ -538,7 +542,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
     
     @print_timing
     def add_vector(self, layername):
-        if not self.pointsLoaded:
+        if not self.pointsLoaded or not kwargs.has_key("x"):
             self.loadPoints()
             self.pointsLoaded = True
         kwargs = self.all_layers[layername]

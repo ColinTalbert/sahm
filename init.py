@@ -523,7 +523,7 @@ class Model(Module):
                     ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
-                    ]
+                    ('runAsynchronously', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),]
     _output_ports = [('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'), 
                      ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
                      ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)'),
@@ -538,6 +538,7 @@ class Model(Module):
                          'makeBinMap':('mbt', utils.R_boolean, False),
                          'makeMESMap':('mes', utils.R_boolean, False),
                          'ThresholdOptimizationMethod':('om', None, False),
+                         'runAsynchronously':('ra', None, False),
 #                         'UsePseudoAbs':('psa', utils.R_boolean, False)
                     }
 
@@ -574,20 +575,23 @@ class Model(Module):
       
         utils.runRScript(self.name, self.argsDict, self)
         
-        if not self.argsDict.has_key('mes'):
-            self.argsDict['mes'] = 'FALSE'
-        self.setModelResult("_prob_map.tif", 'ProbabilityMap', 'mpt')
-        self.setModelResult("_bin_map.tif", 'BinaryMap', 'mbt')
-        self.setModelResult("_resid_map.tif", 'ResidualsMap', 'mes')
-        self.setModelResult("_mess_map.tif", 'MessMap', 'mes')
-        self.setModelResult("_MoD_map.tif", 'MoDMap', 'mes')
-        self.setModelResult("_output.txt", 'Text_Output')
-        self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot') 
+        if not self.argsDict["ra"]:
+            if not self.argsDict.has_key('mes'):
+                self.argsDict['mes'] = 'FALSE'
+            self.setModelResult("_prob_map.tif", 'ProbabilityMap', 'mpt')
+            self.setModelResult("_bin_map.tif", 'BinaryMap', 'mbt')
+            self.setModelResult("_resid_map.tif", 'ResidualsMap', 'mes')
+            self.setModelResult("_mess_map.tif", 'MessMap', 'mes')
+            self.setModelResult("_MoD_map.tif", 'MoDMap', 'mes')
+            self.setModelResult("_output.txt", 'Text_Output')
+            self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot') 
+            
+            
+                  
+            writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
         
         modelWorkspace = utils.create_dir_module(self.output_dname)
         self.setResult("modelWorkspace", modelWorkspace)
-              
-        writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
         
     def setModelResult(self, filename, portname, arg_key=None):
         outFileName = os.path.join(self.output_dname, "*" + filename)
@@ -599,7 +603,7 @@ class Model(Module):
             required = False
         
         outfile_exists = len(glob.glob(outFileName)) > 0
-        if required and not outfile_exists:
+        if required and not outfile_exists and not self.argsDict['RA']:
             msg = "Expected output from " + self.ModelAbbrev + " was not found."
             msg += "\nSpecifically " + self.ModelAbbrev + filename + " was missing."
             msg += "\nThis might indicate problems with the inputs to the R module."

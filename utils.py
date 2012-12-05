@@ -48,6 +48,7 @@ import csv
 import time
 import tempfile
 import subprocess
+import thread
 
 import struct, datetime, decimal, itertools
 
@@ -462,35 +463,41 @@ def runRScript(script, args_dict, module=None):
     writetolog("    args: " + args_str, False, False)
     writetolog("    command: " + command, False, False)
     #print "RUNNING COMMAND:", command_arr
-    p = subprocess.Popen(command_arr, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    ret = p.communicate()
     
-    if 'Error' in ret[1]:
-        msg = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-        msg +="\n  An error was encountered in the R script for this module."
-        msg += "\n     The R error message is below: \n"
-        msg += ret[1]
-        writetolog(msg)
-
-    if 'Warning' in ret[1]:
-        msg = "The R scipt returned the following warning(s).  The R warning message is below - \n"
-        msg += ret[1]
-        writetolog(msg)
-
-    if 'Error' in ret[1]:
-        #also write the errors to a model specific log file in the model output dir
-        #then raise an error
-        writeRErrorsToLog(args_dict, ret)
-        if module:
-            raise ModuleError(module, msg)
-        else:
-            raise RuntimeError , msg
-    elif 'Warning' in ret[1]:
-        writeRErrorsToLog(args_dict, ret)
+    if not args_dict.get("ra", False):
+        p = subprocess.Popen(command_arr, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        ret = p.communicate()
         
-
-    del(ret)
-    writetolog("\nFinished R Processing of " + script, True)
+        if 'Error' in ret[1]:
+            msg = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+            msg +="\n  An error was encountered in the R script for this module."
+            msg += "\n     The R error message is below: \n"
+            msg += ret[1]
+            writetolog(msg)
+    
+        if 'Warning' in ret[1]:
+            msg = "The R scipt returned the following warning(s).  The R warning message is below - \n"
+            msg += ret[1]
+            writetolog(msg)
+    
+        if 'Error' in ret[1]:
+            #also write the errors to a model specific log file in the model output dir
+            #then raise an error
+            writeRErrorsToLog(args_dict, ret)
+            if module:
+                raise ModuleError(module, msg)
+            else:
+                raise RuntimeError , msg
+        elif 'Warning' in ret[1]:
+            writeRErrorsToLog(args_dict, ret)
+            
+    
+        del(ret)
+        writetolog("\nFinished R Processing of " + script, True)
+    else:
+        DEVNULL = open(os.devnull, 'wb')
+        p = subprocess.Popen(command_arr, stderr=DEVNULL, stdout=DEVNULL)
+        writetolog("\n R Processing launched asynchronously " + script, True)
 
 def getR_application(module=None):
     global r_path
