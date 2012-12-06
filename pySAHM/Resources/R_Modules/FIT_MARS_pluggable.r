@@ -83,4 +83,4 @@ FitModels(ma.name=csv,
         tif.dir=NULL,output.dir=output,
         response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
             mars.degree=mars.degree,mars.penalty=mars.penalty,debug.mode=F,
-            script.name="mars",opt.methods=opt.methods,MESS=MESS)
+            script.name="mars",opt.methods=opt.methods,MESS=MESS,ScriptPath=ScriptPath)

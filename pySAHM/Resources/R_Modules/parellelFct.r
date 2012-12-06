@@ -1,50 +1,43 @@
-parRaster<-function(i,nrows,dims,tr,MESS,nvars,fullnames,nvars.final,vnames,NAval,factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.bin,thresh) {
-    library(raster)
-      setwd(file.path("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"))
-    ScriptPath=file.path("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
-    
-    #Fitting Models and making predictions
+parRaster<-function(start.tile,nrows,dims,tr,MESS,nvars,fullnames,nvars.final,vnames,NAval,
+factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.bin,thresh,nToDo,ScriptPath) {
+    #loading code and libraries that are needed
+    setwd(file.path(ScriptPath))
     source("generic.model.fit.r")
     source("FitModels.r")
     source("model.fit.r")
     source("pred.fct.r")
     source("chk.libs.r")
+    source(paste(toupper(Model),".helper.fcts.r",sep=""))
     chk.libs(Model)
         
    continuousRaster<-raster(RasterInfo)
-   outfile.p<-file.path(paste(substr(outfile.p,1,(nchar(outfile.p)-4)),i,".tiff",sep=""))
-   outtext<-paste(substr(outfile.p,1,(nchar(outfile.p)-4)),i,".txt",sep="")
-   capture.output(cat(i),file=outtext)
+   outfile.p<-file.path(paste(substr(outfile.p,1,(nchar(outfile.p)-4)),start.tile,".tiff",sep=""))
+   outtext<-paste(substr(outfile.p,1,(nchar(outfile.p)-4)),start.tile,".txt",sep="")
+   capture.output(cat(start.tile),file=outtext)
     capture.output(cat(ScriptPath),file=outtext,append=TRUE)
-       
-  continuousRaster <- writeStart(continuousRaster, filename=outfile.p, overwrite=TRUE)
-  if(make.binary.tif) {
-     binaryRaster<-raster(RasterInfo)
+    
+    #start up any rasters we need   
+    continuousRaster <- writeStart(continuousRaster, filename=outfile.p, overwrite=TRUE)
+    if(make.binary.tif) {
+      binaryRaster<-raster(RasterInfo)
       binaryRaster <- writeStart(binaryRaster, filename=outfile.bin, overwrite=TRUE)}
-      
-   min.pred<-1
-   max.pred<-0
- 
-   temp <- data.frame(matrix(ncol=nvars,nrow=tr$nrows[1]*ncol(RasterInfo))) # temp data.frame.
-names(temp) <- vnames
-    strt <- c((i-1)*nrows,0)
-     region.dims <- c(min(dims[1]-strt[1],nrows),dims[2])
-
-        if (i==tr$n) if(is.null(dim(temp))) { temp <- temp[1:(tr$nrows[i]*dims[2])]
-                                              if(MESS) pred.rng<-pred.rng[1:(tr$nrows[i]*dims[2])]
-        } else {temp <- as.data.frame(temp[1:(tr$nrows[i]*dims[2]),])
-                      if(MESS) pred.rng<-pred.rng[1:(tr$nrows[i]*dims[2]),]
-                }
-
-         # for the last tile...
-      for(k in 1:nvars) { # fill temp data frame
-            if(is.null(dim(temp))){
-              temp<- getValuesBlock(raster(fullnames[k]), row=tr$row[i], nrows=tr$nrows[i])
-               temp<-as.data.frame(as.matrix(x=temp,nrow=(tr$nrows[i]*dims[2]),ncol=1))
-            } else {temp[,k]<- getValuesBlock(raster(fullnames[k]), row=tr$row[i], nrows=tr$nrows[i])
-                    }
-
-            }
+    if(MESS) {
+      MessRaster<-raster(RasterInfo)
+      ModRaster<-raster(RasterInfo)
+      MessRaster <- writeStart(MessRaster, filename=sub("bin","mess",outfile.bin), overwrite=TRUE)
+      ModRaster <- writeStart(ModRaster, filename=sub("bin","MoD",outfile.bin), overwrite=TRUE)
+      pred.rng<-temp[,names(temp)%in%vnames.final.mod]  
+    }
+    
+ for (i in start.tile:min(start.tile+nToDo-1,length(tr$row))){
+       temp <- data.frame(matrix(ncol=nvars,nrow=tr$nrows[i]*dims[2]))
+       names(temp) <- vnames
+       if(MESS) pred.rng<-pred.rng[1:(tr$nrows[i]*dims[2]),]
+       
+       # fill temp data frame         
+      for(k in 1:nvars) 
+           temp[,k]<- getValuesBlock(raster(fullnames[k]), row=tr$row[i], nrows=tr$nrows[i])
+          
 
              if(MESS){
              for(k in 1:nvars.final){
@@ -66,38 +59,49 @@ names(temp) <- vnames
             }
                    }}
             capture.output(cat("\npred.fct"),file=outtext,append=TRUE)
-    ifelse(sum(complete.cases(temp))==0,  # does not calculate predictions if all predictors in the region are na
-        preds<-matrix(data=NA,nrow=region.dims[1],ncol=region.dims[2]),
-      preds <- t(matrix(pred.fct(model,temp,Model),ncol=dims[2],byrow=T)))
-        
+      ifelse(sum(complete.cases(temp))==0,  # does not calculate predictions if all predictors in the region are na
+        preds<-matrix(data=NA,nrow=dims[2],ncol=tr$nrows[i]),
+        preds <- t(matrix(pred.fct(model,temp,Model),ncol=dims[2],byrow=T)))
+       # preds<-matrix(data=runif(dims[2]*tr$nrows[i]),nrow=dims[2],ncol=tr$nrows[i])
         capture.output(cat("\npred.fct2"),file=outtext,append=TRUE)
        
-        min.pred<-min(na.omit(preds),min.pred)
-        max.pred<-max(na.omit(preds),max.pred)
         preds[is.na(preds)]<-NAval
          capture.output(cat("\nAfter pred.fct"),file=outtext,append=TRUE)
-    ## Writing to the rasters u
-     f<-function(x){
-     if(any(is.na(x))) return(NA)
-     a<-which(x==min(x),arr.ind=TRUE)
-     if(length(a>1)) a<-sample(a,size=1)
-     return(a)
-    }
-    if(MESS) {
-    MessRaster<-writeValues(MessRaster,apply(pred.rng,1,min), tr$row[i])
-    if(!is.null(dim(pred.rng)[2])) a<-apply(as.matrix(pred.rng),1,f)
-    else a<-rep(1,times=length(pred.rng))
-    #if(is.list(a)) a<-unlist(a)
-      ModRaster<-writeValues(ModRaster,a, tr$row[i])
-    }
-      if(make.binary.tif) binaryRaster<-writeValues(binaryRaster,(preds>thresh),tr$row[i])
-   continuousRaster <- writeValues(continuousRaster,preds, tr$row[i])
+        ## Writing to the rasters u
+         f<-function(x){
+         if(any(is.na(x))) return(NA)
+         a<-which(x==min(x),arr.ind=TRUE)
+         if(length(a>1)) a<-sample(a,size=1)
+         return(a)
+        }
+        if(MESS) {
+        MessRaster<-writeValues(MessRaster,apply(pred.rng,1,min), tr$row[i])
+        if(!is.null(dim(pred.rng)[2])) a<-apply(as.matrix(pred.rng),1,f)
+        else a<-rep(1,times=length(pred.rng))
+          ModRaster<-writeValues(ModRaster,a, tr$row[i])
+        }
+          if(make.binary.tif) binaryRaster<-writeValues(binaryRaster,(preds>thresh),tr$row[i])
+       continuousRaster <- writeValues(continuousRaster,preds, tr$row[i])
+   } #end of the big for loop
+   
+   #closing and cropping the files
+   end.seq<-c(tr$row,dims[1]+1)
+   e<-extent(continuousRaster, tr$row[start.tile],(end.seq[start.tile+nToDo]-1),1,dims[2])
    continuousRaster <- writeStop(continuousRaster)
-
+   crop(continuousRaster,e, filename=outfile.p,overwrite=TRUE, snap='near')
   if(make.binary.tif) {
     writeStop(binaryRaster)
+    crop(binaryRaster, e, filename=outfile.p,overwrite=TRUE, snap='near')
   }
+  if(MESS) {
+    writeStop(MessRaster)
+    writeStop(ModRaster)
+    crop(MessRaster,e, filename=outfile.p,overwrite=TRUE, snap='near')
+    crop(ModRaster,e, filename=outfile.p,overwrite=TRUE, snap='near')
+      d<-data.frame(as.integer(seq(1:ncol(pred.rng))),names(pred.rng))
+      names(d)=c("Value","Class")
+      ModRaster@file@datanotation<-"INT1U"
+      write.dbf(d, sub(".tif",".tif.vat.dbf",ModRaster@file@name), factor2char = TRUE, max_nchar = 254)
 
-  #NAvalue(continuousRaster) <-NAval
-        rm(preds);gc() #why is gc not working on the last call
+  }
 }

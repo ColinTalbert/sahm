@@ -57,7 +57,7 @@ input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_FinalTest\\CovariateCorrela
 FitModels(ma.name=input.file,
             output.dir=output.dir,
             response.col=rc,make.p.tif=T,make.binary.tif=T,
-            mars.degree=1,mars.penalty=2,debug.mode=T,script.name="mars",opt.methods=2,MESS=F)
+            mars.degree=1,mars.penalty=2,debug.mode=T,script.name="mars",opt.methods=2,MESS=F,ScriptPath=ScriptPath)
 
 EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,make.binary.tif=TRUE,make.p.tif=TRUE,MESS=TRUE)
 
