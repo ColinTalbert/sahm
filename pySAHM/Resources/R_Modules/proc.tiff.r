@@ -96,6 +96,13 @@ names(filenames)<-sub("_categorical","",names(filenames))
           if(!all(goodfiles)) stop(paste("ERROR: the following image files are missing:",paste(fullnames[!goodfiles],collapse=", ")))
 
 if(nvars.final<=1) MESS=FALSE
+
+if(out$input$make.p.tif)
+  dir.create(paste(out$input$output.dir,"\\ProbTiff",sep=""))
+if(out$input$make.binary.tif)
+  dir.create(paste(out$input$output.dir,"\\BinTiff",sep=""))
+if(MESS)
+  dir.create(paste(out$input$output.dir,"\\MESSTiff",sep=""))    
  ######################################
  # get spatial reference info from existing image file
  options(warn=-1)
@@ -127,7 +134,7 @@ ymax(RasterInfo) <- ymax(RasterInfo) + 0.5 * rs[2]
 
     # setting tile size
     MB.per.row<-dims[2]*nvars*32/8/1000/1024
-
+    if(MESS) MB.per.row<-MB.per.row*3 #use more blocks for mess
     nrows<-min(round(tsize/MB.per.row),dims[1])
     bs<-c(nrows,dims[2])
     nbs <- ceiling(dims[1]/nrows)
@@ -171,12 +178,12 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
     }
   min.pred<-1
   max.pred<-0
- 
+  browser()
   for (i in 1:tr$n) {
     strt <- c((i-1)*nrows,0)
      region.dims <- c(min(dims[1]-strt[1],nrows),dims[2])
 
-        if (i==tr$n) if(is.null(dim(temp))) { temp <- temp[1:(tr$nrows[i]*dims[2])]
+        if (i==tr$n) if(is.null(dim(temp))) { temp <- temp[1:(tr$nrows[i]*dims[2]),]
                                               if(MESS) pred.rng<-pred.rng[1:(tr$nrows[i]*dims[2])]
         } else {temp <- as.data.frame(temp[1:(tr$nrows[i]*dims[2]),])
                       if(MESS) pred.rng<-pred.rng[1:(tr$nrows[i]*dims[2]),]
