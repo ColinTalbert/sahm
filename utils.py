@@ -495,8 +495,17 @@ def runRScript(script, args_dict, module=None):
         del(ret)
         writetolog("\nFinished R Processing of " + script, True)
     else:
-        DEVNULL = open(os.devnull, 'wb')
-        p = subprocess.Popen(command_arr, stderr=DEVNULL, stdout=DEVNULL)
+        if args_dict.has_key("o"):
+            stdErrFname = os.path.join(args_dict['o'], "stdErr.txt")
+            stdOutFname = os.path.join(args_dict['o'], "stdOut.txt")
+            stdErrFile = open(stdErrFname, 'w')
+            stdOutFile = open(stdOutFname, 'w')
+        else:
+            DEVNULL = open(os.devnull, 'wb')
+            stdErrFile = DEVNULL
+            stdOutFile = DEVNULL
+            
+        p = subprocess.Popen(command_arr, stderr=stdErrFile, stdout=stdOutFile)
         writetolog("\n R Processing launched asynchronously " + script, True)
 
 def getR_application(module=None):
@@ -811,3 +820,31 @@ def print_timing(func):
         print tabs,'%s took %0.3f ms' % (func.func_name, (t2-t1)*1000.0)
         return res
     return wrapper
+
+def checkIfModelFinished(model_dir):
+    
+    try:
+        outText = find_file(model_dir, "_output.txt")
+    except RuntimeError:
+        return False
+    
+    model_text = os.path.join(model_dir, outText)
+    try:
+        lastLine = open(model_text, 'r').readlines()[-2]
+    except IndexError:
+        return False
+     
+    if lastLine.startswith("Total time"):
+        return True
+    elif lastLine.startswith("Model failed"):
+        return "Error"
+    else:
+        return False
+
+def find_file(model_dir, suffix):
+    try:
+        return [file_name for file_name in os.listdir(model_dir)
+                                 if file_name.endswith(suffix)][0]
+    except IndexError:
+        raise RuntimeError('The expected model output '
+                               + suffix + ' was not found in the model output directory')

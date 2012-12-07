@@ -129,12 +129,41 @@ def menu_items():
         
         STFM  = SelectAndTestFinalModel(session_dir, configuration.r_path) 
         retVal = STFM.exec_()
-#        if retVal == 1:
-#            raise ModuleError(self, "Cancel or Close selected (not OK) workflow halted.")
-    
+
+    def checkAsyncModels():
+        sessionDir = utils.getrootdir()
+        DEVNULL = open(os.devnull, 'wb')
+        pyExe = sys.executable
+        curDir = os.path.split(__file__)[0]
+        monitorApp = os.path.join(curDir, "JobMoniterApp.py")
+        
+        subprocess.Popen([pyExe, monitorApp, sessionDir], stderr=DEVNULL, stdout=DEVNULL)
+#        subFolders = [x[0] for x in os.walk(sessionDir)]
+#        finished = 0
+#        running = 0
+#        errors = 0
+#        models = ["brt", "rf_", "mar", "glm"]
+#        for subFolder in subFolders:
+#            if os.path.split(subFolder)[1][:3] in models:
+#                result = utils.checkIfModelFinished(subFolder)
+#                if result == "error":
+#                    errors += 1
+#                elif result:
+#                    finished += 1
+#                else:
+#                    running += 1
+#        
+#        msg = "Of the " + str(errors + finished + running) + "models run in this workspace:\n"
+#        msg += "\t" + str(finished) + " are finished\n"
+#        msg += "\t" + str(running) + " are are running (or hung)\n"
+#        msg += "\t" + str(errors) + " returned an error\n"
+#        QtGui.QMessageBox.information(None, "Asynchronous Model Run results", msg)
+        
+
     lst = []
     lst.append(("Change session folder", change_session_folder))
     lst.append(("Select and test the Final Model", select_test_final_model))
+    lst.append(("Check Asynchronous model runs", checkAsyncModels))
     return(lst)
 
 
