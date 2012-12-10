@@ -38,7 +38,7 @@ class Window(QWidget):
         #add a timer so that we can update the contents every 5 sec
         self.timer = QTimer()
         self.timer.timeout.connect(self.updateContents)
-        self.timer.start(5000)
+        self.timer.start(500)
         
         layout = QVBoxLayout()
         layout.addWidget(self.treeView)
@@ -78,7 +78,7 @@ class Window(QWidget):
                 else:
                     resultText = result + "    (with " + str(warningCount) + " warnings)"
                 child_item = QTreeWidgetItem([itemName, resultText])
-                if result == "Completed successfully":
+                if result.startswith("Completed successfully"):
                     child_item.setBackgroundColor(1, QColor(188,220, 157))
                 elif result == "Error in model":
                     child_item.setBackgroundColor(1, QColor(223, 131, 125))
@@ -100,15 +100,18 @@ class Window(QWidget):
        
        
     def getText(self, subfolder, fname):
-        fullName = os.path.join(subfolder, fname)
-        return "".join(open(fullName, "r").readlines())
+        try:
+            fullName = os.path.join(subfolder, fname)
+            return "".join(open(fullName, "r").readlines())
+        except IOError:
+            return ""
                     
     def checkIfModelFinished(self, model_dir):
     
         try:
             outText = self.find_file(model_dir, "_output.txt")
         except RuntimeError:
-            return "Running ..."
+            return "Starting ..."
         
         model_text = os.path.join(model_dir, outText)
         try:
@@ -117,7 +120,7 @@ class Window(QWidget):
             return "Running ..."
          
         if lastLine.startswith("Total time"):
-            return "Completed successfully"
+            return "Completed successfully in " + lastLine[lastLine.find(" = ")+3:]
         elif lastLine.startswith("Model failed"):
             return "Error in model"
         else:

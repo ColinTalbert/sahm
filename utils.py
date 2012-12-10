@@ -464,7 +464,7 @@ def runRScript(script, args_dict, module=None):
     writetolog("    command: " + command, False, False)
     #print "RUNNING COMMAND:", command_arr
     
-    if not args_dict.get("ra", False):
+    if not args_dict.get("runAsync", False) and not args_dict.get("runOnCondor", False):
         p = subprocess.Popen(command_arr, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         ret = p.communicate()
         
@@ -505,8 +505,74 @@ def runRScript(script, args_dict, module=None):
             stdErrFile = DEVNULL
             stdOutFile = DEVNULL
             
-        p = subprocess.Popen(command_arr, stderr=stdErrFile, stdout=stdOutFile)
-        writetolog("\n R Processing launched asynchronously " + script, True)
+        if args_dict.get("runOnCondor", False):
+            runModelOnCondor(script, args_dict, command_arr)
+            writetolog("\n R Processing launched using Condor " + script, True)  
+        else:
+            p = subprocess.Popen(command_arr, stderr=stdErrFile, stdout=stdOutFile)
+            writetolog("\n R Processing launched asynchronously " + script, True)            
+
+def runModelOnCondor(script, args_dict, command_arr):
+    #copy MDS file and convert all refs to K:, I:, N:, J: to UNC paths
+    
+    mdsDir, mdsFile = os.path.split(args_dict["c"])
+    newMDSfname = os.path.join(args_dict['o'], mdsFile)
+    newMDSFile = open(newMDSfname, 'w')
+    oldLines = open(args_dict["c"], 'r').readlines()
+    for headerLine in oldLines[:3]:
+        newMDSFile.write(replaceMappedDrives(headerLine))
+        
+    newMDSFile.writelines(oldLines[3:])
+        
+    os.chdir(args_dict['o'])
+    command_arr = ['c='+newMDSfname if x=='c='+args_dict["c"] else x for x in command_arr]
+        
+        
+    #create condorSubmit file
+    submitFname = os.path.join(args_dict['o'], "modelSubmit.txt")
+    submitFile = open(submitFname, 'w')
+    submitFile.write("Universe                = vanilla\n")
+    submitFile.write("Executable              = c:\Windows\System32\cmd.exe\n")
+    submitFile.write("run_as_owner            = true\n")
+    submitFile.write("Getenv                  = true\n")
+    submitFile.write("Should_transfer_files   = no\n")
+    submitFile.write("transfer_executable     = false\n")
+    
+    machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151', 'igskbacbws425']
+    reqsStr = 'Requirements            = (Machine =="'
+    reqsStr += '.gs.doi.net"||Machine =="'.join(machines) + '.gs.doi.net")\n'
+    submitFile.write(reqsStr)
+    stdErrFname = os.path.join(args_dict['o'], "stdErr.txt")
+    stdOutFname = os.path.join(args_dict['o'], "stdOut.txt")
+    logFname = os.path.join(args_dict['o'], "log.txt")
+    submitFile.write("Output                  = " + replaceMappedDrives(stdOutFname) +"\n")
+    submitFile.write("error                   = " + replaceMappedDrives(stdErrFname) +"\n")
+    submitFile.write("log                     = " + replaceMappedDrives(logFname) +"\n")
+    argsStr = 'Arguments               = "/c pushd ' + "'"
+    argsStr += "' '".join(command_arr) + "'" + '"\n'
+    argsStr = replaceMappedDrives(argsStr)
+    argsStr = argsStr.replace(r"\Rterm.exe'", "' && Rterm.exe")
+    submitFile.write(argsStr)
+    submitFile.write("Notification            = Never\n")
+    submitFile.write("Queue\n")
+    submitFile.close()
+    
+    #launch condor job
+    DEVNULL = open(os.devnull, 'wb')
+    p = subprocess.Popen(["condor_submit", "-n", "igskbacbws425", submitFname], stderr=DEVNULL, stdout=DEVNULL)
+    
+def replaceMappedDrives(inStr):
+    #these are FORT specific
+    uncConversions = {"K":"\\\\igskbacbvmfs002\\common\\",
+                      "I":"\\\\IGSKBACBVMFS002\\Invasives\\",
+                      "N":"\\\\igskbacbfs001\\gis$\\",
+                      "M":"\\\\igskbacbvmfs002\\gis_archive$\\",
+                      "J":"\\\\igskbacbvmfs002\\InvasivesNAS$\\"}
+    for drive in uncConversions.keys():
+        inStr = inStr.replace(drive.lower() + ":\\", uncConversions[drive])
+        inStr = inStr.replace(drive.upper() + ":\\", uncConversions[drive])
+    
+    return inStr
 
 def getR_application(module=None):
     global r_path
