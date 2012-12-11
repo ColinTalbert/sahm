@@ -48,6 +48,7 @@ import csv
 import time
 import tempfile
 import subprocess
+import thread
 
 import struct, datetime, decimal, itertools
 
@@ -462,35 +463,116 @@ def runRScript(script, args_dict, module=None):
     writetolog("    args: " + args_str, False, False)
     writetolog("    command: " + command, False, False)
     #print "RUNNING COMMAND:", command_arr
-    p = subprocess.Popen(command_arr, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    ret = p.communicate()
     
-    if 'Error' in ret[1]:
-        msg = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-        msg +="\n  An error was encountered in the R script for this module."
-        msg += "\n     The R error message is below: \n"
-        msg += ret[1]
-        writetolog(msg)
-
-    if 'Warning' in ret[1]:
-        msg = "The R scipt returned the following warning(s).  The R warning message is below - \n"
-        msg += ret[1]
-        writetolog(msg)
-
-    if 'Error' in ret[1]:
-        #also write the errors to a model specific log file in the model output dir
-        #then raise an error
-        writeRErrorsToLog(args_dict, ret)
-        if module:
-            raise ModuleError(module, msg)
-        else:
-            raise RuntimeError , msg
-    elif 'Warning' in ret[1]:
-        writeRErrorsToLog(args_dict, ret)
+    if not args_dict.get("runAsync", False) and not args_dict.get("runOnCondor", False):
+        p = subprocess.Popen(command_arr, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        ret = p.communicate()
         
+        if 'Error' in ret[1]:
+            msg = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+            msg +="\n  An error was encountered in the R script for this module."
+            msg += "\n     The R error message is below: \n"
+            msg += ret[1]
+            writetolog(msg)
+    
+        if 'Warning' in ret[1]:
+            msg = "The R scipt returned the following warning(s).  The R warning message is below - \n"
+            msg += ret[1]
+            writetolog(msg)
+    
+        if 'Error' in ret[1]:
+            #also write the errors to a model specific log file in the model output dir
+            #then raise an error
+            writeRErrorsToLog(args_dict, ret)
+            if module:
+                raise ModuleError(module, msg)
+            else:
+                raise RuntimeError , msg
+        elif 'Warning' in ret[1]:
+            writeRErrorsToLog(args_dict, ret)
+            
+    
+        del(ret)
+        writetolog("\nFinished R Processing of " + script, True)
+    else:
+        if args_dict.has_key("o"):
+            stdErrFname = os.path.join(args_dict['o'], "stdErr.txt")
+            stdOutFname = os.path.join(args_dict['o'], "stdOut.txt")
+            stdErrFile = open(stdErrFname, 'w')
+            stdOutFile = open(stdOutFname, 'w')
+        else:
+            DEVNULL = open(os.devnull, 'wb')
+            stdErrFile = DEVNULL
+            stdOutFile = DEVNULL
+            
+        if args_dict.get("runOnCondor", False):
+            runModelOnCondor(script, args_dict, command_arr)
+            writetolog("\n R Processing launched using Condor " + script, True)  
+        else:
+            p = subprocess.Popen(command_arr, stderr=stdErrFile, stdout=stdOutFile)
+            writetolog("\n R Processing launched asynchronously " + script, True)            
 
-    del(ret)
-    writetolog("\nFinished R Processing of " + script, True)
+def runModelOnCondor(script, args_dict, command_arr):
+    #copy MDS file and convert all refs to K:, I:, N:, J: to UNC paths
+    
+    mdsDir, mdsFile = os.path.split(args_dict["c"])
+    newMDSfname = os.path.join(args_dict['o'], mdsFile)
+    newMDSFile = open(newMDSfname, 'w')
+    oldLines = open(args_dict["c"], 'r').readlines()
+    for headerLine in oldLines[:3]:
+        newMDSFile.write(replaceMappedDrives(headerLine))
+        
+    newMDSFile.writelines(oldLines[3:])
+        
+    os.chdir(args_dict['o'])
+    command_arr = ['c='+newMDSfname if x=='c='+args_dict["c"] else x for x in command_arr]
+        
+        
+    #create condorSubmit file
+    submitFname = os.path.join(args_dict['o'], "modelSubmit.txt")
+    submitFile = open(submitFname, 'w')
+    submitFile.write("Universe                = vanilla\n")
+    submitFile.write("Executable              = c:\Windows\System32\cmd.exe\n")
+    submitFile.write("run_as_owner            = true\n")
+    submitFile.write("Getenv                  = true\n")
+    submitFile.write("Should_transfer_files   = no\n")
+    submitFile.write("transfer_executable     = false\n")
+    
+    machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151', 'igskbacbws425']
+    reqsStr = 'Requirements            = (Machine =="'
+    reqsStr += '.gs.doi.net"||Machine =="'.join(machines) + '.gs.doi.net")\n'
+    submitFile.write(reqsStr)
+    stdErrFname = os.path.join(args_dict['o'], "stdErr.txt")
+    stdOutFname = os.path.join(args_dict['o'], "stdOut.txt")
+    logFname = os.path.join(args_dict['o'], "log.txt")
+    submitFile.write("Output                  = " + replaceMappedDrives(stdOutFname) +"\n")
+    submitFile.write("error                   = " + replaceMappedDrives(stdErrFname) +"\n")
+    submitFile.write("log                     = " + replaceMappedDrives(logFname) +"\n")
+    argsStr = 'Arguments               = "/c pushd ' + "'"
+    argsStr += "' '".join(command_arr) + "'" + '"\n'
+    argsStr = replaceMappedDrives(argsStr)
+    argsStr = argsStr.replace(r"\Rterm.exe'", "' && Rterm.exe")
+    submitFile.write(argsStr)
+    submitFile.write("Notification            = Never\n")
+    submitFile.write("Queue\n")
+    submitFile.close()
+    
+    #launch condor job
+    DEVNULL = open(os.devnull, 'wb')
+    p = subprocess.Popen(["condor_submit", "-n", "igskbacbws425", submitFname], stderr=DEVNULL, stdout=DEVNULL)
+    
+def replaceMappedDrives(inStr):
+    #these are FORT specific
+    uncConversions = {"K":"\\\\igskbacbvmfs002\\common\\",
+                      "I":"\\\\IGSKBACBVMFS002\\Invasives\\",
+                      "N":"\\\\igskbacbfs001\\gis$\\",
+                      "M":"\\\\igskbacbvmfs002\\gis_archive$\\",
+                      "J":"\\\\igskbacbvmfs002\\InvasivesNAS$\\"}
+    for drive in uncConversions.keys():
+        inStr = inStr.replace(drive.lower() + ":\\", uncConversions[drive])
+        inStr = inStr.replace(drive.upper() + ":\\", uncConversions[drive])
+    
+    return inStr
 
 def getR_application(module=None):
     global r_path
@@ -804,3 +886,40 @@ def print_timing(func):
         print tabs,'%s took %0.3f ms' % (func.func_name, (t2-t1)*1000.0)
         return res
     return wrapper
+
+def checkIfModelFinished(model_dir):
+    
+    try:
+        outText = find_file(model_dir, "_output.txt")
+    except RuntimeError:
+        return False
+    
+    model_text = os.path.join(model_dir, outText)
+    try:
+        lastLine = open(model_text, 'r').readlines()[-2]
+    except IndexError:
+        return False
+     
+    if lastLine.startswith("Total time"):
+        return True
+    elif lastLine.startswith("Model failed"):
+        return "Error"
+    else:
+        return False
+
+def find_file(model_dir, suffix):
+    try:
+        return [file_name for file_name in os.listdir(model_dir)
+                                 if file_name.endswith(suffix)][0]
+    except IndexError:
+        raise RuntimeError('The expected model output '
+                               + suffix + ' was not found in the model output directory')
+        
+def launch_RunMonitorApp():
+        sessionDir = getrootdir()
+        DEVNULL = open(os.devnull, 'wb')
+        pyExe = sys.executable
+        curDir = os.path.split(__file__)[0]
+        monitorApp = os.path.join(curDir, "JobMoniterApp.py")
+        
+        subprocess.Popen([pyExe, monitorApp, sessionDir], stderr=DEVNULL, stdout=DEVNULL)

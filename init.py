@@ -129,12 +129,14 @@ def menu_items():
         
         STFM  = SelectAndTestFinalModel(session_dir, configuration.r_path) 
         retVal = STFM.exec_()
-#        if retVal == 1:
-#            raise ModuleError(self, "Cancel or Close selected (not OK) workflow halted.")
-    
+
+    def checkAsyncModels():
+        utils.launch_RunMonitorApp()
+        
     lst = []
     lst.append(("Change session folder", change_session_folder))
     lst.append(("Select and test the Final Model", select_test_final_model))
+    lst.append(("Check Asynchronous model runs", checkAsyncModels))
     return(lst)
 
 
@@ -523,7 +525,8 @@ class Model(Module):
                     ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
-                    ]
+                    ('runAsynchronously', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+                    ('runOnCondor', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),]
     _output_ports = [('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'), 
                      ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
                      ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)'),
@@ -538,6 +541,8 @@ class Model(Module):
                          'makeBinMap':('mbt', utils.R_boolean, False),
                          'makeMESMap':('mes', utils.R_boolean, False),
                          'ThresholdOptimizationMethod':('om', None, False),
+                         'runAsynchronously':('runAsync', None, False),
+                         'runOnCondor':('runOnCondor', None, False),
 #                         'UsePseudoAbs':('psa', utils.R_boolean, False)
                     }
 
@@ -560,6 +565,8 @@ class Model(Module):
         
         self.output_dname = utils.mknextdir(prefix=self.ModelAbbrev + '_')
         self.argsDict = utils.map_ports(self, self.port_map)
+        
+        self.argsDict['c'] = os.path.normpath(self.argsDict['c'])
 
         mdsFile = self.forceGetInputFromPort('mdsFile').name
         
@@ -574,20 +581,22 @@ class Model(Module):
       
         utils.runRScript(self.name, self.argsDict, self)
         
-        if not self.argsDict.has_key('mes'):
-            self.argsDict['mes'] = 'FALSE'
-        self.setModelResult("_prob_map.tif", 'ProbabilityMap', 'mpt')
-        self.setModelResult("_bin_map.tif", 'BinaryMap', 'mbt')
-        self.setModelResult("_resid_map.tif", 'ResidualsMap', 'mes')
-        self.setModelResult("_mess_map.tif", 'MessMap', 'mes')
-        self.setModelResult("_MoD_map.tif", 'MoDMap', 'mes')
-        self.setModelResult("_output.txt", 'Text_Output')
-        self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot') 
+        if not self.argsDict.get("runAsync", False) and not self.argsDict.get("runOnCondor", False):
+            if not self.argsDict.has_key('mes'):
+                self.argsDict['mes'] = 'FALSE'
+            self.setModelResult("_prob_map.tif", 'ProbabilityMap', 'mpt')
+            self.setModelResult("_bin_map.tif", 'BinaryMap', 'mbt')
+            self.setModelResult("_resid_map.tif", 'ResidualsMap', 'mes')
+            self.setModelResult("_mess_map.tif", 'MessMap', 'mes')
+            self.setModelResult("_MoD_map.tif", 'MoDMap', 'mes')
+            self.setModelResult("_output.txt", 'Text_Output')
+            self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot') 
+            writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
+        else:
+            utils.launch_RunMonitorApp()
         
         modelWorkspace = utils.create_dir_module(self.output_dname)
         self.setResult("modelWorkspace", modelWorkspace)
-              
-        writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
         
     def setModelResult(self, filename, portname, arg_key=None):
         outFileName = os.path.join(self.output_dname, "*" + filename)
@@ -599,7 +608,7 @@ class Model(Module):
             required = False
         
         outfile_exists = len(glob.glob(outFileName)) > 0
-        if required and not outfile_exists:
+        if required and not outfile_exists and not self.argsDict['RA']:
             msg = "Expected output from " + self.ModelAbbrev + " was not found."
             msg += "\nSpecifically " + self.ModelAbbrev + filename + " was missing."
             msg += "\nThis might indicate problems with the inputs to the R module."
@@ -1020,6 +1029,13 @@ class FieldDataQuery(Module):
                     response = 1
                 elif response.lower() in ["0", "false", "f", "absent", "absense", FDQParams['res_abs_val'].lower()]:
                     response = 0
+                elif responsetype == 'responseBinary': 
+                    try:
+                        response = int(response)
+                        if response > 0:
+                            response = 1
+                    except ValueError:
+                        response = row[res_key]
                 else:
                     response = row[res_key]
                     
@@ -1821,6 +1837,8 @@ def initialize():
     
     load_max_ent_params()
     
+    Model._input_ports.remove(('runOnCondor', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}))
+    
     global layers_csv_fname
     
     writetolog("*" * 79)
@@ -1866,6 +1884,7 @@ def build_available_trees():
     
     #if the first file in the layers file does not exist assume that none
     #of them do and use the exampledata version
+    global atFORT
     if not os.path.exists(first_file):
         print (("!" * 30) + " WARNING " + ("!" * 30) + "\n")*3
         print "The first grid in your layers CSV could not be found."
@@ -1874,6 +1893,10 @@ def build_available_trees():
         print "See documentation for more information on setting up the layers.csv\n"
         print (("!" * 30) + " WARNING " + ("!" * 30) + "\n")*3
         layers_csv_fname = os.path.join(os.path.dirname(__file__), 'layers.exampledata.csv')
+        atFORT = False
+        
+    else:
+        atFORT = True
     
 #    #####Only for testing tutorial data
 #    print "For tutorial tesing uing the layers.exampledata.csv"

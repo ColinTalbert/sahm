@@ -83,6 +83,8 @@ from osgeo import gdal, gdalconst
 
 from core.packagemanager import get_package_manager
 
+import utils
+
 class SAHMSpatialOutputViewerCell(SpreadsheetCell):
     """
     SAHMModelOutputViewerCell is a VisTrails Module that
@@ -132,7 +134,7 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
         for model_output in ['prob', 'bin', 'resid', 'mess', 'MoD']:
             try:
                 inputs[model_output +"_map"] = os.path.join(inputs["model_dir"],
-                                self.find_file(inputs["model_dir"], "_" + model_output + "_map.tif"))
+                                utils.find_file(inputs["model_dir"], "_" + model_output + "_map.tif"))
             except:
                 inputs[model_output + "_map"] = ""
 
@@ -161,20 +163,15 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
 #        else:
 #            inputs["max_cells_dimension"] = [item for item in self._input_ports if item[0] == 'max_cells_dimension'][0][2]['defaults']
 
-        self.local_displayAndWait(inputs)
+        if utils.checkIfModelFinished(inputs["model_dir"]):
+            self.local_displayAndWait(inputs)
 
     @print_timing
     def local_displayAndWait(self, inputs):
         self.displayAndWait(SAHMSpatialOutputViewerCellWidget,
                             inputs)       
     
-    def find_file(self, model_dir, suffix):
-        try:
-            return [file_name for file_name in os.listdir(model_dir)
-                                     if file_name.endswith(suffix)][0]
-        except IndexError:
-            raise RuntimeError('The expected model output '
-                               + suffix + ' was not found in the model output directory')
+
 
     def find_mds(self, model_dir):
         """returns the path to the mds that was used to generate this
@@ -185,7 +182,7 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
         file name in the parent folder of the model folder.
         """
         model_text = os.path.join(model_dir,
-                            self.find_file(model_dir, "_output.txt"))
+                            utils.find_file(model_dir, "_output.txt"))
         #assumed to be one level up from model folder.
         session_folder = os.path.split(model_dir)[0]
 
@@ -193,15 +190,20 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
         lines = f.read().splitlines()
 
         # grab the line after "Data:"
-        originalMDS = [lines[i + 1] for i in range(len(lines))
+        try:
+            originalMDS = [lines[i + 1] for i in range(len(lines))
                   if lines[i].startswith("Data:")][0].strip()
+                
 
-        fname = os.path.split(originalMDS)[1]
-        result = os.path.join(session_folder, fname)
-        if os.path.exists(result):
-            return result
-        else:
+            fname = os.path.split(originalMDS)[1]
+            result = os.path.join(session_folder, fname)
+            if os.path.exists(result):
+                return result
+            else:
+                raise RuntimeError('Valid input MDS file not found in Model text output.')
+        except IndexError:
             raise RuntimeError('Valid input MDS file not found in Model text output.')
+
 
 class SAHMSpatialOutputViewerCellWidget(QCellWidget):
     """
@@ -538,10 +540,11 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
     
     @print_timing
     def add_vector(self, layername):
-        if not self.pointsLoaded:
+        kwargs = self.all_layers[layername]
+        if not self.pointsLoaded or not kwargs.has_key("x"):
             self.loadPoints()
             self.pointsLoaded = True
-        kwargs = self.all_layers[layername]
+        
         if self.all_layers[layername]['enabled']:
             self.axes.scatter(kwargs['x'], kwargs['y'], s=10, c=kwargs['color'], linewidth=0.5, antialiased=True)
     

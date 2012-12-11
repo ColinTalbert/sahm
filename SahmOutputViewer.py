@@ -55,8 +55,10 @@ from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
 from packages.spreadsheet.spreadsheet_controller import spreadsheetController
 
 from sahm_picklists import ModelOutputType
+import utils
 
 from core.packagemanager import get_package_manager
+
 
 import os
 import itertools
@@ -116,7 +118,8 @@ Input Ports:
         Dispatch the display event to the spreadsheet with images and labels
         
         """
-        if self.hasInputFromPort("ModelWorkspace"):
+        if self.hasInputFromPort("ModelWorkspace") and \
+            utils.checkIfModelFinished(self.getInputFromPort("ModelWorkspace").name):
             window = spreadsheetController.findSpreadsheetWindow()
             model_workspace = self.getInputFromPort("ModelWorkspace").name
 
@@ -124,10 +127,12 @@ Input Ports:
             model_dir = os.path.split(model_dir_full)[1]
             model_name = model_dir[:model_dir.index('_')]
             auc_graph_path = os.path.join(model_dir_full, model_name + '_modelEvalPlot.jpg')
-            auc_graph = window.file_pool.make_local_copy(auc_graph_path)
+            if os.path.exists(auc_graph_path):
+                auc_graph = window.file_pool.make_local_copy(auc_graph_path)
             
             text_output_path = os.path.join(model_dir_full, model_name + '_output.txt')
-            text_output = window.file_pool.make_local_copy(text_output_path)
+            if os.path.exists(text_output_path):
+                text_output = window.file_pool.make_local_copy(text_output_path)
             
             response_directory = os.path.join(model_dir_full,'responseCurves')
             if os.path.exists(response_directory):
@@ -140,13 +145,16 @@ Input Ports:
                 response_curves = []
             
             calibration_graph_path = os.path.join(model_dir_full, model_name + '_CalibrationPlot.jpg')
-            calibration_graph = window.file_pool.make_local_copy(calibration_graph_path)
+            if os.path.exists(calibration_graph_path):
+                calibration_graph = window.file_pool.make_local_copy(calibration_graph_path)
             
             confusion_graph_path = os.path.join(model_dir_full, model_name + '.confusion.matrix.jpg')
-            confusion_graph = window.file_pool.make_local_copy(confusion_graph_path)
+            if os.path.exists(confusion_graph_path):
+                confusion_graph = window.file_pool.make_local_copy(confusion_graph_path)
             
             residuals_graph_path = os.path.join(model_dir_full, model_name + '.resid.plot.jpg')
-            residuals_graph = window.file_pool.make_local_copy(residuals_graph_path)
+            if os.path.exists(residuals_graph_path):
+                residuals_graph = window.file_pool.make_local_copy(residuals_graph_path)
             
             model_label = model_dir.capitalize().replace('output', 'Output')
             
@@ -165,19 +173,19 @@ Input Ports:
                 initial_display = self.getInputFromPort('InitialModelOutputDisplay')
             else:
                 initial_display = 'AUC'
-            
+
+            self.cellWidget = self.displayAndWait(SAHMOutputViewerCellWidget, (auc_graph, 
+                                                                          text_output,
+                                                                          response_curves,
+                                                                          calibration_graph,
+                                                                          confusion_graph,
+                                                                          residuals_graph,
+                                                                          model_label,
+                                                                          initial_display))
         else:
             fileValue = None
             
-            
-        self.cellWidget = self.displayAndWait(SAHMOutputViewerCellWidget, (auc_graph, 
-                                                                      text_output,
-                                                                      response_curves,
-                                                                      calibration_graph,
-                                                                      confusion_graph,
-                                                                      residuals_graph,
-                                                                      model_label,
-                                                                      initial_display))
+
 
 class SAHMOutputViewerCellWidget(QCellWidget):
     """
