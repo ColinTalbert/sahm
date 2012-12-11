@@ -1,31 +1,34 @@
-import sys, os
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+'''Original from:
+http://stackoverflow.com/questions/8786136/pyqt-how-to-detect-and-close-ui-if-its-already-running
+'''
+import os
+from PyQt4 import QtGui, QtCore, QtNetwork
 
-data = [
-    ("Alice", [
-        ("Keys", []),
-        ("Purse", [
-            ("Cellphone", [])
-            ])
-        ]),
-    ("Bob", [
-        ("Wallet", [
-            ("Credit cardalkdfjdlas;kjf\n\njklhfl;dkfjh\nakudfh\n\nklajhfklds\nakljfld;skj\nalkufhiaurtyeiuh", []),
-            ("Money", [])
-            ])
-        ])
-    ]
+class SingleApplication(QtGui.QApplication):
+    def __init__(self, argv, key):
+        QtGui.QApplication.__init__(self, argv)
+        self._memory = QtCore.QSharedMemory(self)
+        self._memory.setKey(key)
+        if self._memory.attach():
+            self._running = True
+        else:
+            self._running = False
+            if not self._memory.create(1):
+                raise RuntimeError(
+                    self._memory.errorString().toLocal8Bit().data())
 
-class Window(QWidget):
+    def isRunning(self):
+        return self._running
+
+class Window(QtGui.QWidget):
 
     def __init__(self, workspace):
     
-        QWidget.__init__(self)
+        QtGui.QWidget.__init__(self)
         
         self.sessionDir = workspace
         
-        self.treeView = QTreeWidget()
+        self.treeView = QtGui.QTreeWidget()
         self.treeView.setAlternatingRowColors(True)
         self.treeView.setColumnCount(2)
         self.treeView.headerItem().setText(0, "Model")
@@ -36,18 +39,18 @@ class Window(QWidget):
         self.data = self.loadData()
         
         #add a timer so that we can update the contents every 5 sec
-        self.timer = QTimer()
+        self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.updateContents)
         self.timer.start(500)
         
-        layout = QVBoxLayout()
+        layout = QtGui.QVBoxLayout()
         layout.addWidget(self.treeView)
         self.setLayout(layout)
     
     def addItems(self, parent, elements):
     
         for text, children in elements:
-            item = QStandardItem(text)
+            item = QtGui.QStandardItem(text)
             parent.appendRow(item)
             if children:
                 self.addItems(item, children)
@@ -77,17 +80,17 @@ class Window(QWidget):
                     resultText = result
                 else:
                     resultText = result + "    (with " + str(warningCount) + " warnings)"
-                child_item = QTreeWidgetItem([itemName, resultText])
+                child_item = QtGui.QTreeWidgetItem([itemName, resultText])
                 if result.startswith("Completed successfully"):
-                    child_item.setBackgroundColor(1, QColor(188,220, 157))
+                    child_item.setBackgroundColor(1, QtGui.QColor(188,220, 157))
                 elif result == "Error in model":
-                    child_item.setBackgroundColor(1, QColor(223, 131, 125))
+                    child_item.setBackgroundColor(1, QtGui.QColor(223, 131, 125))
                     
                 errorText = self.getText(subFolder, "stdErr.txt").strip()
                     
-                error_item = QTreeWidgetItem(["stdError", errorText])
-                error_item.setTextAlignment(0, Qt.AlignJustify)
-                error_item.setTextAlignment(1, Qt.AlignJustify)
+                error_item = QtGui.QTreeWidgetItem(["stdError", errorText])
+                error_item.setTextAlignment(0, QtCore.Qt.AlignJustify)
+                error_item.setTextAlignment(1, QtCore.Qt.AlignJustify)
 #                out_item = QTreeWidgetItem(["stdOut", self.getText(subFolder, "stdOut.txt")])
 #                out_item.setTextAlignment(Qt.AlignTop, Qt.AlignCenter)
                 child_item.addChild(error_item)
@@ -135,14 +138,21 @@ class Window(QWidget):
                                    + suffix + ' was not found in the model output directory')
         
     def updateContents(self,):
-        self.loadData()                    
+        self.loadData()   
 
 
 
+if __name__ == '__main__':
 
-if __name__ == "__main__":
+    import sys
 
-    app = QApplication(sys.argv)
+    key = 'SAHM_JobMonitorApplication'
+
+    app = SingleApplication(sys.argv, key)
+    if app.isRunning():
+        print('SAHM_JobMonitorApplication is already running')
+        sys.exit(1)
+
     window = Window(sys.argv[1])
     window.setWindowTitle("Asynchronous Model Run Monitor")
     window.resize(750, 800)

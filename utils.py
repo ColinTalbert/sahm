@@ -914,3 +914,12 @@ def find_file(model_dir, suffix):
     except IndexError:
         raise RuntimeError('The expected model output '
                                + suffix + ' was not found in the model output directory')
+        
+def launch_RunMonitorApp():
+        sessionDir = getrootdir()
+        DEVNULL = open(os.devnull, 'wb')
+        pyExe = sys.executable
+        curDir = os.path.split(__file__)[0]
+        monitorApp = os.path.join(curDir, "JobMoniterApp.py")
+        
+        subprocess.Popen([pyExe, monitorApp, sessionDir], stderr=DEVNULL, stdout=DEVNULL)
