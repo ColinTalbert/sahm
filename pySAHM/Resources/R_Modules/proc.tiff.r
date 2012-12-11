@@ -89,101 +89,96 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
     vnames.final.mod<-out$mods$vnames
     if(any(out$mods$vnames%in%names(factor.levels))) vnames.final.mod<-vnames.final.mod[!out$mods$vnames%in%names(factor.levels)]
     nvars.final<-length(vnames.final.mod)
-# setup up output raster to match input raster
-names(filenames)<-sub("_categorical","",names(filenames))
-          fullnames <- as.character(filenames[match(vnames,names(filenames))])
-          goodfiles <- file.access(fullnames)==0
-          if(!all(goodfiles)) stop(paste("ERROR: the following image files are missing:",paste(fullnames[!goodfiles],collapse=", ")))
-
-if(nvars.final<=1) MESS=FALSE
- 
- ######################################
- # get spatial reference info from existing image file
- options(warn=-1)
-    gi <- GDALinfo(fullnames[1])
-options(warn=1)
-    dims <- as.vector(gi)[1:2]
-    ps <- as.vector(gi)[6:7]
-    ll <- as.vector(gi)[4:5]
-    pref<-attr(gi,"projection")
-
-RasterInfo=raster(fullnames[1])
-RasterInfo@file@datanotation<-"FLT4S"
-NAval<- -3.399999999999999961272e+38
-
-#To remove use of the Raster package I need to see if rgdal handles area or point correctly
-if(!is.na(match("AREA_OR_POINT=Point",attr(gi,"mdata")))){
-   xx<-RasterInfo  #this shifts by a half pixel
-nrow(xx) <- nrow(xx) - 1
-ncol(xx) <- ncol(xx) - 1
-rs <- res(xx)
-xmin(RasterInfo) <- xmin(RasterInfo) - 0.5 * rs[1]
-xmax(RasterInfo) <- xmax(RasterInfo) - 0.5 * rs[1]
-ymin(RasterInfo) <- ymin(RasterInfo) + 0.5 * rs[2]
-ymax(RasterInfo) <- ymax(RasterInfo) + 0.5 * rs[2]
- }
-
-    # setting tile size
-    MB.per.row<-dims[2]*nvars*32/8/1000/1024
-    if(MESS) MB.per.row<-MB.per.row*3 #use more blocks for mess
-    nrows<-min(round(tsize/MB.per.row),dims[1])
-    bs<-c(nrows,dims[2])
-    chunksize<-bs[1]*bs[2]
-    tr<-blockSize(RasterInfo,chunksize=chunksize)
-
-FactorInd<-which(!is.na(match(vnames,names(factor.levels))),arr.ind=TRUE)
-  if((nvars-length(FactorInd))==0) MESS<-FALSE #turn this off if only one factor column was selected
+  # setup up output raster to match input raster
+  names(filenames)<-sub("_categorical","",names(filenames))
+            fullnames <- as.character(filenames[match(vnames,names(filenames))])
+            goodfiles <- file.access(fullnames)==0
+            if(!all(goodfiles)) stop(paste("ERROR: the following image files are missing:",paste(fullnames[!goodfiles],collapse=", ")))
   
-
-  if((out$input$ResidMaps)) Pred.Surface(object=RasterInfo,model=out$mods$auc.output$residual.smooth.fct,filename=sub("prob_map.tif","resid_map.tif",outfile.p),NAval=NAval)
-   if(Model=="maxlike"){
-   #this is a bit ugly to copy these sections of code but I'm hoping maxlike will eventually be able to predict to a vector instead of a raster in which case
-   #this will all be deleted anyway
-         model$call$formula<-eval(model$call$formula)
-        y <- predict(model,rasters=stack(model$rast.lst))
-         writeRaster(y,outfile.p)
-         if(make.binary.tif) {
-           y<-y>thresh
-           writeRaster(y,outfile.bin)
-           }
-         if(MESS) warning("Maxlike mess option currently nonfuctional") 
-         return(0) 
-    }
- 
-if(tr$n<10 | getRversion()<2.14){ #multicore is slower for small tiffs so we won't do it and the library is not available prior to 2.14
-start.time<-Sys.time()
-    parRaster(start.tile=1,nrows=nrows,dims=dims,
-    tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
-    model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,outfile.bin=outfile.bin,thresh=thresh,nToDo=tr$n,ScriptPath=out$       
-    input$ScriptPath,vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat)
-Sys.time()-start.time
- }
-if(tr$n>=10){
-    library(parallel)
-    #create some temporary folders    
-    if(out$input$make.p.tif)
-      dir.create(paste(out$input$output.dir,"\\ProbTiff",sep=""))
-      outfile.p=paste(paste(out$input$output.dir,"\\ProbTiff\\",sep=""),"_prob_map.tif",sep="")
-    if(out$input$make.binary.tif)
-      outfile.bin=dir.create(paste(out$input$output.dir,"\\BinTiff",sep=""))
-    if(MESS){
-      dir.create(paste(out$input$output.dir,"\\MESSTiff",sep="")) 
-      dir.create(paste(out$input$output.dir,"\\ModTiff",sep=""))       
-          }
-    cl <- makeCluster(detectCores()) 
-    parLapply(cl,X=1:tr$n,fun=parRaster,nrows=nrows,dims=dims,
-       tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
-       model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,
-       outfile.bin=outfile.bin,thresh=thresh,nToDo= ceiling(tr$n/detectCores()),ScriptPath=out$input$ScriptPath,
-       vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat)
-    stopCluster(cl)
+  if(nvars.final<=1) MESS=FALSE
+   
+   ######################################
+   # get spatial reference info from existing image file
+   options(warn=-1)
+      gi <- GDALinfo(fullnames[1])
+  options(warn=1)
+      dims <- as.vector(gi)[1:2]
+      ps <- as.vector(gi)[6:7]
+      ll <- as.vector(gi)[4:5]
+      pref<-attr(gi,"projection")
   
-    # looks like merging these together is quicker in python but I'll leave this in for now just in case  
-    #  Raster <- (paste("raster('",list.files(paste(out$input$output.dir,"\\ProbTiff",sep=""),full.names=TRUE),"')",sep="",collapse=","))
-    # cmd<-paste("merge(",Raster,", filename = '",file.path(out$input$output.dir,"prob_map.tif"),"'",", overwrite=TRUE, snap='near')",sep="")
-    # cmd<-gsub("\\\\","/",cmd)
-    #a<- eval(parse(text = cmd))
-
-}
-   return(0)
+  RasterInfo=raster(fullnames[1])
+  RasterInfo@file@datanotation<-"FLT4S"
+  NAval<- -3.399999999999999961272e+38
+  
+  #To remove use of the Raster package I need to see if rgdal handles area or point correctly
+  if(!is.na(match("AREA_OR_POINT=Point",attr(gi,"mdata")))){
+     xx<-RasterInfo  #this shifts by a half pixel
+  nrow(xx) <- nrow(xx) - 1
+  ncol(xx) <- ncol(xx) - 1
+  rs <- res(xx)
+  xmin(RasterInfo) <- xmin(RasterInfo) - 0.5 * rs[1]
+  xmax(RasterInfo) <- xmax(RasterInfo) - 0.5 * rs[1]
+  ymin(RasterInfo) <- ymin(RasterInfo) + 0.5 * rs[2]
+  ymax(RasterInfo) <- ymax(RasterInfo) + 0.5 * rs[2]
+   }
+  
+      # setting tile size
+      MB.per.row<-dims[2]*nvars*32/8/1000/1024
+      if(MESS) MB.per.row<-MB.per.row*3 #use more blocks for mess
+      nrows<-min(round(tsize/MB.per.row),dims[1])
+      bs<-c(nrows,dims[2])
+      chunksize<-bs[1]*bs[2]
+      tr<-blockSize(RasterInfo,chunksize=chunksize)
+  
+  FactorInd<-which(!is.na(match(vnames,names(factor.levels))),arr.ind=TRUE)
+    if((nvars-length(FactorInd))==0) MESS<-FALSE #turn this off if only one factor column was selected
+    
+     if(Model=="maxlike"){
+     #this is a bit ugly to copy these sections of code but I'm hoping maxlike will eventually be able to predict to a vector instead of a raster in which case
+     #this will all be deleted anyway
+           model$call$formula<-eval(model$call$formula)
+          y <- predict(model,rasters=stack(model$rast.lst))
+           writeRaster(y,outfile.p)
+           if(make.binary.tif) {
+             y<-y>thresh
+             writeRaster(y,outfile.bin)
+             }
+           if(MESS) warning("Maxlike mess option currently nonfuctional") 
+           return(0) 
+      }
+  browser()
+  if(tr$n<10 | getRversion()<2.14){ #multicore is slower for small tiffs so we won't do it and the library is not available prior to 2.14
+  start.time<-Sys.time()
+      parRaster(start.tile=1,nrows=nrows,dims=dims,
+      tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
+      model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,outfile.bin=outfile.bin,thresh=thresh,nToDo=tr$n,ScriptPath=out$       
+      input$ScriptPath,vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct)
+  Sys.time()-start.time
+   }
+  if(tr$n>=10){
+  start.time<-Sys.time()
+      library(parallel)
+      #create some temporary folders    
+      if(out$input$make.p.tif)
+        dir.create(paste(out$input$output.dir,"\\ProbTiff",sep=""))
+        outfile.p=paste(paste(out$input$output.dir,"\\ProbTiff\\",sep=""),"_prob_map.tif",sep="")
+      if(out$input$make.binary.tif)
+        outfile.bin=dir.create(paste(out$input$output.dir,"\\BinTiff",sep=""))
+      if(MESS){
+        dir.create(paste(out$input$output.dir,"\\MESSTiff",sep="")) 
+        dir.create(paste(out$input$output.dir,"\\ModTiff",sep=""))       
+            }
+       if(out$input$ResidMaps)
+        dir.create(paste(out$input$output.dir,"\\ResidTiff",sep="")) 
+      cl <- makeCluster(detectCores()) 
+      parLapply(cl,X=1:tr$n,fun=parRaster,nrows=nrows,dims=dims,
+         tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
+         model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,
+         outfile.bin=outfile.bin,thresh=thresh,nToDo= ceiling(tr$n/detectCores()),ScriptPath=out$input$ScriptPath,
+         vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct)
+      stopCluster(cl)
+  Sys.time()-start.time  
+  }
+     return(0)
    }

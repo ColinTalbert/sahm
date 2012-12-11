@@ -1,14 +1,15 @@
 parRaster<-function(start.tile,nrows,dims,tr,MESS,nvars,fullnames,nvars.final,vnames,NAval,
-factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.bin,thresh,nToDo,ScriptPath,vnames.final.mod,train.dat) {
+factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.bin,thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth) {
     #loading code and libraries that are needed
     setwd(file.path(ScriptPath))
     source("pred.fct.r")
     source("chk.libs.r")
     source("CalcMESS.r")
+    if(!is.null(residSmooth)) source("Pred.Surface.r")
     source(paste(toupper(Model),".helper.fcts.r",sep=""))
     chk.libs(Model)
    continuousRaster<-raster(RasterInfo)
-   outfile.p<-file.path(paste(substr(outfile.p,1,(nchar(outfile.p)-4)),start.tile,".tiff",sep=""))
+   outfile.p<-file.path(paste(substr(outfile.p,1,(nchar(outfile.p)-4)),start.tile,".tif",sep=""))
    if(make.binary.tif) outfile.bin<-(sub("ProbTiff","BinTiff",sub("prob","bin",outfile.p))) 
     #start up any rasters we need   
     continuousRaster <- writeStart(continuousRaster, filename=outfile.p, overwrite=TRUE)
@@ -80,7 +81,7 @@ factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.
    crop(continuousRaster,e, filename=outfile.p,overwrite=TRUE, snap='near')
   if(make.binary.tif) {
     writeStop(binaryRaster)
-    crop(binaryRaster, e, filename=outfile.p,overwrite=TRUE, snap='near')
+    crop(binaryRaster, e, filename=outfile.bin,overwrite=TRUE, snap='near')
   }
   if(MESS) {
     writeStop(MessRaster)
@@ -93,4 +94,6 @@ factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.
       write.dbf(d, sub(".tif",".tif.vat.dbf",ModRaster@file@name), factor2char = TRUE, max_nchar = 254)
 
   }
+
+ if(!is.null(residSmooth)) Pred.Surface(object=raster(outfile.p),model=residSmooth,filename=(sub("ProbTiff","ResidTiff",sub("prob","resid",outfile.p))),NAval=NAval)
 }
