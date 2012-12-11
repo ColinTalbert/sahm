@@ -86,8 +86,8 @@ factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.
   if(MESS) {
     writeStop(MessRaster)
     writeStop(ModRaster)
-    crop(MessRaster,e, filename=outfile.p,overwrite=TRUE, snap='near')
-    crop(ModRaster,e, filename=outfile.p,overwrite=TRUE, snap='near')
+    crop(MessRaster,e, filename=sub("ProbTiff","MESSTiff",sub("prob","mess",outfile.p)),overwrite=TRUE, snap='near')
+    crop(ModRaster,e, filename=sub("ProbTiff","ModTiff",sub("prob","MoD",outfile.p)),overwrite=TRUE, snap='near')
       d<-data.frame(as.integer(seq(1:ncol(pred.rng))),names(pred.rng))
       names(d)=c("Value","Class")
       ModRaster@file@datanotation<-"INT1U"
