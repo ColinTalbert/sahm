@@ -149,12 +149,14 @@ FactorInd<-which(!is.na(match(vnames,names(factor.levels))),arr.ind=TRUE)
          if(MESS) warning("Maxlike mess option currently nonfuctional") 
          return(0) 
     }
-    browser()
+ 
 if(tr$n<10 | getRversion()<2.14){ #multicore is slower for small tiffs so we won't do it and the library is not available prior to 2.14
+start.time<-Sys.time()
     parRaster(start.tile=1,nrows=nrows,dims=dims,
     tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
     model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,outfile.bin=outfile.bin,thresh=thresh,nToDo=tr$n,ScriptPath=out$       
     input$ScriptPath,vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat)
+Sys.time()-start.time
  }
 if(tr$n>=10){
     library(parallel)
@@ -168,15 +170,14 @@ if(tr$n>=10){
       dir.create(paste(out$input$output.dir,"\\MESSTiff",sep="")) 
       dir.create(paste(out$input$output.dir,"\\ModTiff",sep=""))       
           }
-    
-    cl <- makeCluster(detectCores())
-   
+    cl <- makeCluster(detectCores()) 
     parLapply(cl,X=1:tr$n,fun=parRaster,nrows=nrows,dims=dims,
        tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
        model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,
        outfile.bin=outfile.bin,thresh=thresh,nToDo= ceiling(tr$n/detectCores()),ScriptPath=out$input$ScriptPath,
        vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat)
     stopCluster(cl)
+  
     # looks like merging these together is quicker in python but I'll leave this in for now just in case  
     #  Raster <- (paste("raster('",list.files(paste(out$input$output.dir,"\\ProbTiff",sep=""),full.names=TRUE),"')",sep="",collapse=","))
     # cmd<-paste("merge(",Raster,", filename = '",file.path(out$input$output.dir,"prob_map.tif"),"'",", overwrite=TRUE, snap='near')",sep="")

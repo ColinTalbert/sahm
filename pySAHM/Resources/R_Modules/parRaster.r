@@ -31,14 +31,11 @@ factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.
            temp[,k]<- getValuesBlock(raster(fullnames[match(vnames.final.mod[k],vnames)]), row=tr$row[i], nrows=tr$nrows[i])
              if(MESS){
              pred.rng<-temp
-             browser()
-             start.time<-Sys.time()
              for(k in 1:nvars.final){
                         pred.range<-train.dat[,match(vnames.final.mod[k],names(train.dat))]
                         if(nvars.final>1) pred.rng[,k]<-mapply(CalcMESS,tiff.entry=temp[,match(vnames.final.mod[k],names(temp))],MoreArgs=list(pred.vect=pred.range))
                         else pred.rng<-mapply(CalcMESS,tiff.entry=temp,MoreArgs=list(pred.vect=pred.range))
-                         }
-             Sys.time()-start.time      
+                         }      
                       }
                 if(length(vnames)==1) names(temp)=vnames
 
