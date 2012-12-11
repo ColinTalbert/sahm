@@ -1,21 +1,15 @@
 parRaster<-function(start.tile,nrows,dims,tr,MESS,nvars,fullnames,nvars.final,vnames,NAval,
-factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.bin,thresh,nToDo,ScriptPath) {
+factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.bin,thresh,nToDo,ScriptPath,vnames.final.mod,train.dat) {
     #loading code and libraries that are needed
     setwd(file.path(ScriptPath))
-    source("generic.model.fit.r")
-    source("FitModels.r")
-    source("model.fit.r")
     source("pred.fct.r")
     source("chk.libs.r")
+    source("CalcMESS.r")
     source(paste(toupper(Model),".helper.fcts.r",sep=""))
     chk.libs(Model)
-        
    continuousRaster<-raster(RasterInfo)
    outfile.p<-file.path(paste(substr(outfile.p,1,(nchar(outfile.p)-4)),start.tile,".tiff",sep=""))
-   outtext<-paste(substr(outfile.p,1,(nchar(outfile.p)-4)),start.tile,".txt",sep="")
-   capture.output(cat(start.tile),file=outtext)
-    capture.output(cat(ScriptPath),file=outtext,append=TRUE)
-    
+   if(make.binary.tif) outfile.bin<-(sub("ProbTiff","BinTiff",sub("prob","bin",outfile.p))) 
     #start up any rasters we need   
     continuousRaster <- writeStart(continuousRaster, filename=outfile.p, overwrite=TRUE)
     if(make.binary.tif) {
@@ -24,27 +18,27 @@ factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.
     if(MESS) {
       MessRaster<-raster(RasterInfo)
       ModRaster<-raster(RasterInfo)
-      MessRaster <- writeStart(MessRaster, filename=sub("bin","mess",outfile.bin), overwrite=TRUE)
-      ModRaster <- writeStart(ModRaster, filename=sub("bin","MoD",outfile.bin), overwrite=TRUE)
-      pred.rng<-temp[,names(temp)%in%vnames.final.mod]  
+      MessRaster <- writeStart(MessRaster, filename=sub("ProbTiff","MESSTiff",sub("prob","mess",outfile.p)), overwrite=TRUE)
+      ModRaster <- writeStart(ModRaster, filename=sub("ProbTiff","ModTiff",sub("prob","MoD",outfile.p)), overwrite=TRUE)
     }
     
  for (i in start.tile:min(start.tile+nToDo-1,length(tr$row))){
-       temp <- data.frame(matrix(ncol=nvars,nrow=tr$nrows[i]*dims[2]))
-       names(temp) <- vnames
-       if(MESS) pred.rng<-pred.rng[1:(tr$nrows[i]*dims[2]),]
+       temp <- data.frame(matrix(ncol=nvars.final,nrow=tr$nrows[i]*dims[2]))
+       names(temp) <- vnames.final.mod
        
        # fill temp data frame         
-      for(k in 1:nvars) 
-           temp[,k]<- getValuesBlock(raster(fullnames[k]), row=tr$row[i], nrows=tr$nrows[i])
-          
-
+      for(k in 1:nvars.final) 
+           temp[,k]<- getValuesBlock(raster(fullnames[match(vnames.final.mod[k],vnames)]), row=tr$row[i], nrows=tr$nrows[i])
              if(MESS){
+             pred.rng<-temp
+             browser()
+             start.time<-Sys.time()
              for(k in 1:nvars.final){
-                        pred.range<-out$dat$ma$train$dat[,match(vnames.final.mod[k],names(out$dat$ma$train$dat))]
+                        pred.range<-train.dat[,match(vnames.final.mod[k],names(train.dat))]
                         if(nvars.final>1) pred.rng[,k]<-mapply(CalcMESS,tiff.entry=temp[,match(vnames.final.mod[k],names(temp))],MoreArgs=list(pred.vect=pred.range))
                         else pred.rng<-mapply(CalcMESS,tiff.entry=temp,MoreArgs=list(pred.vect=pred.range))
                          }
+             Sys.time()-start.time      
                       }
                 if(length(vnames)==1) names(temp)=vnames
 
@@ -58,15 +52,13 @@ factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.
                 }
             }
                    }}
-            capture.output(cat("\npred.fct"),file=outtext,append=TRUE)
       ifelse(sum(complete.cases(temp))==0,  # does not calculate predictions if all predictors in the region are na
         preds<-matrix(data=NA,nrow=dims[2],ncol=tr$nrows[i]),
         preds <- t(matrix(pred.fct(model,temp,Model),ncol=dims[2],byrow=T)))
-       # preds<-matrix(data=runif(dims[2]*tr$nrows[i]),nrow=dims[2],ncol=tr$nrows[i])
-        capture.output(cat("\npred.fct2"),file=outtext,append=TRUE)
+      
        
         preds[is.na(preds)]<-NAval
-         capture.output(cat("\nAfter pred.fct"),file=outtext,append=TRUE)
+        
         ## Writing to the rasters u
          f<-function(x){
          if(any(is.na(x))) return(NA)

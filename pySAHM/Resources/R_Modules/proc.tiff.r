@@ -131,17 +131,9 @@ ymax(RasterInfo) <- ymax(RasterInfo) + 0.5 * rs[2]
     chunksize<-bs[1]*bs[2]
     tr<-blockSize(RasterInfo,chunksize=chunksize)
 
-
-FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
+FactorInd<-which(!is.na(match(vnames,names(factor.levels))),arr.ind=TRUE)
   if((nvars-length(FactorInd))==0) MESS<-FALSE #turn this off if only one factor column was selected
-  if(MESS) {
-     MessRaster<-raster(RasterInfo)
-     ModRaster<-raster(RasterInfo)
-      MessRaster <- writeStart(MessRaster, filename=sub("bin","mess",outfile.bin), overwrite=TRUE)
-      ModRaster <- writeStart(ModRaster, filename=sub("bin","MoD",outfile.bin), overwrite=TRUE)
-      pred.rng<-temp[,names(temp)%in%vnames.final.mod]
-      
-    }
+  
 
   if((out$input$ResidMaps)) Pred.Surface(object=RasterInfo,model=out$mods$auc.output$residual.smooth.fct,filename=sub("prob_map.tif","resid_map.tif",outfile.p),NAval=NAval)
    if(Model=="maxlike"){
@@ -157,30 +149,40 @@ FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
          if(MESS) warning("Maxlike mess option currently nonfuctional") 
          return(0) 
     }
-if(out$input$make.p.tif)
-  dir.create(paste(out$input$output.dir,"\\ProbTiff",sep=""))
-  outfile.p=paste(paste(out$input$output.dir,"\\ProbTiff\\",sep=""),"_prob_map.tif",sep="")
-if(out$input$make.binary.tif)
-  dir.create(paste(out$input$output.dir,"\\BinTiff",sep=""))
-if(MESS)
-  dir.create(paste(out$input$output.dir,"\\MESSTiff",sep=""))    
-  
+    browser()
+if(tr$n<10 | getRversion()<2.14){ #multicore is slower for small tiffs so we won't do it and the library is not available prior to 2.14
+    parRaster(start.tile=1,nrows=nrows,dims=dims,
+    tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
+    model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,outfile.bin=outfile.bin,thresh=thresh,nToDo=tr$n,ScriptPath=out$       
+    input$ScriptPath,vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat)
+ }
+if(tr$n>=10){
+    library(parallel)
+    #create some temporary folders    
+    if(out$input$make.p.tif)
+      dir.create(paste(out$input$output.dir,"\\ProbTiff",sep=""))
+      outfile.p=paste(paste(out$input$output.dir,"\\ProbTiff\\",sep=""),"_prob_map.tif",sep="")
+    if(out$input$make.binary.tif)
+      outfile.bin=dir.create(paste(out$input$output.dir,"\\BinTiff",sep=""))
+    if(MESS){
+      dir.create(paste(out$input$output.dir,"\\MESSTiff",sep="")) 
+      dir.create(paste(out$input$output.dir,"\\ModTiff",sep=""))       
+          }
+    
+    cl <- makeCluster(detectCores())
+   
+    parLapply(cl,X=1:tr$n,fun=parRaster,nrows=nrows,dims=dims,
+       tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
+       model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,
+       outfile.bin=outfile.bin,thresh=thresh,nToDo= ceiling(tr$n/detectCores()),ScriptPath=out$input$ScriptPath,
+       vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat)
+    stopCluster(cl)
+    # looks like merging these together is quicker in python but I'll leave this in for now just in case  
+    #  Raster <- (paste("raster('",list.files(paste(out$input$output.dir,"\\ProbTiff",sep=""),full.names=TRUE),"')",sep="",collapse=","))
+    # cmd<-paste("merge(",Raster,", filename = '",file.path(out$input$output.dir,"prob_map.tif"),"'",", overwrite=TRUE, snap='near')",sep="")
+    # cmd<-gsub("\\\\","/",cmd)
+    #a<- eval(parse(text = cmd))
 
-cl <- makeCluster(detectCores())
-parLapply(cl,X=1:tr$n,fun=parRaster,nrows=nrows,dims=dims,
-   tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
-   model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,
-   outfile.bin=outfile.bin,thresh=thresh,nToDo=1,ScriptPath=out$input$ScriptPath)
-stopCluster(cl)
-
+}
    return(0)
    }
-CalcMESS<-function(tiff.entry,pred.vect){
-              f<-sum(pred.vect<tiff.entry)/length(pred.vect)*100
-              if(is.na(f)) return(NA)
-              if(f==0) return((tiff.entry-min(pred.vect))/(max(pred.vect)-min(pred.vect))*100)
-              if(0<f & f<=50) return(2*f)
-              if(50<=f & f<100) return(2*(100-f))
-              if(f==100) return((max(pred.vect)-tiff.entry)/(max(pred.vect)-min(pred.vect))*100)
-              else return(NA)
-}
