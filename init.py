@@ -1020,6 +1020,13 @@ class FieldDataQuery(Module):
                     response = 1
                 elif response.lower() in ["0", "false", "f", "absent", "absense", FDQParams['res_abs_val'].lower()]:
                     response = 0
+                elif responsetype == 'responseBinary': 
+                    try:
+                        response = int(response)
+                        if response > 0:
+                            response = 1
+                    except ValueError:
+                        response = row[res_key]
                 else:
                     response = row[res_key]
                     
