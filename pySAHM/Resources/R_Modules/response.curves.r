@@ -50,8 +50,8 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
       if(Model%in%c("brt","mars","rf"))  nvar <- nrow(out$mods$summary)
       if(Model=="glm")              nvar <- out$mods$n.vars.final-length(grep(":", attr(terms(formula(out$mods$final.mod[[1]])),"term.labels")))
                
-            pcol <- min(ceiling(sqrt(nvar)),4)
-            prow <- min(ceiling(nvar/pcol),3)
+            pcol <- ceiling(sqrt(nvar))
+            prow <- ceiling(nvar/pcol)
       
                      
         #this little section is borrowed from BIOMOD because rf partial plot 
@@ -69,6 +69,7 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
                 levels(Xp[, i]) <- levels(dat[, i])
             }
     }
+   
      dir.create(paste(out$input$output.dir,"\\responseCurves",sep=""))
       for (k in c(1,2)){
           if(k==1){ jpeg(paste(out$input$output.dir,"\\responseCurves\\","all_response_curves.jpg",sep=""),width=2000,height=2000,quality=100)
