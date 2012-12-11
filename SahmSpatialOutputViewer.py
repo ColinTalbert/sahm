@@ -538,10 +538,12 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
     
     @print_timing
     def add_vector(self, layername):
-        if not self.pointsLoaded:
+        kwargs = self.all_layers[layername]
+        if not self.pointsLoaded or not kwargs.has_key("x"):
             self.loadPoints()
             self.pointsLoaded = True
-        kwargs = self.all_layers[layername]
+        
+        
         if self.all_layers[layername]['enabled']:
             self.axes.scatter(kwargs['x'], kwargs['y'], s=10, c=kwargs['color'], linewidth=0.5, antialiased=True)
     
