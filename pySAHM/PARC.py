@@ -189,30 +189,49 @@ class PARC:
                 
     def gen_singlePARC_thread(self, image, outFile, results):
             image_short_name = os.path.split(image[0])[1]
-            args = '-s ' + '"' + os.path.abspath(image[0]) + '"'
-            args += ' -c '  + '"' + image[1] + '"'
-            args += ' -d ' + '"' + os.path.abspath(outFile) + '"'
-            args += ' -t ' + '"' + os.path.abspath(self.template)+ '"' 
-            args += ' -r ' + image[2]
-            args += ' -a ' + image[3]
+            # args = '-s ' + '"' + os.path.abspath(image[0]) + '"'
+            # args += ' -c '  + '"' + image[1] + '"'
+            # args += ' -d ' + '"' + os.path.abspath(outFile) + '"'
+            # args += ' -t ' + '"' + os.path.abspath(self.template)+ '"' 
+            # args += ' -r ' + image[2]
+            # args += ' -a ' + image[3]
+
+            args = ['-s', os.path.abspath(image[0]),
+                    '-c', image[1],
+                    '-d', os.path.abspath(outFile),
+                    '-t', os.path.abspath(self.template),
+                    '-r', image[2],
+                    '-a', image[3]]
+
             if self.ignoreNonOverlap:
-                args += ' -i '
-                args += ' --gt0 ' + str(self.template_params['gt'][0])
-                args += ' --gt3 ' + str(self.template_params['gt'][3])
-                args += ' --tNorth ' + str(self.template_params['tNorth'])
-                args += ' --tSouth ' + str(self.template_params['tSouth'])
-                args += ' --tEast ' + str(self.template_params['tEast'])
-                args += ' --tWest ' + str(self.template_params['tWest'])
-                args += ' --tHeight ' + str(self.template_params['height'])
-                args += ' --tWidth ' + str(self.template_params['width'])
+                # args += ' -i '
+                # args += ' --gt0 ' + str(self.template_params['gt'][0])
+                # args += ' --gt3 ' + str(self.template_params['gt'][3])
+                # args += ' --tNorth ' + str(self.template_params['tNorth'])
+                # args += ' --tSouth ' + str(self.template_params['tSouth'])
+                # args += ' --tEast ' + str(self.template_params['tEast'])
+                # args += ' --tWest ' + str(self.template_params['tWest'])
+                # args += ' --tHeight ' + str(self.template_params['height'])
+                # args += ' --tWidth ' + str(self.template_params['width'])
+
+                args.extend(['-i',
+                             '--gt0', str(self.template_params['gt'][0]),
+                             '--gt3', str(self.template_params['gt'][3]),
+                             '--tNorth', str(self.template_params['tNorth']),
+                             '--tSouth', str(self.template_params['tSouth']),
+                             '--tEast', str(self.template_params['tEast']),
+                             '--tWest', str(self.template_params['tWest']),
+                             '--tHeight', str(self.template_params['height']),
+                             '--tWidth', str(self.template_params['width'])])
     
             execDir = os.path.split(__file__)[0]
-            executable = '"' + os.path.join(execDir, 'singlePARC.py')  + '"'
-            
-            pyEx = '"' + sys.executable + '"'
-            command = ' '.join([pyEx, executable, args])
+            executable = os.path.join(execDir, 'singlePARC.py')
+            pyEx = sys.executable
+            command_arr = [pyEx, executable] + args
+            command = ' '.join(command_arr)
             self.logger.writetolog(command, False, False)
-            proc = subprocess.Popen( command )
+            print "RUNNING COMMAND:", command_arr
+            proc = subprocess.Popen( command_arr )
             thread.start_new_thread(utilities.process_waiter,
                     (proc, image_short_name, results))
         

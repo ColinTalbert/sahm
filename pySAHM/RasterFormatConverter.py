@@ -165,9 +165,12 @@ class FormatConverter(object):
         i = 1
         for f in files:
             f_name = os.path.splitext(os.path.split(f)[1])[0]
-            args = '-i ' + '"' + f + '"'
-            args += ' -o '  + '"' + outputFolder + '"'
-            args += ' -f ' + type
+            # args = '-i ' + '"' + f + '"'
+            # args += ' -o '  + '"' + outputFolder + '"'
+            # args += ' -f ' + type
+            args = ['-i', f,
+                    '-o', outputFolder,
+                    '-f', type]
 #            if self.verbose:
 #                args += " -v"
             
@@ -175,9 +178,10 @@ class FormatConverter(object):
             executable = os.path.join(execDir, 'singleRasterFormatConverter.py')
             
             pyEx = '"' + sys.executable + '"' 
-            command = ' '.join([pyEx, executable, args])
-            self.logger.writetolog(command, False, False)
-            proc = subprocess.Popen( command )
+            # command = ' '.join([pyEx, executable, args])
+            command_arr = [sys.executable, executable] + args
+            self.logger.writetolog(' '.join(command_arr), False, False)
+            proc = subprocess.Popen( command_arr )
             thread.start_new_thread(utilities.process_waiter,
                     (proc, f_name, results))
             process_count+= 1

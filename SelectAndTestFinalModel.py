@@ -331,23 +331,24 @@ class SelectAndTestFinalModel(QtGui.QDialog):
                 outfolder = os.path.join(finalFolder, str(item.text(0)))
                 os.mkdir(outfolder)
                 
-                args = "ws=" + origWS
-                args += " o=" + outfolder
+                args = {"ws":'"' + origWS + '"',
+                        "o":outfolder}
+                        
                 if self.chkProb.checkState() == QtCore.Qt.Checked:
-                    args += " mpt=TRUE"
+                    args["mpt"] = "TRUE"
                 else:
-                    args += " mpt=FALSE"
+                    args["mpt"] = "FALSE"
                 if self.chkBin.checkState() == QtCore.Qt.Checked:
-                    args += " mbt=TRUE"
+                    args["mbt"] = "TRUE"
                 else:
-                    args += " mbt=FALSE"
+                    args["mbt"] = "FALSE"
                 if self.chkMess.checkState() == QtCore.Qt.Checked:
-                    args += " mes=TRUE"
+                    args["mes"] = "TRUE"
                 else:
-                    args += " mes=FALSE"
+                    args["mes"] = "FALSE"
                 
-                command = program + " --vanilla -f " + script + " --args " + args
-                writetolog("    " + command, False, False)
+#                command = program + " --vanilla -f " + script + " --args " + args
+#                writetolog("    " + command, False, False)
                 utils.runRScript("EvaluateNewData.r", args)
                 writetolog("Finished running R for: " + str(item.text(0)) , False, True)
             treeviewIter += 1
