@@ -144,9 +144,8 @@ target.sp<-names(ydat)
   print("Creating predictions for subsets...", quote = F)
 
  selector<-out$dat$selector
- resp.curves<-vector("list",nk)
    out.cv<-list()
-   names(resp.curves)<-seq(1:nk)
+   
  #############################################
  #Start cross validation Fold loop
 for (i in 1:nk) {
@@ -173,12 +172,8 @@ for (i in 1:nk) {
                               #now name the bfs to match the approach used in mars.binomial
                               names(pred.basis.functions) <- paste("bf",1:n.bfs,sep="")
 
-                              #checking if the following two lines produce the same thing
-
-                              fitted.values[pred.mask] <- out$dat$ma[[i]]$pred<-predict(cv.final.mod,
+                            fitted.values[pred.mask] <- out$dat$ma[[i]]$pred<-predict(cv.final.mod,
                          pred.basis.functions, type = "response")
-                 out$dat$ma[[i]]$thresh <- as.numeric(optimal.thresholds(data.frame(ID=1:length(species.subset),pres.abs=species.subset,
-                          pred=cv.final.mod$fitted.values),opt.methods=out$input$opt.methods))[2]
                 }
           if(Model=="glm"){
               penalty <- if(out$input$simp.method=="AIC") 2 else log(nrow(out$dat$ma$ma))
@@ -190,8 +185,6 @@ for (i in 1:nk) {
                                      direction='both',scope=scope.glm,trace=0,k=penalty)
 
                      fitted.values[pred.mask]<-out$dat$ma[[i]]$pred<-predict(cv.final.mod, xdat[pred.mask, ],type="response")
-                     out$dat$ma[[i]]$thresh <- as.numeric(optimal.thresholds(data.frame(ID=1:length(species.subset),pres.abs=species.subset,
-                          pred=cv.final.mod$fitted.values),opt.methods=out$input$opt.methods))[2]
                     }
           if(Model=="brt"){
                       if(debug.mode) assign("out",out,envir=.GlobalEnv)
@@ -226,9 +219,6 @@ for (i in 1:nk) {
 
                     fitted.values[pred.mask]<-out$dat$ma[[i]]$pred<-predict.gbm(cv.final.mod, cbind(ydat[pred.mask],xdat[pred.mask, ]),
                               cv.final.mod$target.trees,type="response")
-
-                     out$dat$ma[[i]]$thresh <-as.numeric(optimal.thresholds(data.frame(ID=1:length(species.subset),pres.abs=species.subset,
-                            pred=pred),opt.methods=out$input$opt.methods))[2]
                       }
 
           if(Model=="rf"){
@@ -250,10 +240,11 @@ for (i in 1:nk) {
 
                     #predict the fitted values
                     fitted.values[pred.mask]<-out$dat$ma[[i]]$pred<-predict(cv.final.mod, xdat[pred.mask, ],type="prob")[,2]
-                     out$dat$ma[[i]]$thresh <-as.numeric(optimal.thresholds(data.frame(ID=1:length(species.subset),pres.abs=species.subset,
-                          pred=pred),opt.methods=out$input$opt.methods))[2]
+                    
 
                  }
+              out$dat$ma[[i]]$thresh <-as.numeric(optimal.thresholds(data.frame(ID=1:length(species.subset),pres.abs=species.subset,
+              pred=pred),opt.methods=out$input$opt.methods))[2]
               y_i <- ydat[pred.mask]
               u_i <- fitted.values[pred.mask]
               weights.subset <- site.weights[pred.mask]
@@ -269,11 +260,6 @@ for (i in 1:nk) {
                 subset.test[i] <- cor(y_i, u_i)
                 subset.calib[i,] <- calibration(y_i, u_i, family = family)
     }
-      #save values for creating response curves
-
-     # out.cv$mods$final.mod<-cv.final.mod
-      #resp.curves[[i]]<-response.curves(out.cv,Model=Model,pred.dat=xdat,cv=TRUE)
-      # names(resp.curves[[i]]$pred)<-names(resp.curves[[i]]$resp)<-resp.curves[[i]]$names
 
   } #end of Cross Validation Fold Loop
   #################################################
@@ -326,7 +312,7 @@ for (i in 1:nk) {
     
   cv.list<-list(full.resid.deviance = full.resid.deviance,
     full.test = full.test, full.calib = full.calib, pooled.deviance = cv.resid.deviance, pooled.test = cv.test,
-    pooled.calib = cv.calib,subset.deviance = subset.deviance, subset.test = subset.test, subset.calib = subset.calib,resp.curves=resp.curves)
+    pooled.calib = cv.calib,subset.deviance = subset.deviance, subset.test = subset.test, subset.calib = subset.calib)
    out$cv<-cv.list
   return(out)
 }
