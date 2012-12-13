@@ -783,16 +783,6 @@ function (mars.glm.object,new.data)
 
   pred.dat <- mars.new.dataframe(new.data)[[1]]
 
-  assign("pred.dat", pred.dat, pos = 1)               #and assign them for later use
-
-# fit the mars model and extract the basis functions
-
-  print(paste("re-fitting initial mars model for",n.spp,"responses"),quote = FALSE)
-  print(paste("using glm family of",family),quote = FALSE)
-
-  #mars.fit <- mars(x = xdat, y = ydat, degree = mars.degree, w = site.weights,
-  #  wp = spp.weights, penalty = penalty)
-
   mars.fit <- mars.glm.object$mars.object  #AKS
 
   old.bf.data <- as.data.frame(eval(mars.fit$x))
@@ -807,7 +797,6 @@ function (mars.glm.object,new.data)
 
 # now cycle through the species fitting glm models
 
-  print("fitting glms for individual responses", quote = F)
 
   prediction <- as.data.frame(matrix(0, ncol = n.spp, nrow = nrow(pred.dat)))
   names(prediction) <- names(ydat)

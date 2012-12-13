@@ -76,8 +76,9 @@ factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.
    
    #closing and cropping the files
    end.seq<-c(tr$row,dims[1]+1)
-   e<-extent(continuousRaster, tr$row[start.tile],(end.seq[start.tile+nToDo]-1),1,dims[2])
+  
    continuousRaster <- writeStop(continuousRaster)
+   e<-extent(continuousRaster, tr$row[start.tile],(end.seq[start.tile+nToDo]-1),1,dims[2])
    crop(continuousRaster,e, filename=outfile.p,overwrite=TRUE, snap='near')
   if(make.binary.tif) {
     writeStop(binaryRaster)
