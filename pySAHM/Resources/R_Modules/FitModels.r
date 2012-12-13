@@ -86,7 +86,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
          # generate a filename for output #
                  out$dat$bname<-bname<-file.path(out$input$output.dir,Model)
                  capture.output(paste(toupper(Model),"Results"),file=paste(bname,"_output.txt",sep="")) # reserve the new basename #
-            on.exit(capture.output(cat("Model Failed"),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE))  
+            on.exit(capture.output(cat("Model Failed\n\n"),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE))  
               
    #Load Libraries
               chk.libs(Model)

@@ -83,4 +83,4 @@ FitModels(ma.name=csv,
       tif.dir=NULL,output.dir=output,
       response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
       simp.method=simp.method,debug.mode=F,script.name="glm",opt.methods=opt.methods,
-      MESS=MESS,squared.terms=squared.terms)
+      MESS=MESS,squared.terms=squared.terms,ScriptPath=ScriptPath)

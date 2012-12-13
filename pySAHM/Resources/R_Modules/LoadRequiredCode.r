@@ -79,6 +79,8 @@ source(paste(ScriptPath,"modalDialog.r",sep="\\"))
 
 #Making maps
 source(paste(ScriptPath,"proc.tiff.r",sep="\\"))
+source(paste(ScriptPath,"CalcMESS.r",sep="\\"))
+source(paste(ScriptPath,"parRaster.r",sep="\\"))
 
 #Other utility functions
 source(paste(ScriptPath,"cv.fctNew.r",sep="\\"))

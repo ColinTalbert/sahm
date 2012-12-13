@@ -89,181 +89,93 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
     vnames.final.mod<-out$mods$vnames
     if(any(out$mods$vnames%in%names(factor.levels))) vnames.final.mod<-vnames.final.mod[!out$mods$vnames%in%names(factor.levels)]
     nvars.final<-length(vnames.final.mod)
-# settup up output raster to match input raster
-names(filenames)<-sub("_categorical","",names(filenames))
-          fullnames <- as.character(filenames[match(vnames,names(filenames))])
-          goodfiles <- file.access(fullnames)==0
-          if(!all(goodfiles)) stop(paste("ERROR: the following image files are missing:",paste(fullnames[!goodfiles],collapse=", ")))
-
-if(nvars.final<=1) MESS=FALSE
- ######################################
- # get spatial reference info from existing image file
- options(warn=-1)
-    gi <- GDALinfo(fullnames[1])
-options(warn=1)
-    dims <- as.vector(gi)[1:2]
-    ps <- as.vector(gi)[6:7]
-    ll <- as.vector(gi)[4:5]
-    pref<-attr(gi,"projection")
-
-RasterInfo=raster(fullnames[1])
-RasterInfo@file@datanotation<-"FLT4S"
-NAval<- -3.399999999999999961272e+38
-
-#To remove use of the Raster package I need to see if rgdal handles area or point correctly
-if(!is.na(match("AREA_OR_POINT=Point",attr(gi,"mdata")))){
-   xx<-RasterInfo  #this shifts by a half pixel
-nrow(xx) <- nrow(xx) - 1
-ncol(xx) <- ncol(xx) - 1
-rs <- res(xx)
-xmin(RasterInfo) <- xmin(RasterInfo) - 0.5 * rs[1]
-xmax(RasterInfo) <- xmax(RasterInfo) - 0.5 * rs[1]
-ymin(RasterInfo) <- ymin(RasterInfo) + 0.5 * rs[2]
-ymax(RasterInfo) <- ymax(RasterInfo) + 0.5 * rs[2]
- }
-    # calculate position of upper left corner and get geotransform ala http://www.gdal.org/gdal_datamodel.html
-    ul <- c(ll[1],ll[2]+(dims[1])*ps[2])
-    gt<-c(ul[1],ps[1],0,ul[2],0,ps[2])
-
-    # setting tile size
-    MB.per.row<-dims[2]*nvars*32/8/1000/1024
-
-    nrows<-min(round(tsize/MB.per.row),dims[1])
-    bs<-c(nrows,dims[2])
-    nbs <- ceiling(dims[1]/nrows)
-    inc<-round(10/nbs,1)
-
-    chunksize<-bs[1]*bs[2]
-    tr<-blockSize(RasterInfo,chunksize=chunksize)
-
-  continuousRaster<-raster(RasterInfo)
-  continuousRaster <- writeStart(continuousRaster, filename=outfile.p, overwrite=TRUE)
-    if(make.binary.tif) {
-     binaryRaster<-raster(RasterInfo)
-      binaryRaster <- writeStart(binaryRaster, filename=outfile.bin, overwrite=TRUE)}
-    
-temp <- data.frame(matrix(ncol=nvars,nrow=tr$nrows[1]*ncol(RasterInfo))) # temp data.frame.
-names(temp) <- vnames
-FactorInd<-which(!is.na(match(names(temp),names(factor.levels))),arr.ind=TRUE)
-  if((nvars-length(FactorInd))==0) MESS<-FALSE #turn this off if only one factor column was selected
-  if(MESS) {
-     MessRaster<-raster(RasterInfo)
-     ModRaster<-raster(RasterInfo)
-      MessRaster <- writeStart(MessRaster, filename=sub("bin","mess",outfile.bin), overwrite=TRUE)
-      ModRaster <- writeStart(ModRaster, filename=sub("bin","MoD",outfile.bin), overwrite=TRUE)
-      pred.rng<-temp[,names(temp)%in%vnames.final.mod]
-      
-    }
-
-  if((out$input$ResidMaps)) Pred.Surface(object=RasterInfo,model=out$mods$auc.output$residual.smooth.fct,filename=sub("prob_map.tif","resid_map.tif",outfile.p),NAval=NAval)
-   if(Model=="maxlike"){
-   #this is a bit ugly to copy these sections of code but I'm hoping maxlike will eventually be able to predict to a vector instead of a raster in which case
-   #this will all be deleted anyway
-         model$call$formula<-eval(model$call$formula)
-        y <- predict(model,rasters=stack(model$rast.lst))
-         writeRaster(y,outfile.p)
-         if(make.binary.tif) {
-           y<-y>thresh
-           writeRaster(y,outfile.bin)
-           }
-         if(MESS) warning("Maxlike mess option currently nonfuctional") 
-         return(0) 
-    }
-  min.pred<-1
-  max.pred<-0
- 
-  for (i in 1:tr$n) {
-    strt <- c((i-1)*nrows,0)
-     region.dims <- c(min(dims[1]-strt[1],nrows),dims[2])
-
-        if (i==tr$n) if(is.null(dim(temp))) { temp <- temp[1:(tr$nrows[i]*dims[2])]
-                                              if(MESS) pred.rng<-pred.rng[1:(tr$nrows[i]*dims[2])]
-        } else {temp <- as.data.frame(temp[1:(tr$nrows[i]*dims[2]),])
-                      if(MESS) pred.rng<-pred.rng[1:(tr$nrows[i]*dims[2]),]
-                }
-
-         # for the last tile...
-      for(k in 1:nvars) { # fill temp data frame
-            if(is.null(dim(temp))){
-              temp<- getValuesBlock(raster(fullnames[k]), row=tr$row[i], nrows=tr$nrows[i])
-               temp<-as.data.frame(as.matrix(x=temp,nrow=(tr$nrows[i]*dims[2]),ncol=1))
-            } else {temp[,k]<- getValuesBlock(raster(fullnames[k]), row=tr$row[i], nrows=tr$nrows[i])
-                    }
-
-            }
-
-             if(MESS){
-             for(k in 1:nvars.final){
-                        pred.range<-out$dat$ma$train$dat[,match(vnames.final.mod[k],names(out$dat$ma$train$dat))]
-                        if(nvars.final>1) pred.rng[,k]<-mapply(CalcMESS,tiff.entry=temp[,match(vnames.final.mod[k],names(temp))],MoreArgs=list(pred.vect=pred.range))
-                        else pred.rng<-mapply(CalcMESS,tiff.entry=temp,MoreArgs=list(pred.vect=pred.range))
-                         }
-                      }
-                if(length(vnames)==1) names(temp)=vnames
-
-    temp[temp==NAval] <- NA # replace missing values #
-        if(sum(!is.na(factor.levels))){
-            factor.cols <- match(names(factor.levels),names(temp))
-            if(sum(!is.na(factor.cols))>0){
-            for(j in 1:length(factor.cols)){
-                if(!is.na(factor.cols[j])){
-                    temp[,factor.cols[j]] <- factor(temp[,factor.cols[j]],levels=factor.levels[[j]]$number,labels=factor.levels[[j]]$class)
-                }
-            }
-                   }}
-        
-    ifelse(sum(complete.cases(temp))==0,  # does not calculate predictions if all predictors in the region are na
-        preds<-matrix(data=NaN,nrow=region.dims[1],ncol=region.dims[2]),
-        preds <- t(matrix(pred.fct(model,temp,Model),ncol=dims[2],byrow=T)))
-        a<-pred.fct(model,temp,Model)
-        min.pred<-min(na.omit(preds),min.pred)
-        max.pred<-max(na.omit(preds),max.pred)
-        preds[is.na(preds)]<-NAval
-    ## Writing to the rasters u
-     f<-function(x){
-     if(any(is.na(x))) return(NA)
-     a<-which(x==min(x),arr.ind=TRUE)
-     if(length(a>1)) a<-sample(a,size=1)
-     return(a)
-    }
-    if(MESS) {
-    MessRaster<-writeValues(MessRaster,apply(pred.rng,1,min), tr$row[i])
-    if(!is.null(dim(pred.rng)[2])) a<-apply(as.matrix(pred.rng),1,f)
-    else a<-rep(1,times=length(pred.rng))
-    #if(is.list(a)) a<-unlist(a)
-      ModRaster<-writeValues(ModRaster,a, tr$row[i])
-    }
-      if(make.binary.tif) binaryRaster<-writeValues(binaryRaster,(preds>thresh),tr$row[i])
-   continuousRaster <- writeValues(continuousRaster,preds, tr$row[i])
-  #NAvalue(continuousRaster) <-NAval
-        rm(preds);gc() #why is gc not working on the last call
-}
-
-  continuousRaster <- writeStop(continuousRaster)
-
-  if(make.binary.tif) {
-    writeStop(binaryRaster)
-  }
-   if(MESS) {
-    writeStop(MessRaster)
-
-    writeStop(ModRaster)
-
-      d<-data.frame(as.integer(seq(1:ncol(pred.rng))),names(pred.rng))
-      names(d)=c("Value","Class")
-      ModRaster@file@datanotation<-"INT1U"
-      write.dbf(d, sub(".tif",".tif.vat.dbf",ModRaster@file@name), factor2char = TRUE, max_nchar = 254)
-
-  }
-
-   return(0)
+  # setup up output raster to match input raster
+  names(filenames)<-sub("_categorical","",names(filenames))
+            fullnames <- as.character(filenames[match(vnames,names(filenames))])
+            goodfiles <- file.access(fullnames)==0
+            if(!all(goodfiles)) stop(paste("ERROR: the following image files are missing:",paste(fullnames[!goodfiles],collapse=", ")))
+  
+  if(nvars.final<=1) MESS=FALSE
+   
+   ######################################
+   # get spatial reference info from existing image file
+   options(warn=-1)
+      gi <- GDALinfo(fullnames[1])
+  options(warn=1)
+      dims <- as.vector(gi)[1:2]
+      ps <- as.vector(gi)[6:7]
+      ll <- as.vector(gi)[4:5]
+      pref<-attr(gi,"projection")
+  
+  RasterInfo=raster(fullnames[1])
+  RasterInfo@file@datanotation<-"FLT4S"
+  NAval<- -3.399999999999999961272e+38
+  
+  #To remove use of the Raster package I need to see if rgdal handles area or point correctly
+  if(!is.na(match("AREA_OR_POINT=Point",attr(gi,"mdata")))){
+     xx<-RasterInfo  #this shifts by a half pixel
+  nrow(xx) <- nrow(xx) - 1
+  ncol(xx) <- ncol(xx) - 1
+  rs <- res(xx)
+  xmin(RasterInfo) <- xmin(RasterInfo) - 0.5 * rs[1]
+  xmax(RasterInfo) <- xmax(RasterInfo) - 0.5 * rs[1]
+  ymin(RasterInfo) <- ymin(RasterInfo) + 0.5 * rs[2]
+  ymax(RasterInfo) <- ymax(RasterInfo) + 0.5 * rs[2]
    }
-CalcMESS<-function(tiff.entry,pred.vect){
-              f<-sum(pred.vect<tiff.entry)/length(pred.vect)*100
-              if(is.na(f)) return(NA)
-              if(f==0) return((tiff.entry-min(pred.vect))/(max(pred.vect)-min(pred.vect))*100)
-              if(0<f & f<=50) return(2*f)
-              if(50<=f & f<100) return(2*(100-f))
-              if(f==100) return((max(pred.vect)-tiff.entry)/(max(pred.vect)-min(pred.vect))*100)
-              else return(NA)
-}
+  
+      # setting tile size
+      MB.per.row<-dims[2]*nvars*32/8/1000/1024
+      if(MESS) MB.per.row<-MB.per.row*3 #use more blocks for mess
+      nrows<-min(round(tsize/MB.per.row),dims[1])
+      bs<-c(nrows,dims[2])
+      chunksize<-bs[1]*bs[2]
+      tr<-blockSize(RasterInfo,chunksize=chunksize)
+  
+  FactorInd<-which(!is.na(match(vnames,names(factor.levels))),arr.ind=TRUE)
+    if((nvars-length(FactorInd))==0) MESS<-FALSE #turn this off if only one factor column was selected
+    
+     if(Model=="maxlike"){
+     #this is a bit ugly to copy these sections of code but I'm hoping maxlike will eventually be able to predict to a vector instead of a raster in which case
+     #this will all be deleted anyway
+           model$call$formula<-eval(model$call$formula)
+          y <- predict(model,rasters=stack(model$rast.lst))
+           writeRaster(y,outfile.p)
+           if(make.binary.tif) {
+             y<-y>thresh
+             writeRaster(y,outfile.bin)
+             }
+           if(MESS) warning("Maxlike mess option currently nonfuctional") 
+           return(0) 
+      }
+  #for debugging I'm always using multiple cores
+  if(tr$n<10 | getRversion()<2.14){ #multicore is slower for small tiffs so we won't do it and the library is not available prior to 2.14
+    parRaster(start.tile=1,nrows=nrows,dims=dims,
+      tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
+      model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,outfile.bin=outfile.bin,thresh=thresh,nToDo=tr$n,ScriptPath=out$       
+      input$ScriptPath,vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct)
+   }
+  if(tr$n>=10 & getRversion()>=2.14){
+      library(parallel)
+      #create some temporary folders    
+      if(out$input$make.p.tif)
+        dir.create(paste(out$input$output.dir,"\\ProbTiff",sep=""))
+        outfile.p=paste(paste(out$input$output.dir,"\\ProbTiff\\",sep=""),"_prob_map.tif",sep="")
+      if(out$input$make.binary.tif)
+        outfile.bin=dir.create(paste(out$input$output.dir,"\\BinTiff",sep=""))
+      if(MESS){
+        dir.create(paste(out$input$output.dir,"\\MESSTiff",sep="")) 
+        dir.create(paste(out$input$output.dir,"\\ModTiff",sep=""))       
+            }
+       if(out$input$ResidMaps)
+        dir.create(paste(out$input$output.dir,"\\ResidTiff",sep=""))
+        tile.start<-seq(from=1,to=tr$n,by=ceiling(tr$n/detectCores())) 
+      cl <- makeCluster(detectCores()) 
+      parLapply(cl,X=tile.start,fun=parRaster,nrows=nrows,dims=dims,
+         tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
+         model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,
+         outfile.bin=outfile.bin,thresh=thresh,nToDo= ceiling(tr$n/detectCores()),ScriptPath=out$input$ScriptPath,
+         vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct)
+      stopCluster(cl)
+  }
+     return(0)
+   }

@@ -1,4 +1,4 @@
-EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess=FALSE,new.tifs=NULL,produce.metrics=TRUE){
+EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess=FALSE,new.tifs=NULL,produce.metrics=TRUE,ScriptPath){
 
 #This functions has several tasks that it will perform
 
@@ -157,7 +157,7 @@ Args <- commandArgs(trailingOnly=FALSE)
 ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
 
-EvaluateNewData(workspace=ws,out.dir=out.dir,b.tif=as.logical(b.tif),p.tif=as.logical(p.tif),mess=as.logical(Mess),new.tifs=new.tiffs,produce.metrics=as.logical(produce.metrics))
+EvaluateNewData(workspace=ws,out.dir=out.dir,b.tif=as.logical(b.tif),p.tif=as.logical(p.tif),mess=as.logical(Mess),new.tifs=new.tiffs,produce.metrics=as.logical(produce.metrics),ScriptPath=ScriptPath)
 
 
 
