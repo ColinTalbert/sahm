@@ -10,6 +10,8 @@ factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.
     chk.libs(Model)
    continuousRaster<-raster(RasterInfo)
    outfile.p<-file.path(paste(substr(outfile.p,1,(nchar(outfile.p)-4)),start.tile,".tif",sep=""))
+   outtext<-file.path(dirname(outfile.p),paste(start.tile,"out.txt",sep=""))
+   capture.output(paste("inside file",Sys.time()),file=outtext)
    if(make.binary.tif) outfile.bin<-(sub("ProbTiff","BinTiff",sub("prob","bin",outfile.p))) 
     #start up any rasters we need   
     continuousRaster <- writeStart(continuousRaster, filename=outfile.p, overwrite=TRUE)
@@ -26,7 +28,7 @@ factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.
  for (i in start.tile:min(start.tile+nToDo-1,length(tr$row))){
        temp <- data.frame(matrix(ncol=nvars.final,nrow=tr$nrows[i]*dims[2]))
        names(temp) <- vnames.final.mod
-       
+        capture.output(paste("loop",i,Sys.time(),sep=" "),file=outtext,append=TRUE)
        # fill temp data frame         
       for(k in 1:nvars.final) 
            temp[,k]<- getValuesBlock(raster(fullnames[match(vnames.final.mod[k],vnames)]), row=tr$row[i], nrows=tr$nrows[i])
@@ -73,7 +75,7 @@ factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.
           if(make.binary.tif) binaryRaster<-writeValues(binaryRaster,(preds>thresh),tr$row[i])
        continuousRaster <- writeValues(continuousRaster,preds, tr$row[i])
    } #end of the big for loop
-   
+     capture.output(paste("completed loop",Sys.time(),sep=" "),file=outtext,append=TRUE)
    #closing and cropping the files
    end.seq<-c(tr$row,dims[1]+1)
   

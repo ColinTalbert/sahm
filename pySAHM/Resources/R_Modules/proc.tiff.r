@@ -147,17 +147,14 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
            if(MESS) warning("Maxlike mess option currently nonfuctional") 
            return(0) 
       }
- 
+  #for debugging I'm always using multiple cores
   if(tr$n<10 | getRversion()<2.14){ #multicore is slower for small tiffs so we won't do it and the library is not available prior to 2.14
-  start.time<-Sys.time()
-      parRaster(start.tile=1,nrows=nrows,dims=dims,
+    parRaster(start.tile=1,nrows=nrows,dims=dims,
       tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
       model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,outfile.bin=outfile.bin,thresh=thresh,nToDo=tr$n,ScriptPath=out$       
       input$ScriptPath,vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct)
-  Sys.time()-start.time
    }
-  if(tr$n>=10){
-  start.time<-Sys.time()
+  if(tr$n>=10 & getRversion()>=2.14){
       library(parallel)
       #create some temporary folders    
       if(out$input$make.p.tif)
@@ -170,15 +167,15 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
         dir.create(paste(out$input$output.dir,"\\ModTiff",sep=""))       
             }
        if(out$input$ResidMaps)
-        dir.create(paste(out$input$output.dir,"\\ResidTiff",sep="")) 
+        dir.create(paste(out$input$output.dir,"\\ResidTiff",sep=""))
+        tile.start<-seq(from=1,to=tr$n,by=ceiling(tr$n/detectCores())) 
       cl <- makeCluster(detectCores()) 
-      parLapply(cl,X=1:tr$n,fun=parRaster,nrows=nrows,dims=dims,
+      parLapply(cl,X=tile.start,fun=parRaster,nrows=nrows,dims=dims,
          tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
          model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,
          outfile.bin=outfile.bin,thresh=thresh,nToDo= ceiling(tr$n/detectCores()),ScriptPath=out$input$ScriptPath,
          vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct)
       stopCluster(cl)
-  Sys.time()-start.time  
   }
      return(0)
    }
