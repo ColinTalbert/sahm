@@ -151,6 +151,7 @@ class PARC:
             process_count= 0
         
         # Clip and reproject each source image.
+        CondorJobs = []
         for image in self.inputs:
             inPath, inFileName = os.path.split(image[0])
                             
@@ -172,29 +173,29 @@ class PARC:
                     #we bombed trying to open the outFile with gdal. Lets rerun it.
                     pass
                 
-            else:    
-#                if os.path.abspath(self.template) != os.path.abspath(image[0]):
-                if self.multicores:
+            else:
+                if self.processingMode == "single thread":
+                    #the original and simples execution mode.  
+                    #process a single raster and wait for it to finish
+                    self.parcFile(image, outFile) 
+                elif self.processingMode == "multiple cores asynchronously":
                     self.gen_singlePARC_thread(image, outFile, results)
                     process_count += 1
-                else:
-                    self.parcFile(image, outFile)
+                elif self.processingMode == "FORT Condor":
+                    CondorJobs.append(outFile)
+                    self.gen_singlePARC_thread(image, outFile, results, True)
 #                elif os.path.abspath(self.template) == os.path.abspath(image[0]): 
 #                    msg = shortname + " is the same as our template. \tOnly copying this file."
 #                    self.logger.writetolog(msg, True, True)
 #                    shutil.copyfile(self.template, outFile)
                     
-        if self.multicores:
+        if self.processingMode == "multiple cores asynchronously":
             self.manage_singlePARC_threads(results, process_count)
-                
-    def gen_singlePARC_thread(self, image, outFile, results):
+        elif self.processingMode == "FORT Condor":
+            self.manage_condor_jobs(CondorJobs)
+            
+    def gen_singlePARC_thread(self, image, outFile, results, Condor=False):
             image_short_name = os.path.split(image[0])[1]
-            # args = '-s ' + '"' + os.path.abspath(image[0]) + '"'
-            # args += ' -c '  + '"' + image[1] + '"'
-            # args += ' -d ' + '"' + os.path.abspath(outFile) + '"'
-            # args += ' -t ' + '"' + os.path.abspath(self.template)+ '"' 
-            # args += ' -r ' + image[2]
-            # args += ' -a ' + image[3]
 
             args = ['-s', os.path.abspath(image[0]),
                     '-c', image[1],
@@ -204,15 +205,6 @@ class PARC:
                     '-a', image[3]]
 
             if self.ignoreNonOverlap:
-                # args += ' -i '
-                # args += ' --gt0 ' + str(self.template_params['gt'][0])
-                # args += ' --gt3 ' + str(self.template_params['gt'][3])
-                # args += ' --tNorth ' + str(self.template_params['tNorth'])
-                # args += ' --tSouth ' + str(self.template_params['tSouth'])
-                # args += ' --tEast ' + str(self.template_params['tEast'])
-                # args += ' --tWest ' + str(self.template_params['tWest'])
-                # args += ' --tHeight ' + str(self.template_params['height'])
-                # args += ' --tWidth ' + str(self.template_params['width'])
 
                 args.extend(['-i',
                              '--gt0', str(self.template_params['gt'][0]),
@@ -225,15 +217,21 @@ class PARC:
                              '--tWidth', str(self.template_params['width'])])
     
             execDir = os.path.split(__file__)[0]
-            executable = os.path.join(execDir, 'singlePARC.py')
+            executable = os.path.join(execDir, 'runSinglePARC.py')
             pyEx = sys.executable
             command_arr = [pyEx, executable] + args
             command = ' '.join(command_arr)
             self.logger.writetolog(command, False, False)
             print "RUNNING COMMAND:", command_arr
-            proc = subprocess.Popen( command_arr )
-            thread.start_new_thread(utilities.process_waiter,
-                    (proc, image_short_name, results))
+            
+            if Condor:
+                workspace, fname = os.path.split(os.path.abspath(outFile))
+                prefix = os.path.splitext(fname)[0]
+                utilities.runCondorPythonJob(command_arr, workspace, prefix)
+            else:
+                proc = subprocess.Popen( command_arr )
+                thread.start_new_thread(utilities.process_waiter,
+                        (proc, image_short_name, results))
         
     def manage_singlePARC_threads(self, results, process_count):
         error_msg = ""
@@ -256,6 +254,49 @@ class PARC:
         if error_msg <> "":
             raise utilities.TrappedError(error_msg)
 
+    def manage_condor_jobs(self, outputs):
+        errors = []
+        while outputs:
+            for process in outputs:
+                result = self.jobFinished(process)
+                if result == "finished":
+                    outputs.remove(process)
+                    
+                    #cleanup some condor files
+                    success = False
+                    while not success:
+                        try: 
+                            for f in ["stdOut", "stdErr", "CondorSubmit"]:
+                                fname = process.replace(".tif", "_" + f + ".txt")
+                                if os.path.exists(fname):
+                                    os.remove(fname)
+                            success = True
+                        except:
+                            pass
+                        
+                elif result == "error":
+                    errors.append(prefix)
+                    outputs.remove(process)
+        
+
+        if len(errors) > 0:
+            msg = "There were problems with one or more runs."
+            raise utilities.TrappedError(msg)
+            
+        
+    def jobFinished(self, output):
+        stdOut = output.replace(".tif", "_stdOut.txt")
+        try:
+            lastLine = open(stdOut, "r").readlines()[-1]
+            if lastLine.startswith("Finished successfully!"):
+                return "finished"
+            elif lastLine.startswith("Job failed!"):
+                return "error"
+            else:
+                return "running"
+        except (IndexError, IOError):
+            pass
+    
 
     def parcFile(self, source, dest):
         """

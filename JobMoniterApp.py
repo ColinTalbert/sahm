@@ -124,7 +124,7 @@ class Window(QtGui.QWidget):
          
         if lastLine.startswith("Total time"):
             return "Completed successfully in " + lastLine[lastLine.find(" = ")+3:]
-        elif lastLine.startswith("Model failed"):
+        elif lastLine.startswith("Model Failed"):
             return "Error in model"
         else:
             return "Running ..."

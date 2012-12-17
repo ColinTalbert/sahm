@@ -148,13 +148,13 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
            return(0) 
       }
   #for debugging I'm always using multiple cores
-  if(tr$n<10 | getRversion()<2.14){ #multicore is slower for small tiffs so we won't do it and the library is not available prior to 2.14
-    parRaster(start.tile=1,nrows=nrows,dims=dims,
-      tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
-      model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,outfile.bin=outfile.bin,thresh=thresh,nToDo=tr$n,ScriptPath=out$       
-      input$ScriptPath,vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct)
-   }
-  if(tr$n>=10 & getRversion()>=2.14){
+  #if(tr$n<10 | getRversion()<2.14){ #multicore is slower for small tiffs so we won't do it and the library is not available prior to 2.14
+  #  parRaster(start.tile=1,nrows=nrows,dims=dims,
+  #    tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
+  #    model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,outfile.bin=outfile.bin,thresh=thresh,nToDo=tr$n,ScriptPath=out$       
+  #    input$ScriptPath,vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct)
+  # }
+  #if(tr$n>=10 & getRversion()>=2.14){
       library(parallel)
       #create some temporary folders    
       if(out$input$make.p.tif)
@@ -176,6 +176,6 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
          outfile.bin=outfile.bin,thresh=thresh,nToDo= ceiling(tr$n/detectCores()),ScriptPath=out$input$ScriptPath,
          vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct)
       stopCluster(cl)
-  }
+  #}
      return(0)
    }

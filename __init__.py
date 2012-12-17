@@ -56,4 +56,5 @@ configuration = \
                         r_path = r'..\\..\\Central_R\R-2.14.1\bin',
                         maxent_path = r'..\\..\\Central_Maxent',
                         cur_session_folder = r"C:\temp\SAHM_workspace",
+                        cur_processing_mode = "multiple cores asynchronously",
                         verbose = 'True')

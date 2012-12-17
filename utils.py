@@ -76,6 +76,7 @@ r_path = None
 gdalconst = None
 gdal = None
 osr = None
+gdal_merge = None
 
 def importOSGEO():
     global gdalconst
@@ -84,6 +85,9 @@ def importOSGEO():
     from osgeo import gdal as gdal
     global osr
     from osgeo import osr as osr
+    global gdal_merge
+    from packages.sahm.GDAL_Resources.Utilities import gdal_merge as gdal_merge
+
 
 def getpixelsize(filename):
     dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
@@ -464,7 +468,9 @@ def runRScript(script, args_dict, module=None):
     writetolog("    command: " + command, False, False)
     #print "RUNNING COMMAND:", command_arr
     
-    if not args_dict.get("runAsync", False) and not args_dict.get("runOnCondor", False):
+    runRModelPy = os.path.join(os.path.dirname(__file__), "pySAHM", "runRModel.py")
+    command_arr = [sys.executable, runRModelPy] + command_arr
+    if args_dict.get("cur_processing_mode", "single thread") == "single thread":
         p = subprocess.Popen(command_arr, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         ret = p.communicate()
         
@@ -491,10 +497,9 @@ def runRScript(script, args_dict, module=None):
         elif 'Warning' in ret[1]:
             writeRErrorsToLog(args_dict, ret)
             
-    
         del(ret)
         writetolog("\nFinished R Processing of " + script, True)
-    else:
+    elif args_dict.get("cur_processing_mode", "single thread") == "multiple cores asynchronously":
         if args_dict.has_key("o"):
             stdErrFname = os.path.join(args_dict['o'], "stdErr.txt")
             stdOutFname = os.path.join(args_dict['o'], "stdOut.txt")
@@ -504,29 +509,31 @@ def runRScript(script, args_dict, module=None):
             DEVNULL = open(os.devnull, 'wb')
             stdErrFile = DEVNULL
             stdOutFile = DEVNULL
-            
-        if args_dict.get("runOnCondor", False):
-            runModelOnCondor(script, args_dict, command_arr)
-            writetolog("\n R Processing launched using Condor " + script, True)  
-        else:
-            p = subprocess.Popen(command_arr, stderr=stdErrFile, stdout=stdOutFile)
-            writetolog("\n R Processing launched asynchronously " + script, True)            
+        p = subprocess.Popen(command_arr, stderr=stdErrFile, stdout=stdOutFile)
+        writetolog("\n R Processing launched asynchronously " + script, True) 
+    elif args_dict.get("cur_processing_mode", "single thread") == "FORT Condor":
+        runModelOnCondor(script, args_dict, command_arr)
+        writetolog("\n R Processing launched using Condor " + script, True)  
+
+                       
 
 def runModelOnCondor(script, args_dict, command_arr):
     #copy MDS file and convert all refs to K:, I:, N:, J: to UNC paths
-    
     mdsDir, mdsFile = os.path.split(args_dict["c"])
     newMDSfname = os.path.join(args_dict['o'], mdsFile)
     newMDSFile = open(newMDSfname, 'w')
     oldLines = open(args_dict["c"], 'r').readlines()
     for headerLine in oldLines[:3]:
-        newMDSFile.write(replaceMappedDrives(headerLine))
+        newMDSFile.write(utilities.replaceMappedDrives(headerLine))
         
     newMDSFile.writelines(oldLines[3:])
         
     os.chdir(args_dict['o'])
-    command_arr = ['c='+newMDSfname if x=='c='+args_dict["c"] else x for x in command_arr]
-        
+    
+    mdsArgIndex = command_arr.index('c='+args_dict["c"])
+    command_arr[mdsArgIndex] = 'c='+newMDSfname
+    for index in range(len(command_arr)):
+        command_arr[index] = utilities.replaceMappedDrives(command_arr[index])
         
     #create condorSubmit file
     submitFname = os.path.join(args_dict['o'], "modelSubmit.txt")
@@ -545,14 +552,15 @@ def runModelOnCondor(script, args_dict, command_arr):
     stdErrFname = os.path.join(args_dict['o'], "stdErr.txt")
     stdOutFname = os.path.join(args_dict['o'], "stdOut.txt")
     logFname = os.path.join(args_dict['o'], "log.txt")
-    submitFile.write("Output                  = " + replaceMappedDrives(stdOutFname) +"\n")
-    submitFile.write("error                   = " + replaceMappedDrives(stdErrFname) +"\n")
-    submitFile.write("log                     = " + replaceMappedDrives(logFname) +"\n")
+    submitFile.write("Output                  = " + utilities.replaceMappedDrives(stdOutFname) +"\n")
+    submitFile.write("error                   = " + utilities.replaceMappedDrives(stdErrFname) +"\n")
+    submitFile.write("log                     = " + utilities.replaceMappedDrives(logFname) +"\n")
     argsStr = 'Arguments               = "/c pushd ' + "'"
     argsStr += "' '".join(command_arr) + "'" + '"\n'
-    argsStr = replaceMappedDrives(argsStr)
-    argsStr = argsStr.replace(r"\Rterm.exe'", "' && Rterm.exe")
+    argsStr = utilities.replaceMappedDrives(argsStr)
+    argsStr = argsStr.replace(r"\python.exe'", "' && python.exe")
     submitFile.write(argsStr)
+    submitFile.write("+RequiresWholeMachine = True\n")
     submitFile.write("Notification            = Never\n")
     submitFile.write("Queue\n")
     submitFile.close()
@@ -561,18 +569,6 @@ def runModelOnCondor(script, args_dict, command_arr):
     DEVNULL = open(os.devnull, 'wb')
     p = subprocess.Popen(["condor_submit", "-n", "igskbacbws425", submitFname], stderr=DEVNULL, stdout=DEVNULL)
     
-def replaceMappedDrives(inStr):
-    #these are FORT specific
-    uncConversions = {"K":"\\\\igskbacbvmfs002\\common\\",
-                      "I":"\\\\IGSKBACBVMFS002\\Invasives\\",
-                      "N":"\\\\igskbacbfs001\\gis$\\",
-                      "M":"\\\\igskbacbvmfs002\\gis_archive$\\",
-                      "J":"\\\\igskbacbvmfs002\\InvasivesNAS$\\"}
-    for drive in uncConversions.keys():
-        inStr = inStr.replace(drive.lower() + ":\\", uncConversions[drive])
-        inStr = inStr.replace(drive.upper() + ":\\", uncConversions[drive])
-    
-    return inStr
 
 def getR_application(module=None):
     global r_path
@@ -923,3 +919,11 @@ def launch_RunMonitorApp():
         monitorApp = os.path.join(curDir, "JobMoniterApp.py")
         
         subprocess.Popen([pyExe, monitorApp, sessionDir], stderr=DEVNULL, stdout=DEVNULL)
+        
+        
+def mosaicAllTifsInFolder(inDir, outFileName):
+    onlyfiles = [os.path.join(inDir,f) for f in os.listdir(inDir) 
+            if os.path.isfile(os.path.join(inDir,f)) and f.endswith(".tif") ]
+    args = ["placeholder", "-o", outFileName] + onlyfiles
+    gdal.DontUseExceptions()
+    gdal_merge.main(args)

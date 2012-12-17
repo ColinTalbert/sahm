@@ -80,7 +80,7 @@ import pySAHM.MDSBuilder as MDSB
 import pySAHM.MDSBuilder_vector as MDSB_V
 import pySAHM.PARC as parc
 import pySAHM.RasterFormatConverter as RFC
-import pySAHM.MaxentRunner as MaxentRunner
+import pySAHM.runMaxent as MaxentRunner
 from SahmOutputViewer import SAHMModelOutputViewerCell
 from SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
 from GeneralSpatialViewer import GeneralSpatialViewer
@@ -129,12 +129,61 @@ def menu_items():
         
         STFM  = SelectAndTestFinalModel(session_dir, configuration.r_path) 
         retVal = STFM.exec_()
+        
+    def selectProcessingMode():
+        selectDialog = QtGui.QDialog()
+        
+        global groupBox
+        groupBox = QtGui.QGroupBox("Processing mode:")
+        vbox = QtGui.QVBoxLayout()
+
+        for mode in [("single thread", True), 
+                     ("multiple cores asynchronously", True), 
+                     ("FORT Condor", isFortCondorAvailible())]:
+            radio =  QtGui.QRadioButton(mode[0])
+            radio.setChecked(mode[0] == configuration.cur_processing_mode)
+            radio.setEnabled(mode[1])
+            QtCore.QObject.connect(radio, QtCore.SIGNAL("toggled(bool)"), selectProcessingMode_changed)
+            vbox.addWidget(radio)
+            
+        groupBox.setLayout(vbox)
+        
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(groupBox)
+        selectDialog.setLayout(layout)
+    
+        selectDialog.exec_()
+        
+    def selectProcessingMode_changed(e):
+        global groupBox
+        qvbl = groupBox.layout()
+        for i in range(0, qvbl.count()):
+            widget = qvbl.itemAt(i).widget() 
+            if (widget!=0) and (type(widget) is QtGui.QRadioButton):
+                if widget.isChecked():
+                    
+                    configuration.cur_processing_mode = str(widget.text())
+        
+                    package_manager = get_package_manager()
+                    package = package_manager.get_package(identifier)
+                    dom, element = package.find_own_dom_element()
+        
+                    configuration.write_to_dom(dom, element)
+
+    def isFortCondorAvailible():
+        cmd = ["condor_store_cred", "-n",  "igskbacbws425", "query"]
+        p = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        ret = p.communicate()
+        return ret[0].find("A credential is stored and is valid") != -1
 
     def checkAsyncModels():
         utils.launch_RunMonitorApp()
         
+        
+        
     lst = []
     lst.append(("Change session folder", change_session_folder))
+    lst.append(("Change processing mode", selectProcessingMode))
     lst.append(("Select and test the Final Model", select_test_final_model))
     lst.append(("Check Asynchronous model runs", checkAsyncModels))
     return(lst)
@@ -524,9 +573,7 @@ class Model(Module):
     _input_ports = [('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)'),
                     ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
-                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
-                    ('runAsynchronously', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
-                    ('runOnCondor', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),]
+                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False})]
     _output_ports = [('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'), 
                      ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
                      ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)'),
@@ -553,7 +600,6 @@ class Model(Module):
     def provide_output_port_documentation(cls, port_name):
          return GenModDoc.construct_port_doc(cls, port_name, 'out') 
 
-
     def compute(self):
         
         ModelOutput = {"FIT_BRT_pluggable.r":"brt",
@@ -578,10 +624,11 @@ class Model(Module):
       
         self.argsDict['o'] = self.output_dname
         self.argsDict['rc'] = utils.MDSresponseCol(mdsFile)
+        self.argsDict['cur_processing_mode'] = configuration.cur_processing_mode
       
         utils.runRScript(self.name, self.argsDict, self)
         
-        if not self.argsDict.get("runAsync", False) and not self.argsDict.get("runOnCondor", False):
+        if configuration.cur_processing_mode == "single thread":
             if not self.argsDict.has_key('mes'):
                 self.argsDict['mes'] = 'FALSE'
             self.setModelResult("_prob_map.tif", 'ProbabilityMap', 'mpt')
@@ -1140,8 +1187,7 @@ class PARC(Module):
                                 ('PredictorList', '(gov.usgs.sahm:PredictorList:Other)'),
                                 ('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                 ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
-                                ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
-                                ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True})]
+                                ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True})]
 
     _output_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
     
@@ -1172,8 +1218,7 @@ class PARC(Module):
         
         ourPARC.out_dir = output_dname
 
-        if self.hasInputFromPort("multipleCores"):
-            ourPARC.multicores = self.getInputFromPort("multipleCores")         
+        ourPARC.processingMode = configuration.cur_processing_mode       
 
         if self.hasInputFromPort("ignoreNonOverlap"):
             ourPARC.ignoreNonOverlap = self.getInputFromPort("ignoreNonOverlap")
@@ -1837,7 +1882,8 @@ def initialize():
     
     load_max_ent_params()
     
-    Model._input_ports.remove(('runOnCondor', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}))
+    import pySAHM.utilities as utilities
+    utilities.storeUNCDrives()
     
     global layers_csv_fname
     

@@ -48,8 +48,13 @@ import time
 import csv
 import string
 
+import tempfile
+
 _logfile = ''
 _verbose = False
+
+import subprocess
+mosaicAllTifsInFolder = None
 
 class logger(object):
     def __init__(self, logfile, verbose):
@@ -132,6 +137,82 @@ def find_key(dic, val):
     from: http://www.daniweb.com/software-development/python/code/217019"""    
     return [k for k, v in dic.iteritems() if v == val][0]
 
-
+def runCondorPythonJob(args, workspace, prefix, wholeMachine=False):
+    #replace all mappedDriveLetters in the argsDict with UNC paths
+    global UNCDrives
+    for item in args:
+        args[args.index(item)] = replaceMappedDrives(item)
+                
+    #create submit file
+        #create condorSubmit file
+    submitFname = os.path.join(workspace, prefix + "_CondorSubmit.txt")
+    submitFile = open(submitFname, 'w')
+    submitFile.write("Universe                = vanilla\n")
+    submitFile.write("Executable              = c:\Windows\System32\cmd.exe\n")
+    submitFile.write("run_as_owner            = true\n")
+    submitFile.write("Getenv                  = true\n")
+    submitFile.write("Should_transfer_files   = no\n")
+    submitFile.write("transfer_executable     = false\n")
     
+    machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151', 'igskbacbws425']
+    reqsStr = 'Requirements            = (Machine == "'
+    reqsStr += '.gs.doi.net" || Machine == "'.join(machines) + '.gs.doi.net")'
+    if wholeMachine:
+        reqsStr += "&& CAN_RUN_WHOLE_MACHINE\n"
+        submitFile.write("+RequiresWholeMachine = True\n")
+    else:
+        reqsStr += "\n"
+    submitFile.write(reqsStr)
+    
+    stdErrFname = os.path.join(workspace, prefix + "_stdErr.txt")
+    stdOutFname = os.path.join(workspace, prefix + "_stdOut.txt")
+    logFname = os.path.join(workspace, "log.txt")
+    submitFile.write("Output                  = " + replaceMappedDrives(stdOutFname) +"\n")
+    submitFile.write("error                   = " + replaceMappedDrives(stdErrFname) +"\n")
+    submitFile.write("log                     = " + replaceMappedDrives(logFname) +"\n")
+    argsStr = 'Arguments               = "/c pushd ' + "'"
+    argsStr += "' '".join(args) + "'" + '"\n'
+    argsStr = replaceMappedDrives(argsStr)
+    argsStr = argsStr.replace(r"\python.exe'", "' && python.exe")
+    submitFile.write(argsStr)
+    submitFile.write("Notification            = Never\n")
+    submitFile.write("Queue\n")
+    submitFile.close()
+    
+    
+    curDir = os.getcwd()
+    os.chdir(os.path.split(curDir)[0])
+    
+    #launch condor job
+    DEVNULL = open(os.devnull, 'wb')
+    p = subprocess.Popen(["condor_submit", "-n", "igskbacbws425", submitFname], stderr=DEVNULL, stdout=DEVNULL)    
+    
+    os.chdir(curDir)        
+    
+def replaceMappedDrives(inStr):
+    global UNCDrives
+    for drive in UNCDrives.keys():
+        inStr = inStr.replace(drive.lower() + "\\", UNCDrives[drive] + "\\")
+        inStr = inStr.replace(drive.upper() + "\\", UNCDrives[drive] + "\\")
+    
+    return inStr
+    
+   
+def storeUNCDrives():
+    global UNCDrives
+    UNCDrives = {}
+    ret = subprocess.Popen(["net","use"], stdout=subprocess.PIPE, universal_newlines=True).communicate()[0].split("\n")
+    for line in ret:
+        line = line.split()
+        if line and line[0] in ["OK", "Disconnected"]:
+            if len(line) > 2 and \
+                os.path.exists(line[2]):
+                UNCDrives[line[1]] = line[2]
 
+
+def mosaicAllTifsInFolder(inDir, outFileName, gdal_merge):
+    onlyfiles = [os.path.join(inDir,f) for f in os.listdir(inDir) 
+            if os.path.isfile(os.path.join(inDir,f)) and f.endswith(".tif") ]
+    args = ["placeholder", "-o", outFileName] + onlyfiles
+    gdal.DontUseExceptions()
+    gdal_merge.main(args)
