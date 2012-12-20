@@ -619,6 +619,8 @@ class Model(Module):
         self.argsDict['c'] = os.path.normpath(self.argsDict['c'])
 
         mdsFile = self.forceGetInputFromPort('mdsFile').name
+        if self.ModelAbbrev == "maxent":
+            self.argsDict['lam'] = self.MaxentPath
         
         if self.ModelAbbrev == 'brt' or \
             self.ModelAbbrev == 'rf':
@@ -1747,7 +1749,7 @@ class MAXENT(Model):
         global models_path
         Model.__init__(self) 
         self.name = 'WrapMaxent.r'
-        self.args = {}
+        self.MaxentPath=""
         #self.port_map.update({'LambdaDir':('lam', None, False), #This is a Maxent specific port
          #                })
         
@@ -1821,12 +1823,12 @@ class MAXENT(Model):
                 for row in MDSreader:
                     if (not newLine[header1.index("Split")] in cvList):
                         cvMaxent.testKey = newLine[header1.index("Split")]
-                        cvMaxent.outputDir = ourMaxent.outputDir + "_" + cvMaxent.testKey
+                        cvMaxent.outputDir = ourMaxent.outputDir + "\\cvSplit" + cvMaxent.testKey
                         os.mkdir(cvMaxent.outputDir)
                         cvList.append(newLine[header1.index("Split")])
                         try:
-                            pass
                             #cvMaxent.run()
+                            pass
                         except TrappedError as e:
                             raise ModuleError(self, e.message)  
                         except:
@@ -1839,14 +1841,13 @@ class MAXENT(Model):
         #maxentrunner will remove a regular test split on it's own 
         #as well as an evaluation split so just run it
         try:
-                #ourMaxent.run()
-                pass
+                ourMaxent.run()
         except TrappedError as e:
             raise ModuleError(self, e.message)  
         except:
             utils.informative_untrapped_error(self, "Maxent")             
         ourMaxent.outputDir="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\maxentFiles_75"
-        self.args = 'lam' +'"' + ourMaxent.outputDir + '"'
+        self.MaxentPath =  ourMaxent.outputDir 
         Model.compute(self)
          #set outputs
         lambdasfile = os.path.join(ourMaxent.outputDir, ourMaxent.args["species_name"] + ".lambdas")
