@@ -10,7 +10,7 @@ factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.
     chk.libs(Model)
     browser()
    continuousRaster<-raster(RasterInfo)
-   outfile.p<-file.path(paste(substr(outfile.p,1,(nchar(outfile.p)-5)),start.tile,".tif",sep=""))
+   outfile.p<-file.path(paste(substr(outfile.p,1,(nchar(outfile.p)-4)),start.tile,".tif",sep=""))
    outtext<-file.path(dirname(outfile.p),paste(start.tile,"out.txt",sep=""))
    capture.output(paste("inside file",Sys.time()),file=outtext)
    if(make.binary.tif) outfile.bin<-(sub("ProbTiff","BinTiff",sub("prob","bin",outfile.p))) 
@@ -81,6 +81,7 @@ factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.
    end.seq<-c(tr$row,dims[1]+1)
   
    continuousRaster <- writeStop(continuousRaster)
+   capture.output(paste("stopped Writing",list.files(dirname(outfile.p)),sep=" "),file=outtext,append=TRUE)
    e<-extent(continuousRaster, tr$row[start.tile],(end.seq[start.tile+nToDo]-1),1,dims[2])
    crop(continuousRaster,e, filename=outfile.p,overwrite=TRUE, snap='near')
   if(make.binary.tif) {
