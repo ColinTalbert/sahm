@@ -1,4 +1,4 @@
-model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,...){
+model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
 
 #This function was written to separate the steps involved in model fitting from the post processing steps
 #needed to produce several of the later outputs
@@ -33,6 +33,12 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,...){
             else return(mymodel.glm.step)
      }
      
+     if(Model=="maxent"){
+          if(missing(Fold)) Fold=length(out$input$lamdas)#the full dataset will be the very last
+          out$mods$final.mod[[1]]<-read.maxent(out$input$lambdas)
+          if(full.fit) return(out)
+          else return(out$mods$final.mod)
+          }
      if(Model=="maxlike"){
   #Maxlike needs several major changes
   #1. I need to define a method for extractAIC so that I can use step

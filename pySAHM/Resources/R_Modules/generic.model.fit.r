@@ -55,17 +55,15 @@ attach(out$dat$ma$train)
 on.exit(detach(out$dat$ma$train))
 on.exit(detach(out$input))
    
-              
+     out<-model.fit(dat,out,Model,weight=weight,full.fit=TRUE)
+       write.txt(out,t0)         
   if(Model=="glm") {
-      #fitting the actual model takes place elsewhere  
-          out<-model.fit(dat,out,Model,weight=weight,full.fit=TRUE)
-          
+     
       #post processing to get a common output for all model fits
             txt0<-paste("\n\n","Settings:\n","\n\t model family =          ",model.family,
                                              "\n\t simplification method = ",simp.method,
             "\n\n\n","Results:\n\t ","number covariates in final model=",length(attr(terms(formula(out$mods$final.mod[[1]])),"term.labels")),"\n",sep="")
             print(out$mods$final.mod[[1]]$summary <- summary(out$mods$final.mod[[1]]))
-            write.txt(out,t0) 
              
             capture.output(cat(txt0),out$mods$final.mod[[1]]$summary,file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
             cat("\n","Finished with stepwise GLM","\n")
@@ -81,8 +79,6 @@ on.exit(detach(out$input))
                }
                
  if(Model=="mars"){        
-      #fitting for each split (if there is a background split)
-          out<-model.fit(dat,out,Model,full.fit=TRUE)
           
        #post processing steps  
             if(out$input$PsdoAbs){ 
@@ -114,17 +110,13 @@ on.exit(detach(out$input))
 
           
           cat("\n","Storing output...","\n","\n")
-          write.txt(out,t0)
           capture.output(cat("\n\nSummary of Model:\n"),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
           capture.output(print(out$mods$summary),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
 
       }
               
  if(Model=="brt"){
-       #fitting for each split (if there is a background split)
-          out<-model.fit(dat,out,Model,full.fit=TRUE)
         
-          write.txt(out,t0)
            txt0 <- paste("\n\n","Settings:\n",
                       if(out$input$PsdoAbs) "(Averaged across available splits)\n", 
                       "\n\trandom seed used =            ",seed,
@@ -142,16 +134,9 @@ on.exit(detach(out$input))
           capture.output(cat(txt0),cat(txt1),print(out$mods$summary),cat(txt2),print(out$mods$interactions,row.names=F),file=paste(out$dat$bname,"_output.txt",sep=""),
              append=TRUE)
           cat(txt0);cat(txt1);print(out$mods$summary);cat(txt2);print(out$mods$interactions,row.names=F)
-
-          
-
-   }
+      }
  
    if(Model=="rf"){
-             #fitting the model 
-          out<-model.fit(dat,out,Model,full.fit=TRUE)
-      #catpuring output                        
-              write.txt(out,t0)
               
               txt0 <- paste("\n\n","Settings:",
               "\n\trandom seed used =                      ",seed,
@@ -169,6 +154,13 @@ on.exit(detach(out$input))
         out$mods$vnames<-out$dat$used.covs
    }
    
+     if(Model=="maxent"){
+      #maybe parse the parameters file to write out settings at some point
+     
+         #storing number of variables in final model
+        out$mods$n.vars.final<- out$mods$n.vars.final<-ncol(out$dat$ma$train$dat)-1
+        out$mods$vnames<-names(out$dat$ma$train$dat)[-1]
+   }
    if(Model=="maxlike"){
    out$dat$split.type="none"
    Pts<-XY[resp==1,]

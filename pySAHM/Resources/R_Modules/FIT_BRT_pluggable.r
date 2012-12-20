@@ -98,7 +98,6 @@ source(file.path(ScriptPath,"BRT.helper.fcts.r"))
 
 
     FitModels(ma.name=csv,
-		tif.dir=NULL,
 		output.dir=output,
 		response.col=responseCol,
 		make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,

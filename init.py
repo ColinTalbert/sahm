@@ -41,7 +41,6 @@
 ##
 ## Any use of trade, firm, or product names is for descriptive purposes only 
 ## and does not imply endorsement by the U.S. Government.
-##test
 ###############################################################################
 
 import csv
@@ -571,7 +570,8 @@ class Model(Module):
     SAHM package. It is not intended for direct use or incorporation into
     the VisTrails workflow by the user.
     '''
-    _input_ports = [('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)'),
+    _input_ports = [('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':"['2']", 'optional':False}),
+                    ('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)'),
                     ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False})]
@@ -582,6 +582,7 @@ class Model(Module):
                      ('MessMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('MoDMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('modelEvalPlot', '(edu.utah.sci.vistrails.basic:File)'),
+#                     ('ResponseCurves', '(edu.utah.sci.vistrails.basic:File)'),
                      ('Text_Output', '(edu.utah.sci.vistrails.basic:File)')]
 
     port_map = {'mdsFile':('c', None, True),#These ports are for all Models
@@ -607,7 +608,9 @@ class Model(Module):
                        "FIT_GLM_pluggable.r":"glm",
                        "FIT_RF_pluggable.r":"rf",
                        "FIT_MARS_pluggable.r":"mars",
-                       "EvaluateNewData.r":"ApplyModel"}
+                       "EvaluateNewData.r":"ApplyModel",
+                       "WrapMaxent.r":"maxent",}
+        
         self.ModelAbbrev = ModelOutput[self.name]
         
         self.output_dname = utils.mknextdir(prefix=self.ModelAbbrev + '_')
@@ -1732,34 +1735,44 @@ class ProjectionLayers(Module):
         self.setResult("MDS", output_file)
         writetolog("Finished Select Projection Layers widget", True)
 
-class MAXENT(Module):
+class MAXENT(Model):
     '''
     
     '''
-
-    _output_ports = [("lambdas", "(edu.utah.sci.vistrails.basic:File)"),
+    _input_ports = list(Model._input_ports)
+    _input_ports.extend([('UseRMetrics', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
+                         ])
+    _output_ports = list(Model._output_ports)
+    _output_ports.extend([("lambdas", "(edu.utah.sci.vistrails.basic:File)"),
                      ("report", "(edu.utah.sci.vistrails.basic:File)"),
-                     ("roc", "(edu.utah.sci.vistrails.basic:File)")]
-
+                     ("roc", "(edu.utah.sci.vistrails.basic:File)")])
+    
+    def __init__(self):
+        global models_path
+        Model.__init__(self) 
+        self.name = 'WrapMaxent.r'
+        self.args = {}
+        #self.port_map.update({'LambdaDir':('lam', None, False), #This is a Maxent specific port
+         #                })
+        
     def compute(self):
         global maxent_path
-
-        writetolog("\nRunning Maxent Widget", True)
 
         ourMaxent = MaxentRunner.MAXENTRunner()
         ourMaxent.outputDir = utils.mknextdir(prefix='maxentFiles_')
         
-        ourMaxent.inputMDS = self.forceGetInputFromPort('inputMDS').name
+        ourMaxent.mdsFile = self.forceGetInputFromPort('mdsFile').name
         
         ourMaxent.maxentpath = maxent_path
         
         MaxentArgsCSV = os.path.join(ourMaxent.outputDir, "MaxentArgs.csv")
         
+            
         argWriter = csv.writer(open(MaxentArgsCSV, 'wb'))
         argWriter.writerow(['parameter','value'])
         for port in self._input_ports:
             #print port
-            if port[0] <> 'inputMDS' and port[0] <> 'projectionlayers':
+            if port[0] <> 'mdsFile' and port[0] <> 'projectionlayers':
                 if self.hasInputFromPort(port[0]):
                     port_val = self.getInputFromPort(port[0])
                     if port[1] == "(edu.utah.sci.vistrails.basic:Boolean)":
@@ -1785,17 +1798,60 @@ class MAXENT(Module):
             projlayers = ','.join([path.name for path in value])
             argWriter.writerow(['projectionlayers', projlayers])
             
-        argWriter.writerow(['inputMDS', ourMaxent.inputMDS])
+        argWriter.writerow(['mdsFile', ourMaxent.mdsFile])
         del argWriter
         ourMaxent.argsCSV = MaxentArgsCSV
         ourMaxent.logger = utils.getLogger()
+
+         
+         #Start marian adding junk to the code   
+        MDSreader = csv.reader(open(ourMaxent.mdsFile, 'r'))
+        header1 = MDSreader.next()
+        header2 = MDSreader.next()
+        header3 = MDSreader.next()
+                   
+        if 'Split' in header1:
+             newLine = MDSreader.next()
+             ttList=["test","train"]
+             cvList=["NA"]
+             #find the first line of the mds that isn't na to determine if test/train or cv split 
+             while newLine[header1.index("Split")]=="NA":
+                newLine = MDSreader.next()
+                
+               #loop through the mds and fit a maxent model withholding each new cv fold
+             if (not newLine[header1.index("Split")] in ttList): 
+                cvMaxent = copy.deepcopy(ourMaxent)
+                cvMaxent.subRun=True
+                for row in MDSreader:
+                    if (not newLine[header1.index("Split")] in cvList):
+                        cvMaxent.testKey = newLine[header1.index("Split")]
+                        cvMaxent.outputDir = ourMaxent.outputDir + "_" + cvMaxent.testKey
+                        os.mkdir(cvMaxent.outputDir)
+                        cvList.append(newLine[header1.index("Split")])
+                        try:
+                            pass
+                            #cvMaxent.run()
+                        except TrappedError as e:
+                            raise ModuleError(self, e.message)  
+                        except:
+                            utils.informative_untrapped_error(self, "Maxent")
+                    newLine=MDSreader.next()        
+                #here we need to run Maxent without the test split csv which breaks it 
+                #ourMaxent.run()
+                     
+            
+        #maxentrunner will remove a regular test split on it's own 
+        #as well as an evaluation split so just run it
         try:
-            ourMaxent.run()
+                #ourMaxent.run()
+                pass
         except TrappedError as e:
             raise ModuleError(self, e.message)  
         except:
-            utils.informative_untrapped_error(self, "Maxent")
-        
+            utils.informative_untrapped_error(self, "Maxent")             
+        ourMaxent.outputDir="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\maxentFiles_75"
+        self.args = 'lam' +'"' + ourMaxent.outputDir + '"'
+        Model.compute(self)
          #set outputs
         lambdasfile = os.path.join(ourMaxent.outputDir, ourMaxent.args["species_name"] + ".lambdas")
         output_file = utils.create_file_module(lambdasfile)
@@ -1812,7 +1868,10 @@ class MAXENT(Module):
         self.setResult("report", output_file)
 
         writetolog("Finished Maxent widget", True)
+
         
+        
+       
 def load_max_ent_params():    
     maxent_fname = os.path.join(os.path.dirname(__file__), 'maxent.csv')
     csv_reader = csv.reader(open(maxent_fname, 'rU'))
@@ -1820,7 +1879,7 @@ def load_max_ent_params():
     csv_reader.next()
     input_ports = []
     
-    input_ports.append(('inputMDS', '(gov.usgs.sahm:MergedDataSet:Other)'))
+    #input_ports.append(('inputMDS', '(gov.usgs.sahm:MergedDataSet:Other)'))
     
     docs = {}
     basic_pkg = 'edu.utah.sci.vistrails.basic'

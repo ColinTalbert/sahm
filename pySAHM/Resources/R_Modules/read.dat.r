@@ -1,4 +1,4 @@
-read.dat<-function(input.file,hl=NULL,include=NULL,response.col,is.inspect=FALSE,pres=TRUE,absn=TRUE,bgd=TRUE){
+read.dat<-function(input.file,hl=NULL,include=NULL,response.col,is.inspect=FALSE,pres=TRUE,absn=TRUE,bgd=TRUE,model="null"){
 #A small function to read in a csv with three header lines and assign everythinig
 #to the parent environment
 
@@ -25,6 +25,7 @@ read.dat<-function(input.file,hl=NULL,include=NULL,response.col,is.inspect=FALSE
              assign("include",include,envir=parent.frame())
              }
           options(warn=1)
+          if(model=="maxent") dat[dat[,match(tolower(response.col),tolower(names(dat)))]==-9999,match(tolower(response.col),tolower(names(dat)))]<--9998 
           response<-dat[,match(tolower(response.col),tolower(names(dat)))]
           dat<-dat[order(response),]
           response<-response[order(response)]

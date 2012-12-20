@@ -69,7 +69,7 @@ class MAXENTRunner(object):
     def __init__(self):
         self.verbose = False
         self.maxentpath = ''
-        self.inputMDS = ''
+        self.mdsFile = ''
         self.projectionlayers = ''
         self.environmentallayers = ''
         self.testCSV = ''
@@ -79,18 +79,24 @@ class MAXENTRunner(object):
         self.categoricals = []
         self.argsCSV = ''
         self.logger = None
+        self.testKey="test"
+        self.subRun=False
       
     def run(self):
         self.loadArgs()
         self.args['outputdirectory'] = self.outputDir
-    
+        
+        if self.subRun:
+           self.args['plots']='false' 
+           self.args['responsecurves']='false'
+           self.args['outputgrids']='false'
 #        if self.projectionlayers <> '':
 #            #A command line input overrides an input in the args csv
 #            self.args['projectionlayers'] = self.projectionlayers
 #    
         self.validateInputs()
     
-        if self.inputMDS <> '':
+        if self.mdsFile <> '':
             self.prepInputs()
         else:
             raise Exception, "No MDS supplied."
@@ -128,7 +134,7 @@ class MAXENTRunner(object):
         self.args["projectionlayers"] = '"' + self.args["projectionlayers"] + '"' 
             
         strargs = ['='.join((str(k),str(v))) for k,v in self.args.iteritems() 
-                    if (k <> "species_name" and k <> "inputMDS")]
+                    if (k <> "species_name" and k <> "mdsFile")]
         
         for categorical in self.categoricals:
             strargs += ['togglelayertype=' + categorical.replace('_categorical', '')]
@@ -173,8 +179,8 @@ class MAXENTRunner(object):
         if not os.path.exists(self.argsCSV):
             raise RuntimeError(self, 'Input argsFile, ' + self.argsCSV + ', could not be found on file system')
         
-        if not os.path.exists(self.inputMDS):
-            raise RuntimeError(self, 'Input MDS, ' + self.inputMDS + ', could not be found on file system')
+        if not os.path.exists(self.mdsFile):
+            raise RuntimeError(self, 'Input MDS, ' + self.mdsFile + ', could not be found on file system')
         
         if not self.args.has_key('projectionlayers'):
              self.args['projectionlayers'] = ''
@@ -192,8 +198,8 @@ class MAXENTRunner(object):
                  if not os.path.isdir(dir):
                      raise RuntimeError(self, "Input 'projectionlayers' must be a directory")
         
-        if not utilities.isMDSFile(self.inputMDS):
-            raise RuntimeError(self, 'Input MDS, ' + self.inputMDS + ', does not appear to be formated as an MDS file.')
+        if not utilities.isMDSFile(self.mdsFile):
+            raise RuntimeError(self, 'Input MDS, ' + self.mdsFile + ', does not appear to be formated as an MDS file.')
     
         if not os.path.exists(self.outputDir):
             raise RuntimeError(self, 'Output directory, ' + self.outputDir + ', could not be found on file system')
@@ -216,7 +222,7 @@ class MAXENTRunner(object):
         backgroundWriter = csv.writer(open(self.backgroundCSV, 'wb'))
         
         #Read through the MDS and pull the headers
-        MDSreader = csv.reader(open(self.inputMDS, 'r'))
+        MDSreader = csv.reader(open(self.mdsFile, 'r'))
         header1 = MDSreader.next()
         header2 = MDSreader.next()
         header3 = MDSreader.next()
@@ -226,6 +232,10 @@ class MAXENTRunner(object):
         #The split column indicates that this file has been run through the 
         #test training split and testing data should be writen to the test file.
         splitcol = None
+        evalsplit = None
+        if 'EvalSplit' in header1:
+            evalsplit =header1.index('EvalSplit')
+            
         try:
             splitcol = header1.index('Split')
             deleteTest = False
@@ -249,21 +259,26 @@ class MAXENTRunner(object):
         absencePointCount = 0
         for row in MDSreader:
             self.convertNA(row)
-            if row[2] == '0':
+            if not evalsplit and row[evalsplit] =="test":
+                 pass 
+             #just throw out everything in the test evalsplit
+             #this might or might not work if there is no evalsplit I'll have to test
+            elif row[2] == '0':
                 #this is an absence point, we will throw it away.
                  absencePointCount += 1
-            elif row[2] == '-9999' or row [2] == '-9998':
+            elif row[2] == '-9999' or row [2] == '-9998' and not row[splitcol]==self.testKey:
+                #only writing training points to the background split
                 hasBackground = True
                 vals = self.usedValues(row, covariateIndexes)
                 backgroundWriter.writerow([''] + row[:2] + vals)
             elif splitcol is None and str(row[2]) != '0':
                 vals = self.usedValues(row, covariateIndexes)
                 trainingWriter.writerow([self.args['species_name']] + row[:2] + vals)
-            elif (row[splitcol] == 'test' and str(row[2]) != '0') or \
+            elif (row[splitcol] == self.testKey and str(row[2]) != '0') or \
                 self.testCSV == '':
                 vals = self.usedValues(row, covariateIndexes)
                 testWriter.writerow([self.args['species_name']] + row[:2] + vals)
-            elif row[splitcol] == 'train'  and str(row[2]) != '0':
+            elif str(row[2]) != '0':
                 vals = self.usedValues(row, covariateIndexes)
                 trainingWriter.writerow([self.args['species_name']] + row[:2] + vals)
 
@@ -382,7 +397,7 @@ def main(argv):
     ourMaxent = MAXENTRunner()
     ourMaxent.verbose = options.verbose
     ourMaxent.maxentpath = options.maxentExecutable
-    ourMaxent.inputMDS = options.MDSFile
+    ourMaxent.mdsFile = options.mdsFile
     ourMaxent.outputDir = options.outputDir
     ourMaxent.argsCSV = options.argsCSV
     ourMaxent.projectionDataFile = options.projectionData

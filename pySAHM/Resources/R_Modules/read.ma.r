@@ -47,7 +47,7 @@
       input.file <- out$input$ma.name
        r.name <- out$input$response.col
       out.list <- list()
-      read.dat(input.file,hl=hl,include=include,response.col=r.name)
+      read.dat(input.file,hl=hl,include=include,response.col=r.name,model=out$input$script.name)
            
           paths<-matrix(file.path(tif.info[[3]]))
           rownames(paths) <-tif.info[[1]][1:length(paths)]

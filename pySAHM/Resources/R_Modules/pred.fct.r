@@ -104,6 +104,10 @@ pred.fct<-function(model,x,Model){
                 y[complete.cases(x)] <- try(as.vector(predict(model,newdata=x[complete.cases(x),],type="prob")[,2]),silent=TRUE)
               }  
    }
+   if(Model=="maxent"){
+
+   y[complete.cases(x)]<-try(maxent.predict(model,x[complete.cases(x),]),silent=TRUE)
+   }
     if(class(y)=="try-error") stop("Predicting the response for the new values failed.  One probable cause is that you are trying to predict to factor levels that were not present during model fitting.")
 return(y)
 }

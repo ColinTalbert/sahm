@@ -8,8 +8,9 @@ factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.
     if(!is.null(residSmooth)) source("Pred.Surface.r")
     source(paste(toupper(Model),".helper.fcts.r",sep=""))
     chk.libs(Model)
+    browser()
    continuousRaster<-raster(RasterInfo)
-   outfile.p<-file.path(paste(substr(outfile.p,1,(nchar(outfile.p)-4)),start.tile,".tif",sep=""))
+   outfile.p<-file.path(paste(substr(outfile.p,1,(nchar(outfile.p)-5)),start.tile,".tif",sep=""))
    outtext<-file.path(dirname(outfile.p),paste(start.tile,"out.txt",sep=""))
    capture.output(paste("inside file",Sys.time()),file=outtext)
    if(make.binary.tif) outfile.bin<-(sub("ProbTiff","BinTiff",sub("prob","bin",outfile.p))) 
@@ -24,7 +25,7 @@ factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.
       MessRaster <- writeStart(MessRaster, filename=sub("ProbTiff","MESSTiff",sub("prob","mess",outfile.p)), overwrite=TRUE)
       ModRaster <- writeStart(ModRaster, filename=sub("ProbTiff","ModTiff",sub("prob","MoD",outfile.p)), overwrite=TRUE)
     }
-    
+      capture.output(paste("start tile ",start.tile,"end tile ",min(start.tile+nToDo-1,length(tr$row)),sep=" "),file=outtext,append=TRUE)
  for (i in start.tile:min(start.tile+nToDo-1,length(tr$row))){
        temp <- data.frame(matrix(ncol=nvars.final,nrow=tr$nrows[i]*dims[2]))
        names(temp) <- vnames.final.mod

@@ -43,7 +43,7 @@
 ###############################################################################
 
 make.auc.plot.jpg<-function(out=out){
-
+ 
   plotname<-paste(out$dat$bname,"_modelEvalPlot.jpg",sep="")
   calib.plot<-paste(out$dat$bname,"_CalibrationPlot.jpg",sep="")
   modelname<-toupper(out$input$model)
@@ -70,8 +70,8 @@ make.auc.plot.jpg<-function(out=out){
           graphics.off()
     }
 ################# Calculate all statistics on test\train or train\cv splits
-    
-   out$input$has.split<-(out$input$PsdoAbs & !out$input$script.name%in%c("glm","maxlike"))
+  
+   out$input$has.split<-(out$input$PsdoAbs & !out$input$script.name%in%c("glm","maxlike","maxent"))
   Stats<-lapply(inlst,calcStat,family=out$input$model.family,has.split=out$input$has.split)
 
 #################### Variable importance plots #####################
