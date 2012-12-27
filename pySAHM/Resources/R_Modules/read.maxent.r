@@ -1,4 +1,5 @@
 read.maxent<-function(lambdas){
+
   lambdas <- read.csv(lambdas,header=FALSE)
   normalizers<-lambdas[(nrow(lambdas)-3):nrow(lambdas),]
     entropy<-normalizers[4,2]
@@ -10,13 +11,15 @@ read.maxent<-function(lambdas){
     fctType[grep("\\^",as.character(lambdas[,1]))]<-"quadratic"
     fctType[grep("[*]",as.character(lambdas[,1]))]<-"product"
     fctType[grep("[(]",as.character(lambdas[,1]))]<-"threshold"
-
-  "Raw.coef"<-lambdas[fctType=="raw",]
-  "Quad.coef"<-lambdas[fctType=="quadratic",]
-  "Prod.coef"<-lambdas[fctType=="product",]
-  "Fwd.Hinge"<-lambdas[fctType=="forward.hinge",]
-  "Rev.Hinge"<-lambdas[fctType=="reverse.hinge",]
-  "Thresh.val"<-lambdas[fctType=="threshold",]
+  
+  #make these all default to NULL in case the feature type was turned off
+  Raw.coef <- Quad.coef <- Prod.coef <- Fwd.Hinge <- Rev.Hinge <- Thresh.val <-NULL 
+  if(any(fctType=="raw")) "Raw.coef"<-lambdas[fctType=="raw",]
+  if(any(fctType=="quadratic")) "Quad.coef"<-lambdas[fctType=="quadratic",]
+  if(any(fctType=="product")) "Prod.coef"<-lambdas[fctType=="product",]
+  if(any(fctType=="forward.hinge")) "Fwd.Hinge"<-lambdas[fctType=="forward.hinge",]
+  if(any(fctType=="reverse.hinge")) "Rev.Hinge"<-lambdas[fctType=="reverse.hinge",]
+  if(any(fctType=="threshold")) "Thresh.val"<-lambdas[fctType=="threshold",]
    Prod.coef[,1]<-gsub("[*]",":",Prod.coef[,1])
    Fwd.Hinge[,1]<-gsub("'","",Fwd.Hinge[,1])
    Rev.Hinge[,1]<-gsub("`","",Rev.Hinge[,1])
