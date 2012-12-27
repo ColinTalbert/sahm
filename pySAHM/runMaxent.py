@@ -65,6 +65,8 @@ class MAXENTRunner(object):
             self.args['species_name'] = self.args['species_name'].replace(' ', '_')
         self.args['outputdirectory'] = '"' + self.args['outputdirectory'] + '"'
         self.args['projectionlayers'] = '"' + self.args['projectionlayers'] + '"'
+        if(not self.testKey): #if there is no testsplit (ie cross validation, remove the empty csv
+            del self.args['testsamplesfile']
         strargs = [ '='.join((str(k), str(v))) for (k, v,) in self.args.iteritems() if k != 'species_name' if k != 'mdsFile' ]
         for categorical in self.categoricals:
             strargs += ['togglelayertype=' + categorical.replace('_categorical', '')]
@@ -255,7 +257,8 @@ class MAXENTRunner(object):
     def pullCategoricals(self, headerline):
         for item in headerline:
             if item.endswith('_categorical'):
-                self.categoricals.append(item)
+                if item not in self.categoricals:
+                    self.categoricals.append(item)
 
 
 
