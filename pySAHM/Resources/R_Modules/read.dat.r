@@ -25,7 +25,8 @@ read.dat<-function(input.file,hl=NULL,include=NULL,response.col,is.inspect=FALSE
              assign("include",include,envir=parent.frame())
              }
           options(warn=1)
-          if(model=="maxent") dat[dat[,match(tolower(response.col),tolower(names(dat)))]==-9999,match(tolower(response.col),tolower(names(dat)))]<--9998 
+          #maxent uses for R evaluation metrics only if -9998
+          if(model=="maxent") dat<-dat[-c(which(dat[,match(tolower(response.col),tolower(names(dat)))]==-9999),arr.ind=TRUE),] 
           response<-dat[,match(tolower(response.col),tolower(names(dat)))]
           dat<-dat[order(response),]
           response<-response[order(response)]

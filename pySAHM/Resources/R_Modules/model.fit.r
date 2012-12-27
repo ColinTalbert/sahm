@@ -34,8 +34,9 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
      }
      
      if(Model=="maxent"){
-          if(missing(Fold)) Fold=length(out$input$lamdas)#the full dataset will be the very last
-          out$mods$final.mod[[1]]<-read.maxent(out$input$lambdas)
+          if(missing(Fold)) lambdasFile=file.path(out$input$lambdas,"cvSplit","species.lambdas") #the full dataset will be the very last
+          else lambdasFile=file.path(out$input$lambdas,paste("cvSplit",Fold,sep=""),"species.lambdas")
+          out$mods$final.mod[[1]]<-read.maxent(lambdasFile)
           if(full.fit) return(out)
           else return(out$mods$final.mod)
           }

@@ -82,21 +82,6 @@ function (fit.object, out, sp.no = 1, prev.stratify = F,Model)
 attach(out$input)
 on.exit(detach(out$input))
 
-if(Model=="mars"){
-      Model.Call <- fit.object$mars.call          #and the mars call details
-      mars.degree <- Model.Call$degree
-      mars.penalty <- Model.Call$penalty
-        mars.x <- Model.Call$mars.x
-        mars.y <- Model.Call$mars.y
-
-      n.spp <- length(mars.y)
-
-      if (sp.no > n.spp) stop(paste("the value specified for sp.no of",sp.no,"exceeds the total number of species, which is ",n.spp,sep=" "))
-
-
-      target.sp <- names(data)[mars.y[sp.no]]
-      u_i <- fit.object$fitted.values[,sp.no]
-  }
 
 data<-out$dat$ma$train
 n.cases<-nrow(out$dat$ma$train$dat)
@@ -106,15 +91,9 @@ u_i<-out$dat$ma$train$pred
 family<-out$input$model.family
 site.weights<-out$dat$ma$train$weight
 
-if(Model=="mars") n.spp <- length(Model.Call$mars.y)
-else{ n.spp=1
-target.sp<-names(ydat)
-}
   ############################################################
-  print(paste("Calculating ROC and calibration from full model for",target.sp),quote=F)
-
-
-  y_i <- ydat
+ 
+ y_i <- ydat
 
   if (family == "binomial" | family=="bernoulli") {
     full.resid.deviance <- calc.deviance(y_i,u_i, weights = site.weights, family="binomial")
@@ -123,7 +102,7 @@ target.sp<-names(ydat)
   }
 
   if (family=="poisson") {
-    full.resid.deviance <- calc.deviance(y_i,u_i, weights = site.weights, family="poisson")
+    full.resid.deviance <- calc.deviance(y_i,u_i, weights = site.weights, family="poisson")                      
     full.test <- cor(y_i, u_i)
     full.calib <- calibration(y_i, u_i, family = "poisson")
   }
@@ -144,107 +123,28 @@ target.sp<-names(ydat)
   print("Creating predictions for subsets...", quote = F)
 
  selector<-out$dat$selector
+ resp.curves<-vector("list",nk)
    out.cv<-list()
-   
+   names(resp.curves)<-seq(1:nk)
  #############################################
  #Start cross validation Fold loop
+
 for (i in 1:nk) {
               cat(i," ")
               model.mask <- selector != i  #used to fit model on majority of data
               pred.mask <- selector == i   #used to identify the with-held subset
               assign("species.subset", ydat[model.mask], pos = 1)
               assign("predictor.subset", xdat[model.mask, ], pos = 1)
-
-              # fit new mars model
-
-          if(Model=="mars"){
-
-                             mars.object <- mars(y = species.subset, x = predictor.subset,
-                                degree = mars.degree, penalty = mars.penalty)
-                                n.bfs <- length(mars.object$selected.terms)
-                              bf.data <- as.data.frame(mars.object$x)
-                              names(bf.data) <- paste("bf",1:n.bfs,sep="")
-                              assign("bf.data", bf.data, pos=1)
-                          # then fit a binomial model to them
-                              cv.final.mod <- glm(species.subset ~ .,data=bf.data[,-1], family= family, maxit = 100)
-                              pred.basis.functions <- as.data.frame(mda:::model.matrix.mars(mars.object,
-                                xdat[pred.mask, ]))
-                              #now name the bfs to match the approach used in mars.binomial
-                              names(pred.basis.functions) <- paste("bf",1:n.bfs,sep="")
-
-                            fitted.values[pred.mask] <- out$dat$ma[[i]]$pred<-predict(cv.final.mod,
-                         pred.basis.functions, type = "response")
-                }
-          if(Model=="glm"){
-              penalty <- if(out$input$simp.method=="AIC") 2 else log(nrow(out$dat$ma$ma))
-                    scope.glm <- list(lower=as.formula(paste("species.subset","~1")),
-                    upper=as.formula(paste("response","~",paste(out$dat$used.covs,collapse='+'))))
-
-                    cv.final.mod <- step(glm(as.formula(paste("species.subset","~1")),family=out$input$model.family,data=cbind(species.subset,predictor.subset),
-                                     weights=site.weights[model.mask],na.action="na.exclude"),
-                                     direction='both',scope=scope.glm,trace=0,k=penalty)
-
-                     fitted.values[pred.mask]<-out$dat$ma[[i]]$pred<-predict(cv.final.mod, xdat[pred.mask, ],type="response")
-                    }
-          if(Model=="brt"){
-                      if(debug.mode) assign("out",out,envir=.GlobalEnv)
-
-                      cat("\nfinished with learning rate estimation, lr=",out$mods$lr.mod$lr0,", t=",round(out$mods$lr.mod$t.elapsed,2),"sec\n")
-                      cat("\nfor final fit, lr=",out$mods$lr.mod$lr,"and tc=",out$mods$parms$tc.full,"\n");flush.console()
-
-                          # remove variables with <1% relative influence and re-fit model
-
-                          t1 <- unclass(Sys.time())
-                              if(length(out$mods$lr.mod$good.cols)<=1) stop("BRT must have at least two independent variables")
-                              out$input$max.trees<-NULL
-                          m0 <- gbm.step.fast(dat=cbind(species.subset,predictor.subset),gbm.x=out$mods$lr.mod$good.cols,gbm.y=1,family=out$input$model.family,
-                                n.trees = c(300,600,800,1000,1200,1500,1800),step.size=out$input$step.size,max.trees=out$input$max.trees,
-                                tolerance.method=out$input$tolerance.method,tolerance=out$input$tolerance, n.folds=out$input$n.folds,tree.complexity=out$mods$parms$tc.sub,
-                                learning.rate=out$mods$lr.mod$lr0,bag.fraction=out$input$bag.fraction,site.weights=site.weights[model.mask],autostop=T,debug.mode=F,silent=!debug.mode,
-                                plot.main=F,superfast=F)
-
-                          simp.mod<- gbm.simplify(m0,n.folds=out$input$n.folds,plot=F,verbose=F,alpha=out$input$alpha) # this step is very slow #
-                          
-
-                           cv.final.mod <- gbm.step.fast(dat=cbind(species.subset,predictor.subset),gbm.x=simp.mod$pred.list[[length(simp.mod$pred.list)]],gbm.y = 1,family=out$input$model.family,
-                            n.trees = c(300,600,700,800,900,1000,1200,1500,1800,2200,2600,3000,3500,4000,4500,5000),n.folds=out$input$n.folds,
-                            tree.complexity=out$mods$parms$tc.full,learning.rate=out$mods$lr.mod$lr,bag.fraction=out$input$bag.fraction,site.weights=site.weights[model.mask],
-                            autostop=T,debug.mode=F,silent=!debug.mode,plot.main=F,superfast=F)
-                               {cat("\n");cat(paste("50",".",i,"%\n",sep=""))}
-
-
-                    #predict the fitted values
-                    pred=predict.gbm(cv.final.mod,cbind(species.subset,predictor.subset),
-                                  cv.final.mod$target.trees,type="response")
-
-                    fitted.values[pred.mask]<-out$dat$ma[[i]]$pred<-predict.gbm(cv.final.mod, cbind(ydat[pred.mask],xdat[pred.mask, ]),
-                              cv.final.mod$target.trees,type="response")
-                      }
-
-          if(Model=="rf"){
-
-                          if(is.null(out$input$mtry)){
-                         mtry <- tuneRF(x=predictor.subset,y=factor(species.subset),mtryStart=3,importance=TRUE,ntreeTry=100,
-                            replace=FALSE, doBest=F, plot=F)
-                              mtry <- mtry[mtry[,2]==min(mtry[,2]),1][1]
-                            }
-                             y<-factor(species.subset)
-                             x<-predictor.subset
-                         cv.final.mod <- randomForest(x=x,y=y,xtest=xtest,ytest=ytest,importance=importance, ntree=n.trees,
-                            mtry=mtry,replace=samp.replace,sampsize=ifelse(is.null(sampsize),(ifelse(samp.replace,nrow(x),ceiling(.632*nrow(x)))),sampsize),
-                            nodesize=ifelse(is.null(nodesize),(if (!is.null(y) && !is.factor(y)) 5 else 1),nodesize),maxnodes=maxnodes,
-                            localImp=localImp, nPerm=nPerm, keep.forest=ifelse(is.null(keep.forest),!is.null(y) && is.null(xtest),keep.forest),
-                            corr.bias=corr.bias, keep.inbag=keep.inbag)
-                   #out of bag predictions
-                   pred<-tweak.p(as.vector(predict(cv.final.mod,type="prob")[,2]))
-
-                    #predict the fitted values
-                    fitted.values[pred.mask]<-out$dat$ma[[i]]$pred<-predict(cv.final.mod, xdat[pred.mask, ],type="prob")[,2]
+              
+              dat<-cbind(predictor.subset,species.subset)
+              names(dat)<-names(data)
+              
+              # fit new model
+              cv.final.mod<-model.fit(dat=out$dat$ma$train$dat[model.mask,],out=out,Model=Model,weight=out$dat$ma$train$weight[model.mask],Fold=i)                        
+              fitted.values[pred.mask]<-out$dat$ma[[i]]$pred<-pred.fct(model=cv.final.mod,x=xdat[pred.mask,],Model)
                     
-
-                 }
-              out$dat$ma[[i]]$thresh <-as.numeric(optimal.thresholds(data.frame(ID=1:length(species.subset),pres.abs=species.subset,
-              pred=pred),opt.methods=out$input$opt.methods))[2]
+                     out$dat$ma[[i]]$thresh <- as.numeric(optimal.thresholds(data.frame(ID=1:nrow(out$dat$ma$train$dat[model.mask,]),pres.abs=out$dat$ma$train$dat[model.mask,]$response,
+                          pred=pred.fct(model=cv.final.mod,x=xdat[model.mask,],Model)),opt.methods=out$input$opt.methods))[2]
               y_i <- ydat[pred.mask]
               u_i <- fitted.values[pred.mask]
               weights.subset <- site.weights[pred.mask]
@@ -259,23 +159,13 @@ for (i in 1:nk) {
                 subset.resid.deviance[i] <- calc.deviance(y_i,u_i,weights = weights.subset, family="poisson")
                 subset.test[i] <- cor(y_i, u_i)
                 subset.calib[i,] <- calibration(y_i, u_i, family = family)
-    }
+                }
 
   } #end of Cross Validation Fold Loop
+ 
   #################################################
-
+ 
   cat("","\n")
-
-# tidy up temporary files
-
-  rm(species.subset,predictor.subset,pos=1)
-
-# and assemble results for return
-
-#  mars.detail <- list(dataframe = dataframe.name,
-#    x = mars.x, x.names = names(xdat),
-#    y = mars.y, y.names = names(data)[mars.y],
-#    target.sp = target.sp, degree=mars.degree, penalty = mars.penalty, family = family)
 
   y_i <- ydat
   u_i <- fitted.values
@@ -309,10 +199,10 @@ for (i in 1:nk) {
 
    subset.deviance <- list(subset.deviances = subset.resid.deviance, subset.deviance.mean = subset.deviance.mean,
     subset.deviance.se = subset.deviance.se)
-    
+  
   cv.list<-list(full.resid.deviance = full.resid.deviance,
     full.test = full.test, full.calib = full.calib, pooled.deviance = cv.resid.deviance, pooled.test = cv.test,
-    pooled.calib = cv.calib,subset.deviance = subset.deviance, subset.test = subset.test, subset.calib = subset.calib)
+    pooled.calib = cv.calib,subset.deviance = subset.deviance, subset.test = subset.test, subset.calib = subset.calib,resp.curves=resp.curves)
    out$cv<-cv.list
   return(out)
 }
