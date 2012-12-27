@@ -76,8 +76,9 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
                     interactions=NULL,  # not used #
                     summary=NULL))
     
-    if(is.null(out$input$seed)) out$input$seed<-round(runif(1,min=-((2^32)/2-1),max=((2^32)/2-1)))
-    set.seed(as.numeric(out$input$seed))
+   #setting seeds these are now used by everything with the addition of variable importance plots
+        if(is.null(out$input$seed)) out$input$seed<-round(runif(1,min=-((2^32)/2-1),max=((2^32)/2-1)))
+        set.seed(as.numeric(out$input$seed))
    #print warnings as they occur
         options(warn=1)
     
@@ -94,7 +95,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
              out <- read.ma(out)
              out$dat$bname <- bname
              if(out$input$script.name=="rf" & out$input$model.family=="poisson") stop("Random Forest not implemented for count data")
-            
+         browser()   
    #writing out the header info to the CSV so in case of a break we know what broke
              out<-place.save(out)
               out$dat$split.label<-out$dat$split.type
@@ -107,10 +108,10 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
               cat("Progress:20%\n");flush.console();
              cat("\n","Fitting",toupper(Model),"model","\n")
              flush.console()
-      
+        
     #Fit the desired model#
                out<-generic.model.fit(out,Model,t0)
-          
+              
     #Making Predictions
                pred.vals<-function(x,model,Model){
               x$pred<-pred.fct(model,x$dat[,2:ncol(x$dat)],Model)
