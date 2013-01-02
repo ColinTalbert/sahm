@@ -613,7 +613,11 @@ class Model(Module):
         
         self.ModelAbbrev = ModelOutput[self.name]
         
-        self.output_dname = utils.mknextdir(prefix=self.ModelAbbrev + '_')
+        #maxent R and java output write to the same directory
+        if self.ModelAbbrev == "maxent":
+            self.output_dname=self.MaxentPath
+        else: 
+            self.output_dname = utils.mknextdir(prefix=self.ModelAbbrev + '_')   
         self.argsDict = utils.map_ports(self, self.port_map)
         
         self.argsDict['c'] = os.path.normpath(self.argsDict['c'])
@@ -652,7 +656,7 @@ class Model(Module):
         self.setResult("modelWorkspace", modelWorkspace)
         
     def setModelResult(self, filename, portname, arg_key=None):
-        outFileName = os.path.join(self.output_dname, "*" + filename)
+        outFileName = os.path.join(self.output_dname, self.ModelAbbrev + filename)
         required = not (self.argsDict.has_key(arg_key) and 
                         self.argsDict[arg_key].lower() == 'false')
         
@@ -817,7 +821,7 @@ class BackgroundSurfaceGenerator(Module):
                         ('method', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["KDE"]', 'optional':True}),
                         ('bandwidthOptimizationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["adhoc"]', 'optional':True}),
                         ('isopleth', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["95"]', 'optional':True}),
-                        ('bias', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True})]
+                        ('continuous', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True})]
     _output_ports = [("KDE", "(edu.utah.sci.vistrails.basic:File)")]
     
     @classmethod
@@ -833,7 +837,7 @@ class BackgroundSurfaceGenerator(Module):
             'method': ('method', None, True),
             'bandwidthOptimizationMethod': ('bandOptMeth', None, True),
             'isopleth': ('isopleth', None, True),
-            'bias': ('bias', utils.R_boolean, True)}
+            'continuous': ('bias', utils.R_boolean, True)}
         
         kde_params = utils.map_ports(self, port_map)
         
@@ -842,8 +846,8 @@ class BackgroundSurfaceGenerator(Module):
         outfName += "_" + kde_params["method"]
         if kde_params["method"] == "KDE":
             outfName += "_" + kde_params["bandOptMeth"]
-            if kde_params["bias"]:
-                outfName += "_bias"
+            if kde_params["continuous"]:
+                outfName += "_continuous"
             else:
                 outfName += "_iso" + str(kde_params["isopleth"])
         
@@ -857,7 +861,7 @@ class BackgroundSurfaceGenerator(Module):
                 "mth":kde_params["method"],
                 "bwopt":kde_params["bandOptMeth"],
                 "ispt":str(kde_params["isopleth"]),
-                "bias":kde_params["bias"]}
+                "continuous":kde_params["continuous"]}
 
         utils.runRScript("PseudoAbs.r", args, self)
         
@@ -1757,7 +1761,7 @@ class MAXENT(Model):
         global maxent_path
 
         ourMaxent = MaxentRunner.MAXENTRunner()
-        ourMaxent.outputDir = utils.mknextdir(prefix='maxentFiles_')
+        ourMaxent.outputDir = utils.mknextdir(prefix='maxent_')
         
         ourMaxent.mdsFile = self.forceGetInputFromPort('mdsFile').name
         
@@ -1821,34 +1825,38 @@ class MAXENT(Model):
                 cvMaxent = copy.deepcopy(ourMaxent)
                 cvMaxent.subRun=True
                 for row in MDSreader:
-                    if (not newLine[header1.index("Split")] in cvList):
-                        cvMaxent.testKey = newLine[header1.index("Split")]
+                    if (not row[header1.index("Split")] in cvList):
+                        cvMaxent.testKey = row[header1.index("Split")]
                         cvMaxent.outputDir = ourMaxent.outputDir + "\\cvSplit" + cvMaxent.testKey
                         os.mkdir(cvMaxent.outputDir)
-                        cvList.append(newLine[header1.index("Split")])
+                        cvList.append(row[header1.index("Split")])
                         try:
                             #cvMaxent.run()
                             pass
                         except TrappedError as e:
                             raise ModuleError(self, e.message)  
                         except:
-                            utils.informative_untrapped_error(self, "Maxent")
-                    newLine=MDSreader.next()        
+                            utils.informative_untrapped_error(self, "Maxent")      
                 #here we need to run Maxent without the test split csv which breaks it 
-                #ourMaxent.run()
+                ourMaxent.testKey = None
                      
             
         #maxentrunner will remove a regular test split on it's own 
         #as well as an evaluation split so just run it
         try:
-                ourMaxent.run()
+                #ourMaxent.run()
+                pass
         except TrappedError as e:
             raise ModuleError(self, e.message)  
         except:
-            utils.informative_untrapped_error(self, "Maxent")             
-        ourMaxent.outputDir="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\maxentFiles_75"
+            utils.informative_untrapped_error(self, "Maxent")
+            #for debugging use this directory             
+#        ourMaxent.outputDir="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\maxent_20"
         self.MaxentPath =  ourMaxent.outputDir 
-        Model.compute(self)
+        #for now display R output only if there was a cv split we might want options
+        if len(cvList)>1: 
+            Model.compute(self)
+            return 
          #set outputs
         lambdasfile = os.path.join(ourMaxent.outputDir, ourMaxent.args["species_name"] + ".lambdas")
         output_file = utils.create_file_module(lambdasfile)
