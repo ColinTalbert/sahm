@@ -116,12 +116,12 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
                    #Maxlike needs to remove incomplete cases which are removed in read.ma if there's a data.frame to work with
                    if(Model=="maxlike") out$dat$ma$train$pred<-out$dat$ma$train$pred[out$dat$ma$train$compl]
                   #Just for the training set for Random Forest we have to take out of bag predictions rather than the regular predictions
-                  if(Model=="rf" & !out$input$PsdoAbs) out$dat$ma$train$pred<-tweak.p(as.vector(predict(out$mods$final.mod[[1]],type="prob")[,2])) 
+                  if(Model=="rf") out$dat$ma$train$pred<-tweak.p(out$mods$predictions) 
                                                   
     #Run Cross Validation if specified might need separate cv functions for each model
             if(out$dat$split.type=="crossValidation") out<-cv.fct(out$mods$final.mod, out=out, sp.no = 1, prev.stratify = F,Model=Model)
             
-                 
+                  assign("out",out,envir=.GlobalEnv)
                   t3 <- unclass(Sys.time())
 
                   if(!is.null(out$dat$bad.factor.cols)){
