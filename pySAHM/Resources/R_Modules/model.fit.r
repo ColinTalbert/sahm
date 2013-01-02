@@ -210,7 +210,7 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
           }
           else return(final.mod)
    }
-  if(Model=="rf")
+  if(Model=="rf"){
       
           psd.abs<-dat[dat$response==0,]
           rf.full<-list()
@@ -239,24 +239,28 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
                   if(i==1)model.summary<-importance(rf.full[[i]])
                       else model.summary<-model.summary+importance(rf.full[[i]])
              }
-           
+            
               n.pres<-sum(dat$response==1)
                out$mods$parms$mtry=mean(unlist(lapply(rf.full,FUN=function(lst){lst$mtry})))
                         #Reduce("combine",rf.full)
                out$mods$final.mod <- rf.full
+               browser()
                if(PsdoAbs){
-                  votes<-rep(NA,times=nrow(dat))
-
-                  #getting pres. votes in the right place
-                  votes[dat$response==1]<-apply(do.call("rbind",lapply(lapply(rf.full,predict,type="vote"),"[",1:n.pres,2)),2,mean)
+                  votes<-rep(NA,times=length(Split))
 
                   #these should be oob votes for the absence in a fairly random order
                   if(num.splits==1) votes[dat$response==0]<-apply(do.call("rbind",lapply(lapply(rf.full,predict,type="vote"),"[",(n.pres+1):nrow(dat),2)),2,mean)
                   else for(i in 1:num.splits){
                        votes[which(i==Split,arr.ind=TRUE)]<-as.vector(apply(do.call("rbind",lapply(lapply(rf.full[-c(i)],predict,newdata=psd.abs[i==Split,-1],type="vote"),"[",,2)),2,mean))
                    }
-
-                 	votes[votes==1]<-max(votes[votes<1])
+                   
+                   #putting in pres votes
+                   pres.votes<-matrix(nrow=sum(resp>=1),ncol=num.splits)
+                   for(i in 1:num.splits)
+                   pres.votes[,i] <- predict(rf.full[[i]],type="vote")[rf.full[[i]]$y==1,2]
+                   votes[dat$response==1]<-apply(pres.votes,2,mean)
+                   
+                 	votes[votes==1]<-max(votes[votes<1])                      
                   votes[votes==0]<-min(votes[votes>0]) #from the original SAHM these can't be equal to 0 or 1 otherwise deviance can't be caluclated
                   #though I'm not sure deviance makes sense for RF anyway
                   #confusion matrix oob error and class error currently don't show up for used available but I think they should
@@ -265,13 +269,13 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
                   oob.error<-100*(1-sum(diag(confusion.mat))/sum(confusion.mat))
                   class.error<-c(confusion.mat[1,2],confusion.mat[2,1])/(apply(confusion.mat,1,sum))
                   out$mods$predictions<-votes
-              } 
+              } else out$mods$predictions<-predict(out$mods$final.mod[[1]],type="vote")[,2]) 
                  
                   model.summary<-1/num.splits*model.summary[order(model.summary[,3],decreasing=T),]
                   out$mods$summary <- model.summary
               if(full.fit) return(out)
               else return(rf.full)
-
+             }
 
 
 }
