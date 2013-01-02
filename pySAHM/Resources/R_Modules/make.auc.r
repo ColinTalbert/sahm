@@ -150,6 +150,7 @@ make.auc.plot.jpg<-function(out=out){
                              eval = Stats$test$calibration.stats,
                                 crossValidation =  apply(do.call("rbind",lapply(lst,function(lst){lst$calibration.stats})),2,mean))
      ## Calibration plot
+     options(warn=-1) #this often gives warnings about probabilities numerically 0 or 1
             a<-do.call("rbind",lapply(lst,function(lst){lst$auc.data}))
             if(out$input$PsdoAbs==TRUE) {
               
@@ -178,7 +179,7 @@ make.auc.plot.jpg<-function(out=out){
              }
             dev.off()
       }
-          
+     options(warn=0)     
    #Some residual plots for poisson data
     if(out$input$model.family%in%c("poisson")){
             jpeg(file=plotname)
