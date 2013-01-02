@@ -75,7 +75,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
                     auc.output=NULL,
                     interactions=NULL,  # not used #
                     summary=NULL))
-    
+         
    #setting seeds these are now used by everything with the addition of variable importance plots
         if(is.null(out$input$seed)) out$input$seed<-round(runif(1,min=-((2^32)/2-1),max=((2^32)/2-1)))
         set.seed(as.numeric(out$input$seed))
@@ -95,19 +95,12 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
              out <- read.ma(out)
              out$dat$bname <- bname
              if(out$input$script.name=="rf" & out$input$model.family=="poisson") stop("Random Forest not implemented for count data")
-         browser()   
+         
    #writing out the header info to the CSV so in case of a break we know what broke
              out<-place.save(out)
               out$dat$split.label<-out$dat$split.type
    #check output dir #
               if(file.access(out$input$output.dir,mode=2)!=0) stop(paste("output directory",output.dir,"is not writable"))
-
-              cat("\nbegin processing of model array:",out$input$ma.name,"\n")
-              cat("\nfile basename set to:",out$dat$bname,"\n")
-              assign("out",out,envir=.GlobalEnv)
-              cat("Progress:20%\n");flush.console();
-             cat("\n","Fitting",toupper(Model),"model","\n")
-             flush.console()
         
     #Fit the desired model#
                out<-generic.model.fit(out,Model,t0)
@@ -128,7 +121,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
     #Run Cross Validation if specified might need separate cv functions for each model
             if(out$dat$split.type=="crossValidation") out<-cv.fct(out$mods$final.mod, out=out, sp.no = 1, prev.stratify = F,Model=Model)
             
-                  assign("out",out,envir=.GlobalEnv)
+                 
                   t3 <- unclass(Sys.time())
 
                   if(!is.null(out$dat$bad.factor.cols)){
@@ -151,9 +144,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
 
   #Response curves #
      if(Model!="maxlike") response.curves(out,Model)
-
-     assign("out",out,envir=.GlobalEnv)
-
+     
    #Save Workspace
    save.image(file.path(output.dir,"modelWorkspace"))
           t4 <- unclass(Sys.time())
@@ -180,11 +171,6 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
             cat("\nfinished with prediction maps, t=",round(t5-t4,2),"sec\n");flush.console()
           }
 
-
-    if(debug.mode) assign("out",out,envir=.GlobalEnv)
-
-    
-     
     if(!debug.mode) {
         sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))
         }

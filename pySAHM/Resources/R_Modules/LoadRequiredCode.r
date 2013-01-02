@@ -46,7 +46,6 @@
 source(paste(ScriptPath,"read.dat.r",sep="\\")) 
 source(paste(ScriptPath,"path.check.r",sep="\\")) 
 source(paste(ScriptPath,"read.ma.r",sep="\\"))
-source(paste(ScriptPath,"read.maxent.r",sep="\\"))
 source(paste(ScriptPath,"chk.libs.r",sep="\\"))
 
 
@@ -55,7 +54,6 @@ source(paste(ScriptPath,"generic.model.fit.r",sep="\\"))
 source(paste(ScriptPath,"FitModels.r",sep="\\"))
 source(paste(ScriptPath,"model.fit.r",sep="\\"))
 source(paste(ScriptPath,"pred.fct.r",sep="\\"))
-source(paste(ScriptPath,"maxent.predict.r",sep="\\"))
 
 #Calculating Evaluation Metrics and producing plots
 source(paste(ScriptPath,"make.auc.r",sep="\\"))
