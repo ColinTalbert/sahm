@@ -83,10 +83,16 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
         options(warn=1)
     
         Model=script.name
-          
+            
          # generate a filename for output #
+                if(debug.mode==TRUE){
+                 bname<-file.path(out$input$output.dir,paste(Model,"_",n<-1,sep=""))
+                 while(file.access(paste(bname,"_output.txt",sep=""))==0) bname<-file.path(out$input$output.dir,paste(Model,"_",n<-n+1,sep=""))
+                } 
+                else
                  out$dat$bname<-bname<-file.path(out$input$output.dir,Model)
-                 capture.output(paste(toupper(Model),"Results"),file=paste(bname,"_output.txt",sep="")) # reserve the new basename #
+                 browser()
+            capture.output(paste(toupper(Model),"Results"),file=paste(bname,"_output.txt",sep="")) # reserve the new basename #
             on.exit(capture.output(cat("Model Failed\n\n"),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE))  
               
    #Load Libraries
