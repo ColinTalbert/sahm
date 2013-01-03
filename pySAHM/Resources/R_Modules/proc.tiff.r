@@ -122,10 +122,10 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
   ymin(RasterInfo) <- ymin(RasterInfo) + 0.5 * rs[2]
   ymax(RasterInfo) <- ymax(RasterInfo) + 0.5 * rs[2]
    }
-  
+     browser()
       # setting tile size
       MB.per.row<-dims[2]*nvars*32/8/1000/1024
-      if(MESS) MB.per.row<-MB.per.row*3 #use more blocks for mess
+      if(MESS) MB.per.row<-MB.per.row*6 #use more blocks for mess
       nrows<-min(round(tsize/MB.per.row),dims[1])
       bs<-c(nrows,dims[2])
       chunksize<-bs[1]*bs[2]
@@ -169,12 +169,12 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
             }
        if(out$input$ResidMaps)
         dir.create(paste(out$input$output.dir,"\\ResidTiff",sep=""))
-        tile.start<-seq(from=1,to=tr$n,by=ceiling(tr$n/detectCores())) 
+        tile.start<-seq(from=1,to=tr$n,by=ceiling(tr$n/(detectCores()-1))) 
       cl <- makeCluster(detectCores()) 
       parLapply(cl,X=tile.start,fun=parRaster,dims=dims,
          tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
          model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,
-         outfile.bin=outfile.bin,thresh=thresh,nToDo= ceiling(tr$n/detectCores()),ScriptPath=out$input$ScriptPath,
+         outfile.bin=outfile.bin,thresh=thresh,nToDo= ceiling(tr$n/(detectCores()-1)),ScriptPath=out$input$ScriptPath,
          vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct)
       stopCluster(cl)
   }

@@ -1,13 +1,13 @@
 VariableImportance<-function(Model,out,auc){
     #this relatively complicated structure is used for cross validation variable importance plots
-     
+    
     cor.mat<-matrix(nrow=length(out$mods$vnames),ncol=length(out$dat$ma))
     #remove the response colum
     dat<-lapply(out$dat$ma,FUN=function(d.frame)d.frame$dat[,-1])
     resp<-lapply(out$dat$ma,"[",1)
     pred<-lapply(out$dat$ma,FUN=function(lst) lst[which(names(lst)=="pred",arr.ind=TRUE)]) 
     #for random forest I switch to in bag predictions here since I can't calculate oob predictions after permuting a predictor
-    if(out$input$script.name=="rf") pred$train$pred<-pred.fct(model=out$mods$final,x=out$dat$ma$train$dat,Model=out$input$script.name)
+    #if(out$input$script.name=="rf") pred$train$pred<-pred.fct(model=out$mods$final,x=out$dat$ma$train$dat,Model=out$input$script.name)
     for(j in 1:length(dat)){
       for (i in 1:length(out$mods$vnames)){
        indx<-match(out$mods$vnames[i],names(dat[[j]]))

@@ -81,6 +81,8 @@ FitModels(ma.name=input.file,
           response.col=rc,make.p.tif=F,make.binary.tif=F,
           simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=FALSE)          
 #RF
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_condor\\rf_1\\modelSelection_cv_1.csv"
+input.file="C:\\VisTrails\\mtalbert_20110504T132851\\readMaTests\\PsdoAbsSplitCrossVal.csv"
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,
@@ -89,7 +91,7 @@ FitModels(ma.name=input.file,
 responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
 samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
 localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=NULL,norm.votes=TRUE,
-do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,MESS=FALSE)
+do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,MESS=TRUE,ScriptPath=ScriptPath)
 
 
 rc="responseBinary"
