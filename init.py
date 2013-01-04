@@ -1175,6 +1175,10 @@ class PARC(Module):
         #otherwise start a new CSV
         if self.hasInputFromPort("RastersWithPARCInfoCSV"):
             inputCSV = self.forceGetInputFromPort("RastersWithPARCInfoCSV").name
+            if not os.path.exists(inputCSV):
+                msg = "RastersWithPARCInfoCSV, " + inputCSV + ", does not exist."
+                writetolog(msg)
+                raise ModuleError(self, msg)
             shutil.copy(inputCSV, workingCSV)
             f = open(workingCSV, "ab")
             csvWriter = csv.writer(f)
