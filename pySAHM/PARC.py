@@ -53,6 +53,8 @@ import csv
 import Queue
 import thread
 import subprocess
+import multiprocessing
+import time
 
 from optparse import OptionParser
 
@@ -146,15 +148,19 @@ class PARC:
         self.logger.writetolog("Finished PARC", True, True)
         
     def processFiles(self):
-        if self.multicores:
-            results= Queue.Queue()
-            process_count= 0
+        if self.processingMode == "multiple cores asynchronously":
+            coreCount = multiprocessing.cpu_count() - 1 
+            processQueue = []
+        else:
+            coreCount = 1
+            processQueue = []
         
         # Clip and reproject each source image.
-        CondorJobs = []
         for image in self.inputs:
-            inPath, inFileName = os.path.split(image[0])
-                            
+            #if we're running to many jobs wait for one to finish
+            self.waitForProcessesToFinish(processQueue, coreCount)
+                        
+            inPath, inFileName = os.path.split(image[0])          
             outFile, ext = os.path.splitext(inFileName)
             if outFile[0].isdigit():
                 outFile = os.path.join(self.out_dir, "_" + outFile + ".tif")
@@ -179,22 +185,31 @@ class PARC:
                     #process a single raster and wait for it to finish
                     self.parcFile(image, outFile) 
                 elif self.processingMode == "multiple cores asynchronously":
-                    self.gen_singlePARC_thread(image, outFile, results)
-                    process_count += 1
+                    processQueue.append(self.gen_singlePARC_thread_test(image, outFile))
                 elif self.processingMode == "FORT Condor":
-                    CondorJobs.append(outFile)
+#                    CondorJobs.append(outFile)
                     self.gen_singlePARC_thread(image, outFile, results, True)
-#                elif os.path.abspath(self.template) == os.path.abspath(image[0]): 
-#                    msg = shortname + " is the same as our template. \tOnly copying this file."
-#                    self.logger.writetolog(msg, True, True)
-#                    shutil.copyfile(self.template, outFile)
-                    
-        if self.processingMode == "multiple cores asynchronously":
-            self.manage_singlePARC_threads(results, process_count)
-        elif self.processingMode == "FORT Condor":
-            self.manage_condor_jobs(CondorJobs)
+        
+        #wait for the last set of processes to finish up
+        self.waitForProcessesToFinish(processQueue)   
             
-    def gen_singlePARC_thread(self, image, outFile, results, Condor=False):
+
+            
+                    
+        print "done"
+#        if self.processingMode == "multiple cores asynchronously":
+#            self.manage_singlePARC_threads(results, process_count)
+#        elif self.processingMode == "FORT Condor":
+#            self.manage_condor_jobs(CondorJobs)
+          
+    def waitForProcessesToFinish(self, processQueue, maxCount=1):
+        while len(processQueue) >= maxCount:
+                time.sleep(1)
+                for process in processQueue:
+                    if process.poll() is not None:
+                        processQueue.remove(process)
+            
+    def gen_singlePARC_thread(self, image, outFile, results=None, Condor=False):
             image_short_name = os.path.split(image[0])[1]
 
             args = ['-s', os.path.abspath(image[0]),
@@ -222,7 +237,7 @@ class PARC:
             command_arr = [pyEx, executable] + args
             command = ' '.join(command_arr)
             self.logger.writetolog(command, False, False)
-            print "RUNNING COMMAND:", command_arr
+#            print "RUNNING COMMAND:", command_arr
             
             if Condor:
                 workspace, fname = os.path.split(os.path.abspath(outFile))
@@ -253,6 +268,43 @@ class PARC:
                 
         if error_msg <> "":
             raise utilities.TrappedError(error_msg)
+
+    def gen_singlePARC_thread_test(self, image, outFile):
+            image_short_name = os.path.split(image[0])[1]
+
+            args = ['-s', os.path.abspath(image[0]),
+                    '-c', image[1],
+                    '-d', os.path.abspath(outFile),
+                    '-t', os.path.abspath(self.template),
+                    '-r', image[2],
+                    '-a', image[3]]
+
+            if self.ignoreNonOverlap:
+
+                args.extend(['-i',
+                             '--gt0', str(self.template_params['gt'][0]),
+                             '--gt3', str(self.template_params['gt'][3]),
+                             '--tNorth', str(self.template_params['tNorth']),
+                             '--tSouth', str(self.template_params['tSouth']),
+                             '--tEast', str(self.template_params['tEast']),
+                             '--tWest', str(self.template_params['tWest']),
+                             '--tHeight', str(self.template_params['height']),
+                             '--tWidth', str(self.template_params['width'])])
+    
+            execDir = os.path.split(__file__)[0]
+            executable = os.path.join(execDir, 'runSinglePARC.py')
+            pyEx = sys.executable
+            command_arr = [pyEx, executable] + args
+            command = ' '.join(command_arr)
+            #self.logger.writetolog(command, False, False)
+            print "RUNNING COMMAND:", command_arr
+            proc = subprocess.Popen( command_arr )
+            return  proc
+#                thread.start_new_thread(utilities.process_waiter,
+#                        (proc, image_short_name, results))
+
+    def log_result(self, result):
+        print results
 
     def manage_condor_jobs(self, outputs):
         errors = []

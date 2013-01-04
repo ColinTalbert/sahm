@@ -122,7 +122,7 @@ def main(args_in):
     
     ourPARC.parcFile([options.source, options.categorical, options.resampling, options.aggregation], options.dest)
 
-    print "Finished successfully!"
+#    print "Finished successfully!"
 
 def setupGDAL():
     parentDir = os.path.split(os.path.dirname(__file__))[0]
