@@ -1018,7 +1018,7 @@ class FieldDataQuery(Module):
                 response = row[res_key]
                 if response.lower() in ["1", "true", "t", "present", "presence", FDQParams['res_pres_val'].lower()]:
                     response = 1
-                elif response.lower() in ["0", "false", "f", "absent", "absense", FDQParams['res_abs_val'].lower()]:
+                elif response.lower() in ["0", "false", "f", "absent", "absence", FDQParams['res_abs_val'].lower()]:
                     response = 0
                 elif responsetype == 'responseBinary': 
                     try:
