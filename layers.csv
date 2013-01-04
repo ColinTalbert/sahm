@@ -1236,3 +1236,233 @@ K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_16_2
 K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_17_2000_2009_2km.img,Precipitation of driest quarter,PRISM (Custom Time Interval),"PRISM (2000-2009) CUSTOM Normals, 2 km.",N
 K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_18_2000_2009_2km.img,Precipitiation of warmest quarter,PRISM (Custom Time Interval),"PRISM (2000-2009) CUSTOM Normals, 2 km.",N
 K:\GIS_LIBRARY\Climate\PRISM\CS_Normals_2000_2009_2km\BioClim_2000_2009\bio_19_2000_2009_2km.img,Precipitation of coldest quarter,PRISM (Custom Time Interval),"PRISM (2000-2009) CUSTOM Normals, 2 km.",N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Bio10_MeanTempWarmestQuarter.tif,Bio10_MeanTempWarmestQuarter,PygmyRabbit,Climate,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Bio10_MeanTempWarmestQuarter_17CellRadiusAVG.tif,Bio10_MeanTempWarmestQuarter_17CellRadiusAVG,PygmyRabbit,Climate,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Bio10_MeanTempWarmestQuarter_33CellRadiusAVG.tif,Bio10_MeanTempWarmestQuarter_33CellRadiusAVG,PygmyRabbit,Climate,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Bio10_MeanTempWarmestQuarter_7CellRadiusAVG.tif,Bio10_MeanTempWarmestQuarter_7CellRadiusAVG,PygmyRabbit,Climate,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Bio11_MeanTempColdestQuarter.tif,Bio11_MeanTempColdestQuarter,PygmyRabbit,Climate,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Bio11_MeanTempColdestQuarter_17CellRadiusAVG.tif,Bio11_MeanTempColdestQuarter_17CellRadiusAVG,PygmyRabbit,Climate,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Bio11_MeanTempColdestQuarter_33CellRadiusAVG.tif,Bio11_MeanTempColdestQuarter_33CellRadiusAVG,PygmyRabbit,Climate,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Bio11_MeanTempColdestQuarter_7CellRadiusAVG.tif,Bio11_MeanTempColdestQuarter_7CellRadiusAVG,PygmyRabbit,Climate,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Bio16_PrecipWettestQuarter.tif,Bio16_PrecipWettestQuarter,PygmyRabbit,Climate,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Bio16_PrecipWettestQuarter_17CellRadiusAVG.tif,Bio16_PrecipWettestQuarter_17CellRadiusAVG,PygmyRabbit,Climate,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Bio16_PrecipWettestQuarter_33CellRadiusAVG.tif,Bio16_PrecipWettestQuarter_33CellRadiusAVG,PygmyRabbit,Climate,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Bio16_PrecipWettestQuarter_7CellRadiusAVG.tif,Bio16_PrecipWettestQuarter_7CellRadiusAVG,PygmyRabbit,Climate,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Bio17_PrecipDriestQuarter.tif,Bio17_PrecipDriestQuarter,PygmyRabbit,Climate,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Bio17_PrecipDriestQuarter_17CellRadiusAVG.tif,Bio17_PrecipDriestQuarter_17CellRadiusAVG,PygmyRabbit,Climate,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Bio17_PrecipDriestQuarter_33CellRadiusAVG.tif,Bio17_PrecipDriestQuarter_33CellRadiusAVG,PygmyRabbit,Climate,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Bio17_PrecipDriestQuarter_7CellRadiusAVG.tif,Bio17_PrecipDriestQuarter_7CellRadiusAVG,PygmyRabbit,Climate,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Bio1_AnnualMeanTemp.tif,Bio1_AnnualMeanTemp,PygmyRabbit,Climate,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Bio1_AnnualMeanTemp_17CellRadiusAVG.tif,Bio1_AnnualMeanTemp_17CellRadiusAVG,PygmyRabbit,Climate,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Bio1_AnnualMeanTemp_33CellRadiusAVG.tif,Bio1_AnnualMeanTemp_33CellRadiusAVG,PygmyRabbit,Climate,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Bio1_AnnualMeanTemp_7CellRadiusAVG.tif,Bio1_AnnualMeanTemp_7CellRadiusAVG,PygmyRabbit,Climate,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentClayAvg.tif,PercentClayAvg,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentClayAvg_17CellRadiusMAJ.tif,PercentClayAvg_17CellRadiusMAJ,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentClayAvg_33CellRadiusMAJ.tif,PercentClayAvg_33CellRadiusMAJ,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentClayAvg_7CellRadiusMAJ.tif,PercentClayAvg_7CellRadiusMAJ,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentClayMax.tif,PercentClayMax,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentClayMax_17CellRadiusMAX.tif,PercentClayMax_17CellRadiusMAX,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentClayMax_33CellRadiusMAX.tif,PercentClayMax_33CellRadiusMAX,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentClayMax_7CellRadiusMAX.tif,PercentClayMax_7CellRadiusMAX,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentClayMin.tif,PercentClayMin,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentClayMin_17CellRadiusMIN.tif,PercentClayMin_17CellRadiusMIN,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentClayMin_33CellRadiusMIN.tif,PercentClayMin_33CellRadiusMIN,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentClayMin_7CellRadiusMIN.tif,PercentClayMin_7CellRadiusMIN,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSandAvg.tif,PercentSandAvg,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSandAvg_17CellRadiusMAJ.tif,PercentSandAvg_17CellRadiusMAJ,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSandAvg_33CellRadiusMAJ.tif,PercentSandAvg_33CellRadiusMAJ,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSandAvg_7CellRadiusMAJ.tif,PercentSandAvg_7CellRadiusMAJ,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSandMax.tif,PercentSandMax,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSandMax_17CellRadiusMAX.tif,PercentSandMax_17CellRadiusMAX,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSandMax_33CellRadiusMAX.tif,PercentSandMax_33CellRadiusMAX,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSandMax_7CellRadiusMAX.tif,PercentSandMax_7CellRadiusMAX,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSandMin.tif,PercentSandMin,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSandMin_17CellRadiusMIN.tif,PercentSandMin_17CellRadiusMIN,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSandMin_33CellRadiusMIN.tif,PercentSandMin_33CellRadiusMIN,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSandMin_7CellRadiusMIN.tif,PercentSandMin_7CellRadiusMIN,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSiltAvg.tif,PercentSiltAvg,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSiltAvg_17CellRadiusMAJ.tif,PercentSiltAvg_17CellRadiusMAJ,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSiltAvg_33CellRadiusMAJ.tif,PercentSiltAvg_33CellRadiusMAJ,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSiltAvg_7CellRadiusMAJ.tif,PercentSiltAvg_7CellRadiusMAJ,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSiltMax.tif,PercentSiltMax,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSiltMax_17CellRadiusMAX.tif,PercentSiltMax_17CellRadiusMAX,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSiltMax_33CellRadiusMAX.tif,PercentSiltMax_33CellRadiusMAX,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSiltMax_7CellRadiusMAX.tif,PercentSiltMax_7CellRadiusMAX,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSiltMin.tif,PercentSiltMin,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSiltMin_17CellRadiusMIN.tif,PercentSiltMin_17CellRadiusMIN,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSiltMin_33CellRadiusMIN.tif,PercentSiltMin_33CellRadiusMIN,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\PercentSiltMin_7CellRadiusMIN.tif,PercentSiltMin_7CellRadiusMIN,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\RestrictDepthAvgCM.tif,RestrictDepthAvgCM,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\RestrictDepthAvgCM_17CellRadiusMAX.tif,RestrictDepthAvgCM_17CellRadiusMAX,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\RestrictDepthAvgCM_33CellRadiusMAX.tif,RestrictDepthAvgCM_33CellRadiusMAX,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\RestrictDepthAvgCM_7CellRadiusMAX.tif,RestrictDepthAvgCM_7CellRadiusMAX,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\RestrictDepthMaxCM.tif,RestrictDepthMaxCM,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\RestrictDepthMaxCM_17CellRadiusMAX.tif,RestrictDepthMaxCM_17CellRadiusMAX,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\RestrictDepthMaxCM_33CellRadiusMAX.tif,RestrictDepthMaxCM_33CellRadiusMAX,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\RestrictDepthMaxCM_7CellRadiusMAX.tif,RestrictDepthMaxCM_7CellRadiusMAX,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\RestrictDepthMinCM.tif,RestrictDepthMinCM,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\RestrictDepthMinCM_17CellRadiusMIN.tif,RestrictDepthMinCM_17CellRadiusMIN,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\RestrictDepthMinCM_33CellRadiusMIN.tif,RestrictDepthMinCM_33CellRadiusMIN,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\RestrictDepthMinCM_7CellRadiusMIN.tif,RestrictDepthMinCM_7CellRadiusMIN,PygmyRabbit,Soils,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_1000mLD.tif,Roads_1000mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_200mLD.tif,Roads_200mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_201_1000mLD.tif,Roads_201_1000mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_201_200mLD.tif,Roads_201_200mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_201_500mLD.tif,Roads_201_500mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_203_1000mLD.tif,Roads_203_1000mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_203_200mLD.tif,Roads_203_200mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_203_500mLD.tif,Roads_203_500mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_205_1000mLD.tif,Roads_205_1000mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_205_200mLD.tif,Roads_205_200mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_205_500mLD.tif,Roads_205_500mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_209_1000mLD.tif,Roads_209_1000mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_209_200mLD.tif,Roads_209_200mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_209_500mLD.tif,Roads_209_500mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_210_1000mLD.tif,Roads_210_1000mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_210_200mLD.tif,Roads_210_200mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_210_500mLD.tif,Roads_210_500mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_211TT_1000mLD.tif,Roads_211TT_1000mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_211TT_200mLD.tif,Roads_211TT_200mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_211TT_500mLD.tif,Roads_211TT_500mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_211_1000mLD.tif,Roads_211_1000mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_211_200mLD.tif,Roads_211_200mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_211_500mLD.tif,Roads_211_500mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_402_1000mLD.tif,Roads_402_1000mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_402_200mLD.tif,Roads_402_200mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_402_500mLD.tif,Roads_402_500mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Roads_500mLD.tif,Roads_500mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Bare.tif,Sagemap_Bare,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Bare_17CellRadiusAVG.tif,Sagemap_Bare_17CellRadiusAVG,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Bare_17CellRadiusMAX.tif,Sagemap_Bare_17CellRadiusMAX,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Bare_17CellRadiusMIN.tif,Sagemap_Bare_17CellRadiusMIN,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Bare_17CellRadiusSTD.tif,Sagemap_Bare_17CellRadiusSTD,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Bare_33CellRadiusAVG.tif,Sagemap_Bare_33CellRadiusAVG,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Bare_33CellRadiusMAX.tif,Sagemap_Bare_33CellRadiusMAX,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Bare_33CellRadiusMIN.tif,Sagemap_Bare_33CellRadiusMIN,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Bare_33CellRadiusSTD.tif,Sagemap_Bare_33CellRadiusSTD,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Bare_7CellRadiusAVG.tif,Sagemap_Bare_7CellRadiusAVG,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Bare_7CellRadiusMAX.tif,Sagemap_Bare_7CellRadiusMAX,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Bare_7CellRadiusMIN.tif,Sagemap_Bare_7CellRadiusMIN,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Bare_7CellRadiusSTD.tif,Sagemap_Bare_7CellRadiusSTD,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_BigSage.tif,Sagemap_BigSage,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_BigSage_17CellRadiusAVG.tif,Sagemap_BigSage_17CellRadiusAVG,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_BigSage_17CellRadiusMAX.tif,Sagemap_BigSage_17CellRadiusMAX,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_BigSage_17CellRadiusMIN.tif,Sagemap_BigSage_17CellRadiusMIN,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_BigSage_17CellRadiusSTD.tif,Sagemap_BigSage_17CellRadiusSTD,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_BigSage_33CellRadiusAVG.tif,Sagemap_BigSage_33CellRadiusAVG,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_BigSage_33CellRadiusMAX.tif,Sagemap_BigSage_33CellRadiusMAX,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_BigSage_33CellRadiusMIN.tif,Sagemap_BigSage_33CellRadiusMIN,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_BigSage_33CellRadiusSTD.tif,Sagemap_BigSage_33CellRadiusSTD,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_BigSage_7CellRadiusAVG.tif,Sagemap_BigSage_7CellRadiusAVG,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_BigSage_7CellRadiusMAX.tif,Sagemap_BigSage_7CellRadiusMAX,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_BigSage_7CellRadiusMIN.tif,Sagemap_BigSage_7CellRadiusMIN,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_BigSage_7CellRadiusSTD.tif,Sagemap_BigSage_7CellRadiusSTD,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Herb.tif,Sagemap_Herb,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Herb_17CellRadiusAVG.tif,Sagemap_Herb_17CellRadiusAVG,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Herb_17CellRadiusMAX.tif,Sagemap_Herb_17CellRadiusMAX,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Herb_17CellRadiusMIN.tif,Sagemap_Herb_17CellRadiusMIN,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Herb_17CellRadiusSTD.tif,Sagemap_Herb_17CellRadiusSTD,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Herb_33CellRadiusAVG.tif,Sagemap_Herb_33CellRadiusAVG,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Herb_33CellRadiusMAX.tif,Sagemap_Herb_33CellRadiusMAX,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Herb_33CellRadiusMIN.tif,Sagemap_Herb_33CellRadiusMIN,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Herb_33CellRadiusSTD.tif,Sagemap_Herb_33CellRadiusSTD,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Herb_7CellRadiusAVG.tif,Sagemap_Herb_7CellRadiusAVG,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Herb_7CellRadiusMAX.tif,Sagemap_Herb_7CellRadiusMAX,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Herb_7CellRadiusMIN.tif,Sagemap_Herb_7CellRadiusMIN,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Herb_7CellRadiusSTD.tif,Sagemap_Herb_7CellRadiusSTD,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Sage.tif,Sagemap_Sage,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Sage_17CellRadiusAVG.tif,Sagemap_Sage_17CellRadiusAVG,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Sage_17CellRadiusMAX.tif,Sagemap_Sage_17CellRadiusMAX,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Sage_17CellRadiusMIN.tif,Sagemap_Sage_17CellRadiusMIN,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Sage_17CellRadiusSTD.tif,Sagemap_Sage_17CellRadiusSTD,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Sage_33CellRadiusAVG.tif,Sagemap_Sage_33CellRadiusAVG,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Sage_33CellRadiusMAX.tif,Sagemap_Sage_33CellRadiusMAX,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Sage_33CellRadiusMIN.tif,Sagemap_Sage_33CellRadiusMIN,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Sage_33CellRadiusSTD.tif,Sagemap_Sage_33CellRadiusSTD,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Sage_7CellRadiusAVG.tif,Sagemap_Sage_7CellRadiusAVG,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Sage_7CellRadiusMAX.tif,Sagemap_Sage_7CellRadiusMAX,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Sage_7CellRadiusMIN.tif,Sagemap_Sage_7CellRadiusMIN,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Sage_7CellRadiusSTD.tif,Sagemap_Sage_7CellRadiusSTD,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Shrub.tif,Sagemap_Shrub,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_ShrubHt.tif,Sagemap_ShrubHt,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_ShrubHt_17CellRadiusAVG.tif,Sagemap_ShrubHt_17CellRadiusAVG,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_ShrubHt_17CellRadiusMAX.tif,Sagemap_ShrubHt_17CellRadiusMAX,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_ShrubHt_17CellRadiusMIN.tif,Sagemap_ShrubHt_17CellRadiusMIN,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_ShrubHt_17CellRadiusSTD.tif,Sagemap_ShrubHt_17CellRadiusSTD,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_ShrubHt_33CellRadiusAVG.tif,Sagemap_ShrubHt_33CellRadiusAVG,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_ShrubHt_33CellRadiusMAX.tif,Sagemap_ShrubHt_33CellRadiusMAX,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_ShrubHt_33CellRadiusMIN.tif,Sagemap_ShrubHt_33CellRadiusMIN,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_ShrubHt_33CellRadiusSTD.tif,Sagemap_ShrubHt_33CellRadiusSTD,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_ShrubHt_7CellRadiusAVG.tif,Sagemap_ShrubHt_7CellRadiusAVG,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_ShrubHt_7CellRadiusMAX.tif,Sagemap_ShrubHt_7CellRadiusMAX,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_ShrubHt_7CellRadiusMIN.tif,Sagemap_ShrubHt_7CellRadiusMIN,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_ShrubHt_7CellRadiusSTD.tif,Sagemap_ShrubHt_7CellRadiusSTD,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Shrub_17CellRadiusAVG.tif,Sagemap_Shrub_17CellRadiusAVG,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Shrub_17CellRadiusMAX.tif,Sagemap_Shrub_17CellRadiusMAX,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Shrub_17CellRadiusMIN.tif,Sagemap_Shrub_17CellRadiusMIN,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Shrub_17CellRadiusSTD.tif,Sagemap_Shrub_17CellRadiusSTD,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Shrub_33CellRadiusAVG.tif,Sagemap_Shrub_33CellRadiusAVG,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Shrub_33CellRadiusMAX.tif,Sagemap_Shrub_33CellRadiusMAX,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Shrub_33CellRadiusMIN.tif,Sagemap_Shrub_33CellRadiusMIN,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Shrub_33CellRadiusSTD.tif,Sagemap_Shrub_33CellRadiusSTD,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Shrub_7CellRadiusAVG.tif,Sagemap_Shrub_7CellRadiusAVG,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Shrub_7CellRadiusMAX.tif,Sagemap_Shrub_7CellRadiusMAX,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Shrub_7CellRadiusMIN.tif,Sagemap_Shrub_7CellRadiusMIN,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\Sagemap_Shrub_7CellRadiusSTD.tif,Sagemap_Shrub_7CellRadiusSTD,PygmyRabbit,Sagemap Products,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\WellsOfInterest_PD_17CellRadius.tif,WellsOfInterest_PD_17CellRadius,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\WellsOfInterest_PD_33CellRadius.tif,WellsOfInterest_PD_33CellRadius,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\WellsOfInterest_PD_7CellRadius.tif,WellsOfInterest_PD_7CellRadius,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\WY_TransLines_ESRI_1000mLD.tif,WY_TransLines_ESRI_1000mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\WY_TransLines_ESRI_200mLD.tif,WY_TransLines_ESRI_200mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\WY_TransLines_ESRI_500mLD.tif,WY_TransLines_ESRI_500mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\WY_TransLines_FEMA_1000mLD.tif,WY_TransLines_FEMA_1000mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\WY_TransLines_FEMA_115_1000mLD.tif,WY_TransLines_FEMA_115_1000mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\WY_TransLines_FEMA_115_200mLD.tif,WY_TransLines_FEMA_115_200mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\WY_TransLines_FEMA_115_500mLD.tif,WY_TransLines_FEMA_115_500mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\WY_TransLines_FEMA_138_1000mLD.tif,WY_TransLines_FEMA_138_1000mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\WY_TransLines_FEMA_138_200mLD.tif,WY_TransLines_FEMA_138_200mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\WY_TransLines_FEMA_138_500mLD.tif,WY_TransLines_FEMA_138_500mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\WY_TransLines_FEMA_200mLD.tif,WY_TransLines_FEMA_200mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\WY_TransLines_FEMA_230_1000mLD.tif,WY_TransLines_FEMA_230_1000mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\WY_TransLines_FEMA_230_200mLD.tif,WY_TransLines_FEMA_230_200mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\WY_TransLines_FEMA_230_500mLD.tif,WY_TransLines_FEMA_230_500mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\WY_TransLines_FEMA_345_1000mLD.tif,WY_TransLines_FEMA_345_1000mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\WY_TransLines_FEMA_345_200mLD.tif,WY_TransLines_FEMA_345_200mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\WY_TransLines_FEMA_345_500mLD.tif,WY_TransLines_FEMA_345_500mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\WY_TransLines_FEMA_500mLD.tif,WY_TransLines_FEMA_500mLD,PygmyRabbit,Anthropogenic,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_Aspect_1_8.tif,_30m_Aspect_1_8,PygmyRabbit,Elevation / Aspect / Slope,Y
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_Aspect_1_8_17CellRadiusMAJ.tif,_30m_Aspect_1_8_17CellRadiusMAJ,PygmyRabbit,Elevation / Aspect / Slope,Y
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_Aspect_1_8_33CellRadiusMAJ.tif,_30m_Aspect_1_8_33CellRadiusMAJ,PygmyRabbit,Elevation / Aspect / Slope,Y
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_Aspect_1_8_3X3MAJ.tif,_30m_Aspect_1_8_3X3MAJ,PygmyRabbit,Elevation / Aspect / Slope,Y
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_Aspect_1_8_7CellRadiusMAJ.tif,_30m_Aspect_1_8_7CellRadiusMAJ,PygmyRabbit,Elevation / Aspect / Slope,Y
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_DEM.tif,_30m_DEM,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_DEM_17CellRadiusAVG.tif,_30m_DEM_17CellRadiusAVG,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_DEM_17CellRadiusMAX.tif,_30m_DEM_17CellRadiusMAX,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_DEM_17CellRadiusMIN.tif,_30m_DEM_17CellRadiusMIN,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_DEM_33CellRadiusAVG.tif,_30m_DEM_33CellRadiusAVG,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_DEM_33CellRadiusMAX.tif,_30m_DEM_33CellRadiusMAX,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_DEM_33CellRadiusMIN.tif,_30m_DEM_33CellRadiusMIN,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_DEM_3X3AVG.tif,_30m_DEM_3X3AVG,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_DEM_3X3MAX.tif,_30m_DEM_3X3MAX,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_DEM_3X3MIN.tif,_30m_DEM_3X3MIN,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_DEM_7CellRadiusAVG.tif,_30m_DEM_7CellRadiusAVG,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_DEM_7CellRadiusMAX.tif,_30m_DEM_7CellRadiusMAX,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_DEM_7CellRadiusMIN.tif,_30m_DEM_7CellRadiusMIN,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_Slope.tif,_30m_Slope,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_Slope_17CellRadiusAVG.tif,_30m_Slope_17CellRadiusAVG,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_Slope_17CellRadiusMAX.tif,_30m_Slope_17CellRadiusMAX,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_Slope_17CellRadiusMIN.tif,_30m_Slope_17CellRadiusMIN,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_Slope_33CellRadiusAVG.tif,_30m_Slope_33CellRadiusAVG,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_Slope_33CellRadiusMAX.tif,_30m_Slope_33CellRadiusMAX,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_Slope_33CellRadiusMIN.tif,_30m_Slope_33CellRadiusMIN,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_Slope_3X3AVG.tif,_30m_Slope_3X3AVG,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_Slope_3X3MAX.tif,_30m_Slope_3X3MAX,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_Slope_3X3MIN.tif,_30m_Slope_3X3MIN,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_Slope_7CellRadiusAVG.tif,_30m_Slope_7CellRadiusAVG,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_Slope_7CellRadiusMAX.tif,_30m_Slope_7CellRadiusMAX,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_Slope_7CellRadiusMIN.tif,_30m_Slope_7CellRadiusMIN,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_SRI.tif,_30m_SRI,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_SRI_17CellRadiusAVG.tif,_30m_SRI_17CellRadiusAVG,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_SRI_33CellRadiusAVG.tif,_30m_SRI_33CellRadiusAVG,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_SRI_3X3AVG.tif,_30m_SRI_3X3AVG,PygmyRabbit,Elevation / Aspect / Slope,N
+J:\Projects\PygmyRabbit_Germaine\VisTrails\AllPredictors\_30m_SRI_7CellRadiusAVG.tif,_30m_SRI_7CellRadiusAVG,PygmyRabbit,Elevation / Aspect / Slope,N
