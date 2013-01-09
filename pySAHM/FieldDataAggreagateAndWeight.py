@@ -262,6 +262,8 @@ class FieldDataQuery(object):
                         count += 1
                     if int(float(v[i][2])) == 0:
                         numAbsense += 1
+                    else:
+                        outValue = int(float(v[i][2]))
                 
                 outputLine[0] = x
                 outputLine[1] = y
@@ -273,7 +275,7 @@ class FieldDataQuery(object):
                 elif numAbsense > 0:
                     outputLine[2] = 0
                 else:
-                    outputLine[2] = -9999
+                    outputLine[2] = outValue
                 
                 outputLine.append(frequency)
                 outputLine.append(total)
