@@ -122,10 +122,10 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
   ymin(RasterInfo) <- ymin(RasterInfo) + 0.5 * rs[2]
   ymax(RasterInfo) <- ymax(RasterInfo) + 0.5 * rs[2]
    }
-     browser()
+    
       # setting tile size
       MB.per.row<-dims[2]*nvars*32/8/1000/1024
-      if(MESS) MB.per.row<-MB.per.row*6 #use more blocks for mess
+      if(MESS) MB.per.row<-MB.per.row*8 #use more blocks for mess
       nrows<-min(round(tsize/MB.per.row),dims[1])
       bs<-c(nrows,dims[2])
       chunksize<-bs[1]*bs[2]
@@ -147,8 +147,8 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
            if(MESS) warning("Maxlike mess option currently nonfuctional") 
            return(0) 
       }
- 
   #for debugging I'm always using multiple cores
+ 
   if(tr$n<10 | getRversion()<2.14){ #multicore is slower for small tiffs so we won't do it and the library is not available prior to 2.14
     parRaster(start.tile=1,dims=dims,
       tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
