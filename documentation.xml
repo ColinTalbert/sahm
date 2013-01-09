@@ -1642,7 +1642,7 @@ Note - The projection and coordinate system used in the template file must match
         <PortName>FD_EPSG_projection</PortName>
         <Definition>This optional parameter is a means of specifying the datum and projection information that the field data X and Y locations are in.  If this parameter is supplied the point locations will be transformed to the datum projection of the template layer.  Otherwise it will be assumed that the points and template are in the same projection and datum.  The value to enter in this port must be a valid EPSG code, see below.
 
-EPSG codes are numbers representing all commonly used geographic and projected coordinate systems.  These are generally 4 to 6 digit numbers.  For example 4326 represents geographic WGS84 data, 4260 represents geographic NAD83, 26912 represents NAD83 / UTM zone 12N, etc.  See the options below for a list of ways to lookup EPSG codes.</Definition>
+EPSG codes are numbers representing all commonly used geographic and projected coordinate systems.  These are generally 4 to 6 digit numbers.  For example 4326 represents geographic WGS84 data, 4269 represents geographic NAD83, 26912 represents NAD83 / UTM zone 12N, etc.  See the options below for a list of ways to lookup EPSG codes.</Definition>
         <Mandatory>False</Mandatory>
         <Default>None, This assumes that the points are in the same coordinate system as your template layer.</Default>
         <Options>

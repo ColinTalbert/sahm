@@ -263,6 +263,8 @@ class FieldDataQuery(object):
                     if int(float(v[i][2])) == 0:
                         numAbsense += 1
                     else:
+                        #outValue can be either -9999 (background) or 
+                        #-9998 (psuedoabsence) the last one 
                         outValue = int(float(v[i][2]))
                 
                 outputLine[0] = x
