@@ -46,14 +46,13 @@ factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.
    writeLoc<-ifelse((start.tile-1)==0,tr$row[i],tr$row[i]-sum(tr$nrows[1:(start.tile-1)]))
        temp <- data.frame(matrix(ncol=nvars.final,nrow=tr$nrows[i]*dims[2]))
        names(temp) <- vnames.final.mod
-      browser()  
-       # fill temp data frame         
+       # fill temp data frame 
+       browser()        
     for(k in 1:nvars.final) 
          temp[,k]<- getValuesBlock(raster(fullnames[match(vnames.final.mod[k],vnames)]), row=tr$row[i], nrows=tr$nrows[i])
      if(MESS){
          pred.rng<-rep(NA,nrow(temp))
-         pred.rng[complete.cases(temp)]<-apply(temp[complete.cases(temp),],1,CalcMESS,train.dat=train.dat)
-         pred.rng<-unlist(pred.rng)
+         pred.rng[complete.cases(temp)]<-CalcMESS(temp[complete.cases(temp),],train.dat=train.dat)
          names(pred.rng)[names(pred.rng)==""]<-NA
      }
    if(length(vnames)==1) names(temp)=vnames
