@@ -59,13 +59,14 @@ FitModels(ma.name=input.file,
 ##MARS
 
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_FinalTest\\CovariateCorrelationOutputMDS_initial.csv"
- 
+start.time<-Sys.time() 
 FitModels(ma.name=input.file,
             output.dir=output.dir,
             response.col=rc,make.p.tif=T,make.binary.tif=T,
-            mars.degree=1,mars.penalty=2,debug.mode=T,script.name="mars",opt.methods=2,MESS=T)
-
-EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,make.binary.tif=TRUE,make.p.tif=TRUE,MESS=TRUE)
+            mars.degree=1,mars.penalty=2,debug.mode=T,script.name="mars",opt.methods=2,MESS=T,ScriptPath=ScriptPath)
+total.time<-Sys.time()-start.time
+total.time
+EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=FALSE)
 
 ##GLM
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_condor\\modelSelection_cv_3.csv"
@@ -86,12 +87,12 @@ input.file="C:\\VisTrails\\mtalbert_20110504T132851\\readMaTests\\PsdoAbsSplitCr
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,
-      response.col=rc,make.p.tif=T,make.binary.tif=T,
+      response.col=rc,make.p.tif=F,make.binary.tif=F,
           debug.mode=F,opt.methods=2,script.name="rf",
 responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
 samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
 localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=NULL,norm.votes=TRUE,
-do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,MESS=TRUE,ScriptPath=ScriptPath)
+do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,MESS=FALSE,ScriptPath=ScriptPath)
 
 
 rc="responseBinary"
@@ -105,7 +106,7 @@ FitModels(ma.name=input.file,
           simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
           bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,MESS=F)
 
-EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=TRUE,new.tifs="I:\\VisTrails\\WorkingFiles\\workspace\\_applyModel\\Error\\MergedDataset_10.csv",produce.metrics=TRUE)
+EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=TRUE,produce.metrics=TRUE)
 
 #Maxlike
 input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\CovariateCorrelationOutputMDS_initial.csv"

@@ -90,7 +90,7 @@ on.exit(detach(out$input))
                  mod.pval<-aggregate(dev.data[,4],list(Var=dev.data$variable),FUN=mean)
                  var.count<-table(dev.data[,1])
                  fit_contribs$deviance.table<-data.frame(cbind("mean delta dev"=round(delta_dev[,2],digits=4),
-                            "mean df"=round(mod.df[,2],digits=2),"mean p-value"=round(mod.pval[,2],digits=6),"times in model"=var.count[match(delta_dev$Var,names(var.count))]))
+                            "mean df"=-round(mod.df[,2],digits=2),"mean p-value"=signif(mod.pval[,2],digits=6),"times in model"=var.count[match(delta_dev$Var,names(var.count))]))
                  x<-fit_contribs$deviance.table
           } else{
                 x<-fit_contribs[[1]][[2]]
