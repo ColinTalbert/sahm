@@ -927,3 +927,10 @@ def mosaicAllTifsInFolder(inDir, outFileName):
     args = ["placeholder", "-o", outFileName] + onlyfiles
     gdal.DontUseExceptions()
     gdal_merge.main(args)
+    
+def waitForProcessesToFinish(processQueue, maxCount=1):
+    while len(processQueue) >= maxCount:
+            time.sleep(1)
+            for process in processQueue:
+                if process.poll() is not None:
+                    processQueue.remove(process)

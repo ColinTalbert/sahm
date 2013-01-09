@@ -28,7 +28,7 @@ class MAXENTRunner(object):
         self.logger = None
         self.testKey = 'test'
         self.subRun = False
-
+        self.singleThread = True
 
 
     def run(self):
@@ -75,7 +75,7 @@ class MAXENTRunner(object):
             jar = '"' + os.path.join(self.maxentpath, 'maxent.jar') + '"'
         else:
             jar = '"' + self.maxentpath + '"'
-        self.run_cmd_line_jar(jar, strargs)
+        return self.run_cmd_line_jar(jar, strargs)
 
 
 
@@ -85,17 +85,20 @@ class MAXENTRunner(object):
          '-jar',
          jar_name] + args)
         self.writetolog('    running:  ' + cmd, True, False)
-        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        self.writetolog('    Finished running:  ', True, False)
-        ret = p.communicate()
-        self.writetolog('    Maxent strOut:  ' + str(ret[0]))
-        if ret[1] is not None:
-            msg = 'An error was encountered running the Maxent jar file.  The error message is below - \n'
-            msg += ret[1]
-            writetolog(msg)
-            raise RuntimeError, msg
-        del ret
-
+        if self.singleThread:
+            proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            self.writetolog('    Finished running:  ', True, False)
+            ret = proc.communicate()
+            self.writetolog('    Maxent strOut:  ' + str(ret[0]))
+            if ret[1] is not None:
+                msg = 'An error was encountered running the Maxent jar file.  The error message is below - \n'
+                msg += ret[1]
+                writetolog(msg)
+                raise RuntimeError, msg
+            del ret
+        else:
+             return subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        
 
 
     def loadArgs(self):
@@ -104,9 +107,6 @@ class MAXENTRunner(object):
         self.args = {}
         for row in argsReader:
             self.args[row[0]] = row[1]
-
-
-
 
     def validateInputs(self):
         if not os.path.exists(self.argsCSV):
@@ -132,8 +132,6 @@ class MAXENTRunner(object):
         if self.logger is None:
             self.logger = utilities.logger(outDir, self.verbose)
         self.writetolog = self.logger.writetolog
-
-
 
     def prepInputs(self):
         """parses out input MDS file into the 1 to 3 SWD files that Maxent requires.
@@ -222,8 +220,6 @@ class MAXENTRunner(object):
                 self.args['outputgrids'] = 'false'
             return 
 
-
-
     def convertNA(self, vals):
         """Switches the NA value used in our R models
         to the value expected by Maxent
@@ -231,9 +227,6 @@ class MAXENTRunner(object):
         for (index, item,) in enumerate(vals):
             if item == 'NA':
                 vals[index] = '-9999'
-
-
-
 
     def usedIndexes(self, header1, header2):
         covariateIndexes = []
@@ -243,8 +236,6 @@ class MAXENTRunner(object):
 
         return covariateIndexes
 
-
-
     def usedValues(self, values, indexes):
         usedvals = []
         for i in indexes:
@@ -252,16 +243,11 @@ class MAXENTRunner(object):
 
         return usedvals
 
-
-
     def pullCategoricals(self, headerline):
         for item in headerline:
             if item.endswith('_categorical'):
                 if item not in self.categoricals:
                     self.categoricals.append(item)
-
-
-
 
     def isSWD(self, file):
         """Checks the format of a file to see if it is in the 
@@ -273,8 +259,6 @@ class MAXENTRunner(object):
             if header[0].lower() in ('species', 'full_name', 'fullname'):
                 return True
         return False
-
-
 
 
 def main(argv):
