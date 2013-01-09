@@ -54,6 +54,7 @@ import subprocess
 import traceback
 import random
 import copy
+import multiprocessing
 
 
 from core.modules.vistrails_module import Module, ModuleError, ModuleConnector
@@ -1811,41 +1812,52 @@ class MAXENT(Model):
         header1 = MDSreader.next()
         header2 = MDSreader.next()
         header3 = MDSreader.next()
+               
+               
                    
         if 'Split' in header1:
-             newLine = MDSreader.next()
-             ttList=["test","train"]
-             cvList=["NA"]
-             #find the first line of the mds that isn't na to determine if test/train or cv split 
-             while newLine[header1.index("Split")]=="NA":
-                newLine = MDSreader.next()
-                
-               #loop through the mds and fit a maxent model withholding each new cv fold
-             if (not newLine[header1.index("Split")] in ttList): 
-                cvMaxent = copy.deepcopy(ourMaxent)
-                cvMaxent.subRun=True
-                for row in MDSreader:
-                    if (not row[header1.index("Split")] in cvList):
-                        cvMaxent.testKey = row[header1.index("Split")]
-                        cvMaxent.outputDir = ourMaxent.outputDir + "\\cvSplit" + cvMaxent.testKey
-                        os.mkdir(cvMaxent.outputDir)
-                        cvList.append(row[header1.index("Split")])
-                        try:
-                            #cvMaxent.run()
-                            pass
-                        except TrappedError as e:
-                            raise ModuleError(self, e.message)  
-                        except:
-                            utils.informative_untrapped_error(self, "Maxent")      
-                #here we need to run Maxent without the test split csv which breaks it 
-                ourMaxent.testKey = None
-                     
+            if configuration.cur_processing_mode == "multiple cores asynchronously":
+                coreCount = multiprocessing.cpu_count() - 1 
+                processQueue = []
+            else:
+                coreCount = 1
+                processQueue = []
+             
+            newLine = MDSreader.next()
+            ttList=["test","train"]
+            cvList=["NA"]
+            #find the first line of the mds that isn't na to determine if test/train or cv split 
+            while newLine[header1.index("Split")]=="NA":
+               newLine = MDSreader.next()
+               
+              #loop through the mds and fit a maxent model withholding each new cv fold
+            if (not newLine[header1.index("Split")] in ttList): 
+               cvMaxent = copy.deepcopy(ourMaxent)
+               cvMaxent.subRun=True
+               for row in MDSreader:
+                   if (not row[header1.index("Split")] in cvList):
+                       cvMaxent.testKey = row[header1.index("Split")]
+                       cvMaxent.outputDir = ourMaxent.outputDir + "\\cvSplit" + cvMaxent.testKey
+                       os.mkdir(cvMaxent.outputDir)
+                       cvList.append(row[header1.index("Split")])
+                       try:
+                           #if we're running to many jobs wait for one to finish
+                           utils.waitForProcessesToFinish(processQueue, coreCount)
+                           #if cvMaxent is set to singleThread = false run returns a running process
+                           cvMaxent.singleThread = False
+                           processQueue.append(cvMaxent.run())
+                       except TrappedError as e:
+                           raise ModuleError(self, e.message)  
+                       except:
+                           utils.informative_untrapped_error(self, "Maxent")      
+               #here we need to run Maxent without the test split csv which breaks it 
+               ourMaxent.testKey = None
+               utils.waitForProcessesToFinish(processQueue, coreCount)
             
         #maxentrunner will remove a regular test split on it's own 
         #as well as an evaluation split so just run it
         try:
-                #ourMaxent.run()
-                pass
+                ourMaxent.run()
         except TrappedError as e:
             raise ModuleError(self, e.message)  
         except:
@@ -1873,8 +1885,6 @@ class MAXENT(Model):
         self.setResult("report", output_file)
 
         writetolog("Finished Maxent widget", True)
-
-        
         
        
 def load_max_ent_params():    
@@ -2127,13 +2137,12 @@ _modules = generate_namespaces({'DataInput': [
                                           ]
                                 })
 
-#from core.upgradeworkflow import UpgradeWorkflowHandler
-#
-#def handle_module_upgrade_request(controller, module_id, pipeline):
-#    module_remap = {'Tools|MDSBuilder':
-#                     [(None, '1.0.1', 'Tools|MDSBuilder', 
-#                          {'dst_port_remap': {'backgroundpointCount': 'backgroundPointCount'} })]}
-#    
-#    return UpgradeWorkflowHandler.remap_module(controller, module_id, 
-#                                               pipeline, module_remap)
+from core.upgradeworkflow import UpgradeWorkflowHandler
+
+def handle_module_upgrade_request(controller, module_id, pipeline):    
+    module_remap = {'Tools|BackgroundSurfaceGenerator':
+                     [(None, '1.0.2', 'Tools|BackgroundSurfaceGenerator', 
+                          {'dst_port_remap': {'bias': 'continuous'} })]}
+    return UpgradeWorkflowHandler.remap_module(controller, module_id, pipeline,
+                                             module_remap)
 
