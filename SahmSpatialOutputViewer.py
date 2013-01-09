@@ -199,6 +199,8 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
             result = os.path.join(session_folder, fname)
             if os.path.exists(result):
                 return result
+            elif os.path.exists(originalMDS):
+                return originalMDS
             else:
                 raise RuntimeError('Valid input MDS file not found in Model text output.')
         except IndexError:

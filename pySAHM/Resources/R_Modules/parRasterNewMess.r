@@ -1,9 +1,11 @@
-parRaster<-function(start.tile,dims,tr,MESS,nvars,fullnames,nvars.final,vnames,NAval,factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.bin,thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth) {
+parRaster<-function(start.tile,dims,tr,MESS,nvars,fullnames,nvars.final,vnames,NAval,
+factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.bin,thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth) {
     #loading code and libraries that are needed
     setwd(file.path(ScriptPath))
     source("pred.fct.r")
     source("chk.libs.r")
-    source("CalcMESS.r")
+    source("MessCalculation.r")
+    #source("CalcMESS.r")
     if(!is.null(residSmooth)) source("Pred.Surface.r")
     source(paste(toupper(Model),".helper.fcts.r",sep=""))
    
@@ -40,24 +42,23 @@ parRaster<-function(start.tile,dims,tr,MESS,nvars,fullnames,nvars.final,vnames,N
     }
    
  for (i in start.tile:min(start.tile+nToDo-1,length(tr$row))){
- capture.output(cat(paste("starting tile", i,Sys.time(),"\n")),file=outtext,append=TRUE)
+   capture.output(cat(paste("starting tile", i,Sys.time(),"\n")),file=outtext,append=TRUE)
    #alter the write start location because we always start at position 1
    writeLoc<-ifelse((start.tile-1)==0,tr$row[i],tr$row[i]-sum(tr$nrows[1:(start.tile-1)]))
        temp <- data.frame(matrix(ncol=nvars.final,nrow=tr$nrows[i]*dims[2]))
        names(temp) <- vnames.final.mod
         
        # fill temp data frame         
-      for(k in 1:nvars.final) 
-           temp[,k]<- getValuesBlock(raster(fullnames[match(vnames.final.mod[k],vnames)]), row=tr$row[i], nrows=tr$nrows[i])
-             if(MESS){
-             pred.rng<-temp
-             for(k in 1:nvars.final){
-                        if(nvars.final>1) pred.rng[,k]<-mapply(CalcMESS,tiff.entry=temp[,match(vnames.final.mod[k],names(temp))],MoreArgs=list(pred.vect=train.dat[,k]))
-                        else pred.rng<-mapply(CalcMESS,tiff.entry=temp,MoreArgs=list(pred.vect=pred.range))
-                         }      
-                      }
-                if(length(vnames)==1) names(temp)=vnames
-    temp[temp==NAval] <- NA # replace missing values #
+    for(k in 1:nvars.final) 
+         temp[,k]<- getValuesBlock(raster(fullnames[match(vnames.final.mod[k],vnames)]), row=tr$row[i], nrows=tr$nrows[i])
+     if(MESS){
+         pred.rng<-rep(NA,nrow(temp))
+         pred.rng[complete.cases(temp)]<-apply(temp[complete.cases(temp),],1,CalcMESS,train.dat=train.dat)
+         pred.rng<-unlist(pred.rng)
+         names(pred.rng)[names(pred.rng)==""]<-NA
+     }
+   if(length(vnames)==1) names(temp)=vnames
+   temp[temp==NAval] <- NA # replace missing values #
         if(sum(!is.na(factor.levels))){
             factor.cols <- match(names(factor.levels),names(temp))
             if(sum(!is.na(factor.cols))>0){
@@ -71,21 +72,11 @@ parRaster<-function(start.tile,dims,tr,MESS,nvars,fullnames,nvars.final,vnames,N
         preds<-matrix(data=NA,nrow=dims[2],ncol=tr$nrows[i]),
         preds <- t(matrix(pred.fct(model,temp,Model),ncol=dims[2],byrow=T)))
       
-       
         preds[is.na(preds)]<-NAval
         
-        ## Writing to the rasters u
-         f<-function(x){
-         if(any(is.na(x))) return(NA)
-         a<-which(x==min(x),arr.ind=TRUE)
-         if(length(a>1)) a<-sample(a,size=1)
-         return(a)
-        }
         if(MESS) {
-        MessRaster<-writeValues(MessRaster,apply(pred.rng,1,min), writeLoc)
-        if(!is.null(dim(pred.rng)[2])) a<-apply(as.matrix(pred.rng),1,f)
-        else a<-rep(1,times=length(pred.rng))
-          ModRaster<-writeValues(ModRaster,a, writeLoc)
+          MessRaster<-writeValues(MessRaster,pred.rng, writeLoc)
+          ModRaster<-writeValues(ModRaster,names(pred.rng), writeLoc)
         }
           if(make.binary.tif) binaryRaster<-writeValues(binaryRaster,(preds>thresh),writeLoc)
        continuousRaster <- writeValues(continuousRaster,preds,writeLoc)

@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-## Copyright (C) 2010-2012, USGS Fort Collins Science Center. 
+## Copyright (C) 20010-2012, USGS Fort Collins Science Center. 
 ## All rights reserved.
 ## Contact: talbertc@usgs.gov
 ##
@@ -42,28 +42,55 @@
 ## and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
-chk.libs <- function(Model){
-#Checks libraries for many functions I should probably pass just the list of libs to check but this helps me update 
-#documentation on all libraries required by SAHM 
-#Written by Marian Talbert 2/2012
-     if(Model=="PairsExplore") libs=list("gam")
-     if(Model=="Pred.inspect") libs=list("raster","gam")
-     if(Model=="mars")        libs<-list("PresenceAbsence","rgdal","sp","survival","mda","raster","tcltk2","foreign","ade4","ROCR","ncf")
-     if(Model=="glm")         libs<-list("PresenceAbsence","rgdal","sp","survival","tools","raster","tcltk2","foreign","ade4","ROCR","ncf")
-     if(Model=="rf")          libs<-list("randomForest","PresenceAbsence","rgdal","sp","raster","tcltk2","foreign","ade4","ROCR","ncf")
-     if(Model=="gam")          libs<-list("gam","PresenceAbsence","rgdal","sp","raster","tcltk2","foreign","ade4","ROCR","ncf")
-     if(Model=="ann")          libs<-list("nnet","PresenceAbsence","rgdal","sp","raster","tcltk2","foreign","ade4","ROCR","ncf")
-     if(Model=="brt")         libs<-list("PresenceAbsence","rgdal","sp","survival","lattice","raster","tcltk2","foreign","ade4","gbm","ROCR","ncf")
-     if(Model=="maxent")         libs<-list("PresenceAbsence","rgdal","sp","survival","lattice","raster","tcltk2","foreign","ade4","ROCR","ncf")
-     if(Model=="maxlike")         libs<-list("PresenceAbsence","rgdal","sp","survival","lattice","raster","tcltk2","foreign","ade4","maxlike","ROCR","ncf")
-     if(Model=="GenPsdAbs")   libs<-list("adehabitatHR","ks","raster","rgdal","sp","spatstat")
-      lib.mssg <- unlist(suppressMessages(suppressWarnings(lapply(libs,require,quietly = T, warn.conflicts=F,character.only=T))))
-      if(any(!lib.mssg)){
-            install.packages(unlist(libs[!lib.mssg]), repos = "http://cran.r-project.org")
-            lib.mssg <- unlist(suppressMessages(suppressWarnings(lapply(libs,require,quietly = T, warn.conflicts=F,character.only=T))))
-            }
-        if(any(!lib.mssg)) stop(paste("\nthe following package(s) could not be loaded: ",paste(unlist(libs[!lib.mssg]),sep="")))
+make.p.tif=T
+make.binary.tif=T
+seed=NULL
+opt.methods=2
+MESS=FALSE
 
-      }
+spline.deg=3
+
+# Interpret command line argurments #
+# Make Function Call #
+Args <- commandArgs(trailingOnly=FALSE)
+
+    for (i in 1:length(Args)){
+     if(Args[i]=="-f") ScriptPath<-Args[i+1]
+     }
+
+    for (arg in Args) {
+    	argSplit <- strsplit(arg, "=")
+    	argSplit[[1]][1]
+    	argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="c") csv <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="o") output <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
+   		if(argSplit[[1]][1]=="mpt") make.p.tif <- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="om")  opt.methods <- as.numeric(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="mes")  MESS <-as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="seed")  seed <- as.numeric(argSplit[[1]][2])
+ 			
+ 		  if(argSplit[[1]][1]=="sp")  spline.deg <- argSplit[[1]][2])
+ 		  
+ 			
+    }
+
+ScriptPath<-dirname(ScriptPath)
+source(file.path(ScriptPath,"LoadRequiredCode.r"))
+source(file.path(ScriptPath,"BRT.helper.fcts.r))
+
+
+
+    FitModels(ma.name=csv,
+		tif.dir=NULL,
+		output.dir=output,
+		response.col=responseCol,
+		make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
+		debug.mode=F,script.name="gam",
+		seed=seed,
+    opt.methods=opt.methods,MESS=MESS,spline.deg=spline.deg
+    )
+
 
 

@@ -81,13 +81,13 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
     #
 
     # Start of function #
-    
+     
     if(is.null(factor.levels)) factor.levels<-NA
     MESS=out$input$MESS
     if(is.null(thresh)) thresh<-.5
     nvars<-length(vnames)
     vnames.final.mod<-out$mods$vnames
-    if(any(out$mods$vnames%in%names(factor.levels))) vnames.final.mod<-vnames.final.mod[!out$mods$vnames%in%names(factor.levels)]
+  
     nvars.final<-length(vnames.final.mod)
   # setup up output raster to match input raster
   names(filenames)<-sub("_categorical","",names(filenames))
@@ -122,10 +122,10 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
   ymin(RasterInfo) <- ymin(RasterInfo) + 0.5 * rs[2]
   ymax(RasterInfo) <- ymax(RasterInfo) + 0.5 * rs[2]
    }
-  
+    
       # setting tile size
       MB.per.row<-dims[2]*nvars*32/8/1000/1024
-      if(MESS) MB.per.row<-MB.per.row*3 #use more blocks for mess
+      if(MESS) MB.per.row<-MB.per.row*8 #use more blocks for mess
       nrows<-min(round(tsize/MB.per.row),dims[1])
       bs<-c(nrows,dims[2])
       chunksize<-bs[1]*bs[2]
@@ -148,13 +148,14 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
            return(0) 
       }
   #for debugging I'm always using multiple cores
-  #if(tr$n<10 | getRversion()<2.14){ #multicore is slower for small tiffs so we won't do it and the library is not available prior to 2.14
-  #  parRaster(start.tile=1,nrows=nrows,dims=dims,
-  #    tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
-  #    model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,outfile.bin=outfile.bin,thresh=thresh,nToDo=tr$n,ScriptPath=out$       
-  #    input$ScriptPath,vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct)
-  # }
-  #if(tr$n>=10 & getRversion()>=2.14){
+ 
+  if(tr$n<10 | getRversion()<2.14){ #multicore is slower for small tiffs so we won't do it and the library is not available prior to 2.14
+    parRaster(start.tile=1,dims=dims,
+      tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
+      model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,outfile.bin=outfile.bin,thresh=thresh,nToDo=tr$n,ScriptPath=out$       
+      input$ScriptPath,vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct)
+   }
+  if(tr$n>=10 & getRversion()>=2.14){
       library(parallel)
       #create some temporary folders    
       if(out$input$make.p.tif)
@@ -168,14 +169,14 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
             }
        if(out$input$ResidMaps)
         dir.create(paste(out$input$output.dir,"\\ResidTiff",sep=""))
-        tile.start<-seq(from=1,to=tr$n,by=ceiling(tr$n/detectCores())) 
+        tile.start<-seq(from=1,to=tr$n,by=ceiling(tr$n/(detectCores()-1))) 
       cl <- makeCluster(detectCores()) 
-      parLapply(cl,X=tile.start,fun=parRaster,nrows=nrows,dims=dims,
+      parLapply(cl,X=tile.start,fun=parRaster,dims=dims,
          tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
          model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,
-         outfile.bin=outfile.bin,thresh=thresh,nToDo= ceiling(tr$n/detectCores()),ScriptPath=out$input$ScriptPath,
+         outfile.bin=outfile.bin,thresh=thresh,nToDo= ceiling(tr$n/(detectCores()-1)),ScriptPath=out$input$ScriptPath,
          vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct)
       stopCluster(cl)
-  #}
+  }
      return(0)
    }

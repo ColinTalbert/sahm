@@ -41,7 +41,6 @@
 ##
 ## Any use of trade, firm, or product names is for descriptive purposes only 
 ## and does not imply endorsement by the U.S. Government.
-##test
 ###############################################################################
 
 import csv
@@ -55,6 +54,7 @@ import subprocess
 import traceback
 import random
 import copy
+import multiprocessing
 
 
 from core.modules.vistrails_module import Module, ModuleError, ModuleConnector
@@ -571,7 +571,8 @@ class Model(Module):
     SAHM package. It is not intended for direct use or incorporation into
     the VisTrails workflow by the user.
     '''
-    _input_ports = [('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)'),
+    _input_ports = [('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':"['2']", 'optional':False}),
+                    ('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)'),
                     ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False})]
@@ -582,6 +583,7 @@ class Model(Module):
                      ('MessMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('MoDMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('modelEvalPlot', '(edu.utah.sci.vistrails.basic:File)'),
+#                     ('ResponseCurves', '(edu.utah.sci.vistrails.basic:File)'),
                      ('Text_Output', '(edu.utah.sci.vistrails.basic:File)')]
 
     port_map = {'mdsFile':('c', None, True),#These ports are for all Models
@@ -607,15 +609,23 @@ class Model(Module):
                        "FIT_GLM_pluggable.r":"glm",
                        "FIT_RF_pluggable.r":"rf",
                        "FIT_MARS_pluggable.r":"mars",
-                       "EvaluateNewData.r":"ApplyModel"}
+                       "EvaluateNewData.r":"ApplyModel",
+                       "WrapMaxent.r":"maxent",}
+        
         self.ModelAbbrev = ModelOutput[self.name]
         
-        self.output_dname = utils.mknextdir(prefix=self.ModelAbbrev + '_')
+        #maxent R and java output write to the same directory
+        if self.ModelAbbrev == "maxent":
+            self.output_dname=self.MaxentPath
+        else: 
+            self.output_dname = utils.mknextdir(prefix=self.ModelAbbrev + '_')   
         self.argsDict = utils.map_ports(self, self.port_map)
         
         self.argsDict['c'] = os.path.normpath(self.argsDict['c'])
 
         mdsFile = self.forceGetInputFromPort('mdsFile').name
+        if self.ModelAbbrev == "maxent":
+            self.argsDict['lam'] = self.MaxentPath
         
         if self.ModelAbbrev == 'brt' or \
             self.ModelAbbrev == 'rf':
@@ -647,7 +657,7 @@ class Model(Module):
         self.setResult("modelWorkspace", modelWorkspace)
         
     def setModelResult(self, filename, portname, arg_key=None):
-        outFileName = os.path.join(self.output_dname, "*" + filename)
+        outFileName = os.path.join(self.output_dname, self.ModelAbbrev + filename)
         required = not (self.argsDict.has_key(arg_key) and 
                         self.argsDict[arg_key].lower() == 'false')
         
@@ -671,8 +681,7 @@ class GLM(Model):
     __doc__ = GenModDoc.construct_module_doc('GLM')
     
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':"['2']", 'optional':False}),
-                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+    _input_ports.extend([('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                          ('SimplificationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["AIC"]', 'optional':True}),
                          ('SquaredTerms', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
                          ])
@@ -688,8 +697,7 @@ class RandomForest(Model):
     __doc__ = GenModDoc.construct_module_doc('RandomForest')
     
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["2"]', 'optional':False}),
-                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+    _input_ports.extend([('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                          ('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                          ('mTry', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["1"]', 'optional':True}),
                          ('nTrees', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
@@ -726,8 +734,7 @@ class MARS(Model):
     __doc__ = GenModDoc.construct_module_doc('MARS')
     
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["2"]', 'optional':False}),
-                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+    _input_ports.extend([('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                          ('MarsDegree', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["1"]', 'optional':True}),
                           ('MarsPenalty', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["2"]', 'optional':True}),
                           ])
@@ -777,8 +784,7 @@ class BoostedRegressionTree(Model):
     __doc__ = GenModDoc.construct_module_doc('BoostedRegressionTree')
     
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["2"]', 'optional':False}),
-                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+    _input_ports.extend([('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                          ('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ('TreeComplexity', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ('BagFraction', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.5"]', 'optional':True}),
@@ -816,7 +822,7 @@ class BackgroundSurfaceGenerator(Module):
                         ('method', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["KDE"]', 'optional':True}),
                         ('bandwidthOptimizationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["adhoc"]', 'optional':True}),
                         ('isopleth', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["95"]', 'optional':True}),
-                        ('bias', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True})]
+                        ('continuous', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True})]
     _output_ports = [("KDE", "(edu.utah.sci.vistrails.basic:File)")]
     
     @classmethod
@@ -832,7 +838,7 @@ class BackgroundSurfaceGenerator(Module):
             'method': ('method', None, True),
             'bandwidthOptimizationMethod': ('bandOptMeth', None, True),
             'isopleth': ('isopleth', None, True),
-            'bias': ('bias', utils.R_boolean, True)}
+            'continuous': ('bias', utils.R_boolean, True)}
         
         kde_params = utils.map_ports(self, port_map)
         
@@ -841,8 +847,8 @@ class BackgroundSurfaceGenerator(Module):
         outfName += "_" + kde_params["method"]
         if kde_params["method"] == "KDE":
             outfName += "_" + kde_params["bandOptMeth"]
-            if kde_params["bias"]:
-                outfName += "_bias"
+            if kde_params["continuous"]:
+                outfName += "_continuous"
             else:
                 outfName += "_iso" + str(kde_params["isopleth"])
         
@@ -856,7 +862,7 @@ class BackgroundSurfaceGenerator(Module):
                 "mth":kde_params["method"],
                 "bwopt":kde_params["bandOptMeth"],
                 "ispt":str(kde_params["isopleth"]),
-                "bias":kde_params["bias"]}
+                "continuous":kde_params["continuous"]}
 
         utils.runRScript("PseudoAbs.r", args, self)
         
@@ -1732,34 +1738,44 @@ class ProjectionLayers(Module):
         self.setResult("MDS", output_file)
         writetolog("Finished Select Projection Layers widget", True)
 
-class MAXENT(Module):
+class MAXENT(Model):
     '''
     
     '''
-
-    _output_ports = [("lambdas", "(edu.utah.sci.vistrails.basic:File)"),
+    _input_ports = list(Model._input_ports)
+    _input_ports.extend([('UseRMetrics', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
+                         ])
+    _output_ports = list(Model._output_ports)
+    _output_ports.extend([("lambdas", "(edu.utah.sci.vistrails.basic:File)"),
                      ("report", "(edu.utah.sci.vistrails.basic:File)"),
-                     ("roc", "(edu.utah.sci.vistrails.basic:File)")]
-
+                     ("roc", "(edu.utah.sci.vistrails.basic:File)")])
+    
+    def __init__(self):
+        global models_path
+        Model.__init__(self) 
+        self.name = 'WrapMaxent.r'
+        self.MaxentPath=""
+        #self.port_map.update({'LambdaDir':('lam', None, False), #This is a Maxent specific port
+         #                })
+        
     def compute(self):
         global maxent_path
 
-        writetolog("\nRunning Maxent Widget", True)
-
         ourMaxent = MaxentRunner.MAXENTRunner()
-        ourMaxent.outputDir = utils.mknextdir(prefix='maxentFiles_')
+        ourMaxent.outputDir = utils.mknextdir(prefix='maxent_')
         
-        ourMaxent.inputMDS = self.forceGetInputFromPort('inputMDS').name
+        ourMaxent.mdsFile = self.forceGetInputFromPort('mdsFile').name
         
         ourMaxent.maxentpath = maxent_path
         
         MaxentArgsCSV = os.path.join(ourMaxent.outputDir, "MaxentArgs.csv")
         
+            
         argWriter = csv.writer(open(MaxentArgsCSV, 'wb'))
         argWriter.writerow(['parameter','value'])
         for port in self._input_ports:
             #print port
-            if port[0] <> 'inputMDS' and port[0] <> 'projectionlayers':
+            if port[0] <> 'mdsFile' and port[0] <> 'projectionlayers':
                 if self.hasInputFromPort(port[0]):
                     port_val = self.getInputFromPort(port[0])
                     if port[1] == "(edu.utah.sci.vistrails.basic:Boolean)":
@@ -1785,17 +1801,74 @@ class MAXENT(Module):
             projlayers = ','.join([path.name for path in value])
             argWriter.writerow(['projectionlayers', projlayers])
             
-        argWriter.writerow(['inputMDS', ourMaxent.inputMDS])
+        argWriter.writerow(['mdsFile', ourMaxent.mdsFile])
         del argWriter
         ourMaxent.argsCSV = MaxentArgsCSV
         ourMaxent.logger = utils.getLogger()
+
+         
+         #Start marian adding junk to the code   
+        MDSreader = csv.reader(open(ourMaxent.mdsFile, 'r'))
+        header1 = MDSreader.next()
+        header2 = MDSreader.next()
+        header3 = MDSreader.next()
+               
+               
+                   
+        if 'Split' in header1:
+            if configuration.cur_processing_mode == "multiple cores asynchronously":
+                coreCount = multiprocessing.cpu_count() - 1 
+                processQueue = []
+            else:
+                coreCount = 1
+                processQueue = []
+             
+            newLine = MDSreader.next()
+            ttList=["test","train"]
+            cvList=["NA"]
+            #find the first line of the mds that isn't na to determine if test/train or cv split 
+            while newLine[header1.index("Split")]=="NA":
+               newLine = MDSreader.next()
+               
+              #loop through the mds and fit a maxent model withholding each new cv fold
+            if (not newLine[header1.index("Split")] in ttList): 
+               cvMaxent = copy.deepcopy(ourMaxent)
+               cvMaxent.subRun=True
+               for row in MDSreader:
+                   if (not row[header1.index("Split")] in cvList):
+                       cvMaxent.testKey = row[header1.index("Split")]
+                       cvMaxent.outputDir = ourMaxent.outputDir + "\\cvSplit" + cvMaxent.testKey
+                       os.mkdir(cvMaxent.outputDir)
+                       cvList.append(row[header1.index("Split")])
+                       try:
+                           #if we're running to many jobs wait for one to finish
+                           utils.waitForProcessesToFinish(processQueue, coreCount)
+                           #if cvMaxent is set to singleThread = false run returns a running process
+                           cvMaxent.singleThread = False
+                           processQueue.append(cvMaxent.run())
+                       except TrappedError as e:
+                           raise ModuleError(self, e.message)  
+                       except:
+                           utils.informative_untrapped_error(self, "Maxent")      
+               #here we need to run Maxent without the test split csv which breaks it 
+               ourMaxent.testKey = None
+               utils.waitForProcessesToFinish(processQueue, coreCount)
+            
+        #maxentrunner will remove a regular test split on it's own 
+        #as well as an evaluation split so just run it
         try:
-            ourMaxent.run()
+                ourMaxent.run()
         except TrappedError as e:
             raise ModuleError(self, e.message)  
         except:
             utils.informative_untrapped_error(self, "Maxent")
-        
+            #for debugging use this directory             
+#        ourMaxent.outputDir="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\maxent_20"
+        self.MaxentPath =  ourMaxent.outputDir 
+        #for now display R output only if there was a cv split we might want options
+        if len(cvList)>1: 
+            Model.compute(self)
+            return 
          #set outputs
         lambdasfile = os.path.join(ourMaxent.outputDir, ourMaxent.args["species_name"] + ".lambdas")
         output_file = utils.create_file_module(lambdasfile)
@@ -1813,6 +1886,7 @@ class MAXENT(Module):
 
         writetolog("Finished Maxent widget", True)
         
+       
 def load_max_ent_params():    
     maxent_fname = os.path.join(os.path.dirname(__file__), 'maxent.csv')
     csv_reader = csv.reader(open(maxent_fname, 'rU'))
@@ -1820,7 +1894,7 @@ def load_max_ent_params():
     csv_reader.next()
     input_ports = []
     
-    input_ports.append(('inputMDS', '(gov.usgs.sahm:MergedDataSet:Other)'))
+    #input_ports.append(('inputMDS', '(gov.usgs.sahm:MergedDataSet:Other)'))
     
     docs = {}
     basic_pkg = 'edu.utah.sci.vistrails.basic'
@@ -2063,13 +2137,12 @@ _modules = generate_namespaces({'DataInput': [
                                           ]
                                 })
 
-#from core.upgradeworkflow import UpgradeWorkflowHandler
-#
-#def handle_module_upgrade_request(controller, module_id, pipeline):
-#    module_remap = {'Tools|MDSBuilder':
-#                     [(None, '1.0.1', 'Tools|MDSBuilder', 
-#                          {'dst_port_remap': {'backgroundpointCount': 'backgroundPointCount'} })]}
-#    
-#    return UpgradeWorkflowHandler.remap_module(controller, module_id, 
-#                                               pipeline, module_remap)
+from core.upgradeworkflow import UpgradeWorkflowHandler
+
+def handle_module_upgrade_request(controller, module_id, pipeline):    
+    module_remap = {'Tools|BackgroundSurfaceGenerator':
+                     [(None, '1.0.2', 'Tools|BackgroundSurfaceGenerator', 
+                          {'dst_port_remap': {'bias': 'continuous'} })]}
+    return UpgradeWorkflowHandler.remap_module(controller, module_id, pipeline,
+                                             module_remap)
 

@@ -83,7 +83,7 @@ source(paste(ScriptPath,"CalcMESS.r",sep="\\"))
 source(paste(ScriptPath,"parRaster.r",sep="\\"))
 
 #Other utility functions
-source(paste(ScriptPath,"cv.fctNew.r",sep="\\"))
+source(paste(ScriptPath,"cv.fct.r",sep="\\"))
 source(paste(ScriptPath,"place.save.r",sep="\\"))
 source(paste(ScriptPath,"SplitBackground.r",sep="\\"))
 

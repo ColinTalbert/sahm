@@ -115,7 +115,7 @@ function (mars.glm.object,sp.no = 1, verbose = TRUE)
            }else new.model <- glm(y.data[,sp.no] ~ ., data=x.data.new, family = family)
 
       comparison <- anova(glm.model,new.model,test="Chisq")
-
+     
       df[i] <- comparison[2,3]
       delta.deviance[i] <- zapsmall(comparison[2,4],4)
       signif[i] <- zapsmall(comparison[2,5],6)

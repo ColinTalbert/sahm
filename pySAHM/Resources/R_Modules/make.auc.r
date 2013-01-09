@@ -43,7 +43,7 @@
 ###############################################################################
 
 make.auc.plot.jpg<-function(out=out){
-
+ 
   plotname<-paste(out$dat$bname,"_modelEvalPlot.jpg",sep="")
   calib.plot<-paste(out$dat$bname,"_CalibrationPlot.jpg",sep="")
   modelname<-toupper(out$input$model)
@@ -70,8 +70,8 @@ make.auc.plot.jpg<-function(out=out){
           graphics.off()
     }
 ################# Calculate all statistics on test\train or train\cv splits
-    
-   out$input$has.split<-(out$input$PsdoAbs & !out$input$script.name%in%c("glm","maxlike"))
+  
+   out$input$has.split<-(out$input$PsdoAbs & !out$input$script.name%in%c("glm","maxlike","maxent"))
   Stats<-lapply(inlst,calcStat,family=out$input$model.family,has.split=out$input$has.split)
 
 #################### Variable importance plots #####################
@@ -150,6 +150,7 @@ make.auc.plot.jpg<-function(out=out){
                              eval = Stats$test$calibration.stats,
                                 crossValidation =  apply(do.call("rbind",lapply(lst,function(lst){lst$calibration.stats})),2,mean))
      ## Calibration plot
+     options(warn=-1) #this often gives warnings about probabilities numerically 0 or 1
             a<-do.call("rbind",lapply(lst,function(lst){lst$auc.data}))
             if(out$input$PsdoAbs==TRUE) {
               
@@ -178,7 +179,7 @@ make.auc.plot.jpg<-function(out=out){
              }
             dev.off()
       }
-          
+     options(warn=0)     
    #Some residual plots for poisson data
     if(out$input$model.family%in%c("poisson")){
             jpeg(file=plotname)

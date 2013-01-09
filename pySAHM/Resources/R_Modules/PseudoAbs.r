@@ -211,7 +211,7 @@ Args <- commandArgs(trailingOnly=FALSE)
     method <- "KDE"
     bw.opt="adhoc"
     ispt=95
-    bias=FALSE
+    continuous=FALSE
     
     #replace the defaults with passed values
     for (arg in Args) {
@@ -223,7 +223,7 @@ Args <- commandArgs(trailingOnly=FALSE)
    	  if(argSplit[[1]][1]=="mth") method <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="bwopt") bw.opt <- argSplit[[1]][2]
       if(argSplit[[1]][1]=="ispt") ispt <- as.numeric(argSplit[[1]][2])
-      if(argSplit[[1]][1]=="bias") bias <- as.logical(argSplit[[1]][2])
+      if(argSplit[[1]][1]=="bias") continuous <- as.logical(argSplit[[1]][2])
       if(argSplit[[1]][1]=="tmplt") template<-argSplit[[1]][2]
      
     }
