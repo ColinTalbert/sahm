@@ -58,7 +58,7 @@ FitModels(ma.name=input.file,
             debug.mode=T,script.name="maxent",opt.methods=2,MESS=T,lambdas=lambdas.file)
 ##MARS
 
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_FinalTest\\CovariateCorrelationOutputMDS_initial.csv"
+input.file="J://Projects//Climate_RS_Comparison//Cheatgrass_VisTrails//WUS//NOV2012//ModelEvaluation_Split_1.csv"
 start.time<-Sys.time() 
 FitModels(ma.name=input.file,
             output.dir=output.dir,
@@ -84,16 +84,18 @@ FitModels(ma.name=input.file,
 #RF
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_condor\\rf_1\\modelSelection_cv_1.csv"
 input.file="C:\\VisTrails\\mtalbert_20110504T132851\\readMaTests\\PsdoAbsSplitCrossVal.csv"
+start.time<-Sys.time()
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,
       response.col=rc,make.p.tif=F,make.binary.tif=F,
-          debug.mode=F,opt.methods=2,script.name="rf",
+          debug.mode=T,opt.methods=2,script.name="rf",
 responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
 samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
 localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=NULL,norm.votes=TRUE,
-do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,MESS=FALSE,ScriptPath=ScriptPath)
-
+do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,MESS=F,ScriptPath=ScriptPath)
+total.time<-Sys.time()-start.time
+total.time
 
 rc="responseBinary"
 #BRT

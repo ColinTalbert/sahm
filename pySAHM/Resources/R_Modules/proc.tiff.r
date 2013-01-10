@@ -147,8 +147,8 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
            if(MESS) warning("Maxlike mess option currently nonfuctional") 
            return(0) 
       }
+     
   #for debugging I'm always using multiple cores
-    browser()
   if(tr$n<10 | getRversion()<2.14){ #multicore is slower for small tiffs so we won't do it and the library is not available prior to 2.14
     parRaster(start.tile=1,dims=dims,
       tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,

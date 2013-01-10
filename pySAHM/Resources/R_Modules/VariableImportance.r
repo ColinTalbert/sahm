@@ -7,7 +7,7 @@ VariableImportance<-function(Model,out,auc){
     resp<-lapply(out$dat$ma,"[",1)
     pred<-lapply(out$dat$ma,FUN=function(lst) lst[which(names(lst)=="pred",arr.ind=TRUE)]) 
     #for random forest I switch to in bag predictions here since I can't calculate oob predictions after permuting a predictor
-    #if(out$input$script.name=="rf") pred$train$pred<-pred.fct(model=out$mods$final,x=out$dat$ma$train$dat,Model=out$input$script.name)
+    if(out$input$script.name=="rf") pred$train$pred<-pred.fct(model=out$mods$final,x=out$dat$ma$train$dat,Model=out$input$script.name)
     for(j in 1:length(dat)){
       for (i in 1:length(out$mods$vnames)){
        indx<-match(out$mods$vnames[i],names(dat[[j]]))

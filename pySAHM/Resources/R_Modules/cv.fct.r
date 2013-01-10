@@ -140,7 +140,7 @@ for (i in 1:nk) {
               names(dat)<-names(data)
               
               # fit new model
-              cv.final.mod<-model.fit(dat=out$dat$ma$train$dat[model.mask,],out=out,Model=Model,weight=out$dat$ma$train$weight[model.mask],Fold=i)                        
+              cv.final.mod<-model.fit(dat=out$dat$ma$train$dat[model.mask,],out=out,Model=Model,weight=out$dat$ma$train$weight[model.mask],Fold=i)                       
               fitted.values[pred.mask]<-out$dat$ma[[i]]$pred<-pred.fct(model=cv.final.mod,x=xdat[pred.mask,],Model)
                     
                      out$dat$ma[[i]]$thresh <- as.numeric(optimal.thresholds(data.frame(ID=1:nrow(out$dat$ma$train$dat[model.mask,]),pres.abs=out$dat$ma$train$dat[model.mask,]$response,
