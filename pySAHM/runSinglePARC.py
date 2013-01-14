@@ -122,7 +122,7 @@ def main(args_in):
     
     ourPARC.parcFile([options.source, options.categorical, options.resampling, options.aggregation], options.dest)
 
-#    print "Finished successfully!"
+    print "Finished successfully!"
 
 def setupGDAL():
     parentDir = os.path.split(os.path.dirname(__file__))[0]
@@ -136,7 +136,11 @@ if __name__ == "__main__":
 
     try:
         main(sys.argv[1:])
-    except:
+    except Exception as e:
+        print e
+        import traceback
+        print traceback.format_exc()
+        sys.stderr.write(traceback.format_exc())
         print "Job failed!", sys.exc_info()[0]
     
 

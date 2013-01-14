@@ -54,6 +54,8 @@ _logfile = ''
 _verbose = False
 
 import subprocess
+import multiprocessing
+
 mosaicAllTifsInFolder = None
 
 class logger(object):
@@ -126,16 +128,20 @@ def isMDSFile(MDSFile):
     return True
     del MDSreader
 
-def process_waiter(popen, description, que):
-    try: 
-        popen.wait()     
-    finally: 
-        que.put( (description, popen.returncode) ) 
 
 def find_key(dic, val):
     """return the key of dictionary dic given the value
     from: http://www.daniweb.com/software-development/python/code/217019"""    
     return [k for k, v in dic.iteritems() if v == val][0]
+
+#parallelization, remote processing, etc utilites
+def process_waiter(popen, description, que):
+    '''This needs to be replaced with something that allow
+    '''
+    try: 
+        popen.wait()     
+    finally: 
+        que.put( (description, popen.returncode) ) 
 
 def runCondorPythonJob(args, workspace, prefix, wholeMachine=False):
     #replace all mappedDriveLetters in the argsDict with UNC paths
@@ -154,7 +160,8 @@ def runCondorPythonJob(args, workspace, prefix, wholeMachine=False):
     submitFile.write("Should_transfer_files   = no\n")
     submitFile.write("transfer_executable     = false\n")
     
-    machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151', 'igskbacbws425']
+    machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151a', 'igskbacbws425']
+#    machines = ['igskbacbwsvis3']
     reqsStr = 'Requirements            = (Machine == "'
     reqsStr += '.gs.doi.net" || Machine == "'.join(machines) + '.gs.doi.net")'
     if wholeMachine:
@@ -166,7 +173,7 @@ def runCondorPythonJob(args, workspace, prefix, wholeMachine=False):
     
     stdErrFname = os.path.join(workspace, prefix + "_stdErr.txt")
     stdOutFname = os.path.join(workspace, prefix + "_stdOut.txt")
-    logFname = os.path.join(workspace, "log.txt")
+    logFname = os.path.join(workspace, prefix + "_log.txt")
     submitFile.write("Output                  = " + replaceMappedDrives(stdOutFname) +"\n")
     submitFile.write("error                   = " + replaceMappedDrives(stdErrFname) +"\n")
     submitFile.write("log                     = " + replaceMappedDrives(logFname) +"\n")
@@ -190,26 +197,61 @@ def runCondorPythonJob(args, workspace, prefix, wholeMachine=False):
     os.chdir(curDir)        
     
 def replaceMappedDrives(inStr):
+    '''This function replaces all instances of each stored drive letter 
+    in the format  'i:\' with the full unc path.
+    Caution should be used with this function, especially with long input 
+    strings as the combination could occur in other contexts.
+    '''
     global UNCDrives
     for drive in UNCDrives.keys():
-        inStr = inStr.replace(drive.lower() + "\\", UNCDrives[drive] + "\\")
-        inStr = inStr.replace(drive.upper() + "\\", UNCDrives[drive] + "\\")
+        inStr = inStr.replace(drive.upper(), UNCDrives[drive])
     
     return inStr
     
    
 def storeUNCDrives():
+    '''Condor jobs are run on remote computers which are dynamically logged into.
+    Since this method does not map the the current users lettered drives we 
+    needed to implement a means of replacing the mapped drive letters in file names
+    with the fullly qualified unc path (ie replacing i:\ with \\igskbacb...\)
+    To do this we run the storeUNCDrives once when the sahm package loads.  
+    This function parses the 'net use' windows command line utility output to
+    extract and store the unc paths to all of the currently mapped unc drives.
+    '''
     global UNCDrives
     UNCDrives = {}
-    ret = subprocess.Popen(["net","use"], stdout=subprocess.PIPE, universal_newlines=True).communicate()[0].split("\n")
+    ret = subprocess.Popen(["net","use"], stdout=subprocess.PIPE, 
+                           universal_newlines=True).communicate()[0].split("\n")
     for line in ret:
         line = line.split()
         if line and line[0] in ["OK", "Disconnected"]:
             if len(line) > 2 and \
                 os.path.exists(line[2]):
-                UNCDrives[line[1]] = line[2]
+                UNCDrives[line[1].lower() + '\\'] = line[2] + "\\"
 
-
+def waitForProcessesToFinish(processQueue, maxCount=1):
+    '''Given a list of running processes and a maximum number of running processes
+    this function waits for enough of the processes have finished to have
+    the number of running jobs be less that the maximum number of jobs we want.
+    '''
+    while len(processQueue) > maxCount:
+            time.sleep(1)
+            for process in processQueue:
+                if process.poll() is not None:
+                    processQueue.remove(process)
+    
+def getProcessCount(strProcessingMode):
+    '''The number of concurrently running jobs is dependent on the currently 
+    selected processingMode.  This function returns the number of jobs to allow.
+    '''
+    if strProcessingMode == "multiple cores asynchronously":
+        return multiprocessing.cpu_count() - 1 
+    elif strProcessingMode == "single thread":
+        return  1
+    elif strProcessingMode == "FORT Condor":
+        return  2**32
+    
+#Spatial utilities
 def mosaicAllTifsInFolder(inDir, outFileName, gdal_merge):
     onlyfiles = [os.path.join(inDir,f) for f in os.listdir(inDir) 
             if os.path.isfile(os.path.join(inDir,f)) and f.endswith(".tif") ]

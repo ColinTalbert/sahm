@@ -53,7 +53,6 @@ import csv
 import Queue
 import thread
 import subprocess
-import multiprocessing
 import time
 
 from optparse import OptionParser
@@ -148,17 +147,14 @@ class PARC:
         self.logger.writetolog("Finished PARC", True, True)
         
     def processFiles(self):
-        if self.processingMode == "multiple cores asynchronously":
-            coreCount = multiprocessing.cpu_count() - 1 
-            processQueue = []
-        else:
-            coreCount = 1
-            processQueue = []
-        
+        processQueue = []
+        coreCount = utilities.getProcessCount(self.processingMode)
+            
         # Clip and reproject each source image.
         for image in self.inputs:
-            #if we're running to many jobs wait for one to finish
-            self.waitForProcessesToFinish(processQueue, coreCount)
+            if self.processingMode == "multiple cores asynchronously":
+                #if we're running to many jobs wait for one to finish
+                utilities.waitForProcessesToFinish(processQueue, coreCount)
                         
             inPath, inFileName = os.path.split(image[0])          
             outFile, ext = os.path.splitext(inFileName)
@@ -180,96 +176,18 @@ class PARC:
                     pass
                 
             else:
-                if self.processingMode == "single thread":
-                    #the original and simples execution mode.  
-                    #process a single raster and wait for it to finish
-                    self.parcFile(image, outFile) 
-                elif self.processingMode == "multiple cores asynchronously":
-                    processQueue.append(self.gen_singlePARC_thread_test(image, outFile))
-                elif self.processingMode == "FORT Condor":
-#                    CondorJobs.append(outFile)
-                    self.gen_singlePARC_thread(image, outFile, results, True)
-        
+                processQueue.append(self.gen_singlePARC_thread(image, outFile))
+
         #wait for the last set of processes to finish up
-        self.waitForProcessesToFinish(processQueue)   
+        if self.processingMode == "multiple cores asynchronously":
+            utilities.waitForProcessesToFinish(processQueue)   
+        elif self.processingMode == "FORT Condor":
+            self.waitForCondorProcessesToFinish(processQueue)
             
-
-            
-                    
         print "done"
-#        if self.processingMode == "multiple cores asynchronously":
-#            self.manage_singlePARC_threads(results, process_count)
-#        elif self.processingMode == "FORT Condor":
-#            self.manage_condor_jobs(CondorJobs)
-          
-    def waitForProcessesToFinish(self, processQueue, maxCount=1):
-        while len(processQueue) >= maxCount:
-                time.sleep(1)
-                for process in processQueue:
-                    if process.poll() is not None:
-                        processQueue.remove(process)
             
-    def gen_singlePARC_thread(self, image, outFile, results=None, Condor=False):
-            image_short_name = os.path.split(image[0])[1]
 
-            args = ['-s', os.path.abspath(image[0]),
-                    '-c', image[1],
-                    '-d', os.path.abspath(outFile),
-                    '-t', os.path.abspath(self.template),
-                    '-r', image[2],
-                    '-a', image[3]]
-
-            if self.ignoreNonOverlap:
-
-                args.extend(['-i',
-                             '--gt0', str(self.template_params['gt'][0]),
-                             '--gt3', str(self.template_params['gt'][3]),
-                             '--tNorth', str(self.template_params['tNorth']),
-                             '--tSouth', str(self.template_params['tSouth']),
-                             '--tEast', str(self.template_params['tEast']),
-                             '--tWest', str(self.template_params['tWest']),
-                             '--tHeight', str(self.template_params['height']),
-                             '--tWidth', str(self.template_params['width'])])
-    
-            execDir = os.path.split(__file__)[0]
-            executable = os.path.join(execDir, 'runSinglePARC.py')
-            pyEx = sys.executable
-            command_arr = [pyEx, executable] + args
-            command = ' '.join(command_arr)
-            self.logger.writetolog(command, False, False)
-#            print "RUNNING COMMAND:", command_arr
-            
-            if Condor:
-                workspace, fname = os.path.split(os.path.abspath(outFile))
-                prefix = os.path.splitext(fname)[0]
-                utilities.runCondorPythonJob(command_arr, workspace, prefix)
-            else:
-                proc = subprocess.Popen( command_arr )
-                thread.start_new_thread(utilities.process_waiter,
-                        (proc, image_short_name, results))
-        
-    def manage_singlePARC_threads(self, results, process_count):
-        error_msg = ""
-        while process_count > 0:
-            description, rc= results.get()
-            
-            if rc == 0:
-                if self.verbose:
-                    msg = "    " + description + " finished successfully:  " + \
-                        str(len(self.inputs) - process_count + 1)  + " done out of " \
-                        + str(len(self.inputs))
-                    self.logger.writetolog(msg, True, True)
-            else:
-                msg = "There was a problem with: " + description
-                error_msg += msg + "\n"
-                self.logger.writetolog(msg , True, True)
-                
-            process_count-= 1
-                
-        if error_msg <> "":
-            raise utilities.TrappedError(error_msg)
-
-    def gen_singlePARC_thread_test(self, image, outFile):
+    def gen_singlePARC_thread(self, image, outFile):
             image_short_name = os.path.split(image[0])[1]
 
             args = ['-s', os.path.abspath(image[0]),
@@ -297,16 +215,24 @@ class PARC:
             command_arr = [pyEx, executable] + args
             command = ' '.join(command_arr)
             #self.logger.writetolog(command, False, False)
-            print "RUNNING COMMAND:", command_arr
-            proc = subprocess.Popen( command_arr )
-            return  proc
+            
+            if self.processingMode == "FORT Condor":
+                workspace, fname = os.path.split(os.path.abspath(outFile))
+                prefix = os.path.splitext(fname)[0]
+                utilities.runCondorPythonJob(command_arr, workspace, prefix)
+                return os.path.abspath(outFile)
+            else:
+            
+                print "RUNNING COMMAND:", command_arr
+                proc = subprocess.Popen( command_arr )
+                return  proc
 #                thread.start_new_thread(utilities.process_waiter,
 #                        (proc, image_short_name, results))
 
     def log_result(self, result):
         print results
 
-    def manage_condor_jobs(self, outputs):
+    def waitForCondorProcessesToFinish(self, outputs):
         errors = []
         while outputs:
             for process in outputs:
@@ -318,7 +244,7 @@ class PARC:
                     success = False
                     while not success:
                         try: 
-                            for f in ["stdOut", "stdErr", "CondorSubmit"]:
+                            for f in ["log", "stdOut", "stdErr", "CondorSubmit"]:
                                 fname = process.replace(".tif", "_" + f + ".txt")
                                 if os.path.exists(fname):
                                     os.remove(fname)
@@ -327,12 +253,16 @@ class PARC:
                             pass
                         
                 elif result == "error":
-                    errors.append(prefix)
+                    if os.path.exists(process):
+                        os.remove(process)
+                    errors.append(process)
                     outputs.remove(process)
         
 
         if len(errors) > 0:
             msg = "There were problems with one or more runs."
+            for process in errors:
+                msg += "\n" + process + " did not run correctly"
             raise utilities.TrappedError(msg)
             
         

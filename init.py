@@ -420,15 +420,6 @@ class TemplateLayer(Path):
     def provide_output_port_documentation(cls, port_name):
          return GenModDoc.construct_port_doc(cls, port_name, 'out') 
     
-#    def compute(self):
-#        output_file = create_file_module(self.forceGetInputFromPort('FilePath', []))
-#        self.setResult('value', output_file)
-
-#class SingleInputPredictor(Predictor):
-#    pass
-#
-#class SpatialDef(Module):
-#    _output_ports = [('spatialDef', '(gov.usgs.sahm:SpatialDef:DataInput)')]
 
 class MergedDataSet(File):
     '''
@@ -452,118 +443,6 @@ class RastersWithPARCInfoCSV(File):
     
     pass
 
-#    def compute(self, is_input=None):
-#        PersistentPath.compute(self, is_input, 'blob')
-
-
-#class ApplyModel(Module):
-#    '''
-#    Apply Model
-#
-#    The ApplyModel module allows the user to apply a model developed using a
-#    particular package within the workflow and generate output probability and binary
-#    maps. The process of creating an output probability map and binary map based on
-#    a particular model can be time-consuming, depending on the input data. By
-#    existing as a stand-alone process in the workflow, the ApplyModel module allows
-#    a user to investigate the performance metrics for a particular model (such as
-#    the ROC curve or the AUC) before dedicating the processing time needed to generate
-#    the output maps. In most cases, a user will "fine tune" a model by exploring the
-#    performance metrics of different model iterations before applying the model and
-#    generating the actual maps as a final step.
-#    
-#    The ApplyModel module also provides the user with the option of projecting the results
-#    of a model developed from one set of environmental predictors onto a new modeled space
-#    containing that same set of environmental predictors but representing data captured at
-#    a different temporal or spatial location. For example, a user could generate a model
-#    predicting habitat suitability using recorded presence points and certain environmental
-#    predictors such as elevation, landcover, and proximity to water in one geographic
-#    location. Based on the training from this information, the modeled results could be
-#    generated for (or "projected to") a new location based on the range of values seen in
-#    elevation, landcover, and proximity to water in the second geographic area. Similarly,
-#    modeling predicted results through time is also possible. A model trained using field
-#    data and a set of predictor layers representative of one time period could be projected
-#    onto the same geographical area using a new set of layers corresponding to the same
-#    predictors but representing data from a different time period (e.g., different climate
-#    data).
-#
-#    The ApplyModel module accepts two inputs from the user:
-#
-#    1. Model Workspace: The model workspace field accepts as an input a modeling
-#    package element (complete with all required parameters) from upstream in the workflow.
-#    The inputs and specifications provided in the dialogue fields of the model will be applied
-#    and used to generate the output maps. A user should populate the model workspace field by
-#    connecting a model element to the appropriate input port of the ApplyModel module in the
-#    visual display of the model workflow.
-#    
-#    2. Projection Target: The projection target is an optional parameter that allows a user to
-#    apply a model to a particular geographic area and or set of predictors (other than those
-#    used to train the model) and create output maps within the spatial extent of the projection
-#    target layers. This input field should be populated by connecting either the output of the
-#    ProjectionLayers module or a separate MDSBuilder element to the appropriate input port of
-#    the ApplyModel module.
-#    
-#    '''
-#    
-#    _input_ports = [('projectionTargetMDS', '(gov.usgs.sahm:MergedDataSet:Other)'),
-#                    ('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'),
-#                    ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
-#                    ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
-#                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
-#                    ('produceMetrics', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False})]
-#    _output_ports =  [('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'), 
-#                     ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
-#                     ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)'),
-#                     ('ResidualsMap', '(edu.utah.sci.vistrails.basic:File)'),
-#                     ('MessMap', '(edu.utah.sci.vistrails.basic:File)'),
-#                     ('MoDMap', '(edu.utah.sci.vistrails.basic:File)'),
-#                     ('modelEvalPlot', '(edu.utah.sci.vistrails.basic:File)'),
-#                     ('ResponseCurves', '(edu.utah.sci.vistrails.basic:File)'),
-#                     ('Text_Output', '(edu.utah.sci.vistrails.basic:File)')]
-#    
-#    
-#    
-#    def compute(self):
-#        
-#
-#        args = "ws=" + '"' + self.forceGetInputFromPort('modelWorkspace').name + '"'
-#        output_dname = utils.mknextdir(prefix='AppliedModel_')
-#        args += " o=" + '"' + output_dname + '"'
-#        
-#        mdsFile = self.forceGetInputFromPort('projectionTargetMDS').name
-#        args += " ntfs=" + '"' + mdsFile + '"'
-#
-#            
-#        if self.hasInputFromPort('makeBinMap'):
-#            makeBinMap = self.forceGetInputFromPort('makeBinMap')
-#            args += ' mbt=' + str(makeBinMap).upper()
-#        else:
-#            args += ' mbt=TRUE'
-#            
-#        if self.hasInputFromPort('makeProbabilityMap'):
-#            makeProbabilityMap = self.forceGetInputFromPort('makeProbabilityMap')
-#            args += ' mpt=' + str(makeProbabilityMap).upper()
-#        else:
-#             args += ' mpt=TRUE'
-#                
-#        
-#        utils.runRScript('PredictModel.r', args, self)
-#        
-#        input_fname = os.path.join(output_dname, "prob_map.tif")
-#        output_fname = os.path.join(output_dname, 'prob_map.jpeg')
-#        if os.path.exists(input_fname):
-#            utils.tif_to_color_jpeg(input_fname, output_fname, color_breaks_csv)
-#            output_file1 = utils.create_file_module(output_fname)
-#            self.setResult('ProbabilityMap', output_file1)
-#        else:
-#            msg = "Expected output from ApplyModel was not found."
-#            msg += "\nThis likely indicates problems with the inputs to the R module."
-#            writetolog(msg, False, True)
-#            raise ModuleError(self, msg)
-#        
-#        if  os.path.exists(os.path.join(output_dname, "bin_map.tif")):
-#            outFileName = os.path.join(output_dname, "bin_map.tif")
-#            output_file2 = utils.create_file_module(outFileName)
-#            self.setResult('BinaryMap', output_file2)
         
 class Model(Module):
     '''
@@ -584,7 +463,8 @@ class Model(Module):
                      ('MoDMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('modelEvalPlot', '(edu.utah.sci.vistrails.basic:File)'),
 #                     ('ResponseCurves', '(edu.utah.sci.vistrails.basic:File)'),
-                     ('Text_Output', '(edu.utah.sci.vistrails.basic:File)')]
+                     ('Text_Output', '(edu.utah.sci.vistrails.basic:File)'),
+                     ('ModelVariableImportance', '(edu.utah.sci.vistrails.basic:File)')]
 
     port_map = {'mdsFile':('c', None, True),#These ports are for all Models
                          'makeProbabilityMap':('mpt', utils.R_boolean, False),
@@ -648,7 +528,8 @@ class Model(Module):
             self.setModelResult("_mess_map.tif", 'MessMap', 'mes')
             self.setModelResult("_MoD_map.tif", 'MoDMap', 'mes')
             self.setModelResult("_output.txt", 'Text_Output')
-            self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot') 
+            self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot')
+            self.setModelResult("_variable.importance.jpg", 'ModelVariableImportance')  
             writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
         else:
             utils.launch_RunMonitorApp()
@@ -1805,57 +1686,8 @@ class MAXENT(Model):
         del argWriter
         ourMaxent.argsCSV = MaxentArgsCSV
         ourMaxent.logger = utils.getLogger()
+        ourMaxent.cur_processing_mode = configuration.cur_processing_mode
 
-         
-         #Start marian adding junk to the code   
-        MDSreader = csv.reader(open(ourMaxent.mdsFile, 'r'))
-        header1 = MDSreader.next()
-        header2 = MDSreader.next()
-        header3 = MDSreader.next()
-               
-               
-                   
-        if 'Split' in header1:
-            if configuration.cur_processing_mode == "multiple cores asynchronously":
-                coreCount = multiprocessing.cpu_count() - 1 
-                processQueue = []
-            else:
-                coreCount = 1
-                processQueue = []
-             
-            newLine = MDSreader.next()
-            ttList=["test","train"]
-            cvList=["NA"]
-            #find the first line of the mds that isn't na to determine if test/train or cv split 
-            while newLine[header1.index("Split")]=="NA":
-               newLine = MDSreader.next()
-               
-              #loop through the mds and fit a maxent model withholding each new cv fold
-            if (not newLine[header1.index("Split")] in ttList): 
-               cvMaxent = copy.deepcopy(ourMaxent)
-               cvMaxent.subRun=True
-               for row in MDSreader:
-                   if (not row[header1.index("Split")] in cvList):
-                       cvMaxent.testKey = row[header1.index("Split")]
-                       cvMaxent.outputDir = ourMaxent.outputDir + "\\cvSplit" + cvMaxent.testKey
-                       os.mkdir(cvMaxent.outputDir)
-                       cvList.append(row[header1.index("Split")])
-                       try:
-                           #if we're running to many jobs wait for one to finish
-                           utils.waitForProcessesToFinish(processQueue, coreCount)
-                           #if cvMaxent is set to singleThread = false run returns a running process
-                           cvMaxent.singleThread = False
-                           processQueue.append(cvMaxent.run())
-                       except TrappedError as e:
-                           raise ModuleError(self, e.message)  
-                       except:
-                           utils.informative_untrapped_error(self, "Maxent")      
-               #here we need to run Maxent without the test split csv which breaks it 
-               ourMaxent.testKey = None
-               utils.waitForProcessesToFinish(processQueue, coreCount)
-            
-        #maxentrunner will remove a regular test split on it's own 
-        #as well as an evaluation split so just run it
         try:
                 ourMaxent.run()
         except TrappedError as e:
@@ -1866,14 +1698,13 @@ class MAXENT(Model):
 #        ourMaxent.outputDir="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\maxent_20"
         self.MaxentPath =  ourMaxent.outputDir 
         #for now display R output only if there was a cv split we might want options
-        if len(cvList)>1: 
+        if ourMaxent.hasCrossValidation:
             Model.compute(self)
-            return 
+#            return 
          #set outputs
         lambdasfile = os.path.join(ourMaxent.outputDir, ourMaxent.args["species_name"] + ".lambdas")
         output_file = utils.create_file_module(lambdasfile)
         self.setResult("lambdas", output_file)
-        
         
         rocfile = os.path.join(ourMaxent.outputDir, 'plots', ourMaxent.args["species_name"] + "_roc.png")
         output_file = utils.create_file_module(rocfile)

@@ -569,7 +569,7 @@ def runModelOnCondor(script, args_dict, command_arr):
     DEVNULL = open(os.devnull, 'wb')
     p = subprocess.Popen(["condor_submit", "-n", "igskbacbws425", submitFname], stderr=DEVNULL, stdout=DEVNULL)
     
-
+    
 def getR_application(module=None):
     global r_path
     
@@ -929,7 +929,7 @@ def mosaicAllTifsInFolder(inDir, outFileName):
     gdal_merge.main(args)
     
     
-def waitForProcessesToFinish(self, processQueue, maxCount=1):
+def waitForProcessesToFinish(processQueue, maxCount=1):
     while len(processQueue) >= maxCount:
             time.sleep(1)
             for process in processQueue:

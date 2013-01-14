@@ -10,6 +10,8 @@ import utilities
 from osgeo import gdalconst
 from osgeo import gdal
 from osgeo import osr
+import copy
+
 
 class MAXENTRunner(object):
 
@@ -99,8 +101,6 @@ class MAXENTRunner(object):
         else:
              return subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         
-
-
     def loadArgs(self):
         argsReader = csv.reader(open(self.argsCSV, 'r'))
         header = argsReader.next()
@@ -134,6 +134,9 @@ class MAXENTRunner(object):
         self.writetolog = self.logger.writetolog
 
     def prepInputs(self):
+        if not self.subRun:
+            self.handleCrossValidations()
+        
         """parses out input MDS file into the 1 to 3 SWD files that Maxent requires.
         """
         self.testCSV = os.path.join(self.outputDir, 'testSamples.csv')
@@ -220,6 +223,52 @@ class MAXENTRunner(object):
                 self.args['outputgrids'] = 'false'
             return 
 
+    def handleCrossValidations(self):
+        #Start marian adding junk to the code   
+        MDSreader = csv.reader(open(self.mdsFile, 'r'))
+        header1 = MDSreader.next()
+        header2 = MDSreader.next()
+        header3 = MDSreader.next()
+               
+        if 'Split' in header1:
+            processQueue = []
+            coreCount = utilities.getProcessCount(self.cur_processing_mode)
+             
+            newLine = MDSreader.next()
+            ttList=["test","train"]
+            cvList=["NA"]
+            #find the first line of the mds that isn't na to determine if test/train or cv split 
+            while newLine[header1.index("Split")]=="NA":
+               newLine = MDSreader.next()
+               
+              #loop through the mds and fit a maxent model withholding each new cv fold
+            if (not newLine[header1.index("Split")] in ttList): 
+               cvMaxent = copy.deepcopy(self)
+               cvMaxent.subRun=True
+               for row in MDSreader:
+                   if (not row[header1.index("Split")] in cvList):
+                       cvMaxent.testKey = row[header1.index("Split")]
+                       cvMaxent.outputDir = os.path.join(self.outputDir, "cvSplit" + cvMaxent.testKey)
+                       os.mkdir(cvMaxent.outputDir)
+                       cvList.append(row[header1.index("Split")])
+                       try:
+                           #if we're running to many jobs wait for one to finish
+                           utilities.waitForProcessesToFinish(processQueue, coreCount)
+                           #if cvMaxent is set to singleThread = false run returns a running process
+                           cvMaxent.singleThread = False
+                           processQueue.append(cvMaxent.run())
+                       except utilities.TrappedError as e:
+                           raise ModuleError(self, e.message)  
+     
+#               #here we need to run Maxent without the test split csv which breaks it 
+               self.testKey = None
+               utilities.waitForProcessesToFinish(processQueue, 1)
+        
+        if len(cvList) > 1:
+            self.hasCrossValidation = True
+        #maxentrunner will remove a regular test split on it's own 
+        #as well as an evaluation split so just run it
+
     def convertNA(self, vals):
         """Switches the NA value used in our R models
         to the value expected by Maxent
@@ -278,4 +327,3 @@ def main(argv):
     ourMaxent.maxentpath = options.maxentExecutable
     ourMaxent.mdsFile = options.mdsFile
     ourMaxent.outputDir = options.outputDir
-    ou
