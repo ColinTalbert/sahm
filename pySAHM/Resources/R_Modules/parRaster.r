@@ -23,7 +23,7 @@ factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.
   
    continuousRaster<-raster(RasterInfo)
    outfile.p<-file.path(paste(substr(outfile.p,1,(nchar(outfile.p)-4)),ifelse(start.tile==1,"",start.tile),".tif",sep=""))
-   outtext<-paste(substr(outfile.p,1,(nchar(outfile.p)-4)),start.tile,".txt",sep="")
+   outtext<-paste(substr(outfile.p,1,(nchar(outfile.p)-4)),".txt",sep="")
    capture.output(cat(paste(nToDo,"tiles to do\n")),file=outtext,append=TRUE)
    if(make.binary.tif) outfile.bin<-(sub("ProbTiff","BinTiff",sub("prob","bin",outfile.p))) 
     #start up any rasters we need   
@@ -42,6 +42,7 @@ factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.
     }
      
  for (i in start.tile:min(start.tile+nToDo-1,length(tr$row))){
+ 
    capture.output(cat(paste("starting tile", i,Sys.time(),"\n")),file=outtext,append=TRUE)
    #alter the write start location because we always start at position 1                                   
    writeLoc<-ifelse((start.tile-1)==0,tr$row[i],tr$row[i]-sum(tr$nrows[1:(start.tile-1)]))
@@ -70,10 +71,10 @@ factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.
                 }
             }
                    }}
+        
       ifelse(sum(complete.cases(temp))==0,  # does not calculate predictions if all predictors in the region are na
         preds<-matrix(data=NA,nrow=dims[2],ncol=tr$nrows[i]),
         preds <- t(matrix(pred.fct(model,temp,Model),ncol=dims[2],byrow=T)))
-      
         preds[is.na(preds)]<-NAval
         
         if(MESS) {
