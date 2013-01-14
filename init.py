@@ -1973,7 +1973,10 @@ from core.upgradeworkflow import UpgradeWorkflowHandler
 def handle_module_upgrade_request(controller, module_id, pipeline):    
     module_remap = {'Tools|BackgroundSurfaceGenerator':
                      [(None, '1.0.2', 'Tools|BackgroundSurfaceGenerator', 
-                          {'dst_port_remap': {'bias': 'continuous'} })]}
+                          {'dst_port_remap': {'bias': 'continuous'} })],
+                    'Tools|PARC':
+                     [(None, '1.0.2', 'Tools|PARC', 
+                          {'dst_port_remap': {'bias': ''} })],}
     return UpgradeWorkflowHandler.remap_module(controller, module_id, pipeline,
                                              module_remap)
 
