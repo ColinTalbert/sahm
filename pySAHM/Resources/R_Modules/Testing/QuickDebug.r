@@ -1,9 +1,11 @@
-setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
-ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
+#setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
+#ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
 
-#setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
-#ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
+setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
 
+#setwd("I:\\VisTrails\\VisTrails_SAHM_x64\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
+#ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
 source("GLM.helper.fcts.r")
@@ -50,8 +52,8 @@ input.file="C:\\temp\\SAHM_workspace\\modelSelection_split_20.csv"
 input.file="C:\\temp\\SAHM_workspace\\NonSpatialData.csv"
 
 ## Maxent
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\MergedDataset_7.csv"
-lambdas.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\maxentFiles_4\\Nutria.lambdas"
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\CovariateCorrelationOutputMDS.csv"
+lambdas.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\maxentFiles_94"
 FitModels(ma.name=input.file,
             output.dir=output.dir,
             response.col=rc,make.p.tif=T,make.binary.tif=T,
@@ -74,7 +76,7 @@ FitModels(ma.name=input.file,
           tif.dir=NULL,
           output.dir=output.dir,
           response.col=rc,make.p.tif=T,make.binary.tif=T,
-          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=FALSE,ScriptPath=ScriptPath)
+          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=T,opt.methods=2,squared.terms=FALSE,ScriptPath=ScriptPath)
 
 FitModels(ma.name=input.file,
           tif.dir=NULL,
@@ -88,7 +90,7 @@ start.time<-Sys.time()
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,
-      response.col=rc,make.p.tif=F,make.binary.tif=F,
+      response.col=rc,make.p.tif=T,make.binary.tif=T,
           debug.mode=T,opt.methods=2,script.name="rf",
 responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
 samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
@@ -106,7 +108,7 @@ FitModels(ma.name=input.file,
       family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
   tolerance = 0.001,seed=-616264908,opt.methods=2,
           simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
-          bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,MESS=F)
+          bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,MESS=T,ScriptPath=ScriptPath)
 
 EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=TRUE,produce.metrics=TRUE)
 

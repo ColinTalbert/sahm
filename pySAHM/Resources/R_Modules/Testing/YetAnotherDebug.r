@@ -126,7 +126,7 @@ source("chk.libs.r")
 source("read.dat.r")
 source("my.panel.smooth.binary.r")
 source("Predictor.inspection.r")
-dir.path<-"I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\Debug1.10\\PredInspect""
+dir.path<-"I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\Debug1.10\\PredInspect"
 input.file<-vector()
 
 input.file[1]="I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\Split.csv"
@@ -136,7 +136,7 @@ input.file[4]="I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_2
 input.file[5]="I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\SplitCrossVal.csv"
 input.file[6]="I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\Count.csv"
 ##pseudoabs
-input.file[7]="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\ElithPsdoAbs.csv"
+input.file[7]="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\CovariateCorrelationOutputMDS.csv"
       ## Nonspatial data should work through SAHM
 input.file[8]="I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\NonSpatialData.csv"   
 predictor<-c("bio_13_wgs84","bio_15_wgs84_categorical","bio_7_wgs84","asp_2k_alb","bio_16_wgs84","dem","Temperature")
@@ -147,7 +147,7 @@ for(i in 1:length(input.file)){
        try(Pairs.Explore(num.plots=5,
                 min.cor=.5,
                 input.file=input.file[i],
-            		output.file=paste(dir.path,"\\PairsExploreTest2\\",i,"Par1",".jpg",sep=""),
+            		output.file=paste(dir.path,i,"Par1",".jpg",sep=""),
             		response.col=responseCol[i],
             		pres=TRUE,
             		absn=TRUE,
@@ -155,7 +155,7 @@ for(i in 1:length(input.file)){
         try(Pairs.Explore(num.plots=10,
                 min.cor=.5,
                 input.file=input.file[i],
-            		output.file=paste(dir.path,"\\PairsExploreTest2\\",i,"Par2",".jpg",sep=""),
+            		output.file=paste(dir.path,i,"Par2",".jpg",sep=""),
             		response.col=responseCol[i],
             		pres=TRUE,
             		absn=FALSE,
@@ -163,7 +163,7 @@ for(i in 1:length(input.file)){
                 cors.w.highest=TRUE))
        try(Predictor.inspection(predictor[i],
                 input.file=input.file[i],
-            		output.dir=paste(dir.path,"\\PairsExploreTest2",sep=""),
+            		output.dir=paste(dir.path,sep=""),
             		response.col=responseCol[i],
             		pres=TRUE,
             		absn=TRUE,
@@ -172,7 +172,7 @@ for(i in 1:length(input.file)){
  try(Pairs.Explore(num.plots=15,
     min.cor=min.cor,
     input.file=input.file[i],
-		output.file=paste(dir.path,"\\PairsExploreTest2\\",i,".jpg",sep=""),
+		output.file=paste(dir.path,i,".jpg",sep=""),
 		response.col=responseCol[i],
 		pres=TRUE,
 		absn=TRUE,
@@ -180,7 +180,7 @@ for(i in 1:length(input.file)){
 		
 	try(Predictor.inspection(predictor[i],
     input.file[i],
-		output.dir=paste(dir.path,"\\PairsExploreTest2",sep=""),
+		output.dir=paste(dir.path,sep=""),
 		response.col=responseCol[i],
 		pres=TRUE,
 		absn=TRUE,
@@ -193,7 +193,7 @@ for (i in 5:25){
  try(Pairs.Explore(num.plots=i,
                 min.cor=.5,
                 input.file=input.file,
-            		output.file=paste(dir.path,"\\PairsExploreTest2\\",i,"NumPlotsTest",".jpg",sep=""),
+            		output.file=paste(dir.path,i,"NumPlotsTest",".jpg",sep=""),
             		response.col=responseCol[1],
             		pres=TRUE,
             		absn=TRUE,
