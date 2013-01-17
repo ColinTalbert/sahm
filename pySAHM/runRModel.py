@@ -56,7 +56,7 @@ def mosaicTiledOutputs(outputDirectory):
                 args = ["placeholder", "-o", outFname] + onlyfiles
                 gdal.DontUseExceptions()
                 gdal_merge.main(args)
-                shutil.rmtree(tilesFolder)
+                #shutil.rmtree(tilesFolder)
                 
     
     

@@ -77,7 +77,7 @@ make.auc.plot.jpg<-function(out=out){
 #################### Variable importance plots #####################
   
     if(tolower(out$input$script.name)!="maxlike" & length(out$mods$vnames)>1 & out$input$model.family!="poisson"){
-      jpeg(paste(out$dat$bname,"_variable.importance.jpeg",sep=""),height=1000,width=1000)  
+      jpeg(paste(out$dat$bname,"_variable.importance.jpg",sep=""),height=1000,width=1000)  
         VariableImportance(Modelout$input$script.name,out=out,auc=lapply(Stats,"[",9)) 
       graphics.off()
     }    
