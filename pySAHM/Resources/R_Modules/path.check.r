@@ -5,12 +5,11 @@ path.check<-function(paths,newBasepath=NULL){
        #determined based on the path to the mds file so after switching these out I check for file existence. If the tiffs 
        #aren't relative to the mds I switch them back to what they were before and hope for the best there is no way to figure out
        #the name of the old session folder from the information in the mds file that I can figure out
-    
+  
        new.paths<-file.path(file.path(newBasepath,basename(dirname(paths))),basename(paths))
-       new.paths[file.access(new.paths,mode=0)!=0]<-paths[file.access(new.paths,mode=0)!=0]
        names(new.paths)<-names(paths)
        if(any(file.access(paths,mode=0)!=0))
-       paths[file.access(paths,mode=0)!=0]<-new.paths[file.access(paths,mode=0)!=0]
+       paths[file.access(paths,mode=0)!=0]<-new.paths[(file.access(paths,mode=0)!=0)]
   }
   if(any(file.access(paths,mode=0)!=0)){
        temp<-as.vector(file.access(paths))==-1

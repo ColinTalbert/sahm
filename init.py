@@ -1865,10 +1865,9 @@ class MAXENT(Model):
             #for debugging use this directory             
 #        ourMaxent.outputDir="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\maxent_20"
         self.MaxentPath =  ourMaxent.outputDir 
-        #for now display R output only if there was a cv split we might want options
-        if len(cvList)>1: 
-            Model.compute(self)
-            return 
+        #for now display R output 
+        Model.compute(self)
+          
          #set outputs
         lambdasfile = os.path.join(ourMaxent.outputDir, ourMaxent.args["species_name"] + ".lambdas")
         output_file = utils.create_file_module(lambdasfile)
@@ -2142,7 +2141,17 @@ from core.upgradeworkflow import UpgradeWorkflowHandler
 def handle_module_upgrade_request(controller, module_id, pipeline):    
     module_remap = {'Tools|BackgroundSurfaceGenerator':
                      [(None, '1.0.2', 'Tools|BackgroundSurfaceGenerator', 
-                          {'dst_port_remap': {'bias': 'continuous'} })]}
+                          {'dst_port_remap': {'bias': 'continuous'} })],
+                    'Tools|PARC':
+                     [(None, '1.0.2', 'Tools|PARC', 
+                          {'dst_port_remap': {'bias': ''} })],
+                    'Tools|MDSBuilder':
+                     [(None, '1.0.2', 'Tools|PARC', 
+                          {'dst_port_remap': {'backgroundPointCount': 'backgroundpointCount'} })],
+                    'Models|MAXENT':
+                     [(None, '1.0.2', 'Tools|PARC', 
+                          {'dst_port_remap': {'inputMDS': 'mdsFile'} })],
+                    }
     return UpgradeWorkflowHandler.remap_module(controller, module_id, pipeline,
                                              module_remap)
 
