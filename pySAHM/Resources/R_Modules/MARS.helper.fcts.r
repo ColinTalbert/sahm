@@ -108,14 +108,13 @@ function (mars.glm.object,new.data)
   bf.names <- paste("bf", 1:n.bfs, sep = "")
   old.bf.data <- as.data.frame(old.bf.data[,-1])
   names(old.bf.data) <- bf.names[-1]
-
   new.bf.data <- as.data.frame(my.model.matrix.mars(mars.fit,new.data))
   new.bf.data <- as.data.frame(new.bf.data[,-1])
   names(new.bf.data) <- bf.names[-1]
 
 # now cycle through the species fitting glm models
 
-
+ 
   prediction <- as.data.frame(matrix(0, ncol = n.spp, nrow = nrow(pred.dat)))
   names(prediction) <- names(ydat)
   standard.errors <- as.data.frame(matrix(0, ncol = n.spp, nrow = nrow(pred.dat)))
@@ -833,6 +832,7 @@ my.model.matrix.mars<-function (object, x, which = object$selected.terms, full =
         return(object$x)
          nterms <- length(which)
          which <- which[-1] 
+        x<-(mars.new.dataframe(x))[[1]]
     used.predictors<-which(apply(abs(object$factor[object$selected.terms,]),2,sum)!=0)
     x <- as.matrix(x[,match(names(used.predictors),colnames(x))])
     
