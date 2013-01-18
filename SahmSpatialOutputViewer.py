@@ -93,9 +93,9 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
     """
     _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
-                    ('display_presense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
-                    ('display_absense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
-                    ('display_background_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+                    ('display_presense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'[False]', 'optional':False}),
+                    ('display_absense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'[False]', 'optional':False}),
+                    ('display_background_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'[False]', 'optional':False}),
                     ('initial_raster_display', '(gov.usgs.sahm:OutputRaster:Other)', {'defaults':'["Probability"]'}),
                     ('model_workspace', '(edu.utah.sci.vistrails.basic:Directory)')]
     #all inputs are determined relative to the model_workspace
@@ -1108,10 +1108,10 @@ class SAHMSpatialViewerToolBar(QCellToolBar):
         sw = self.getSnappedWidget()
 
         actions = [{"tag":"pres_points", "icon":"RedPoints.png",
-                     "checked":True, "label":"Display presence points",
+                     "checked":False, "label":"Display presence points",
                      "group":"pres_points"},
                    {"tag":"abs_points", "icon":"GreenPoints.png",
-                     "checked":True, "label":"Display absence points",
+                     "checked":False, "label":"Display absence points",
                      "group":"abs_points"},
                    {"tag":"backs_points", "icon":"BlackPoints.png",
                      "checked":False, "label":"Display background points",
@@ -1178,7 +1178,7 @@ class SAHMSpatialViewerToolBar(QCellToolBar):
             if type(action) == ViewLayerAction:
                 #disenable all action refering to data we don't have
                 action.setEnabled(sw.all_layers[action.tag]['enabled'])
-
+                action.setChecked(sw.all_layers[action.tag]['displayed'])
 
         sw.popMenu = self.gen_popup_menu()
 
