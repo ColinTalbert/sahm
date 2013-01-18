@@ -1698,8 +1698,7 @@ class MAXENT(Model):
 #        ourMaxent.outputDir="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\maxent_20"
         self.MaxentPath =  ourMaxent.outputDir 
         #for now display R output only if there was a cv split we might want options
-        if ourMaxent.hasCrossValidation:
-            Model.compute(self)
+        Model.compute(self)
 #            return 
          #set outputs
         lambdasfile = os.path.join(ourMaxent.outputDir, ourMaxent.args["species_name"] + ".lambdas")
