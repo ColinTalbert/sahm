@@ -172,7 +172,7 @@ class MAXENTRunner(object):
         absencePointCount = 0
         for row in MDSreader:
             self.convertNA(row)
-            if not evalsplit and row[evalsplit] == 'test':
+            if evalsplit and row[evalsplit] == 'test':
                 pass
             elif row[2] == '0':
                 absencePointCount += 1
@@ -264,8 +264,7 @@ class MAXENTRunner(object):
                self.testKey = None
                utilities.waitForProcessesToFinish(processQueue, 1)
         
-        if len(cvList) > 1:
-            self.hasCrossValidation = True
+#        self.hasCrossValidation = len(cvList) > 1
         #maxentrunner will remove a regular test split on it's own 
         #as well as an evaluation split so just run it
 
