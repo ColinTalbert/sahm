@@ -1081,7 +1081,7 @@ class FieldDataQuery(Module):
                 response = row[res_key]
                 if response.lower() in ["1", "true", "t", "present", "presence", FDQParams['res_pres_val'].lower()]:
                     response = 1
-                elif response.lower() in ["0", "false", "f", "absent", "absense", FDQParams['res_abs_val'].lower()]:
+                elif response.lower() in ["0", "false", "f", "absent", "absence", FDQParams['res_abs_val'].lower()]:
                     response = 0
                 elif responsetype == 'responseBinary': 
                     try:
@@ -1236,6 +1236,10 @@ class PARC(Module):
         #otherwise start a new CSV
         if self.hasInputFromPort("RastersWithPARCInfoCSV"):
             inputCSV = self.forceGetInputFromPort("RastersWithPARCInfoCSV").name
+            if not os.path.exists(inputCSV):
+                msg = "RastersWithPARCInfoCSV, " + inputCSV + ", does not exist."
+                writetolog(msg)
+                raise ModuleError(self, msg)
             shutil.copy(inputCSV, workingCSV)
             f = open(workingCSV, "ab")
             csvWriter = csv.writer(f)
@@ -1344,7 +1348,7 @@ class ModelEvaluationSplit(Module):
 
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('trainingProportion', '(edu.utah.sci.vistrails.basic:Float)', 
-                        {'defaults':'0.7'}),
+                        {'defaults':'["0.7"]'}),
                     ('RatioPresAbs', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
@@ -1416,7 +1420,7 @@ class ModelSelectionSplit(Module):
     
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('trainingProportion', '(edu.utah.sci.vistrails.basic:Float)', 
-                        {'defaults':'0.7'}),
+                        {'defaults':'["0.7"]'}),
                     ('RatioPresAbs', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
@@ -1490,8 +1494,8 @@ class ModelSelectionCrossValidation(Module):
 
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('nFolds', '(edu.utah.sci.vistrails.basic:Integer)', 
-                        {'defaults':'10'}),
-                    ('Stratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'True', 'optional':True}),
+                        {'defaults':'["10"]', 'optional':True}),
+                    ('Stratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
                     ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
 
