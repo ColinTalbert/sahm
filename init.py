@@ -1975,7 +1975,13 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                           {'dst_port_remap': {'bias': 'continuous'} })],
                     'Tools|PARC':
                      [(None, '1.0.2', 'Tools|PARC', 
-                          {'dst_port_remap': {'bias': ''} })],}
+                          {'dst_port_remap': {'bias': ''} })],
+                    'Tools|MDSBuilder':
+                     [(None, '1.0.2', 'Tools|PARC', 
+                          {'dst_port_remap': {'backgroundPointCount': 'backgroundpointCount'} })],
+                    'Models|MAXENT':
+                     [(None, '1.0.2', 'Tools|PARC', 
+                          {'dst_port_remap': {'inputMDS': 'mdsFile'} })],
+                    }
     return UpgradeWorkflowHandler.remap_module(controller, module_id, pipeline,
                                              module_remap)
-
