@@ -127,9 +127,9 @@ FitModels(ma.name=input.file,
 
 
 #Now evaluating new data
-workspace="I:\\VisTrails\\WorkingFiles\\workspace\\_TutorialTesting\\brt_1"
+workspace=output.dir
 
-EvaluateNewData(workspace=paste(workspace,"modelWorkspace",sep="\\"),outDir=output.dir,binary.tif=TRUE,p.tif=TRUE,mes=TRUE)
+EvaluateNewData(workspace=paste(workspace,"modelWorkspace",sep="\\"),out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mes=FALSE,ScriptPath=ScriptPath)
   logname<-NULL
   sink(logname)
   sink(logname, type="message")
