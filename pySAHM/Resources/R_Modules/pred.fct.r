@@ -97,8 +97,8 @@ pred.fct<-function(model,x,Model){
                   #getting the predictions from each split of the data then taking out one column and getting the average
                           lst.preds<-try(lapply(lapply(model,FUN=predict,newdata=x[complete.cases(x),],type="vote"),"[",,2))
                          y[complete.cases(x)]<-try(apply(do.call("rbind",lst.preds),2,mean))
-                         	y[y==1]<-max(y[y<1])
-	                        y[y==0]<-min(y[y>0])
+                         	y[y==1]<-max(y[y<1],na.rm=TRUE)
+	                        y[y==0]<-min(y[y>0],na.rm=TRUE)
                          }  else{
                 y[complete.cases(x)] <- try(as.vector(predict(model,newdata=x[complete.cases(x),],type="vote")[,2]),silent=TRUE)
               }  
