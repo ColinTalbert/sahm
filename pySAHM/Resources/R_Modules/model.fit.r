@@ -182,7 +182,9 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
                   int$p <- round(int$p,4)
                   names(int) <- c("v1","name1","v2","name2","int.size","p-value")
                   row.names(int)<-NULL
-                  if(nrow(int)>0) out$mods$interactions[[i]] <- int else out$mods$interactions <- NULL     
+                 if(full.fit){
+                     if(nrow(int)>0) out$mods$interactions[[i]] <- int else out$mods$interactions[[i]] <- NULL
+                     }     
           }
          
           if(full.fit) {
