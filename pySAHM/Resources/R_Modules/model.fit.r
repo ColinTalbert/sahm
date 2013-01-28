@@ -140,7 +140,7 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
                  out$mods$parms$tc.full<-round(mean(unlist(lapply(lr.list,function(lst){lst$parms$tc.full}))))
                  out$mods$lr.mod$lr0<-mean(unlist(lapply(lr.list,function(lst){lst$lr.mod$lr0})))
                  out$mods$lr.mod$lr<-mean(unlist(lapply(lr.list,function(lst){lst$lr.mod$lr})))
-
+               
                 cat("\nfinished with learning rate estimation, lr=",out$mods$lr.mod$lr0)
                 cat("\nfor final fit, lr=",out$mods$lr.mod$lr,"and tc=",out$mods$parms$tc.full,"\n")
 
@@ -182,10 +182,13 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
                   int$p <- round(int$p,4)
                   names(int) <- c("v1","name1","v2","name2","int.size","p-value")
                   row.names(int)<-NULL
-                  if(nrow(int)>0) out$mods$interactions[[i]] <- int else out$mods$interactions <- NULL     
+                 if(full.fit){
+                     if(nrow(int)>0) out$mods$interactions[[i]] <- int else out$mods$interactions[[i]] <- NULL
+                     }     
           }
-       
+         
           if(full.fit) {
+        
           #post processing steps
           out$mods$final.mod<-final.mod
           var.name<-unlist(lapply(final.mod,function(lst){as.character(lst$contributions[,1])}))
@@ -202,9 +205,8 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
              
           if(!is.null(unlist(lapply(out$mods$interactions,is.null)))){
                interaction.lst<-out$mods$interactions[!unlist(lapply(out$mods$interactions,is.null))]
-               #taking out the names of predictors from interactions and then ordering them so we can aggregate
-               interaction.list<-apply(cbind(do.call("rbind",lapply(interaction.lst,"[",2)),do.call("rbind",lapply(interaction.lst,"[",4))),1,sort)
-               out$mods$interactions<-interaction.lst[!duplicated(interaction.list,MARGIN=2)]
+               interactions<-(do.call("rbind",out$mods$interactions))[,1:4] #can't consider p-value just if they were included at least once
+               out$mods$interactions<-interactions[!duplicated(interactions[,1:4],MARGIN=1),]
               } else out$mods$interactions=NULL
               return(out)
           }
@@ -250,7 +252,8 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
                   #these should be oob votes for the absence in a fairly random order
                   if(num.splits==1) votes[dat$response==0]<-apply(do.call("rbind",lapply(lapply(rf.full,predict,type="vote"),"[",1:sum(dat$response==0),2)),2,mean)
                   else for(i in 1:num.splits){
-                       votes[which(i==Split,arr.ind=TRUE)]<-as.vector(apply(do.call("rbind",lapply(lapply(rf.full[-c(i)],predict,newdata=psd.abs[i==Split,-1],type="vote"),"[",,2)),2,mean))
+                       votes[which(i==Split,arr.ind=TRUE)]<-as.vector(apply(do.call("rbind",
+                       lapply(lapply(rf.full[-c(i)],predict,newdata=psd.abs[i==Split,-1],type="vote"),"[",,2)),2,mean))
                    }
                    
                    #putting in pres votes

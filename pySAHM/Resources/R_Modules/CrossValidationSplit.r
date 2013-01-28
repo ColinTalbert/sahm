@@ -59,7 +59,7 @@ CrossValidationSplit<-function(input.file,output.file,response.col="ResponseBina
 
 #Written by Marian Talbert 9/29/2011
  if(is.null(seed)) seed<-round(runif(1,min=-((2^32)/2-1),max=((2^32)/2-1)))
-set.seed(as.numeric(seed))
+set.seed(seed)
 options(warn=1)
      if(n.folds<=1 | n.folds%%1!=0) stop("n.folds must be an integer greater than 1")
 
@@ -159,7 +159,7 @@ options(warn=1)
     	if(argSplit[[1]][1]=="o") output.file <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="i") infil <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
-   		if(argSplit[[1]][1]=="seed")  seed <- argSplit[[1]][2]
+   		if(argSplit[[1]][1]=="seed")  seed <- as.numeric(argSplit[[1]][2])
     }
  stratify<-as.logical(stratify)
  n.folds<-as.numeric(n.folds)

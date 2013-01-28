@@ -4,11 +4,14 @@ ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packa
 #setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
 #ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
 
+#setwd("I:\\VisTrails\\VisTrails_SAHM_x64\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
+#ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
 source("GLM.helper.fcts.r")
 source("BRT.helper.fcts.r")
 source("RF.helper.fcts.r")
+source("MAXENT.helper.fcts.r")
 output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
 rc="responseBinary"
 
@@ -50,41 +53,35 @@ input.file="C:\\temp\\SAHM_workspace\\modelSelection_split_20.csv"
 input.file="C:\\temp\\SAHM_workspace\\NonSpatialData.csv"
 
 ## Maxent
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\MergedDataset_7.csv"
-lambdas.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\maxentFiles_4\\Nutria.lambdas"
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\CovariateCorrelationOutputMDS.csv"
+lambdas.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\maxentFiles_94"
 FitModels(ma.name=input.file,
             output.dir=output.dir,
             response.col=rc,make.p.tif=T,make.binary.tif=T,
             debug.mode=T,script.name="maxent",opt.methods=2,MESS=T,lambdas=lambdas.file)
 ##MARS
+ input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\CovariateCorrelationOutputMDS.csv"
 
-input.file="J://Projects//Climate_RS_Comparison//Cheatgrass_VisTrails//WUS//NOV2012//ModelEvaluation_Split_1.csv"
 start.time<-Sys.time() 
 FitModels(ma.name=input.file,
             output.dir=output.dir,
-            response.col=rc,make.p.tif=T,make.binary.tif=T,
-            mars.degree=1,mars.penalty=2,debug.mode=T,script.name="mars",opt.methods=2,MESS=T,ScriptPath=ScriptPath)
+            response.col=rc,make.p.tif=T,make.binary.tif=F,
+            mars.degree=1,mars.penalty=2,debug.mode=T,script.name="mars",opt.methods=2,MESS=F,ScriptPath=ScriptPath)
 total.time<-Sys.time()-start.time
 total.time
-EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=FALSE)
+#EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=FALSE)
 
 ##GLM
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_condor\\modelSelection_cv_3.csv"
+#input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_condor\\modelSelection_cv_3.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,
           output.dir=output.dir,
           response.col=rc,make.p.tif=T,make.binary.tif=T,
-          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=FALSE,ScriptPath=ScriptPath)
+          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=T,opt.methods=2,squared.terms=FALSE,ScriptPath=ScriptPath)
 
-FitModels(ma.name=input.file,
-          tif.dir=NULL,
-          output.dir=output.dir,
-          response.col=rc,make.p.tif=F,make.binary.tif=F,
-          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=FALSE)          
+   
 #RF
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_condor\\rf_1\\modelSelection_cv_1.csv"
-input.file="C:\\VisTrails\\mtalbert_20110504T132851\\readMaTests\\PsdoAbsSplitCrossVal.csv"
-start.time<-Sys.time()
+
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,
@@ -99,14 +96,14 @@ total.time
 
 rc="responseBinary"
 #BRT
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_FinalTest\\CovariateCorrelationOutputMDS_initial.csv"
+#input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_FinalTest\\CovariateCorrelationOutputMDS_initial.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,output.dir=output.dir,
-          response.col=rc,make.p.tif=T,make.binary.tif=T,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
+          response.col=rc,make.p.tif=F,make.binary.tif=F,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
       family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
-  tolerance = 0.001,seed=-616264908,opt.methods=2,
+  tolerance = 0.001,seed=1,opt.methods=2,
           simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
-          bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,MESS=F)
+          bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,MESS=F,ScriptPath=ScriptPath)
 
 EvaluateNewData(workspace=paste(output.dir,"modelWorkspace",sep="\\"),out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=TRUE,produce.metrics=TRUE)
 
@@ -130,9 +127,9 @@ FitModels(ma.name=input.file,
 
 
 #Now evaluating new data
-workspace="I:\\VisTrails\\WorkingFiles\\workspace\\_TutorialTesting\\brt_1"
+workspace=output.dir
 
-EvaluateNewData(workspace=paste(workspace,"modelWorkspace",sep="\\"),outDir=output.dir,binary.tif=TRUE,p.tif=TRUE,mes=TRUE)
+EvaluateNewData(workspace=paste(workspace,"modelWorkspace",sep="\\"),out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mes=FALSE,ScriptPath=ScriptPath)
   logname<-NULL
   sink(logname)
   sink(logname, type="message")

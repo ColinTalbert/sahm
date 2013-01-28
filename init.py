@@ -1430,7 +1430,8 @@ class CovariateCorrelationAndSelection(Module):
                     ('ShowGUI', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]'}),
                     ('numPlots', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["8"]', 'optional':True}),
                     ('minCor', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.7"]', 'optional':True}),
-                    ('corsWithHighest', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True})]
+                    ('corsWithHighest', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
+                    ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
 
     @classmethod
@@ -1451,7 +1452,12 @@ class CovariateCorrelationAndSelection(Module):
                     'corsWithHighest': ('corsWithHighest', utils.R_boolean, False),}
         
         params = utils.map_ports(self, port_map)
-
+        if self.hasInputFromPort("Seed"):
+            seed = str(self.getInputFromPort("Seed"))
+        else:
+            seed = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
+        writetolog("    seed used for subsampling = " + str(seed))
+        params["seed"] = str(seed)
         global session_dir
         params['outputMDS'] = os.path.join(session_dir, "CovariateCorrelationOutputMDS_" + params['selectionName'] + ".csv")
         params['displayJPEG'] = os.path.join(session_dir, "CovariateCorrelationDisplay.jpg")

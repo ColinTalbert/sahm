@@ -4,9 +4,9 @@ ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packa
 dir.path<-"I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\Debug1.10"
 
 #master branch
-#setwd("I:\\VisTrails\\VisTrails_SAHM_x32\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
-#ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x32\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
-#dir.path<-"C:\\temp\\AcrossModelPerformanceDetailsForTesting\\MasterBranch7.12"
+setwd("I:\\VisTrails\\VisTrails_SAHM_x64\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
+dir.path<-"I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\Master1.15"
 #For Model tests
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
@@ -66,11 +66,11 @@ output.dir[5]<-paste(dir.path,"\\maxlike",sep="")
          for(i in 1:length(input.file)){
               try(FitModels(ma.name=input.file[i],
                         tif.dir=NULL,output.dir=output.dir[2],
-                        response.col=rc[i],make.p.tif=T,make.binary.tif=F,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
+                        response.col=rc[i],make.p.tif=F,make.binary.tif=F,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
                     family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
                 tolerance = 0.001,seed=1,opt.methods=2,
                         simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
-                        learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=T,ScriptPath=ScriptPath))
+                        learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,save.model=TRUE,MESS=F,ScriptPath=ScriptPath))
                       }
               
               
@@ -78,8 +78,8 @@ output.dir[5]<-paste(dir.path,"\\maxlike",sep="")
               for(i in 1:length(input.file)){
                   try(FitModels(ma.name=input.file[i],
                           tif.dir=NULL,output.dir=output.dir[3],
-                          response.col=rc[i],make.p.tif=T,make.binary.tif=T,
-                          mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars",opt.methods=2,MESS=TRUE,ScriptPath=ScriptPath))
+                          response.col=rc[i],make.p.tif=F,make.binary.tif=F,
+                          mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars",opt.methods=2,MESS=F,ScriptPath=ScriptPath))
                       }
                 
               
@@ -88,7 +88,7 @@ output.dir[5]<-paste(dir.path,"\\maxlike",sep="")
                   try(FitModels(ma.name=input.file[i],
                         tif.dir=NULL,
                         output.dir=output.dir[4],
-                        response.col=rc[i],make.p.tif=T,make.binary.tif=F,
+                        response.col=rc[i],make.p.tif=F,make.binary.tif=F,
                         simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=TRUE,ScriptPath=ScriptPath))
                         }
               
@@ -98,7 +98,7 @@ output.dir[5]<-paste(dir.path,"\\maxlike",sep="")
               try(FitModels(ma.name=input.file[i],
                     tif.dir=NULL,
                     output.dir=output.dir[1],
-                    response.col=rc[i],make.p.tif=T,make.binary.tif=F,
+                    response.col=rc[i],make.p.tif=F,make.binary.tif=F,
                         debug.mode=T,opt.methods=2,script.name="rf",
               responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
               samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
@@ -126,7 +126,7 @@ source("chk.libs.r")
 source("read.dat.r")
 source("my.panel.smooth.binary.r")
 source("Predictor.inspection.r")
-dir.path<-"I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\Debug1.10\\PredInspect""
+dir.path<-file.path(dir.name,"PredInspect")
 input.file<-vector()
 
 input.file[1]="I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\Split.csv"
@@ -136,7 +136,7 @@ input.file[4]="I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_2
 input.file[5]="I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\SplitCrossVal.csv"
 input.file[6]="I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\Count.csv"
 ##pseudoabs
-input.file[7]="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\ElithPsdoAbs.csv"
+input.file[7]="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\CovariateCorrelationOutputMDS.csv"
       ## Nonspatial data should work through SAHM
 input.file[8]="I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\NonSpatialData.csv"   
 predictor<-c("bio_13_wgs84","bio_15_wgs84_categorical","bio_7_wgs84","asp_2k_alb","bio_16_wgs84","dem","Temperature")
@@ -147,7 +147,7 @@ for(i in 1:length(input.file)){
        try(Pairs.Explore(num.plots=5,
                 min.cor=.5,
                 input.file=input.file[i],
-            		output.file=paste(dir.path,"\\PairsExploreTest2\\",i,"Par1",".jpg",sep=""),
+            		output.file=paste(dir.path,i,"Par1",".jpg",sep=""),
             		response.col=responseCol[i],
             		pres=TRUE,
             		absn=TRUE,
@@ -155,7 +155,7 @@ for(i in 1:length(input.file)){
         try(Pairs.Explore(num.plots=10,
                 min.cor=.5,
                 input.file=input.file[i],
-            		output.file=paste(dir.path,"\\PairsExploreTest2\\",i,"Par2",".jpg",sep=""),
+            		output.file=paste(dir.path,i,"Par2",".jpg",sep=""),
             		response.col=responseCol[i],
             		pres=TRUE,
             		absn=FALSE,
@@ -163,7 +163,7 @@ for(i in 1:length(input.file)){
                 cors.w.highest=TRUE))
        try(Predictor.inspection(predictor[i],
                 input.file=input.file[i],
-            		output.dir=paste(dir.path,"\\PairsExploreTest2",sep=""),
+            		output.dir=paste(dir.path,sep=""),
             		response.col=responseCol[i],
             		pres=TRUE,
             		absn=TRUE,
@@ -172,7 +172,7 @@ for(i in 1:length(input.file)){
  try(Pairs.Explore(num.plots=15,
     min.cor=min.cor,
     input.file=input.file[i],
-		output.file=paste(dir.path,"\\PairsExploreTest2\\",i,".jpg",sep=""),
+		output.file=paste(dir.path,i,".jpg",sep=""),
 		response.col=responseCol[i],
 		pres=TRUE,
 		absn=TRUE,
@@ -180,7 +180,7 @@ for(i in 1:length(input.file)){
 		
 	try(Predictor.inspection(predictor[i],
     input.file[i],
-		output.dir=paste(dir.path,"\\PairsExploreTest2",sep=""),
+		output.dir=paste(dir.path,sep=""),
 		response.col=responseCol[i],
 		pres=TRUE,
 		absn=TRUE,
@@ -193,7 +193,7 @@ for (i in 5:25){
  try(Pairs.Explore(num.plots=i,
                 min.cor=.5,
                 input.file=input.file,
-            		output.file=paste(dir.path,"\\PairsExploreTest2\\",i,"NumPlotsTest",".jpg",sep=""),
+            		output.file=paste(dir.path,i,"NumPlotsTest",".jpg",sep=""),
             		response.col=responseCol[1],
             		pres=TRUE,
             		absn=TRUE,

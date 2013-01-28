@@ -169,11 +169,10 @@ class MAXENTRunner(object):
         absencePointCount = 0
         for row in MDSreader:
             self.convertNA(row)
-            if not evalsplit and row[evalsplit] == 'test':
+            if evalsplit and row[evalsplit] == 'test':
                 pass
-            elif row[2] == '0':
-                absencePointCount += 1
-            elif row[2] == '-9999' or row[2] == '-9998' and not row[splitcol] == self.testKey:
+            #in order to have comparable output to R we need to keep background points
+            elif row[2] in ['-9999','-9998','0'] and not row[splitcol] == self.testKey:
                 hasBackground = True
                 vals = self.usedValues(row, covariateIndexes)
                 backgroundWriter.writerow([''] + row[:2] + vals)

@@ -21,6 +21,8 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
        try(rm(out,envir=.GlobalEnv),silent=TRUE)
        try(rm(out),silent=TRUE)
        out<-out1
+       out$input$ScriptPath=ScriptPath #this might not have been in the original, it's a new requirement
+       out$input$MESS=mess
     # generate a filename for output #
                 out$input$output.dir<-out.dir
                 out$input$MESS<-mess
@@ -93,7 +95,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                             out$dat$split.type=out$dat$split.label="eval"
                             out$dat$bname<-paste(out$input$output.dir,paste("/",Model,sep=""),sep="")
                       }
-                      browser()
+             
                   # Making Predictions
                            pred.vals<-function(x,model,Model){
                           x$pred<-pred.fct(model,x$dat[,2:ncol(x$dat)],Model)
@@ -109,18 +111,19 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                           #producing auc and residual plots model summary information and accross model evaluation metric
                       out$mods$auc.output<-make.auc.plot.jpg(out=out)
            }
-          
+          browser()
      ################################ Making the tiff
    if(p.tif==T | b.tif==T){
         if((n.var <- out$mods$n.vars.final)<1){
             stop("Error producing geotiff output:  null model selected by stepwise procedure - pointless to make maps")
             } else {
             cat("\nproducing prediction maps...","\n","\n");flush.console()
-               proc.tiff(model=out$mods$final.mod,vnames=names(out$dat$ma$train$dat)[-1],
-                tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=pred.fct,factor.levels=out$dat$factor.levels,make.binary.tif=b.tif,
+            proc.tiff(model=out$mods$final.mod,vnames=names(out$dat$ma$train$dat)[-1],
+                tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,factor.levels=out$dat$factor.levels,make.binary.tif=b.tif,
                 thresh=out$mods$auc.output$thresh,make.p.tif=p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
                 outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50.0,NAval=-3000,
-                fnames=out$dat$tif.names,out=out,Model=Model)     
+                fnames=out$dat$tif.names,out=out,Model=Model)
+                
             }
 
      }
@@ -129,7 +132,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
 
 p.tif=T
 b.tif=T
-Mess=FALSE
+mess=FALSE
 new.tiffs=NULL
 produce.metrics=TRUE
 

@@ -116,7 +116,7 @@ on.exit(detach(out$input))
       }
               
  if(Model=="brt"){
-        
+               
            txt0 <- paste("\n\n","Settings:\n",
                       if(out$input$PsdoAbs) "(Averaged across available splits)\n", 
                       "\n\trandom seed used =            ",seed,
@@ -130,8 +130,8 @@ on.exit(detach(out$input))
           txt1 <- "\nRelative influence of predictors in final model:\n\n"
           txt2 <- if(!out$input$PsdoAbs) "\nImportant interactions in final model:\n\n"
                      else "\nImportant interactions in at least one split of available points:\n\n"
-             
-          capture.output(cat(txt0),cat(txt1),print(out$mods$summary),cat(txt2),print(out$mods$interactions,row.names=F),file=paste(out$dat$bname,"_output.txt",sep=""),
+                    
+          capture.output(cat(txt0),cat(txt1),print(out$mods$summary,row.names=FALSE),cat(txt2),print(out$mods$interactions,row.names=F),file=paste(out$dat$bname,"_output.txt",sep=""),
              append=TRUE)
           cat(txt0);cat(txt1);print(out$mods$summary);cat(txt2);print(out$mods$interactions,row.names=F)
       }

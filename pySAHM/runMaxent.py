@@ -169,26 +169,28 @@ class MAXENTRunner(object):
         trainingWriter.writerow(['full_name', 'x', 'y'] + covariateNamesClean)
         backgroundWriter.writerow(['full_name', 'x', 'y'] + covariateNamesClean)
         hasBackground = False
-        absencePointCount = 0
         for row in MDSreader:
             self.convertNA(row)
-            if evalsplit and row[evalsplit] == 'test':
+            vals = self.usedValues(row, covariateIndexes)
+            if evalsplit and row[evalsplit] == 'test': #handle evaluation split
                 pass
-            elif row[2] == '0':
-                absencePointCount += 1
-            elif row[2] == '-9999' or row[2] == '-9998' and not row[splitcol] == self.testKey:
-                hasBackground = True
-                vals = self.usedValues(row, covariateIndexes)
-                backgroundWriter.writerow([''] + row[:2] + vals)
-            elif splitcol is None and str(row[2]) != '0':
-                vals = self.usedValues(row, covariateIndexes)
-                trainingWriter.writerow([self.args['species_name']] + row[:2] + vals)
-            elif row[splitcol] == self.testKey and str(row[2]) != '0' or self.testCSV == '':
-                vals = self.usedValues(row, covariateIndexes)
-                testWriter.writerow([self.args['species_name']] + row[:2] + vals)
-            elif str(row[2]) != '0':
-                vals = self.usedValues(row, covariateIndexes)
-                trainingWriter.writerow([self.args['species_name']] + row[:2] + vals)
+            elif splitcol is None: #no split column
+                if row[2]=='1':
+                    trainingWriter.writerow([self.args['species_name']] + row[:2] + vals)
+                elif row[2] in ['-9999','-9998','0']:
+                    hasBackground = True
+                    backgroundWriter.writerow([''] + row[:2] + vals)
+            elif not row[splitcol] == self.testKey: #train split
+                if row[2] in ['-9999','-9998','0']: 
+                    hasBackground = True
+                    backgroundWriter.writerow([''] + row[:2] + vals)
+                elif row[2]=='1': 
+                    trainingWriter.writerow([self.args['species_name']] + row[:2] + vals)   
+            elif row[splitcol] == self.testKey or self.testCSV == '': #test split only used by Maxent and only using pres data
+                if row[2]=='1':
+                    testWriter.writerow([self.args['species_name']] + row[:2] + vals)
+            else :
+                pass
 
         if not hasBackground and self.args['environmentallayers'] == '':
             msg = '    No environmental layers were provided and '
