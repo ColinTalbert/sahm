@@ -521,13 +521,13 @@ def writeRErrorsToLog(args, ret):
     #first check that this is a model run, or has a o= in the args.
     #If so write the output log file in the directory
     if os.path.isdir(args["o"]):
-        pass
+        outputfolder = args["o"]
     elif os.path.isdir(os.path.split(args["o"])[0]):
-        output = os.path.split(args["o"])[0]
+        outputfolder = os.path.split(args["o"])[0]
     else:
         return False
     
-    outFileN = os.path.join(args["o"], "errorLogFile.txt")
+    outFileN = os.path.join(outputfolder, "errorLogFile.txt")
     outFile = open(outFileN, "w")
     outFile.write("standard out:\n\n")
     outFile.write(ret[0] + "\n\n\n")
