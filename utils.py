@@ -804,3 +804,7 @@ def print_timing(func):
         print tabs,'%s took %0.3f ms' % (func.func_name, (t2-t1)*1000.0)
         return res
     return wrapper
+
+def getParentDir(f):
+    parentdirf = os.path.dirname(f.name)
+    return create_dir_module(parentdirf)

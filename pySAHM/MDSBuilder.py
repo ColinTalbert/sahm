@@ -255,10 +255,13 @@ class MDSBuilder(object):
     
     def findTemplate(self):
         #identify template if there is one.
-        fieldDataCSV = csv.reader(open(self.fieldData, "r"))
-        origHeader = fieldDataCSV.next()
-        if SpatialUtilities.isRaster(origHeader[-2]):
-            self.template = origHeader[-2]
+        if os.path.exists(self.fieldData):
+            fieldDataCSV = csv.reader(open(self.fieldData, "r"))
+            origHeader = fieldDataCSV.next()
+            if SpatialUtilities.isRaster(origHeader[-2]):
+                self.template = origHeader[-2]
+            else:
+                self.template = self.inputs[0]
         else:
             self.template = self.inputs[0]
     
