@@ -483,9 +483,6 @@ class Model(Module):
                          'makeBinMap':('mbt', utils.R_boolean, False),
                          'makeMESMap':('mes', utils.R_boolean, False),
                          'ThresholdOptimizationMethod':('om', None, False),
-                         'runAsynchronously':('runAsync', None, False),
-                         'runOnCondor':('runOnCondor', None, False),
-#                         'UsePseudoAbs':('psa', utils.R_boolean, False)
                     }
 
     @classmethod
@@ -551,21 +548,21 @@ class Model(Module):
         
     def setModelResult(self, filename, portname, arg_key=None):
         outFileName = os.path.join(self.output_dname, self.ModelAbbrev + filename)
-        required = not (self.argsDict.has_key(arg_key) and 
-                        self.argsDict[arg_key].lower() == 'false')
-        
-        if (self.ModelAbbrev == "ApplyModel" and portname == "ResidualsMap") \
-            or (self.ModelAbbrev == "ApplyModel" and arg_key is None):
-            required = False
-        
-        outfile_exists = len(glob.glob(outFileName)) > 0
-        if required and not outfile_exists and not self.argsDict['RA']:
-            msg = "Expected output from " + self.ModelAbbrev + " was not found."
-            msg += "\nSpecifically " + self.ModelAbbrev + filename + " was missing."
-            msg += "\nThis might indicate problems with the inputs to the R module."
-            msg += "\nCheck the console output for additional R warnings "
-            writetolog(msg, False, True)
-            raise ModuleError(self, msg)
+#        required = not (self.argsDict.has_key(arg_key) and 
+#                        self.argsDict[arg_key].lower() == 'false')
+#        
+#        if (self.ModelAbbrev == "ApplyModel" and portname == "ResidualsMap") \
+#            or (self.ModelAbbrev == "ApplyModel" and arg_key is None):
+#            required = False
+#        
+#        outfile_exists = len(glob.glob(outFileName)) > 0
+#        if required and not outfile_exists and not self.argsDict['RA']:
+#            msg = "Expected output from " + self.ModelAbbrev + " was not found."
+#            msg += "\nSpecifically " + self.ModelAbbrev + filename + " was missing."
+#            msg += "\nThis might indicate problems with the inputs to the R module."
+#            msg += "\nCheck the console output for additional R warnings "
+#            writetolog(msg, False, True)
+#            raise ModuleError(self, msg)
             
         output_file = utils.create_file_module(outFileName)
         self.setResult(portname, output_file)
