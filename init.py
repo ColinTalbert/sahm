@@ -2025,16 +2025,16 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
 #                          {'dst_port_remap': {'inputMDS': 'mdsFile',} })],
                     }
     for m in ['GLM', 'MARS', 'RandomForest', 'BoostedRegressionTree']:
-        module_remap['Models|' + m] = [(None, '1.0.2', 'Models|' + m, 
+        module_remap['Models|' + m] = [(None, '1.0.1', 'Models|' + m, 
                           {'dst_port_remap': {'modelWorkspace': utils.getParentDir} })]
         
     for m in ['ApplyModel']:
-        module_remap['Tools|' + m] = [(None, '1.0.2', 'Tools|' + m, 
+        module_remap['Tools|' + m] = [(None, '1.0.1', 'Tools|' + m, 
                           {'dst_port_remap': {'modelWorkspace': utils.getParentDir} })]
     
-    module_remap['Output|SAHMSpatialOutputViewerCell'] = [(None, '1.0.2', 'Output|SAHMSpatialOutputViewerCell', 
+    module_remap['Output|SAHMSpatialOutputViewerCell'] = [(None, '1.0.1', 'Output|SAHMSpatialOutputViewerCell', 
                           {'src_port_remap': {'model_workspace': utils.getParentDir} })]
-    module_remap['Output|SAHMModelOutputViewerCell'] = [(None, '1.0.2', 'Output|SAHMModelOutputViewerCell', 
+    module_remap['Output|SAHMModelOutputViewerCell'] = [(None, '1.0.1', 'Output|SAHMModelOutputViewerCell', 
                           {'src_port_remap': {'ModelWorkspace': utils.getParentDir} })]
 #    
 #    for m in ['SAHMSpatialOutputViewerCell', 'SAHMModelOutputViewerCell']:

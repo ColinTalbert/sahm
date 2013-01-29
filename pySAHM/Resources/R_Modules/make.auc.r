@@ -107,11 +107,11 @@ make.auc.plot.jpg<-function(out=out){
   if(out$input$ResidMaps){
         if(out$dat$split.label!="eval"){
         residual.smooth.fct<-resid.image(calc.dev(inlst$train$dat$response, inlst$train$pred, inlst$train$weight, family=out$input$model.family)$dev.cont,inlst$train$pred,
-                inlst$train$dat$response,inlst$train$XY$X,inlst$train$XY$Y,out$input$model.family,out$input$output.dir,label=out$dat$split.label,out)
+                inlst$train$dat$response,inlst$train$XY$X,inlst$train$XY$Y,inlst$train$weight,out$input$model.family,out$input$output.dir,label=out$dat$split.label,out)
             }
         else{
              residual.smooth.fct<-resid.image(calc.dev(inlst$test$dat$response, inlst$test$pred, inlst$test$weight, family=out$input$model.family)$dev.cont,inlst$test$pred,
-                inlst$test$dat$response,inlst$test$XY$X,inlst$test$XY$Y,out$input$model.family,out$input$output.dir,label=out$dat$split.label,out)
+                inlst$test$dat$response,inlst$test$XY$X,inlst$test$XY$Y,inlst$test$weight,out$input$model.family,out$input$output.dir,label=out$dat$split.label,out)
              }
       } else residual.smooth.fct=NULL
 ########## AUC and Calibration plot for binomial data #######################
