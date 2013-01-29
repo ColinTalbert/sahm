@@ -22,7 +22,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
        try(rm(out),silent=TRUE)
        out<-out1
        out$input$ScriptPath=ScriptPath #this might not have been in the original, it's a new requirement
-       out$input$MESS=mess
+       
     # generate a filename for output #
                 out$input$output.dir<-out.dir
                 out$input$MESS<-mess
@@ -111,7 +111,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                           #producing auc and residual plots model summary information and accross model evaluation metric
                       out$mods$auc.output<-make.auc.plot.jpg(out=out)
            }
-          browser()
+        
      ################################ Making the tiff
    if(p.tif==T | b.tif==T){
         if((n.var <- out$mods$n.vars.final)<1){
@@ -161,7 +161,7 @@ Args <- commandArgs(trailingOnly=FALSE)
 ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
 
-EvaluateNewData(workspace=ws,out.dir=out.dir,b.tif=as.logical(b.tif),p.tif=as.logical(p.tif),mess=as.logical(Mess),new.tifs=new.tiffs,produce.metrics=as.logical(produce.metrics),ScriptPath=ScriptPath)
+EvaluateNewData(workspace=ws,out.dir=out.dir,b.tif=as.logical(b.tif),p.tif=as.logical(p.tif),mess=as.logical(mess),new.tifs=new.tiffs,produce.metrics=as.logical(produce.metrics),ScriptPath=ScriptPath)
 
 
 
