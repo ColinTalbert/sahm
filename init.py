@@ -54,7 +54,6 @@ import subprocess
 import traceback
 import random
 import copy
-import multiprocessing
 
 
 from core.modules.vistrails_module import Module, ModuleError, ModuleConnector
@@ -81,7 +80,7 @@ import pySAHM.MDSBuilder as MDSB
 import pySAHM.MDSBuilder_vector as MDSB_V
 import pySAHM.PARC as parc
 import pySAHM.RasterFormatConverter as RFC
-import pySAHM.runMaxent as MaxentRunner
+import pySAHM.MaxentRunner as MaxentRunner
 from SahmOutputViewer import SAHMModelOutputViewerCell
 from SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
 from GeneralSpatialViewer import GeneralSpatialViewer
@@ -130,63 +129,12 @@ def menu_items():
         
         STFM  = SelectAndTestFinalModel(session_dir, configuration.r_path) 
         retVal = STFM.exec_()
-        
-    def selectProcessingMode():
-        selectDialog = QtGui.QDialog()
-        
-        global groupBox
-        groupBox = QtGui.QGroupBox("Processing mode:")
-        vbox = QtGui.QVBoxLayout()
-
-        for mode in [("single thread", True), 
-                     ("multiple cores asynchronously", True), 
-                     ("FORT Condor", isFortCondorAvailible())]:
-            radio =  QtGui.QRadioButton(mode[0])
-            radio.setChecked(mode[0] == configuration.cur_processing_mode)
-            radio.setEnabled(mode[1])
-            QtCore.QObject.connect(radio, QtCore.SIGNAL("toggled(bool)"), selectProcessingMode_changed)
-            vbox.addWidget(radio)
-            
-        groupBox.setLayout(vbox)
-        
-        layout = QtGui.QVBoxLayout()
-        layout.addWidget(groupBox)
-        selectDialog.setLayout(layout)
+#        if retVal == 1:
+#            raise ModuleError(self, "Cancel or Close selected (not OK) workflow halted.")
     
-        selectDialog.exec_()
-        
-    def selectProcessingMode_changed(e):
-        global groupBox
-        qvbl = groupBox.layout()
-        for i in range(0, qvbl.count()):
-            widget = qvbl.itemAt(i).widget() 
-            if (widget!=0) and (type(widget) is QtGui.QRadioButton):
-                if widget.isChecked():
-                    
-                    configuration.cur_processing_mode = str(widget.text())
-        
-                    package_manager = get_package_manager()
-                    package = package_manager.get_package(identifier)
-                    dom, element = package.find_own_dom_element()
-        
-                    configuration.write_to_dom(dom, element)
-
-    def isFortCondorAvailible():
-        cmd = ["condor_store_cred", "-n",  "igskbacbws425", "query"]
-        p = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        ret = p.communicate()
-        return ret[0].find("A credential is stored and is valid") != -1
-
-    def checkAsyncModels():
-        utils.launch_RunMonitorApp()
-        
-        
-        
     lst = []
     lst.append(("Change session folder", change_session_folder))
-    lst.append(("Change processing mode", selectProcessingMode))
     lst.append(("Select and test the Final Model", select_test_final_model))
-    lst.append(("Check Asynchronous model runs", checkAsyncModels))
     return(lst)
 
 
@@ -420,6 +368,15 @@ class TemplateLayer(Path):
     def provide_output_port_documentation(cls, port_name):
          return GenModDoc.construct_port_doc(cls, port_name, 'out') 
     
+#    def compute(self):
+#        output_file = create_file_module(self.forceGetInputFromPort('FilePath', []))
+#        self.setResult('value', output_file)
+
+#class SingleInputPredictor(Predictor):
+#    pass
+#
+#class SpatialDef(Module):
+#    _output_ports = [('spatialDef', '(gov.usgs.sahm:SpatialDef:DataInput)')]
 
 class MergedDataSet(File):
     '''
@@ -443,6 +400,118 @@ class RastersWithPARCInfoCSV(File):
     
     pass
 
+#    def compute(self, is_input=None):
+#        PersistentPath.compute(self, is_input, 'blob')
+
+
+#class ApplyModel(Module):
+#    '''
+#    Apply Model
+#
+#    The ApplyModel module allows the user to apply a model developed using a
+#    particular package within the workflow and generate output probability and binary
+#    maps. The process of creating an output probability map and binary map based on
+#    a particular model can be time-consuming, depending on the input data. By
+#    existing as a stand-alone process in the workflow, the ApplyModel module allows
+#    a user to investigate the performance metrics for a particular model (such as
+#    the ROC curve or the AUC) before dedicating the processing time needed to generate
+#    the output maps. In most cases, a user will "fine tune" a model by exploring the
+#    performance metrics of different model iterations before applying the model and
+#    generating the actual maps as a final step.
+#    
+#    The ApplyModel module also provides the user with the option of projecting the results
+#    of a model developed from one set of environmental predictors onto a new modeled space
+#    containing that same set of environmental predictors but representing data captured at
+#    a different temporal or spatial location. For example, a user could generate a model
+#    predicting habitat suitability using recorded presence points and certain environmental
+#    predictors such as elevation, landcover, and proximity to water in one geographic
+#    location. Based on the training from this information, the modeled results could be
+#    generated for (or "projected to") a new location based on the range of values seen in
+#    elevation, landcover, and proximity to water in the second geographic area. Similarly,
+#    modeling predicted results through time is also possible. A model trained using field
+#    data and a set of predictor layers representative of one time period could be projected
+#    onto the same geographical area using a new set of layers corresponding to the same
+#    predictors but representing data from a different time period (e.g., different climate
+#    data).
+#
+#    The ApplyModel module accepts two inputs from the user:
+#
+#    1. Model Workspace: The model workspace field accepts as an input a modeling
+#    package element (complete with all required parameters) from upstream in the workflow.
+#    The inputs and specifications provided in the dialogue fields of the model will be applied
+#    and used to generate the output maps. A user should populate the model workspace field by
+#    connecting a model element to the appropriate input port of the ApplyModel module in the
+#    visual display of the model workflow.
+#    
+#    2. Projection Target: The projection target is an optional parameter that allows a user to
+#    apply a model to a particular geographic area and or set of predictors (other than those
+#    used to train the model) and create output maps within the spatial extent of the projection
+#    target layers. This input field should be populated by connecting either the output of the
+#    ProjectionLayers module or a separate MDSBuilder element to the appropriate input port of
+#    the ApplyModel module.
+#    
+#    '''
+#    
+#    _input_ports = [('projectionTargetMDS', '(gov.usgs.sahm:MergedDataSet:Other)'),
+#                    ('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'),
+#                    ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
+#                    ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
+#                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+#                    ('produceMetrics', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False})]
+#    _output_ports =  [('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'), 
+#                     ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
+#                     ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)'),
+#                     ('ResidualsMap', '(edu.utah.sci.vistrails.basic:File)'),
+#                     ('MessMap', '(edu.utah.sci.vistrails.basic:File)'),
+#                     ('MoDMap', '(edu.utah.sci.vistrails.basic:File)'),
+#                     ('modelEvalPlot', '(edu.utah.sci.vistrails.basic:File)'),
+#                     ('ResponseCurves', '(edu.utah.sci.vistrails.basic:File)'),
+#                     ('Text_Output', '(edu.utah.sci.vistrails.basic:File)')]
+#    
+#    
+#    
+#    def compute(self):
+#        
+#
+#        args = "ws=" + '"' + self.forceGetInputFromPort('modelWorkspace').name + '"'
+#        output_dname = utils.mknextdir(prefix='AppliedModel_')
+#        args += " o=" + '"' + output_dname + '"'
+#        
+#        mdsFile = self.forceGetInputFromPort('projectionTargetMDS').name
+#        args += " ntfs=" + '"' + mdsFile + '"'
+#
+#            
+#        if self.hasInputFromPort('makeBinMap'):
+#            makeBinMap = self.forceGetInputFromPort('makeBinMap')
+#            args += ' mbt=' + str(makeBinMap).upper()
+#        else:
+#            args += ' mbt=TRUE'
+#            
+#        if self.hasInputFromPort('makeProbabilityMap'):
+#            makeProbabilityMap = self.forceGetInputFromPort('makeProbabilityMap')
+#            args += ' mpt=' + str(makeProbabilityMap).upper()
+#        else:
+#             args += ' mpt=TRUE'
+#                
+#        
+#        utils.runRScript('PredictModel.r', args, self)
+#        
+#        input_fname = os.path.join(output_dname, "prob_map.tif")
+#        output_fname = os.path.join(output_dname, 'prob_map.jpeg')
+#        if os.path.exists(input_fname):
+#            utils.tif_to_color_jpeg(input_fname, output_fname, color_breaks_csv)
+#            output_file1 = utils.create_file_module(output_fname)
+#            self.setResult('ProbabilityMap', output_file1)
+#        else:
+#            msg = "Expected output from ApplyModel was not found."
+#            msg += "\nThis likely indicates problems with the inputs to the R module."
+#            writetolog(msg, False, True)
+#            raise ModuleError(self, msg)
+#        
+#        if  os.path.exists(os.path.join(output_dname, "bin_map.tif")):
+#            outFileName = os.path.join(output_dname, "bin_map.tif")
+#            output_file2 = utils.create_file_module(outFileName)
+#            self.setResult('BinaryMap', output_file2)
         
 class Model(Module):
     '''
@@ -450,11 +519,11 @@ class Model(Module):
     SAHM package. It is not intended for direct use or incorporation into
     the VisTrails workflow by the user.
     '''
-    _input_ports = [('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':"['2']", 'optional':False}),
-                    ('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)'),
+    _input_ports = [('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)'),
                     ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
-                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False})]
+                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+                    ]
     _output_ports = [('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'), 
                      ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
                      ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)'),
@@ -462,17 +531,13 @@ class Model(Module):
                      ('MessMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('MoDMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('modelEvalPlot', '(edu.utah.sci.vistrails.basic:File)'),
-#                     ('ResponseCurves', '(edu.utah.sci.vistrails.basic:File)'),
-                     ('Text_Output', '(edu.utah.sci.vistrails.basic:File)'),
-                     ('ModelVariableImportance', '(edu.utah.sci.vistrails.basic:File)')]
+                     ('Text_Output', '(edu.utah.sci.vistrails.basic:File)')]
 
     port_map = {'mdsFile':('c', None, True),#These ports are for all Models
                          'makeProbabilityMap':('mpt', utils.R_boolean, False),
                          'makeBinMap':('mbt', utils.R_boolean, False),
                          'makeMESMap':('mes', utils.R_boolean, False),
                          'ThresholdOptimizationMethod':('om', None, False),
-                         'runAsynchronously':('runAsync', None, False),
-                         'runOnCondor':('runOnCondor', None, False),
 #                         'UsePseudoAbs':('psa', utils.R_boolean, False)
                     }
 
@@ -483,29 +548,20 @@ class Model(Module):
     def provide_output_port_documentation(cls, port_name):
          return GenModDoc.construct_port_doc(cls, port_name, 'out') 
 
+
     def compute(self):
         
         ModelOutput = {"FIT_BRT_pluggable.r":"brt",
                        "FIT_GLM_pluggable.r":"glm",
                        "FIT_RF_pluggable.r":"rf",
                        "FIT_MARS_pluggable.r":"mars",
-                       "EvaluateNewData.r":"ApplyModel",
-                       "WrapMaxent.r":"maxent",}
-        
+                       "EvaluateNewData.r":"ApplyModel"}
         self.ModelAbbrev = ModelOutput[self.name]
         
-        #maxent R and java output write to the same directory
-        if self.ModelAbbrev == "maxent":
-            self.output_dname=self.MaxentPath
-        else: 
-            self.output_dname = utils.mknextdir(prefix=self.ModelAbbrev + '_')   
+        self.output_dname = utils.mknextdir(prefix=self.ModelAbbrev + '_')
         self.argsDict = utils.map_ports(self, self.port_map)
-        
-        self.argsDict['c'] = os.path.normpath(self.argsDict['c'])
 
         mdsFile = self.forceGetInputFromPort('mdsFile').name
-        if self.ModelAbbrev == "maxent":
-            self.argsDict['lam'] = self.MaxentPath
         
         if self.ModelAbbrev == 'brt' or \
             self.ModelAbbrev == 'rf':
@@ -515,30 +571,26 @@ class Model(Module):
       
         self.argsDict['o'] = self.output_dname
         self.argsDict['rc'] = utils.MDSresponseCol(mdsFile)
-        self.argsDict['cur_processing_mode'] = configuration.cur_processing_mode
       
         utils.runRScript(self.name, self.argsDict, self)
         
-        if configuration.cur_processing_mode == "single thread":
-            if not self.argsDict.has_key('mes'):
-                self.argsDict['mes'] = 'FALSE'
-            self.setModelResult("_prob_map.tif", 'ProbabilityMap', 'mpt')
-            self.setModelResult("_bin_map.tif", 'BinaryMap', 'mbt')
-            self.setModelResult("_resid_map.tif", 'ResidualsMap', 'mes')
-            self.setModelResult("_mess_map.tif", 'MessMap', 'mes')
-            self.setModelResult("_MoD_map.tif", 'MoDMap', 'mes')
-            self.setModelResult("_output.txt", 'Text_Output')
-            self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot')
-            self.setModelResult("_variable.importance.jpg", 'ModelVariableImportance')  
-            writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
-        else:
-            utils.launch_RunMonitorApp()
+        if not self.argsDict.has_key('mes'):
+            self.argsDict['mes'] = 'FALSE'
+        self.setModelResult("_prob_map.tif", 'ProbabilityMap', 'mpt')
+        self.setModelResult("_bin_map.tif", 'BinaryMap', 'mbt')
+        self.setModelResult("_resid_map.tif", 'ResidualsMap', 'mes')
+        self.setModelResult("_mess_map.tif", 'MessMap', 'mes')
+        self.setModelResult("_MoD_map.tif", 'MoDMap', 'mes')
+        self.setModelResult("_output.txt", 'Text_Output')
+        self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot') 
         
         modelWorkspace = utils.create_dir_module(self.output_dname)
         self.setResult("modelWorkspace", modelWorkspace)
+              
+        writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
         
     def setModelResult(self, filename, portname, arg_key=None):
-        outFileName = os.path.join(self.output_dname, self.ModelAbbrev + filename)
+        outFileName = os.path.join(self.output_dname, "*" + filename)
         required = not (self.argsDict.has_key(arg_key) and 
                         self.argsDict[arg_key].lower() == 'false')
         
@@ -547,7 +599,7 @@ class Model(Module):
             required = False
         
         outfile_exists = len(glob.glob(outFileName)) > 0
-        if required and not outfile_exists and not self.argsDict['RA']:
+        if required and not outfile_exists:
             msg = "Expected output from " + self.ModelAbbrev + " was not found."
             msg += "\nSpecifically " + self.ModelAbbrev + filename + " was missing."
             msg += "\nThis might indicate problems with the inputs to the R module."
@@ -562,7 +614,8 @@ class GLM(Model):
     __doc__ = GenModDoc.construct_module_doc('GLM')
     
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':"['2']", 'optional':False}),
+                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                          ('SimplificationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["AIC"]', 'optional':True}),
                          ('SquaredTerms', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
                          ])
@@ -578,7 +631,8 @@ class RandomForest(Model):
     __doc__ = GenModDoc.construct_module_doc('RandomForest')
     
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["2"]', 'optional':False}),
+                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                          ('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                          ('mTry', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["1"]', 'optional':True}),
                          ('nTrees', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
@@ -615,7 +669,8 @@ class MARS(Model):
     __doc__ = GenModDoc.construct_module_doc('MARS')
     
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["2"]', 'optional':False}),
+                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                          ('MarsDegree', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["1"]', 'optional':True}),
                           ('MarsPenalty', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["2"]', 'optional':True}),
                           ])
@@ -665,7 +720,8 @@ class BoostedRegressionTree(Model):
     __doc__ = GenModDoc.construct_module_doc('BoostedRegressionTree')
     
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+    _input_ports.extend([('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["2"]', 'optional':False}),
+                         ('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                          ('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ('TreeComplexity', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ('BagFraction', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.5"]', 'optional':True}),
@@ -703,7 +759,7 @@ class BackgroundSurfaceGenerator(Module):
                         ('method', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["KDE"]', 'optional':True}),
                         ('bandwidthOptimizationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["adhoc"]', 'optional':True}),
                         ('isopleth', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["95"]', 'optional':True}),
-                        ('continuous', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True})]
+                        ('bias', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True})]
     _output_ports = [("KDE", "(edu.utah.sci.vistrails.basic:File)")]
     
     @classmethod
@@ -719,7 +775,7 @@ class BackgroundSurfaceGenerator(Module):
             'method': ('method', None, True),
             'bandwidthOptimizationMethod': ('bandOptMeth', None, True),
             'isopleth': ('isopleth', None, True),
-            'continuous': ('bias', utils.R_boolean, True)}
+            'bias': ('bias', utils.R_boolean, True)}
         
         kde_params = utils.map_ports(self, port_map)
         
@@ -728,8 +784,8 @@ class BackgroundSurfaceGenerator(Module):
         outfName += "_" + kde_params["method"]
         if kde_params["method"] == "KDE":
             outfName += "_" + kde_params["bandOptMeth"]
-            if kde_params["continuous"]:
-                outfName += "_continuous"
+            if kde_params["bias"]:
+                outfName += "_bias"
             else:
                 outfName += "_iso" + str(kde_params["isopleth"])
         
@@ -743,7 +799,7 @@ class BackgroundSurfaceGenerator(Module):
                 "mth":kde_params["method"],
                 "bwopt":kde_params["bandOptMeth"],
                 "ispt":str(kde_params["isopleth"]),
-                "continuous":kde_params["continuous"]}
+                "bias":kde_params["bias"]}
 
         utils.runRScript("PseudoAbs.r", args, self)
         
@@ -765,7 +821,7 @@ class MDSBuilder(Module):
     _input_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
                                  ('backgroundPointType', '(gov.usgs.sahm:RandomPointType:Other)', {'defaults':'["Background"]'}),
-                                 ('backgroundpointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
+                                 ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
                                  ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)'),
                                  ('Seed', '(edu.utah.sci.vistrails.basic:Integer)')]
                             
@@ -962,7 +1018,7 @@ class FieldDataQuery(Module):
                 response = row[res_key]
                 if response.lower() in ["1", "true", "t", "present", "presence", FDQParams['res_pres_val'].lower()]:
                     response = 1
-                elif response.lower() in ["0", "false", "f", "absent", "absense", FDQParams['res_abs_val'].lower()]:
+                elif response.lower() in ["0", "false", "f", "absent", "absence", FDQParams['res_abs_val'].lower()]:
                     response = 0
                 elif responsetype == 'responseBinary': 
                     try:
@@ -1075,7 +1131,8 @@ class PARC(Module):
                                 ('PredictorList', '(gov.usgs.sahm:PredictorList:Other)'),
                                 ('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                 ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
-                                ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True})]
+                                ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
+                                ('multipleCores', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True})]
 
     _output_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
     
@@ -1106,7 +1163,8 @@ class PARC(Module):
         
         ourPARC.out_dir = output_dname
 
-        ourPARC.processingMode = configuration.cur_processing_mode       
+        if self.hasInputFromPort("multipleCores"):
+            ourPARC.multicores = self.getInputFromPort("multipleCores")         
 
         if self.hasInputFromPort("ignoreNonOverlap"):
             ourPARC.ignoreNonOverlap = self.getInputFromPort("ignoreNonOverlap")
@@ -1117,6 +1175,10 @@ class PARC(Module):
         #otherwise start a new CSV
         if self.hasInputFromPort("RastersWithPARCInfoCSV"):
             inputCSV = self.forceGetInputFromPort("RastersWithPARCInfoCSV").name
+            if not os.path.exists(inputCSV):
+                msg = "RastersWithPARCInfoCSV, " + inputCSV + ", does not exist."
+                writetolog(msg)
+                raise ModuleError(self, msg)
             shutil.copy(inputCSV, workingCSV)
             f = open(workingCSV, "ab")
             csvWriter = csv.writer(f)
@@ -1430,8 +1492,7 @@ class CovariateCorrelationAndSelection(Module):
                     ('ShowGUI', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]'}),
                     ('numPlots', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["8"]', 'optional':True}),
                     ('minCor', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.7"]', 'optional':True}),
-                    ('corsWithHighest', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
-                    ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
+                    ('corsWithHighest', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True})]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
 
     @classmethod
@@ -1452,12 +1513,7 @@ class CovariateCorrelationAndSelection(Module):
                     'corsWithHighest': ('corsWithHighest', utils.R_boolean, False),}
         
         params = utils.map_ports(self, port_map)
-        if self.hasInputFromPort("Seed"):
-            seed = str(self.getInputFromPort("Seed"))
-        else:
-            seed = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
-        writetolog("    seed used for subsampling = " + str(seed))
-        params["seed"] = str(seed)
+
         global session_dir
         params['outputMDS'] = os.path.join(session_dir, "CovariateCorrelationOutputMDS_" + params['selectionName'] + ".csv")
         params['displayJPEG'] = os.path.join(session_dir, "CovariateCorrelationDisplay.jpg")
@@ -1625,44 +1681,34 @@ class ProjectionLayers(Module):
         self.setResult("MDS", output_file)
         writetolog("Finished Select Projection Layers widget", True)
 
-class MAXENT(Model):
+class MAXENT(Module):
     '''
     
     '''
-    _input_ports = list(Model._input_ports)
-    _input_ports.extend([('UseRMetrics', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
-                         ])
-    _output_ports = list(Model._output_ports)
-    _output_ports.extend([("lambdas", "(edu.utah.sci.vistrails.basic:File)"),
+
+    _output_ports = [("lambdas", "(edu.utah.sci.vistrails.basic:File)"),
                      ("report", "(edu.utah.sci.vistrails.basic:File)"),
-                     ("roc", "(edu.utah.sci.vistrails.basic:File)")])
-    
-    def __init__(self):
-        global models_path
-        Model.__init__(self) 
-        self.name = 'WrapMaxent.r'
-        self.MaxentPath=""
-        #self.port_map.update({'LambdaDir':('lam', None, False), #This is a Maxent specific port
-         #                })
-        
+                     ("roc", "(edu.utah.sci.vistrails.basic:File)")]
+
     def compute(self):
         global maxent_path
 
+        writetolog("\nRunning Maxent Widget", True)
+
         ourMaxent = MaxentRunner.MAXENTRunner()
-        ourMaxent.outputDir = utils.mknextdir(prefix='maxent_')
+        ourMaxent.outputDir = utils.mknextdir(prefix='maxentFiles_')
         
-        ourMaxent.mdsFile = self.forceGetInputFromPort('mdsFile').name
+        ourMaxent.inputMDS = self.forceGetInputFromPort('inputMDS').name
         
         ourMaxent.maxentpath = maxent_path
         
         MaxentArgsCSV = os.path.join(ourMaxent.outputDir, "MaxentArgs.csv")
         
-            
         argWriter = csv.writer(open(MaxentArgsCSV, 'wb'))
         argWriter.writerow(['parameter','value'])
         for port in self._input_ports:
             #print port
-            if port[0] <> 'mdsFile' and port[0] <> 'projectionlayers':
+            if port[0] <> 'inputMDS' and port[0] <> 'projectionlayers':
                 if self.hasInputFromPort(port[0]):
                     port_val = self.getInputFromPort(port[0])
                     if port[1] == "(edu.utah.sci.vistrails.basic:Boolean)":
@@ -1688,28 +1734,22 @@ class MAXENT(Model):
             projlayers = ','.join([path.name for path in value])
             argWriter.writerow(['projectionlayers', projlayers])
             
-        argWriter.writerow(['mdsFile', ourMaxent.mdsFile])
+        argWriter.writerow(['inputMDS', ourMaxent.inputMDS])
         del argWriter
         ourMaxent.argsCSV = MaxentArgsCSV
         ourMaxent.logger = utils.getLogger()
-        ourMaxent.cur_processing_mode = configuration.cur_processing_mode
-
         try:
-                ourMaxent.run()
+            ourMaxent.run()
         except TrappedError as e:
             raise ModuleError(self, e.message)  
         except:
             utils.informative_untrapped_error(self, "Maxent")
-            #for debugging use this directory             
-#        ourMaxent.outputDir="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\maxent_20"
-        self.MaxentPath =  ourMaxent.outputDir 
-        #for now display R output only if there was a cv split we might want options
-        Model.compute(self)
-#            return 
+        
          #set outputs
         lambdasfile = os.path.join(ourMaxent.outputDir, ourMaxent.args["species_name"] + ".lambdas")
         output_file = utils.create_file_module(lambdasfile)
         self.setResult("lambdas", output_file)
+        
         
         rocfile = os.path.join(ourMaxent.outputDir, 'plots', ourMaxent.args["species_name"] + "_roc.png")
         output_file = utils.create_file_module(rocfile)
@@ -1722,7 +1762,6 @@ class MAXENT(Model):
 
         writetolog("Finished Maxent widget", True)
         
-       
 def load_max_ent_params():    
     maxent_fname = os.path.join(os.path.dirname(__file__), 'maxent.csv')
     csv_reader = csv.reader(open(maxent_fname, 'rU'))
@@ -1730,7 +1769,7 @@ def load_max_ent_params():
     csv_reader.next()
     input_ports = []
     
-    #input_ports.append(('inputMDS', '(gov.usgs.sahm:MergedDataSet:Other)'))
+    input_ports.append(('inputMDS', '(gov.usgs.sahm:MergedDataSet:Other)'))
     
     docs = {}
     basic_pkg = 'edu.utah.sci.vistrails.basic'
@@ -1793,9 +1832,6 @@ def initialize():
     
     load_max_ent_params()
     
-    import pySAHM.utilities as utilities
-    utilities.storeUNCDrives()
-    
     global layers_csv_fname
     
     writetolog("*" * 79)
@@ -1841,7 +1877,6 @@ def build_available_trees():
     
     #if the first file in the layers file does not exist assume that none
     #of them do and use the exampledata version
-    global atFORT
     if not os.path.exists(first_file):
         print (("!" * 30) + " WARNING " + ("!" * 30) + "\n")*3
         print "The first grid in your layers CSV could not be found."
@@ -1850,10 +1885,6 @@ def build_available_trees():
         print "See documentation for more information on setting up the layers.csv\n"
         print (("!" * 30) + " WARNING " + ("!" * 30) + "\n")*3
         layers_csv_fname = os.path.join(os.path.dirname(__file__), 'layers.exampledata.csv')
-        atFORT = False
-        
-    else:
-        atFORT = True
     
 #    #####Only for testing tutorial data
 #    print "For tutorial tesing uing the layers.exampledata.csv"
@@ -1979,15 +2010,38 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
     module_remap = {'Tools|BackgroundSurfaceGenerator':
                      [(None, '1.0.2', 'Tools|BackgroundSurfaceGenerator', 
                           {'dst_port_remap': {'bias': 'continuous'} })],
+                    'Tools|MDSBuilder':
+                     [(None, '1.0.2', 'Tools|MDSBuilder', 
+                          {'dst_port_remap': {'backgroundpointCount': 'backgroundPointCount'} })],
                     'Tools|PARC':
                      [(None, '1.0.2', 'Tools|PARC', 
-                          {'dst_port_remap': {'bias': ''} })],
-                    'Tools|MDSBuilder':
-                     [(None, '1.0.2', 'Tools|PARC', 
-                          {'dst_port_remap': {'backgroundPointCount': 'backgroundpointCount'} })],
-                    'Models|MAXENT':
-                     [(None, '1.0.2', 'Tools|PARC', 
-                          {'dst_port_remap': {'inputMDS': 'mdsFile'} })],
+                          {'dst_port_remap': {'bias': '',
+                                              'multipleCores': '',} })],
+                    'Tools|RasterFormatConverter':
+                    [(None, '1.0.2', 'Tools|RasterFormatConverter', 
+                          {'dst_port_remap': {'multipleCores': '',} })],
+#                    'Models|MAXENT':
+#                    [(None, '1.0.2', 'Models|MAXENT', 
+#                          {'dst_port_remap': {'inputMDS': 'mdsFile',} })],
                     }
+    for m in ['GLM', 'MARS', 'RandomForest', 'BoostedRegressionTree']:
+        module_remap['Models|' + m] = [(None, '1.0.2', 'Models|' + m, 
+                          {'dst_port_remap': {'modelWorkspace': utils.getParentDir} })]
+        
+    for m in ['ApplyModel']:
+        module_remap['Tools|' + m] = [(None, '1.0.2', 'Tools|' + m, 
+                          {'dst_port_remap': {'modelWorkspace': utils.getParentDir} })]
+    
+    module_remap['Output|SAHMSpatialOutputViewerCell'] = [(None, '1.0.2', 'Output|SAHMSpatialOutputViewerCell', 
+                          {'src_port_remap': {'model_workspace': utils.getParentDir} })]
+    module_remap['Output|SAHMModelOutputViewerCell'] = [(None, '1.0.2', 'Output|SAHMModelOutputViewerCell', 
+                          {'src_port_remap': {'ModelWorkspace': utils.getParentDir} })]
+#    
+#    for m in ['SAHMSpatialOutputViewerCell', 'SAHMModelOutputViewerCell']:
+#        module_remap['Output|' + m] = [(None, '1.0.2', 'Output|' + m, 
+#                          {'src_port_remap': {'model_workspace': 'ModelWorkspace',
+#                                              'modelWorkspace': utils.getParentDir} })]
+                          
     return UpgradeWorkflowHandler.remap_module(controller, module_id, pipeline,
                                              module_remap)
+
