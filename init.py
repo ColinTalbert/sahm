@@ -1989,6 +1989,9 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                     'Tools|RasterFormatConverter':
                     [(None, '1.0.2', 'Tools|RasterFormatConverter', 
                           {'dst_port_remap': {'multipleCores': '',} })],
+                    'Models|MAXENT':
+                    [(None, '1.0.2', 'Models|MAXENT', 
+                          {'dst_port_remap': {'inputMDS': 'mdsFile',} })],
                     }
     for m in ['GLM', 'MARS', 'RandomForest', 'BoostedRegressionTree']:
         module_remap['Models|' + m] = [(None, '1.0.2', 'Models|' + m, 
