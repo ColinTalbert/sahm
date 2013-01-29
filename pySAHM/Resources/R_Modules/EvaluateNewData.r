@@ -22,7 +22,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
        try(rm(out),silent=TRUE)
        out<-out1
        out$input$ScriptPath=ScriptPath #this might not have been in the original, it's a new requirement
-       
+       source(file.path(ScriptPath,paste(toupper(out$input$script.name),".helper.fcts.r",sep="")))
     # generate a filename for output #
                 out$input$output.dir<-out.dir
                 out$input$MESS<-mess
@@ -101,13 +101,13 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                           x$pred<-pred.fct(model,x$dat[,2:ncol(x$dat)],Model)
                           return(x)}
                           
-      
+                       
                          assign("out",out,envir=.GlobalEnv)
                           #getting the predictions for the test/train split
                           out$dat$ma<-(lapply(X=out$dat$ma,FUN=pred.vals,model=out$mods$final.mod,Model=Model))
                           #Just for the training set for Random Forest we have to take out of bag predictions rather than the regular predictions
                           if(Model=="rf") out$dat$ma$train$pred<-tweak.p(as.vector(predict(out$mods$final.mod[[1]],type="vote")[,2]))
-      
+                    
                           #producing auc and residual plots model summary information and accross model evaluation metric
                       out$mods$auc.output<-make.auc.plot.jpg(out=out)
            }
