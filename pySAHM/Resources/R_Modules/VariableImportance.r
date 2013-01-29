@@ -13,7 +13,9 @@ VariableImportance<-function(Model,out,auc){
        indx<-match(out$mods$vnames[i],names(dat[[j]]))
        Dat<-dat[[j]]
        Dat[,indx]<-Dat[sample(1:dim(dat[[j]])[1]),indx]
+       options(warn=-1)
        new.pred<-as.vector(pred.fct(model=out$mods$final,x=Dat,Model=out$input$script.name))
+       options(warn=0)
        cor.mat[i,j]<-1-cor(unlist(pred[[j]]),new.pred)
     }
    }
@@ -24,8 +26,8 @@ VariableImportance<-function(Model,out,auc){
                      }
    #if cross validation we need to avg across folds otherwise plot for each
    #order by the best in the train split
-  
-   xright<-as.matrix(cor.mat[order(apply(cor.mat,1,mean),decreasing=FALSE),])
+   
+   xright<-as.matrix(cor.mat[order(cor.mat[,ncol(cor.mat)],decreasing=FALSE),])
    ymiddle=seq(from=0,to=length(out$mods$vnames),length=nrow(xright))
   offSet<-.5 
 
@@ -36,9 +38,9 @@ VariableImportance<-function(Model,out,auc){
       if(out$dat$split.type!="crossValidation"){
          rect(xleft=0,ybottom=ymiddle,xright=xright[,ncol(xright)],ytop=ymiddle+offSet,col="blue",lwd=2)
       }                         
-     if(out$dat$split.type=="test"){
+     if(out$dat$split.type=="test" | out$dat$split.type=="eval"){
         rect(xleft=0,ybottom=ymiddle-offSet,xright=xright[,1],ytop=ymiddle,col="lightblue",lwd=2)
-        legend("bottomright" ,legend=c("train","test"),fill=c("blue","lightblue"),bg="white",cex=2)
+        legend("bottomright" ,legend=c("train",ifelse(out$dat$split.type=="eval","eval. split","test")),fill=c("blue","lightblue"),bg="white",cex=2)
       }                         
       if(out$dat$split.type=="crossValidation"){ 
         cor.mat<-cor.mat[order(cor.mat[,ncol(cor.mat)],decreasing=FALSE),]
