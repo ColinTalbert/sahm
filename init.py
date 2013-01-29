@@ -765,7 +765,7 @@ class MDSBuilder(Module):
     _input_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
                                  ('backgroundPointType', '(gov.usgs.sahm:RandomPointType:Other)', {'defaults':'["Background"]'}),
-                                 ('backgroundpointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
+                                 ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
                                  ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)'),
                                  ('Seed', '(edu.utah.sci.vistrails.basic:Integer)')]
                             
@@ -1979,15 +1979,34 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
     module_remap = {'Tools|BackgroundSurfaceGenerator':
                      [(None, '1.0.2', 'Tools|BackgroundSurfaceGenerator', 
                           {'dst_port_remap': {'bias': 'continuous'} })],
+                    'Tools|MDSBuilder':
+                     [(None, '1.0.2', 'Tools|MDSBuilder', 
+                          {'dst_port_remap': {'backgroundpointCount': 'backgroundPointCount'} })],
                     'Tools|PARC':
                      [(None, '1.0.2', 'Tools|PARC', 
-                          {'dst_port_remap': {'bias': ''} })],
-                    'Tools|MDSBuilder':
-                     [(None, '1.0.2', 'Tools|PARC', 
-                          {'dst_port_remap': {'backgroundPointCount': 'backgroundpointCount'} })],
-                    'Models|MAXENT':
-                     [(None, '1.0.2', 'Tools|PARC', 
-                          {'dst_port_remap': {'inputMDS': 'mdsFile'} })],
+                          {'dst_port_remap': {'bias': '',
+                                              'multipleCores': '',} })],
+                    'Tools|RasterFormatConverter':
+                    [(None, '1.0.2', 'Tools|RasterFormatConverter', 
+                          {'dst_port_remap': {'multipleCores': '',} })],
                     }
+    for m in ['GLM', 'MARS', 'RandomForest', 'BoostedRegressionTree']:
+        module_remap['Models|' + m] = [(None, '1.0.2', 'Models|' + m, 
+                          {'dst_port_remap': {'modelWorkspace': utils.getParentDir} })]
+        
+    for m in ['ApplyModel']:
+        module_remap['Tools|' + m] = [(None, '1.0.2', 'Tools|' + m, 
+                          {'dst_port_remap': {'modelWorkspace': utils.getParentDir} })]
+    
+    module_remap['Output|SAHMSpatialOutputViewerCell'] = [(None, '1.0.2', 'Output|SAHMSpatialOutputViewerCell', 
+                          {'src_port_remap': {'model_workspace': utils.getParentDir} })]
+    module_remap['Output|SAHMModelOutputViewerCell'] = [(None, '1.0.2', 'Output|SAHMModelOutputViewerCell', 
+                          {'src_port_remap': {'ModelWorkspace': utils.getParentDir} })]
+#    
+#    for m in ['SAHMSpatialOutputViewerCell', 'SAHMModelOutputViewerCell']:
+#        module_remap['Output|' + m] = [(None, '1.0.2', 'Output|' + m, 
+#                          {'src_port_remap': {'model_workspace': 'ModelWorkspace',
+#                                              'modelWorkspace': utils.getParentDir} })]
+                          
     return UpgradeWorkflowHandler.remap_module(controller, module_id, pipeline,
                                              module_remap)
