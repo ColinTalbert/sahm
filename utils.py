@@ -936,6 +936,6 @@ def waitForProcessesToFinish(processQueue, maxCount=1):
                 if process.poll() is not None:
                     processQueue.remove(process)
                     
-def getParentDir(f):
+def getParentDir(f, x=None):
     parentdirf = os.path.dirname(f.name)
     return create_dir_module(parentdirf)

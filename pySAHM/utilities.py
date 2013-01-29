@@ -56,6 +56,8 @@ _verbose = False
 import subprocess
 import multiprocessing
 
+from PyQt4 import QtCore, QtGui
+
 mosaicAllTifsInFolder = None
 
 class logger(object):
@@ -228,6 +230,15 @@ def storeUNCDrives():
             if len(line) > 2 and \
                 os.path.exists(line[2]):
                 UNCDrives[line[1].lower() + '\\'] = line[2] + "\\"
+
+def checkIfFolderIsOnNetwork(dirname):
+    global UNCDrives
+    if not os.path.splitdrive(dirname)[0].lower() + "\\" in UNCDrives.keys():
+        QtGui.QMessageBox.critical(None, "Session folder error", "For Fort Condor execution to work your session folder must be on a network drive." \
+            + "\nCurrently this is set to:   " + dirname)
+        return False
+    else:
+        return True
 
 def waitForProcessesToFinish(processQueue, maxCount=1):
     '''Given a list of running processes and a maximum number of running processes

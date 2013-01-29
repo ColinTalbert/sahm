@@ -4,6 +4,7 @@ import utilities
 import shutil
 
 from osgeo import gdal as gdal
+from osgeo import gdalconst as gdalconst
 
 def main(args_in):
     print "args used = ", args_in
@@ -63,7 +64,7 @@ def mosaicTiledOutputs(outputDirectory):
                 dataset = gdal.Open( outFname, gdal.GA_Update )
                 dataset.GetRasterBand(1).SetNoDataValue(float(NDValue))
                 dataset.GetRasterBand(1).ComputeStatistics(1)
-                #shutil.rmtree(tilesFolder)
+                shutil.rmtree(tilesFolder)
                
 #these three functi 
 def getNDVal(filename):
@@ -142,7 +143,7 @@ def approx_equal(x, y, *args, **kwargs):
 
 if __name__ == "__main__":
 
-    try:
-        main(sys.argv[1:])
-    except:
-        print "Job failed!", sys.exc_info()[0]
+#    try:
+    main(sys.argv[1:])
+#    except:
+#        print "Job failed!", sys.exc_info()[0]

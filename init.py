@@ -91,6 +91,7 @@ from sahm_picklists import ResponseType, AggregationMethod, \
 
 from utils import writetolog
 from pySAHM.utilities import TrappedError
+global utilities
 
 identifier = 'gov.usgs.sahm' 
 
@@ -109,6 +110,10 @@ def menu_items():
         if path == '':
             return None
         
+        if configuration.cur_processing_mode == "FORT Condor" and \
+            not utilities.checkIfFolderIsOnNetwork(path):
+            return None
+            
         session_dir = path
         utils.setrootdir(path)
         utils.createLogger(session_dir, configuration.output_dir)
@@ -156,20 +161,27 @@ def menu_items():
         selectDialog.exec_()
         
     def selectProcessingMode_changed(e):
-        global groupBox
-        qvbl = groupBox.layout()
-        for i in range(0, qvbl.count()):
-            widget = qvbl.itemAt(i).widget() 
-            if (widget!=0) and (type(widget) is QtGui.QRadioButton):
-                if widget.isChecked():
-                    
-                    configuration.cur_processing_mode = str(widget.text())
-        
-                    package_manager = get_package_manager()
-                    package = package_manager.get_package(identifier)
-                    dom, element = package.find_own_dom_element()
-        
-                    configuration.write_to_dom(dom, element)
+        if e:
+            global groupBox
+            qvbl = groupBox.layout()
+            for i in range(0, qvbl.count()):
+                widget = qvbl.itemAt(i).widget() 
+                if (widget!=0) and (type(widget) is QtGui.QRadioButton):
+                    if widget.isChecked():
+                        
+                        configuration.cur_processing_mode = str(widget.text())
+            
+                        package_manager = get_package_manager()
+                        package = package_manager.get_package(identifier)
+                        dom, element = package.find_own_dom_element()
+                        
+                        if configuration.cur_processing_mode == "FORT Condor":
+                            if not utilities.checkIfFolderIsOnNetwork(configuration.cur_session_folder):
+                                widget = qvbl.itemAt(i - 1).widget()
+                                widget.setChecked(True)
+                                return
+                            
+                        configuration.write_to_dom(dom, element)
 
     def isFortCondorAvailible():
         cmd = ["condor_store_cred", "-n",  "igskbacbws425", "query"]
@@ -1793,6 +1805,7 @@ def initialize():
     
     load_max_ent_params()
     
+    global utilities
     import pySAHM.utilities as utilities
     utilities.storeUNCDrives()
     
@@ -1998,7 +2011,7 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                           {'dst_port_remap': {'modelWorkspace': utils.getParentDir} })]
         
     for m in ['ApplyModel']:
-        module_remap['Tools|' + m] = [(None, '1.0.2', 'Tools|' + m, 
+        module_remap['Tools|' + m] = [(None, '1.0.1', 'Tools|' + m, 
                           {'dst_port_remap': {'modelWorkspace': utils.getParentDir} })]
     
     module_remap['Output|SAHMSpatialOutputViewerCell'] = [(None, '1.0.2', 'Output|SAHMSpatialOutputViewerCell', 
