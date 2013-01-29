@@ -1,2 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<metadata xml:lang="en"><Esri><CreaDate>20111209</CreaDate><CreaTime>11123100</CreaTime><ArcGISFormat>1.0</ArcGISFormat><SyncOnce>TRUE</SyncOnce><DataProperties><lineage><Process ToolSource="c:\arcgis\desktop10.0\ArcToolbox\Toolboxes\Conversion Tools.tbx\PolygonToRaster" Date="20111209" Time="111231">PolygonToRaster VegPolys Sheet1$.ReclassNum "I:\VisTrails\Tutorial files\original files not to include in tar\romoveg100mr" MAXIMUM_COMBINED_AREA NONE 100</Process></lineage></DataProperties></Esri></metadata>
