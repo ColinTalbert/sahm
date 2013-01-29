@@ -147,7 +147,7 @@ Args <- commandArgs(trailingOnly=FALSE)
     	argSplit[[1]][2]
     	if(argSplit[[1]][1]=="ws") ws <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="o") out.dir <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="mes")  mess <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="mes")  Mess <- argSplit[[1]][2]
    		if(argSplit[[1]][1]=="mpt") p.tif <- argSplit[[1]][2]
  			if(argSplit[[1]][1]=="mbt")  b.tif <- argSplit[[1]][2]
  			if(argSplit[[1]][1]=="c") new.tiffs <- argSplit[[1]][2]   #mds file header
