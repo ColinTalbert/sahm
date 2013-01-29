@@ -883,6 +883,10 @@ def print_timing(func):
         return res
     return wrapper
 
+def getParentDir(f):
+    parentdirf = os.path.dirname(f.name)
+    return create_dir_module(parentdirf)
+
 def checkIfModelFinished(model_dir):
     
     try:
