@@ -42,15 +42,14 @@
 ## and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
-resid.image<-function(dev.contrib,pred,raw.dat,x,y,model.type,file.name,out,label){
+resid.image<-function(dev.contrib,pred,raw.dat,x,y,wgt,model.type,file.name,out,label){
 #produces a map of deviance residuals unless we're using independent evaluation data in which case
 #it produces a map of predicted-observed data with a lowess smooth so the relationship is easier to see
 #if there are more than 2000 points a random sample is drawn to speed up the caluclations
 #if weights are available these are used for the lowess surface
 #eventually this should include an option to produce moran's i corellogram but this must be an option
 #as it can be computaitonally intensive.   Written by Marian Talbert 2011.
-  
-    wgt<-out$dat$ma$train$weight
+browser()
        if(length(pred)>2000){
            samp<-seq(1:length(pred))[order(runif(length(pred)))][1:2000]
            dev.contrib<-dev.contrib[samp]
