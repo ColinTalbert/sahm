@@ -344,6 +344,7 @@ class SAHMOutputViewerCellWidget(QCellWidget):
 #                                       self.gs_response_graph,
 #                                       self.ui.gv_response,
 #                                       max_size]
+        self.ui.crv_combobox.clear()
         if self.response_curves:
             for response_curve in self.response_curves:
                 shortName = os.path.split(response_curve)[1]

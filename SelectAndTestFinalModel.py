@@ -316,11 +316,6 @@ class SelectAndTestFinalModel(QtGui.QDialog):
                 return None
             else:
                 os.mkdir(finalFolder)
-                
-        
- 
-        program = os.path.join(self.rPath, "i386", "Rterm.exe") 
-        script = os.path.join(utils.getModelsPath(), "EvaluateNewData.r")
         
         treeviewIter = QtGui.QTreeWidgetItemIterator(self.treeview)
         checked_count = 0
@@ -337,7 +332,7 @@ class SelectAndTestFinalModel(QtGui.QDialog):
                 if evaluation: 
                     os.mkdir(outfolder)
                 
-                args = {"ws":'"' + origWS + '"',
+                args = {"ws":origWS,
                         "o":outfolder}
                         
                 if self.chkProb.checkState() == QtCore.Qt.Checked:
@@ -353,8 +348,6 @@ class SelectAndTestFinalModel(QtGui.QDialog):
                 else:
                     args["mes"] = "FALSE"
                 
-#                command = program + " --vanilla -f " + script + " --args " + args
-#                writetolog("    " + command, False, False)
                 utils.runRScript("EvaluateNewData.r", args)
                 writetolog("Finished running R for: " + str(item.text(0)) , False, True)
             treeviewIter += 1
