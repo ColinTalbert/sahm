@@ -1,7 +1,7 @@
 #debug branch
 setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
 ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
-dir.path<-"I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\Debug1.10"
+dir.path<-"I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\Debug1.29"
 
 #master branch
 setwd("I:\\VisTrails\\VisTrails_SAHM_x64\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
@@ -28,7 +28,7 @@ source("CrossValidationSplit.r")
 
 
 
-rc=c(rep("responseBinary",times=10),rep("responseCount",times=2))
+rc=c(rep("responseBinary",times=8),rep("responseCount",times=2))
 input.file<-vector()
 input.file=c(#used/available
        "I:\\VisTrails\\WorkingFiles\\workspace\\_condor\\rf_1\\modelSelection_cv_1.csv",
@@ -37,12 +37,10 @@ input.file=c(#used/available
       "I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\NonSpatialData.csv",      
       
         #pres/abs
-      "I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\BadPath.csv",
       "I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\Split.csv",
       "I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\SplitCrossVal.csv",
       "I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\SplitFactor.csv",
       "I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\Factor.csv",
-      "I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\SplitWeights.csv",  
       "I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\NoSplit.csv", 
        #count
       "I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\Count.csv",
