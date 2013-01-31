@@ -119,15 +119,14 @@ site.weights<-out$dat$ma$train$weight
   pred.values <- rep(0, n.cases)
   fitted.values <- rep(0, n.cases)
 
-  print("", quote = FALSE)
-  print("Creating predictions for subsets...", quote = F)
-
  selector<-out$dat$selector
  resp.curves<-vector("list",nk)
    out.cv<-list()
    names(resp.curves)<-seq(1:nk)
  #############################################
  #Start cross validation Fold loop
+   cor.mat<-matrix(nrow=length(out$mods$vnames),ncol=nk)
+   rownames(cor.mat)<-out$mods$vnames
 
 for (i in 1:nk) {
               cat(i," ")
@@ -138,11 +137,11 @@ for (i in 1:nk) {
               
               dat<-cbind(predictor.subset,species.subset)
               names(dat)<-names(data)
-              
+             
               # fit new model
               cv.final.mod<-model.fit(dat=out$dat$ma$train$dat[model.mask,],out=out,Model=Model,weight=out$dat$ma$train$weight[model.mask],Fold=i)                       
               fitted.values[pred.mask]<-out$dat$ma[[i]]$pred<-pred.fct(model=cv.final.mod,x=xdat[pred.mask,],Model)
-                    
+              cor.mat[,i]<-PermutePredict(out$mods$vnames,xdat[pred.mask,],fitted.values[pred.mask],cv.final.mod,Model)      
                      out$dat$ma[[i]]$thresh <- as.numeric(optimal.thresholds(data.frame(ID=1:nrow(out$dat$ma$train$dat[model.mask,]),pres.abs=out$dat$ma$train$dat[model.mask,]$response,
                           pred=pred.fct(model=cv.final.mod,x=xdat[model.mask,],Model)),opt.methods=out$input$opt.methods))[2]
               y_i <- ydat[pred.mask]
@@ -202,7 +201,7 @@ for (i in 1:nk) {
   
   cv.list<-list(full.resid.deviance = full.resid.deviance,
     full.test = full.test, full.calib = full.calib, pooled.deviance = cv.resid.deviance, pooled.test = cv.test,
-    pooled.calib = cv.calib,subset.deviance = subset.deviance, subset.test = subset.test, subset.calib = subset.calib,resp.curves=resp.curves)
+    pooled.calib = cv.calib,subset.deviance = subset.deviance, subset.test = subset.test, subset.calib = subset.calib,resp.curves=resp.curves,cor.mat=cor.mat)
    out$cv<-cv.list
   return(out)
 }

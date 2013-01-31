@@ -100,6 +100,7 @@ Input Ports:
             Calibration
             Confusion
             Residuals
+            Variable Importance
     """
     _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
@@ -156,6 +157,10 @@ Input Ports:
             if os.path.exists(residuals_graph_path):
                 residuals_graph = window.file_pool.make_local_copy(residuals_graph_path)
             
+            variable_imp_path = os.path.join(model_dir_full, model_name + '_variable.importance.jpg')
+            if os.path.exists(variable_imp_path):
+                variable_graph = window.file_pool.make_local_copy(variable_imp_path)
+                
             model_label = model_dir.capitalize().replace('output', 'Output')
             
             
@@ -180,6 +185,7 @@ Input Ports:
                                                                           calibration_graph,
                                                                           confusion_graph,
                                                                           residuals_graph,
+                                                                          variable_graph,
                                                                           model_label,
                                                                           initial_display))
         else:
@@ -239,6 +245,10 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         self.gs_residuals_graph = QtGui.QGraphicsScene()
         self.ui.gv_residuals.setScene(self.gs_residuals_graph)
         self.gs_residuals_graph.wheelEvent = self.wheel_event_residuals
+        
+        self.gs_variable_graph = QtGui.QGraphicsScene()
+        self.ui.gv_variable.setScene(self.gs_variable_graph)
+        self.gs_variable_graph.wheelEvent = self.wheel_event_variable
         
         #add in ie browsers for the text and response
         self.text_browser = QAxContainer.QAxWidget(self)
@@ -310,7 +320,7 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         
         """
         (auc_graph, text_output, self.response_curves, calibration_graph, confusion_graph, 
-         residuals_graph, model_label, inital_display) = inputPorts
+         residuals_graph, variable_graph, model_label, inital_display) = inputPorts
         
         self.images = {}
         
@@ -391,7 +401,18 @@ class SAHMOutputViewerCellWidget(QCellWidget):
                                        self.gs_residuals_graph,
                                        self.ui.gv_residuals,
                                        max_size]
-        
+        if variable_graph:
+            pixmap_res = QtGui.QPixmap(variable_graph.name)
+            max_size = self.getMaxSize(self.ui.gv_variable)
+            scaled_pixmap_res = pixmap_res.scaled(max_size, max_size, 
+                                            QtCore.Qt.KeepAspectRatio, 
+                                            QtCore.Qt.SmoothTransformation)
+            
+            self.images['variable_graph'] = [pixmap_res,
+                                       scaled_pixmap_res,
+                                       self.gs_variable_graph,
+                                       self.ui.gv_variable,
+                                       max_size]
 
         self.text_urlSrc = QtCore.QUrl.fromLocalFile(text_output.name)
         if self.text_urlSrc!=None:
@@ -400,7 +421,7 @@ class SAHMOutputViewerCellWidget(QCellWidget):
             self.text_browser.dynamicCall('Navigate(const QString&)', QtCore.QString('about:blank'))
         
        
-        choices = ['Text', 'Response Curves', 'AUC', 'Calibration', 'Confusion', 'Residuals']
+        choices = ['Text', 'Response Curves', 'AUC', 'Calibration', 'Confusion', 'Residuals','Variable Importance']
         selected_index = choices.index(inital_display)
         self.ui.tabWidget.setCurrentIndex(selected_index)
 
@@ -441,7 +462,10 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         
     def wheel_event_residuals(self, event):
         self.wheel_event(event, 'residuals_graph', QtCore.Qt.SmoothTransformation)
-       
+    
+    def wheel_event_variable(self, event):
+        self.wheel_event(event, 'variable_graph', QtCore.Qt.SmoothTransformation)
+           
     def wheel_event (self, event, id, transform):
         numDegrees = event.delta() / 8 
         numSteps = numDegrees / 15.0 
@@ -747,7 +771,19 @@ class Ui_Frame(object):
         self.horizontalLayout_7.addWidget(self.gv_residuals)
         self.tabWidget.addTab(self.residuals, _fromUtf8(""))
 
-        
+        self.variable = QtGui.QWidget()
+        self.variable.setObjectName(_fromUtf8("variable"))
+        self.horizontalLayout_7 = QtGui.QHBoxLayout(self.variable)
+        self.horizontalLayout_7.setSpacing(0)
+        self.horizontalLayout_7.setMargin(0)
+        self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
+        self.gv_variable = QtGui.QGraphicsView(self.variable)
+        self.gv_variable.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
+        self.gv_variable.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        self.gv_variable.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        self.gv_variable.setObjectName(_fromUtf8("gv_variable"))
+        self.horizontalLayout_7.addWidget(self.gv_variable)
+        self.tabWidget.addTab(self.variable, _fromUtf8(""))
         self.horizontalLayout.addWidget(self.tabWidget)
         self.retranslateUi(Frame)
         self.tabWidget.setCurrentIndex(2)
@@ -761,3 +797,4 @@ class Ui_Frame(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.calibration), QtGui.QApplication.translate("Frame", "Calibration", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.confusion), QtGui.QApplication.translate("Frame", "Confusion", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.residuals), QtGui.QApplication.translate("Frame", "Residuals", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.variable), QtGui.QApplication.translate("Frame", "Variable Importance", None, QtGui.QApplication.UnicodeUTF8))
