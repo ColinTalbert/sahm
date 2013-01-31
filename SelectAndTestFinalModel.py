@@ -294,9 +294,11 @@ class SelectAndTestFinalModel(QtGui.QDialog):
    
         
     def runR(self):
-#       
+#        
+        evaluation=False
         if self.chkEvalHoldout.checkState() == QtCore.Qt.Checked:
             #create a finalModelEvaluation folder
+            evaluation=True
             eval_type = os.path.split(self.findModel.csv_file)[1]
             eval_type = os.path.splitext(eval_type)[0]
             eval_type = eval_type.replace("AcrossModel", "")
@@ -328,8 +330,11 @@ class SelectAndTestFinalModel(QtGui.QDialog):
             if item.checkState(0) == QtCore.Qt.Checked:
                 checked_count += 1
                 origWS = os.path.join(self.session_folder, str(item.text(0)), "modelWorkspace")
+                if not evaluation:
+                    finalFolder=self.session_folder
                 outfolder = os.path.join(finalFolder, str(item.text(0)))
-                os.mkdir(outfolder)
+                if evaluation: 
+                    os.mkdir(outfolder)
                 
                 args = {"ws":'"' + origWS + '"',
                         "o":outfolder}
@@ -476,12 +481,15 @@ class FindModelType():
             widget_layout.addWidget(lbl)
             
             second_layout = QtGui.QVBoxLayout(parent)
+           
             for model_type in csvOutputs:
                 button = QtGui.QPushButton()
                 buttonText = os.path.split(model_type)[1].replace('.csv', '')
                 button.setText(buttonText)
-                button.clicked.connect(lambda: self.button_push(model_type))
-#                button.connect(button, QtCore.SIGNAL('clicked(' + model_type + ')'), button_push)
+                button.connection = model_type
+                button.clicked.connect(self.button_push)
+                #buttonName.clicked.connect(lambda: self.button_push())
+               # button.connect(button, QtCore.SIGNAL('clicked(' + model_type + ')'), button_push)
                 
                 second_layout.addWidget(button)
             
@@ -494,6 +502,7 @@ class FindModelType():
         
         self.jpeg_file = self.csv_file.replace(".csv", ".jpg")
         
-    def button_push(self, model_event):
-        self.csv_file = model_event
+    def button_push(self):
+        sender =self.which_type.sender()
+        self.csv_file = sender.connection
         self.which_type.accept()
