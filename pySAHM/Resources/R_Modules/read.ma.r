@@ -47,7 +47,7 @@
       input.file <- out$input$ma.name
        r.name <- out$input$response.col
       out.list <- list()
-      read.dat(input.file,hl=hl,include=include,response.col=r.name)
+      read.dat(input.file,hl=hl,include=include,response.col=r.name,model=out$input$script.name)
            
           paths<-matrix(file.path(tif.info[[3]]))
           rownames(paths) <-tif.info[[1]][1:length(paths)]
@@ -225,8 +225,8 @@
       # if producing geotiff output, check to make sure geotiffs are available for each column of the model array #
         if(out$input$make.binary.tif==T | out$input$make.p.tif==T){
                 #Check that tiffs to be used exist
-         path.check(paths,newBasepath=dirname(out$input$ma.name))
-
+        paths<-path.check(paths,newBasepath=dirname(out$input$ma.name))
+          
                  } else out.list$tif.names <- dat.names[-1]
 
                  out.list$tif.ind<-paths

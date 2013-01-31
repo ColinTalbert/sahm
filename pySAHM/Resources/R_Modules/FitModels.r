@@ -64,8 +64,8 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
     #    showing the effects of interactions deemed important.  if F, output is diverted to a text file and the console is kept clear 
     #    in either case, a set of standard output files are created in the output directory.
     # 
-    t0 <- unclass(Sys.time())
-
+   
+    t0 <- unclass(Sys.time()) 
     # Setting up the list that holds everything.  This is quite different for each model
         out <- list(
           input=lapply(as.list(Call[2:length(Call)]),eval), #with optional args this definition might be a problem but since called from the command line it works
@@ -75,45 +75,42 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
                     auc.output=NULL,
                     interactions=NULL,  # not used #
                     summary=NULL))
-
-    if(is.null(out$input$seed)) out$input$seed<-round(runif(1,min=-((2^32)/2-1),max=((2^32)/2-1)))
-    set.seed(as.numeric(out$input$seed))
+         
+   #setting seeds these are now used by everything with the addition of variable importance plots
+        if(is.null(out$input$seed)) out$input$seed<-round(runif(1,min=-((2^32)/2-1),max=((2^32)/2-1)))
+        set.seed(as.numeric(out$input$seed))
    #print warnings as they occur
         options(warn=1)
     
         Model=script.name
-
+            
          # generate a filename for output #
-   
-              if(debug.mode==T){
-                outfile <- paste(bname<-paste(out$input$output.dir,paste("/",Model,"_",sep=""),n<-1,sep=""),"_output.txt",sep="")
-                while(file.access(outfile)==0) outfile<-paste(bname<-paste(out$input$output.dir,paste("/",Model,"_",sep=""),n<-n+1,sep=""),"_output.txt",sep="")
-                capture.output(paste(toupper(Model),"Results"),file=outfile) # reserve the new basename #
-                } else bname<-file.path(out$input$output.dir,Model)
-
+                if(debug.mode==TRUE){
+                 bname<-file.path(out$input$output.dir,paste(Model,"_",n<-1,sep=""))
+                 while(file.access(paste(bname,"_output.txt",sep=""))==0) bname<-file.path(out$input$output.dir,paste(Model,"_",n<-n+1,sep=""))
+                } 
+                else
+                 out$dat$bname<-bname<-file.path(out$input$output.dir,Model)
+              
+            capture.output(paste(toupper(Model),"Results"),file=paste(bname,"_output.txt",sep="")) # reserve the new basename #
+            on.exit(capture.output(cat("Model Failed\n\n"),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE))  
+              
    #Load Libraries
               chk.libs(Model)
    #Read in data, perform several checks and store all of the information in the out list
              out <- read.ma(out)
              out$dat$bname <- bname
              if(out$input$script.name=="rf" & out$input$model.family=="poisson") stop("Random Forest not implemented for count data")
-            
+         
    #writing out the header info to the CSV so in case of a break we know what broke
              out<-place.save(out)
               out$dat$split.label<-out$dat$split.type
    #check output dir #
               if(file.access(out$input$output.dir,mode=2)!=0) stop(paste("output directory",output.dir,"is not writable"))
-
-              cat("\nbegin processing of model array:",out$input$ma.name,"\n")
-              cat("\nfile basename set to:",out$dat$bname,"\n")
-              assign("out",out,envir=.GlobalEnv)
-              cat("Progress:20%\n");flush.console();
-             cat("\n","Fitting",toupper(Model),"model","\n")
-             flush.console()
-      
+        
     #Fit the desired model#
                out<-generic.model.fit(out,Model,t0)
-          
+              
     #Making Predictions
                pred.vals<-function(x,model,Model){
               x$pred<-pred.fct(model,x$dat[,2:ncol(x$dat)],Model)
@@ -125,7 +122,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
                    #Maxlike needs to remove incomplete cases which are removed in read.ma if there's a data.frame to work with
                    if(Model=="maxlike") out$dat$ma$train$pred<-out$dat$ma$train$pred[out$dat$ma$train$compl]
                   #Just for the training set for Random Forest we have to take out of bag predictions rather than the regular predictions
-                  if(Model=="rf" & !out$input$PsdoAbs) out$dat$ma$train$pred<-tweak.p(as.vector(predict(out$mods$final.mod[[1]],type="prob")[,2])) 
+                  if(Model=="rf") out$dat$ma$train$pred<-tweak.p(out$mods$predictions) 
                                                   
     #Run Cross Validation if specified might need separate cv functions for each model
             if(out$dat$split.type=="crossValidation") out<-cv.fct(out$mods$final.mod, out=out, sp.no = 1, prev.stratify = F,Model=Model)
@@ -153,9 +150,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
 
   #Response curves #
      if(Model!="maxlike") response.curves(out,Model)
-
-     assign("out",out,envir=.GlobalEnv)
-
+     
    #Save Workspace
    save.image(file.path(output.dir,"modelWorkspace"))
           t4 <- unclass(Sys.time())
@@ -182,15 +177,11 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
             cat("\nfinished with prediction maps, t=",round(t5-t4,2),"sec\n");flush.console()
           }
 
-
-    if(debug.mode) assign("out",out,envir=.GlobalEnv)
-
-    
-    cat(paste("\ntotal time=",round((unclass(Sys.time())-t0)/60,2),"min\n\n\n",sep=""))
     if(!debug.mode) {
         sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))
         }
     cat("Progress:100%\n");flush.console()
+    on.exit(capture.output(cat(paste("\nTotal time = ",round((unclass(Sys.time())-t0)/60,2)," min\n\n",sep="")),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)) 
     if(debug.mode) assign("fit",out$mods$final.mod,envir=.GlobalEnv)
     invisible(out)
 }

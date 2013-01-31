@@ -45,6 +45,96 @@
 ###########################################################################################
 #  The following functions are from Elith et al.
 ###########################################################################################
+"mars.predict" <-
+function (mars.glm.object,new.data)
+{
+#
+# j leathwick, j elith - August 2006
+#
+# version 3.1 - developed in R 2.3.1 using mda 0.3-1
+#
+# calculates a mars/glm object in which basis functions are calculated
+# using an initial mars model with single or multiple responses
+# data for individual species are then fitted as glms using the
+# common set of mars basis functions with results returned as a list
+#
+# takes as input a dataset and args selecting x and y variables, and degree of interaction
+# along with site and species weights, the CV penalty, and the glm family arguments
+# the latter would normally be one of "binomial" or "poisson" - "gaussian" could be used
+# but in this case the model shouldn't differ from that fitted using mars on its own
+#
+# naming problem for dataframes fixed - je - 15/12/06
+#
+# requires mda and leathwick/elith's mars.export
+#
+  require(mda)
+
+# first recreate both the original mars model and the glm model
+    
+# setup input data and create original temporary data
+  dataframe.name <- mars.glm.object$mars.call$dataframe  # get the dataframe name
+  mars.x <- mars.glm.object$mars.call$mars.x
+  mars.y <- mars.glm.object$mars.call$mars.y
+  n.spp <- length(mars.y)
+  family <- mars.glm.object$mars.call$family
+  mars.degree <- mars.glm.object$mars.call$degree
+  penalty <- mars.glm.object$mars.call$penalty
+  site.weights <- mars.glm.object$weights[[1]]
+  spp.weights <- mars.glm.object$weights[[2]]
+ 
+   base.data<-mars.glm.object$fit.dat
+  
+  x.temp <- eval(base.data[, mars.x])                 #form the temporary datasets
+  base.names <- names(x.temp)
+
+  xdat <- mars.new.dataframe(x.temp)[[1]]
+
+  ydat <- as.data.frame(base.data[, mars.y])
+  names(ydat) <- names(base.data)[mars.y]
+
+  assign("xdat", xdat, pos = 1)               #and assign them for later use
+  assign("ydat", ydat, pos = 1)
+
+# now create the temporary dataframe for the new data
+ 
+  new.names <- names(new.data)
+  #selector <- na.rm(match(names(x.temp),names(new.data)))
+
+  pred.dat <- mars.new.dataframe(new.data)[[1]]
+
+  mars.fit <- mars.glm.object$mars.object  #AKS
+  old.bf.data <- as.data.frame(eval(mars.fit$x))
+  n.bfs <- ncol(old.bf.data)
+  bf.names <- paste("bf", 1:n.bfs, sep = "")
+  old.bf.data <- as.data.frame(old.bf.data[,-1])
+  names(old.bf.data) <- bf.names[-1]
+  new.bf.data <- as.data.frame(my.model.matrix.mars(mars.fit,new.data))
+  new.bf.data <- as.data.frame(new.bf.data[,-1])
+  names(new.bf.data) <- bf.names[-1]
+
+# now cycle through the species fitting glm models
+
+ 
+  prediction <- as.data.frame(matrix(0, ncol = n.spp, nrow = nrow(pred.dat)))
+  names(prediction) <- names(ydat)
+  standard.errors <- as.data.frame(matrix(0, ncol = n.spp, nrow = nrow(pred.dat)))
+  names(standard.errors) <- names(ydat)
+
+  for (i in 1:n.spp) {
+
+    print(names(ydat)[i], quote = FALSE)
+    model.glm <- glm(ydat[, i] ~ ., data = old.bf.data, weights = site.weights,
+      family = family, maxit = 100)
+    temp <- predict.glm(model.glm,new.bf.data,type="response",se.fit=TRUE)
+    prediction[,i] <- temp[[1]]
+    standard.errors[,i] <- temp[[2]]
+
+    }
+
+  return(list("prediction"=prediction,"ses"=standard.errors))
+}
+
+
 "mars.contribs" <-
 function (mars.glm.object,sp.no = 1, verbose = TRUE)
 {
@@ -115,7 +205,7 @@ function (mars.glm.object,sp.no = 1, verbose = TRUE)
            }else new.model <- glm(y.data[,sp.no] ~ ., data=x.data.new, family = family)
 
       comparison <- anova(glm.model,new.model,test="Chisq")
-
+     
       df[i] <- comparison[2,3]
       delta.deviance[i] <- zapsmall(comparison[2,4],4)
       signif[i] <- zapsmall(comparison[2,5],6)
@@ -280,8 +370,7 @@ function (data,                         # the input data frame
 
   cat("fitting initial mars model for",n.spp,"responses","\n")
   cat("followed by a glm model with a family of",family,"\n")
-
-  mars.object <- mars(x = xdat, y = ydat, degree = mars.degree, w = site.weights,
+   mars.object <- mars(x = xdat, y = ydat, degree = mars.degree, w = site.weights,
        wp = spp.weights, penalty = penalty)
   if(length(mars.object$coefficients)==1) stop("MARS has fit the null model (intercept only) \n new predictors are required")
   bf.data <- as.data.frame(eval(mars.object$x))
@@ -716,117 +805,6 @@ function(mars.glm.object,    # the input mars object
   if (!use.windows) dev.off()
 }
 
-"mars.predict" <-
-function (mars.glm.object,new.data)
-{
-#
-# j leathwick, j elith - August 2006
-#
-# version 3.1 - developed in R 2.3.1 using mda 0.3-1
-#
-# calculates a mars/glm object in which basis functions are calculated
-# using an initial mars model with single or multiple responses
-# data for individual species are then fitted as glms using the
-# common set of mars basis functions with results returned as a list
-#
-# takes as input a dataset and args selecting x and y variables, and degree of interaction
-# along with site and species weights, the CV penalty, and the glm family arguments
-# the latter would normally be one of "binomial" or "poisson" - "gaussian" could be used
-# but in this case the model shouldn't differ from that fitted using mars on its own
-#
-# naming problem for dataframes fixed - je - 15/12/06
-#
-# requires mda and leathwick/elith's mars.export
-#
-  require(mda)
-
-# first recreate both the original mars model and the glm model
-    
-# setup input data and create original temporary data
-  dataframe.name <- mars.glm.object$mars.call$dataframe  # get the dataframe name
-  mars.x <- mars.glm.object$mars.call$mars.x
-  mars.y <- mars.glm.object$mars.call$mars.y
-  n.spp <- length(mars.y)
-  family <- mars.glm.object$mars.call$family
-  mars.degree <- mars.glm.object$mars.call$degree
-  penalty <- mars.glm.object$mars.call$penalty
-  site.weights <- mars.glm.object$weights[[1]]
-  spp.weights <- mars.glm.object$weights[[2]]
- 
-  print("creating original data frame...",quote=FALSE)
-  print(dataframe.name)
-  
-  #base.data <-try(as.data.frame(eval(parse(text = dataframe.name),envir=parent.frame())),silent=TRUE)
-   #if(class(base.data)=="try-error") 
-   base.data<-mars.glm.object$fit.dat
-  
-  x.temp <- eval(base.data[, mars.x])                 #form the temporary datasets
-  base.names <- names(x.temp)
-
-  xdat <- mars.new.dataframe(x.temp)[[1]]
-
-  ydat <- as.data.frame(base.data[, mars.y])
-  names(ydat) <- names(base.data)[mars.y]
-
-  assign("xdat", xdat, pos = 1)               #and assign them for later use
-  assign("ydat", ydat, pos = 1)
-
-# now create the temporary dataframe for the new data
-
-  print("checking variable matching with new data",quote = FALSE)
-
-  new.names <- names(new.data)
-
-  print("and creating temporary dataframe for new data...",quote=FALSE)
-
-  #selector <- na.rm(match(names(x.temp),names(new.data)))
-
-  pred.dat <- mars.new.dataframe(new.data)[[1]]
-
-  assign("pred.dat", pred.dat, pos = 1)               #and assign them for later use
-
-# fit the mars model and extract the basis functions
-
-  print(paste("re-fitting initial mars model for",n.spp,"responses"),quote = FALSE)
-  print(paste("using glm family of",family),quote = FALSE)
-
-  #mars.fit <- mars(x = xdat, y = ydat, degree = mars.degree, w = site.weights,
-  #  wp = spp.weights, penalty = penalty)
-
-  mars.fit <- mars.glm.object$mars.object  #AKS
-
-  old.bf.data <- as.data.frame(eval(mars.fit$x))
-  n.bfs <- ncol(old.bf.data)
-  bf.names <- paste("bf", 1:n.bfs, sep = "")
-  old.bf.data <- as.data.frame(old.bf.data[,-1])
-  names(old.bf.data) <- bf.names[-1]
-
-  new.bf.data <- as.data.frame(mda:::model.matrix.mars(mars.fit,pred.dat))
-  new.bf.data <- as.data.frame(new.bf.data[,-1])
-  names(new.bf.data) <- bf.names[-1]
-
-# now cycle through the species fitting glm models
-
-  print("fitting glms for individual responses", quote = F)
-
-  prediction <- as.data.frame(matrix(0, ncol = n.spp, nrow = nrow(pred.dat)))
-  names(prediction) <- names(ydat)
-  standard.errors <- as.data.frame(matrix(0, ncol = n.spp, nrow = nrow(pred.dat)))
-  names(standard.errors) <- names(ydat)
-
-  for (i in 1:n.spp) {
-
-    print(names(ydat)[i], quote = FALSE)
-    model.glm <- glm(ydat[, i] ~ ., data = old.bf.data, weights = site.weights,
-      family = family, maxit = 100)
-    temp <- predict.glm(model.glm,new.bf.data,type="response",se.fit=TRUE)
-    prediction[,i] <- temp[[1]]
-    standard.errors[,i] <- temp[[2]]
-
-    }
-
-  return(list("prediction"=prediction,"ses"=standard.errors))
-}
 
 
 
@@ -845,70 +823,37 @@ pred.mars <- function(model,x) {
     }
 
 
-
-file_path_as_absolute <- function (x){
-    if (!file.exists(epath <- path.expand(x)))
-        stop(gettextf("file '%s' does not exist", x), domain = NA)
-    cwd <- getwd()
-    on.exit(setwd(cwd))
-    if (file_test("-d", epath)) {
-        setwd(epath)
-        getwd()
-    }
-    else {
-        setwd(dirname(epath))
-        file.path(getwd(), basename(epath))
-    }
-}
-
-get.cov.names <- function(model){
-    return(attr(terms(formula(model)),"term.labels"))
-    }
-
-
-check.dir <- function(dname){
-    if(is.null(dname)) dname <- getwd()
-    dname <- gsub("[\\]","/",dname)
-    end.char <- substr(dname,nchar(dname),nchar(dname))
-    if(end.char == "/") dname <- substr(dname,1,nchar(dname)-1)
-    exist <- suppressWarnings(as.numeric(file.access(dname,mode=0))==0) # -1 if bad, 0 if ok #
-    if(exist) dname <- file_path_as_absolute(dname)
-    readable <- suppressWarnings(as.numeric(file.access(dname,mode=4))==0) # -1 if bad, 0 if ok #
-    writable <- suppressWarnings(as.numeric(file.access(dname,mode=2))==0) # -1 if bad, 0 if ok #
-    return(list(dname=dname,exist=exist,readable=readable,writable=writable))
-    }
-
-
-get.image.info <- function(image.names){
-    # this function creates a data.frame with summary image info for a set of images #
-    require(rgdal)
-    n.images <- length(image.names)
-
-    full.names <- image.names
-    out <- data.frame(image=full.names,available=rep(F,n.images),size=rep(NA,n.images),
-        type=factor(rep("unk",n.images),levels=c("asc","envi","tif","unk")))
-    out$type[grep(".tif",image.names)]<-"tif"
-    out$type[grep(".asc",image.names)]<-"asc"
-    for(i in 1:n.images){
-        if(out$type[i]=="tif"){
-            x <-try(GDAL.open(full.names[1],read.only=T))
-            suppressMessages(try(GDAL.close(x)))
-            if(class(x)!="try-error") out$available[i]<-T
-            x<-try(file.info(full.names[i]))
-        } else {
-            x<-try(file.info(full.names[i]))
-            if(!is.na(x$size)) out$available[i]<-T
+my.model.matrix.mars<-function (object, x, which = object$selected.terms, full = FALSE, 
+    ...) 
+{
+#I'm rewriting this model.matrix.mars which is used by the mars.predict function because
+#it requires all preditors even those not selected by the model and this is inefficient for producing tiffs
+    if (missing(x)) 
+        return(object$x)
+         nterms <- length(which)
+         which <- which[-1] 
+        x<-(mars.new.dataframe(x))[[1]]
+    used.predictors<-which(apply(abs(object$factor[object$selected.terms,]),2,sum)!=0)
+    x <- as.matrix(x[,match(names(used.predictors),colnames(x))])
+    
+    dir <- object$factor[which,match(names(used.predictors),colnames(object$factor))]
+    cut <- object$cuts[which,match(names(used.predictors),colnames(object$factor))]
+    n<-nrow(x)
+    p<-ncol(x)
+   bx <- matrix(1, nrow = n, ncol = nterms)
+        for (i in seq(along = which)) {
+        j <- which[i]
+        if (all(dir[i, ] == 0)) {
+            stop("error in factor or which")
         }
-        if(out$available[i]==T){
-            out$size[i]<-x$size
-            if(out$type[i]=="unk"){
-                # if extension not known, look for envi .hdr file in same directory #
-                if(file.access(paste(file_path_sans_ext(full.names[i]),".hdr",sep=""))==0)
-                    out$type[i]<-"envi"
-                }
+        temp1 <- 1
+        for (k in 1:p) {
+            if (dir[i, k] != 0) {
+                temp2 <- dir[i, k] * (x[, k] - cut[i, k])
+                temp1 <- temp1 * temp2 * (temp2 > 0)
+            }
         }
+       bx[, i + 1] <- temp1
     }
-    return(out)
+    bx
 }
-
-

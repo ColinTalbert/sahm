@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-## Copyright (C) 2010-2012, USGS Fort Collins Science Center. 
+## Copyright (C) 20010-2012, USGS Fort Collins Science Center. 
 ## All rights reserved.
 ## Contact: talbertc@usgs.gov
 ##
@@ -42,15 +42,15 @@
 ## and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
-
-#set defaults
 make.p.tif=T
 make.binary.tif=T
-mars.degree=1
-mars.penalty=2
+seed=NULL
 opt.methods=2
 MESS=FALSE
 
+wgt.decay=3
+hid.units
+ann.cv.opt
 # Interpret command line argurments #
 # Make Function Call #
 Args <- commandArgs(trailingOnly=FALSE)
@@ -59,7 +59,6 @@ Args <- commandArgs(trailingOnly=FALSE)
      if(Args[i]=="-f") ScriptPath<-Args[i+1]
      }
 
-    print(Args)
     for (arg in Args) {
     	argSplit <- strsplit(arg, "=")
     	argSplit[[1]][1]
@@ -67,20 +66,32 @@ Args <- commandArgs(trailingOnly=FALSE)
     	if(argSplit[[1]][1]=="c") csv <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="o") output <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="mpt") make.p.tif <- as.logical(argSplit[[1]][2])
+   		if(argSplit[[1]][1]=="mpt") make.p.tif <- as.logical(argSplit[[1]][2])
  			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- as.logical(argSplit[[1]][2])
-    	if(argSplit[[1]][1]=="deg") mars.degree <- as.numeric(argSplit[[1]][2])
-    	if(argSplit[[1]][1]=="pen") mars.penalty <- as.numeric(argSplit[[1]][2])
-    	if(argSplit[[1]][1]=="om")  opt.methods <- as.numeric(argSplit[[1]][2])
-    	if(argSplit[[1]][1]=="mes")  MESS <- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="om")  opt.methods <- as.numeric(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="mes")  MESS <-as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="seed")  seed <- as.numeric(argSplit[[1]][2])
+ 			
+ 		  if(argSplit[[1]][1]=="sp")  spline.deg <- argSplit[[1]][2])
+ 		  
+ 			
     }
 
 ScriptPath<-dirname(ScriptPath)
 source(file.path(ScriptPath,"LoadRequiredCode.r"))
-source(file.path(ScriptPath,"MARS.helper.fcts.r"))
+source(file.path(ScriptPath,"BRT.helper.fcts.r))
 
-FitModels(ma.name=csv,
-        tif.dir=NULL,output.dir=output,
-        response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
-            mars.degree=mars.degree,mars.penalty=mars.penalty,debug.mode=F,
-            script.name="mars",opt.methods=opt.methods,MESS=MESS,ScriptPath=ScriptPath)
+
+
+    FitModels(ma.name=csv,
+		tif.dir=NULL,
+		output.dir=output,
+		response.col=responseCol,
+		make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
+		debug.mode=F,script.name="gam",
+		seed=seed,
+    opt.methods=opt.methods,MESS=MESS,spline.deg=spline.deg
+    )
+
+
+

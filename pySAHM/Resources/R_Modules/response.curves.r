@@ -46,8 +46,9 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
       attach(out$input)
       on.exit(detach(out$input))
       bname<-out$dat$bname
-  
+       
       if(Model%in%c("brt","mars","rf"))  nvar <- nrow(out$mods$summary)
+      if(Model=="maxent") nvar <- out$mods$n.vars.final
       if(Model=="glm")              nvar <- out$mods$n.vars.final-length(grep(":", attr(terms(formula(out$mods$final.mod[[1]])),"term.labels")))
                
             pcol <- ceiling(sqrt(nvar))
@@ -89,8 +90,8 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
                       nrow(dat) - (Nrepcat * length(levels(dat[,
                         i])))), rep(levels(dat[, i]), each = Nrepcat)))
                 }
-                Xf<-matrix(nrow=nrow(Xp1),ncol=length(out$mods$final.mod))
-                for(j in 1:length(out$mods$final.mod)){
+                Xf<-matrix(nrow=nrow(Xp1),ncol=max(length(out$mods$final.mod),1))
+                for(j in 1:max(1,length(out$mods$final.mod))){
                       Xf[,j] <- pred.fct(out$mods$final.mod[[j]], as.data.frame(Xp1),Model)
                  }
                       y.lim<-c(0,1)

@@ -1,4 +1,4 @@
-EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess=FALSE,new.tifs=NULL,produce.metrics=TRUE){
+EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess=FALSE,new.tifs=NULL,produce.metrics=TRUE,ScriptPath){
 
 #This functions has several tasks that it will perform
 
@@ -21,6 +21,8 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
        try(rm(out,envir=.GlobalEnv),silent=TRUE)
        try(rm(out),silent=TRUE)
        out<-out1
+       out$input$ScriptPath=ScriptPath #this might not have been in the original, it's a new requirement
+       source(file.path(ScriptPath,paste(toupper(out$input$script.name),".helper.fcts.r",sep="")))
     # generate a filename for output #
                 out$input$output.dir<-out.dir
                 out$input$MESS<-mess
@@ -93,33 +95,35 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                             out$dat$split.type=out$dat$split.label="eval"
                             out$dat$bname<-paste(out$input$output.dir,paste("/",Model,sep=""),sep="")
                       }
+             
                   # Making Predictions
                            pred.vals<-function(x,model,Model){
                           x$pred<-pred.fct(model,x$dat[,2:ncol(x$dat)],Model)
                           return(x)}
                           
-      
+                       
                          assign("out",out,envir=.GlobalEnv)
                           #getting the predictions for the test/train split
                           out$dat$ma<-(lapply(X=out$dat$ma,FUN=pred.vals,model=out$mods$final.mod,Model=Model))
                           #Just for the training set for Random Forest we have to take out of bag predictions rather than the regular predictions
-                          if(Model=="rf") out$dat$ma$train$pred<-tweak.p(as.vector(predict(out$mods$final.mod,type="prob")[,2]))
-      
+                          if(Model=="rf") out$dat$ma$train$pred<-tweak.p(as.vector(predict(out$mods$final.mod[[1]],type="vote")[,2]))
+                    
                           #producing auc and residual plots model summary information and accross model evaluation metric
                       out$mods$auc.output<-make.auc.plot.jpg(out=out)
            }
-          
+        
      ################################ Making the tiff
    if(p.tif==T | b.tif==T){
         if((n.var <- out$mods$n.vars.final)<1){
             stop("Error producing geotiff output:  null model selected by stepwise procedure - pointless to make maps")
             } else {
             cat("\nproducing prediction maps...","\n","\n");flush.console()
-               proc.tiff(model=out$mods$final.mod,vnames=names(out$dat$ma$train$dat)[-1],
-                tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,pred.fct=pred.fct,factor.levels=out$dat$factor.levels,make.binary.tif=b.tif,
+            proc.tiff(model=out$mods$final.mod,vnames=names(out$dat$ma$train$dat)[-1],
+                tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,factor.levels=out$dat$factor.levels,make.binary.tif=b.tif,
                 thresh=out$mods$auc.output$thresh,make.p.tif=p.tif,outfile.p=paste(out$dat$bname,"_prob_map.tif",sep=""),
                 outfile.bin=paste(out$dat$bname,"_bin_map.tif",sep=""),tsize=50.0,NAval=-3000,
-                fnames=out$dat$tif.names,out=out,Model=Model)     
+                fnames=out$dat$tif.names,out=out,Model=Model)
+                
             }
 
      }
@@ -128,7 +132,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
 
 p.tif=T
 b.tif=T
-Mess=FALSE
+mess=FALSE
 new.tiffs=NULL
 produce.metrics=TRUE
 
@@ -157,7 +161,7 @@ Args <- commandArgs(trailingOnly=FALSE)
 ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
 
-EvaluateNewData(workspace=ws,out.dir=out.dir,b.tif=as.logical(b.tif),p.tif=as.logical(p.tif),mess=as.logical(Mess),new.tifs=new.tiffs,produce.metrics=as.logical(produce.metrics))
+EvaluateNewData(workspace=ws,out.dir=out.dir,b.tif=as.logical(b.tif),p.tif=as.logical(p.tif),mess=as.logical(mess),new.tifs=new.tiffs,produce.metrics=as.logical(produce.metrics),ScriptPath=ScriptPath)
 
 
 

@@ -49,7 +49,7 @@ resid.image<-function(dev.contrib,pred,raw.dat,x,y,wgt,model.type,file.name,out,
 #if weights are available these are used for the lowess surface
 #eventually this should include an option to produce moran's i corellogram but this must be an option
 #as it can be computaitonally intensive.   Written by Marian Talbert 2011.
-browser()
+  
        if(length(pred)>2000){
            samp<-seq(1:length(pred))[order(runif(length(pred)))][1:2000]
            dev.contrib<-dev.contrib[samp]

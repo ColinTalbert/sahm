@@ -42,7 +42,7 @@
 ## and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
-Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.col="ResponseBinary",cors.w.highest=FALSE,pres=TRUE,absn=TRUE,bgd=TRUE,Debug=FALSE){
+Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.col="ResponseBinary",cors.w.highest=FALSE,pres=TRUE,absn=TRUE,bgd=TRUE,Debug=FALSE,seed=1){
 
       #num.plots=plots per page of display
       #min.cor=the minimum correlation to be included in determining which set of predictors to display
@@ -63,7 +63,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
       #Written by Marian Talbert 2011
      
    chk.libs("PairsExplore")   
-            
+    set.seed(seed)        
    #Read input data 
    read.dat(input.file=input.file,response.col=response.col,is.inspect=TRUE,pres=pres,absn=absn,bgd=bgd)
                 
@@ -190,6 +190,7 @@ Args <- commandArgs(trailingOnly=FALSE)
     pres=TRUE
     absn=TRUE
     bgd=TRUE
+    seed=1
     #replace the defaults with passed values
     for (arg in Args) {
     	argSplit <- strsplit(arg, "=")
@@ -204,6 +205,7 @@ Args <- commandArgs(trailingOnly=FALSE)
       if(argSplit[[1]][1]=="pres") pres <- as.logical(argSplit[[1]][2])
       if(argSplit[[1]][1]=="absn") absn <- as.logical(argSplit[[1]][2])
       if(argSplit[[1]][1]=="bgd") bgd <- as.logical(argSplit[[1]][2])
+      if(argSplit[[1]][1]=="seed")  seed <- as.numeric(argSplit[[1]][2])
     }
  
  ScriptPath<-dirname(ScriptPath)
