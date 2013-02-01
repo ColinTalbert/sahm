@@ -1223,7 +1223,7 @@ Row counts start from 1.</Definition>
   <Tools></Tools>
   <Module>
     <Title>BackgroundSurfaceGenerator</Title>
-    <Description>This function takes a field data file and based on the options specified creates a bias or binary mask for generation of background points either using a Kernel Density (KDE) of the presence points with various options for optimizing bandwidth or a minimum convex polygon (MCP). 
+    <Description>This function takes a field data file and based on the options specified creates a continuous or binary mask for generation of background points either using a Kernel Density (KDE) of the presence points with various options for optimizing bandwidth or a minimum convex polygon (MCP). 
     </Description>
     <InputPorts>
       <Port>
@@ -1251,8 +1251,8 @@ Row counts start from 1.</Definition>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
       <Port>
-        <PortName>Bias</PortName>
-        <Definition>Indicate whether a bias (continuous) surface or a binary mask should be created.  If bias is set to TRUE then the isopleth argument will be ignored and a continuous surface will be generated.  If bias is set to false then the isopleth argument will determine where the binary cuttoff is drawn.</Definition>
+        <PortName>continuous</PortName>
+        <Definition>Indicate whether a continuous (bias) surface or a binary mask should be created.  If continuous is set to TRUE then the isopleth argument will be ignored and a continuous surface will be generated.  If continuous is set to false then the isopleth argument will determine where the binary cuttoff is drawn.</Definition>
         <Mandatory>False</Mandatory>
         <Default>False (Unchecked)</Default>
         <Options>
@@ -1263,9 +1263,9 @@ Row counts start from 1.</Definition>
       </Port>
       <Port>
         <PortName>isopleth</PortName>
-        <Definition>If bias is selected the isopleth is used to determine where the cuttoff for the binary mask is drawn.  This should be in percent so an isopleth of 95 will include the region that contains 95% of the presence locations.  </Definition>
+        <Definition>If continuous is selected the isopleth is used to determine where the cuttoff for the binary mask is drawn.  This should be in percent so an isopleth of 95 will include the region that contains 95% of the presence locations.  </Definition>
         <Mandatory>False</Mandatory>
-        <Default>95 but this is only used if Bias is set False or if method is MCP</Default>
+        <Default>95 but this is only used if continuous is set False or if method is MCP</Default>
         <Options>
           <Option>True (Checked)</Option>
           <Option>False (Unchecked)</Option>
@@ -1274,7 +1274,7 @@ Row counts start from 1.</Definition>
       </Port>
       <Port>
         <PortName>method</PortName>
-        <Definition>The method used to generate the surface for background point generation.  This should be either KDE (Kernel Density Estimate) or MCP (Minimum Convex Polygon).  If MCP is used the arguments Bias ans Isopleth will be ignored.</Definition>
+        <Definition>The method used to generate the surface for background point generation.  This should be either KDE (Kernel Density Estimate) or MCP (Minimum Convex Polygon).  If MCP is used the arguments continuous ans Isopleth will be ignored.</Definition>
         <Mandatory>False</Mandatory>
         <Default>KDE</Default>
         <Options>

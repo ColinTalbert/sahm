@@ -728,7 +728,7 @@ class BackgroundSurfaceGenerator(Module):
             'method': ('method', None, True),
             'bandwidthOptimizationMethod': ('bandOptMeth', None, True),
             'isopleth': ('isopleth', None, True),
-            'continuous': ('bias', utils.R_boolean, True)}
+            'continuous': ('continuous', utils.R_boolean, True)}
         
         kde_params = utils.map_ports(self, port_map)
         

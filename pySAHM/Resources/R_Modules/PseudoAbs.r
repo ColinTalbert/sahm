@@ -223,13 +223,13 @@ Args <- commandArgs(trailingOnly=FALSE)
    	  if(argSplit[[1]][1]=="mth") method <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="bwopt") bw.opt <- argSplit[[1]][2]
       if(argSplit[[1]][1]=="ispt") ispt <- as.numeric(argSplit[[1]][2])
-      if(argSplit[[1]][1]=="bias") continuous <- as.logical(argSplit[[1]][2])
+      if(argSplit[[1]][1]=="continuous") continuous <- as.logical(argSplit[[1]][2])
       if(argSplit[[1]][1]=="tmplt") template<-argSplit[[1]][2]
      
     }
 
-if(method=="MCP") bias=FALSE
+if(method=="MCP") continuous=FALSE
 ScriptPath<-dirname(ScriptPath)
 source(paste(ScriptPath,"chk.libs.r",sep="\\"))
 
-PseudoAbsGen(input.file=infile,outfile=output,method=method,bw.otim=bw.opt,isopleth=ispt,bias=bias,template=template)
+PseudoAbsGen(input.file=infile,outfile=output,method=method,bw.otim=bw.opt,isopleth=ispt,bias=continuous,template=template)
