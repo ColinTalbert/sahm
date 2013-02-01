@@ -785,7 +785,7 @@ class BackgroundSurfaceGenerator(Module):
         if kde_params["method"] == "KDE":
             outfName += "_" + kde_params["bandOptMeth"]
             if kde_params["bias"] == "TRUE":
-                outfName += "_bias"
+                outfName += "_continuous"
             else:
                 outfName += "_iso" + str(kde_params["isopleth"])
         
