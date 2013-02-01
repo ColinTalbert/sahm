@@ -1252,7 +1252,7 @@ Row counts start from 1.</Definition>
       </Port>
       <Port>
         <PortName>Bias</PortName>
-        <Definition>Indicate whether a bias (continuous) surface or a binary mask should be created.  If bias is set to TRUE then the isopleth argument will determine where the binary cuttoff is drawn.</Definition>
+        <Definition>Indicate whether a bias (continuous) surface or a binary mask should be created.  If bias is set to TRUE then the isopleth argument will be ignored and a continuous surface will be generated.  If bias is set to false then the isopleth argument will determine where the binary cuttoff is drawn.</Definition>
         <Mandatory>False</Mandatory>
         <Default>False (Unchecked)</Default>
         <Options>
@@ -1274,7 +1274,7 @@ Row counts start from 1.</Definition>
       </Port>
       <Port>
         <PortName>method</PortName>
-        <Definition>The method used to generate the surface for background point generation.  This should be either KDE (Kernel Density Estimate) or MCP (Minimum Convex Polygon)</Definition>
+        <Definition>The method used to generate the surface for background point generation.  This should be either KDE (Kernel Density Estimate) or MCP (Minimum Convex Polygon).  If MCP is used the arguments Bias ans Isopleth will be ignored.</Definition>
         <Mandatory>False</Mandatory>
         <Default>KDE</Default>
         <Options>
