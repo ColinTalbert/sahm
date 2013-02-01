@@ -1,12 +1,12 @@
 #debug branch
 setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
 ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
-dir.path<-"I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\Debug1.29"
+dir.path<-"I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\Debug1.31"
 
 #master branch
 setwd("I:\\VisTrails\\VisTrails_SAHM_x64\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
 ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
-dir.path<-"I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\Master1.15"
+dir.path<-"I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\Master1.31"
 #For Model tests
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
@@ -35,7 +35,6 @@ input.file=c(#used/available
       "I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\CovariateCorrelationOutputMDS.csv",
       ## Nonspatial data should work through SAHM
       "I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\NonSpatialData.csv",      
-      
         #pres/abs
       "I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\Split.csv",
       "I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\SplitCrossVal.csv",
