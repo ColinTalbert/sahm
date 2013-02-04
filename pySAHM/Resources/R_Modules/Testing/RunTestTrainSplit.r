@@ -8,10 +8,11 @@ response.col="responseCount"
 input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\VistrailsSessions\\MergedDataset_4.csv"
 output.file<-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\VistrailsSessions\\MergedDataset_Split.csv"
 
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\CovariateCorrelationOutputMDS.csv"
-output.file<-"I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\CovariateCorrelationOutputMDS.csv"
+response.col="responseBinary"
+input.file="C:\\temp\\SAHM_workspace\\ModelEvaluation_Split_6.csv"
+output.file<-"C:\\temp\\SAHM_workspace\\Test.out.csv"
 ## Running the code
-TestTrainSplit(input.file,output.file,response.col=response.col,trainProp=.7,seed=NULL,Eval.Split=TRUE)  #tried also with .8, and no RatioPresAb
+TestTrainSplit(input.file,output.file,response.col=response.col,trainProp=.7,seed=NULL,Eval.Split=FALSE)  #tried also with .8, and no RatioPresAb
 
 ## Running some tests on the output
 input.file<-output.file

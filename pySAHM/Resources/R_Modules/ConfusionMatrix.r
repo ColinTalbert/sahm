@@ -45,9 +45,16 @@
 confusion.matrix<-function(Stats,split.type){
 
      par(oma=c(5,3,5,3),mar=c(13,5,5,2))
+     #zlim<-c(min(unlist(lapply(Stats,function(lst){100*lst$Cmx/sum(lst$Cmx)}))),max(unlist(lapply(Stats,function(lst){100*lst$Cmx/sum(lst$Cmx)}))))
+   #instead of basing the zlim on the acutal confusion matricies, base them on the maximum achievable value for a cell given the ratio of pres/abs
+       extract.max<-function(lst){
+         max(100*table(lst$auc.data$pres.abs)/length(lst$auc.dat$pres.abs))
+         }
+   zlim=c(0,max(unlist(lapply(Stats,extract.max)))) 
+
   if(split.type=="none") lo<-layout(matrix(data=c(1,2), nrow=1, ncol=2), c(4.5,1), 1)
    else {lo<-layout(matrix(data=c(1,2,3), nrow=1, ncol=3), c(4.5,4.5,1), 1)
-    
+  
        if(split.type=="crossValidation"){
                                  a<-lapply(Stats[names(Stats)!="train"],function(lst){lst$Cmx})
                                   cmx<-a[[1]]
@@ -56,17 +63,14 @@ confusion.matrix<-function(Stats,split.type){
                                        return(c(lst$Sens,lst$Specf,lst$Pcc,lst$Kappa,lst$Tss))}))),2,mean)
                                 Stats$crossValidation<-list(Cmx=cmx,Sens=csv.stats[1],Specf=csv.stats[2],Pcc=csv.stats[3],Kappa=csv.stats[4],Tss=csv.stats[5])
                                 Stats<-list("crossValidation"=Stats$crossValidation,"train"=Stats$train)
+                                
             }
           }
 
-#zlim<-c(min(unlist(lapply(Stats,function(lst){100*lst$Cmx/sum(lst$Cmx)}))),max(unlist(lapply(Stats,function(lst){100*lst$Cmx/sum(lst$Cmx)}))))
-#instead of basing the zlim on the acutal confusion matricies, base them on the maximum achievable value for a cell given the ratio of pres/abs
-       extract.max<-function(lst){
-         max(100*table(lst$auc.data$pres.abs)/length(lst$auc.dat$pres.abs))
-         }
-zlim=c(0,max(unlist(lapply(Stats,extract.max))))
+
   for(i in length(Stats):1){
-      image((1:2),c(2,4),matrix(data=c(100*Stats[[i]]$Cmx[2]/sum(Stats[[i]]$Cmx),100*Stats[[i]]$Cmx[4]/sum(Stats[[i]]$Cmx),100*Stats[[i]]$Cmx[1]/sum(Stats[[i]]$Cmx),100*Stats[[i]]$Cmx[3]/sum(Stats[[i]]$Cmx)),nrow=2),
+      image((1:2),c(2,4),matrix(data=c(100*Stats[[i]]$Cmx[2]/sum(Stats[[i]]$Cmx),100*Stats[[i]]$Cmx[4]/sum(Stats[[i]]$Cmx),
+                               100*Stats[[i]]$Cmx[1]/sum(Stats[[i]]$Cmx),100*Stats[[i]]$Cmx[3]/sum(Stats[[i]]$Cmx)),nrow=2),
                zlim=zlim,xaxt="n",yaxt="n",xlab="",
                ylab="",main=paste("Confusion matrix for \n", names(Stats)[i], "data",sep=" "),col=heat.colors(50)[50:1],cex.lab=1.5,cex.main=1.8)
           mtext("Absence",side=2,at=2,cex=1.2,lwd=1.3)

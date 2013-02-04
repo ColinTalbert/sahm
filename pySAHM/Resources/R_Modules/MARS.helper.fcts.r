@@ -121,8 +121,6 @@ function (mars.glm.object,new.data)
   names(standard.errors) <- names(ydat)
 
   for (i in 1:n.spp) {
-
-    print(names(ydat)[i], quote = FALSE)
     model.glm <- glm(ydat[, i] ~ ., data = old.bf.data, weights = site.weights,
       family = family, maxit = 100)
     temp <- predict.glm(model.glm,new.bf.data,type="response",se.fit=TRUE)
@@ -174,9 +172,6 @@ function (mars.glm.object,sp.no = 1, verbose = TRUE)
 
   glm.model <- glm(y.data[,sp.no] ~ .,data = x.data,family = family)
 
-  print(paste("performing backwards drops for mars/glm model for",
-       spp.names[sp.no]),quote=F)
-
   n.bfs <- length(m.table[,1])
 
   delta.deviance <- rep(0,n.preds)
@@ -195,10 +190,7 @@ function (mars.glm.object,sp.no = 1, verbose = TRUE)
       x.data.new <- x.data[,drop.list]
       assign("x.data.new",x.data.new,pos=1)
 
-      if (verbose) {
- 	  print(paste("Dropping ",pred.names[i],"...",sep=""),
-	             quote=FALSE)
-      }
+     
       x.data.new<-as.data.frame(x.data.new)
       if(dim(x.data.new)[2]==0){
            new.model <- glm(y.data[,sp.no] ~ 1, family = family)
@@ -368,8 +360,6 @@ function (data,                         # the input data frame
 
 # fit the mars model and extract the basis functions
 
-  cat("fitting initial mars model for",n.spp,"responses","\n")
-  cat("followed by a glm model with a family of",family,"\n")
    mars.object <- mars(x = xdat, y = ydat, degree = mars.degree, w = site.weights,
        wp = spp.weights, penalty = penalty)
   if(length(mars.object$coefficients)==1) stop("MARS has fit the null model (intercept only) \n new predictors are required")
@@ -388,11 +378,7 @@ function (data,                         # the input data frame
 
 # now cycle through the species fitting glm models
 
-  cat("fitting glms for individual responses","\n")
-
   for (i in 1:n.spp) {
-
-    cat(names(ydat)[i],"\n")
     model.glm <- glm(ydat[, i] ~ ., data = bf.data, weights = site.weights,
   	  family = family, maxit = 100)
 
@@ -448,10 +434,7 @@ function (input.data)
 # in a mars analysis
 #
 
-  if (!is.data.frame(input.data)) {
-    print("input data must be a dataframe..",quote = FALSE)
-    return()
-  }
+ 
 
   n <- 1
   for (i in 1:ncol(input.data)) {  #first transfer the vector variables
