@@ -71,7 +71,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
   #before exploring predictor relationship COLUMNS 
   rm.cols <- as.vector(na.omit(c(match("x",tolower(names(dat))),match("y",tolower(names(dat))),
   match("site.weights",tolower(names(dat))),match(tolower(response.col),tolower(names(dat))),match("Split",names(dat)),match("EvalSplit",names(dat)))))
-                
+       
   missing.summary<-1-apply(apply(dat,2,complete.cases),2,sum)/nrow(dat)
      
   #the deviance calculation requires even columns which will be removed for the pairs explore
@@ -92,7 +92,10 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
            }
           write.csv(as.data.frame(devExp,row.names=names(for.dev[[1]])), file = paste(dirname(output.file),"devInfo.csv",sep="/"))
           #now removing factor columns
-          if(length(grep("categorical",names(dat)))>0) dat<-dat[,-c(fact.cols)]
+          browser()
+          if(length(grep("categorical",names(dat)))>0){ dat<-dat[,-c(fact.cols)]
+              warning("The covariate correlation tool does not consider categorical predictors")
+          }
 
           #after calculating the deviance for all predictors we have to remove the excluded predictors for the following plots
       for.dev$dat=dat 
@@ -110,6 +113,8 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
      
     
   #Remove columns with only one unique value
+  if(is.null(dim(dat)))
+  stop("you must have more than 1 non-categorical predictor to use the pairs plot") 
     dat<-try(dat[,as.vector(apply(dat,2,var,na.rm=TRUE)==0)!=1],silent=TRUE)
     if(class(dat)=="try-error") stop("mds file contains nonnumeric columns please remove and continue")
   
