@@ -141,7 +141,7 @@ class SAHMRaster():
         return col, row
     
     def getPixelValueFromIndex(self, col, row):
-        return self.band.ReadAsArray(col, row, 1, 1)[0,0]
+        return self.band.ReadAsArray(int(col), int(row), 1, 1)[0,0]
     
     def getPixelValueFromCoords(self, x, y):
         col, row = self.convertCoordsToColRow(x, y)
