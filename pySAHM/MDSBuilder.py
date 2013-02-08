@@ -71,6 +71,7 @@ class MDSBuilder(object):
         self.pointType = 'Background'
         self.probSurfacefName = ''
         self.probSurface = None
+        self.templateSurface = None
         self.pointCount = 0
         self.ndFlag = 'NA'
         self.seed = None
@@ -264,6 +265,8 @@ class MDSBuilder(object):
                 self.template = self.inputs[0]
         else:
             self.template = self.inputs[0]
+        
+        self.templateSurface = SpatialUtilities.SAHMRaster(self.template)
     
     def readInPoints(self):
         '''Loop through each row in our field data and add the X, Y, response
@@ -358,8 +361,9 @@ class MDSBuilder(object):
             probRaster = self.probSurface
             useProbSurf = True
         else:
-            probRaster = SpatialUtilities.SAHMRaster(self.template)
+            probRaster = self.templateSurface
             useProbSurf = False
+        
         
         if self.verbose:
             self.writetolog('    Starting generation of ' + str(self.pointCount) + ' random background points, ')
@@ -386,7 +390,8 @@ class MDSBuilder(object):
                     pixelProb = probRaster.getPixelValueFromIndex(col, row)
                 keep = pixelProb >= random.randint(1,100)
                 if keep and \
-                    not self.floatEquality(probRaster.getPixelValueFromIndex(col, row), probRaster.NoData):
+                    not self.floatEquality(probRaster.getPixelValueFromIndex(col, row), probRaster.NoData) and \
+                    not self.floatEquality(self.templateSurface.getPixelValueFromIndex(col, row), self.templateSurface.NoData):
                     #convert our outValues for row, col to coordinates
                     x, y = probRaster.convertColRowToCoords(col, row)
                     tmpPixel = [x, y, pointVal]
@@ -451,7 +456,9 @@ class MDSBuilder(object):
                     numCols = cols - j
                 
                 data = self.probSurface.band.ReadAsArray(j, i, numCols, numRows)
+                templateData = self.templateSurface.band.ReadAsArray(j, i, numCols, numRows)
                 data[data==self.probSurface.NoData] = 0
+                data[templateData==self.templateSurface.NoData] = 0
                 randomVals = np.random.rand(numRows, numCols)*100
                 
                 successes = np.where(data>randomVals)
