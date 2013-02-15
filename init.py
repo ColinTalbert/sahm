@@ -1170,6 +1170,87 @@ class PARC(Module):
 #        writetolog("Finished running PARC", True)
         self.setResult('RastersWithPARCInfoCSV', output_file)
         
+class Reclassifier(Module):
+    '''
+    '''
+#    __doc__ = GenModDoc.construct_module_doc('RasterFormatConverter')
+
+    _input_ports = [("inputRaster", "(edu.utah.sci.vistrails.basic:File)"),
+                    ('reclassFile', '(edu.utah.sci.vistrails.basic:File)'),
+                    ]
+
+    _output_ports = [('outputRaster', '(edu.utah.sci.vistrails.basic:File)')]
+
+#    @classmethod
+#    def provide_input_port_documentation(cls, port_name):
+#        return GenModDoc.construct_port_doc(cls, port_name, 'in')
+#    @classmethod
+#    def provide_output_port_documentation(cls, port_name):
+#         return GenModDoc.construct_port_doc(cls, port_name, 'out')
+
+    def compute(self):
+        writetolog("\nRunning Reclassifier", True)
+        port_map = {'inputRaster':('inputRaster', utils.dir_path_value, True),
+                    'reclassFile':('reclassFile', utils.dir_path_value, True)}
+        
+        argsDict = utils.map_ports(self, port_map)
+
+        from pySAHM.TiffProcessor import rasterReclassifier
+        import pySAHM.SpatialUtilities as SpatialUtilities
+        ourReclassifier = rasterReclassifier()
+        ourReclassifier.inputFname = argsDict['inputRaster']
+        ourReclassifier.reclassFName = argsDict['reclassFile']
+        ourReclassifier.outDir = utils.getrootdir()
+        ourReclassifier.outName = SpatialUtilities.getRasterShortName(argsDict['inputRaster']) + "_rc.tif"
+        outFName = os.path.join(ourReclassifier.outDir, ourReclassifier.outName)
+        ourReclassifier.run()
+
+        output_file = utils.create_file_module(outFName)
+        
+        
+#        writetolog("Finished running PARC", True)
+        self.setResult('outputRaster', output_file)
+
+
+class CategoricalToContinuous(Module):
+    '''
+    '''
+#    __doc__ = GenModDoc.construct_module_doc('RasterFormatConverter')
+
+    _input_ports = [("inputRaster", "(edu.utah.sci.vistrails.basic:File)"),
+                    ('templateFile', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
+                    ]
+
+    _output_ports = [('outputWorkspace', '(edu.utah.sci.vistrails.basic:Directory)')]
+
+#    @classmethod
+#    def provide_input_port_documentation(cls, port_name):
+#        return GenModDoc.construct_port_doc(cls, port_name, 'in')
+#    @classmethod
+#    def provide_output_port_documentation(cls, port_name):
+#         return GenModDoc.construct_port_doc(cls, port_name, 'out')
+
+    def compute(self):
+        writetolog("\nRunning Reclassifier", True)
+        port_map = {'inputRaster':('inputRaster', utils.dir_path_value, True),
+                    'templateFile':('templateFile', utils.dir_path_value, True)}
+        
+        argsDict = utils.map_ports(self, port_map)
+
+        from pySAHM.TiffProcessor import categoricalToContinuousRasters
+        import pySAHM.SpatialUtilities as SpatialUtilities
+        ourC2C = categoricalToContinuousRasters()
+        ourC2C.inputFname = argsDict['inputRaster']
+        ourC2C.templateFName = argsDict['templateFile']
+        shortName = SpatialUtilities.getRasterShortName(argsDict['inputRaster'])
+        
+        ourC2C.outDir = os.path.join(utils.getrootdir(), shortName + "_c2c")
+        
+        ourC2C.run()
+
+#        writetolog("Finished running PARC", True)
+        modelWorkspace = utils.create_dir_module(ourC2C.outDir)
+        self.setResult("outputWorkspace", modelWorkspace)
 
 class RasterFormatConverter(Module):
     '''
@@ -1948,7 +2029,10 @@ _modules = generate_namespaces({'DataInput': [
                                           CovariateCorrelationAndSelection,
                                           ApplyModel,
                                           BackgroundSurfaceGenerator
-                                          ],                                          
+                                          ],
+                                'GeospatialTools': [Reclassifier,
+                                                    CategoricalToContinuous
+                                                    ],                                        
                                 'Models': [(GLM, {'moduleColor':model_color,
                                                            'moduleFringe':model_fringe}),
                                            (RandomForest, {'moduleColor':model_color,
