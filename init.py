@@ -260,7 +260,7 @@ class FieldData(Path):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-         return GenModDoc.construct_port_doc(cls, port_name, 'out') 
+        return GenModDoc.construct_port_doc(cls, port_name, 'out') 
     
 class Predictor(Constant):
     '''
@@ -279,7 +279,7 @@ class Predictor(Constant):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-         return GenModDoc.construct_port_doc(cls, port_name, 'out') 
+        return GenModDoc.construct_port_doc(cls, port_name, 'out') 
 
     def compute(self):
         if (self.hasInputFromPort("ResampleMethod")):
@@ -367,7 +367,7 @@ class PredictorListFile(Module):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-         return GenModDoc.construct_port_doc(cls, port_name, 'out') 
+        return GenModDoc.construct_port_doc(cls, port_name, 'out') 
 
     @staticmethod
     def translate_to_string(v):
@@ -430,7 +430,7 @@ class TemplateLayer(Path):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-         return GenModDoc.construct_port_doc(cls, port_name, 'out') 
+        return GenModDoc.construct_port_doc(cls, port_name, 'out') 
     
 
 class MergedDataSet(File):
@@ -490,7 +490,7 @@ class Model(Module):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-         return GenModDoc.construct_port_doc(cls, port_name, 'out') 
+        return GenModDoc.construct_port_doc(cls, port_name, 'out') 
 
     def compute(self):
         
@@ -720,7 +720,7 @@ class BackgroundSurfaceGenerator(Module):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-         return GenModDoc.construct_port_doc(cls, port_name, 'out') 
+        return GenModDoc.construct_port_doc(cls, port_name, 'out') 
                          
     def compute(self):
         port_map = {'templateLayer': ('templatefName', None, True),
@@ -786,7 +786,7 @@ class MDSBuilder(Module):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-         return GenModDoc.construct_port_doc(cls, port_name, 'out')
+        return GenModDoc.construct_port_doc(cls, port_name, 'out')
 
     def compute(self):
         port_map = {'fieldData': ('fieldData', None, False),
@@ -849,7 +849,7 @@ class MDSBuilder_vector(Module):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-         return GenModDoc.construct_port_doc(cls, port_name, 'out')
+        return GenModDoc.construct_port_doc(cls, port_name, 'out')
 
     def compute(self):
         port_map = {'VectorFieldData': ('VectorFieldData', None, True),
@@ -913,7 +913,7 @@ class FieldDataQuery(Module):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-         return GenModDoc.construct_port_doc(cls, port_name, 'out') 
+        return GenModDoc.construct_port_doc(cls, port_name, 'out') 
     
     def compute(self):
         writetolog("\nRunning FieldDataQuery", True)
@@ -952,7 +952,7 @@ class FieldDataQuery(Module):
             use_query = True
             query  = FDQParams['query']
             #check if we're using a simple (equality) or complex (python syntax) query
-            use_complex = any(str in query for str in ['[' + str + ']' for str in header] )
+            use_complex = any(s in query for s in ['[' + s + ']' for s in header] )
             
         if self.hasInputFromPort('Query_column'):
             query_col_key = self.find_column(header,FDQParams['query_col'])
@@ -1049,7 +1049,7 @@ class FieldDataAggregateAndWeight(Module):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-         return GenModDoc.construct_port_doc(cls, port_name, 'out')  
+        return GenModDoc.construct_port_doc(cls, port_name, 'out')  
     
     def compute(self):
         writetolog("\nFieldDataAggregateAndWeight", True)
@@ -1093,7 +1093,7 @@ class PARC(Module):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-         return GenModDoc.construct_port_doc(cls, port_name, 'out')
+        return GenModDoc.construct_port_doc(cls, port_name, 'out')
     
     def compute(self):
         #writetolog("\nRunning PARC", True)
@@ -1189,7 +1189,7 @@ class RasterFormatConverter(Module):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-         return GenModDoc.construct_port_doc(cls, port_name, 'out')
+        return GenModDoc.construct_port_doc(cls, port_name, 'out')
 
     def compute(self):
         writetolog("\nRunning TiffConverter", True)
@@ -1200,13 +1200,13 @@ class RasterFormatConverter(Module):
             ourRFC.inputDir = self.forceGetInputFromPort('inputDir').name
             
         if self.hasInputFromPort('format'):
-            format = self.forceGetInputFromPort('format')
-            if format == '':
-                format = 'asc'
-            ourRFC.format = format
+            f = self.forceGetInputFromPort('format')
+            if f == '':
+                f = 'asc'
+            ourRFC.format = f
              
         if self.hasInputFromPort("multipleCores"):
-             if self.getInputFromPort("multipleCores"):
+            if self.getInputFromPort("multipleCores"):
                 ourRFC.multicores = "True"
         
         ourRFC.outputDir = utils.mknextdir(prefix='ConvertedRasters_')
@@ -1244,7 +1244,7 @@ class ModelEvaluationSplit(Module):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-         return GenModDoc.construct_port_doc(cls, port_name, 'out')
+        return GenModDoc.construct_port_doc(cls, port_name, 'out')
     
     def compute(self):
         writetolog("\nGenerating Model Evaluation split ", True)
@@ -1316,7 +1316,7 @@ class ModelSelectionSplit(Module):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-         return GenModDoc.construct_port_doc(cls, port_name, 'out')
+        return GenModDoc.construct_port_doc(cls, port_name, 'out')
      
     def compute(self):
         writetolog("\nGenerating Model Selection split ", True)
@@ -1390,7 +1390,7 @@ class ModelSelectionCrossValidation(Module):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-         return GenModDoc.construct_port_doc(cls, port_name, 'out')
+        return GenModDoc.construct_port_doc(cls, port_name, 'out')
          
     def compute(self):
         writetolog("\nGenerating Cross Validation split ", True)
@@ -1448,7 +1448,7 @@ class CovariateCorrelationAndSelection(Module):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-         return GenModDoc.construct_port_doc(cls, port_name, 'out')
+        return GenModDoc.construct_port_doc(cls, port_name, 'out')
      
     def compute(self):
         writetolog("\nOpening Select Predictors Layers widget", True)
@@ -1601,8 +1601,8 @@ class ProjectionLayers(Module):
             origFile = row[4]
             newOrigFile = origFile
             for lookup in fromto:
-               if lookup[0] in origFile:
-                   newOrigFile = origFile.replace(lookup[0], lookup[1])
+                if lookup[0] in origFile:
+                    newOrigFile = origFile.replace(lookup[0], lookup[1])
             tmpCSV.writerow([newOrigFile,] + row[1:4])
         del tmpCSV
         
@@ -1654,8 +1654,6 @@ class MAXENT(Model):
         Model.__init__(self) 
         self.name = 'WrapMaxent.r'
         self.MaxentPath=""
-        #self.port_map.update({'LambdaDir':('lam', None, False), #This is a Maxent specific port
-         #                })
         
     def compute(self):
         global maxent_path
@@ -1718,7 +1716,7 @@ class MAXENT(Model):
         #for now display R output only if there was a cv split we might want options
         Model.compute(self)
 #            return 
-         #set outputs
+    #set outputs
         lambdasfile = os.path.join(ourMaxent.outputDir, ourMaxent.args["species_name"] + ".lambdas")
         output_file = utils.create_file_module(lambdasfile)
         self.setResult("lambdas", output_file)
