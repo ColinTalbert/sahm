@@ -1565,6 +1565,9 @@ class ProjectionLayers(Module):
         
         inputCSV = self.forceGetInputFromPort('RastersWithPARCInfoCSV').name
         
+        template = self.forceGetInputFromPort('templateLayer', '')
+        fromto = []
+        
         if self.hasInputFromPort('directoryCrosswalkCSV'):
             crosswalkCSV = csv.reader(open(self.forceGetInputFromPort('directoryCrosswalkCSV'), 'r'))
             header = crosswalkCSV.next()
