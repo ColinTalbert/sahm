@@ -14,7 +14,7 @@ source("RF.helper.fcts.r")
 source("MAXENT.helper.fcts.r")
 output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
 rc="responseBinary"
-#Testing GitHub again
+#Testing GitHub again Another commit
 #options(warn=2)
 #options(error=expression(if(interactive()) recover() else dump.calls()))
 #options(error=NULL)
