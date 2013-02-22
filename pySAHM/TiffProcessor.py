@@ -1,5 +1,6 @@
 
 import sys, os
+import csv
 
 from osgeo import gdalconst
 from osgeo import gdal
@@ -24,7 +25,9 @@ def main(args):
     ourLittleWorker.run()
     
 class rasterProcessor(object):
-    
+    '''The base class that all other Raster processing
+    objects will inherit from
+    '''
     def __init__(self):
         #instance level variables
         self.verbose = True
@@ -65,6 +68,15 @@ class rasterProcessor(object):
         self.inputRaster = SpatialUtilities.SAHMRaster(self.inputFname)
     
 class rasterReclassifier(rasterProcessor):
+    '''produces an output raster that has been reclassified according to 
+    a reclass text file provided.
+    The format of this file conforms to the ESRI reclass by asci form
+    Information available at: http://resources.arcgis.com/en/help/main/10.1/index.html#//00q90000003w000000
+    
+    Values not specified in the reclass file will remain unchanged.
+    No Data values are specified in both the input and output line with a NoData string
+    
+    '''
     def __init__(self):
         rasterProcessor.__init__(self)
         #template is optional and is only used to specify extent
@@ -199,6 +211,15 @@ class categoricalToContinuousRasters(rasterProcessor):
         print tmpIntermediaryFname
         gdal.Unlink(tmpIntermediaryFname)
         
+        #write our outputs to a PredictorListFile
+        output_fname = os.path.join(self.outDir, "ouputFileList.csv")
+        csv_writer = csv.writer(open(output_fname, 'wb'))
+        csv_writer.writerow(["file", "Resampling", "Aggregation"])
+        for k,v in outputs.iteritems():
+            csv_writer.writerow([os.path.normpath(v.source), "0", "NearestNeighbor", "Mean"])
+        del csv_writer
+        
+        self.outputPredictorsList = output_fname
         
     def initializeOneOutput(self, val):
         inputJustName = SpatialUtilities.getRasterShortName(self.inputFname)

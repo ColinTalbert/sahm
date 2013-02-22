@@ -1211,7 +1211,6 @@ class Reclassifier(Module):
 #        writetolog("Finished running PARC", True)
         self.setResult('outputRaster', output_file)
 
-
 class CategoricalToContinuous(Module):
     '''
     '''
@@ -1221,7 +1220,7 @@ class CategoricalToContinuous(Module):
                     ('templateFile', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                     ]
 
-    _output_ports = [('outputWorkspace', '(edu.utah.sci.vistrails.basic:Directory)')]
+    _output_ports = [('outputsPredictorListFile', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
 
 #    @classmethod
 #    def provide_input_port_documentation(cls, port_name):
@@ -1248,9 +1247,8 @@ class CategoricalToContinuous(Module):
         
         ourC2C.run()
 
-#        writetolog("Finished running PARC", True)
-        modelWorkspace = utils.create_dir_module(ourC2C.outDir)
-        self.setResult("outputWorkspace", modelWorkspace)
+        output_file = utils.create_file_module(ourC2C.outputPredictorsList) 
+        self.setResult('outputsPredictorListFile', output_file)
 
 class RasterFormatConverter(Module):
     '''
