@@ -49,7 +49,7 @@ identifier = "gov.usgs.sahm"
 version = '1.0.2'
 
 def package_dependencies():
-   return ['edu.utah.sci.vistrails.matplotlib']
+    return ['edu.utah.sci.vistrails.matplotlib']
 
 configuration = \
     ConfigurationObject(output_dir= r'C:\temp\SAHM_workspace',

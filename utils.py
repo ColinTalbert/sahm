@@ -86,7 +86,7 @@ def importOSGEO():
     global osr
     from osgeo import osr as osr
     global gdal_merge
-    from packages.sahm.GDAL_Resources.Utilities import gdal_merge as gdal_merge
+    from GDAL_Resources.Utilities import gdal_merge as gdal_merge
 
 
 def getpixelsize(filename):
