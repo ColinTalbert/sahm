@@ -4,6 +4,7 @@ import random
 import string
 
 from math import floor
+import numpy as np
 
 from osgeo import gdalconst
 from osgeo import gdal
@@ -16,17 +17,82 @@ gdal.UseExceptions()
 gdal.AllRegister()
 
 class SAHMRaster():
-    '''An extension to a GDAL raster that contains methods for 
-    the various methods we call on rasters.
+    '''An extension to a GDAL raster that contains convenience methods for 
+    some of the operations we use use.
     '''
     def __init__(self, rasterFile):
         self.source = rasterFile
-        self.getParams()
+
+        self.resetBlocks()
+        #default values
+        self.blockSize = 2048
+        self.driverName = "GTiff"
+        self.pixelType = "GDT_Int32"
+        self.NoData = -2147483647
+        self.signedByte = False
+        #Must be supplied for new rasters or read from input
+        self.xScale = None
+        self.yScale = None
+        self.width = None
+        self.height = None
+        self.east = None
+        self.north = None
+        self.prj = None
+        #convenience values pulled or calculated
+        self.west = None
+        self.south = None
+        self.gt = None
         
-    def getParams(self):
+        if isRaster(rasterFile):
+            self.loadRaster()
+            self.getParams()
+      
+    def loadRaster(self):
+        if not os.path.exists(self.source):
+            self.Error.append("The input file (" + self.source + ") does not exist on the file system.")
+            return
+        
+        self.ds = gdal.Open(self.source, gdalconst.GA_ReadOnly)
+        self.band = self.ds.GetRasterBand(1)
+      
+    def createNewRaster(self):
+        #delete the output if it exists
+        gdal.Unlink(self.source)
+        
+        #register the gdal driver
+        driver = gdal.GetDriverByName(self.driverName)
+        if self.signedByte: 
+            self.ds = tifDriver.Create(self.source, 
+                                            self.width, self.height,
+                                            1, self.pixelType, ["PIXELTYPE=SIGNEDBYTE"])
+        else:
+            self.ds = driver.Create(self.source, 
+                                            self.width, self.height,
+                                            1, self.pixelType)
+            
+        self.gt = (self.west, self.xScale, 0, self.north, 0, self.yScale)
+        self.ds.SetGeoTransform(self.gt)
+        self.band = self.ds.GetRasterBand(1)
+        
+        if self.prj is not None:
+            self.ds.SetProjection(self.prj)
+        self.band.SetNoDataValue(self.NoData)
+        if self.signedByte:
+            self.band.pixelType = "SIGNEDBYTE"
+            self.band.SetMetadata({'PIXELTYPE': 'SIGNEDBYTE'}, 'IMAGE_STRUCTURE')
+      
+    def pullParamsFromRaster(self, otherRasterFile):
+        if not os.path.exists(otherRasterFile):
+               raise utilities.TrappedError("Raster does not appear to be a valid raster.\nThe input file (" + otherRasterFile + ") does not exist on the file system.")
+            
+        # Get the PARC parameters from the rasterFile.
+        otherDS = gdal.Open(otherRasterFile, gdalconst.GA_ReadOnly)
+        self.getParams(otherDS)
+        
+    def getParams(self, ds=None):
         """
         Extracts properties from a passed raster
-        All values are stored in a dictionary which is returned.
+        All values are stored as instance variables
         If errors are encountered along the way the error messages will
         be returned as a list in the 'Error' element.
         """
@@ -35,30 +101,25 @@ class SAHMRaster():
             allRasterParams = ["Error", "xScale", "yScale", "width", "height",
                             "east", "north", "west", "south",  
                             "gEast", "gNorth", "gWest", "gSouth",  
-                            "Wkt", "srs", "gt", "prj", "NoData", "PixelType", "file_name"]
+                            "Wkt", "srs", "gt", "prj", "NoData", "pixelType", "file_name"]
             
             for param in allRasterParams:
                 setattr(self, param, None)
                 
             self.Error = []
             
-            if not os.path.exists(self.source):
-                self.Error.append("The input file (" + self.source + ") does not exist on the file system.")
-                return
-            
-            # Get the PARC parameters from the rasterFile.
-            self.ds = gdal.Open(self.source, gdalconst.GA_ReadOnly)
-            self.band = self.ds.GetRasterBand(1)
-            if self.ds is None:
-                self.Error.append("Unable to open file with GDAL")
-                return params
+            if ds is None:
+                ds = self.ds
+                band = self.band
+            else:
+                band = ds.GetRasterBand(1)
                 
-            xform  = self.ds.GetGeoTransform()
+            xform  = ds.GetGeoTransform()
             self.xScale = xform[1]
             self.yScale = xform[5]
     
-            self.width  = self.ds.RasterXSize
-            self.height = self.ds.RasterYSize
+            self.width  = ds.RasterXSize
+            self.height = ds.RasterYSize
     
             self.west = xform[0]
             self.north = xform[3]
@@ -66,11 +127,11 @@ class SAHMRaster():
             self.south = self.north + self.height * self.yScale
     
             try:
-                wkt = self.ds.GetProjection()
-                self.gt = self.ds.GetGeoTransform()
-                self.prj = self.ds.GetProjectionRef()
-                self.srs = osr.SpatialReference(wkt)
-                if wkt == '':
+                self.wkt = ds.GetProjection()
+                self.gt = ds.GetGeoTransform()
+                self.prj = ds.GetProjectionRef()
+                self.srs = osr.SpatialReference(self.wkt)
+                if self.wkt == '':
                     self.Error.append("Undefined projection")
                 else:
                     try:
@@ -85,41 +146,21 @@ class SAHMRaster():
                 self.Error.append("Undefined problems extracting the projection information")
     
             try:
-                self.signedByte = self.band.GetMetadata('IMAGE_STRUCTURE')['PIXELTYPE'] == 'SIGNEDBYTE'
+                self.signedByte = band.GetMetadata('IMAGE_STRUCTURE')['PIXELTYPE'] == 'SIGNEDBYTE'
             except KeyError:
                 self.signedByte = False
             
-            self.NoData = self.band.GetNoDataValue()
+            self.NoData = band.GetNoDataValue()
             if self.NoData == None:
-                if self.band.DataType == 1:
-                    print "Warning:  Could not extract NoData value.  Using assumed nodata value of 255"
-                    self.NoData = 255
-                elif self.band.DataType == 2:
-                    print "Warning:  Could not extract NoData value.  Using assumed nodata value of 65536"
-                    self.NoData = 65536
-                elif self.band.DataType == 3:
-                    print "Warning:  Could not extract NoData value.  Using assumed nodata value of 32767"
-                    self.NoData = 32767
-                elif self.band.DataType == 4:
-                    print "Warning:  Could not extract NoData value.  Using assumed nodata value of 2147483647"
-                    self.NoData = 2147483647
-                elif self.band.DataType == 5:
-                    print "Warning:  Could not extract NoData value.  Using assumed nodata value of 2147483647"
-                    self.NoData = 2147483647
-                elif self.band.DataType == 6:
-                    print "Warning:  Could not extract NoData value.  Using assumed nodata value of -3.40282346639e+038"
-                    self.NoData = -3.40282346639e+038
-                else:
-                    self.Error.append("Could not identify nodata value")
-            self.PixelType = self.band.DataType
-            if self.PixelType == None:
+                self.NoData = defaultNoData(band.DataType)
+            self.pixelType = band.DataType
+            if self.pixelType == None:
                 self.Error.append("Could not identify pixel type (bit depth)")
             
         except:
             #print "We ran into problems extracting raster parameters from " + rasterFile
             self.Error.append("Some untrapped error was encountered")
 
- 
     def getRandomPixel(self):
         col = random.randint(0, self.width - 1) 
         row = random.randint(0, self.height - 1)
@@ -147,6 +188,38 @@ class SAHMRaster():
         col, row = self.convertCoordsToColRow(x, y)
         return self.getPixelValueFromIndex(col, row)
     
+    def getBlock(self, row, col, numCols, numRows):
+        data = self.band.ReadAsArray(row, col, numCols, numRows)
+        ndMask = np.ma.masked_array(data, mask=(data==self.NoData))
+        return ndMask
+    
+    def putBlock(self, data, col, row):
+        '''this only works on rasters we've opened for writing
+        '''
+        self.band.WriteArray(data, col, row)
+    
+    def iterBlocks(self):
+        rows = int(self.height)
+        cols = int(self.width)
+        for i in range(0, rows, self.blockSize):
+            self.curRow = i
+            if i + self.blockSize  < rows:
+                numRows = self.blockSize
+            else:
+                numRows = rows - i
+                
+            for j in range(0, cols, self.blockSize):
+                self.curCol = j
+                if j + self.blockSize < cols:
+                    numCols = self.blockSize
+                else:
+                    numCols = cols - j
+                yield self.getBlock(j, i, numCols, numRows)
+        
+    def resetBlocks(self):
+        self.curRow = 0
+        self.curCol = 0
+    
     def pointInExtent(self, x, y):
         if (float(x) >= self.west and
             float(x) <= self.east and
@@ -155,6 +228,17 @@ class SAHMRaster():
             return True
         else:
             return False
+    
+    def calcStats(self):
+
+#        histogram = self.band.GetDefaultHistogram()
+#        self.band.SetDefaultHistogram(histogram[0], histogram[1], histogram[3])
+        self.ds.BuildOverviews(overviewlist=[2,4,8,16,32,64,128])
+        self.band.FlushCache()
+        self.band.GetStatistics(0,1)
+        
+    def close(self):
+        self.ds = None
     
 def mds_to_shape(MDSFile, outputfolder):
     
@@ -271,6 +355,11 @@ def getRasterName(fullPathName):
         rastername = fullPathName
     return rastername
 
+def getRasterShortName(fullPathName):
+    rasterName = getRasterName(fullPathName)
+    rasterJustName = os.path.split(rasterName)[1]   
+    return os.path.splitext(rasterJustName)[0]
+
 def transformPoint(x, y, from_srs, to_srs):
     """
     Transforms a point from one srs to another
@@ -299,3 +388,129 @@ def isRaster(filePath):
             del dataset
     except:
         return False
+
+def defaultNoData(GDALdatatype, signedByte=False):
+    '''returns a reasonable default NoData value for a given 
+    GDAL data type.
+    '''
+    if signedByte:
+        return -128
+    
+    crossWalk = {"Unknown":0,
+                 "Byte":255,
+                "Int16":32767,
+                "UInt32":4294967295,
+                "Int32":2147483647,
+                "Float32":-3.4028235e+038,
+                "Float64":2.2250738585072014e-308,
+                "CInt16":32767,
+                "CInt32":2147483647,
+                "CFloat32":-3.4028235e+038,
+                "CFloat64":2.2250738585072014e-308,
+                }
+    return crossWalk[gdal.GetDataTypeName(GDALdatatype)]
+   
+def GDALToNPDataType(GDALdatatype, signedByte=False):
+    '''returns the coresponding numpy data time for a gdal data type
+    '''
+    if signedByte:
+        return np.int8
+    
+    crossWalk = {"Unknown":np.int32,
+                 "Byte":np.uint8,
+                "Int16":np.int16,
+                "UInt32":np.uint32,
+                "Int32":np.int32,
+                "Float32":np.float32,
+                "Float64":np.float64,
+                "CInt16":np.int16,
+                "CInt32":np.int32,
+                "CFloat32":np.float32,
+                "CFloat64":np.float64,
+                }
+    return crossWalk[gdal.GetDataTypeName(GDALdatatype)]
+
+def getAggregateTargetCellSize(sourceRaster, templateRaster):
+    """
+    This function determines the appropriate cell size to
+    reproject/resample our source raster into before 
+    aggregating.
+    This size is the cell size that results in a template 
+    cell containing a whole number of cells which are as 
+    close as possible to the cell dimension that would 
+    result if you reprojected the source cells into the 
+    target srs without changing cell size.
+    """
+    #first determine what cell size we are going to use for the initial reproject/resample 
+    #step 1:  Determine the native cell size in the template coordinate system.
+    templateSRSCellSize = self.getTemplateSRSCellSize(sourceParams)
+    #step 2:  round this up or down to an even fraction of the template cell size
+    # for example source = 30, target = 250 resampledSource = 250/round(250/30)
+    sourcePixelsPerTarget = round(templateRaster.xScale/templateSRSCellSize)
+    nearestWholeCellSize = (templateRaster.xScale / sourcePixelsPerTarget)
+    return nearestWholeCellSize, sourcePixelsPerTarget
+
+def getTemplateSRSCellSize(sourceRaster, templateRaster):
+    """
+    Calculate what size our source image pixels would be in the template SRS
+    """
+    #first convert our template origin into the source srs
+    tOriginX, tOriginY = transformPoint(templateRaster.west, templateRaster.north, 
+                                    templateRaster.srs, sourceRaster.srs)
+    #next add the source xScale to the converted origin x and convert that back to template srs
+    tOriginX1 = transformPoint (tOriginX + sourceRaster.xScale, tOriginY, 
+                                            sourceRaster.srs, templateRaster.srs)[0]                        
+    
+    
+#        templateCellXCorner1 = (self.template_params["west"], self.template_params["north"], 
+#                                        self.template_params["srs"], sourceParams["srs"])[0]
+#        
+#        targetCellXCorner1 = (sourceParams["west"], sourceParams["north"], 
+#                                                sourceParams["srs"], self.template_params["srs"])[0]
+#        targetCellXCorner2 = self.transformPoint(sourceParams["west"] + sourceParams["xScale"], 
+#                                                sourceParams["north"], sourceParams["srs"], self.template_params["srs"])[0]
+    templateSRSCellSize = abs(abs(tOriginX1) - abs(templateRaster.west))
+    return templateSRSCellSize
+
+def getAggregateTargetCellSize(sourceRaster, templateRaster):
+    """
+    This function determines the appropriate cell size to
+    reproject/resample our source raster into before 
+    aggregating.
+    This size is the cell size that results in a template 
+    cell containing a whole number of cells which are as 
+    close as possible to the cell dimension that would 
+    result if you reprojected the source cells into the 
+    target srs without changing cell size.
+    """
+    #first determine what cell size we are going to use for the initial reproject/resample 
+    #step 1:  Determine the native cell size in the template coordinate system.
+    templateSRSCellSize = getTemplateSRSCellSize(sourceRaster, templateRaster)
+    #step 2:  round this up or down to an even fraction of the template cell size
+    # for example source = 30, target = 250 resampledSource = 250/round(250/30)
+    sourcePixelsPerTarget = round(templateRaster.xScale/templateSRSCellSize)
+    nearestWholeCellSize = (templateRaster.xScale / 
+                        sourcePixelsPerTarget)
+    return nearestWholeCellSize, sourcePixelsPerTarget
+
+def intermediaryReprojection(sourceRaster, templateRaster, outRasterFName, resamplingType):
+    '''Reprojects the sourceRaster into the templateRaster projection, datum 
+    and extent.  The output cell size is determined to be the closest dimension
+    to the sourceRaster cell size that will evenly go into the template raster
+    cell size
+    '''
+    outputFile = SAHMRaster(outRasterFName)
+    outputFile.getParams(templateRaster.ds)
+    outputFile.NoData = sourceRaster.NoData
+    outputFile.signedByte = sourceRaster.signedByte
+    targetCellSize, numSourcePerTarget = getAggregateTargetCellSize(sourceRaster, templateRaster)
+    outputFile.xScale = targetCellSize
+    outputFile.yScale = -1 * targetCellSize
+    outputFile.height = templateRaster.height * int(templateRaster.xScale/targetCellSize)
+    outputFile.width = templateRaster.width * int(templateRaster.xScale/targetCellSize)
+    outputFile.createNewRaster()
+    
+    err = gdal.ReprojectImage(sourceRaster.ds, outputFile.ds, sourceRaster.srs.ExportToWkt(), templateRaster.srs.ExportToWkt(), resamplingType)
+    
+    
+    

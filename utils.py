@@ -128,7 +128,7 @@ def getNDVal(filename):
     NDValue = band.GetNoDataValue()
     
     min = band.GetMinimum()
-    if approx_equal(NDValue, min):
+    if min is not None and approx_equal(NDValue, min):
         upperLeftPixVal = band.ReadAsArray(0, 0, 1, 1, 1, 1)[0][0]
         if approx_equal(NDValue, upperLeftPixVal):
             NDValue = band.ReadAsArray(0, 0, 1, 1, 1, 1)[0][0]

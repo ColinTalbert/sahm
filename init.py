@@ -1169,6 +1169,85 @@ class PARC(Module):
 #        writetolog("Finished running PARC", True)
         self.setResult('RastersWithPARCInfoCSV', output_file)
         
+class Reclassifier(Module):
+    '''
+    '''
+#    __doc__ = GenModDoc.construct_module_doc('RasterFormatConverter')
+
+    _input_ports = [("inputRaster", "(edu.utah.sci.vistrails.basic:File)"),
+                    ('reclassFile', '(edu.utah.sci.vistrails.basic:File)'),
+                    ]
+
+    _output_ports = [('outputRaster', '(edu.utah.sci.vistrails.basic:File)')]
+
+#    @classmethod
+#    def provide_input_port_documentation(cls, port_name):
+#        return GenModDoc.construct_port_doc(cls, port_name, 'in')
+#    @classmethod
+#    def provide_output_port_documentation(cls, port_name):
+#         return GenModDoc.construct_port_doc(cls, port_name, 'out')
+
+    def compute(self):
+        writetolog("\nRunning Reclassifier", True)
+        port_map = {'inputRaster':('inputRaster', utils.dir_path_value, True),
+                    'reclassFile':('reclassFile', utils.dir_path_value, True)}
+        
+        argsDict = utils.map_ports(self, port_map)
+
+        from pySAHM.TiffProcessor import rasterReclassifier
+        import pySAHM.SpatialUtilities as SpatialUtilities
+        ourReclassifier = rasterReclassifier()
+        ourReclassifier.inputFname = argsDict['inputRaster']
+        ourReclassifier.reclassFName = argsDict['reclassFile']
+        ourReclassifier.outDir = utils.getrootdir()
+        ourReclassifier.outName = SpatialUtilities.getRasterShortName(argsDict['inputRaster']) + "_rc.tif"
+        outFName = os.path.join(ourReclassifier.outDir, ourReclassifier.outName)
+        ourReclassifier.run()
+
+        output_file = utils.create_file_module(outFName)
+        
+        
+#        writetolog("Finished running PARC", True)
+        self.setResult('outputRaster', output_file)
+
+class CategoricalToContinuous(Module):
+    '''
+    '''
+#    __doc__ = GenModDoc.construct_module_doc('RasterFormatConverter')
+
+    _input_ports = [("inputRaster", "(edu.utah.sci.vistrails.basic:File)"),
+                    ('templateFile', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
+                    ]
+
+    _output_ports = [('outputsPredictorListFile', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
+
+#    @classmethod
+#    def provide_input_port_documentation(cls, port_name):
+#        return GenModDoc.construct_port_doc(cls, port_name, 'in')
+#    @classmethod
+#    def provide_output_port_documentation(cls, port_name):
+#         return GenModDoc.construct_port_doc(cls, port_name, 'out')
+
+    def compute(self):
+        writetolog("\nRunning Reclassifier", True)
+        port_map = {'inputRaster':('inputRaster', utils.dir_path_value, True),
+                    'templateFile':('templateFile', utils.dir_path_value, True)}
+        
+        argsDict = utils.map_ports(self, port_map)
+
+        from pySAHM.TiffProcessor import categoricalToContinuousRasters
+        import pySAHM.SpatialUtilities as SpatialUtilities
+        ourC2C = categoricalToContinuousRasters()
+        ourC2C.inputFname = argsDict['inputRaster']
+        ourC2C.templateFName = argsDict['templateFile']
+        shortName = SpatialUtilities.getRasterShortName(argsDict['inputRaster'])
+        
+        ourC2C.outDir = os.path.join(utils.getrootdir(), shortName + "_c2c")
+        
+        ourC2C.run()
+
+        output_file = utils.create_file_module(ourC2C.outputPredictorsList) 
+        self.setResult('outputsPredictorListFile', output_file)
 
 class RasterFormatConverter(Module):
     '''
@@ -1909,6 +1988,159 @@ def build_predictor_modules():
             
     return modules
 
+###################################
+from core.modules.module_configure import StandardModuleConfigurationWidget
+class TextFile(File):
+    pass
+
+class TextFileConfiguration(StandardModuleConfigurationWidget):
+    # FIXME add available_dict as parameter to allow config
+    def __init__(self, module, controller, contents=None, 
+                 filter='', parent=None):
+        StandardModuleConfigurationWidget.__init__(self, module, controller, 
+                                                   parent)
+        self.fileFilter = filter
+        
+        if contents:
+            self.contents = contents
+        else:
+            self.contents = QtGui.QTextEdit(self)
+        
+        self.setWindowTitle("Text File")
+        self.build_gui()
+        
+        fid = self.findSourceFunction()
+        if fid!=-1:
+            f = self.module.functions[fid]
+            self.path = f.params[0].strValue
+            self.loadText()
+        
+    def findSourceFunction(self):
+        fid = -1
+        for i in xrange(self.module.getNumFunctions()):
+            if self.module.functions[i].name=="value":
+                fid = i
+                break
+        return fid
+        
+    def build_gui(self):
+        QtGui.QWidget.__init__(self)
+    
+        self.buttonOpen = QtGui.QPushButton('Open', self)
+        self.buttonSave = QtGui.QPushButton('Save', self)
+        self.buttonSaveAs = QtGui.QPushButton('Save As...', self)
+        self.buttonReset = QtGui.QPushButton('Cancel', self)
+        
+        self.buttonOpen.clicked.connect(self.handleOpen)
+        self.buttonSave.clicked.connect(self.handleSave)
+        self.buttonSaveAs.clicked.connect(self.handleSaveAs)
+        self.buttonReset.clicked.connect(self.handleReset)
+        
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(self.contents)
+        buttonLayout = QtGui.QHBoxLayout()
+        buttonLayout.addWidget(self.buttonOpen)
+        buttonLayout.addWidget(self.buttonSave)
+        buttonLayout.addWidget(self.buttonSaveAs)
+        buttonLayout.addWidget(self.buttonReset)
+        layout.addLayout(buttonLayout)
+        self.setLayout(layout)
+        
+        self.path = ''
+
+    def handleReset(self):
+        self.loadText()
+    
+    def handleSave(self):
+        if not os.path.exists(self.path):
+            self.path = QtGui.QFileDialog.getSaveFileName(
+                self, 'Save File', os.path.split(self.path)[0], self.fileFilter)
+        if not self.path.isEmpty():
+            self.save()
+        
+    def save(self):
+        f = open(self.path, "w")
+        f.write(self.contents.toPlainText())
+        
+    def handleSaveAs(self):
+        self.path = QtGui.QFileDialog.getSaveFileName(
+                self, 'Save File As', os.path.split(self.path)[0], self.fileFilter)
+            
+        if not self.path.isEmpty():
+            tmp = open(self.path, "w")
+            del tmp
+            self.handleSave()
+            self.updateVisTrail()
+    
+    def updateVisTrail(self):
+        self.controller.update_ports_and_functions(self.module.id, 
+                                           [], [], [("value", [str(self.path)])])
+        self.state_changed = False
+        self.emit(QtCore.SIGNAL("stateChanged"))
+        self.emit(QtCore.SIGNAL('doneConfigure'), self.module.id)
+    
+    def handleOpen(self):
+        self.path = QtGui.QFileDialog.getOpenFileName(
+                self, 'Open File', os.path.split(self.path)[0], '')
+        if not self.path.isEmpty():
+            self.loadText()
+            self.updateVisTrail()
+            
+    def loadText(self):
+        f = open(self.path, 'r')
+        data = f.read()
+        self.contents.setText(data)
+
+class CSVTextFile(TextFile):
+    pass
+
+class CSVTextFileConfiguration(TextFileConfiguration):
+    # FIXME add available_dict as parameter to allow config
+    def __init__(self, module, controller, parent=None):
+        
+        fileFilter = 'CSV(*.csv)'
+        contents = QtGui.QTableWidget(0, 0)
+        TextFileConfiguration.__init__(self, module, controller, contents,
+                                            fileFilter, parent)
+        
+        self.setWindowTitle("CSV Text File")
+
+    
+    def save(self):
+         with open(unicode(self.path), 'wb') as stream:
+            writer = csv.writer(stream)
+            #surely there is some cleaner way to get the header list!
+            header = [str(self.contents.horizontalHeaderItem(i).text()) for i in 
+                      range(self.contents.horizontalHeader().count())]
+            writer.writerow(header)
+            for row in range(self.contents.rowCount()):
+                rowdata = []
+                for column in range(self.contents.columnCount()):
+                    item = self.contents.item(row, column)
+                    if item is not None:
+                        rowdata.append(
+                            unicode(item.text()).encode('utf8'))
+                    else:
+                        rowdata.append('')
+                writer.writerow(rowdata)
+
+    def loadText(self):
+        with open(unicode(self.path), 'rb') as stream:
+            csvReader = csv.reader(stream)
+            header = csvReader.next()
+            self.contents.setRowCount(0)
+            self.contents.setColumnCount(len(header))
+            self.contents.setHorizontalHeaderLabels(header)
+
+            for rowdata in csvReader:
+                row = self.contents.rowCount()
+                self.contents.insertRow(row)
+                self.contents.setColumnCount(len(rowdata))
+                for column, data in enumerate(rowdata):
+                    item = QtGui.QTableWidgetItem(data.decode('utf8'))
+                    self.contents.setItem(row, column, item)
+
+###################################
 
 input_color = (0.76, 0.76, 0.8)
 input_fringe = [(0.0, 0.0),
@@ -1948,7 +2180,10 @@ _modules = generate_namespaces({'DataInput': [
                                           CovariateCorrelationAndSelection,
                                           ApplyModel,
                                           BackgroundSurfaceGenerator
-                                          ],                                          
+                                          ],
+                                'GeospatialTools': [Reclassifier,
+                                                    CategoricalToContinuous
+                                                    ],                                        
                                 'Models': [(GLM, {'moduleColor':model_color,
                                                            'moduleFringe':model_fringe}),
                                            (RandomForest, {'moduleColor':model_color,
@@ -1973,6 +2208,8 @@ _modules = generate_namespaces({'DataInput': [
                                            (ModelOutputType, {'abstract': True}),
                                            (RandomPointType, {'abstract': True}),
                                            (OutputRaster, {'abstract': True}),
+                                           (TextFile, {'configureWidgetType': TextFileConfiguration}),
+                                           (CSVTextFile, {'configureWidgetType': CSVTextFileConfiguration})
                                            ],
                                 'Output': [(SAHMModelOutputViewerCell, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe}),

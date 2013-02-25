@@ -390,7 +390,7 @@ class MDSBuilder(object):
                     pixelProb = probRaster.getPixelValueFromIndex(col, row)
                 keep = pixelProb >= random.randint(1,100)
                 if keep and \
-                    not self.floatEquality(probRaster.getPixelValueFromIndex(col, row), probRaster.NoData) and \
+                    not self.floatEquality(pixelProb, probRaster.NoData) and \
                     not self.floatEquality(self.templateSurface.getPixelValueFromIndex(col, row), self.templateSurface.NoData):
                     #convert our outValues for row, col to coordinates
                     x, y = probRaster.convertColRowToCoords(col, row)
