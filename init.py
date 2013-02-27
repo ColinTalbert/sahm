@@ -838,7 +838,7 @@ class MDSBuilder(Module):
     def compute(self):
         port_map = {'fieldData': ('fieldData', None, False),
                     'backgroundPointType': ('pointType', None, False),
-                    'backgroundpointCount': ('pointCount', None, False),
+                    'backgroundPointCount': ('pointCount', None, False),
                     'backgroundProbSurf': ('probSurfacefName', None, False),
                     'Seed': ('seed', None, False)}
         
