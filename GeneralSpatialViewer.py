@@ -59,9 +59,9 @@ from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
 from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
 from packages.spreadsheet.spreadsheet_controller import spreadsheetController
 
-from packages.sahm.sahm_picklists import OutputRaster
-from packages.sahm.utils import map_ports
-from packages.sahm.SahmSpatialOutputViewer import AnchoredText, MyMapCanvas, \
+from sahm.sahm_picklists import OutputRaster
+from sahm.utils import map_ports
+from sahm.SahmSpatialOutputViewer import AnchoredText, MyMapCanvas, \
     RasterDisplay, fullExtent, viewTitleLegend, sync_changes, MPL_action 
 from utils import dbfreader, getRasterParams
 

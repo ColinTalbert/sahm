@@ -110,7 +110,7 @@ def menu_items():
         
         session_dir = path
         utils.setrootdir(path)
-        utils.createLogger(session_dir, configuration.output_dir)
+        utils.createLogger(session_dir, True)
         
         configuration.cur_session_folder = path
         
