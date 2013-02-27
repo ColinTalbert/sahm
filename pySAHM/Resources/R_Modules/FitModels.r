@@ -106,7 +106,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
              out<-place.save(out)
               out$dat$split.label<-out$dat$split.type
    #check output dir #
-              if(file.access(out$input$output.dir,mode=2)!=0) stop(paste("output directory",output.dir,"is not writable"))
+             # if(file.access(out$input$output.dir,mode=2)!=0) stop(paste("output directory",output.dir,"is not writable"))
         
     #Fit the desired model#
                out<-generic.model.fit(out,Model,t0)
