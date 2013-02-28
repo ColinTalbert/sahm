@@ -416,7 +416,7 @@ class MDSBuilder(object):
         for cell in backgrounds:
             col, row = divmod(cell, rows)
             x, y = probsurf.convertColRowToCoords(col, row)
-            if not self.floatEquality(probsurf.getPixelValueFromIndex(col, row), self.probSurface.NoData):
+            if not self.floatEquality(probsurf.getPixelValueFromIndex(col, row), probsurf.NoData):
                 tmpPixel = [x, y, pointVal]
                 fOut.writerow(tmpPixel)
         
