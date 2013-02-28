@@ -110,7 +110,7 @@ def menu_items():
         
         session_dir = path
         utils.setrootdir(path)
-        utils.createLogger(session_dir, configuration.output_dir)
+        utils.createLogger(session_dir, True)
         
         configuration.cur_session_folder = path
         
@@ -1817,7 +1817,14 @@ def initialize():
     
     session_dir = configuration.cur_session_folder
     if not os.path.exists(session_dir):
-        os.makedirs(session_dir)
+        import tempfile
+        orig_session_dir = session_dir
+        session_dir = tempfile.mkdtemp(prefix="SAHM_session_dir_")
+        utils.createLogger(session_dir, configuration.verbose)
+        writetolog("!" * 79)
+        writetolog("The previous session directory: " + orig_session_dir + " no longer exists on the file system!")
+        writetolog("Defaulting to a random temporary location: " + session_dir)
+        writetolog("!" * 79)
         
     utils.setrootdir(session_dir)
     utils.importOSGEO() 
