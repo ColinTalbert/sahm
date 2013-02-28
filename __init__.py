@@ -46,7 +46,7 @@ from core.configuration import ConfigurationObject
 
 name = "SAHM"
 identifier = "gov.usgs.sahm"
-version = '1.0.2'
+version = '1.1.0'
 
 def package_dependencies():
     return ['edu.utah.sci.vistrails.matplotlib']
