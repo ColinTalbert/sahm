@@ -416,7 +416,7 @@ class MDSBuilder(object):
         for cell in backgrounds:
             col, row = divmod(cell, rows)
             x, y = probsurf.convertColRowToCoords(col, row)
-            if not self.floatEquality(probsurf.getPixelValueFromIndex(col, row), probRaster.NoData):
+            if not self.floatEquality(probsurf.getPixelValueFromIndex(col, row), self.probSurface.NoData):
                 tmpPixel = [x, y, pointVal]
                 fOut.writerow(tmpPixel)
         
@@ -570,7 +570,7 @@ class MDSBuilder(object):
         rasters = []
         dirList = os.listdir(directory)
         for file in [elem for elem in dirList if elem[-4:].lower() == ".tif"]:
-            if SpatialUtilites.isRaster(os.path.join(directory, file)):
+            if SpatialUtilities.isRaster(os.path.join(directory, file)):
                 rasters.append(os.path.join(directory, file))
         for file in [elem for elem in dirList if elem[-4:].lower() == ".asc"]:
             if SpatialUtilities.isRaster(os.path.join(directory,file)):
