@@ -68,6 +68,8 @@ import numpy
 import pySAHM.utilities as utilities
 import getpass
 
+import gui.application
+
 _roottempdir = ""
 _logger = None
 r_path = None
@@ -311,6 +313,8 @@ def path_port(module, portName):
     path.replace("/", os.path.sep)
     if os.path.exists(path):
         return path
+    elif os.path.exists(getFileRelativeToCurrentVT(path)):
+        return getFileRelativeToCurrentVT(path)
     else:
         raise RuntimeError, 'The indicated file or directory, ' + \
             path + ', does not exist on the file system.  Cannot continue!'
@@ -329,14 +333,14 @@ def R_boolean(value):
         return 'FALSE'
 
 def dir_path_value(value):
-    val = value.name
+    val = getFileRelativeToCurrentVT(value.name)
     sep = os.path.sep
     return val.replace("/", sep)
 
 def create_file_module(fname, f=None):
     if f is None:
         f = File()
-    f.name = fname
+    f.name = getFileRelativeToCurrentVT(fname)
     f.upToDate = True
     return f
 
@@ -437,7 +441,7 @@ def getRasterName(fullPathName):
         rastername = os.path.split(fullPathName)[0]
     else:
         rastername = fullPathName
-    return rastername
+    return getFileRelativeToCurrentVT(rastername)
 
 def getModelsPath():
     return os.path.join(os.path.dirname(__file__), "pySAHM", "Resources", "R_Modules")
@@ -703,7 +707,7 @@ def getRasterParams(rasterFile):
 class InteractiveQGraphicsView(QtGui.QGraphicsView):
     '''
     Extends a QGraphicsView to enable wheel zooming and scrolling
-    The main QGraphicsView contains a graphics scene which is dynamically
+    The main QGraphicsView contains a graphics scene 
     
     l_pix - original picture
     c_view - scaled picture
@@ -808,3 +812,9 @@ def print_timing(func):
 def getParentDir(f):
     parentdirf = os.path.dirname(f.name)
     return create_dir_module(parentdirf)
+
+def getFileRelativeToCurrentVT(fname):
+    app = gui.application.get_vistrails_application()()
+    curlocator = app.get_vistrail().locator.name
+    curVTdir = os.path.split(curlocator)[0]
+    return os.path.abspath(os.path.join(curVTdir, fname))
