@@ -1,11 +1,11 @@
 FileName,LayerName,Group,Source,Categorical
-..\examples\SAHM_example\CovariateLayers\bio_03_1971_2000_800m.img,Isothermality,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-..\examples\SAHM_example\CovariateLayers\bio_05_1971_2000_800m.img,Max. temperature of warmest month,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-..\examples\SAHM_example\CovariateLayers\bio_06_1971_2000_800m.img,Min. temperature of coldest month,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-..\examples\SAHM_example\CovariateLayers\bio_07_1971_2000_800m.img,Temperature annual range,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-..\examples\SAHM_example\CovariateLayers\bio_15_1971_2000_800m.img,Precipitation seasonality,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-..\examples\SAHM_example\CovariateLayers\bio_17_1971_2000_800m.img,Precipitation of driest quarter,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-..\examples\SAHM_example\CovariateLayers\bio_18_1971_2000_800m.img,Precipitiation of warmest quarter,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
-..\examples\SAHM_example\CovariateLayers\NDVI_amplitudes1_Average.tif,NDVI_amplitudes1_Average,MODIS Phenology,NDVI (230 m),N
-..\examples\SAHM_example\CovariateLayers\NDVI_annualMeanValue_Average.tif,NDVI_annualMeanValue_Average,MODIS Phenology,NDVI (230 m),N
-..\examples\SAHM_example\CovariateLayers\NDVI_seasonlengths1_Average.tif,NDVI_seasonlengths1_Average,MODIS Phenology,NDVI (230 m),N
+CovariateLayers\bio_03_1971_2000_800m.img,Isothermality,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+CovariateLayers\bio_05_1971_2000_800m.img,Max. temperature of warmest month,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+CovariateLayers\bio_06_1971_2000_800m.img,Min. temperature of coldest month,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+CovariateLayers\bio_07_1971_2000_800m.img,Temperature annual range,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+CovariateLayers\bio_15_1971_2000_800m.img,Precipitation seasonality,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+CovariateLayers\bio_17_1971_2000_800m.img,Precipitation of driest quarter,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+CovariateLayers\bio_18_1971_2000_800m.img,Precipitiation of warmest quarter,PRISM,"PRISM (1971-2000) Normals, 800 m.",N
+CovariateLayers\NDVI_amplitudes1_Average.tif,NDVI_amplitudes1_Average,MODIS Phenology,NDVI (230 m),N
+CovariateLayers\NDVI_annualMeanValue_Average.tif,NDVI_annualMeanValue_Average,MODIS Phenology,NDVI (230 m),N
+CovariateLayers\NDVI_seasonlengths1_Average.tif,NDVI_seasonlengths1_Average,MODIS Phenology,NDVI (230 m),N
