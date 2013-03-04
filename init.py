@@ -1759,7 +1759,7 @@ class MAXENT(Model):
         ourMaxent = MaxentRunner.MAXENTRunner()
         ourMaxent.outputDir = utils.mknextdir(prefix='maxent_')
         
-        self.mdsFile = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('mdsFile').name)
+        ourMaxent.mdsFile = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('mdsFile').name)
         
         ourMaxent.maxentpath = maxent_path
         
