@@ -48,7 +48,6 @@ import csv
 import time
 import tempfile
 import subprocess
-import thread
 
 import struct, datetime, decimal, itertools
 
@@ -69,6 +68,8 @@ import numpy
 import pySAHM.utilities as utilities
 import getpass
 
+import gui.application
+
 _roottempdir = ""
 _logger = None
 r_path = None
@@ -76,7 +77,6 @@ r_path = None
 gdalconst = None
 gdal = None
 osr = None
-gdal_merge = None
 
 def importOSGEO():
     global gdalconst
@@ -85,9 +85,6 @@ def importOSGEO():
     from osgeo import gdal as gdal
     global osr
     from osgeo import osr as osr
-    global gdal_merge
-    from GDAL_Resources.Utilities import gdal_merge as gdal_merge
-
 
 def getpixelsize(filename):
     dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
@@ -128,7 +125,7 @@ def getNDVal(filename):
     NDValue = band.GetNoDataValue()
     
     min = band.GetMinimum()
-    if min is not None and approx_equal(NDValue, min):
+    if approx_equal(NDValue, min):
         upperLeftPixVal = band.ReadAsArray(0, 0, 1, 1, 1, 1)[0][0]
         if approx_equal(NDValue, upperLeftPixVal):
             NDValue = band.ReadAsArray(0, 0, 1, 1, 1, 1)[0][0]
@@ -316,6 +313,8 @@ def path_port(module, portName):
     path.replace("/", os.path.sep)
     if os.path.exists(path):
         return path
+    elif os.path.exists(getFileRelativeToCurrentVT(path)):
+        return getFileRelativeToCurrentVT(path)
     else:
         raise RuntimeError, 'The indicated file or directory, ' + \
             path + ', does not exist on the file system.  Cannot continue!'
@@ -334,14 +333,14 @@ def R_boolean(value):
         return 'FALSE'
 
 def dir_path_value(value):
-    val = value.name
+    val = getFileRelativeToCurrentVT(value.name)
     sep = os.path.sep
     return val.replace("/", sep)
 
 def create_file_module(fname, f=None):
     if f is None:
         f = File()
-    f.name = fname
+    f.name = getFileRelativeToCurrentVT(fname)
     f.upToDate = True
     return f
 
@@ -442,7 +441,7 @@ def getRasterName(fullPathName):
         rastername = os.path.split(fullPathName)[0]
     else:
         rastername = fullPathName
-    return rastername
+    return getFileRelativeToCurrentVT(rastername)
 
 def getModelsPath():
     return os.path.join(os.path.dirname(__file__), "pySAHM", "Resources", "R_Modules")
@@ -467,109 +466,36 @@ def runRScript(script, args_dict, module=None):
     writetolog("    args: " + args_str, False, False)
     writetolog("    command: " + command, False, False)
     #print "RUNNING COMMAND:", command_arr
+    p = subprocess.Popen(command_arr, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    ret = p.communicate()
     
-    runRModelPy = os.path.join(os.path.dirname(__file__), "pySAHM", "runRModel.py")
-    command_arr = [sys.executable, runRModelPy] + command_arr
-    if args_dict.get("cur_processing_mode", "single thread") == "single thread":
-        p = subprocess.Popen(command_arr, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        ret = p.communicate()
-        
-        if 'Error' in ret[1]:
-            msg = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-            msg +="\n  An error was encountered in the R script for this module."
-            msg += "\n     The R error message is below: \n"
-            msg += ret[1]
-            writetolog(msg)
-    
-        if 'Warning' in ret[1]:
-            msg = "The R scipt returned the following warning(s).  The R warning message is below - \n"
-            msg += ret[1]
-            writetolog(msg)
-    
-        if 'Error' in ret[1]:
-            #also write the errors to a model specific log file in the model output dir
-            #then raise an error
-            writeRErrorsToLog(args_dict, ret)
-            if module:
-                raise ModuleError(module, msg)
-            else:
-                raise RuntimeError , msg
-        elif 'Warning' in ret[1]:
-            writeRErrorsToLog(args_dict, ret)
-            
-        del(ret)
-        writetolog("\nFinished R Processing of " + script, True)
-    elif args_dict.get("cur_processing_mode", "single thread") == "multiple cores asynchronously":
-        if args_dict.has_key("o"):
-            stdErrFname = os.path.join(args_dict['o'], "stdErr.txt")
-            stdOutFname = os.path.join(args_dict['o'], "stdOut.txt")
-            stdErrFile = open(stdErrFname, 'w')
-            stdOutFile = open(stdOutFname, 'w')
+    if 'Error' in ret[1]:
+        msg = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        msg +="\n  An error was encountered in the R script for this module."
+        msg += "\n     The R error message is below: \n"
+        msg += ret[1]
+        writetolog(msg)
+
+    if 'Warning' in ret[1]:
+        msg = "The R scipt returned the following warning(s).  The R warning message is below - \n"
+        msg += ret[1]
+        writetolog(msg)
+
+    if 'Error' in ret[1]:
+        #also write the errors to a model specific log file in the model output dir
+        #then raise an error
+        writeRErrorsToLog(args_dict, ret)
+        if module:
+            raise ModuleError(module, msg)
         else:
-            DEVNULL = open(os.devnull, 'wb')
-            stdErrFile = DEVNULL
-            stdOutFile = DEVNULL
-        p = subprocess.Popen(command_arr, stderr=stdErrFile, stdout=stdOutFile)
-        writetolog("\n R Processing launched asynchronously " + script, True) 
-    elif args_dict.get("cur_processing_mode", "single thread") == "FORT Condor":
-        runModelOnCondor(script, args_dict, command_arr)
-        writetolog("\n R Processing launched using Condor " + script, True)  
+            raise RuntimeError , msg
+    elif 'Warning' in ret[1]:
+        writeRErrorsToLog(args_dict, ret)
+        
 
-                       
+    del(ret)
+    writetolog("\nFinished R Processing of " + script, True)
 
-def runModelOnCondor(script, args_dict, command_arr):
-    #copy MDS file and convert all refs to K:, I:, N:, J: to UNC paths
-    mdsDir, mdsFile = os.path.split(args_dict["c"])
-    newMDSfname = os.path.join(args_dict['o'], mdsFile)
-    newMDSFile = open(newMDSfname, 'w')
-    oldLines = open(args_dict["c"], 'r').readlines()
-    for headerLine in oldLines[:3]:
-        newMDSFile.write(utilities.replaceMappedDrives(headerLine))
-        
-    newMDSFile.writelines(oldLines[3:])
-        
-    os.chdir(args_dict['o'])
-    
-    mdsArgIndex = command_arr.index('c='+args_dict["c"])
-    command_arr[mdsArgIndex] = 'c='+newMDSfname
-    for index in range(len(command_arr)):
-        command_arr[index] = utilities.replaceMappedDrives(command_arr[index])
-        
-    #create condorSubmit file
-    submitFname = os.path.join(args_dict['o'], "modelSubmit.txt")
-    submitFile = open(submitFname, 'w')
-    submitFile.write("Universe                = vanilla\n")
-    submitFile.write("Executable              = c:\Windows\System32\cmd.exe\n")
-    submitFile.write("run_as_owner            = true\n")
-    submitFile.write("Getenv                  = true\n")
-    submitFile.write("Should_transfer_files   = no\n")
-    submitFile.write("transfer_executable     = false\n")
-    
-    machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151', 'igskbacbws425']
-    reqsStr = 'Requirements            = (Machine =="'
-    reqsStr += '.gs.doi.net"||Machine =="'.join(machines) + '.gs.doi.net")\n'
-    submitFile.write(reqsStr)
-    stdErrFname = os.path.join(args_dict['o'], "stdErr.txt")
-    stdOutFname = os.path.join(args_dict['o'], "stdOut.txt")
-    logFname = os.path.join(args_dict['o'], "log.txt")
-    submitFile.write("Output                  = " + utilities.replaceMappedDrives(stdOutFname) +"\n")
-    submitFile.write("error                   = " + utilities.replaceMappedDrives(stdErrFname) +"\n")
-    submitFile.write("log                     = " + utilities.replaceMappedDrives(logFname) +"\n")
-    argsStr = 'Arguments               = "/c pushd ' + "'"
-    argsStr += "' '".join(command_arr) + "'" + '"\n'
-    argsStr = utilities.replaceMappedDrives(argsStr)
-    argsStr = argsStr.replace(r"\python.exe'", "' && python.exe")
-    submitFile.write(argsStr)
-    submitFile.write("+RequiresWholeMachine = True\n")
-    submitFile.write("Notification            = Never\n")
-    submitFile.write("Queue\n")
-    submitFile.close()
-    
-    #launch condor job
-    DEVNULL = open(os.devnull, 'wb')
-    p = subprocess.Popen(["condor_submit", "-n", "igskbacbws425", submitFname], stderr=DEVNULL, stdout=DEVNULL)
-    
-    
 def getR_application(module=None):
     global r_path
     
@@ -781,7 +707,7 @@ def getRasterParams(rasterFile):
 class InteractiveQGraphicsView(QtGui.QGraphicsView):
     '''
     Extends a QGraphicsView to enable wheel zooming and scrolling
-    The main QGraphicsView contains a graphics scene which is dynamically
+    The main QGraphicsView contains a graphics scene 
     
     l_pix - original picture
     c_view - scaled picture
@@ -883,59 +809,12 @@ def print_timing(func):
         return res
     return wrapper
 
-def checkIfModelFinished(model_dir):
-    
-    try:
-        outText = find_file(model_dir, "_output.txt")
-    except RuntimeError:
-        return False
-    
-    model_text = os.path.join(model_dir, outText)
-    try:
-        lastLine = open(model_text, 'r').readlines()[-2]
-    except IndexError:
-        return False
-     
-    if lastLine.startswith("Total time"):
-        return True
-    elif lastLine.startswith("Model failed"):
-        return "Error"
-    else:
-        return False
-
-def find_file(model_dir, suffix):
-    try:
-        return [file_name for file_name in os.listdir(model_dir)
-                                 if file_name.endswith(suffix)][0]
-    except IndexError:
-        raise RuntimeError('The expected model output '
-                               + suffix + ' was not found in the model output directory')
-        
-def launch_RunMonitorApp():
-        sessionDir = getrootdir()
-        DEVNULL = open(os.devnull, 'wb')
-        pyExe = sys.executable
-        curDir = os.path.split(__file__)[0]
-        monitorApp = os.path.join(curDir, "JobMoniterApp.py")
-        
-        subprocess.Popen([pyExe, monitorApp, sessionDir], stderr=DEVNULL, stdout=DEVNULL)
-        
-        
-def mosaicAllTifsInFolder(inDir, outFileName):
-    onlyfiles = [os.path.join(inDir,f) for f in os.listdir(inDir) 
-            if os.path.isfile(os.path.join(inDir,f)) and f.endswith(".tif") ]
-    args = ["placeholder", "-o", outFileName] + onlyfiles
-    gdal.DontUseExceptions()
-    gdal_merge.main(args)
-    
-    
-def waitForProcessesToFinish(processQueue, maxCount=1):
-    while len(processQueue) >= maxCount:
-            time.sleep(1)
-            for process in processQueue:
-                if process.poll() is not None:
-                    processQueue.remove(process)
-                    
-def getParentDir(f, x=None):
+def getParentDir(f):
     parentdirf = os.path.dirname(f.name)
     return create_dir_module(parentdirf)
+
+def getFileRelativeToCurrentVT(fname):
+    app = gui.application.get_vistrails_application()()
+    curlocator = app.get_vistrail().locator.name
+    curVTdir = os.path.split(curlocator)[0]
+    return os.path.abspath(os.path.join(curVTdir, fname))

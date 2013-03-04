@@ -259,8 +259,12 @@ class FieldData(Path):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-        return GenModDoc.construct_port_doc(cls, port_name, 'out') 
-    
+         return GenModDoc.construct_port_doc(cls, port_name, 'out')
+     
+    def compute(self):
+        output_file = utils.create_file_module(self.getInputFromPort("value").name)
+        self.setResult('value', output_file)
+         
 class Predictor(Constant):
     '''
     '''
@@ -341,7 +345,7 @@ class PredictorList(Constant):
         if not b:
             raise ModuleError(self, "Internal Error: Constant failed validation")
         if len(v) > 0 and type(v[0]) == tuple:
-            f_list = [utils.create_file_module(v_elt[1]) for v_elt in v]
+            f_list = [utils.create_file_module(v_elt[0]) for v_elt in v]
         else:
             f_list = v
         p_list += f_list
@@ -431,6 +435,15 @@ class TemplateLayer(Path):
     def provide_output_port_documentation(cls, port_name):
         return GenModDoc.construct_port_doc(cls, port_name, 'out') 
     
+    def compute(self):
+        output_file = utils.create_file_module(self.getInputFromPort("value").name)
+        self.setResult('value', output_file)
+
+#class SingleInputPredictor(Predictor):
+#    pass
+#
+#class SpatialDef(Module):
+#    _output_ports = [('spatialDef', '(gov.usgs.sahm:SpatialDef:DataInput)')]
 
 class MergedDataSet(File):
     '''
@@ -509,9 +522,8 @@ class Model(Module):
             self.output_dname = utils.mknextdir(prefix=self.ModelAbbrev + '_')   
         self.argsDict = utils.map_ports(self, self.port_map)
         
-        self.argsDict['c'] = os.path.normpath(self.argsDict['c'])
+        mdsFile = utils.getFileRelativeToCurrentVT(self.argsDict['c'])
 
-        mdsFile = self.forceGetInputFromPort('mdsFile').name
         if self.ModelAbbrev == "maxent":
             self.argsDict['lam'] = self.MaxentPath
         
@@ -652,7 +664,8 @@ class ApplyModel(Model):
     def compute(self):
         #if the suplied mds has rows, observations then 
         #pass r code the flag to produce metrics
-        mdsfile = open(self.forceGetInputFromPort('mdsFile').name, "r")
+        mdsfname = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('mdsFile').name)
+        mdsfile = open(mdsfname, "r")
         lines = 0 
         readline = mdsfile.readline 
         while readline(): 
@@ -804,10 +817,10 @@ class MDSBuilder(Module):
             raise ModuleError(self, "Must supply at least one 'RastersWithPARCInfoCSV'/nThis is the output from the PARC module")
         if len(inputs_csvs) > 1:
             inputs_csv = utils.mknextfile(prefix='CombinedPARCFiles_', suffix='.csv')
-            inputs_names = [f.name for f in inputs_csvs]
+            inputs_names = [utils.getFileRelativeToCurrentVT(f.name) for f in inputs_csvs]
             utils.merge_inputs_csvs(inputs_names, inputs_csv)
         else:
-            inputs_csv = inputs_csvs[0].name
+            inputs_csv = utils.getFileRelativeToCurrentVT(inputs_csvs[0].name)
         MDSParams['inputsCSV'] = inputs_csv
         
         #inputsCSV = utils.path_port(self, 'RastersWithPARCInfoCSV')
@@ -865,7 +878,7 @@ class MDSBuilder_vector(Module):
             raise ModuleError(self, "Must supply at least one 'RastersWithPARCInfoCSV'/nThis is the output from the PARC module")
         if len(inputs_csvs) > 1:
             inputs_csv = utils.mknextfile(prefix='CombinedPARCFiles_', suffix='.csv')
-            inputs_names = [f.name for f in inputs_csvs]
+            inputs_names = [utils.getFileRelativeToCurrentVT(f.name) for f in inputs_csvs]
             utils.merge_inputs_csvs(inputs_names, inputs_csv)
         else:
             inputs_csv = inputs_csvs[0].name
@@ -1098,7 +1111,7 @@ class PARC(Module):
         #writetolog("\nRunning PARC", True)
         
         ourPARC = parc.PARC()
-        template = self.forceGetInputFromPort('templateLayer').name
+        template = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('templateLayer').name)
         template_path, template_fname = os.path.split(template)
         template_fname = os.path.splitext(template_fname)[0]
         if template_fname == 'hdr':
@@ -1124,7 +1137,7 @@ class PARC(Module):
         #append additional inputs to the existing CSV if one was supplied
         #otherwise start a new CSV
         if self.hasInputFromPort("RastersWithPARCInfoCSV"):
-            inputCSV = self.forceGetInputFromPort("RastersWithPARCInfoCSV").name
+            inputCSV = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort("RastersWithPARCInfoCSV").name)
             shutil.copy(inputCSV, workingCSV)
             f = open(workingCSV, "ab")
             csvWriter = csv.writer(f)
@@ -1137,12 +1150,12 @@ class PARC(Module):
             predictor_lists = self.forceGetInputListFromPort('PredictorList')
             for predictor_list in predictor_lists:
                 for predictor in predictor_list:
-                    csvWriter.writerow(list(predictor))
+                    csvWriter.writerow([utils.getFileRelativeToCurrentVT(predictor[0]), predictor[1], predictor[2], predictor[3]])
         
         if self.hasInputFromPort("predictor"):
             predictor_list = self.forceGetInputListFromPort('predictor')
             for predictor in predictor_list:
-                csvWriter.writerow(list(predictor))
+                csvWriter.writerow([utils.getFileRelativeToCurrentVT(predictor[0]), predictor[1], predictor[2], predictor[3]])
         f.close()
         del csvWriter
         ourPARC.inputs_CSV = workingCSV
@@ -1273,9 +1286,9 @@ class RasterFormatConverter(Module):
         writetolog("\nRunning TiffConverter", True)
         ourRFC = RFC.FormatConverter()
         if self.hasInputFromPort('inputMDS'):
-            ourRFC.MDSFile = self.forceGetInputFromPort('inputMDS').name
+            ourRFC.MDSFile = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('inputMDS').name)
         elif self.hasInputFromPort('inputDir'):
-            ourRFC.inputDir = self.forceGetInputFromPort('inputDir').name
+            ourRFC.inputDir = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('inputDir').name)
             
         if self.hasInputFromPort('format'):
             f = self.forceGetInputFromPort('format')
@@ -1326,7 +1339,7 @@ class ModelEvaluationSplit(Module):
     
     def compute(self):
         writetolog("\nGenerating Model Evaluation split ", True)
-        inputMDS = utils.dir_path_value(self.forceGetInputFromPort('inputMDS', []))
+        inputMDS = utils.getFileRelativeToCurrentVT(utils.dir_path_value(self.forceGetInputFromPort('inputMDS', [])))
         outputMDS = utils.mknextfile(prefix='ModelEvaluation_Split_', suffix='.csv')
 
         global models_path
@@ -1398,7 +1411,7 @@ class ModelSelectionSplit(Module):
      
     def compute(self):
         writetolog("\nGenerating Model Selection split ", True)
-        inputMDS = utils.dir_path_value(self.forceGetInputFromPort('inputMDS', []))
+        inputMDS = utils.getFileRelativeToCurrentVT(utils.dir_path_value(self.forceGetInputFromPort('inputMDS', [])))
         outputMDS = utils.mknextfile(prefix='modelSelection_split_', suffix='.csv')
 
         global models_path
@@ -1641,17 +1654,24 @@ class ProjectionLayers(Module):
     
         writetolog("\nRunning make Projection Layers", True)
         
-        inputCSV = self.forceGetInputFromPort('RastersWithPARCInfoCSV').name
+        inputCSV = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('RastersWithPARCInfoCSV').name)
         
         template = self.forceGetInputFromPort('templateLayer', '')
         fromto = []
         
         if self.hasInputFromPort('directoryCrosswalkCSV'):
-            crosswalkCSV = csv.reader(open(self.forceGetInputFromPort('directoryCrosswalkCSV'), 'r'))
+            crosswalkCSVFname = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('directoryCrosswalkCSV'))
+            crosswalkCSV = csv.reader(open(crosswalkCSVFname, 'r'))
             header = crosswalkCSV.next()
+            fromto = []
             for row in crosswalkCSV:
                 fromto.append(row[0], row[1])
             del crosswalkCSV    
+            
+        if self.hasInputFromPort('templateLayer'):
+            template = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('templateLayer'))
+        else:
+            template = ''
             
         #write out the outputs to an empty MDS file (just the header is needed to PARC the outputs)
         inCSV = csv.reader(open(inputCSV, 'r'))
@@ -1739,7 +1759,7 @@ class MAXENT(Model):
         ourMaxent = MaxentRunner.MAXENTRunner()
         ourMaxent.outputDir = utils.mknextdir(prefix='maxent_')
         
-        ourMaxent.mdsFile = self.forceGetInputFromPort('mdsFile').name
+        ourMaxent.inputMDS = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('inputMDS').name)
         
         ourMaxent.maxentpath = maxent_path
         
