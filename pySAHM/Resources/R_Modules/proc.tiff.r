@@ -106,7 +106,7 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
       ps <- as.vector(gi)[6:7]
       ll <- as.vector(gi)[4:5]
       pref<-attr(gi,"projection")
-  
+
   RasterInfo=raster(fullnames[1])
   RasterInfo@file@datanotation<-"FLT4S"
   NAval<- -3.399999999999999961272e+38
@@ -134,27 +134,15 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
   FactorInd<-which(!is.na(match(vnames,names(factor.levels))),arr.ind=TRUE)
     if((nvars-length(FactorInd))==0) MESS<-FALSE #turn this off if only one factor column was selected
     
-     if(Model=="maxlike"){
-     #this is a bit ugly to copy these sections of code but I'm hoping maxlike will eventually be able to predict to a vector instead of a raster in which case
-     #this will all be deleted anyway
-           model$call$formula<-eval(model$call$formula)
-          y <- predict(model,rasters=stack(model$rast.lst))
-           writeRaster(y,outfile.p)
-           if(make.binary.tif) {
-             y<-y>thresh
-             writeRaster(y,outfile.bin)
-             }
-           if(MESS) warning("Maxlike mess option currently nonfuctional") 
-           return(0) 
-      }
-     
+    
   #for debugging I'm always using multiple cores
   if(tr$n<10 | getRversion()<2.14){ #multicore is slower for small tiffs so we won't do it and the library is not available prior to 2.14
     parRaster(start.tile=1,dims=dims,
       tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
       model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,outfile.bin=outfile.bin,thresh=thresh,nToDo=tr$n,ScriptPath=out$       
-      input$ScriptPath,vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct)
-   }
+      input$ScriptPath,vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct,template=out$dat$input$ParcTemplate)
+}
+
   if(tr$n>=10 & getRversion()>=2.14){
       library(parallel)
       #create some temporary folders    
@@ -175,8 +163,9 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
          tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
          model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,
          outfile.bin=outfile.bin,thresh=thresh,nToDo= ceiling(tr$n/(detectCores()-1)),ScriptPath=out$input$ScriptPath,
-         vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct)
+         vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct,
+         template=out$dat$input$ParcTemplate)
       stopCluster(cl)
-  }
+ }
      return(0)
    }

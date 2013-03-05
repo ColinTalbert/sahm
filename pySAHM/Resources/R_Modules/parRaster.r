@@ -1,10 +1,12 @@
 parRaster<-function(start.tile,dims,tr,MESS,nvars,fullnames,nvars.final,vnames,NAval,
-factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.bin,thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth) {
+factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.bin,
+thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template) {
     #loading code and libraries that are needed
     setwd(file.path(ScriptPath))
     source("pred.fct.r")
     source("chk.libs.r")
     source("CalcMESS.r")
+    
     if(!is.null(residSmooth)) source("Pred.Surface.r")
     source(paste(toupper(Model),".helper.fcts.r",sep=""))
    
@@ -30,7 +32,8 @@ factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.
     continuousRaster <- writeStart(continuousRaster, filename=outfile.p, overwrite=TRUE)
     if(make.binary.tif) {
       binaryRaster<-raster(RasterInfo)
-      binaryRaster <- writeStart(binaryRaster, filename=outfile.bin, overwrite=TRUE)}
+      binaryRaster <- writeStart(binaryRaster, filename=outfile.bin, overwrite=TRUE)
+    }
     if(MESS) {
       MessRaster<-raster(RasterInfo)
       ModRaster<-raster(RasterInfo)
@@ -40,38 +43,54 @@ factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.
         #order the training data so that we can consider the first and last row  only in mess calculations
         for(k in 1:nvars.final) train.dat[,k]<-sort(train.dat[,k])
     }
-     
+    template<-raster(template)
+  
  for (i in start.tile:min(start.tile+nToDo-1,length(tr$row))){
  
    capture.output(cat(paste("starting tile", i,Sys.time(),"\n")),file=outtext,append=TRUE)
    #alter the write start location because we always start at position 1                                   
    writeLoc<-ifelse((start.tile-1)==0,tr$row[i],tr$row[i]-sum(tr$nrows[1:(start.tile-1)]))
-       temp <- data.frame(matrix(ncol=nvars.final,nrow=tr$nrows[i]*dims[2]))
-       names(temp) <- vnames.final.mod
-       # fill temp data frame    
-    for(k in 1:nvars.final) 
-         temp[,k]<- getValuesBlock(raster(fullnames[match(vnames.final.mod[k],vnames)]), row=tr$row[i], nrows=tr$nrows[i])
-     if(MESS){
-         pred.rng<-rep(NA,nrow(temp))
-         names(pred.rng)<-NA
-         if(any(complete.cases(temp))) {
-             MessVals<-CalcMESS(temp[complete.cases(temp),],train.dat=train.dat)
-             pred.rng[complete.cases(temp)]<-MessVals[,2]
-             names(pred.rng)[complete.cases(temp)]<-MessVals[,1]
-         }
-     }
-   if(length(vnames)==1) names(temp)=vnames
-   temp[temp==NAval] <- NA # replace missing values #
-        if(sum(!is.na(factor.levels))){
-            factor.cols <- match(names(factor.levels),names(temp))
-            if(sum(!is.na(factor.cols))>0){
-            for(j in 1:length(factor.cols)){
-                if(!is.na(factor.cols[j])){
-                    temp[,factor.cols[j]] <- factor(temp[,factor.cols[j]],levels=factor.levels[[j]]$number,labels=factor.levels[[j]]$class)
-                }
-            }
-                   }}
-        
+   TemplateMask<-getValuesBlock(template, row=tr$row[i], nrows=tr$nrows[i])
+  browser()
+   if(all(is.na(TemplateMask))){
+     #if the template is completely NA values, don't read in any other data
+       temp<-rep(NA,times=tr$nrow[i]*dims[2])
+       if(MESS) pred.rng<-rep(NA,nrow(temp))
+        }
+   else{     
+         temp <- data.frame(matrix(ncol=nvars.final,nrow=tr$nrows[i]*dims[2]))
+         #Setting the first predictor equal to NA where ever the mask is NA
+         
+         # fill temp data frame    
+      for(k in 1:nvars.final) 
+           temp[,k]<- getValuesBlock(raster(fullnames[match(vnames.final.mod[k],vnames)]), row=tr$row[i], nrows=tr$nrows[i])
+         
+         #so we won't write out predictions here
+         temp[is.na(TemplateMask),1]<-NA 
+         names(temp) <- vnames.final.mod
+         
+       if(MESS){
+           pred.rng<-rep(NA,nrow(temp))
+           names(pred.rng)<-NA
+           if(any(complete.cases(temp))) {
+               MessVals<-CalcMESS(temp[complete.cases(temp),],train.dat=train.dat)
+               pred.rng[complete.cases(temp)]<-MessVals[,2]
+               names(pred.rng)[complete.cases(temp)]<-MessVals[,1]
+           }
+       }
+         if(length(vnames)==1) names(temp)=vnames
+         temp[temp==NAval] <- NA # replace missing values #
+         if(sum(!is.na(factor.levels))){
+              factor.cols <- match(names(factor.levels),names(temp))
+              if(sum(!is.na(factor.cols))>0){
+              for(j in 1:length(factor.cols)){
+                  if(!is.na(factor.cols[j])){
+                      temp[,factor.cols[j]] <- factor(temp[,factor.cols[j]],levels=factor.levels[[j]]$number,labels=factor.levels[[j]]$class)
+                  }
+              }
+                     }} 
+    } 
+     
       ifelse(sum(complete.cases(temp))==0,  # does not calculate predictions if all predictors in the region are na
         preds<-matrix(data=NA,nrow=dims[2],ncol=tr$nrows[i]),
         preds <- t(matrix(pred.fct(model,temp,Model),ncol=dims[2],byrow=T)))
