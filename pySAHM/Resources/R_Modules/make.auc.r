@@ -51,11 +51,13 @@ make.auc.plot.jpg<-function(out=out){
  
 ########################################################################
 ######################### Calc threshold on train split #################
-   
+          
  if(out$input$model.family!="poisson"){
-            inlst$train$thresh<-out$dat$ma$train$thresh<- as.numeric(optimal.thresholds(data.frame(ID=1:length(inlst$train$resp),pres.abs=inlst$train$resp,
+            inlst$train$thresh<-out$dat$ma$train$thresh<- as.numeric(optimal.thresholds(data.frame(ID=1:length(inlst$train$resp$response),pres.abs=inlst$train$resp,
                 pred=inlst$train$pred),opt.methods=out$input$opt.methods))[2]
-              if(out$dat$split.type%in%c("test","eval"))  inlst$test$thresh<-out$dat$ma$test$thresh<-inlst$train$thresh
+              if(out$dat$split.type%in%c("test","eval"))  
+              inlst$test$thresh<-out$dat$ma$test$thresh <- as.numeric(optimal.thresholds(data.frame(ID=1:length(inlst$test$resp$response),pres.abs=inlst$test$resp,
+                pred=inlst$test$pred),opt.methods=out$input$opt.methods))[2]
             }
             else inlst$train$thresh=NULL
 
