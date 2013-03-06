@@ -115,7 +115,7 @@ def menu_items():
             
         session_dir = path
         utils.setrootdir(path)
-        utils.createLogger(session_dir, configuration.output_dir)
+        utils.createLogger(session_dir, True)
         
         configuration.cur_session_folder = path
         
@@ -259,8 +259,12 @@ class FieldData(Path):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-        return GenModDoc.construct_port_doc(cls, port_name, 'out') 
-    
+         return GenModDoc.construct_port_doc(cls, port_name, 'out')
+     
+    def compute(self):
+        output_file = utils.create_file_module(self.getInputFromPort("value").name)
+        self.setResult('value', output_file)
+         
 class Predictor(Constant):
     '''
     '''
@@ -341,7 +345,7 @@ class PredictorList(Constant):
         if not b:
             raise ModuleError(self, "Internal Error: Constant failed validation")
         if len(v) > 0 and type(v[0]) == tuple:
-            f_list = [utils.create_file_module(v_elt[1]) for v_elt in v]
+            f_list = [utils.create_file_module(v_elt[0]) for v_elt in v]
         else:
             f_list = v
         p_list += f_list
@@ -431,6 +435,15 @@ class TemplateLayer(Path):
     def provide_output_port_documentation(cls, port_name):
         return GenModDoc.construct_port_doc(cls, port_name, 'out') 
     
+    def compute(self):
+        output_file = utils.create_file_module(self.getInputFromPort("value").name)
+        self.setResult('value', output_file)
+
+#class SingleInputPredictor(Predictor):
+#    pass
+#
+#class SpatialDef(Module):
+#    _output_ports = [('spatialDef', '(gov.usgs.sahm:SpatialDef:DataInput)')]
 
 class MergedDataSet(File):
     '''
@@ -509,9 +522,8 @@ class Model(Module):
             self.output_dname = utils.mknextdir(prefix=self.ModelAbbrev + '_')   
         self.argsDict = utils.map_ports(self, self.port_map)
         
-        self.argsDict['c'] = os.path.normpath(self.argsDict['c'])
+        mdsFile = utils.getFileRelativeToCurrentVT(self.argsDict['c'])
 
-        mdsFile = self.forceGetInputFromPort('mdsFile').name
         if self.ModelAbbrev == "maxent":
             self.argsDict['lam'] = self.MaxentPath
         
@@ -652,7 +664,8 @@ class ApplyModel(Model):
     def compute(self):
         #if the suplied mds has rows, observations then 
         #pass r code the flag to produce metrics
-        mdsfile = open(self.forceGetInputFromPort('mdsFile').name, "r")
+        mdsfname = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('mdsFile').name)
+        mdsfile = open(mdsfname, "r")
         lines = 0 
         readline = mdsfile.readline 
         while readline(): 
@@ -804,10 +817,10 @@ class MDSBuilder(Module):
             raise ModuleError(self, "Must supply at least one 'RastersWithPARCInfoCSV'/nThis is the output from the PARC module")
         if len(inputs_csvs) > 1:
             inputs_csv = utils.mknextfile(prefix='CombinedPARCFiles_', suffix='.csv')
-            inputs_names = [f.name for f in inputs_csvs]
+            inputs_names = [utils.getFileRelativeToCurrentVT(f.name) for f in inputs_csvs]
             utils.merge_inputs_csvs(inputs_names, inputs_csv)
         else:
-            inputs_csv = inputs_csvs[0].name
+            inputs_csv = utils.getFileRelativeToCurrentVT(inputs_csvs[0].name)
         MDSParams['inputsCSV'] = inputs_csv
         
         #inputsCSV = utils.path_port(self, 'RastersWithPARCInfoCSV')
@@ -865,7 +878,7 @@ class MDSBuilder_vector(Module):
             raise ModuleError(self, "Must supply at least one 'RastersWithPARCInfoCSV'/nThis is the output from the PARC module")
         if len(inputs_csvs) > 1:
             inputs_csv = utils.mknextfile(prefix='CombinedPARCFiles_', suffix='.csv')
-            inputs_names = [f.name for f in inputs_csvs]
+            inputs_names = [utils.getFileRelativeToCurrentVT(f.name) for f in inputs_csvs]
             utils.merge_inputs_csvs(inputs_names, inputs_csv)
         else:
             inputs_csv = inputs_csvs[0].name
@@ -1098,7 +1111,7 @@ class PARC(Module):
         #writetolog("\nRunning PARC", True)
         
         ourPARC = parc.PARC()
-        template = self.forceGetInputFromPort('templateLayer').name
+        template = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('templateLayer').name)
         template_path, template_fname = os.path.split(template)
         template_fname = os.path.splitext(template_fname)[0]
         if template_fname == 'hdr':
@@ -1124,7 +1137,7 @@ class PARC(Module):
         #append additional inputs to the existing CSV if one was supplied
         #otherwise start a new CSV
         if self.hasInputFromPort("RastersWithPARCInfoCSV"):
-            inputCSV = self.forceGetInputFromPort("RastersWithPARCInfoCSV").name
+            inputCSV = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort("RastersWithPARCInfoCSV").name)
             shutil.copy(inputCSV, workingCSV)
             f = open(workingCSV, "ab")
             csvWriter = csv.writer(f)
@@ -1137,12 +1150,12 @@ class PARC(Module):
             predictor_lists = self.forceGetInputListFromPort('PredictorList')
             for predictor_list in predictor_lists:
                 for predictor in predictor_list:
-                    csvWriter.writerow(list(predictor))
+                    csvWriter.writerow([utils.getFileRelativeToCurrentVT(predictor[0]), predictor[1], predictor[2], predictor[3]])
         
         if self.hasInputFromPort("predictor"):
             predictor_list = self.forceGetInputListFromPort('predictor')
             for predictor in predictor_list:
-                csvWriter.writerow(list(predictor))
+                csvWriter.writerow([utils.getFileRelativeToCurrentVT(predictor[0]), predictor[1], predictor[2], predictor[3]])
         f.close()
         del csvWriter
         ourPARC.inputs_CSV = workingCSV
@@ -1169,6 +1182,85 @@ class PARC(Module):
 #        writetolog("Finished running PARC", True)
         self.setResult('RastersWithPARCInfoCSV', output_file)
         
+class Reclassifier(Module):
+    '''
+    '''
+#    __doc__ = GenModDoc.construct_module_doc('RasterFormatConverter')
+
+    _input_ports = [("inputRaster", "(edu.utah.sci.vistrails.basic:File)"),
+                    ('reclassFile', '(edu.utah.sci.vistrails.basic:File)'),
+                    ]
+
+    _output_ports = [('outputRaster', '(edu.utah.sci.vistrails.basic:File)')]
+
+#    @classmethod
+#    def provide_input_port_documentation(cls, port_name):
+#        return GenModDoc.construct_port_doc(cls, port_name, 'in')
+#    @classmethod
+#    def provide_output_port_documentation(cls, port_name):
+#         return GenModDoc.construct_port_doc(cls, port_name, 'out')
+
+    def compute(self):
+        writetolog("\nRunning Reclassifier", True)
+        port_map = {'inputRaster':('inputRaster', utils.dir_path_value, True),
+                    'reclassFile':('reclassFile', utils.dir_path_value, True)}
+        
+        argsDict = utils.map_ports(self, port_map)
+
+        from pySAHM.TiffProcessor import rasterReclassifier
+        import pySAHM.SpatialUtilities as SpatialUtilities
+        ourReclassifier = rasterReclassifier()
+        ourReclassifier.inputFname = argsDict['inputRaster']
+        ourReclassifier.reclassFName = argsDict['reclassFile']
+        ourReclassifier.outDir = utils.getrootdir()
+        ourReclassifier.outName = SpatialUtilities.getRasterShortName(argsDict['inputRaster']) + "_rc.tif"
+        outFName = os.path.join(ourReclassifier.outDir, ourReclassifier.outName)
+        ourReclassifier.run()
+
+        output_file = utils.create_file_module(outFName)
+        
+        
+#        writetolog("Finished running PARC", True)
+        self.setResult('outputRaster', output_file)
+
+class CategoricalToContinuous(Module):
+    '''
+    '''
+#    __doc__ = GenModDoc.construct_module_doc('RasterFormatConverter')
+
+    _input_ports = [("inputRaster", "(edu.utah.sci.vistrails.basic:File)"),
+                    ('templateFile', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
+                    ]
+
+    _output_ports = [('outputsPredictorListFile', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
+
+#    @classmethod
+#    def provide_input_port_documentation(cls, port_name):
+#        return GenModDoc.construct_port_doc(cls, port_name, 'in')
+#    @classmethod
+#    def provide_output_port_documentation(cls, port_name):
+#         return GenModDoc.construct_port_doc(cls, port_name, 'out')
+
+    def compute(self):
+        writetolog("\nRunning Reclassifier", True)
+        port_map = {'inputRaster':('inputRaster', utils.dir_path_value, True),
+                    'templateFile':('templateFile', utils.dir_path_value, True)}
+        
+        argsDict = utils.map_ports(self, port_map)
+
+        from pySAHM.TiffProcessor import categoricalToContinuousRasters
+        import pySAHM.SpatialUtilities as SpatialUtilities
+        ourC2C = categoricalToContinuousRasters()
+        ourC2C.inputFname = argsDict['inputRaster']
+        ourC2C.templateFName = argsDict['templateFile']
+        shortName = SpatialUtilities.getRasterShortName(argsDict['inputRaster'])
+        
+        ourC2C.outDir = os.path.join(utils.getrootdir(), shortName + "_c2c")
+        
+        ourC2C.run()
+
+        output_file = utils.create_file_module(ourC2C.outputPredictorsList) 
+        self.setResult('outputsPredictorListFile', output_file)
 
 class RasterFormatConverter(Module):
     '''
@@ -1194,9 +1286,9 @@ class RasterFormatConverter(Module):
         writetolog("\nRunning TiffConverter", True)
         ourRFC = RFC.FormatConverter()
         if self.hasInputFromPort('inputMDS'):
-            ourRFC.MDSFile = self.forceGetInputFromPort('inputMDS').name
+            ourRFC.MDSFile = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('inputMDS').name)
         elif self.hasInputFromPort('inputDir'):
-            ourRFC.inputDir = self.forceGetInputFromPort('inputDir').name
+            ourRFC.inputDir = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('inputDir').name)
             
         if self.hasInputFromPort('format'):
             f = self.forceGetInputFromPort('format')
@@ -1247,7 +1339,7 @@ class ModelEvaluationSplit(Module):
     
     def compute(self):
         writetolog("\nGenerating Model Evaluation split ", True)
-        inputMDS = utils.dir_path_value(self.forceGetInputFromPort('inputMDS', []))
+        inputMDS = utils.getFileRelativeToCurrentVT(utils.dir_path_value(self.forceGetInputFromPort('inputMDS', [])))
         outputMDS = utils.mknextfile(prefix='ModelEvaluation_Split_', suffix='.csv')
 
         global models_path
@@ -1319,7 +1411,7 @@ class ModelSelectionSplit(Module):
      
     def compute(self):
         writetolog("\nGenerating Model Selection split ", True)
-        inputMDS = utils.dir_path_value(self.forceGetInputFromPort('inputMDS', []))
+        inputMDS = utils.getFileRelativeToCurrentVT(utils.dir_path_value(self.forceGetInputFromPort('inputMDS', [])))
         outputMDS = utils.mknextfile(prefix='modelSelection_split_', suffix='.csv')
 
         global models_path
@@ -1562,17 +1654,24 @@ class ProjectionLayers(Module):
     
         writetolog("\nRunning make Projection Layers", True)
         
-        inputCSV = self.forceGetInputFromPort('RastersWithPARCInfoCSV').name
+        inputCSV = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('RastersWithPARCInfoCSV').name)
         
         template = self.forceGetInputFromPort('templateLayer', '')
         fromto = []
         
         if self.hasInputFromPort('directoryCrosswalkCSV'):
-            crosswalkCSV = csv.reader(open(self.forceGetInputFromPort('directoryCrosswalkCSV'), 'r'))
+            crosswalkCSVFname = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('directoryCrosswalkCSV'))
+            crosswalkCSV = csv.reader(open(crosswalkCSVFname, 'r'))
             header = crosswalkCSV.next()
+            fromto = []
             for row in crosswalkCSV:
                 fromto.append(row[0], row[1])
             del crosswalkCSV    
+            
+        if self.hasInputFromPort('templateLayer'):
+            template = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('templateLayer'))
+        else:
+            template = ''
             
         #write out the outputs to an empty MDS file (just the header is needed to PARC the outputs)
         inCSV = csv.reader(open(inputCSV, 'r'))
@@ -1660,7 +1759,7 @@ class MAXENT(Model):
         ourMaxent = MaxentRunner.MAXENTRunner()
         ourMaxent.outputDir = utils.mknextdir(prefix='maxent_')
         
-        ourMaxent.mdsFile = self.forceGetInputFromPort('mdsFile').name
+        ourMaxent.mdsFile = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('mdsFile').name)
         
         ourMaxent.maxentpath = maxent_path
         
@@ -1787,7 +1886,14 @@ def initialize():
     
     session_dir = configuration.cur_session_folder
     if not os.path.exists(session_dir):
-        os.makedirs(session_dir)
+        import tempfile
+        orig_session_dir = session_dir
+        session_dir = tempfile.mkdtemp(prefix="SAHM_session_dir_")
+        utils.createLogger(session_dir, configuration.verbose)
+        writetolog("!" * 79)
+        writetolog("The previous session directory: " + orig_session_dir + " no longer exists on the file system!")
+        writetolog("Defaulting to a random temporary location: " + session_dir)
+        writetolog("!" * 79)
         
     utils.setrootdir(session_dir)
     utils.importOSGEO() 
@@ -1909,6 +2015,159 @@ def build_predictor_modules():
             
     return modules
 
+###################################
+from core.modules.module_configure import StandardModuleConfigurationWidget
+class TextFile(File):
+    pass
+
+class TextFileConfiguration(StandardModuleConfigurationWidget):
+    # FIXME add available_dict as parameter to allow config
+    def __init__(self, module, controller, contents=None, 
+                 filter='', parent=None):
+        StandardModuleConfigurationWidget.__init__(self, module, controller, 
+                                                   parent)
+        self.fileFilter = filter
+        
+        if contents:
+            self.contents = contents
+        else:
+            self.contents = QtGui.QTextEdit(self)
+        
+        self.setWindowTitle("Text File")
+        self.build_gui()
+        
+        fid = self.findSourceFunction()
+        if fid!=-1:
+            f = self.module.functions[fid]
+            self.path = f.params[0].strValue
+            self.loadText()
+        
+    def findSourceFunction(self):
+        fid = -1
+        for i in xrange(self.module.getNumFunctions()):
+            if self.module.functions[i].name=="value":
+                fid = i
+                break
+        return fid
+        
+    def build_gui(self):
+        QtGui.QWidget.__init__(self)
+    
+        self.buttonOpen = QtGui.QPushButton('Open', self)
+        self.buttonSave = QtGui.QPushButton('Save', self)
+        self.buttonSaveAs = QtGui.QPushButton('Save As...', self)
+        self.buttonReset = QtGui.QPushButton('Cancel', self)
+        
+        self.buttonOpen.clicked.connect(self.handleOpen)
+        self.buttonSave.clicked.connect(self.handleSave)
+        self.buttonSaveAs.clicked.connect(self.handleSaveAs)
+        self.buttonReset.clicked.connect(self.handleReset)
+        
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(self.contents)
+        buttonLayout = QtGui.QHBoxLayout()
+        buttonLayout.addWidget(self.buttonOpen)
+        buttonLayout.addWidget(self.buttonSave)
+        buttonLayout.addWidget(self.buttonSaveAs)
+        buttonLayout.addWidget(self.buttonReset)
+        layout.addLayout(buttonLayout)
+        self.setLayout(layout)
+        
+        self.path = ''
+
+    def handleReset(self):
+        self.loadText()
+    
+    def handleSave(self):
+        if not os.path.exists(self.path):
+            self.path = QtGui.QFileDialog.getSaveFileName(
+                self, 'Save File', os.path.split(self.path)[0], self.fileFilter)
+        if not self.path.isEmpty():
+            self.save()
+        
+    def save(self):
+        f = open(self.path, "w")
+        f.write(self.contents.toPlainText())
+        
+    def handleSaveAs(self):
+        self.path = QtGui.QFileDialog.getSaveFileName(
+                self, 'Save File As', os.path.split(self.path)[0], self.fileFilter)
+            
+        if not self.path.isEmpty():
+            tmp = open(self.path, "w")
+            del tmp
+            self.handleSave()
+            self.updateVisTrail()
+    
+    def updateVisTrail(self):
+        self.controller.update_ports_and_functions(self.module.id, 
+                                           [], [], [("value", [str(self.path)])])
+        self.state_changed = False
+        self.emit(QtCore.SIGNAL("stateChanged"))
+        self.emit(QtCore.SIGNAL('doneConfigure'), self.module.id)
+    
+    def handleOpen(self):
+        self.path = QtGui.QFileDialog.getOpenFileName(
+                self, 'Open File', os.path.split(self.path)[0], '')
+        if not self.path.isEmpty():
+            self.loadText()
+            self.updateVisTrail()
+            
+    def loadText(self):
+        f = open(self.path, 'r')
+        data = f.read()
+        self.contents.setText(data)
+
+class CSVTextFile(TextFile):
+    pass
+
+class CSVTextFileConfiguration(TextFileConfiguration):
+    # FIXME add available_dict as parameter to allow config
+    def __init__(self, module, controller, parent=None):
+        
+        fileFilter = 'CSV(*.csv)'
+        contents = QtGui.QTableWidget(0, 0)
+        TextFileConfiguration.__init__(self, module, controller, contents,
+                                            fileFilter, parent)
+        
+        self.setWindowTitle("CSV Text File")
+
+    
+    def save(self):
+         with open(unicode(self.path), 'wb') as stream:
+            writer = csv.writer(stream)
+            #surely there is some cleaner way to get the header list!
+            header = [str(self.contents.horizontalHeaderItem(i).text()) for i in 
+                      range(self.contents.horizontalHeader().count())]
+            writer.writerow(header)
+            for row in range(self.contents.rowCount()):
+                rowdata = []
+                for column in range(self.contents.columnCount()):
+                    item = self.contents.item(row, column)
+                    if item is not None:
+                        rowdata.append(
+                            unicode(item.text()).encode('utf8'))
+                    else:
+                        rowdata.append('')
+                writer.writerow(rowdata)
+
+    def loadText(self):
+        with open(unicode(self.path), 'rb') as stream:
+            csvReader = csv.reader(stream)
+            header = csvReader.next()
+            self.contents.setRowCount(0)
+            self.contents.setColumnCount(len(header))
+            self.contents.setHorizontalHeaderLabels(header)
+
+            for rowdata in csvReader:
+                row = self.contents.rowCount()
+                self.contents.insertRow(row)
+                self.contents.setColumnCount(len(rowdata))
+                for column, data in enumerate(rowdata):
+                    item = QtGui.QTableWidgetItem(data.decode('utf8'))
+                    self.contents.setItem(row, column, item)
+
+###################################
 
 input_color = (0.76, 0.76, 0.8)
 input_fringe = [(0.0, 0.0),
@@ -1948,7 +2207,10 @@ _modules = generate_namespaces({'DataInput': [
                                           CovariateCorrelationAndSelection,
                                           ApplyModel,
                                           BackgroundSurfaceGenerator
-                                          ],                                          
+                                          ],
+                                'GeospatialTools': [Reclassifier,
+                                                    CategoricalToContinuous
+                                                    ],                                        
                                 'Models': [(GLM, {'moduleColor':model_color,
                                                            'moduleFringe':model_fringe}),
                                            (RandomForest, {'moduleColor':model_color,
@@ -1973,6 +2235,8 @@ _modules = generate_namespaces({'DataInput': [
                                            (ModelOutputType, {'abstract': True}),
                                            (RandomPointType, {'abstract': True}),
                                            (OutputRaster, {'abstract': True}),
+                                           (TextFile, {'configureWidgetType': TextFileConfiguration}),
+                                           (CSVTextFile, {'configureWidgetType': CSVTextFileConfiguration})
                                            ],
                                 'Output': [(SAHMModelOutputViewerCell, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe}),

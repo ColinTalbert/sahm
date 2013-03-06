@@ -150,7 +150,10 @@ def runCondorPythonJob(args, workspace, prefix, wholeMachine=False):
     global UNCDrives
     for item in args:
         args[args.index(item)] = replaceMappedDrives(item)
-                
+         
+    if prefix[0].isdigit():
+        prefix = "_" + prefix
+               
     #create submit file
         #create condorSubmit file
     submitFname = os.path.join(workspace, prefix + "_CondorSubmit.txt")

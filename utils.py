@@ -48,7 +48,6 @@ import csv
 import time
 import tempfile
 import subprocess
-import thread
 
 import struct, datetime, decimal, itertools
 
@@ -60,6 +59,7 @@ from PyQt4 import QtCore, QtGui
 from core.modules.basic_modules import File, Path, Directory, new_constant, Constant
 from core.modules.vistrails_module import ModuleError
 import core.system
+import gui.application
 
 #from osgeo import gdalconst
 #from osgeo import gdal
@@ -128,7 +128,7 @@ def getNDVal(filename):
     NDValue = band.GetNoDataValue()
     
     min = band.GetMinimum()
-    if approx_equal(NDValue, min):
+    if min is not None and approx_equal(NDValue, min):
         upperLeftPixVal = band.ReadAsArray(0, 0, 1, 1, 1, 1)[0][0]
         if approx_equal(NDValue, upperLeftPixVal):
             NDValue = band.ReadAsArray(0, 0, 1, 1, 1, 1)[0][0]
@@ -316,6 +316,8 @@ def path_port(module, portName):
     path.replace("/", os.path.sep)
     if os.path.exists(path):
         return path
+    elif os.path.exists(getFileRelativeToCurrentVT(path)):
+        return getFileRelativeToCurrentVT(path)
     else:
         raise RuntimeError, 'The indicated file or directory, ' + \
             path + ', does not exist on the file system.  Cannot continue!'
@@ -334,14 +336,14 @@ def R_boolean(value):
         return 'FALSE'
 
 def dir_path_value(value):
-    val = value.name
+    val = getFileRelativeToCurrentVT(value.name)
     sep = os.path.sep
     return val.replace("/", sep)
 
 def create_file_module(fname, f=None):
     if f is None:
         f = File()
-    f.name = fname
+    f.name = getFileRelativeToCurrentVT(fname)
     f.upToDate = True
     return f
 
@@ -442,7 +444,7 @@ def getRasterName(fullPathName):
         rastername = os.path.split(fullPathName)[0]
     else:
         rastername = fullPathName
-    return rastername
+    return getFileRelativeToCurrentVT(rastername)
 
 def getModelsPath():
     return os.path.join(os.path.dirname(__file__), "pySAHM", "Resources", "R_Modules")
@@ -939,3 +941,9 @@ def waitForProcessesToFinish(processQueue, maxCount=1):
 def getParentDir(f, x=None):
     parentdirf = os.path.dirname(f.name)
     return create_dir_module(parentdirf)
+
+def getFileRelativeToCurrentVT(fname):
+    app = gui.application.get_vistrails_application()()
+    curlocator = app.get_vistrail().locator.name
+    curVTdir = os.path.split(curlocator)[0]
+    return os.path.abspath(os.path.join(curVTdir, fname))
