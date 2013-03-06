@@ -158,13 +158,31 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
        if(out$input$ResidMaps)
         dir.create(paste(out$input$output.dir,"\\ResidTiff",sep=""))
         tile.start<-seq(from=1,to=tr$n,by=ceiling(tr$n/(detectCores()-1))) 
-      cl <- makeCluster(detectCores()) 
-      parLapply(cl,X=tile.start,fun=parRaster,dims=dims,
+      cl <- try(makeCluster(detectCores()),silent=TRUE)
+       while(grepl("socketConnection",cl[1]) & grepl("cannot be opened",cl[1])){
+          Sys.sleep(30)
+          cl <- try(makeCluster(detectCores()),silent=TRUE)
+          } 
+      tryCluster<-try(parLapply(cl,X=tile.start,fun=parRaster,dims=dims,
          tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
          model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,
          outfile.bin=outfile.bin,thresh=thresh,nToDo= ceiling(tr$n/(detectCores()-1)),ScriptPath=out$input$ScriptPath,
          vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct,
-         template=out$dat$input$ParcTemplate)
+         template=out$dat$input$ParcTemplate),silent=TRUE)
+         if(class(tryCluster)=="try-error") stop("Error in parLapply")
+      #because multiple instances spinning of clusters at the same time break R
+      #this has overhead in that a lot of RAM is unavailable while this is going on 
+    
+       while(grepl("socketConnection",tryCluster[1]) & grepl("cannot be opened",tryCluster[1])){
+          Sys.sleep(30) 
+           tryCluster<-try(parLapply(cl,X=tile.start,fun=parRaster,dims=dims,
+             tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
+             model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,
+             outfile.bin=outfile.bin,thresh=thresh,nToDo= ceiling(tr$n/(detectCores()-1)),ScriptPath=out$input$ScriptPath,
+             vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct,
+             template=out$dat$input$ParcTemplate),silent=TRUE)
+         }
+        
       stopCluster(cl)
  }
      return(0)

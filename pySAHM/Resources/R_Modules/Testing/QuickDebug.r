@@ -4,8 +4,8 @@
 #setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
 #ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
 
-setwd("I:\\VisTrails\\VisTrails_SAHM_x64\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
-ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
+setwd("N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\DevelopmentWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\DevelopmentWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
 source("GLM.helper.fcts.r")
@@ -20,10 +20,14 @@ rc="responseBinary"
 #options(error=NULL)
 #trace(proc.tiff,browser)
 #list.files()
-input.file="C:\\SAHMTesting\\SAHM_workspace\\CovariateCorrelationOutputMDS_initial.csv"
-#Testing Compile Output on data with no test train and with a test train
-
 #rc="responseCount"
+
+input.file="C:\\SAHMTesting\\SAHM_workspace\\CovariateCorrelationOutputMDS_initial.csv"
+input.file="C:\\SAHMTesting\\SAHM_workspace\\modelSelection_split_2.csv"
+##MASK
+input.file="C:\\SAHMTesting\\SAHM_workspace\\ModelEvaluation_Split_2.csv"
+
+
 
 ## Maxent
 FitModels(ma.name=input.file,
