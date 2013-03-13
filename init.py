@@ -1915,7 +1915,7 @@ def initialize():
     global layers_csv_fname
     
     writetolog("*" * 79)
-    writetolog("Initializing:", True, True)
+    writetolog("Initializing SAHM:", True, True)
     writetolog("  Locations of dependencies")
 #    writetolog("   Layers CSV = " + os.path.join(os.path.dirname(__file__), 'layers.csv'))
     writetolog("   Layers CSV = " + layers_csv_fname)
@@ -1925,7 +1925,6 @@ def initialize():
 #    writetolog("        Must contain subfolders qgis1.7.0, OSGeo4W")
     writetolog("    ")
     writetolog("*" * 79)
-    
     writetolog("*" * 79)
     writetolog(" output directory:   " + session_dir)
     writetolog("*" * 79)
