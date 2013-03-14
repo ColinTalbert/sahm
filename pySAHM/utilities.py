@@ -165,7 +165,7 @@ def runCondorPythonJob(args, workspace, prefix, wholeMachine=False):
     submitFile.write("Should_transfer_files   = no\n")
     submitFile.write("transfer_executable     = false\n")
     
-    machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151a', 'igskbacbws425']
+    machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151a', 'igskbacbws425', 'igskbacbws108']
 #    machines = ['igskbacbwsvis3']
     reqsStr = 'Requirements            = (Machine == "'
     reqsStr += '.gs.doi.net" || Machine == "'.join(machines) + '.gs.doi.net")'
@@ -197,7 +197,7 @@ def runCondorPythonJob(args, workspace, prefix, wholeMachine=False):
     
     #launch condor job
     DEVNULL = open(os.devnull, 'wb')
-    p = subprocess.Popen(["condor_submit", "-n", "igskbacbws425", submitFname], stderr=DEVNULL, stdout=DEVNULL)    
+    p = subprocess.Popen(["condor_submit", "-n", 'igskbacbws108', submitFname], stderr=DEVNULL, stdout=DEVNULL)    
     
     os.chdir(curDir)        
     

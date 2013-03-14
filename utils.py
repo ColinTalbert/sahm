@@ -547,7 +547,7 @@ def runModelOnCondor(script, args_dict, command_arr):
     submitFile.write("Should_transfer_files   = no\n")
     submitFile.write("transfer_executable     = false\n")
     
-    machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151', 'igskbacbws425']
+    machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151', 'igskbacbws425', 'igskbacbws108']
     reqsStr = 'Requirements            = (Machine =="'
     reqsStr += '.gs.doi.net"||Machine =="'.join(machines) + '.gs.doi.net")\n'
     submitFile.write(reqsStr)
@@ -569,7 +569,7 @@ def runModelOnCondor(script, args_dict, command_arr):
     
     #launch condor job
     DEVNULL = open(os.devnull, 'wb')
-    p = subprocess.Popen(["condor_submit", "-n", "igskbacbws425", submitFname], stderr=DEVNULL, stdout=DEVNULL)
+    p = subprocess.Popen(["condor_submit", "-n", 'igskbacbws108', submitFname], stderr=DEVNULL, stdout=DEVNULL)
     
     
 def getR_application(module=None):
