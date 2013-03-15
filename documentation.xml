@@ -1541,7 +1541,7 @@ Columns can be specified with either a positional argument (1, 2, 3, etc) if you
         <Mandatory>False</Mandatory>
         <Default>By default any value in the list '1', 'True', 'T', 'Present', 'Presence' will be assigned a value of 1 (presence) in the output. Note: not case sensitive.</Default>
         <Options>
-          <Option>And number or string can be entered, quotes are not required.</Option>
+          <Option>Any number or string can be entered, quotes are not required.</Option>
         </Options>
         <Connections>Does not generally Connect to any other Module.</Connections>
       </Port>
@@ -1551,7 +1551,7 @@ Columns can be specified with either a positional argument (1, 2, 3, etc) if you
         <Mandatory>False</Mandatory>
         <Default>By default any value in the list '0', 'False', 'F', 'Absent', 'Absence' will be assigned a value of 0 (absence) in the output. Note: not case sensitive.</Default>
         <Options>
-          <Option>And number or string can be entered, quotes are not required.</Option>
+          <Option>Any number or string can be entered, quotes are not required.</Option>
         </Options>
         <Connections>Does not generally Connect to any other Module.</Connections>
       </Port>
