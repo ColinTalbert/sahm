@@ -944,6 +944,9 @@ def getParentDir(f, x=None):
 
 def getFileRelativeToCurrentVT(fname):
     app = gui.application.get_vistrails_application()()
-    curlocator = app.get_vistrail().locator.name
-    curVTdir = os.path.split(curlocator)[0]
-    return os.path.abspath(os.path.join(curVTdir, fname))
+    try:
+        curlocator = app.get_vistrail().locator.name
+        curVTdir = os.path.split(curlocator)[0]
+        return os.path.abspath(os.path.join(curVTdir, fname))
+    except:
+        return fname
