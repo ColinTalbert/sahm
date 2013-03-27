@@ -225,10 +225,13 @@ class PARC:
 #                        (proc, image_short_name, results))
 
     def log_result(self, result):
-        print results
+        print result
 
     def waitForCondorProcessesToFinish(self, outputs):
         errors = []
+        originalCount = len(outputs)
+        successes = 0
+        failures = 0
         while outputs:
             for process in outputs:
                 result = self.jobFinished(process)
@@ -247,12 +250,13 @@ class PARC:
                         except:
                             pass
                         
+                    print str(originalCount - len(outputs)) + " PARC layers finished"
                 elif result == "error":
                     if os.path.exists(process):
                         os.remove(process)
                     errors.append(process)
                     outputs.remove(process)
-        
+                    print str(originalCount - len(outputs)) + " PARC layers finished"
 
         if len(errors) > 0:
             msg = "There were problems with one or more runs."
