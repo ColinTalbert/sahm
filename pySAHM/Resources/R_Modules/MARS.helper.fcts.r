@@ -123,13 +123,13 @@ function (mars.glm.object,new.data)
   for (i in 1:n.spp) {
     model.glm <- glm(ydat[, i] ~ ., data = old.bf.data, weights = site.weights,
       family = family, maxit = 100)
-    temp <- predict.glm(model.glm,new.bf.data,type="response",se.fit=TRUE)
-    prediction[,i] <- temp[[1]]
+    temp <- predict.glm(model.glm,new.bf.data,type="response")
+    prediction[,i] <- temp
     standard.errors[,i] <- temp[[2]]
 
     }
 
-  return(list("prediction"=prediction,"ses"=standard.errors))
+  return(list("prediction"=prediction))
 }
 
 
