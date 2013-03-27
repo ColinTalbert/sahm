@@ -95,7 +95,7 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
                       Xf[,j] <- pred.fct(out$mods$final.mod[[j]], as.data.frame(Xp1),Model)
                  }
                       y.lim<-c(0,1)
-                     y.lim=range(apply(Xf,1,mean))
+                     #y.lim=range(apply(Xf,1,mean))
                        plot(Xp1[, i],apply(Xf,1,mean), ylim = y.lim, xlab = "",
                       ylab = "", type = "l", main = names(dat)[i],lwd=2,cex=3,cex.main=3,cex.axis=2.5)
                if(k==2) graphics.off()              
