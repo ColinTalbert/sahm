@@ -55,8 +55,11 @@ import traceback
 import random
 import copy
 import multiprocessing
+import time
+import core.modules.module_registry
+from core.modules.vistrails_module import Module, ModuleError, ModuleSuspended
 
-from core.modules.vistrails_module import Module, ModuleError, ModuleConnector
+from core.modules.vistrails_module import Module, ModuleError, ModuleConnector, ModuleSuspended 
 from core.modules.basic_modules import File, Directory, Path, new_constant, Constant
 from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
 from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
@@ -467,7 +470,46 @@ class RastersWithPARCInfoCSV(File):
     
     pass
 
+class TimeQueue:
+    def __init__(self, dir, seconds=10):
+        self.directory = dir
+        self.seconds = seconds
+    def finished(self):
+        # use a file to store the time when the queue was first executed
+        # and return wether "seconds" haved passed since then
+        if not os.path.exists(self.directory.name):
+            os.mkdir(self.directory.name)
+        fname = os.path.join(self.directory.name, 'output.txt')
+        if not os.path.exists(fname):
+            # save file with timestamp
+            f = open(fname, 'w')
+            f.write(str(time.time()))
+            f.close()
+            return False
+        f = open(fname)
+        # check if enough time have passes
+        timestamp = float(f.read())
+        diff = time.time() - timestamp
+        self.finished().val = diff>self.seconds
+        f.close()
+        return diff>self.seconds
+
+class WaitX(Module):
+    _input_ports = [('dir', '(edu.utah.sci.vistrails.basic:Directory)', False),
+                    ('seconds', '(edu.utah.sci.vistrails.basic:Integer)', True)]
+    _output_ports = [('dir', '(edu.utah.sci.vistrails.basic:Directory)', False)]
+     
+    def compute(self):
+        dir = self.getInputFromPort("dir")
+        seconds = self.getInputFromPort("seconds")
+
+        queue = TimeQueue(dir, seconds)
+        if not queue.finished():
+            raise ModuleSuspended(self, "Waiting for TimeQueue to finish", queue=queue)
         
+        self.setResult('dir', dir)
+
+            
 class Model(Module):
     '''
     This module is a required class for other modules and scripts within the
@@ -2221,7 +2263,12 @@ _modules = generate_namespaces({'DataInput': [
                                            (BoostedRegressionTree, 
                                                 {
                                                  'moduleColor':model_color,
-                                                           'moduleFringe':model_fringe})
+                                                           'moduleFringe':model_fringe}),
+                                           (WaitX, 
+                                                {
+                                                 'moduleColor':model_color,
+                                                           'moduleFringe':model_fringe}),
+                                           
                                            ],
                                 'Other':  [(Model, {'abstract': True}),
                                            (ResampleMethod, {'abstract': True}),
