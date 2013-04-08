@@ -50,6 +50,7 @@ mars.degree=1
 mars.penalty=2
 opt.methods=2
 MESS=FALSE
+multCore=TRUE
 
 # Interpret command line argurments #
 # Make Function Call #
@@ -73,6 +74,7 @@ Args <- commandArgs(trailingOnly=FALSE)
     	if(argSplit[[1]][1]=="pen") mars.penalty <- as.numeric(argSplit[[1]][2])
     	if(argSplit[[1]][1]=="om")  opt.methods <- as.numeric(argSplit[[1]][2])
     	if(argSplit[[1]][1]=="mes")  MESS <- as.logical(argSplit[[1]][2])
+    	 if(argSplit[[1]][1]=="mc")  multCore <- as.logical(argSplit[[1]][2])
     }
 
 ScriptPath<-dirname(ScriptPath)
@@ -83,4 +85,4 @@ FitModels(ma.name=csv,
         tif.dir=NULL,output.dir=output,
         response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
             mars.degree=mars.degree,mars.penalty=mars.penalty,debug.mode=F,
-            script.name="mars",opt.methods=opt.methods,MESS=MESS,ScriptPath=ScriptPath)
+            script.name="mars",opt.methods=opt.methods,MESS=MESS,ScriptPath=ScriptPath,multCore=multCore)
