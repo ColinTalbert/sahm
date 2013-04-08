@@ -4,8 +4,8 @@
 #setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
 #ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
 
-setwd("I:\\VisTrails\\VisTrails_SAHM_x64\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
-ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
+setwd("I:\\VisTrails\\DevWorkspace\\Colin\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\DevWorkspace\\Colin\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
 source("GLM.helper.fcts.r")
@@ -61,12 +61,13 @@ FitModels(ma.name=input.file,
             debug.mode=T,script.name="maxent",opt.methods=2,MESS=T,lambdas=lambdas.file)
 ##MARS
  input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\CovariateCorrelationOutputMDS.csv"
-
+ input.file="C:\\Users\\mtalbert\\Downloads\\modelSelection_cv_2.csv"
 start.time<-Sys.time() 
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_MarianParallel\\OnCondor\\MergedDataset_1.csv"
 FitModels(ma.name=input.file,
             output.dir=output.dir,
-            response.col=rc,make.p.tif=T,make.binary.tif=F,
-            mars.degree=1,mars.penalty=2,debug.mode=T,script.name="mars",opt.methods=2,MESS=F,ScriptPath=ScriptPath)
+            response.col=rc,make.p.tif=F,make.binary.tif=F,
+            mars.degree=1,mars.penalty=2,debug.mode=T,script.name="mars",opt.methods=2,MESS=F,ScriptPath=ScriptPath,multCore=TRUE)
 total.time<-Sys.time()-start.time
 total.time
 EvaluateNewData(workspace="C:\\temp\\SAHM_workspace\\rf_1\\modelWorkspace",out.dir="C:\\temp\\SAHM_workspace\\rf_3",b.tif=TRUE,p.tif=TRUE,mess=FALSE)
