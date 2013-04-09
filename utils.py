@@ -473,6 +473,7 @@ def runRScript(script, args_dict, module=None):
     runRModelPy = os.path.join(os.path.dirname(__file__), "pySAHM", "runRModel.py")
     command_arr = [sys.executable, runRModelPy] + command_arr
     if args_dict.get("cur_processing_mode", "single thread") == "single thread":
+        command_arr += ["mc=FALSE"]
         p = subprocess.Popen(command_arr, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         ret = p.communicate()
         
@@ -502,6 +503,7 @@ def runRScript(script, args_dict, module=None):
         del(ret)
         writetolog("\nFinished R Processing of " + script, True)
     elif args_dict.get("cur_processing_mode", "single thread") == "multiple cores asynchronously":
+        command_arr += ["mc=FALSE"]
         if args_dict.has_key("o"):
             stdErrFname = os.path.join(args_dict['o'], "stdErr.txt")
             stdOutFname = os.path.join(args_dict['o'], "stdOut.txt")
@@ -514,6 +516,7 @@ def runRScript(script, args_dict, module=None):
         p = subprocess.Popen(command_arr, stderr=stdErrFile, stdout=stdOutFile)
         writetolog("\n R Processing launched asynchronously " + script, True) 
     elif args_dict.get("cur_processing_mode", "single thread") == "FORT Condor":
+        command_arr += ["mc=True"]
         runModelOnCondor(script, args_dict, command_arr)
         writetolog("\n R Processing launched using Condor " + script, True)  
 
@@ -547,7 +550,7 @@ def runModelOnCondor(script, args_dict, command_arr):
     submitFile.write("Should_transfer_files   = no\n")
     submitFile.write("transfer_executable     = false\n")
     
-    machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151', 'igskbacbws425']
+    machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151', 'igskbacbws425', 'igskbacbws108']
     reqsStr = 'Requirements            = (Machine =="'
     reqsStr += '.gs.doi.net"||Machine =="'.join(machines) + '.gs.doi.net")\n'
     submitFile.write(reqsStr)
@@ -569,7 +572,7 @@ def runModelOnCondor(script, args_dict, command_arr):
     
     #launch condor job
     DEVNULL = open(os.devnull, 'wb')
-    p = subprocess.Popen(["condor_submit", "-n", "igskbacbws425", submitFname], stderr=DEVNULL, stdout=DEVNULL)
+    p = subprocess.Popen(["condor_submit", "-n", 'igskbacbws108', submitFname], stderr=DEVNULL, stdout=DEVNULL)
     
     
 def getR_application(module=None):
@@ -943,7 +946,12 @@ def getParentDir(f, x=None):
     return create_dir_module(parentdirf)
 
 def getFileRelativeToCurrentVT(fname):
-    app = gui.application.get_vistrails_application()()
-    curlocator = app.get_vistrail().locator.name
-    curVTdir = os.path.split(curlocator)[0]
-    return os.path.abspath(os.path.join(curVTdir, fname))
+    try:
+        app = gui.application.get_vistrails_application()()
+        curlocator = app.get_vistrail().locator.name
+        curVTdir = os.path.split(curlocator)[0]
+        return os.path.abspath(os.path.join(curVTdir, fname))
+    except:
+        #if anything goes wrong with this convenience function 
+        #just return their original file name
+        return fname

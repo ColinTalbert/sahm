@@ -71,6 +71,7 @@ seed=NULL
 MESS=FALSE
 xtest=NULL
 ytest=NULL
+multCore=TRUE
 
 Args <- commandArgs(trailingOnly=FALSE)
 
@@ -106,6 +107,7 @@ Args <- commandArgs(trailingOnly=FALSE)
  		  if(argSplit[[1]][1]=="om")  opt.methods <- as.numeric(argSplit[[1]][2])
       if(argSplit[[1]][1]=="mes")  MESS <- as.logical(argSplit[[1]][2])
       if(argSplit[[1]][1]=="seed")  seed <- as.numeric(argSplit[[1]][2])
+      if(argSplit[[1]][1]=="mc")  multCore <- as.logical(argSplit[[1]][2])
 
  		  
     }
@@ -119,6 +121,6 @@ FitModels(ma.name=csv,tif.dir=NULL,output.dir=output,response.col=responseCol,ma
       nodesize=nodesize,maxnodes=maxnodes,importance=importance,
       localImp=localImp,nPerm=nPerm,proximity=proximity,oob.prox=oob.prox,norm.votes=norm.votes,do.trace=do.trace,keep.forest=keep.forest,
       keep.inbag=keep.inbag,make.r.curves=make.r.curves,
-      seed=seed,script.name="rf",opt.methods=opt.methods,MESS=MESS,ScriptPath=ScriptPath)
+      seed=seed,script.name="rf",opt.methods=opt.methods,MESS=MESS,ScriptPath=ScriptPath,multCore=multCore)
 
  

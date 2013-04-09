@@ -64,6 +64,8 @@ from core.modules.basic_modules import File, Directory, Path, new_constant, Cons
 from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
 from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
 
+from core.modules.module_configure import StandardModuleConfigurationWidget
+
 from core.modules.basic_modules import String
 from core.packagemanager import get_package_manager
 
@@ -1231,6 +1233,7 @@ class Reclassifier(Module):
 
     _input_ports = [("inputRaster", "(edu.utah.sci.vistrails.basic:File)"),
                     ('reclassFile', '(edu.utah.sci.vistrails.basic:File)'),
+                    ('reclassFileContents', '(edu.utah.sci.vistrails.basic:String)'),
                     ]
 
     _output_ports = [('outputRaster', '(edu.utah.sci.vistrails.basic:File)')]
@@ -1244,8 +1247,9 @@ class Reclassifier(Module):
 
     def compute(self):
         writetolog("\nRunning Reclassifier", True)
-        port_map = {'inputRaster':('inputRaster', utils.dir_path_value, True),
-                    'reclassFile':('reclassFile', utils.dir_path_value, True)}
+        port_map = {'inputRaster':('inputRaster', utils.dir_path_value, False),
+                    'reclassFile':('reclassFile', utils.dir_path_value, False),
+                    'reclassFileContents':('reclassFileContents', None, False),}
         
         argsDict = utils.map_ports(self, port_map)
 
@@ -1253,17 +1257,113 @@ class Reclassifier(Module):
         import pySAHM.SpatialUtilities as SpatialUtilities
         ourReclassifier = rasterReclassifier()
         ourReclassifier.inputFname = argsDict['inputRaster']
-        ourReclassifier.reclassFName = argsDict['reclassFile']
+        
+        if argsDict.has_key('reclassFileContents'):
+            reclassFileName = utils.mknextfile("reclass", ".txt")
+            reclassFile = open(reclassFileName, "w")
+            reclassFile.write(self.forceGetInputFromPort('reclassFileContents'))
+            reclassFile.close()
+            ourReclassifier.reclassFName = reclassFileName
+        elif argsDict.has_key('reclassFile'):
+            ourReclassifier.reclassFName = argsDict['reclassFile']
+        else:
+            msg = "Neither a reclass File or reclassFileContents have been specified\n"
+            msg += "One or the other must be provided."
+            raise ModuleError(self, msg)
+            
         ourReclassifier.outDir = utils.getrootdir()
-        ourReclassifier.outName = SpatialUtilities.getRasterShortName(argsDict['inputRaster']) + "_rc.tif"
-        outFName = os.path.join(ourReclassifier.outDir, ourReclassifier.outName)
+        ourReclassifier.outName = utils.mknextfile(SpatialUtilities.getRasterShortName(argsDict['inputRaster']), "_rc.tif")
+#        outFName = os.path.join(ourReclassifier.outDir, ourReclassifier.outName)
         ourReclassifier.run()
 
-        output_file = utils.create_file_module(outFName)
+        output_file = utils.create_file_module(ourReclassifier.outName)
         
         
 #        writetolog("Finished running PARC", True)
         self.setResult('outputRaster', output_file)
+        
+
+class ReclassifierConfiguration(StandardModuleConfigurationWidget):
+    # FIXME add available_dict as parameter to allow config
+    def __init__(self, module, controller, parent=None):
+
+        StandardModuleConfigurationWidget.__init__(self, module, controller,
+                                                   parent)
+        self.setWindowTitle("Reclassification")
+        self.build_gui()
+      
+        self.loadText()
+      
+    def build_gui(self):
+        QtGui.QWidget.__init__(self)
+
+        self.buttonSave = QtGui.QPushButton('Save', self)
+        self.buttonReset = QtGui.QPushButton('Cancel', self)
+
+        self.buttonSave.clicked.connect(self.handleSave)
+        self.buttonReset.clicked.connect(self.handleReset)
+
+        layout = QtGui.QVBoxLayout()
+        self.textBox = QtGui.QTextEdit(self)
+        
+        layout.addWidget(self.textBox)
+        
+        buttonLayout = QtGui.QHBoxLayout()
+        buttonLayout.addWidget(self.buttonSave)
+        buttonLayout.addWidget(self.buttonReset)
+        layout.addLayout(buttonLayout)
+        self.setLayout(layout)
+
+        self.path = None  
+    
+    def getPortValue(self, portName):
+        for i in xrange(self.module.getNumFunctions()):
+            if self.module.functions[i].name==portName:
+                return self.module.functions[i].params[0].strValue
+        return None
+
+    def handleSave(self):
+        #call this to save any current changes
+        curStringValue = str(self.textBox.toPlainText())
+
+        self.updateVisTrail(curStringValue)
+  
+    def handleReset(self):
+        self.close()
+
+#    def save(self):
+#        with open(unicode(self.path), 'wb') as stream:
+#            writer = csv.writer(stream)
+#            #surely there is some cleaner way to get the header list!
+#            header = [str(self.contents.horizontalHeaderItem(i).text())
+#                    for i in range(self.contents.horizontalHeader().count())]
+#            writer.writerow(header)
+#            for row in range(self.contents.rowCount()):
+#                rowdata = []
+#                for column in range(self.contents.columnCount()):
+#                    item = self.contents.item(row, column)
+#                    if item is not None:
+#                        rowdata.append(
+#                            unicode(item.text()).encode('utf8'))
+#                    else:
+#                        rowdata.append('')
+#                writer.writerow(rowdata)
+
+    def updateVisTrail(self, strCurContents):
+        self.controller.update_ports_and_functions(self.module.id, 
+                                           [], [], [("reclassFileContents", [strCurContents])])
+        self.state_changed = False
+        self.emit(QtCore.SIGNAL("stateChanged"))
+        self.emit(QtCore.SIGNAL('doneConfigure'), self.module.id)
+
+    def loadText(self):
+        
+        if self.getPortValue('reclassFileContents'):
+            self.textBox.setText(self.getPortValue('reclassFileContents'))
+        elif self.getPortValue('reclassFile'):
+            curContents = open(self.getPortValue('reclassFile'), 'r').readlines()
+        
+    
 
 class CategoricalToContinuous(Module):
     '''
@@ -2249,7 +2349,7 @@ _modules = generate_namespaces({'DataInput': [
                                           ApplyModel,
                                           BackgroundSurfaceGenerator
                                           ],
-                                'GeospatialTools': [Reclassifier,
+                                'GeospatialTools': [(Reclassifier, {'configureWidgetType': ReclassifierConfiguration}),
                                                     CategoricalToContinuous
                                                     ],                                        
                                 'Models': [(GLM, {'moduleColor':model_color,

@@ -52,6 +52,7 @@ simp.method="AIC"
 opt.methods=2
 MESS=FALSE
 squared.terms=FALSE
+multCore=TRUE
 
 Args <- commandArgs(trailingOnly=FALSE)
 
@@ -73,6 +74,7 @@ Args <- commandArgs(trailingOnly=FALSE)
  			if(argSplit[[1]][1]=="om")  opt.methods <- as.numeric(argSplit[[1]][2])
  			if(argSplit[[1]][1]=="sm")  simp.method <- argSplit[[1]][2]
  			if(argSplit[[1]][1]=="mes")  MESS <- as.logical(argSplit[[1]][2])
+ 			 if(argSplit[[1]][1]=="mc")  multCore <- as.logical(argSplit[[1]][2])
     }
 
 ScriptPath<-dirname(ScriptPath)
@@ -83,4 +85,4 @@ FitModels(ma.name=csv,
       tif.dir=NULL,output.dir=output,
       response.col=responseCol,make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
       simp.method=simp.method,debug.mode=F,script.name="glm",opt.methods=opt.methods,
-      MESS=MESS,squared.terms=squared.terms,ScriptPath=ScriptPath)
+      MESS=MESS,squared.terms=squared.terms,ScriptPath=ScriptPath,multCore=multCore)

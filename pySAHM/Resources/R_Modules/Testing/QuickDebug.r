@@ -4,56 +4,87 @@
 #setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
 #ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
 
-setwd("N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\DevelopmentWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
-ScriptPath="N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\DevelopmentWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
+setwd("I:\\VisTrails\\DevWorkspace\\Colin\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\DevWorkspace\\Colin\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
 source("GLM.helper.fcts.r")
 source("BRT.helper.fcts.r")
 source("RF.helper.fcts.r")
 source("MAXENT.helper.fcts.r")
-output.dir="N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\DevelopmentWorkspace\\Marian\\Workspace\\SAHMDebugging\\DebugOut"
+output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
 rc="responseBinary"
 #Testing GitHub again Another commit
-
+#options(warn=2)
 #options(error=expression(if(interactive()) recover() else dump.calls()))
 #options(error=NULL)
 #trace(proc.tiff,browser)
 #list.files()
-#rc="responseCount"
 
-input.file="C:\\SAHMTesting\\SAHM_workspace\\CovariateCorrelationOutputMDS_initial.csv"
-input.file="C:\\SAHMTesting\\SAHM_workspace\\modelSelection_split_2.csv"
-##MASK
-input.file="C:\\SAHMTesting\\SAHM_workspace\\ModelEvaluation_Split_2.csv"
+#Testing Compile Output on data with no test train and with a test train
 
+rc="responseCount"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
+input.file="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\WUS\\OCT2012\\modelSelection_cv_2.csv"
 
+###########################################################################
+############### Quick debug  ##############################################
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Split.csv"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/NoSplit.csv"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Factor.csv"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Spat.Weights.csv"
+input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/LargeDataset.csv"
+input.file<-"C:/VisTrails/mtalbert_20110504T132851/readMaTests/UsedAvailable.csv"
+#######################################################################
+#Sp 1 synthetic presence only data
+input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\UsedAvailableSp1CV.csv"
+input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\UsedAvailableSp1NoCV.csv"
+input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\RFtest.csv"
+input.file="C:\\temp\\TestDataSets\\CanadaThistlePseudoAbsence.csv"
+input.file="C:\\temp\\SAHM_workspace\\Species1PresOnlyCV.csv"
+## new file for checking pseudoabs
+input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\ElithPsdoAbs.csv"
+##elith synthetic surface presence absence
+input.file="C:\\temp\\SAHM_workspace\\modelSelection_split_20.csv"
+
+## Nonspatial data should work through SAHM
+input.file="C:\\temp\\SAHM_workspace\\NonSpatialData.csv"
 
 ## Maxent
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\CovariateCorrelationOutputMDS.csv"
+lambdas.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\maxentFiles_94"
 FitModels(ma.name=input.file,
             output.dir=output.dir,
             response.col=rc,make.p.tif=T,make.binary.tif=T,
             debug.mode=T,script.name="maxent",opt.methods=2,MESS=T,lambdas=lambdas.file)
 ##MARS
+ input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\CovariateCorrelationOutputMDS.csv"
+ input.file="C:\\Users\\mtalbert\\Downloads\\modelSelection_cv_2.csv"
+start.time<-Sys.time() 
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_MarianParallel\\OnCondor\\MergedDataset_1.csv"
 FitModels(ma.name=input.file,
             output.dir=output.dir,
-            response.col=rc,make.p.tif=T,make.binary.tif=F,
-            mars.degree=1,mars.penalty=2,debug.mode=T,script.name="mars",opt.methods=2,MESS=F,ScriptPath=ScriptPath)
-
+            response.col=rc,make.p.tif=F,make.binary.tif=F,
+            mars.degree=1,mars.penalty=2,debug.mode=T,script.name="mars",opt.methods=2,MESS=F,ScriptPath=ScriptPath,multCore=TRUE)
+total.time<-Sys.time()-start.time
+total.time
 EvaluateNewData(workspace="C:\\temp\\SAHM_workspace\\rf_1\\modelWorkspace",out.dir="C:\\temp\\SAHM_workspace\\rf_3",b.tif=TRUE,p.tif=TRUE,mess=FALSE)
 
 I:\VisTrails\VisTrails_SAHM_x64_debug\Central_R\R-2.14.1\bin\x64\Rterm.exe --vanilla -f I:\VisTrails\VisTrails_SAHM_x64_debug\VisTrails\vistrails\packages\sahm_MarianDev\pySAHM\Resources\R_Modules\EvaluateNewData.r --args mbt=TRUE mpt=TRUE ws="C:\temp\SAHM_workspace\rf_1\modelWorkspace" mes=FALSE o=C:\temp\SAHM_workspace\rf_3\modelWorkspace\rf_1
 
 ##GLM
-input.file="N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\DevelopmentWorkspace\\Marian\\Workspace\\SAHMDebugging\\break145.csv"
+#input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_condor\\modelSelection_cv_3.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,
           output.dir=output.dir,
-          response.col=rc,make.p.tif=F,make.binary.tif=F,
-          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=F,opt.methods=2,squared.terms=FALSE,ScriptPath=ScriptPath)
+          response.col=rc,make.p.tif=T,make.binary.tif=T,
+          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=T,opt.methods=2,squared.terms=FALSE,ScriptPath=ScriptPath)
 
    
 #RF
+
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,

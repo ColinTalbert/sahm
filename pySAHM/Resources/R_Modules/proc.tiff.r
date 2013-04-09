@@ -106,7 +106,7 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
       ps <- as.vector(gi)[6:7]
       ll <- as.vector(gi)[4:5]
       pref<-attr(gi,"projection")
-
+  
   RasterInfo=raster(fullnames[1])
   RasterInfo@file@datanotation<-"FLT4S"
   NAval<- -3.399999999999999961272e+38
@@ -134,16 +134,25 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
   FactorInd<-which(!is.na(match(vnames,names(factor.levels))),arr.ind=TRUE)
     if((nvars-length(FactorInd))==0) MESS<-FALSE #turn this off if only one factor column was selected
     
-    
+     if(Model=="maxlike"){
+     #this is a bit ugly to copy these sections of code but I'm hoping maxlike will eventually be able to predict to a vector instead of a raster in which case
+     #this will all be deleted anyway
+           model$call$formula<-eval(model$call$formula)
+          y <- predict(model,rasters=stack(model$rast.lst))
+           writeRaster(y,outfile.p)
+           if(make.binary.tif) {
+             y<-y>thresh
+             writeRaster(y,outfile.bin)
+             }
+           if(MESS) warning("Maxlike mess option currently nonfuctional") 
+           return(0) 
+      }
+  
   #for debugging I'm always using multiple cores
-  if(tr$n<10 | getRversion()<2.14){ #multicore is slower for small tiffs so we won't do it and the library is not available prior to 2.14
-    parRaster(start.tile=1,dims=dims,
-      tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
-      model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,outfile.bin=outfile.bin,thresh=thresh,nToDo=tr$n,ScriptPath=out$       
-      input$ScriptPath,vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct,template=out$dat$input$ParcTemplate)
-}
-
-  if(tr$n>=10 & getRversion()>=2.14){
+  multCore<-out$input$multCore
+  if(tr$n<10 | getRversion()<2.14) multCore<-FALSE #turn off multicore in certian circumstances
+  
+  if(multCore){
       library(parallel)
       #create some temporary folders    
       if(out$input$make.p.tif)
@@ -158,32 +167,19 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
        if(out$input$ResidMaps)
         dir.create(paste(out$input$output.dir,"\\ResidTiff",sep=""))
         tile.start<-seq(from=1,to=tr$n,by=ceiling(tr$n/(detectCores()-1))) 
-      cl <- try(makeCluster(detectCores()),silent=TRUE)
-       while(grepl("socketConnection",cl[1]) & grepl("cannot be opened",cl[1])){
-          Sys.sleep(30)
-          cl <- try(makeCluster(detectCores()),silent=TRUE)
-          } 
-      tryCluster<-try(parLapply(cl,X=tile.start,fun=parRaster,dims=dims,
+      cl <- makeCluster(detectCores()) 
+      parLapply(cl,X=tile.start,fun=parRaster,dims=dims,
          tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
          model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,
          outfile.bin=outfile.bin,thresh=thresh,nToDo= ceiling(tr$n/(detectCores()-1)),ScriptPath=out$input$ScriptPath,
-         vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct,
-         template=out$dat$input$ParcTemplate),silent=TRUE)
-         if(class(tryCluster)=="try-error") stop("Error in parLapply")
-      #because multiple instances spinning of clusters at the same time break R
-      #this has overhead in that a lot of RAM is unavailable while this is going on 
-    
-       while(grepl("socketConnection",tryCluster[1]) & grepl("cannot be opened",tryCluster[1])){
-          Sys.sleep(30) 
-           tryCluster<-try(parLapply(cl,X=tile.start,fun=parRaster,dims=dims,
-             tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
-             model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,
-             outfile.bin=outfile.bin,thresh=thresh,nToDo= ceiling(tr$n/(detectCores()-1)),ScriptPath=out$input$ScriptPath,
-             vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct,
-             template=out$dat$input$ParcTemplate),silent=TRUE)
-         }
-        
+         vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct)
       stopCluster(cl)
- }
+  }  else{  #multicore is slower for small tiffs so we won't do it and the library is not available prior to 2.14
+            #also due to multicore multiinstance R issues we're currently only running it on condor or when running synchronously
+    parRaster(start.tile=1,dims=dims,
+      tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
+      model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,outfile.bin=outfile.bin,thresh=thresh,nToDo=tr$n,ScriptPath=out$       
+      input$ScriptPath,vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct)
+      }
      return(0)
    }

@@ -195,6 +195,7 @@ class categoricalToContinuousRasters(rasterProcessor):
             ndMask = ndMask.transpose( [0, 2, 1, 3] )
             ndMask = ndMask.reshape( (x*y, pixelsPerBlock) )
             ans =  np.array(stats.mode(ndMask, 1)[0]).reshape(x, y)
+            
             for uniqueVal in uniques:
                 print uniqueVal, type(uniqueVal)
                 if not type(uniqueVal) is np.ma.core.MaskedConstant:
