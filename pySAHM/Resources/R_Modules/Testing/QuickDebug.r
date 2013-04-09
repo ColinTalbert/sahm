@@ -12,7 +12,7 @@ source("GLM.helper.fcts.r")
 source("BRT.helper.fcts.r")
 source("RF.helper.fcts.r")
 source("MAXENT.helper.fcts.r")
-output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
+output.dir="C:\\SAHMTesting\\SAHMDebugJunk\\BRTOut1"
 rc="responseBinary"
 #Testing GitHub again Another commit
 #options(warn=2)
@@ -23,34 +23,8 @@ rc="responseBinary"
 
 #Testing Compile Output on data with no test train and with a test train
 
-rc="responseCount"
-input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
-input.file="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\WUS\\OCT2012\\modelSelection_cv_2.csv"
+input.file="N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\DevelopmentWorkspace\\Marian\\Workspace\\SAHMDebugging\\break145.csv"
 
-###########################################################################
-############### Quick debug  ##############################################
-input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Split.csv"
-input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/NoSplit.csv"
-input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
-input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Factor.csv"
-input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
-input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Spat.Weights.csv"
-input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/LargeDataset.csv"
-input.file<-"C:/VisTrails/mtalbert_20110504T132851/readMaTests/UsedAvailable.csv"
-#######################################################################
-#Sp 1 synthetic presence only data
-input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\UsedAvailableSp1CV.csv"
-input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\UsedAvailableSp1NoCV.csv"
-input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\RFtest.csv"
-input.file="C:\\temp\\TestDataSets\\CanadaThistlePseudoAbsence.csv"
-input.file="C:\\temp\\SAHM_workspace\\Species1PresOnlyCV.csv"
-## new file for checking pseudoabs
-input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\ElithPsdoAbs.csv"
-##elith synthetic surface presence absence
-input.file="C:\\temp\\SAHM_workspace\\modelSelection_split_20.csv"
-
-## Nonspatial data should work through SAHM
-input.file="C:\\temp\\SAHM_workspace\\NonSpatialData.csv"
 
 ## Maxent
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\CovariateCorrelationOutputMDS.csv"
@@ -60,10 +34,7 @@ FitModels(ma.name=input.file,
             response.col=rc,make.p.tif=T,make.binary.tif=T,
             debug.mode=T,script.name="maxent",opt.methods=2,MESS=T,lambdas=lambdas.file)
 ##MARS
- input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\CovariateCorrelationOutputMDS.csv"
- input.file="C:\\Users\\mtalbert\\Downloads\\modelSelection_cv_2.csv"
-start.time<-Sys.time() 
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_MarianParallel\\OnCondor\\MergedDataset_1.csv"
+ 
 FitModels(ma.name=input.file,
             output.dir=output.dir,
             response.col=rc,make.p.tif=F,make.binary.tif=F,
@@ -84,7 +55,6 @@ FitModels(ma.name=input.file,
 
    
 #RF
-
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,
