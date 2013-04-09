@@ -50,8 +50,7 @@ place.save<-function(out,Final.Model){
                                        switch(out$input$model.family,"binomial"="Binom","bernoulli"="Binom","poisson"="Count"),if(out$input$PsdoAbs)"PsdoAbs",
                                        ".csv",
                                       sep="")
-                                )
-                              
+                                )        
  Header<-cbind(c("","Original Field Data","Field Data Template","PARC Output Folder","PARC Template","Covariate Selection Name",""),
                             c(basename(out$input$output.dir),
                             out$dat$input$OrigFieldData,out$dat$input$FieldDataTemp,out$dat$input$ParcOutputFolder,
@@ -59,10 +58,12 @@ place.save<-function(out,Final.Model){
 
 if(file.access(compile.out,mode=0)==-1){ #if very first time through little
           write.table(Header,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=",")
+          out$input$WriteColumn<-2
 
   } else { #this else (not the first time through) read current csv first
           input<-read.table(compile.out,fill=TRUE,sep=",")
           output<-cbind(input,c(Header[,2],rep("",times=(nrow(input)-nrow(Header)))))
+          out$input$WriteColumn<-ncol(output)
               temp=try(write.table(output,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=","),silent=TRUE)
            while(class(temp)=="try-error"){
                       modalDialog("","Please Close the AppendedOutput.exe\ so that R can write to it then press ok to continue ","")
