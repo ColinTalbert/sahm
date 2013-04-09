@@ -61,6 +61,7 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
              output<-apply(output,2,as.character)
              output[1:nrow(input),1:ncol(input)]<- apply(input,2,as.character)
              output[,out$input$WriteColumn]<-c(Header[,2],as.character(x[,2]))
+             output[(nrow(output)-nrow(x)+1):nrow(output),1]<-as.character(x[,1])
             
               temp=try(write.table(output,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=","),silent=TRUE)
            while(class(temp)=="try-error"){
