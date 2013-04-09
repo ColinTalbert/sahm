@@ -473,6 +473,7 @@ def runRScript(script, args_dict, module=None):
     runRModelPy = os.path.join(os.path.dirname(__file__), "pySAHM", "runRModel.py")
     command_arr = [sys.executable, runRModelPy] + command_arr
     if args_dict.get("cur_processing_mode", "single thread") == "single thread":
+        command_arr += ["mc=FALSE"]
         p = subprocess.Popen(command_arr, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         ret = p.communicate()
         
@@ -502,6 +503,7 @@ def runRScript(script, args_dict, module=None):
         del(ret)
         writetolog("\nFinished R Processing of " + script, True)
     elif args_dict.get("cur_processing_mode", "single thread") == "multiple cores asynchronously":
+        command_arr += ["mc=FALSE"]
         if args_dict.has_key("o"):
             stdErrFname = os.path.join(args_dict['o'], "stdErr.txt")
             stdOutFname = os.path.join(args_dict['o'], "stdOut.txt")
@@ -514,6 +516,7 @@ def runRScript(script, args_dict, module=None):
         p = subprocess.Popen(command_arr, stderr=stdErrFile, stdout=stdOutFile)
         writetolog("\n R Processing launched asynchronously " + script, True) 
     elif args_dict.get("cur_processing_mode", "single thread") == "FORT Condor":
+        command_arr += ["mc=True"]
         runModelOnCondor(script, args_dict, command_arr)
         writetolog("\n R Processing launched using Condor " + script, True)  
 
