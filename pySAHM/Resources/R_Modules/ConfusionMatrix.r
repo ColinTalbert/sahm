@@ -58,13 +58,15 @@ confusion.matrix<-function(Stats,split.type){
                                 Stats<-list("crossValidation"=Stats$crossValidation,"train"=Stats$train)
             }
           }
-
+ 
 #zlim<-c(min(unlist(lapply(Stats,function(lst){100*lst$Cmx/sum(lst$Cmx)}))),max(unlist(lapply(Stats,function(lst){100*lst$Cmx/sum(lst$Cmx)}))))
 #instead of basing the zlim on the acutal confusion matricies, base them on the maximum achievable value for a cell given the ratio of pres/abs
        extract.max<-function(lst){
          max(100*table(lst$auc.data$pres.abs)/length(lst$auc.dat$pres.abs))
          }
+         options(warn=-1)
 zlim=c(0,max(unlist(lapply(Stats,extract.max))))
+        options(warn=0)
   for(i in length(Stats):1){
       image((1:2),c(2,4),matrix(data=c(100*Stats[[i]]$Cmx[2]/sum(Stats[[i]]$Cmx),100*Stats[[i]]$Cmx[4]/sum(Stats[[i]]$Cmx),100*Stats[[i]]$Cmx[1]/sum(Stats[[i]]$Cmx),100*Stats[[i]]$Cmx[3]/sum(Stats[[i]]$Cmx)),nrow=2),
                zlim=zlim,xaxt="n",yaxt="n",xlab="",
