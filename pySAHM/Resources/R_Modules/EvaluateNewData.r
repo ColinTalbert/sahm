@@ -14,7 +14,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
 #or evaluate a model on a completely new region if an mds is available for the new region new.tifs should be the mds and produce.metrics should be set to true 
 
 #Written by Marian Talbert 5/2012
-
+     t0 <- unclass(Sys.time()) 
     load(workspace)
     chk.libs(out$input$script.name)
        out1<-out
@@ -22,6 +22,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
        try(rm(out),silent=TRUE)
        out<-out1
        out$input$ScriptPath=ScriptPath #this might not have been in the original, it's a new requirement
+       on.exit(capture.output(cat("Model Failed\n\n"),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE))  
        source(file.path(ScriptPath,paste(toupper(out$input$script.name),".helper.fcts.r",sep="")))
     # generate a filename for output #
                 out$input$output.dir<-out.dir
@@ -29,7 +30,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                 Model<-out$input$script.name
               out$dat$bname<-paste(out$input$output.dir,paste("/",Model,sep=""),sep="")
                if(!produce.metrics & !is.null(new.tifs)) out$input$NoResidMaps=TRUE
-    
+         
     #write a few details on the data to the output txt document
         txt0 <- paste("Original Model:\n\t",
                   switch(out$input$script.name,
@@ -80,7 +81,8 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                                   if(!is.na(Split<-match("split",tolower(unlist(hl))))) {hl[[1]][Split]<-"Unused"
                                     include[Split]<-0
                                   }
-                                  hl[[1]][Eval.split]<-"Split"  
+                                  hl[[1]][Eval.split]<-"Split"
+                                  out$dat$split.type="eval"
                          }
                    }
                                 
@@ -95,7 +97,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                             out$dat$split.type=out$dat$split.label="eval"
                             out$dat$bname<-paste(out$input$output.dir,paste("/",Model,sep=""),sep="")
                       }
-             
+                        place.save(out,Final.Model=TRUE)
                   # Making Predictions
                            pred.vals<-function(x,model,Model){
                           x$pred<-pred.fct(model,x$dat[,2:ncol(x$dat)],Model)
@@ -110,6 +112,8 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                     
                           #producing auc and residual plots model summary information and accross model evaluation metric
                       out$mods$auc.output<-make.auc.plot.jpg(out=out)
+                      response.curves(out,Model)
+             
            }
         
      ################################ Making the tiff
@@ -127,7 +131,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
             }
 
      }
-
+    on.exit(capture.output(cat(paste("\nTotal time = ",round((unclass(Sys.time())-t0)/60,2)," min\n\n",sep="")),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)) 
 }
 
 p.tif=T
@@ -151,7 +155,7 @@ Args <- commandArgs(trailingOnly=FALSE)
     	argSplit[[1]][2]
     	if(argSplit[[1]][1]=="ws") ws <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="o") out.dir <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="mes")  Mess <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="mes")  mess <- argSplit[[1]][2]
    		if(argSplit[[1]][1]=="mpt") p.tif <- argSplit[[1]][2]
  			if(argSplit[[1]][1]=="mbt")  b.tif <- argSplit[[1]][2]
  			if(argSplit[[1]][1]=="c") new.tiffs <- argSplit[[1]][2]   #mds file header
