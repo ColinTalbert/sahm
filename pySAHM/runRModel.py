@@ -64,7 +64,13 @@ def mosaicTiledOutputs(outputDirectory):
                 dataset = gdal.Open( outFname, gdal.GA_Update )
                 dataset.GetRasterBand(1).SetNoDataValue(float(NDValue))
                 dataset.GetRasterBand(1).ComputeStatistics(1)
-                shutil.rmtree(tilesFolder)
+                try:
+                    shutil.rmtree(tilesFolder)
+                except:
+                    #can run into latency problems with the thumbs.db in windows.
+                    #if we can't clean up this folder it's not the end of the world.
+                    pass
+                
                
 #these three functi 
 def getNDVal(filename):
