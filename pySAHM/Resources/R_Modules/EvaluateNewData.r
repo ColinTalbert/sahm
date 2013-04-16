@@ -1,4 +1,4 @@
-EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess=FALSE,new.tifs=NULL,produce.metrics=TRUE,ScriptPath){
+EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess=FALSE,new.tifs=NULL,produce.metrics=TRUE,out=out){
 
 #This functions has several tasks that it will perform
 
@@ -15,7 +15,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
 
 #Written by Marian Talbert 5/2012
      t0 <- unclass(Sys.time()) 
-    load(workspace)
+   
     chk.libs(out$input$script.name)
        out1<-out
        try(rm(out,envir=.GlobalEnv),silent=TRUE)
@@ -97,7 +97,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                             out$dat$split.type=out$dat$split.label="eval"
                             out$dat$bname<-paste(out$input$output.dir,paste("/",Model,sep=""),sep="")
                       }
-                        place.save(out,Final.Model=TRUE)
+                        out <- place.save(out,Final.Model=TRUE)
                   # Making Predictions
                            pred.vals<-function(x,model,Model){
                           x$pred<-pred.fct(model,x$dat[,2:ncol(x$dat)],Model)
@@ -111,6 +111,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                           if(Model=="rf") out$dat$ma$train$pred<-tweak.p(as.vector(predict(out$mods$final.mod[[1]],type="vote")[,2]))
                     
                           #producing auc and residual plots model summary information and accross model evaluation metric
+                         
                       out$mods$auc.output<-make.auc.plot.jpg(out=out)
                       response.curves(out,Model)
              
@@ -162,10 +163,15 @@ Args <- commandArgs(trailingOnly=FALSE)
  			if(argSplit[[1]][1]=="pmt")  produce.metrics <- argSplit[[1]][2]
     }
 
-ScriptPath<-dirname(ScriptPath)
-source(paste(ScriptPath,"LoadRequiredCode.r",sep="\\"))
-
-EvaluateNewData(workspace=ws,out.dir=out.dir,b.tif=as.logical(b.tif),p.tif=as.logical(p.tif),mess=as.logical(mess),new.tifs=new.tiffs,produce.metrics=as.logical(produce.metrics),ScriptPath=ScriptPath)
+ScrptPath<-dirname(ScriptPath)
+load(ws)
+rm(ScriptPath)
+ScriptPath<-ScrptPath
+setwd(ScriptPath)
+source(file.path(ScriptPath,"LoadRequiredCode.r"))
+source(paste(toupper(out$input$script.name),".helper.fcts.r",sep=""))
+    
+EvaluateNewData(out.dir=out.dir,b.tif=as.logical(b.tif),p.tif=as.logical(p.tif),mess=as.logical(mess),new.tifs=new.tiffs,produce.metrics=as.logical(produce.metrics),ScriptPath=ScriptPath,out=out)
 
 
 

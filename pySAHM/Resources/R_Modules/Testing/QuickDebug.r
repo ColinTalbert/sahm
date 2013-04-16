@@ -51,15 +51,18 @@ input.file="C:\\temp\\SAHM_workspace\\modelSelection_split_20.csv"
 
 ## Nonspatial data should work through SAHM
 input.file="C:\\temp\\SAHM_workspace\\NonSpatialData.csv"
-
-## Maxent
+#================================================================#
+                      # Maxent
+#================================================================#
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\CovariateCorrelationOutputMDS.csv"
 lambdas.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\maxentFiles_94"
 FitModels(ma.name=input.file,
             output.dir=output.dir,
             response.col=rc,make.p.tif=T,make.binary.tif=T,
             debug.mode=T,script.name="maxent",opt.methods=2,MESS=T,lambdas=lambdas.file)
-##MARS
+#================================================================#
+                      #MARS
+#================================================================#
  input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\CovariateCorrelationOutputMDS.csv"
  input.file="C:\\Users\\mtalbert\\Downloads\\modelSelection_cv_2.csv"
 start.time<-Sys.time() 
@@ -73,8 +76,9 @@ total.time
 EvaluateNewData(workspace="C:\\temp\\SAHM_workspace\\rf_1\\modelWorkspace",out.dir="C:\\temp\\SAHM_workspace\\rf_3",b.tif=TRUE,p.tif=TRUE,mess=FALSE)
 
 I:\VisTrails\VisTrails_SAHM_x64_debug\Central_R\R-2.14.1\bin\x64\Rterm.exe --vanilla -f I:\VisTrails\VisTrails_SAHM_x64_debug\VisTrails\vistrails\packages\sahm_MarianDev\pySAHM\Resources\R_Modules\EvaluateNewData.r --args mbt=TRUE mpt=TRUE ws="C:\temp\SAHM_workspace\rf_1\modelWorkspace" mes=FALSE o=C:\temp\SAHM_workspace\rf_3\modelWorkspace\rf_1
-
-##GLM
+#================================================================#
+                          #GLM
+#================================================================#
 #input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_condor\\modelSelection_cv_3.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,
@@ -82,9 +86,9 @@ FitModels(ma.name=input.file,
           response.col=rc,make.p.tif=T,make.binary.tif=T,
           simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=T,opt.methods=2,squared.terms=FALSE,ScriptPath=ScriptPath)
 
-   
-#RF
-
+#================================================================#   
+                           #RF
+#================================================================#
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,
@@ -98,7 +102,9 @@ total.time<-Sys.time()-start.time
 total.time
 
 rc="responseBinary"
-#BRT
+#================================================================#
+                              #BRT
+#================================================================#
 #input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_FinalTest\\CovariateCorrelationOutputMDS_initial.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,output.dir=output.dir,
@@ -108,16 +114,21 @@ FitModels(ma.name=input.file,
           simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
           bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,MESS=F,ScriptPath=ScriptPath)
 
-
+#================================================================#
+                  # Evaluate New Data 
+#================================================================#
 new.tifs="J://Projects//Climate_RS_Comparison//Cheatgrass_VisTrails//WUS/FEB2013//validation//WYandNV_MergedDataset.csv"
-ws="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\WUS\\FEB2013\\ParameterOptimization\\brt_1\\ModelWorkspace"
+wksp="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\WUS\\FEB2013\\ParameterOptimization\\brt_1\\ModelWorkspace"
+ScrptPath="I:\\VisTrails\\DevWorkspace\\Colin\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
+load(wksp)
+rm(ScriptPath)
+ScriptPath<-ScrptPath
+setwd(ScriptPath)
+source(file.path(ScriptPath,"LoadRequiredCode.r"))
+source(paste(toupper(out$input$script.name),".helper.fcts.r",sep=""))
 
-EvaluateNewData(workspace=ws,out.dir=output.dir,b.tif=FALSE,p.tif=FALSE,mess=FALSE,produce.metrics=TRUE,new.tifs=new.tifs)
+EvaluateNewData(out.dir=output.dir,b.tif=FALSE,p.tif=FALSE,mess=FALSE,produce.metrics=TRUE,new.tifs=new.tifs)
 
-#Maxlike
-input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\CovariateCorrelationOutputMDS_initial.csv"
-Formula="~bio_06_2000_2km + bio_14_2000_4km + NDVI_annualMaximumValue_2009 + NDVI_greenuprates1_2003 + NDVI_peakdates1_2003"
-"I:\VisTrails\VisTrails_SAHM_x32_debug\Central_R\R-2.14.1\bin\i386\Rterm.exe" --vanilla -f "I:\VisTrails\VisTrails_SAHM_x32_debug\VisTrails\vistrails\packages\sahm_MarianDev\pySAHM\Resources\R_Modules\FIT_MaxLike_pluggable.r" --args  om=2 c="I:/VisTrails/VisTrails_SAHM_x32_debug/VisTrails/vistrails/packages/TestingRCode/CovariateCorrelationOutputMDS_initial.csv" fmla="~bio_06_2000_2km + bio_14_2000_4km + NDVI_annualMaximumValue_2009 + NDVI_greenuprates1_2003 + NDVI_peakdates1_2003" o="C:\temp\SAHM_workspace\maxlike_4" rc=responseBinary
 
 c="I:/VisTrails/VisTrails_SAHM_x32_debug/VisTrails/vistrails/packages/TestingRCode/CovariateCorrelationOutputMDS_initial.csv" 
 fmla=~bio_06_2000_2km + bio_14_2000_4km + NDVI_annualMaximumValue_2009 + NDVI_greenuprates1_2003 + NDVI_peakdates1_2003 
