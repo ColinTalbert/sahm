@@ -171,7 +171,7 @@ setwd(ScriptPath)
 source(file.path(ScriptPath,"LoadRequiredCode.r"))
 source(paste(toupper(out$input$script.name),".helper.fcts.r",sep=""))
     
-EvaluateNewData(out.dir=out.dir,b.tif=as.logical(b.tif),p.tif=as.logical(p.tif),mess=as.logical(mess),new.tifs=new.tiffs,produce.metrics=as.logical(produce.metrics),ScriptPath=ScriptPath,out=out)
+EvaluateNewData(out.dir=out.dir,b.tif=as.logical(b.tif),p.tif=as.logical(p.tif),mess=as.logical(mess),new.tifs=new.tiffs,produce.metrics=as.logical(produce.metrics),out=out)
 
 
 
