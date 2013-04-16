@@ -59,7 +59,7 @@ class Window(QtGui.QWidget):
         
         
         subFolders = [x[0] for x in os.walk(self.sessionDir)]
-        models = ["brt", "rf_", "mar", "glm", "max"]
+        models = ["brt", "rf_", "mar", "glm", "max", "App"]
         self.data = []
         
         expandedNodes = []
