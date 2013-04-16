@@ -117,8 +117,9 @@ class MDSBuilder(object):
                 raise RuntimeError, "The supplied probability surface, " + self.probSurfacefName + ", does not appear to be a valid raster."
             else:
                 self.probSurface = SpatialUtilities.SAHMRaster(self.probSurfacefName)
-        
-        #5) if point count supplied its an integer greater than 0
+
+            
+        #6) if point count supplied its an integer greater than 0
         try:
             self.pointCount = int(self.pointCount)
         except:
@@ -126,7 +127,7 @@ class MDSBuilder(object):
         if not self.pointCount >= 0:
             raise RuntimeError, "The supplied point count parameter, " + self.pointCount +", must be greater than 0" 
         
-        #6) output directory exists
+        #7) output directory exists
         outDir = os.path.split(self.outputMDS)[0]
         if not os.path.exists(outDir):
             raise RuntimeError, "The directory of the supplied MDS output file path, " + self.outputMDS +", does not appear to exist on the filesystem"
@@ -149,6 +150,20 @@ class MDSBuilder(object):
         self.constructEmptyMDS()
         
         self.findTemplate()
+        
+        #5) one more validateArgs step that needs to happen after the above two steps
+        if self.probSurfacefName <> '':
+            extentMatch = True
+            if self.templateSurface.xScale != self.probSurface.xScale: extentMatch = False
+            if self.templateSurface.yScale != self.probSurface.yScale: extentMatch = False
+            if self.templateSurface.width != self.probSurface.width: extentMatch = False
+            if self.templateSurface.height != self.probSurface.height: extentMatch = False
+            if self.templateSurface.east != self.probSurface.east: extentMatch = False
+            if self.templateSurface.north != self.probSurface.north: extentMatch = False
+            if self.templateSurface.prj != self.probSurface.prj: extentMatch = False
+            if not extentMatch:
+                raise RuntimeError, "The supplied probability surface, " + self.probSurfacefName + ", does not appear to match the supplied template," + self.template + "\nin terms of extent, cell size or projection"
+        
         
         if self.pointCount > 0:
             self.addBackgroundPoints()
