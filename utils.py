@@ -550,7 +550,7 @@ def runModelOnCondor(script, args_dict, command_arr):
     submitFile.write("Should_transfer_files   = no\n")
     submitFile.write("transfer_executable     = false\n")
     
-    machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151', 'igskbacbws425', 'igskbacbws108']
+    machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151', 'igskbacbws425']
     reqsStr = 'Requirements            = (Machine =="'
     reqsStr += '.gs.doi.net"||Machine =="'.join(machines) + '.gs.doi.net")\n'
     submitFile.write(reqsStr)
