@@ -88,7 +88,7 @@ from SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
 from GeneralSpatialViewer import GeneralSpatialViewer
 from sahm_picklists import ResponseType, AggregationMethod, \
         ResampleMethod, PointAggregationMethod, ModelOutputType, RandomPointType, \
-        OutputRaster
+        OutputRaster, mpl_colormap
 
 from utils import writetolog
 from pySAHM.utilities import TrappedError
@@ -2335,6 +2335,7 @@ _modules = generate_namespaces({'DataInput': [
                                            (ModelOutputType, {'abstract': True}),
                                            (RandomPointType, {'abstract': True}),
                                            (OutputRaster, {'abstract': True}),
+                                           (mpl_colormap, {'abstract': True}),
                                            (TextFile, {'configureWidgetType': TextFileConfiguration}),
                                            (CSVTextFile, {'configureWidgetType': CSVTextFileConfiguration})
                                            ],
