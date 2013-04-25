@@ -70,6 +70,7 @@
           #either for model selection or evaluation if set to true then this split will be ignored until
           #after a final model has been selected
 if(is.null(seed)) seed<-round(runif(1,min=-((2^32)/2-1),max=((2^32)/2-1)))
+if(Eval.Split) seed=seed+6341 #because if someone sets the same seed for model selection and model evaluation then everything breaks
 set.seed(as.numeric(seed))
 
      if(trainProp<=0 | trainProp>1) stop("Train Proportion (trainProp) must be a number between 0 and 1 excluding 0")
@@ -90,7 +91,7 @@ set.seed(as.numeric(seed))
           if(sum(as.numeric(response)==0)==0 && !is.null(RatioPresAbs)) stop("The ratio of presence to absence cannot be set with only presence data")
           
   #Ignoring background data that might be present in the mds
-
+        
           bg.dat<-dat[response==-9999,]
 
           if(dim(bg.dat)[1]!=0){

@@ -27,6 +27,12 @@ infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\modelSelection
 #infil="C:\\temp\\TestDataSets\\TestTrainingSplit_8.csv"
 infil="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\MergedDataset_9.csv" 
 output.file="C:\\temp\\SAHMDebugJunk\\BRTOut1\\pairPresTesting.jpg"
+
+#### testing proportion
+infil="N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\DevelopmentWorkspace\\Marian\\Workspace\\SAHMDebugging\\ProportionData.csv"
+output.file="N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\DevelopmentWorkspace\\Marian\\Workspace\\SAHMDebugging\\pairPresTesting.jpg"
+responseCol="responseProp"
+
 Pairs.Explore(num.plots=15,                                
     min.cor=min.cor,
     input.file=infil,

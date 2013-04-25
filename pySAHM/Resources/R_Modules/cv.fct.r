@@ -134,10 +134,7 @@ for (i in 1:nk) {
               pred.mask <- selector == i   #used to identify the with-held subset
               assign("species.subset", ydat[model.mask], pos = 1)
               assign("predictor.subset", xdat[model.mask, ], pos = 1)
-              
-              dat<-cbind(predictor.subset,species.subset)
-              names(dat)<-names(data)
-             
+         
               # fit new model
               cv.final.mod<-model.fit(dat=out$dat$ma$train$dat[model.mask,],out=out,Model=Model,weight=out$dat$ma$train$weight[model.mask],Fold=i)                       
               fitted.values[pred.mask]<-out$dat$ma[[i]]$pred<-pred.fct(model=cv.final.mod,x=xdat[pred.mask,],Model)

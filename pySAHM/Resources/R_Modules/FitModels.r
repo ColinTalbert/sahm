@@ -149,7 +149,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
               cat("Progress:70%\n");flush.console()
 
   #Response curves #
-     response.curves(out,Model)
+     if(Model!="maxlike") response.curves(out,Model)
      
    #Save Workspace
    save.image(file.path(output.dir,"modelWorkspace"))

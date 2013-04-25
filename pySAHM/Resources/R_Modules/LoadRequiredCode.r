@@ -43,47 +43,47 @@
 ###############################################################################
 
 #Reading data and checking libraries
-source(paste(ScriptPath,"read.dat.r",sep="\\")) 
-source(paste(ScriptPath,"path.check.r",sep="\\")) 
-source(paste(ScriptPath,"read.ma.r",sep="\\"))
-source(paste(ScriptPath,"chk.libs.r",sep="\\"))
+source(file.path(ScriptPath,"read.dat.r")) 
+source(file.path(ScriptPath,"path.check.r")) 
+source(file.path(ScriptPath,"read.ma.r"))
+source(file.path(ScriptPath,"chk.libs.r"))
 
 
 #Fitting Models and making predictions
-source(paste(ScriptPath,"generic.model.fit.r",sep="\\"))
-source(paste(ScriptPath,"FitModels.r",sep="\\"))
-source(paste(ScriptPath,"model.fit.r",sep="\\"))
-source(paste(ScriptPath,"pred.fct.r",sep="\\"))
+source(file.path(ScriptPath,"generic.model.fit.r"))
+source(file.path(ScriptPath,"FitModels.r"))
+source(file.path(ScriptPath,"model.fit.r"))
+source(file.path(ScriptPath,"pred.fct.r"))
 
 #Calculating Evaluation Metrics and producing plots
-source(paste(ScriptPath,"make.auc.r",sep="\\"))
-source(paste(ScriptPath,"EvalStats.r",sep="\\"))
-source(paste(ScriptPath,"ResidualImage.r",sep="\\"))
-source(paste(ScriptPath,"Pred.Surface.r",sep="\\"))
-source(paste(ScriptPath,"calc.deviance.r",sep="\\"))
-source(paste(ScriptPath,"calibration.r",sep="\\"))
-source(paste(ScriptPath,"roc.r",sep="\\"))
-source(paste(ScriptPath,"CalcStats.r",sep="\\"))
-source(paste(ScriptPath,"EvalStatsHelperFcts.r",sep="\\"))
-source(paste(ScriptPath,"TestTrainRocPlot.r",sep="\\"))
-source(paste(ScriptPath,"ConfusionMatrix.r",sep="\\"))
-source(paste(ScriptPath,"PresenceOnlyCalibration.r",sep="\\"))
-source(paste(ScriptPath,"response.curves.r",sep="\\"))
-source(paste(ScriptPath,"VariableImportance.r",sep="\\"))
+source(file.path(ScriptPath,"make.auc.r"))
+source(file.path(ScriptPath,"EvalStats.r"))
+source(file.path(ScriptPath,"ResidualImage.r"))
+source(file.path(ScriptPath,"Pred.Surface.r"))
+source(file.path(ScriptPath,"calc.deviance.r"))
+source(file.path(ScriptPath,"calibration.r"))
+source(file.path(ScriptPath,"roc.r"))
+source(file.path(ScriptPath,"CalcStats.r"))
+source(file.path(ScriptPath,"EvalStatsHelperFcts.r"))
+source(file.path(ScriptPath,"TestTrainRocPlot.r"))
+source(file.path(ScriptPath,"ConfusionMatrix.r"))
+source(file.path(ScriptPath,"PresenceOnlyCalibration.r"))
+source(file.path(ScriptPath,"response.curves.r"))
+source(file.path(ScriptPath,"VariableImportance.r"))
 
 #Writing output metrics
-source(paste(ScriptPath,"capture.stats.r",sep="\\"))
-source(paste(ScriptPath,"write.txt.r",sep="\\"))
-source(paste(ScriptPath,"AppendOut.r",sep="\\"))
-source(paste(ScriptPath,"modalDialog.r",sep="\\"))
+source(file.path(ScriptPath,"capture.stats.r"))
+source(file.path(ScriptPath,"write.txt.r"))
+source(file.path(ScriptPath,"AppendOut.r"))
+source(file.path(ScriptPath,"modalDialog.r"))
 
 #Making maps
-source(paste(ScriptPath,"proc.tiff.r",sep="\\"))
-source(paste(ScriptPath,"CalcMESS.r",sep="\\"))
-source(paste(ScriptPath,"parRaster.r",sep="\\"))
+source(file.path(ScriptPath,"proc.tiff.r"))
+source(file.path(ScriptPath,"CalcMESS.r"))
+source(file.path(ScriptPath,"parRaster.r"))
 
 #Other utility functions
-source(paste(ScriptPath,"cv.fct.r",sep="\\"))
-source(paste(ScriptPath,"place.save.r",sep="\\"))
-source(paste(ScriptPath,"SplitBackground.r",sep="\\"))
+source(file.path(ScriptPath,"cv.fct.r"))
+source(file.path(ScriptPath,"place.save.r"))
+source(file.path(ScriptPath,"SplitBackground.r"))
 

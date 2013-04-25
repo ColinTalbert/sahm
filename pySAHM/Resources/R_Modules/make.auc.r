@@ -51,14 +51,13 @@ make.auc.plot.jpg<-function(out=out){
  
 ########################################################################
 ######################### Calc threshold on train split #################
-   
+          
  if(out$input$model.family!="poisson"){
-            inlst$train$thresh<-out$dat$ma$train$thresh<- as.numeric(optimal.thresholds(data.frame(ID=1:length(inlst$train$resp),pres.abs=inlst$train$resp,
+            inlst$train$thresh<-out$dat$ma$train$thresh<- as.numeric(optimal.thresholds(data.frame(ID=1:length(inlst$train$resp$response),pres.abs=inlst$train$resp,
                 pred=inlst$train$pred),opt.methods=out$input$opt.methods))[2]
-               
-              if(out$dat$split.type%in%c("test","eval"))  inlst$test$thresh<-out$dat$ma$test$thresh<-as.numeric(
-                    optimal.thresholds(data.frame(ID=1:length(inlst$test$resp),pres.abs=inlst$test$resp,
-                    pred=inlst$test$pred),opt.methods=out$input$opt.methods))[2]
+              if(out$dat$split.type%in%c("test","eval"))  
+              inlst$test$thresh<-out$dat$ma$test$thresh <- as.numeric(optimal.thresholds(data.frame(ID=1:length(inlst$test$resp$response),pres.abs=inlst$test$resp,
+                pred=inlst$test$pred),opt.methods=out$input$opt.methods))[2]
             }
             else inlst$train$thresh=NULL
 
@@ -239,7 +238,7 @@ make.auc.plot.jpg<-function(out=out){
                         Header<-cbind(c("","Original Field Data","Field Data Template","PARC Output Folder","PARC Template","Covariate Selection Name",""),
                             c(basename(out$input$output.dir),
                             out$dat$input$OrigFieldData,out$dat$input$FieldDataTemp,out$dat$input$ParcOutputFolder,
-                            out$dat$input$ParcTemplate,ifelse(length(out$dat$input$CovSelectName)==0,"NONE",out$dat$input$CovSelectName),""))
+                            basename(out$dat$input$ParcTemplate),ifelse(length(out$dat$input$CovSelectName)==0,"NONE",out$dat$input$CovSelectName),""))
                       
                      if(out$input$script.name!="maxlike") 
                         AppendOut(compile.out=out$input$Append.Dir,Header,x,out,Parm.Len=length(stat.names),parent=parent,split.type=out$dat$split.type)

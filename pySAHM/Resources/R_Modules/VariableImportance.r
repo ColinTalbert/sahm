@@ -33,6 +33,7 @@ VariableImportance<-function(Model,out,auc){
 
 ######################## copied from append out
   par(mar=c(5,17,4,2))
+  
     plot(c(min(0,min(cor.mat)),(max(cor.mat)+.1)),y=c(-.5,(length(out$mods$vnames)+.5)),type="n",xlab="Importance",main="Importance using one minus the correlation \nof predictions with and without permutation of the given independent variable",ylab="",yaxt="n",cex.lab=1.4)
     grid()
       if(out$dat$split.type!="crossValidation"){
@@ -56,6 +57,7 @@ VariableImportance<-function(Model,out,auc){
 
 PermutePredict<-function(pred.names,dat,pred,modelFit,Model){
     cor.vect<-rep(NA,times=length(pred.names))
+   
      for (i in 1:length(pred.names)){
            indx<-match(pred.names[i],names(dat))
            Dat<-dat

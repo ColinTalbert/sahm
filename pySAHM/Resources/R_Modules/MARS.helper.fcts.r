@@ -119,19 +119,16 @@ function (mars.glm.object,new.data)
   names(prediction) <- names(ydat)
   standard.errors <- as.data.frame(matrix(0, ncol = n.spp, nrow = nrow(pred.dat)))
   names(standard.errors) <- names(ydat)
-
+ 
   for (i in 1:n.spp) {
-
-    print(names(ydat)[i], quote = FALSE)
+ 
     model.glm <- glm(ydat[, i] ~ ., data = old.bf.data, weights = site.weights,
       family = family, maxit = 100)
-    temp <- predict.glm(model.glm,new.bf.data,type="response",se.fit=TRUE)
-    prediction[,i] <- temp[[1]]
-    standard.errors[,i] <- temp[[2]]
-
+    temp <- predict.glm(model.glm,new.bf.data,type="response")
+    prediction[,i] <- temp
     }
 
-  return(list("prediction"=prediction,"ses"=standard.errors))
+  return(list("prediction"=prediction))
 }
 
 
@@ -368,8 +365,6 @@ function (data,                         # the input data frame
 
 # fit the mars model and extract the basis functions
 
-  cat("fitting initial mars model for",n.spp,"responses","\n")
-  cat("followed by a glm model with a family of",family,"\n")
    mars.object <- mars(x = xdat, y = ydat, degree = mars.degree, w = site.weights,
        wp = spp.weights, penalty = penalty)
   if(length(mars.object$coefficients)==1) stop("MARS has fit the null model (intercept only) \n new predictors are required")
