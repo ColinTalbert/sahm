@@ -46,7 +46,7 @@ capture.stats<-function(Stats.lst,file.name,label,family,opt.methods,out){
 if(label=="eval") label="Final evaluation"
 
 # Written by Marian Talbert 2012 
-
+     
 capture.output(cat(" applied to",label, "split:\n",sep=" "),
                         file=file.name,append=TRUE)
     capture.output(cat( "\n",

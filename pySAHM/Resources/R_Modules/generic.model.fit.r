@@ -119,7 +119,7 @@ on.exit(detach(out$input))
                
            txt0 <- paste("\n\n","Settings:\n",
                       if(out$input$PsdoAbs) "(Averaged across available splits)\n", 
-                      "\n\trandom seed used =            ",seed,
+                      "\n\trandom seed used =            ",out$input$seed,
                       "\n\ttree complexity =             ",out$mods$parms$tc.full,
                       "\n\tlearning rate =               ",round(out$mods$lr.mod$lr,4),
                       "\n\tn(trees) =                    ",mean(unlist(lapply(out$mods$final.mod,function(lst){lst$n.trees}))),
@@ -139,7 +139,7 @@ on.exit(detach(out$input))
    if(Model=="rf"){
               
               txt0 <- paste("\n\n","Settings:",
-              "\n\trandom seed used =                      ",seed,
+              "\n\trandom seed used =                      ",out$input$seed,
               "\n\tn covariates considered at each split = ", mean(unlist(lapply(out$mods$final.mod,"[",14))),
                 if(out$input$PsdoAbs==TRUE) "\n\t   (averaged over each used available split)\n",
               "\n\tn trees =                               ",n.trees,
