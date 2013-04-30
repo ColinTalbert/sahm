@@ -51,7 +51,7 @@ thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template) {
    #alter the write start location because we always start at position 1                                   
    writeLoc<-ifelse((start.tile-1)==0,tr$row[i],tr$row[i]-sum(tr$nrows[1:(start.tile-1)]))
    TemplateMask<-getValuesBlock(template, row=tr$row[i], nrows=tr$nrows[i])
-  browser()
+
    if(all(is.na(TemplateMask))){
      #if the template is completely NA values, don't read in any other data
        temp<-rep(NA,times=tr$nrow[i]*dims[2])
@@ -94,13 +94,15 @@ thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template) {
       ifelse(sum(complete.cases(temp))==0,  # does not calculate predictions if all predictors in the region are na
         preds<-matrix(data=NA,nrow=dims[2],ncol=tr$nrows[i]),
         preds <- t(matrix(pred.fct(model,temp,Model),ncol=dims[2],byrow=T)))
-        preds[is.na(preds)]<-NAval
+        
         
         if(MESS) {
           MessRaster<-writeValues(MessRaster,pred.rng, writeLoc)
           ModRaster<-writeValues(ModRaster,names(pred.rng), writeLoc)
         }
+       
           if(make.binary.tif) binaryRaster<-writeValues(binaryRaster,(preds>thresh),writeLoc)
+          #preds[is.na(preds)]<-NAval
        continuousRaster <- writeValues(continuousRaster,preds,writeLoc)
    } #end of the big for loop
 
