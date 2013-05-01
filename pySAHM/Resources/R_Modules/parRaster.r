@@ -55,7 +55,7 @@ thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template) {
    if(all(is.na(TemplateMask))){
      #if the template is completely NA values, don't read in any other data
        temp<-rep(NA,times=tr$nrow[i]*dims[2])
-       if(MESS) pred.rng<-rep(NA,nrow(temp))
+       if(MESS) pred.rng<-rep(NA,length(temp))
         }
    else{     
          temp <- data.frame(matrix(ncol=nvars.final,nrow=tr$nrows[i]*dims[2]))
@@ -98,6 +98,7 @@ thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template) {
         
         if(MESS) {
           MessRaster<-writeValues(MessRaster,pred.rng, writeLoc)
+          if(is.null(names(pred.rng))) names(pred.rng)<-NA
           ModRaster<-writeValues(ModRaster,names(pred.rng), writeLoc)
         }
        
