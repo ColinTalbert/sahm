@@ -55,6 +55,7 @@ import traceback
 import random
 import copy
 import multiprocessing
+import time
 
 from core.modules.vistrails_module import Module, ModuleError, ModuleConnector
 from core.modules.basic_modules import File, Directory, Path, new_constant, Constant
@@ -507,7 +508,6 @@ class Model(Module):
         return GenModDoc.construct_port_doc(cls, port_name, 'out') 
 
     def compute(self):
-        
         ModelOutput = {"FIT_BRT_pluggable.r":"brt",
                        "FIT_GLM_pluggable.r":"glm",
                        "FIT_RF_pluggable.r":"rf",
@@ -539,6 +539,11 @@ class Model(Module):
         self.argsDict['rc'] = utils.MDSresponseCol(mdsFile)
         self.argsDict['cur_processing_mode'] = configuration.cur_processing_mode
       
+        if not configuration.cur_processing_mode == "single thread":
+            #This give previously launched models time to finish writing their 
+            #logs so we don't get a lock
+            time.sleep(10)
+            
         utils.runRScript(self.name, self.argsDict, self)
         
         if configuration.cur_processing_mode == "single thread":

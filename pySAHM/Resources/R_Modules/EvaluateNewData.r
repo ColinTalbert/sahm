@@ -54,7 +54,10 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                  #if evaluating on brand new data switch out the mds 
                  if(!is.null(new.tifs)){out$input$ma.name<-new.tifs
                     store.train<-out$dat$ma$train
+                    newDat<-try(read.csv(new.tifs,skip=4,nrows=2),silent=TRUE)
+                    if(class(newDat)=="try-error") produce.metrics=FALSE
                  }
+                
                  hl=readLines(out$input$ma.name,1)
                  hl=strsplit(hl,',')
                  tif.info<-readLines(out$input$ma.name,3)

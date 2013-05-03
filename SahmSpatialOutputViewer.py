@@ -574,6 +574,8 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 
         if kwargs['categorical']:
             raster_plot = self.axes.imshow(raster_array, interpolation="nearest", cmap=kwargs['cmap'], origin='upper', extent=self.getDataExtent())
+        elif kwargs['threeband']:
+            raster_plot = self.axes.imshow(raster_array, origin='upper', extent=self.getDataExtent())
         else:
             rmin = kwargs['min']
             rmax = kwargs['max']
@@ -845,21 +847,39 @@ class RasterDisplay(object):
 
 #        print "rows, cols:  ", ncols, nrows
 #        print "pixelspulled: ", self.height, self.width
-
-        ary = ds.GetRasterBand(1).ReadAsArray(xoff=xOffset, yoff=yOffset,
-                                              win_xsize=ncols, win_ysize=nrows,
-                                              buf_ysize=self.height, buf_xsize=self.width)
-        
-        if self.NoDataValue == "ExtractFromFile":
-            ndval = utils.getNDVal(self.rasterfile)
+        if self.threeBand:
+            from PIL import Image
+            r = ds.GetRasterBand(1)
+            g = ds.GetRasterBand(2)
+            b = ds.GetRasterBand(3)
+            r1 = r.ReadAsArray(xoff=xOffset, yoff=yOffset,
+                                                  win_xsize=ncols, win_ysize=nrows,
+                                                  buf_ysize=self.height, buf_xsize=self.width)
+            b1 = b.ReadAsArray(xoff=xOffset, yoff=yOffset,
+                                                  win_xsize=ncols, win_ysize=nrows,
+                                                  buf_ysize=self.height, buf_xsize=self.width)
+            g1 = g.ReadAsArray(xoff=xOffset, yoff=yOffset,
+                                                  win_xsize=ncols, win_ysize=nrows,
+                                                  buf_ysize=self.height, buf_xsize=self.width)
+            imR = Image.fromarray(r1)
+            imG = Image.fromarray(g1)
+            imB = Image.fromarray(b1)
+            return Image.merge('RGB', (imR, imG, imB))
         else:
-            ndval = float(self.NoDataValue)
-
-        if ary is None or ary.size == 1:
-                print "raster_array is None!!!/n/n"
-                return np.empty([1960, 1080])
-        else:
-                return np.ma.masked_array(ary, mask=(ary==ndval))
+            ary = ds.GetRasterBand(1).ReadAsArray(xoff=xOffset, yoff=yOffset,
+                                                  win_xsize=ncols, win_ysize=nrows,
+                                                  buf_ysize=self.height, buf_xsize=self.width)
+            
+            if self.NoDataValue == "ExtractFromFile":
+                ndval = utils.getNDVal(self.rasterfile)
+            else:
+                ndval = float(self.NoDataValue)
+    
+            if ary is None or ary.size == 1:
+                    print "raster_array is None!!!/n/n"
+                    return np.empty([1960, 1080])
+            else:
+                    return np.ma.masked_array(ary, mask=(ary==ndval))
             
     @print_timing
     def setDims(self, ax):
