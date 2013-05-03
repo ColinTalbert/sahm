@@ -16,17 +16,16 @@ VariableImportance<-function(Model,out,auc){
          cor.mat[,1]<-unlist(auc$test)-PermutePredict(out$mods$vnames,dat=out$dat$ma$test$dat[,-1],pred=out$dat$ma$test$pred,out$mods$final.mod,Model,resp=out$dat$ma$test$dat[,1])
            #I've decided not to normalize the variable importance but to give the values so people can do what they want
           # cor.mat[,1]<-cor.mat[,1]/sum(cor.mat[,1])
-    if(out$dat$split.type=="crossValidation")
+    #if(out$dat$split.type=="crossValidation")
         # cor.mat[,1:(ncol(cor.mat)-1)]<-out$cv$cor.mat
    
     colnames(cor.mat)<-names(out$dat$ma)
     rownames(cor.mat)<-out$mods$vnames
-    
+
     #writing output to a csv for Cathrine, formalize this a bit more if we decide to keep it.
-    variable.importance.csv<-file.path(dirname(dirname(out$dat$bname)),paste("VariableImportance_",out$dat$split.type,".csv",sep=""))  
-    write.table(rbind(c(paste(basename(dirname(out$dat$bname)),out$input$ma.name,sep="."),colnames(cor.mat)),
-    cbind(rownames(cor.mat),cor.mat)),file =variable.importance.csv,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=",",append=TRUE)
-    write.table("",file =variable.importance.csv,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=",",append=TRUE)
+    variable.importance.csv<-file.path(out$dat$bnameExpanded,"VariableImportance.csv")  
+    write.table(cbind(predictor=out$mods$vnames,cor.mat),file = variable.importance.csv,row.names=FALSE,col.names=TRUE,quote=FALSE,sep=",")
+    
     
      for(k in 1:length(out$mods$vnames)){
                          if((lng<-nchar(rownames(cor.mat))[k])>=20) rownames(cor.mat)[k]<-paste(substr(rownames(cor.mat)[k],1,17),"\n",substr(rownames(cor.mat)[k],18,lng),sep="")

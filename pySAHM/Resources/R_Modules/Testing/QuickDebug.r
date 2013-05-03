@@ -42,7 +42,7 @@ FitModels(ma.name=input.file,
 #================================================================#
 #                            MARS
 #================================================================#
-
+input.file="H:\\Desktop\\CheatgrassAnalysis\\BlockCV.csv"
 FitModels(ma.name=input.file,
             output.dir=output.dir,
             response.col=rc,make.p.tif=F,make.binary.tif=F,
@@ -52,9 +52,11 @@ total.time
 #================================================================#
 #                   Evaluate New Data
 #================================================================#
-ws<-"J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\WUS\\FEB2013\\mars_1\\modelWorkspace"
-output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
-new.tiffs="J://Projects//Climate_RS_Comparison//Cheatgrass_VisTrails//WUS//FEB2013//validation//MergedDataset_1.csv"
+o=I:\VisTrails\WorkingFiles\workspace\CheatgrassApplyModel\ApplyModelResults\TestingNewVariableImportance\MDS1\ApplyModel_5 mpt=FALSE ws=J:\Projects\Climate_RS_Comparison\Cheatgrass_VisTrails\WUS\FEB2013\ParameterOptimization\brt_4\modelWorkspace mes=FALSE rc=responseBinary mbt=FALSE
+
+ws<-"J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\WUS\\FEB2013\\ParameterOptimization\\brt_4\\modelWorkspace"
+output.dir="I:\\VisTrails\\WorkingFiles\\workspace\\CheatgrassApplyModel\\ApplyModelResults\\TestingNewVariableImportance\\MDS1\\ApplyModel_5"
+new.tiffs="J:/Projects/Climate_RS_Comparison/Cheatgrass_VisTrails/WUS/FEB2013/validation/MergedDataset_1.csv"
 
 load(ws)
 setwd("I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
@@ -73,8 +75,8 @@ I:\VisTrails\VisTrails_SAHM_x64_debug\Central_R\R-2.14.1\bin\x64\Rterm.exe --van
 FitModels(ma.name=input.file,
           tif.dir=NULL,
           output.dir=output.dir,
-          response.col=rc,make.p.tif=T,make.binary.tif=T,
-          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=T,opt.methods=2,squared.terms=FALSE,ScriptPath=ScriptPath)
+          response.col=rc,make.p.tif=F,make.binary.tif=F,
+          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=F,opt.methods=2,squared.terms=FALSE,ScriptPath=ScriptPath)
 
    
 #================================================================#

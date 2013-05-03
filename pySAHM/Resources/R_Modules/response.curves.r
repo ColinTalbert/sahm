@@ -72,7 +72,6 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
     }
        
      dir.create(paste(out$input$output.dir,"\\responseCurves",sep=""))
-     rsp.out<-file.path(out$input$output.dir,"response.curves.csv")
      rsp.dat<-NA
     
       for (k in c(1,2)){
@@ -109,7 +108,7 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
                } 
          if(k==1) graphics.off()     
        }
-       write.csv(rsp.dat,file=rsp.out,col.names=FALSE,sep=",")
+       write.csv(rsp.dat,file=file.path(out$dat$bnameExpanded,"ResponseCurves.csv")  ,col.names=FALSE,sep=",")
                 
   }         
                 
