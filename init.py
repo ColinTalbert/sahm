@@ -1128,7 +1128,10 @@ class PARC(Module):
         if template_fname == 'hdr':
             template_fname = os.path.split(template_path)[1]
         
-        output_dname = os.path.join(utils.getrootdir(), 'PARC_' + template_fname)
+        if self.hasInputFromPort("outputFolderName"):
+            output_dname = os.path.join(utils.getrootdir(), 'PARC_' + self.getInputFromPort("outputFolderName"))
+        else:
+            output_dname = os.path.join(utils.getrootdir(), 'PARC_' + template_fname)
         if not os.path.exists(output_dname):
             os.mkdir(output_dname)
         
@@ -1142,6 +1145,8 @@ class PARC(Module):
 
         if self.hasInputFromPort("ignoreNonOverlap"):
             ourPARC.ignoreNonOverlap = self.getInputFromPort("ignoreNonOverlap")
+
+        
 
         workingCSV = os.path.join(output_dname, "tmpFilesToPARC.csv")
 
