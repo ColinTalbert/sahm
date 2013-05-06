@@ -3,23 +3,29 @@ VariableImportance<-function(Model,out,auc){
     
     cor.mat<-matrix(nrow=length(out$mods$vnames),ncol=length(out$dat$ma))
     #remove the response colum
-     if(out$input$script.name=="rf") trainPred<-pred.fct(model=out$mods$final,x=out$dat$ma$train$dat,Model=out$input$script.name)
+     if(out$input$script.name=="rf") {
+        trainPred<-pred.fct(model=out$mods$final,x=out$dat$ma$train$dat,Model=out$input$script.name)
+        auc$train<-roc(out$dat$ma$train$dat[,1],trainPred)
+     }
      else trainPred=out$dat$ma$train$pred
-    
-    cor.mat[,ncol(cor.mat)]<-PermutePredict(out$mods$vnames,dat=out$dat$ma$train$dat[,-1],pred=trainPred,out$mods$final.mod,Model)
+       #I have to add 1 to the drop in AUC to ensure it's greater than zero then I can normalize
+      
+    cor.mat[,ncol(cor.mat)]<-unlist(auc$train)-PermutePredict(out$mods$vnames,dat=out$dat$ma$train$dat[,-1],pred=trainPred,out$mods$final.mod,Model,resp=out$dat$ma$train$dat[,1])
+    #cor.mat[,ncol(cor.mat)]<-cor.mat[,ncol(cor.mat)]/sum(cor.mat[,ncol(cor.mat)])
     if(out$dat$split.type%in%c("eval","test"))
-         cor.mat[,1]<-PermutePredict(out$mods$vnames,dat=out$dat$ma$test$dat[,-1],pred=out$dat$ma$test$pred,out$mods$final.mod,Model)
-    if(out$dat$split.type=="crossValidation")
-         cor.mat[,1:(ncol(cor.mat)-1)]<-out$cv$cor.mat
+         cor.mat[,1]<-unlist(auc$test)-PermutePredict(out$mods$vnames,dat=out$dat$ma$test$dat[,-1],pred=out$dat$ma$test$pred,out$mods$final.mod,Model,resp=out$dat$ma$test$dat[,1])
+           #I've decided not to normalize the variable importance but to give the values so people can do what they want
+          # cor.mat[,1]<-cor.mat[,1]/sum(cor.mat[,1])
+    #if(out$dat$split.type=="crossValidation")
+        # cor.mat[,1:(ncol(cor.mat)-1)]<-out$cv$cor.mat
    
     colnames(cor.mat)<-names(out$dat$ma)
     rownames(cor.mat)<-out$mods$vnames
-    
+
     #writing output to a csv for Cathrine, formalize this a bit more if we decide to keep it.
-    variable.importance.csv<-file.path(dirname(dirname(out$dat$bname)),paste("VariableImportance_",out$dat$split.type,".csv",sep=""))  
-    write.table(rbind(c(paste(basename(dirname(out$dat$bname)),out$input$ma.name,sep="."),colnames(cor.mat)),
-    cbind(rownames(cor.mat),cor.mat)),file =variable.importance.csv,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=",",append=TRUE)
-    write.table("",file =variable.importance.csv,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=",",append=TRUE)
+    variable.importance.csv<-file.path(out$dat$bnameExpanded,"VariableImportance.csv")  
+    write.table(cbind(predictor=out$mods$vnames,cor.mat),file = variable.importance.csv,row.names=FALSE,col.names=TRUE,quote=FALSE,sep=",")
+    
     
      for(k in 1:length(out$mods$vnames)){
                          if((lng<-nchar(rownames(cor.mat))[k])>=20) rownames(cor.mat)[k]<-paste(substr(rownames(cor.mat)[k],1,17),"\n",substr(rownames(cor.mat)[k],18,lng),sep="")
@@ -33,8 +39,8 @@ VariableImportance<-function(Model,out,auc){
 
 ######################## copied from append out
   par(mar=c(5,17,4,2))
-  
-    plot(c(min(0,min(cor.mat)),(max(cor.mat)+.1)),y=c(-.5,(length(out$mods$vnames)+.5)),type="n",xlab="Importance",main="Importance using one minus the correlation \nof predictions with and without permutation of the given independent variable",ylab="",yaxt="n",cex.lab=1.4)
+   
+    plot(c(min(0,min(cor.mat)),(max(cor.mat)+.1)),y=c(-.5,(length(out$mods$vnames)+.5)),type="n",xlab="Importance",main="Importance using the change in AUC when each predictor is permuted",ylab="",yaxt="n",cex.lab=1.4)
     grid()
       if(out$dat$split.type!="crossValidation"){
          rect(xleft=0,ybottom=ymiddle,xright=xright[,ncol(xright)],ytop=ymiddle+offSet,col="blue",lwd=2)
@@ -55,17 +61,19 @@ VariableImportance<-function(Model,out,auc){
     title(ylab="Variables",line=15,cex.lab=1.4,font.lab=2)
 } 
 
-PermutePredict<-function(pred.names,dat,pred,modelFit,Model){
-    cor.vect<-rep(NA,times=length(pred.names))
-   
+PermutePredict<-function(pred.names,dat,pred,modelFit,Model,resp){
+    AUC<-rep(NA,times=length(pred.names)) 
+     
      for (i in 1:length(pred.names)){
            indx<-match(pred.names[i],names(dat))
            Dat<-dat
            Dat[,indx]<-Dat[sample(1:dim(dat)[1]),indx]
            options(warn=-1)
            new.pred<-as.vector(pred.fct(model=modelFit,x=Dat,Model=Model))
+           #have to use ROC here because auc in presence absence incorrectly assumes auc will be greater than .5
+           AUC[i]<-roc(resp,new.pred)
            options(warn=0)
-           cor.vect[i]<-1-cor(pred,new.pred)  
+           
         }
-      return(cor.vect)
+      return(AUC)
 }   

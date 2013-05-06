@@ -7,8 +7,8 @@
 setwd("I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
 ScriptPath="I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
 
-#setwd("I:\\VisTrails\\DevWorkspace\\Colin\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
-#ScriptPath="I:\\VisTrails\\DevWorkspace\\Colin\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
+setwd("I:\\VisTrails\\DevWorkspace\\Colin\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\DevWorkspace\\Colin\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
 source("GLM.helper.fcts.r")
@@ -52,16 +52,18 @@ total.time
 #================================================================#
 #                   Evaluate New Data
 #================================================================#
+o=I:\VisTrails\WorkingFiles\workspace\CheatgrassApplyModel\ApplyModelResults\TestingNewVariableImportance\MDS1\ApplyModel_5 mpt=FALSE ws=J:\Projects\Climate_RS_Comparison\Cheatgrass_VisTrails\WUS\FEB2013\ParameterOptimization\brt_4\modelWorkspace mes=FALSE rc=responseBinary mbt=FALSE
 
-new.tiffs="J:\\Projects\\NPScape\\DerivedData\\March2013\\MergedDataset_2.csv" 
-ws="J:\\Projects\\NPScape\\DerivedData\\March2013\\brt_1\\modelWorkspace" 
-output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
+ws<-"J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\WUS\\FEB2013\\ParameterOptimization\\brt_4\\modelWorkspace"
+output.dir="I:\\VisTrails\\WorkingFiles\\workspace\\CheatgrassApplyModel\\ApplyModelResults\\TestingNewVariableImportance\\MDS1\\ApplyModel_5"
+new.tiffs="J:/Projects/Climate_RS_Comparison/Cheatgrass_VisTrails/WUS/FEB2013/validation/MergedDataset_1.csv"
+
 load(ws)
 setwd("I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
 ScriptPath="I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
 source(file.path(ScriptPath,"LoadRequiredCode.r"))
 source(paste(toupper(out$input$script.name),".helper.fcts.r",sep=""))
-EvaluateNewData(workspace=ws,out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=FALSE,new.tifs=new.tiffs,out=out)
+EvaluateNewData(workspace=ws,out.dir=output.dir,b.tif=FALSE,p.tif=FALSE,mess=FALSE,new.tifs=new.tiffs,out=out)
 
 #================================================================#
 I:\VisTrails\VisTrails_SAHM_x64_debug\Central_R\R-2.14.1\bin\x64\Rterm.exe --vanilla -f I:\VisTrails\VisTrails_SAHM_x64_debug\VisTrails\vistrails\packages\sahm_MarianDev\pySAHM\Resources\R_Modules\EvaluateNewData.r --args mbt=TRUE mpt=TRUE ws="C:\temp\SAHM_workspace\rf_1\modelWorkspace" mes=FALSE o=C:\temp\SAHM_workspace\rf_3\modelWorkspace\rf_1
