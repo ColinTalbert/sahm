@@ -1103,7 +1103,8 @@ class PARC(Module):
                                 ('PredictorList', '(gov.usgs.sahm:PredictorList:Other)'),
                                 ('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                 ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
-                                ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True})]
+                                ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
+                                ('outputFolderName', '(edu.utah.sci.vistrails.basic:String)', {'optional':True}),]
 
     _output_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
     
