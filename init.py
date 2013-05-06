@@ -186,10 +186,13 @@ def menu_items():
                         configuration.write_to_dom(dom, element)
 
     def isFortCondorAvailible():
-        cmd = ["condor_store_cred", "-n",  "igskbacbws425", "query"]
-        p = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        ret = p.communicate()
-        return ret[0].find("A credential is stored and is valid") != -1
+        try:
+            cmd = ["condor_store_cred", "-n",  "igskbacbws425", "query"]
+            p = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+            ret = p.communicate()
+            return ret[0].find("A credential is stored and is valid") != -1
+        except:
+            return False
 
     def checkAsyncModels():
         utils.launch_RunMonitorApp()
