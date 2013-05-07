@@ -186,10 +186,13 @@ def menu_items():
                         configuration.write_to_dom(dom, element)
 
     def isFortCondorAvailible():
-        cmd = ["condor_store_cred", "-n",  "igskbacbws425", "query"]
-        p = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        ret = p.communicate()
-        return ret[0].find("A credential is stored and is valid") != -1
+        try:
+            cmd = ["condor_store_cred", "-n",  "igskbacbws425", "query"]
+            p = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+            ret = p.communicate()
+            return ret[0].find("A credential is stored and is valid") != -1
+        except:
+            return False
 
     def checkAsyncModels():
         utils.launch_RunMonitorApp()
@@ -1103,7 +1106,8 @@ class PARC(Module):
                                 ('PredictorList', '(gov.usgs.sahm:PredictorList:Other)'),
                                 ('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                 ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
-                                ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True})]
+                                ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
+                                ('outputFolderName', '(edu.utah.sci.vistrails.basic:String)', {'optional':True}),]
 
     _output_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
     
@@ -1124,7 +1128,10 @@ class PARC(Module):
         if template_fname == 'hdr':
             template_fname = os.path.split(template_path)[1]
         
-        output_dname = os.path.join(utils.getrootdir(), 'PARC_' + template_fname)
+        if self.hasInputFromPort("outputFolderName"):
+            output_dname = os.path.join(utils.getrootdir(), 'PARC_' + self.getInputFromPort("outputFolderName"))
+        else:
+            output_dname = os.path.join(utils.getrootdir(), 'PARC_' + template_fname)
         if not os.path.exists(output_dname):
             os.mkdir(output_dname)
         
@@ -1138,6 +1145,8 @@ class PARC(Module):
 
         if self.hasInputFromPort("ignoreNonOverlap"):
             ourPARC.ignoreNonOverlap = self.getInputFromPort("ignoreNonOverlap")
+
+        
 
         workingCSV = os.path.join(output_dname, "tmpFilesToPARC.csv")
 
