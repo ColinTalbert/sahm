@@ -484,7 +484,9 @@ class Model(Module):
                     ('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)'),
                     ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
-                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False})]
+                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+                    ('outputFolderName', '(edu.utah.sci.vistrails.basic:String)', {'optional':True}),]
+    
     _output_ports = [('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'), 
                      ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
                      ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)'),
@@ -521,7 +523,9 @@ class Model(Module):
         self.ModelAbbrev = ModelOutput[self.name]
         
         #maxent R and java output write to the same directory
-        if self.ModelAbbrev == "maxent":
+        if self.hasInputFromPort("outputFolderName"):
+            self.output_dname = utils.mknextdir(self.getInputFromPort("outputFolderName"))
+        elif self.ModelAbbrev == "maxent":
             self.output_dname=self.MaxentPath
         else: 
             self.output_dname = utils.mknextdir(prefix=self.ModelAbbrev + '_')   
@@ -1586,6 +1590,7 @@ class ModelSelectionCrossValidation(Module):
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('nFolds', '(edu.utah.sci.vistrails.basic:Integer)', 
                         {'defaults':'["10"]', 'optional':True}),
+                    ('SpatialSplit', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
                     ('Stratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
                     ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
@@ -1601,6 +1606,7 @@ class ModelSelectionCrossValidation(Module):
         writetolog("\nGenerating Cross Validation split ", True)
         port_map = {'inputMDS':('i', utils.dir_path_value, True),
                     'nFolds':('nf', None, True),
+                    'SpatialSplit':('spt', utils.R_boolean, True),
                     'Stratify':('stra', utils.R_boolean, True)}
         
         argsDict = utils.map_ports(self, port_map)
@@ -1612,8 +1618,7 @@ class ModelSelectionCrossValidation(Module):
 
         if argsDict["nf"] <= 0:
             raise ModuleError(self, "Number of Folds must be greater than 0")
-        argsDict["es"] = "TRUE"
-
+ 
         if self.hasInputFromPort("Seed"):
             seed = str(self.getInputFromPort("Seed"))
         else:
