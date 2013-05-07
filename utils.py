@@ -466,14 +466,15 @@ def runRScript(script, args_dict, module=None):
     command = ' '.join(command_arr)
     
     writetolog("\nStarting R Processing of "  + script , True)
-    writetolog("    args: " + args_str, False, False)
-    writetolog("    command: " + command, False, False)
+    #writetolog("    args: " + args_str, False, False)
+    
     #print "RUNNING COMMAND:", command_arr
     
     runRModelPy = os.path.join(os.path.dirname(__file__), "pySAHM", "runRModel.py")
     command_arr = [sys.executable, runRModelPy] + command_arr
     if args_dict.get("cur_processing_mode", "single thread") == "single thread":
         command_arr += ["mc=FALSE"]
+        writetolog("    command: " + " ".join(command_arr), False, False)
         p = subprocess.Popen(command_arr, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         ret = p.communicate()
         
@@ -504,6 +505,7 @@ def runRScript(script, args_dict, module=None):
         writetolog("\nFinished R Processing of " + script, True)
     elif args_dict.get("cur_processing_mode", "single thread") == "multiple cores asynchronously":
         command_arr += ["mc=FALSE"]
+        writetolog("    command: " + " ".join(command_arr), False, False)
         if args_dict.has_key("o"):
             stdErrFname = os.path.join(args_dict['o'], "stdErr.txt")
             stdOutFname = os.path.join(args_dict['o'], "stdOut.txt")

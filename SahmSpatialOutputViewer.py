@@ -572,9 +572,9 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 #        rmin = np.amin(raster_array)
 #        rmax = np.amax(raster_array)
 
-        if kwargs['categorical']:
+        if kwargs.get('categorical', False):
             raster_plot = self.axes.imshow(raster_array, interpolation="nearest", cmap=kwargs['cmap'], origin='upper', extent=self.getDataExtent())
-        elif kwargs['threeband']:
+        elif kwargs.get('threeband', False):
             raster_plot = self.axes.imshow(raster_array, origin='upper', extent=self.getDataExtent())
         else:
             rmin = kwargs['min']
