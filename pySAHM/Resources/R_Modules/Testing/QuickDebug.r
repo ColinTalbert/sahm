@@ -7,8 +7,8 @@
 setwd("I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
 ScriptPath="I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
 
-setwd("I:\\VisTrails\\DevWorkspace\\Colin\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
-ScriptPath="I:\\VisTrails\\DevWorkspace\\Colin\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
+#setwd("I:\\VisTrails\\DevWorkspace\\Colin\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
+#ScriptPath="I:\\VisTrails\\DevWorkspace\\Colin\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
 source("GLM.helper.fcts.r")
@@ -82,6 +82,8 @@ FitModels(ma.name=input.file,
 #================================================================#
 #                            RF
 #================================================================#
+input.file<-"J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\WUS\\FEB2013\\ParameterOptimization_SpatialCV\\CovariateCorrelationOutputMDS_mds1_kde_cont.csv"
+
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,

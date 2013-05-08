@@ -16,9 +16,10 @@ VariableImportance<-function(Model,out,auc){
          cor.mat[,1]<-unlist(auc$test)-PermutePredict(out$mods$vnames,dat=out$dat$ma$test$dat[,-1],pred=out$dat$ma$test$pred,out$mods$final.mod,Model,resp=out$dat$ma$test$dat[,1])
            #I've decided not to normalize the variable importance but to give the values so people can do what they want
           # cor.mat[,1]<-cor.mat[,1]/sum(cor.mat[,1])
-    #if(out$dat$split.type=="crossValidation")
-        # cor.mat[,1:(ncol(cor.mat)-1)]<-out$cv$cor.mat
    
+    if(out$dat$split.type=="crossValidation")
+         cor.mat[,1:(ncol(cor.mat)-1)]<- -apply(out$cv$cor.mat,1,"-",as.vector(unlist(auc)[1:(ncol(cor.mat)-1)]))
+
     colnames(cor.mat)<-names(out$dat$ma)
     rownames(cor.mat)<-out$mods$vnames
 
