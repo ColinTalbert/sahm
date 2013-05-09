@@ -1591,7 +1591,7 @@ class ModelSelectionCrossValidation(Module):
                     ('nFolds', '(edu.utah.sci.vistrails.basic:Integer)', 
                         {'defaults':'["10"]', 'optional':True}),
                     ('SpatialSplit', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
-                    ('Stratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
+                    ('Stratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
                     ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
 
