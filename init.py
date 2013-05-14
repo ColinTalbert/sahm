@@ -1590,8 +1590,8 @@ class ModelSelectionCrossValidation(Module):
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('nFolds', '(edu.utah.sci.vistrails.basic:Integer)', 
                         {'defaults':'["10"]', 'optional':True}),
-                    ('SpatialSplit', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
-                    ('Stratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
+                    ('SpatialSplit', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+                    ('Stratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
                     ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
 
@@ -1606,7 +1606,7 @@ class ModelSelectionCrossValidation(Module):
         writetolog("\nGenerating Cross Validation split ", True)
         port_map = {'inputMDS':('i', utils.dir_path_value, True),
                     'nFolds':('nf', None, True),
-                    'SpatialSplit':('spt', utils.R_boolean, True),
+                    'SpatialSplit':('spt', utils.R_boolean, False),
                     'Stratify':('stra', utils.R_boolean, True)}
         
         argsDict = utils.map_ports(self, port_map)
@@ -1623,9 +1623,12 @@ class ModelSelectionCrossValidation(Module):
             seed = str(self.getInputFromPort("Seed"))
         else:
             seed = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
+        if not argsDict.has_key('spt'):
+                argsDict['spt'] = 'FALSE'
+       
         writetolog("    seed used for Split = " + str(seed))
         argsDict["seed"] = str(seed)
-
+        
         utils.runRScript("CrossValidationSplit.r", argsDict, self)
         
         output = os.path.join(outputMDS)
