@@ -239,26 +239,32 @@ def mknextfile(prefix, suffix="", directory=""):
     file.close()
     return filename
 
-def mknextdir(prefix, directory=""):
+def mknextdir(prefix, directory="", skipSequence=False):
     global _roottempdir
     if directory == "":
         directory = _roottempdir
-    files = os.listdir(directory)
-    seq = 0
-    for f in files:
-        if (f.startswith(prefix) and
-            not os.path.isfile(f)):
-            try:
-                f_seq = int(f.replace(prefix, ''))
-                if f_seq > seq:
-                    seq = f_seq
-            except ValueError:
-                #someone has renamed a folder to a non-numeric string
-                pass 
-    seq += 1
-    dirname = prefix + str(seq)
-    os.mkdir(os.path.join(directory, dirname))
-    return os.path.join(directory, dirname)
+    
+    if skipSequence:
+        dirname = os.path.join(directory, prefix)
+        if os.path.exists(dirname):
+            shutil.rmtree(dirname)
+    else:   
+        files = os.listdir(directory)
+        seq = 0
+        for f in files:
+            if (f.startswith(prefix) and
+                not os.path.isfile(f)):
+                try:
+                    f_seq = int(f.replace(prefix, ''))
+                    if f_seq > seq:
+                        seq = f_seq
+                except ValueError:
+                    #someone has renamed a folder to a non-numeric string
+                    pass 
+        seq += 1
+        dirname = os.path.join(directory, prefix + str(seq))
+    os.mkdir(dirname)
+    return dirname
 
 def setrootdir(session_dir):
     global _roottempdir

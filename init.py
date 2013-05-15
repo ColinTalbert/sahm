@@ -524,7 +524,7 @@ class Model(Module):
         
         #maxent R and java output write to the same directory
         if self.hasInputFromPort("outputFolderName"):
-            self.output_dname = utils.mknextdir(self.getInputFromPort("outputFolderName"))
+            self.output_dname = utils.mknextdir(self.getInputFromPort("outputFolderName"),skipSequence=True)
         elif self.ModelAbbrev == "maxent":
             self.output_dname=self.MaxentPath
         else: 
