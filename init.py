@@ -485,7 +485,7 @@ class Model(Module):
                     ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
-                    ('outputFolderName', '(edu.utah.sci.vistrails.basic:String)', {'optional':True}),]
+                    ('outputFolderName', '(edu.utah.sci.vistrails.basic:String)'),]
     
     _output_ports = [('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'), 
                      ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
@@ -523,12 +523,16 @@ class Model(Module):
         self.ModelAbbrev = ModelOutput[self.name]
         
         #maxent R and java output write to the same directory
+        prefix = self.ModelAbbrev
         if self.hasInputFromPort("outputFolderName"):
-            self.output_dname = utils.mknextdir(self.getInputFromPort("outputFolderName"),skipSequence=True)
-        elif self.ModelAbbrev == "maxent":
+            prefix += '_' + self.getInputFromPort("outputFolderName")
+        prefix += '_' 
+            
+        if self.ModelAbbrev == "maxent":
             self.output_dname=self.MaxentPath
-        else: 
-            self.output_dname = utils.mknextdir(prefix=self.ModelAbbrev + '_')   
+        else:
+            self.output_dname = utils.mknextdir(prefix=prefix)
+               
         self.argsDict = utils.map_ports(self, self.port_map)
         
         mdsFile = utils.getFileRelativeToCurrentVT(self.argsDict['c'])
