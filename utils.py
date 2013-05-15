@@ -234,8 +234,10 @@ def mknextfile(prefix, suffix="", directory=""):
                 if int(old_seq) > seq:
                     seq = int(old_seq)
     seq += 1
-    filename = prefix + str(seq) + suffix
-    return os.path.join(directory, filename)
+    filename = os.path.join(directory, prefix + str(seq) + suffix)
+    file = open(filename, 'w')
+    file.close()
+    return filename
 
 def mknextdir(prefix, directory=""):
     global _roottempdir
@@ -952,11 +954,19 @@ def getParentDir(f, x=None):
 
 def getFileRelativeToCurrentVT(fname):
     try:
+        open(r"c:\temp\test37.txt", "w").write("preApp")
         app = gui.application.get_vistrails_application()()
+        open(r"c:\temp\test37.txt", "w").write("postApp")
         curlocator = app.get_vistrail().locator.name
+        open(r"c:\temp\test37.txt", "w").write(curlocator)
         curVTdir = os.path.split(curlocator)[0]
+        print curVTdir
         return os.path.abspath(os.path.join(curVTdir, fname))
-    except:
+    except Exception, e:
         #if anything goes wrong with this convenience function 
         #just return their original file name
+        import traceback
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        traceback.print_exc(file=open(r"c:\temp\test37.txt", "w"))
+        #open(r"c:\temp\test37.txt", "w").write(str(e))
         return fname
