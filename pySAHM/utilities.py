@@ -256,14 +256,14 @@ def waitForProcessesToFinish(processQueue, maxCount=1):
     
 def getProcessCount(strProcessingMode):
     '''The number of concurrently running jobs is dependent on the currently 
-    selected processingMode.  This function returns the number of jobs to allow.
+    selected processingMode. 
+    If on Condor then send them all and let Condor manage the Queue.
+    else we will be running n-1 jobs (this function is only used by PARC now)
     '''
-    if strProcessingMode == "multiple cores asynchronously":
-        return multiprocessing.cpu_count() - 1 
-    elif strProcessingMode == "single thread":
-        return  1
-    elif strProcessingMode == "FORT Condor":
+    if strProcessingMode == "FORT Condor":
         return  2**32
+    else:
+        return multiprocessing.cpu_count() - 1
     
 #Spatial utilities
 def mosaicAllTifsInFolder(inDir, outFileName, gdal_merge):

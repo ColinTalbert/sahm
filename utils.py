@@ -472,8 +472,11 @@ def runRScript(script, args_dict, module=None):
     
     runRModelPy = os.path.join(os.path.dirname(__file__), "pySAHM", "runRModel.py")
     command_arr = [sys.executable, runRModelPy] + command_arr
-    if args_dict.get("cur_processing_mode", "single thread") == "single thread":
-        command_arr += ["mc=FALSE"]
+    processing_mode = args_dict.get("cur_processing_mode", "single models sequentially (n - 1 cores each)")
+    if processing_mode == "single models sequentially (n - 1 cores each)":
+        #we waiting for each model to finish before moving on.
+        #but set the mc (multiple core) flag appropriately
+        command_arr += ["multicore=TRUE"]
         writetolog("    command: " + " ".join(command_arr), False, False)
         p = subprocess.Popen(command_arr, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         ret = p.communicate()
@@ -503,8 +506,8 @@ def runRScript(script, args_dict, module=None):
             
         del(ret)
         writetolog("\nFinished R Processing of " + script, True)
-    elif args_dict.get("cur_processing_mode", "single thread") == "multiple cores asynchronously":
-        command_arr += ["mc=FALSE"]
+    elif processing_mode == "multiple models simultaneously (1 core each)":
+        command_arr += ["multicore=FALSE"]
         writetolog("    command: " + " ".join(command_arr), False, False)
         if args_dict.has_key("o"):
             stdErrFname = os.path.join(args_dict['o'], "stdErr.txt")
@@ -517,8 +520,8 @@ def runRScript(script, args_dict, module=None):
             stdOutFile = DEVNULL
         p = subprocess.Popen(command_arr, stderr=stdErrFile, stdout=stdOutFile)
         writetolog("\n R Processing launched asynchronously " + script, True) 
-    elif args_dict.get("cur_processing_mode", "single thread") == "FORT Condor":
-        command_arr += ["mc=True"]
+    elif processing_mode == "FORT Condor":
+        command_arr += ["multicore=True"]
         runModelOnCondor(script, args_dict, command_arr)
         writetolog("\n R Processing launched using Condor " + script, True)  
 

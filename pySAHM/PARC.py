@@ -152,9 +152,8 @@ class PARC:
             
         # Clip and reproject each source image.
         for image in self.inputs:
-            if self.processingMode == "multiple cores asynchronously":
-                #if we're running to many jobs wait for one to finish
-                utilities.waitForProcessesToFinish(processQueue, coreCount)
+            #if we're running to many jobs wait for one to finish
+            utilities.waitForProcessesToFinish(processQueue, coreCount)
                         
             inPath, inFileName = os.path.split(image[0])          
             outFile, ext = os.path.splitext(inFileName)
@@ -173,11 +172,11 @@ class PARC:
             else:
                 processQueue.append(self.gen_singlePARC_thread(image, outFile))
 
-        #wait for the last set of processes to finish up
-        if self.processingMode == "multiple cores asynchronously":
-            utilities.waitForProcessesToFinish(processQueue)   
-        elif self.processingMode == "FORT Condor":
+        #wait for the last set of processes to finish up 
+        if self.processingMode == "FORT Condor":
             self.waitForCondorProcessesToFinish(processQueue)
+        else:
+            utilities.waitForProcessesToFinish(processQueue)
             
         print "done"
             

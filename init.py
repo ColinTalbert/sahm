@@ -145,8 +145,8 @@ def menu_items():
         groupBox = QtGui.QGroupBox("Processing mode:")
         vbox = QtGui.QVBoxLayout()
 
-        for mode in [("single thread", True), 
-                     ("multiple cores asynchronously", True), 
+        for mode in [("multiple models simultaneously (1 core each)", True),
+                     ("single models sequentially (n - 1 cores each)", True),  
                      ("FORT Condor", isFortCondorAvailible())]:
             radio =  QtGui.QRadioButton(mode[0])
             radio.setChecked(mode[0] == configuration.cur_processing_mode)
@@ -540,29 +540,30 @@ class Model(Module):
       
         self.argsDict['o'] = self.output_dname
         self.argsDict['rc'] = utils.MDSresponseCol(mdsFile)
-        self.argsDict['cur_processing_mode'] = configuration.cur_processing_mode
+        self.argsDict['cur_processing_mode'] = configuration.cur_processing_mode    
       
-        if not configuration.cur_processing_mode == "single thread":
+        if not configuration.cur_processing_mode == "multiple models simultaneously (1 core each)":
             #This give previously launched models time to finish writing their 
             #logs so we don't get a lock
             time.sleep(10)
             
         utils.runRScript(self.name, self.argsDict, self)
         
-        if configuration.cur_processing_mode == "single thread":
-            if not self.argsDict.has_key('mes'):
-                self.argsDict['mes'] = 'FALSE'
-            self.setModelResult("_prob_map.tif", 'ProbabilityMap', 'mpt')
-            self.setModelResult("_bin_map.tif", 'BinaryMap', 'mbt')
-            self.setModelResult("_resid_map.tif", 'ResidualsMap', 'mes')
-            self.setModelResult("_mess_map.tif", 'MessMap', 'mes')
-            self.setModelResult("_MoD_map.tif", 'MoDMap', 'mes')
-            self.setModelResult("_output.txt", 'Text_Output')
-            self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot')
-            self.setModelResult("_variable.importance.jpg", 'ModelVariableImportance')  
-            writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
-        else:
+        if not configuration.cur_processing_mode == "single models sequentially (n - 1 cores each)":
             utils.launch_RunMonitorApp()
+        
+        #set our output ports
+        if not self.argsDict.has_key('mes'):
+            self.argsDict['mes'] = 'FALSE'
+        self.setModelResult("_prob_map.tif", 'ProbabilityMap', 'mpt')
+        self.setModelResult("_bin_map.tif", 'BinaryMap', 'mbt')
+        self.setModelResult("_resid_map.tif", 'ResidualsMap', 'mes')
+        self.setModelResult("_mess_map.tif", 'MessMap', 'mes')
+        self.setModelResult("_MoD_map.tif", 'MoDMap', 'mes')
+        self.setModelResult("_output.txt", 'Text_Output')
+        self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot')
+        self.setModelResult("_variable.importance.jpg", 'ModelVariableImportance')  
+        writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
         
         modelWorkspace = utils.create_dir_module(self.output_dname)
         self.setResult("modelWorkspace", modelWorkspace)
