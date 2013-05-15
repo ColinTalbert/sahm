@@ -187,7 +187,7 @@ def menu_items():
 
     def isFortCondorAvailible():
         try:
-            cmd = ["condor_store_cred", "-n",  "igskbacbws425", "query"]
+            cmd = ["condor_store_cred", "-n",  "igskbacbws108", "query"]
             p = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
             ret = p.communicate()
             return ret[0].find("A credential is stored and is valid") != -1
@@ -484,7 +484,8 @@ class Model(Module):
                     ('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)'),
                     ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
-                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False})]
+                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+                    ('outputName', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'[""]', 'optional':True})]
     _output_ports = [('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'), 
                      ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
                      ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)'),
@@ -1086,9 +1087,6 @@ class FieldDataAggregateAndWeight(Module):
         output_fname = utils.mknextfile(prefix='FDAW_', suffix='.csv')
         writetolog("    output_fname=" + output_fname, True, False)
         FDAWParams['output'] = output_fname
-        
-        output_fname = utils.mknextfile(prefix='FDAW_', suffix='.csv')
-        writetolog("    output_fname=" + output_fname, True, False)
         
         ourFDAW = FDAW.FieldDataQuery()
         utils.PySAHM_instance_params(ourFDAW, FDAWParams) 
