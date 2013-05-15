@@ -63,6 +63,8 @@ from numpy import *
 import numpy as np
 
 import utilities
+import SpatialUtilities
+
 from PARC import PARC
 
 def main(args_in):
@@ -87,38 +89,21 @@ def main(args_in):
     parser.add_option("-a", dest="aggregation") 
     
     parser.add_option('-i', dest='ignoreNonOverlap',default=False, action="store_true")
-    parser.add_option('--gt0', dest='gt0')
-    parser.add_option('--gt3', dest='gt3')
-    parser.add_option('--tNorth', dest='tNorth')
-    parser.add_option('--tSouth', dest='tSouth')
-    parser.add_option('--tEast', dest='tEast')
-    parser.add_option('--tWest', dest='tWest')
-    parser.add_option('--tHeight', dest='height')
-    parser.add_option('--tWidth', dest='width')
     
     (options, args) = parser.parse_args(args_in)
     
+    # Process command-line args.  tin
     ourPARC = PARC()
     ourPARC.verbose = options.verbose
     ourPARC.template = options.template
+    ourPARC.templateRaster = SpatialUtilities.SAHMRaster(options.template)
     outDir = os.path.split(options.dest)[0]
     ourPARC.outDir = outDir
     ourPARC.logger = utilities.logger(outDir, ourPARC.verbose)
     ourPARC.writetolog = ourPARC.logger.writetolog
-    ourPARC.template_params = ourPARC.getRasterParams(options.template)
     
     if options.ignoreNonOverlap:
-        gt = list(ourPARC.template_params['gt'])
-        gt[0] = float(options.gt0)
-        gt[3] = float(options.gt3)
-        ourPARC.template_params["gt"] = tuple(gt)
-        
-        ourPARC.template_params['tNorth'] = float(options.tNorth)
-        ourPARC.template_params['tSouth'] = float(options.tSouth)
-        ourPARC.template_params['tEast'] = float(options.tEast)
-        ourPARC.template_params['tWest'] = float(options.tWest)
-        ourPARC.template_params['height'] = int(options.height)
-        ourPARC.template_params['width'] = int(options.width)
+        ourPARC.shrink_template_extent(SpatialUtilities.SAHMRaster(options.source))
     
     ourPARC.parcFile([options.source, options.categorical, options.resampling, options.aggregation], options.dest)
 
