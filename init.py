@@ -1209,7 +1209,7 @@ class Reclassifier(Module):
     '''
 #    __doc__ = GenModDoc.construct_module_doc('RasterFormatConverter')
 
-    _input_ports = [("inputRaster", "(edu.utah.sci.vistrails.basic:File)"),
+    _input_ports = [("inputRaster", "(edu.utah.sci.vistrails.basic:Path)"),
                     ('reclassFile', '(edu.utah.sci.vistrails.basic:File)'),
                     ('reclassFileContents', '(edu.utah.sci.vistrails.basic:String)'),
                     ]

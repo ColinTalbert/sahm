@@ -500,7 +500,9 @@ def intermediaryReprojection(sourceRaster, templateRaster, outRasterFName,
     outputFile = SAHMRaster(outRasterFName)
     outputFile.getParams(templateRaster.ds)
     outputFile.NoData = sourceRaster.NoData
+    outputFile.pixelType = sourceRaster.pixelType
     outputFile.signedByte = sourceRaster.signedByte
+    
     if matchTemplateCellSize:
         targetCellSize, numSourcePerTarget = (templateRaster.xScale, 1)
     else:

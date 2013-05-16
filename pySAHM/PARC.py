@@ -199,7 +199,7 @@ class PARC:
             pyEx = sys.executable
             command_arr = [pyEx, executable] + args
             command = ' '.join(command_arr)
-            #self.logger.writetolog(command, False, False)
+            self.logger.writetolog(command, False, False)
             
             if self.processingMode == "FORT Condor":
                 workspace, fname = os.path.split(os.path.abspath(outFile))
