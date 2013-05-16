@@ -153,15 +153,7 @@ class MDSBuilder(object):
         
         #5) one more validateArgs step that needs to happen after the above two steps
         if self.probSurfacefName <> '':
-            extentMatch = True
-            if self.templateSurface.xScale != self.probSurface.xScale: extentMatch = False
-            if self.templateSurface.yScale != self.probSurface.yScale: extentMatch = False
-            if self.templateSurface.width != self.probSurface.width: extentMatch = False
-            if self.templateSurface.height != self.probSurface.height: extentMatch = False
-            if self.templateSurface.east != self.probSurface.east: extentMatch = False
-            if self.templateSurface.north != self.probSurface.north: extentMatch = False
-            if self.templateSurface.prj != self.probSurface.prj: extentMatch = False
-            if not extentMatch:
+            if not SpatialUtilities.extentMatch(self.templateSurface, self.probSurface):
                 raise RuntimeError, "The supplied probability surface, " + self.probSurfacefName + ", does not appear to match the supplied template," + self.template + "\nin terms of extent, cell size or projection"
         
         

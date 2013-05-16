@@ -395,6 +395,18 @@ def isRaster(filePath):
     except:
         return False
 
+def extentMatch(raster1, raster2):
+    answer = True
+    if not utilities.approx_equal(raster1.xScale, raster2.xScale): answer = False
+    if not utilities.approx_equal(raster1.yScale, raster2.yScale): answer = False
+    if not utilities.approx_equal(raster1.width, raster2.width): answer = False
+    if not utilities.approx_equal(raster1.height, raster2.height): answer = False
+    if not utilities.approx_equal(raster1.east, raster2.east): answer = False
+    if not utilities.approx_equal(raster1.north, raster2.north): answer = False
+    if raster1.prj != raster2.prj: answer = False
+
+    return answer
+
 def defaultNoData(GDALdatatype, signedByte=False):
     '''returns a reasonable default NoData value for a given 
     GDAL data type.
