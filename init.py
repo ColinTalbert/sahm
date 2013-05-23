@@ -145,8 +145,8 @@ def menu_items():
         groupBox = QtGui.QGroupBox("Processing mode:")
         vbox = QtGui.QVBoxLayout()
 
-        for mode in [("single thread", True), 
-                     ("multiple cores asynchronously", True), 
+        for mode in [("multiple models simultaneously (1 core each)", True),
+                     ("single models sequentially (n - 1 cores each)", True),  
                      ("FORT Condor", isFortCondorAvailible())]:
             radio =  QtGui.QRadioButton(mode[0])
             radio.setChecked(mode[0] == configuration.cur_processing_mode)
@@ -187,7 +187,7 @@ def menu_items():
 
     def isFortCondorAvailible():
         try:
-            cmd = ["condor_store_cred", "-n",  "igskbacbws425", "query"]
+            cmd = ["condor_store_cred", "-n",  "igskbacbws108", "query"]
             p = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
             ret = p.communicate()
             return ret[0].find("A credential is stored and is valid") != -1
@@ -485,7 +485,7 @@ class Model(Module):
                     ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
-                    ('outputFolderName', '(edu.utah.sci.vistrails.basic:String)', {'optional':True}),]
+                    ('outputFolderName', '(edu.utah.sci.vistrails.basic:String)'),]
     
     _output_ports = [('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'), 
                      ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
@@ -523,12 +523,16 @@ class Model(Module):
         self.ModelAbbrev = ModelOutput[self.name]
         
         #maxent R and java output write to the same directory
+        prefix = self.ModelAbbrev
         if self.hasInputFromPort("outputFolderName"):
-            self.output_dname = utils.mknextdir(self.getInputFromPort("outputFolderName"))
-        elif self.ModelAbbrev == "maxent":
+            prefix += '_' + self.getInputFromPort("outputFolderName")
+        prefix += '_' 
+            
+        if self.ModelAbbrev == "maxent":
             self.output_dname=self.MaxentPath
-        else: 
-            self.output_dname = utils.mknextdir(prefix=self.ModelAbbrev + '_')   
+        else:
+            self.output_dname = utils.mknextdir(prefix=prefix)
+               
         self.argsDict = utils.map_ports(self, self.port_map)
         
         mdsFile = utils.getFileRelativeToCurrentVT(self.argsDict['c'])
@@ -544,29 +548,30 @@ class Model(Module):
       
         self.argsDict['o'] = self.output_dname
         self.argsDict['rc'] = utils.MDSresponseCol(mdsFile)
-        self.argsDict['cur_processing_mode'] = configuration.cur_processing_mode
+        self.argsDict['cur_processing_mode'] = configuration.cur_processing_mode    
       
-        if not configuration.cur_processing_mode == "single thread":
+        if not configuration.cur_processing_mode == "multiple models simultaneously (1 core each)":
             #This give previously launched models time to finish writing their 
             #logs so we don't get a lock
             time.sleep(10)
             
         utils.runRScript(self.name, self.argsDict, self)
         
-        if configuration.cur_processing_mode == "single thread":
-            if not self.argsDict.has_key('mes'):
-                self.argsDict['mes'] = 'FALSE'
-            self.setModelResult("_prob_map.tif", 'ProbabilityMap', 'mpt')
-            self.setModelResult("_bin_map.tif", 'BinaryMap', 'mbt')
-            self.setModelResult("_resid_map.tif", 'ResidualsMap', 'mes')
-            self.setModelResult("_mess_map.tif", 'MessMap', 'mes')
-            self.setModelResult("_MoD_map.tif", 'MoDMap', 'mes')
-            self.setModelResult("_output.txt", 'Text_Output')
-            self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot')
-            self.setModelResult("_variable.importance.jpg", 'ModelVariableImportance')  
-            writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
-        else:
+        if not configuration.cur_processing_mode == "single models sequentially (n - 1 cores each)":
             utils.launch_RunMonitorApp()
+        
+        #set our output ports
+        if not self.argsDict.has_key('mes'):
+            self.argsDict['mes'] = 'FALSE'
+        self.setModelResult("_prob_map.tif", 'ProbabilityMap', 'mpt')
+        self.setModelResult("_bin_map.tif", 'BinaryMap', 'mbt')
+        self.setModelResult("_resid_map.tif", 'ResidualsMap', 'mes')
+        self.setModelResult("_mess_map.tif", 'MessMap', 'mes')
+        self.setModelResult("_MoD_map.tif", 'MoDMap', 'mes')
+        self.setModelResult("_output.txt", 'Text_Output')
+        self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot')
+        self.setModelResult("_variable.importance.jpg", 'ModelVariableImportance')  
+        writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
         
         modelWorkspace = utils.create_dir_module(self.output_dname)
         self.setResult("modelWorkspace", modelWorkspace)
@@ -1090,9 +1095,6 @@ class FieldDataAggregateAndWeight(Module):
         writetolog("    output_fname=" + output_fname, True, False)
         FDAWParams['output'] = output_fname
         
-        output_fname = utils.mknextfile(prefix='FDAW_', suffix='.csv')
-        writetolog("    output_fname=" + output_fname, True, False)
-        
         ourFDAW = FDAW.FieldDataQuery()
         utils.PySAHM_instance_params(ourFDAW, FDAWParams) 
         ourFDAW.processCSV()
@@ -1207,7 +1209,7 @@ class Reclassifier(Module):
     '''
 #    __doc__ = GenModDoc.construct_module_doc('RasterFormatConverter')
 
-    _input_ports = [("inputRaster", "(edu.utah.sci.vistrails.basic:File)"),
+    _input_ports = [("inputRaster", "(edu.utah.sci.vistrails.basic:Path)"),
                     ('reclassFile', '(edu.utah.sci.vistrails.basic:File)'),
                     ('reclassFileContents', '(edu.utah.sci.vistrails.basic:String)'),
                     ]

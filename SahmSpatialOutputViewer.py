@@ -428,21 +428,23 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
             self.all_layers[pointType]['x'] = []
             self.all_layers[pointType]['y'] = []
         
-        mdsReader = csv.reader(open(self.inputs["mds"], 'r'))
-        header = mdsReader.next()
-        header2 = mdsReader.next()
-        header3 = mdsReader.next()
         
-        for row in mdsReader:
-            if int(row[2]) > 0:
-                self.all_layers['pres_points']['x'].append(float(row[0]))
-                self.all_layers['pres_points']['y'].append(float(row[1]))
-            elif int(row[2]) == 0:
-                self.all_layers['abs_points']['x'].append(float(row[0]))
-                self.all_layers['abs_points']['y'].append(float(row[1]))
-            else:
-                self.all_layers['backs_points']['x'].append(float(row[0]))
-                self.all_layers['backs_points']['y'].append(float(row[1]))
+        if os.path.exists(self.inputs["mds"]):
+            mdsReader = csv.reader(open(self.inputs["mds"], 'r'))
+            header = mdsReader.next()
+            header2 = mdsReader.next()
+            header3 = mdsReader.next()
+        
+            for row in mdsReader:
+                if int(row[2]) > 0:
+                    self.all_layers['pres_points']['x'].append(float(row[0]))
+                    self.all_layers['pres_points']['y'].append(float(row[1]))
+                elif int(row[2]) == 0:
+                    self.all_layers['abs_points']['x'].append(float(row[0]))
+                    self.all_layers['abs_points']['y'].append(float(row[1]))
+                else:
+                    self.all_layers['backs_points']['x'].append(float(row[0]))
+                    self.all_layers['backs_points']['y'].append(float(row[1]))
                 
         for pointType in ['abs_points', 'pres_points', 'backs_points']:
             self.all_layers[pointType]["enabled"] = len(self.all_layers[pointType]['x']) > 0

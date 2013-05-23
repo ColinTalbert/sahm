@@ -46,6 +46,8 @@ class SAHMRaster():
         if isRaster(rasterFile):
             self.loadRaster()
             self.getParams()
+        else:
+            self.Error = ['Input file is not a raster']
       
     def loadRaster(self):
         if not os.path.exists(self.source):
@@ -56,13 +58,14 @@ class SAHMRaster():
         self.band = self.ds.GetRasterBand(1)
       
     def createNewRaster(self):
+        self.Error = []
         #delete the output if it exists
         gdal.Unlink(self.source)
         
         #register the gdal driver
         driver = gdal.GetDriverByName(self.driverName)
-        if self.signedByte: 
-            self.ds = tifDriver.Create(self.source, 
+        if self.signedByte:
+            self.ds = driver.Create(self.source, 
                                             self.width, self.height,
                                             1, self.pixelType, ["PIXELTYPE=SIGNEDBYTE"])
         else:
@@ -236,6 +239,9 @@ class SAHMRaster():
         self.ds.BuildOverviews(overviewlist=[2,4,8,16,32,64,128])
         self.band.FlushCache()
         self.band.GetStatistics(0,1)
+        histogram = self.band.GetDefaultHistogram()
+        self.band.SetDefaultHistogram(histogram[0], histogram[1], histogram[3])
+        
         
     def close(self):
         self.ds = None
@@ -389,6 +395,18 @@ def isRaster(filePath):
     except:
         return False
 
+def extentMatch(raster1, raster2):
+    answer = True
+    if not utilities.approx_equal(raster1.xScale, raster2.xScale): answer = False
+    if not utilities.approx_equal(raster1.yScale, raster2.yScale): answer = False
+    if not utilities.approx_equal(raster1.width, raster2.width): answer = False
+    if not utilities.approx_equal(raster1.height, raster2.height): answer = False
+    if not utilities.approx_equal(raster1.east, raster2.east): answer = False
+    if not utilities.approx_equal(raster1.north, raster2.north): answer = False
+    if raster1.prj != raster2.prj: answer = False
+
+    return answer
+
 def defaultNoData(GDALdatatype, signedByte=False):
     '''returns a reasonable default NoData value for a given 
     GDAL data type.
@@ -443,7 +461,7 @@ def getAggregateTargetCellSize(sourceRaster, templateRaster):
     """
     #first determine what cell size we are going to use for the initial reproject/resample 
     #step 1:  Determine the native cell size in the template coordinate system.
-    templateSRSCellSize = self.getTemplateSRSCellSize(sourceParams)
+    templateSRSCellSize = getTemplateSRSCellSize(sourceRaster, templateRaster)
     #step 2:  round this up or down to an even fraction of the template cell size
     # for example source = 30, target = 250 resampledSource = 250/round(250/30)
     sourcePixelsPerTarget = round(templateRaster.xScale/templateSRSCellSize)
@@ -472,28 +490,8 @@ def getTemplateSRSCellSize(sourceRaster, templateRaster):
     templateSRSCellSize = abs(abs(tOriginX1) - abs(templateRaster.west))
     return templateSRSCellSize
 
-def getAggregateTargetCellSize(sourceRaster, templateRaster):
-    """
-    This function determines the appropriate cell size to
-    reproject/resample our source raster into before 
-    aggregating.
-    This size is the cell size that results in a template 
-    cell containing a whole number of cells which are as 
-    close as possible to the cell dimension that would 
-    result if you reprojected the source cells into the 
-    target srs without changing cell size.
-    """
-    #first determine what cell size we are going to use for the initial reproject/resample 
-    #step 1:  Determine the native cell size in the template coordinate system.
-    templateSRSCellSize = getTemplateSRSCellSize(sourceRaster, templateRaster)
-    #step 2:  round this up or down to an even fraction of the template cell size
-    # for example source = 30, target = 250 resampledSource = 250/round(250/30)
-    sourcePixelsPerTarget = round(templateRaster.xScale/templateSRSCellSize)
-    nearestWholeCellSize = (templateRaster.xScale / 
-                        sourcePixelsPerTarget)
-    return nearestWholeCellSize, sourcePixelsPerTarget
-
-def intermediaryReprojection(sourceRaster, templateRaster, outRasterFName, resamplingType):
+def intermediaryReprojection(sourceRaster, templateRaster, outRasterFName, 
+                             resamplingType, matchTemplateCellSize=False):
     '''Reprojects the sourceRaster into the templateRaster projection, datum 
     and extent.  The output cell size is determined to be the closest dimension
     to the sourceRaster cell size that will evenly go into the template raster
@@ -502,15 +500,21 @@ def intermediaryReprojection(sourceRaster, templateRaster, outRasterFName, resam
     outputFile = SAHMRaster(outRasterFName)
     outputFile.getParams(templateRaster.ds)
     outputFile.NoData = sourceRaster.NoData
+    outputFile.pixelType = sourceRaster.pixelType
     outputFile.signedByte = sourceRaster.signedByte
-    targetCellSize, numSourcePerTarget = getAggregateTargetCellSize(sourceRaster, templateRaster)
+    
+    if matchTemplateCellSize:
+        targetCellSize, numSourcePerTarget = (templateRaster.xScale, 1)
+    else:
+        targetCellSize, numSourcePerTarget = getAggregateTargetCellSize(sourceRaster, templateRaster)
     outputFile.xScale = targetCellSize
     outputFile.yScale = -1 * targetCellSize
     outputFile.height = templateRaster.height * int(templateRaster.xScale/targetCellSize)
     outputFile.width = templateRaster.width * int(templateRaster.xScale/targetCellSize)
     outputFile.createNewRaster()
     
-    err = gdal.ReprojectImage(sourceRaster.ds, outputFile.ds, sourceRaster.srs.ExportToWkt(), templateRaster.srs.ExportToWkt(), resamplingType)
-    
+    err = gdal.ReprojectImage(sourceRaster.ds, outputFile.ds, 
+                              sourceRaster.srs.ExportToWkt(), 
+                              templateRaster.srs.ExportToWkt(), resamplingType)
     
     
