@@ -134,20 +134,8 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
   FactorInd<-which(!is.na(match(vnames,names(factor.levels))),arr.ind=TRUE)
     if((nvars-length(FactorInd))==0) MESS<-FALSE #turn this off if only one factor column was selected
     
-     if(Model=="maxlike"){
-     #this is a bit ugly to copy these sections of code but I'm hoping maxlike will eventually be able to predict to a vector instead of a raster in which case
-     #this will all be deleted anyway
-           model$call$formula<-eval(model$call$formula)
-          y <- predict(model,rasters=stack(model$rast.lst))
-           writeRaster(y,outfile.p)
-           if(make.binary.tif) {
-             y<-y>thresh
-             writeRaster(y,outfile.bin)
-             }
-           if(MESS) warning("Maxlike mess option currently nonfuctional") 
-           return(0) 
-      }
-
+   
+  browser()
   #for debugging I'm always using multiple cores
   multCore<-out$input$multCore
   if(tr$n<10 | getRversion()<2.14) multCore<-FALSE #turn off multicore in certian circumstances

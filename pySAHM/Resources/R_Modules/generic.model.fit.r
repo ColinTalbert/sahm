@@ -161,16 +161,6 @@ on.exit(detach(out$input))
         out$mods$n.vars.final<- out$mods$n.vars.final<-ncol(out$dat$ma$train$dat)-1
         out$mods$vnames<-names(out$dat$ma$train$dat)[-1]
    }
-   if(Model=="maxlike"){
-   out$dat$split.type="none"
-   Pts<-XY[resp==1,]
-     out<-model.fit(dat,out,Model,full.fit=TRUE,pts=Pts)
-     out$mods$n.vars.final<-length(attr(out$mods$final.mod$Est,"dimnames")[[1]])-1
-     out$mods$vnames<-(attr(out$mods$final.mod$Est,"dimnames")[[1]])[-1]
-
-     write.txt(out,t0)
-     capture.output(summary(out$mods$final.mod),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
-     
-   }
+  
   return(out)
 }
