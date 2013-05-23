@@ -29,7 +29,7 @@ thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template) {
    if(make.p.tif) outtext <- paste(substr(outfile.p,1,(nchar(outfile.p)-4)),".txt",sep="")
        else if(make.bin.tif) outtext <- paste(substr(outfile.bin,1,(nchar(outfile.bin)-4)),".txt",sep="") 
          else {
-         out.file<-sub("prob","mess",outfile.p))
+         out.file<-sub("prob","mess",outfile.p)
          outtext <- paste(substr(out.file,1,(nchar(out.file)-4)),".txt",sep="") 
          
          } 
@@ -42,6 +42,7 @@ thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template) {
       binaryRaster <- writeStart(binaryRaster, filename=outfile.bin, overwrite=TRUE)
     }
     if(MESS) {
+    
       MessRaster<-raster(RasterInfo)
       ModRaster<-raster(RasterInfo)
       MessRaster <- writeStart(MessRaster, filename=sub("ProbTiff","MESSTiff",sub("prob","mess",outfile.p)), overwrite=TRUE)
