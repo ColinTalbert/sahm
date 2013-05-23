@@ -42,7 +42,7 @@
 ## and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
- read.ma <- function(out,include=NULL,hl=NULL){
+ read.ma <- function(out,include=NULL,hl=NULL,evalNew=FALSE){
 
       input.file <- out$input$ma.name
        r.name <- out$input$response.col
@@ -163,12 +163,13 @@
           }
   
             #removing predictors with only one unique value
-            if(length(which(lapply(apply(dat[,-c(rm.list)],2,unique),length)==1,arr.ind=TRUE))>0){
-                warning(paste("\nThe Following Predictors will be removed because they have only 1 unique value: ",
-                names(which(lapply(apply(dat[,-c(rm.list)],2,unique),length)==1,arr.ind=TRUE)),sep=" "))
-                rm.list<-c(rm.list,which(lapply(apply(dat,2,unique),length)==1,arr.ind=TRUE))
-                }
-
+            if(!evalNew){ #remove predictors with only one unique value but not for evaluation dat
+                if(length(which(lapply(apply(dat[,-c(rm.list)],2,unique),length)==1,arr.ind=TRUE))>0){
+                    warning(paste("\nThe Following Predictors will be removed because they have only 1 unique value: ",
+                    names(which(lapply(apply(dat[,-c(rm.list)],2,unique),length)==1,arr.ind=TRUE)),sep=" "))
+                    rm.list<-c(rm.list,which(lapply(apply(dat,2,unique),length)==1,arr.ind=TRUE))
+                    }
+             }
                 rm.list<-rm.list[rm.list!=r.col]
                   #splitting the data into test and training splits (should work for CV splits as well and then splits the dataframe into data/response $dat
                   #$XY and $weights
