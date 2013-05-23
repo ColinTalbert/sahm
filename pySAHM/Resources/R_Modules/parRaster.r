@@ -1,5 +1,5 @@
 parRaster<-function(start.tile,dims,tr,MESS,nvars,fullnames,nvars.final,vnames,NAval,
-factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.bin,
+factor.levels,model,Model,pred.fct,make.binary.tif,make.p.tif,RasterInfo,outfile.p,outfile.bin,
 thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template) {
     #loading code and libraries that are needed
     setwd(file.path(ScriptPath))
@@ -25,7 +25,14 @@ thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template) {
   
    continuousRaster<-raster(RasterInfo)
    outfile.p<-file.path(paste(substr(outfile.p,1,(nchar(outfile.p)-4)),ifelse(start.tile==1,"",start.tile),".tif",sep=""))
-   outtext<-paste(substr(outfile.p,1,(nchar(outfile.p)-4)),".txt",sep="")
+   #finding a folder that's been created so we can keep the user updated on the progress of creating the files
+   if(make.p.tif) outtext <- paste(substr(outfile.p,1,(nchar(outfile.p)-4)),".txt",sep="")
+       else if(make.bin.tif) outtext <- paste(substr(outfile.bin,1,(nchar(outfile.bin)-4)),".txt",sep="") 
+         else {
+         out.file<-sub("prob","mess",outfile.p))
+         outtext <- paste(substr(out.file,1,(nchar(out.file)-4)),".txt",sep="") 
+         
+         } 
    capture.output(cat(paste(nToDo,"tiles to do\n")),file=outtext,append=TRUE)
    if(make.binary.tif) outfile.bin<-(sub("ProbTiff","BinTiff",sub("prob","bin",outfile.p))) 
     #start up any rasters we need   
