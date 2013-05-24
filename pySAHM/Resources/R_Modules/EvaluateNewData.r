@@ -52,6 +52,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
          ##################################################################################
          ###################### Producing Evalutaiton Metrics for the hold out data
                  #if evaluating on brand new data switch out the mds 
+                
                  if(!is.null(new.tifs)){out$input$ma.name<-new.tifs
                     store.train<-out$dat$ma$train
                     newDat<-try(read.csv(new.tifs,skip=4,nrows=2),silent=TRUE)
@@ -93,7 +94,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                       
                       #if we have completely new data then the whole dataset should be used for testing and the original displayed as training data
                       if(!is.null(new.tifs)) {
-                      out <- read.ma(out,hl=hl,include=include)
+                      out <- read.ma(out,hl=hl,include=include,evalNew=TRUE)
                          #read.ma wasn't designed for what it's doing here and overwrites a few things it shouldn't 
                          #these are reset correctly here
                           names(out$dat$ma)<-"test"
@@ -130,6 +131,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
         if((n.var <- out$mods$n.vars.final)<1){
             stop("Error producing geotiff output:  null model selected by stepwise procedure - pointless to make maps")
             } else {
+           
             cat("\nproducing prediction maps...","\n","\n");flush.console()
             proc.tiff(model=out$mods$final.mod,vnames=names(out$dat$ma$train$dat)[-1],
                 tif.dir=out$dat$tif.dir$dname,filenames=out$dat$tif.ind,factor.levels=out$dat$factor.levels,make.binary.tif=b.tif,

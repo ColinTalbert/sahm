@@ -51,12 +51,6 @@ pred.fct<-function(model,x,Model){
         else  y[complete.cases(x)] <- try(as.vector(predict(model,x[complete.cases(x),],type="response")),silent=TRUE)
      }
      
-  if(Model=="maxlike"){
-          model$call$formula<-eval(model$call$formula)
-          y <- try(predict(model,rasters=stack(model$rast.lst)),silent=TRUE)
-          y<-as.vector(getValues(y))
-     }
-     
   if(Model=="mars"){
         # retrieve key items from the global environment #
         # make predictions.

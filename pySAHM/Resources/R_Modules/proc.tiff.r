@@ -134,20 +134,7 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
   FactorInd<-which(!is.na(match(vnames,names(factor.levels))),arr.ind=TRUE)
     if((nvars-length(FactorInd))==0) MESS<-FALSE #turn this off if only one factor column was selected
     
-     if(Model=="maxlike"){
-     #this is a bit ugly to copy these sections of code but I'm hoping maxlike will eventually be able to predict to a vector instead of a raster in which case
-     #this will all be deleted anyway
-           model$call$formula<-eval(model$call$formula)
-          y <- predict(model,rasters=stack(model$rast.lst))
-           writeRaster(y,outfile.p)
-           if(make.binary.tif) {
-             y<-y>thresh
-             writeRaster(y,outfile.bin)
-             }
-           if(MESS) warning("Maxlike mess option currently nonfuctional") 
-           return(0) 
-      }
-  
+
   #for debugging I'm always using multiple cores
   multCore<-out$input$multCore
   if(tr$n<10 | getRversion()<2.14) multCore<-FALSE #turn off multicore in certian circumstances
@@ -155,10 +142,10 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
   if(multCore){
       library(parallel)
       #create some temporary folders    
-      if(out$input$make.p.tif)
+      if(make.p.tif)
         dir.create(paste(out$input$output.dir,"\\ProbTiff",sep=""))
         outfile.p=paste(paste(out$input$output.dir,"\\ProbTiff\\",sep=""),"_prob_map.tif",sep="")
-      if(out$input$make.binary.tif)
+      if(make.binary.tif)
         outfile.bin=dir.create(paste(out$input$output.dir,"\\BinTiff",sep=""))
       if(MESS){
         dir.create(paste(out$input$output.dir,"\\MESSTiff",sep="")) 
@@ -170,7 +157,7 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
       cl <- makeCluster(detectCores()) 
       parLapply(cl,X=tile.start,fun=parRaster,dims=dims,
          tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
-         model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,
+         model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,make.p.tif=make.p.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,
          outfile.bin=outfile.bin,thresh=thresh,nToDo= ceiling(tr$n/(detectCores()-1)),ScriptPath=out$input$ScriptPath,
          vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct,
          template=out$dat$input$ParcTemplate)
@@ -179,7 +166,7 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
             #also due to multicore multiinstance R issues we're currently only running it on condor or when running synchronously
     parRaster(start.tile=1,dims=dims,
       tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
-      model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,outfile.bin=outfile.bin,thresh=thresh,nToDo=tr$n,ScriptPath=out$       
+      model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,make.p.tif=make.p.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,outfile.bin=outfile.bin,thresh=thresh,nToDo=tr$n,ScriptPath=out$       
       input$ScriptPath,vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct,
          template=out$dat$input$ParcTemplate)
       }
