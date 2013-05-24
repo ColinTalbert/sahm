@@ -9,18 +9,41 @@ from osgeo import gdalconst as gdalconst
 def main(args_in):
     print "args used = ", args_in
     
+    for arg in args_in:
+        logger = False
+        if arg.startswith("o="):
+            outDir = arg[2:]
+            
+            while not os.path.isdir(outDir):
+                outDir = os.path.split(outDir)[0]
+                
+            print "outDir=", outDir
+            logger = utilities.logger(os.path.join(outDir, "logfile.txt"), True)
+    
     
     p = subprocess.Popen(args_in, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     ret = p.communicate()
     
-    print ret[0]
+    if 'Error' in ret[1]:
+        msg = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        msg +="\n  An error was encountered in the R script for this module."
+        msg += "\n     The R error message is below: \n"
+        msg += ret[1]
+        if logger:
+            logger.writetolog(msg)
+
+        print msg
+        return
+
+    elif 'Warning' in ret[1]:
+        msg = "The R scipt returned the following warning(s).  The R warning message is below - \n"
+        msg += ret[1]
+        if logger:
+            logger.writetolog(msg)
+    
+       
     sys.stderr.write(ret[1])
     
-    for arg in args_in:
-        if arg.startswith("o="):
-            outDir = arg[2:]
-    
-    print "outDir=", outDir
     setupGDAL()
     mosaicTiledOutputs(outDir)
     

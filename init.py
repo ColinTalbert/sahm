@@ -187,7 +187,7 @@ def menu_items():
 
     def isFortCondorAvailible():
         try:
-            cmd = ["condor_store_cred", "-n",  "igskbacbws108", "query"]
+            cmd = ["condor_store_cred", "-n",  "IGSKBACBWSCDRS3", "query"]
             p = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
             ret = p.communicate()
             return ret[0].find("A credential is stored and is valid") != -1

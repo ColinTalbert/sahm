@@ -66,17 +66,16 @@ class logger(object):
         self.verbose = verbose
         
         #if we mistakenly get a output dir instead of a filename
-        if os.path.isdir(logfile):
+        if os.path.isdir(self.logfile):
             self.logfile = os.path.join(logfile, 'sessionLog.txt')
-        else:
-            self.logfile = logfile
             
         if os.path.exists(self.logfile):
             self.writetolog("\nSession continued\n", True, True)
         else:
             logDir = os.path.split(self.logfile)[0]
+            self.logfile = os.path.join(logDir, 'sessionLog.txt')
             if not os.path.exists(logDir):
-                raise RuntimeError('Directory of specified logfile does not exist.')
+                raise RuntimeError("\n".join([logDir, self.logfile, 'Directory of specified logfile does not exist.']))
             f = open(self.logfile, "a")
             del f
             self.writetolog("\nSession started\n", True, False)
@@ -165,7 +164,7 @@ def runCondorPythonJob(args, workspace, prefix, wholeMachine=False):
     submitFile.write("Should_transfer_files   = no\n")
     submitFile.write("transfer_executable     = false\n")
     
-    machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151a', 'igskbacbws425', 'igskbacbws108']
+    machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151a', 'igskbacbws425']
 #    machines = ['igskbacbwsvis3']
     reqsStr = 'Requirements            = (Machine == "'
     reqsStr += '.gs.doi.net" || Machine == "'.join(machines) + '.gs.doi.net")'
@@ -197,7 +196,7 @@ def runCondorPythonJob(args, workspace, prefix, wholeMachine=False):
     
     #launch condor job
     DEVNULL = open(os.devnull, 'wb')
-    p = subprocess.Popen(["condor_submit", "-n", 'igskbacbws108', submitFname], stderr=DEVNULL, stdout=DEVNULL)    
+    p = subprocess.Popen(["condor_submit", "-n", 'IGSKBACBWSCDRS3', submitFname], stderr=DEVNULL, stdout=DEVNULL)    
     
     os.chdir(curDir)        
     
