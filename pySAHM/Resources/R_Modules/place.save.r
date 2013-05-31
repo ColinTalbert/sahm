@@ -55,7 +55,7 @@ place.save<-function(out,Final.Model){
                             c(basename(out$input$output.dir),
                             out$dat$input$OrigFieldData,out$dat$input$FieldDataTemp,out$dat$input$ParcOutputFolder,
                             out$dat$input$ParcTemplate,ifelse(length(out$dat$input$CovSelectName)==0,"NONE",out$dat$input$CovSelectName),""))
-Sys.sleep(round(runif(1,min=2,max=60)))
+
 if(file.access(compile.out,mode=0)==-1){ #if very first time through little
           write.table(Header,file =compile.out,row.names=FALSE,col.names=FALSE,quote=FALSE,sep=",")
           out$input$WriteColumn<-2
