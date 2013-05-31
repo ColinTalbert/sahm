@@ -531,7 +531,7 @@ def runModelOnCondor(script, args_dict, command_arr):
     
     #launch condor job
     DEVNULL = open(os.devnull, 'wb')
-    p = subprocess.Popen(["condor_submit", "-n", 'igskbacbws108', submitFname], stderr=DEVNULL, stdout=DEVNULL)
+    p = subprocess.Popen(["condor_submit", "-n", 'IGSKBACBWSCDRS3', submitFname], stderr=DEVNULL, stdout=DEVNULL)
     
     
 def getR_application(module=None):
