@@ -462,55 +462,55 @@ class PARC:
             smallest_south = self.minSouth(sourceRaster)
             largest_east = self.maxEast(sourceRaster)
             smallest_west = self.minWest(sourceRaster)
-            
+        
             #Now for each direction step through the pixels until we have one smaller
             #or larger than our min/max source extent.
-            orig_tNorth = self.templateRaster.tNorth
+            orig_tNorth = self.templateRaster.north
             shrinkN = 0
-            while self.templateRaster.tNorth > largest_north:
+            while self.templateRaster.north > largest_north:
                 #yScale is negative
-                self.templateRaster.tNorth += self.templateRaster.yScale
+                self.templateRaster.north += self.templateRaster.yScale
                 self.templateRaster.height -= 1
                 shrinkN += 1
-            if orig_tNorth <> self.templateRaster.tNorth:
+            if orig_tNorth <> self.templateRaster.north:
                 msg = "Northern edge of template reduced " + str(shrinkN) + " pixels due to, "
                 msg += "the extent of " + sourceRaster.source
                 self.writetolog(msg) 
             
-            orig_tSouth = self.templateRaster.tSouth
+            orig_tSouth = self.templateRaster.south
             shrinkN = 0    
-            while self.templateRaster.tSouth < smallest_south:
-                self.templateRaster.tSouth -= self.templateRaster.yScale
+            while self.templateRaster.south < smallest_south:
+                self.templateRaster.south -= self.templateRaster.yScale
                 self.templateRaster.height -= 1
                 shrinkN += 1
-            if orig_tSouth <> self.templateRaster.tSouth:
+            if orig_tSouth <> self.templateRaster.south:
                 msg = "NSouthern edge of template reduced " + str(shrinkN) + " pixels due to, "
                 msg += "the extent of " + sourceRaster.source
                 self.writetolog(msg)
             
-            gt[3] = self.templateRaster.tNorth
+            gt[3] = self.templateRaster.north
             
             
-            orig_tWest = self.templateRaster.tWest
+            orig_tWest = self.templateRaster.west
             shrinkN = 0
-            while self.templateRaster.tWest < smallest_west:
+            while self.templateRaster.west < smallest_west:
                 #yScale is negative
-                self.templateRaster.tWest += self.templateRaster.xScale
+                self.templateRaster.west += self.templateRaster.xScale
                 self.templateRaster.width -= 1
                 shrinkN += 1
-            if orig_tWest <> self.templateRaster.tWest:
+            if orig_tWest <> self.templateRaster.west:
                 msg = "Western edge of template reduced " + str(shrinkN) + " pixels due to, "
                 msg += "the extent of " + sourceRaster.source   
                 self.writetolog(msg)
             
-            orig_tEast = self.templateRaster.tEast
+            orig_tEast = self.templateRaster.east
             shrinkN = 0
-            while self.templateRaster.tEast > largest_east:
-                self.templateRaster.tEast -= self.templateRaster.xScale
+            while self.templateRaster.east > largest_east:
+                self.templateRaster.east -= self.templateRaster.xScale
                 self.templateRaster.width -= 1
                 shrinkN += 1
-            gt[0] = self.templateRaster.tWest
-            if orig_tEast <> self.templateRaster.tEast:
+            gt[0] = self.templateRaster.west
+            if orig_tEast <> self.templateRaster.east:
                 msg = "Eastern edge of template reduced " + str(shrinkN) + " pixels due to, "
                 msg += "the extent of " + sourceRaster.source
                 self.writetolog(msg)
@@ -525,7 +525,7 @@ class PARC:
         maxNorth = -999999
         for step in range(steps + 1):
             curWest = sourceRaster.west + step*(northWidth/steps)
-            transPoint = self.transformPoint(curWest, sourceRaster.north, 
+            transPoint = SpatialUtilities.transformPoint(curWest, sourceRaster.north, 
                         sourceRaster.srs, self.templateRaster.srs)
 #            print curWest, sourceParams['north'], " = ", transPoint
             if transPoint[1] > maxNorth:
@@ -539,7 +539,7 @@ class PARC:
         minSouth = 999999
         for step in range(steps + 1):
             curWest = sourceRaster.west + step*(southWidth/steps)
-            transPoint = self.transformPoint(curWest, sourceRaster.south, 
+            transPoint = SpatialUtilities.transformPoint(curWest, sourceRaster.south, 
                         sourceRaster.srs, self.templateRaster.srs)
 #            print curWest, sourceParams['south'], " = ", transPoint
             if transPoint[1] < minSouth:
@@ -553,7 +553,7 @@ class PARC:
         maxEast = -999999
         for step in range(steps + 1):
             curNorth = sourceRaster.south + step*(eastHeight/steps)
-            transPoint = self.transformPoint(sourceRaster.east, curNorth,
+            transPoint = SpatialUtilities.transformPoint(sourceRaster.east, curNorth,
                         sourceRaster.srs, self.templateRaster.srs)
 #            print curWest, sourceParams['south'], " = ", transPoint
             if transPoint[0] > maxEast:
@@ -567,7 +567,7 @@ class PARC:
         minWest = 999999
         for step in range(steps + 1):
             curNorth = sourceRaster.south + step*(westHeight/steps)
-            transPoint = self.transformPoint(sourceRaster.west, curNorth,
+            transPoint = SpatialUtilities.transformPoint(sourceRaster.west, curNorth,
                         sourceRaster.srs, self.templateRaster.srs)
 #            print curWest, sourceParams['south'], " = ", transPoint
             if transPoint[0] < minWest:
