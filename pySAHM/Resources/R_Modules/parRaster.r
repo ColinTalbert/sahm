@@ -51,14 +51,19 @@ thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template) {
         #order the training data so that we can consider the first and last row  only in mess calculations
         for(k in 1:nvars.final) train.dat[,k]<-sort(train.dat[,k])
     }
-    template<-raster(template)
-  
+   
+    templateRast<-try(raster(template),silent=TRUE) 
+    if(class(templateRast)=="try-error"){ #so that we can move a session folder to a new computer
+        template <- file.path(dirname(out$input$ma.name), basename(template))
+        templateRast <- try(raster(template),silent=TRUE) 
+        if(class(templateRast)=="try-error") stop("Cannot find template file if you have switched computers it must be placed at the same level as the MDS")
+    }
  for (i in start.tile:min(start.tile+nToDo-1,length(tr$row))){
  
    capture.output(cat(paste("starting tile", i,Sys.time(),"\n")),file=outtext,append=TRUE)
    #alter the write start location because we always start at position 1                                   
    writeLoc<-ifelse((start.tile-1)==0,tr$row[i],tr$row[i]-sum(tr$nrows[1:(start.tile-1)]))
-   TemplateMask<-getValuesBlock(template, row=tr$row[i], nrows=tr$nrows[i])
+   TemplateMask<-getValuesBlock(templateRast, row=tr$row[i], nrows=tr$nrows[i])
 
    if(all(is.na(TemplateMask))){
      #if the template is completely NA values, don't read in any other data

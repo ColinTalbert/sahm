@@ -1,18 +1,23 @@
 ### This file runs the TestTrainSplit and checks that all ratios end up being what they should if RatioPresAbs is set at an extreme value
 ### an excessive number of values are deleted and ratios and be drastically off might want to include future error checking
+#=================================================================#
+                   ## Specifying input
+#=================================================================#
 
-
+setwd("I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
 source("TestTrainSplit.r")
 
-response.col="responseCount"
-input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\VistrailsSessions\\MergedDataset_4.csv"
-output.file<-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\VistrailsSessions\\MergedDataset_Split.csv"
 
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\CovariateCorrelationOutputMDS.csv"
-output.file<-"I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\CovariateCorrelationOutputMDS.csv"
-## Running the code
-TestTrainSplit(input.file,output.file,response.col=response.col,trainProp=.7,seed=NULL,Eval.Split=TRUE)  #tried also with .8, and no RatioPresAb
-
+i="I:\\VisTrails\\WorkingFiles\\workspace\\MarianTesting\\TestSuite\\MergedDataset_2.csv"
+seed=2 
+es=TRUE 
+o="I:\\VisTrails\\WorkingFiles\\workspace\\MarianTesting\\TestSuite\\ModelEvaluation_Split_2.csv" 
+rc="responseBinary" 
+#=================================================================#
+                   ## Running the code
+TestTrainSplit(input.file=i,output.file=o,response.col=rc,trainProp=.7,seed=seed,Eval.Split=es)  #tried also with .8, and no RatioPresAb
+#=================================================================#
 ## Running some tests on the output
 input.file<-output.file
 dat<-read.csv(input.file,skip=3,header=FALSE)
