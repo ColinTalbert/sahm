@@ -27,7 +27,7 @@ class SAHMRaster():
         #default values
         self.blockSize = 2048
         self.driverName = "GTiff"
-        self.pixelType = "GDT_Int32"
+        self.pixelType = gdalconst.GDT_Int32
         self.NoData = -2147483647
         self.signedByte = False
         #Must be supplied for new rasters or read from input
@@ -180,8 +180,8 @@ class SAHMRaster():
         return x, y
         
     def convertCoordsToColRow(self, x, y):
-        col = int(floor((x - self.west) / self.xScale))
-        row = int(floor((y - self.north) / self.yScale))
+        col = int(floor(round(((x - self.west) / self.xScale), 5)))
+        row = int(floor(round(((y - self.north) / self.yScale), 5)))
         return col, row
     
     def getPixelValueFromIndex(self, col, row):
