@@ -537,6 +537,15 @@ class Model(Module):
         
         mdsFile = utils.getFileRelativeToCurrentVT(self.argsDict['c'])
 
+        if not utils.checkModelCovariatenames(mdsFile):
+            msg = "These R models do not work with covariate names begining with non-letter characters or \n"
+            msg += "covariate names that contain non-alphanumeric characters other than '.' or '_'.\n"
+            msg += "Please check your covariate names and rename any that do not meet these constraints.\n"
+            msg += "Covaraiate names are found in the first line of the mds file: \n"
+            msg += "\t\t"+ mdsFile
+            writetolog(msg, False, True)
+            raise ModuleError(self, msg)
+
         if self.ModelAbbrev == "maxent":
             self.argsDict['lam'] = self.MaxentPath
         

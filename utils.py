@@ -48,6 +48,7 @@ import csv
 import time
 import tempfile
 import subprocess
+import re
 
 import struct, datetime, decimal, itertools
 
@@ -315,6 +316,21 @@ def MDSresponseCol(MDSFile):
     responseCol = header[2]
     return responseCol 
    
+def checkModelCovariatenames(MDSFile):
+    """These R models break if any of the covariate names used
+    start with anything other than an alpha character
+    contain any special characters besides "." and "_"
+    """
+    MDSisOK = True
+    covariates = open(MDSFile, "r").readline().split(",")[3:]
+    for covariate in covariates:
+        if not covariate[0].isalpha():
+            return False
+        if not covariate.replace(".", "").replace("_", "").replace("\n", "").isalnum():
+            return False
+        
+    return True
+    
 def print_exc_plus( ):
     """ Print the usual traceback information, followed by a listing of
         all the local variables in each frame.
