@@ -119,7 +119,7 @@ on.exit(detach(out$input))
                
            txt0 <- paste("\n\n","Settings:\n",
                       if(out$input$PsdoAbs) "(Averaged across available splits)\n", 
-                      "\n\trandom seed used =            ",seed,
+                      "\n\trandom seed used =            ",out$input$seed,
                       "\n\ttree complexity =             ",out$mods$parms$tc.full,
                       "\n\tlearning rate =               ",round(out$mods$lr.mod$lr,4),
                       "\n\tn(trees) =                    ",mean(unlist(lapply(out$mods$final.mod,function(lst){lst$n.trees}))),
@@ -139,7 +139,7 @@ on.exit(detach(out$input))
    if(Model=="rf"){
               
               txt0 <- paste("\n\n","Settings:",
-              "\n\trandom seed used =                      ",seed,
+              "\n\trandom seed used =                      ",out$input$seed,
               "\n\tn covariates considered at each split = ", mean(unlist(lapply(out$mods$final.mod,"[",14))),
                 if(out$input$PsdoAbs==TRUE) "\n\t   (averaged over each used available split)\n",
               "\n\tn trees =                               ",n.trees,
@@ -161,16 +161,6 @@ on.exit(detach(out$input))
         out$mods$n.vars.final<- out$mods$n.vars.final<-ncol(out$dat$ma$train$dat)-1
         out$mods$vnames<-names(out$dat$ma$train$dat)[-1]
    }
-   if(Model=="maxlike"){
-   out$dat$split.type="none"
-   Pts<-XY[resp==1,]
-     out<-model.fit(dat,out,Model,full.fit=TRUE,pts=Pts)
-     out$mods$n.vars.final<-length(attr(out$mods$final.mod$Est,"dimnames")[[1]])-1
-     out$mods$vnames<-(attr(out$mods$final.mod$Est,"dimnames")[[1]])[-1]
-
-     write.txt(out,t0)
-     capture.output(summary(out$mods$final.mod),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
-     
-   }
+  
   return(out)
 }

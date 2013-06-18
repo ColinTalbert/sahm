@@ -46,6 +46,7 @@ make.p.tif=T
 make.binary.tif=T
 opt.methods=2
 MESS=FALSE
+multCore=TRUE
 
 # Interpret command line argurments #
 # Make Function Call #
@@ -67,6 +68,7 @@ Args <- commandArgs(trailingOnly=FALSE)
  			if(argSplit[[1]][1]=="om")  opt.methods <- as.numeric(argSplit[[1]][2])
  		  if(argSplit[[1]][1]=="mes")  MESS <-as.logical(argSplit[[1]][2])
  			if(argSplit[[1]][1]=="lam")  lambdas <-argSplit[[1]][2]
+ 			 if(argSplit[[1]][1]=="multicore")  multCore <- as.logical(argSplit[[1]][2])
     }
 
 ScriptPath<-dirname(ScriptPath)
@@ -79,7 +81,7 @@ source(file.path(ScriptPath,"MAXENT.helper.fcts.r"))
 		response.col=responseCol,
 		make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
 		script.name="maxent",
-    opt.methods=opt.methods,MESS=MESS,lambdas=lambdas,ScriptPath=ScriptPath)
+    opt.methods=opt.methods,MESS=MESS,lambdas=lambdas,ScriptPath=ScriptPath,multCore=multCore)
 
 
 

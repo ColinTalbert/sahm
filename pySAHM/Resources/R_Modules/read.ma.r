@@ -42,7 +42,7 @@
 ## and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
- read.ma <- function(out,include=NULL,hl=NULL){
+ read.ma <- function(out,include=NULL,hl=NULL,evalNew=FALSE){
 
       input.file <- out$input$ma.name
        r.name <- out$input$response.col
@@ -57,7 +57,7 @@
             out.list$input$FieldDataTemp<-basename(tif.info[[2]][1])
             out.list$input$OrigFieldData<-basename(tif.info[[2]][2])
             out.list$input$CovSelectName<-basename(tif.info[[2]][3])
-            out.list$input$ParcTemplate<-basename(tif.info[[3]][1])
+            out.list$input$ParcTemplate<-tif.info[[3]][1]
             out.list$input$ParcOutputFolder<-basename(tif.info[[3]][2])
   
           if(r.name=="responseCount") out$input$model.family="poisson"
@@ -163,19 +163,16 @@
           }
   
             #removing predictors with only one unique value
-            if(length(which(lapply(apply(dat[,-c(rm.list)],2,unique),length)==1,arr.ind=TRUE))>0){
-                warning(paste("\nThe Following Predictors will be removed because they have only 1 unique value: ",
-                names(which(lapply(apply(dat[,-c(rm.list)],2,unique),length)==1,arr.ind=TRUE)),sep=" "))
-                rm.list<-c(rm.list,which(lapply(apply(dat,2,unique),length)==1,arr.ind=TRUE))
-                }
-
+            if(!evalNew){ #remove predictors with only one unique value but not for evaluation dat
+                if(length(which(lapply(apply(dat[,-c(rm.list)],2,unique),length)==1,arr.ind=TRUE))>0){
+                    warning(paste("\nThe Following Predictors will be removed because they have only 1 unique value: ",
+                    names(which(lapply(apply(dat[,-c(rm.list)],2,unique),length)==1,arr.ind=TRUE)),sep=" "))
+                    rm.list<-c(rm.list,which(lapply(apply(dat,2,unique),length)==1,arr.ind=TRUE))
+                    }
+             }
                 rm.list<-rm.list[rm.list!=r.col]
                   #splitting the data into test and training splits (should work for CV splits as well and then splits the dataframe into data/response $dat
                   #$XY and $weights
-                   if(out$input$script.name=="maxlike") {
-                       if(length(na.omit(split.indx))>0) warning("\nMaxlike presently cannot handle data splitting.  \nYour split selection will be ignored.") 
-                       split.indx<-NA
-                   }
                    
                    if(length(na.omit(split.indx))>0){ dat.out<-split(dat,f=dat[,split.indx],drop=TRUE)
                    if(all(c("test","train")%in%names(table(dat[split.indx])))) Split.type="test"

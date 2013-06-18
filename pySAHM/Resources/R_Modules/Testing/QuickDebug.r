@@ -4,8 +4,11 @@
 #setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
 #ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
 
-setwd("I:\\VisTrails\\VisTrails_SAHM_x64\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
-ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
+setwd("I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
+
+#setwd("I:\\VisTrails\\DevWorkspace\\Colin\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
+#ScriptPath="I:\\VisTrails\\DevWorkspace\\Colin\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
 source("GLM.helper.fcts.r")
@@ -22,67 +25,68 @@ rc="responseBinary"
 #list.files()
 
 #Testing Compile Output on data with no test train and with a test train
+I:\VisTrails\VisTrails_SAHM_x64_debug\Central_R\R-2.14.1\bin\x64\Rterm.exe --vanilla -f I:\VisTrails\DevWorkspace\Catherine\userpackages\..\userpackages\sahm\pySAHM\Resources\R_Modules\FIT_BRT_pluggable.r --args cur_processing_mode=multiple cores asynchronously c=J:\Projects\NormalsComparison\SAHM4\AHB\modelSelection_cv_2.csv seed=-789157713 o=J:\Projects\NormalsComparison\SAHM4\AHB\brt_4 rc=responseBinary mes=TRUE
 
-rc="responseCount"
-input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Count.csv"
-input.file="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\WUS\\OCT2012\\modelSelection_cv_2.csv"
+input.file="N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\DevelopmentWorkspace\\Marian\\Workspace\\SAHMDebugging\\break145.csv"
+input.file="C:\\temp\\TestDataSets\\modelSelection_split_1.csv"
 
-###########################################################################
-############### Quick debug  ##############################################
-input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Split.csv"
-input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/NoSplit.csv"
-input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv"
-input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Factor.csv"
-input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
-input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/Spat.Weights.csv"
-input.file="C:/VisTrails/mtalbert_20110504T132851/readMaTests/LargeDataset.csv"
-input.file<-"C:/VisTrails/mtalbert_20110504T132851/readMaTests/UsedAvailable.csv"
-#######################################################################
-#Sp 1 synthetic presence only data
-input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\UsedAvailableSp1CV.csv"
-input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\UsedAvailableSp1NoCV.csv"
-input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\RFtest.csv"
-input.file="C:\\temp\\TestDataSets\\CanadaThistlePseudoAbsence.csv"
-input.file="C:\\temp\\SAHM_workspace\\Species1PresOnlyCV.csv"
-## new file for checking pseudoabs
-input.file="I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode\\ElithPsdoAbs.csv"
-##elith synthetic surface presence absence
-input.file="C:\\temp\\SAHM_workspace\\modelSelection_split_20.csv"
+#================================================================#
+#                       Maxent
+#================================================================#
 
-## Nonspatial data should work through SAHM
-input.file="C:\\temp\\SAHM_workspace\\NonSpatialData.csv"
-
-## Maxent
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\CovariateCorrelationOutputMDS.csv"
 lambdas.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\maxentFiles_94"
 FitModels(ma.name=input.file,
             output.dir=output.dir,
             response.col=rc,make.p.tif=T,make.binary.tif=T,
             debug.mode=T,script.name="maxent",opt.methods=2,MESS=T,lambdas=lambdas.file)
-##MARS
- input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\CovariateCorrelationOutputMDS.csv"
-
-start.time<-Sys.time() 
+#================================================================#
+#                            MARS
+#================================================================#
+input.file="H:\\Desktop\\CheatgrassAnalysis\\BlockCV.csv"
 FitModels(ma.name=input.file,
             output.dir=output.dir,
-            response.col=rc,make.p.tif=T,make.binary.tif=F,
-            mars.degree=1,mars.penalty=2,debug.mode=T,script.name="mars",opt.methods=2,MESS=F,ScriptPath=ScriptPath)
+            response.col=rc,make.p.tif=F,make.binary.tif=F,
+            mars.degree=1,mars.penalty=2,debug.mode=T,script.name="mars",opt.methods=2,MESS=F,ScriptPath=ScriptPath,multCore=TRUE)
 total.time<-Sys.time()-start.time
 total.time
-EvaluateNewData(workspace="C:\\temp\\SAHM_workspace\\rf_1\\modelWorkspace",out.dir="C:\\temp\\SAHM_workspace\\rf_3",b.tif=TRUE,p.tif=TRUE,mess=FALSE)
+#================================================================#
+#                   Evaluate New Data
+#================================================================#
+o=I:\VisTrails\WorkingFiles\workspace\CheatgrassApplyModel\ApplyModelResults\TestingNewVariableImportance\MDS1\ApplyModel_5 mpt=FALSE ws=J:\Projects\Climate_RS_Comparison\Cheatgrass_VisTrails\WUS\FEB2013\ParameterOptimization\brt_4\modelWorkspace mes=FALSE rc=responseBinary mbt=FALSE
 
+
+
+ws<-"J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\WUS\\FEB2013\\ParameterOptimization_SpatialCV2\\maxent_7\\modelWorkspace"
+output.dir="J:\\Projects\\Climate_RS_Comparison\\MarianTesting2\\ApplyModel_MDS1_KDEbin_maxent_2"
+new.tiffs="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\WUS\\FEB2013\\validation\\MergedDataset_1.csv"
+
+load(ws)
+setwd("I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
+source(file.path(ScriptPath,"LoadRequiredCode.r"))
+source(paste(toupper(out$input$script.name),".helper.fcts.r",sep=""))
+options(error=expression(if(interactive()) recover() else dump.calls()))
+EvaluateNewData(workspace=ws,out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=FALSE,out=out,produce.metrics=FALSE)
+
+#================================================================#
 I:\VisTrails\VisTrails_SAHM_x64_debug\Central_R\R-2.14.1\bin\x64\Rterm.exe --vanilla -f I:\VisTrails\VisTrails_SAHM_x64_debug\VisTrails\vistrails\packages\sahm_MarianDev\pySAHM\Resources\R_Modules\EvaluateNewData.r --args mbt=TRUE mpt=TRUE ws="C:\temp\SAHM_workspace\rf_1\modelWorkspace" mes=FALSE o=C:\temp\SAHM_workspace\rf_3\modelWorkspace\rf_1
 
-##GLM
-#input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_condor\\modelSelection_cv_3.csv"
+#================================================================#
+#                            GLM
+#================================================================#
+J:\Projects\Climate_RS_Comparison\MarianTesting\DebuggingMess\CovariateCorrelationOutputMDS_mds1_kde_bin.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,
           output.dir=output.dir,
-          response.col=rc,make.p.tif=T,make.binary.tif=T,
-          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=T,opt.methods=2,squared.terms=FALSE,ScriptPath=ScriptPath)
+          response.col=rc,make.p.tif=F,make.binary.tif=F,
+          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=F,opt.methods=2,squared.terms=FALSE,ScriptPath=ScriptPath)
 
    
-#RF
+#================================================================#
+#                            RF
+#================================================================#
+input.file<-"J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\WUS\\FEB2013\\ParameterOptimization_SpatialCV\\CovariateCorrelationOutputMDS_mds1_kde_cont.csv"
 
 FitModels(ma.name=input.file,
       tif.dir=NULL,
@@ -97,15 +101,18 @@ total.time<-Sys.time()-start.time
 total.time
 
 rc="responseBinary"
-#BRT
+#================================================================#
+#                            BRT
+#================================================================#
+input.file="J:\\Projects\\NormalsComparison\\SAHM4\\AHB\\modelSelection_cv_2.csv"
 #input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_FinalTest\\CovariateCorrelationOutputMDS_initial.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,output.dir=output.dir,
-          response.col=rc,make.p.tif=F,make.binary.tif=F,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
+          response.col=rc,make.p.tif=T,make.binary.tif=T,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
       family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
   tolerance = 0.001,seed=1,opt.methods=2,
           simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
-          bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,MESS=F,ScriptPath=ScriptPath)
+          bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,MESS=T,ScriptPath=ScriptPath,multCore=FALSE)
 
 "I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\RFDebug\\modelWorkspace"
 EvaluateNewData(workspace="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\RFDebug\\modelWorkspace",out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=FALSE,produce.metrics=TRUE)

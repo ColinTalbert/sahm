@@ -100,6 +100,8 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
    #Read in data, perform several checks and store all of the information in the out list
              out <- read.ma(out)
              out$dat$bname <- bname
+             out$dat$bnameExpanded=file.path(dirname(out$dat$bname),"ExpandedOutput")
+             dir.create(out$dat$bnameExpanded)
              if(out$input$script.name=="rf" & out$input$model.family=="poisson") stop("Random Forest not implemented for count data")
          
    #writing out the header info to the CSV so in case of a break we know what broke
@@ -119,8 +121,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
               #getting the predictions for the test/train or cross validation splits into the object at the correct list location
                   if(out$dat$split.type!="crossValidation") out$dat$ma<-(lapply(X=out$dat$ma,FUN=pred.vals,model=out$mods$final.mod,Model=Model))
                      else out$dat$ma$train$pred<-pred.vals(out$dat$ma$train,out$mods$final.mod,Model=Model)$pred  
-                   #Maxlike needs to remove incomplete cases which are removed in read.ma if there's a data.frame to work with
-                   if(Model=="maxlike") out$dat$ma$train$pred<-out$dat$ma$train$pred[out$dat$ma$train$compl]
+                  
                   #Just for the training set for Random Forest we have to take out of bag predictions rather than the regular predictions
                   if(Model=="rf") out$dat$ma$train$pred<-tweak.p(out$mods$predictions) 
                                                   
@@ -149,7 +150,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
               cat("Progress:70%\n");flush.console()
 
   #Response curves #
-     if(Model!="maxlike") response.curves(out,Model)
+     response.curves(out,Model)
      
    #Save Workspace
    save.image(file.path(output.dir,"modelWorkspace"))

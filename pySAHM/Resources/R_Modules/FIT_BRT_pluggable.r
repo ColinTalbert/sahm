@@ -58,6 +58,7 @@ tolerance = 0.001
 seed=NULL
 opt.methods=2
 MESS=FALSE
+multCore=TRUE
 
 # Interpret command line argurments #
 # Make Function Call #
@@ -88,6 +89,7 @@ Args <- commandArgs(trailingOnly=FALSE)
  		  if(argSplit[[1]][1]=="tolm")  tolerance.method <- argSplit[[1]][2]
  		  if(argSplit[[1]][1]=="tol")  tolerance <- as.numeric(argSplit[[1]][2])
  		  if(argSplit[[1]][1]=="mes")  MESS <-as.logical(argSplit[[1]][2])
+ 		   if(argSplit[[1]][1]=="multicore")  multCore <- as.logical(argSplit[[1]][2])
  			
     }
 
@@ -103,7 +105,7 @@ source(file.path(ScriptPath,"BRT.helper.fcts.r"))
 		make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
 		simp.method="cross-validation",debug.mode=F,tc=tc,n.folds=n.folds,alpha=alpha,script.name="brt",
 		learning.rate =learning.rate, bag.fraction = bag.fraction,prev.stratify = prev.stratify,max.trees = max.trees,seed=seed,
-    opt.methods=opt.methods,MESS=MESS,tolerance.method = tolerance.method,tolerance=tolerance,ScriptPath=ScriptPath)
+    opt.methods=opt.methods,MESS=MESS,tolerance.method = tolerance.method,tolerance=tolerance,ScriptPath=ScriptPath,multCore=multCore)
 
 
 

@@ -1,9 +1,12 @@
-source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\PairsExplore.r")
-source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\read.dat.r")
-source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\chk.libs.r")
-source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\read.dat.r")
-source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\my.panel.smooth.binary.r")
-source("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules\\Predictor.inspection.r")
+setwd("I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
+
+source("PairsExplore.r")
+source("read.dat.r")
+source("chk.libs.r")
+source("read.dat.r")
+source("my.panel.smooth.binary.r")
+source("Predictor.inspection.r")
 
 infil="C:\\temp\\TestDataSets\\CanadaThistleNewFormat.csv"
 predictor="bio_13"
@@ -26,13 +29,18 @@ predictor="TemperatureRastPois"
 o="I:\\VisTrails\\WorkingFiles\\workspace\\NewOutput\\SyntheticCountData"
 rc="responseCount"
 
-   Predictor.inspection(predictor,
+bgd=TRUE 
+i="I:\\VisTrails\\WorkingFiles\\workspace\\MarianTesting\\TestSuite\\modelSelection_split_1.csv"
+o="I:\\VisTrails\\WorkingFiles\\workspace\\MarianTesting\\TestSuite\\PredictorInspections"
+p="PRISM_bio_03_1971_2000_800m" 
+rc="responseBinary" 
+   Predictor.inspection(p,
         input.file=i,
     		output.dir=o,
     		response.col=rc,
     		pres=TRUE,
     		absn=TRUE,
-    		bgd=FALSE)
+    		bgd=bgd)
     		
 infil="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\ModelEvaluation_Split_2.csv"
 predictor="bio_08_2000_2009_2km"

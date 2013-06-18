@@ -55,11 +55,14 @@ import traceback
 import random
 import copy
 import multiprocessing
+import time
 
 from core.modules.vistrails_module import Module, ModuleError, ModuleConnector
 from core.modules.basic_modules import File, Directory, Path, new_constant, Constant
 from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
 from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
+
+from core.modules.module_configure import StandardModuleConfigurationWidget
 
 from core.modules.basic_modules import String
 from core.packagemanager import get_package_manager
@@ -86,7 +89,7 @@ from SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
 from GeneralSpatialViewer import GeneralSpatialViewer
 from sahm_picklists import ResponseType, AggregationMethod, \
         ResampleMethod, PointAggregationMethod, ModelOutputType, RandomPointType, \
-        OutputRaster
+        OutputRaster, mpl_colormap
 
 from utils import writetolog
 from pySAHM.utilities import TrappedError
@@ -142,8 +145,8 @@ def menu_items():
         groupBox = QtGui.QGroupBox("Processing mode:")
         vbox = QtGui.QVBoxLayout()
 
-        for mode in [("single thread", True), 
-                     ("multiple cores asynchronously", True), 
+        for mode in [("multiple models simultaneously (1 core each)", True),
+                     ("single models sequentially (n - 1 cores each)", True),  
                      ("FORT Condor", isFortCondorAvailible())]:
             radio =  QtGui.QRadioButton(mode[0])
             radio.setChecked(mode[0] == configuration.cur_processing_mode)
@@ -183,10 +186,13 @@ def menu_items():
                         configuration.write_to_dom(dom, element)
 
     def isFortCondorAvailible():
-        cmd = ["condor_store_cred", "-n",  "igskbacbws425", "query"]
-        p = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        ret = p.communicate()
-        return ret[0].find("A credential is stored and is valid") != -1
+        try:
+            cmd = ["condor_store_cred", "-n",  "IGSKBACBWSCDRS3", "query"]
+            p = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+            ret = p.communicate()
+            return ret[0].find("A credential is stored and is valid") != -1
+        except:
+            return False
 
     def checkAsyncModels():
         utils.launch_RunMonitorApp()
@@ -478,7 +484,9 @@ class Model(Module):
                     ('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)'),
                     ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
-                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False})]
+                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+                    ('outputFolderName', '(edu.utah.sci.vistrails.basic:String)'),]
+    
     _output_ports = [('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'), 
                      ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
                      ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)'),
@@ -505,7 +513,6 @@ class Model(Module):
         return GenModDoc.construct_port_doc(cls, port_name, 'out') 
 
     def compute(self):
-        
         ModelOutput = {"FIT_BRT_pluggable.r":"brt",
                        "FIT_GLM_pluggable.r":"glm",
                        "FIT_RF_pluggable.r":"rf",
@@ -516,10 +523,16 @@ class Model(Module):
         self.ModelAbbrev = ModelOutput[self.name]
         
         #maxent R and java output write to the same directory
+        prefix = self.ModelAbbrev
+        if self.hasInputFromPort("outputFolderName"):
+            prefix += '_' + self.getInputFromPort("outputFolderName")
+        prefix += '_' 
+            
         if self.ModelAbbrev == "maxent":
             self.output_dname=self.MaxentPath
-        else: 
-            self.output_dname = utils.mknextdir(prefix=self.ModelAbbrev + '_')   
+        else:
+            self.output_dname = utils.mknextdir(prefix=prefix)
+               
         self.argsDict = utils.map_ports(self, self.port_map)
         
         mdsFile = utils.getFileRelativeToCurrentVT(self.argsDict['c'])
@@ -535,24 +548,30 @@ class Model(Module):
       
         self.argsDict['o'] = self.output_dname
         self.argsDict['rc'] = utils.MDSresponseCol(mdsFile)
-        self.argsDict['cur_processing_mode'] = configuration.cur_processing_mode
+        self.argsDict['cur_processing_mode'] = configuration.cur_processing_mode    
       
+        if not configuration.cur_processing_mode == "multiple models simultaneously (1 core each)":
+            #This give previously launched models time to finish writing their 
+            #logs so we don't get a lock
+            time.sleep(10)
+            
         utils.runRScript(self.name, self.argsDict, self)
         
-        if configuration.cur_processing_mode == "single thread":
-            if not self.argsDict.has_key('mes'):
-                self.argsDict['mes'] = 'FALSE'
-            self.setModelResult("_prob_map.tif", 'ProbabilityMap', 'mpt')
-            self.setModelResult("_bin_map.tif", 'BinaryMap', 'mbt')
-            self.setModelResult("_resid_map.tif", 'ResidualsMap', 'mes')
-            self.setModelResult("_mess_map.tif", 'MessMap', 'mes')
-            self.setModelResult("_MoD_map.tif", 'MoDMap', 'mes')
-            self.setModelResult("_output.txt", 'Text_Output')
-            self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot')
-            self.setModelResult("_variable.importance.jpg", 'ModelVariableImportance')  
-            writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
-        else:
+        if not configuration.cur_processing_mode == "single models sequentially (n - 1 cores each)":
             utils.launch_RunMonitorApp()
+        
+        #set our output ports
+        if not self.argsDict.has_key('mes'):
+            self.argsDict['mes'] = 'FALSE'
+        self.setModelResult("_prob_map.tif", 'ProbabilityMap', 'mpt')
+        self.setModelResult("_bin_map.tif", 'BinaryMap', 'mbt')
+        self.setModelResult("_resid_map.tif", 'ResidualsMap', 'mes')
+        self.setModelResult("_mess_map.tif", 'MessMap', 'mes')
+        self.setModelResult("_MoD_map.tif", 'MoDMap', 'mes')
+        self.setModelResult("_output.txt", 'Text_Output')
+        self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot')
+        self.setModelResult("_variable.importance.jpg", 'ModelVariableImportance')  
+        writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
         
         modelWorkspace = utils.create_dir_module(self.output_dname)
         self.setResult("modelWorkspace", modelWorkspace)
@@ -1076,9 +1095,6 @@ class FieldDataAggregateAndWeight(Module):
         writetolog("    output_fname=" + output_fname, True, False)
         FDAWParams['output'] = output_fname
         
-        output_fname = utils.mknextfile(prefix='FDAW_', suffix='.csv')
-        writetolog("    output_fname=" + output_fname, True, False)
-        
         ourFDAW = FDAW.FieldDataQuery()
         utils.PySAHM_instance_params(ourFDAW, FDAWParams) 
         ourFDAW.processCSV()
@@ -1096,7 +1112,8 @@ class PARC(Module):
                                 ('PredictorList', '(gov.usgs.sahm:PredictorList:Other)'),
                                 ('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                 ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
-                                ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True})]
+                                ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
+                                ('outputFolderName', '(edu.utah.sci.vistrails.basic:String)', {'optional':True}),]
 
     _output_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
     
@@ -1117,7 +1134,10 @@ class PARC(Module):
         if template_fname == 'hdr':
             template_fname = os.path.split(template_path)[1]
         
-        output_dname = os.path.join(utils.getrootdir(), 'PARC_' + template_fname)
+        if self.hasInputFromPort("outputFolderName"):
+            output_dname = os.path.join(utils.getrootdir(), 'PARC_' + self.getInputFromPort("outputFolderName"))
+        else:
+            output_dname = os.path.join(utils.getrootdir(), 'PARC_' + template_fname)
         if not os.path.exists(output_dname):
             os.mkdir(output_dname)
         
@@ -1131,6 +1151,8 @@ class PARC(Module):
 
         if self.hasInputFromPort("ignoreNonOverlap"):
             ourPARC.ignoreNonOverlap = self.getInputFromPort("ignoreNonOverlap")
+
+        
 
         workingCSV = os.path.join(output_dname, "tmpFilesToPARC.csv")
 
@@ -1187,8 +1209,9 @@ class Reclassifier(Module):
     '''
 #    __doc__ = GenModDoc.construct_module_doc('RasterFormatConverter')
 
-    _input_ports = [("inputRaster", "(edu.utah.sci.vistrails.basic:File)"),
+    _input_ports = [("inputRaster", "(edu.utah.sci.vistrails.basic:Path)"),
                     ('reclassFile', '(edu.utah.sci.vistrails.basic:File)'),
+                    ('reclassFileContents', '(edu.utah.sci.vistrails.basic:String)'),
                     ]
 
     _output_ports = [('outputRaster', '(edu.utah.sci.vistrails.basic:File)')]
@@ -1202,8 +1225,9 @@ class Reclassifier(Module):
 
     def compute(self):
         writetolog("\nRunning Reclassifier", True)
-        port_map = {'inputRaster':('inputRaster', utils.dir_path_value, True),
-                    'reclassFile':('reclassFile', utils.dir_path_value, True)}
+        port_map = {'inputRaster':('inputRaster', utils.dir_path_value, False),
+                    'reclassFile':('reclassFile', utils.dir_path_value, False),
+                    'reclassFileContents':('reclassFileContents', None, False),}
         
         argsDict = utils.map_ports(self, port_map)
 
@@ -1211,17 +1235,113 @@ class Reclassifier(Module):
         import pySAHM.SpatialUtilities as SpatialUtilities
         ourReclassifier = rasterReclassifier()
         ourReclassifier.inputFname = argsDict['inputRaster']
-        ourReclassifier.reclassFName = argsDict['reclassFile']
+        
+        if argsDict.has_key('reclassFileContents'):
+            reclassFileName = utils.mknextfile("reclass", ".txt")
+            reclassFile = open(reclassFileName, "w")
+            reclassFile.write(self.forceGetInputFromPort('reclassFileContents'))
+            reclassFile.close()
+            ourReclassifier.reclassFName = reclassFileName
+        elif argsDict.has_key('reclassFile'):
+            ourReclassifier.reclassFName = argsDict['reclassFile']
+        else:
+            msg = "Neither a reclass File or reclassFileContents have been specified\n"
+            msg += "One or the other must be provided."
+            raise ModuleError(self, msg)
+            
         ourReclassifier.outDir = utils.getrootdir()
-        ourReclassifier.outName = SpatialUtilities.getRasterShortName(argsDict['inputRaster']) + "_rc.tif"
-        outFName = os.path.join(ourReclassifier.outDir, ourReclassifier.outName)
+        ourReclassifier.outName = utils.mknextfile(SpatialUtilities.getRasterShortName(argsDict['inputRaster']), "_rc.tif")
+#        outFName = os.path.join(ourReclassifier.outDir, ourReclassifier.outName)
         ourReclassifier.run()
 
-        output_file = utils.create_file_module(outFName)
+        output_file = utils.create_file_module(ourReclassifier.outName)
         
         
 #        writetolog("Finished running PARC", True)
         self.setResult('outputRaster', output_file)
+        
+
+class ReclassifierConfiguration(StandardModuleConfigurationWidget):
+    # FIXME add available_dict as parameter to allow config
+    def __init__(self, module, controller, parent=None):
+
+        StandardModuleConfigurationWidget.__init__(self, module, controller,
+                                                   parent)
+        self.setWindowTitle("Reclassification")
+        self.build_gui()
+      
+        self.loadText()
+      
+    def build_gui(self):
+        QtGui.QWidget.__init__(self)
+
+        self.buttonSave = QtGui.QPushButton('Save', self)
+        self.buttonReset = QtGui.QPushButton('Cancel', self)
+
+        self.buttonSave.clicked.connect(self.handleSave)
+        self.buttonReset.clicked.connect(self.handleReset)
+
+        layout = QtGui.QVBoxLayout()
+        self.textBox = QtGui.QTextEdit(self)
+        
+        layout.addWidget(self.textBox)
+        
+        buttonLayout = QtGui.QHBoxLayout()
+        buttonLayout.addWidget(self.buttonSave)
+        buttonLayout.addWidget(self.buttonReset)
+        layout.addLayout(buttonLayout)
+        self.setLayout(layout)
+
+        self.path = None  
+    
+    def getPortValue(self, portName):
+        for i in xrange(self.module.getNumFunctions()):
+            if self.module.functions[i].name==portName:
+                return self.module.functions[i].params[0].strValue
+        return None
+
+    def handleSave(self):
+        #call this to save any current changes
+        curStringValue = str(self.textBox.toPlainText())
+
+        self.updateVisTrail(curStringValue)
+  
+    def handleReset(self):
+        self.close()
+
+#    def save(self):
+#        with open(unicode(self.path), 'wb') as stream:
+#            writer = csv.writer(stream)
+#            #surely there is some cleaner way to get the header list!
+#            header = [str(self.contents.horizontalHeaderItem(i).text())
+#                    for i in range(self.contents.horizontalHeader().count())]
+#            writer.writerow(header)
+#            for row in range(self.contents.rowCount()):
+#                rowdata = []
+#                for column in range(self.contents.columnCount()):
+#                    item = self.contents.item(row, column)
+#                    if item is not None:
+#                        rowdata.append(
+#                            unicode(item.text()).encode('utf8'))
+#                    else:
+#                        rowdata.append('')
+#                writer.writerow(rowdata)
+
+    def updateVisTrail(self, strCurContents):
+        self.controller.update_ports_and_functions(self.module.id, 
+                                           [], [], [("reclassFileContents", [strCurContents])])
+        self.state_changed = False
+        self.emit(QtCore.SIGNAL("stateChanged"))
+        self.emit(QtCore.SIGNAL('doneConfigure'), self.module.id)
+
+    def loadText(self):
+        
+        if self.getPortValue('reclassFileContents'):
+            self.textBox.setText(self.getPortValue('reclassFileContents'))
+        elif self.getPortValue('reclassFile'):
+            curContents = open(self.getPortValue('reclassFile'), 'r').readlines()
+        
+    
 
 class CategoricalToContinuous(Module):
     '''
@@ -1472,6 +1592,7 @@ class ModelSelectionCrossValidation(Module):
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('nFolds', '(edu.utah.sci.vistrails.basic:Integer)', 
                         {'defaults':'["10"]', 'optional':True}),
+                    ('SpatialSplit', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                     ('Stratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
                     ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
@@ -1487,6 +1608,7 @@ class ModelSelectionCrossValidation(Module):
         writetolog("\nGenerating Cross Validation split ", True)
         port_map = {'inputMDS':('i', utils.dir_path_value, True),
                     'nFolds':('nf', None, True),
+                    'SpatialSplit':('spt', utils.R_boolean, False),
                     'Stratify':('stra', utils.R_boolean, True)}
         
         argsDict = utils.map_ports(self, port_map)
@@ -1498,15 +1620,17 @@ class ModelSelectionCrossValidation(Module):
 
         if argsDict["nf"] <= 0:
             raise ModuleError(self, "Number of Folds must be greater than 0")
-        argsDict["es"] = "TRUE"
-
+ 
         if self.hasInputFromPort("Seed"):
             seed = str(self.getInputFromPort("Seed"))
         else:
             seed = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
+        if not argsDict.has_key('spt'):
+                argsDict['spt'] = 'FALSE'
+       
         writetolog("    seed used for Split = " + str(seed))
         argsDict["seed"] = str(seed)
-
+        
         utils.runRScript("CrossValidationSplit.r", argsDict, self)
         
         output = os.path.join(outputMDS)
@@ -2208,7 +2332,7 @@ _modules = generate_namespaces({'DataInput': [
                                           ApplyModel,
                                           BackgroundSurfaceGenerator
                                           ],
-                                'GeospatialTools': [Reclassifier,
+                                'GeospatialTools': [(Reclassifier, {'configureWidgetType': ReclassifierConfiguration}),
                                                     CategoricalToContinuous
                                                     ],                                        
                                 'Models': [(GLM, {'moduleColor':model_color,
@@ -2235,6 +2359,7 @@ _modules = generate_namespaces({'DataInput': [
                                            (ModelOutputType, {'abstract': True}),
                                            (RandomPointType, {'abstract': True}),
                                            (OutputRaster, {'abstract': True}),
+                                           (mpl_colormap, {'abstract': True}),
                                            (TextFile, {'configureWidgetType': TextFileConfiguration}),
                                            (CSVTextFile, {'configureWidgetType': CSVTextFileConfiguration})
                                            ],

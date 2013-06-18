@@ -42,7 +42,7 @@
 ## and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
-CrossValidationSplit<-function(input.file,output.file,response.col="ResponseBinary",n.folds=10,stratify=FALSE,seed){
+CrossValidationSplit<-function(input.file,output.file,response.col="ResponseBinary",n.folds=10,stratify=FALSE,spatSplit=FALSE,seed){
 
 #Description:
 #this code takes as input an mds file with the first line being the predictor or
@@ -107,19 +107,33 @@ options(warn=1)
             }
             #this splits the training set
               if(any(!is.na(match(tolower("evalsplit"),tolower(names(dat)))))){
-             split.mask<-dat[,match(tolower("evalsplit"),tolower(names(dat)))]=="train"
-             index<-seq(1:nrow(dat))[split.mask]
+                 split.mask<-dat[,match(tolower("evalsplit"),tolower(names(dat)))]=="train"
+                 index<-seq(1:nrow(dat))[split.mask]
              } else split.mask<-index<-seq(1:nrow(dat))
-             if(stratify==TRUE){
-               dat[,ncol(dat)+1]<-NA
+             
+           
+              dat[,ncol(dat)+1]<-NA
+             
+             if(stratify & !spatSplit){
+               
                 for(i in 1:length(names(table(response)))){
                   index.i<-index[response[split.mask]==names(table(response))[i]]
                   index.i<-index.i[order(runif(length(index.i)))]
                   dat[index.i,ncol(dat)]<-c(rep(seq(1:n.folds),each=floor(length(index.i)/n.folds)),sample(seq(1:n.folds),size=length(index.i)%%n.folds,replace=FALSE))
                 }
-             } else{
+             } else if(spatSplit){
+                 X<-as.numeric(dat$X[split.mask])
+                 Y<-as.numeric(dat$Y[split.mask])
+                 Xbreak<-c(quantile(X,probs=c(.333,.666)),max(X))
+                 Ybreak<-c(quantile(Y,probs=c(.333,.666)),max(Y))
+                CVsplit<-apply(outer(X,Xbreak,"<"),1,sum)
+                    if(any(CVsplit==0)) CVsplit[CVsplit==0]<-1
+                CVsplitY<-apply(outer(Y,Ybreak,"<"),1,sum)
+                    if(any(CVsplitY==0)) CVsplitY[CVsplitY==0]<-1
+                dat[index,ncol(dat)]<-as.numeric(as.factor(paste(CVsplit,CVsplitY)))
+             }else{
                 index<-index[order(runif(length(index)))]
-                dat[index,ncol(dat)+1]<-c(rep(seq(1:n.folds),each=floor(length(index)/n.folds)),sample(seq(1:n.folds),size=length(index)%%n.folds,replace=FALSE))
+                dat[index,ncol(dat)]<-c(rep(seq(1:n.folds),each=floor(length(index)/n.folds)),sample(seq(1:n.folds),size=length(index)%%n.folds,replace=FALSE))
              }
              names(dat)[ncol(dat)]<-"Split"
          #inserting data must be done in 3 steps because dat.in isn't a proper dataframe in that
@@ -145,6 +159,7 @@ options(warn=1)
   n.folds=10
   stratify=TRUE
   seed=NULL
+  spatSplit=FALSE
  #Reading in command line arguments
  Args <- commandArgs(T)
     print(Args)
@@ -154,15 +169,16 @@ options(warn=1)
     	argSplit <- strsplit(arg, "=")
     	argSplit[[1]][1]
     	argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="nf") n.folds <- argSplit[[1]][2]
-    	if(argSplit[[1]][1]=="stra") stratify <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="nf") n.folds <- as.numeric(argSplit[[1]][2])
+    	if(argSplit[[1]][1]=="stra") stratify <- as.logical(argSplit[[1]][2])
     	if(argSplit[[1]][1]=="o") output.file <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="i") infil <- argSplit[[1]][2]
     	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
    		if(argSplit[[1]][1]=="seed")  seed <- as.numeric(argSplit[[1]][2])
+   		if(argSplit[[1]][1]=="spt")  spatSplit <- as.logical(argSplit[[1]][2])
     }
- stratify<-as.logical(stratify)
- n.folds<-as.numeric(n.folds)
+ 
+ 
 	#Run the Test training split with these parameters
 	CrossValidationSplit(input.file=infil,output.file=output.file,response.col=responseCol,
-  n.folds=n.folds,stratify=stratify,seed=seed)
+  n.folds=n.folds,stratify=stratify,spatSplit=spatSplit,seed=seed)

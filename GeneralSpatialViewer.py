@@ -81,6 +81,8 @@ from osgeo import gdal, gdalconst
 
 from core.packagemanager import get_package_manager
 
+from sahm_picklists import mpl_colormap
+
 class GeneralSpatialViewer(SpreadsheetCell):
     """
     SAHMModelOutputViewerCell is a VisTrails Module that
@@ -92,7 +94,7 @@ class GeneralSpatialViewer(SpreadsheetCell):
     _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("rasterFile", '(edu.utah.sci.vistrails.basic:Path)'),
-                    ("colorRamp", '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["jet"]'}),
+                    ("colorRamp", '(gov.usgs.sahm:mpl_colormap:Other)', {'defaults':'["jet"]'}),
                     ('categorical', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                     ('threeBand', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                     ('dataMin', '(edu.utah.sci.vistrails.basic:Float)'),

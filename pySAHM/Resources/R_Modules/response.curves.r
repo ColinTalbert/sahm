@@ -70,8 +70,10 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
                 levels(Xp[, i]) <- levels(dat[, i])
             }
     }
-   
+       
      dir.create(paste(out$input$output.dir,"\\responseCurves",sep=""))
+     rsp.dat<-NA
+      
       for (k in c(1,2)){
           if(k==1){ jpeg(paste(out$input$output.dir,"\\responseCurves\\","all_response_curves.jpg",sep=""),width=2000,height=2000,quality=100)
                     par(oma=c(2,2,4,2),mfrow=c(prow,pcol))}                   
@@ -95,13 +97,19 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
                       Xf[,j] <- pred.fct(out$mods$final.mod[[j]], as.data.frame(Xp1),Model)
                  }
                       y.lim<-c(0,1)
-                     y.lim=range(apply(Xf,1,mean))
+                     #y.lim=range(apply(Xf,1,mean))
                        plot(Xp1[, i],apply(Xf,1,mean), ylim = y.lim, xlab = "",
                       ylab = "", type = "l", main = names(dat)[i],lwd=2,cex=3,cex.main=3,cex.axis=2.5)
-               if(k==2) graphics.off()              
+               if(k==2) graphics.off() 
+               if(k==2) {if(i==min(sort(match(out$mods$vnames,names(dat))))) rsp.dat<-cbind(Xp1[, i],apply(Xf,1,mean))
+                        else rsp.dat<-cbind(rsp.dat,Xp1[, i],apply(Xf,1,mean))
+                            colnames(rsp.dat)[(ncol(rsp.dat)-1):(ncol(rsp.dat))]<-c(names(dat)[i],basename(out$input$output.dir))  
+                        }             
                } 
          if(k==1) graphics.off()     
-       }         
+       }
+       write.csv(rsp.dat,file=file.path(out$dat$bnameExpanded,"ResponseCurves.csv"))
+                
   }         
                 
                 

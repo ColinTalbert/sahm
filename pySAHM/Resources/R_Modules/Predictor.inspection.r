@@ -38,7 +38,7 @@ Predictor.inspection<-function(predictor,input.file,output.dir,response.col="Res
      if(class(a)=="try-error") spatialDat=FALSE
      output.file<-file.path(output.dir,paste(names(dat)[pred.indx],".jpg",sep=""))
      ### Producing some plots
-    
+  
     jpeg(output.file,pointsize=13,height=2000,width=2000,quality=100)
          if(spatialDat) par(mfrow=c(2,2),mar=c(5,7,9,6),oma=c(6,2,2,2))
          else par(mfrow=c(2,1),mar=c(15,25,9,25))
@@ -73,7 +73,7 @@ Predictor.inspection<-function(predictor,input.file,output.dir,response.col="Res
        ####PLOT 3.
         if(spatialDat){ 
             par(mar=c(5,7,5,5))
-            plot(a,alpha=.5,maxpixels=5000,main=paste("Spatial distribution of missing data\n",ifelse(pres.lab=="Pres","presence and absence","used and available"),sep=""),xlab="",ylab="",cex.lab=cex.mult,
+            plot(a,col=rev(terrain.colors(20)),alpha=.5,maxpixels=5000,main=paste("Spatial distribution of missing data\n",ifelse(pres.lab=="Pres","presence and absence","used and available"),sep=""),xlab="",ylab="",cex.lab=cex.mult,
                      cex.axis=.7*cex.mult,cex=cex.mult,cex.main=cex.mult*.8,legend=FALSE)
                #points(xy$x,xy$y,col=c("black","red")[complete.cases(pred)+1],pch=16,cex=.5*cex.mult)
                points(x=xy$x[complete.cases(pred)],y=xy$y[complete.cases(pred)],col=c("red4","blue4")[(response[complete.cases(pred)]==0)+1],

@@ -127,21 +127,18 @@ site.weights<-out$dat$ma$train$weight
  #Start cross validation Fold loop
    cor.mat<-matrix(nrow=length(out$mods$vnames),ncol=nk)
    rownames(cor.mat)<-out$mods$vnames
-
+   
 for (i in 1:nk) {
               cat(i," ")
               model.mask <- selector != i  #used to fit model on majority of data
               pred.mask <- selector == i   #used to identify the with-held subset
               assign("species.subset", ydat[model.mask], pos = 1)
               assign("predictor.subset", xdat[model.mask, ], pos = 1)
-              
-              dat<-cbind(predictor.subset,species.subset)
-              names(dat)<-names(data)
-             
-              # fit new model
+         
+              # fit new model  pred.names,dat,pred,modelFit,Model,resp
               cv.final.mod<-model.fit(dat=out$dat$ma$train$dat[model.mask,],out=out,Model=Model,weight=out$dat$ma$train$weight[model.mask],Fold=i)                       
               fitted.values[pred.mask]<-out$dat$ma[[i]]$pred<-pred.fct(model=cv.final.mod,x=xdat[pred.mask,],Model)
-              cor.mat[,i]<-PermutePredict(out$mods$vnames,xdat[pred.mask,],fitted.values[pred.mask],cv.final.mod,Model)      
+              cor.mat[,i]<-PermutePredict(out$mods$vnames,xdat[pred.mask,],fitted.values[pred.mask],cv.final.mod,Model,ydat[pred.mask])      
                      out$dat$ma[[i]]$thresh <- as.numeric(optimal.thresholds(data.frame(ID=1:nrow(out$dat$ma$train$dat[model.mask,]),pres.abs=out$dat$ma$train$dat[model.mask,]$response,
                           pred=pred.fct(model=cv.final.mod,x=xdat[model.mask,],Model)),opt.methods=out$input$opt.methods))[2]
               y_i <- ydat[pred.mask]
