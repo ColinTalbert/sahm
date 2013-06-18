@@ -24,6 +24,10 @@ def main(args_in):
     p = subprocess.Popen(args_in, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     ret = p.communicate()
     
+    print ret[0]#this sends it to the std out
+    sys.stderr.write(ret[1])
+    
+    msg = ""
     if 'Error' in ret[1]:
         msg = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
         msg +="\n  An error was encountered in the R script for this module."
@@ -31,7 +35,7 @@ def main(args_in):
         msg += ret[1]
         if logger:
             logger.writetolog(msg)
-
+        sys.stderr.write(msg)
         print msg
         return
 
@@ -40,7 +44,7 @@ def main(args_in):
         msg += ret[1]
         if logger:
             logger.writetolog(msg)
-    
+    sys.stderr.write(msg)
        
     sys.stderr.write(ret[1])
     
