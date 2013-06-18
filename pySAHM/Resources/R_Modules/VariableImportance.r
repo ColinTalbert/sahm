@@ -1,6 +1,8 @@
 VariableImportance<-function(Model,out,auc){
     #this relatively complicated structure is used for cross validation variable importance plots
-    
+    #This function can produce some strange results for random Forest if it is seriously overparameterized
+    #in which case permutation in any single value might not lead to a drop in auc so all variables have
+    #approximately zero importance all other models drop variables and haven't shown this
     cor.mat<-matrix(nrow=length(out$mods$vnames),ncol=length(out$dat$ma))
     #remove the response colum
      if(out$input$script.name=="rf") {
@@ -64,7 +66,7 @@ VariableImportance<-function(Model,out,auc){
 
 PermutePredict<-function(pred.names,dat,pred,modelFit,Model,resp){
     AUC<-rep(NA,times=length(pred.names)) 
-     
+       
      for (i in 1:length(pred.names)){
            indx<-match(pred.names[i],names(dat))
            Dat<-dat
