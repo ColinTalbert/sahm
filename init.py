@@ -56,10 +56,8 @@ import random
 import copy
 import multiprocessing
 import time
-import core.modules.module_registry
-from core.modules.vistrails_module import Module, ModuleError, ModuleSuspended
 
-from core.modules.vistrails_module import Module, ModuleError, ModuleConnector, ModuleSuspended 
+from core.modules.vistrails_module import Module, ModuleError, ModuleConnector
 from core.modules.basic_modules import File, Directory, Path, new_constant, Constant
 from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
 from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
@@ -91,7 +89,7 @@ from SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
 from GeneralSpatialViewer import GeneralSpatialViewer
 from sahm_picklists import ResponseType, AggregationMethod, \
         ResampleMethod, PointAggregationMethod, ModelOutputType, RandomPointType, \
-        OutputRaster
+        OutputRaster, mpl_colormap
 
 from utils import writetolog
 from pySAHM.utilities import TrappedError
@@ -147,8 +145,8 @@ def menu_items():
         groupBox = QtGui.QGroupBox("Processing mode:")
         vbox = QtGui.QVBoxLayout()
 
-        for mode in [("single thread", True), 
-                     ("multiple cores asynchronously", True), 
+        for mode in [("multiple models simultaneously (1 core each)", True),
+                     ("single models sequentially (n - 1 cores each)", True),  
                      ("FORT Condor", isFortCondorAvailible())]:
             radio =  QtGui.QRadioButton(mode[0])
             radio.setChecked(mode[0] == configuration.cur_processing_mode)
@@ -188,10 +186,13 @@ def menu_items():
                         configuration.write_to_dom(dom, element)
 
     def isFortCondorAvailible():
-        cmd = ["condor_store_cred", "-n",  "igskbacbws425", "query"]
-        p = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        ret = p.communicate()
-        return ret[0].find("A credential is stored and is valid") != -1
+        try:
+            cmd = ["condor_store_cred", "-n",  "IGSKBACBWSCDRS3", "query"]
+            p = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+            ret = p.communicate()
+            return ret[0].find("A credential is stored and is valid") != -1
+        except:
+            return False
 
     def checkAsyncModels():
         utils.launch_RunMonitorApp()
@@ -472,46 +473,7 @@ class RastersWithPARCInfoCSV(File):
     
     pass
 
-class TimeQueue:
-    def __init__(self, dir, seconds=10):
-        self.directory = dir
-        self.seconds = seconds
-    def finished(self):
-        # use a file to store the time when the queue was first executed
-        # and return wether "seconds" haved passed since then
-        if not os.path.exists(self.directory.name):
-            os.mkdir(self.directory.name)
-        fname = os.path.join(self.directory.name, 'output.txt')
-        if not os.path.exists(fname):
-            # save file with timestamp
-            f = open(fname, 'w')
-            f.write(str(time.time()))
-            f.close()
-            return False
-        f = open(fname)
-        # check if enough time have passes
-        timestamp = float(f.read())
-        diff = time.time() - timestamp
-        self.finished().val = diff>self.seconds
-        f.close()
-        return diff>self.seconds
-
-class WaitX(Module):
-    _input_ports = [('dir', '(edu.utah.sci.vistrails.basic:Directory)', False),
-                    ('seconds', '(edu.utah.sci.vistrails.basic:Integer)', True)]
-    _output_ports = [('dir', '(edu.utah.sci.vistrails.basic:Directory)', False)]
-     
-    def compute(self):
-        dir = self.getInputFromPort("dir")
-        seconds = self.getInputFromPort("seconds")
-
-        queue = TimeQueue(dir, seconds)
-        if not queue.finished():
-            raise ModuleSuspended(self, "Waiting for TimeQueue to finish", queue=queue)
         
-        self.setResult('dir', dir)
-
-            
 class Model(Module):
     '''
     This module is a required class for other modules and scripts within the
@@ -522,7 +484,9 @@ class Model(Module):
                     ('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)'),
                     ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
-                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False})]
+                    ('makeMESMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+                    ('outputFolderName', '(edu.utah.sci.vistrails.basic:String)'),]
+    
     _output_ports = [('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'), 
                      ('BinaryMap', '(edu.utah.sci.vistrails.basic:File)'), 
                      ('ProbabilityMap', '(edu.utah.sci.vistrails.basic:File)'),
@@ -549,7 +513,6 @@ class Model(Module):
         return GenModDoc.construct_port_doc(cls, port_name, 'out') 
 
     def compute(self):
-        
         ModelOutput = {"FIT_BRT_pluggable.r":"brt",
                        "FIT_GLM_pluggable.r":"glm",
                        "FIT_RF_pluggable.r":"rf",
@@ -560,10 +523,16 @@ class Model(Module):
         self.ModelAbbrev = ModelOutput[self.name]
         
         #maxent R and java output write to the same directory
+        prefix = self.ModelAbbrev
+        if self.hasInputFromPort("outputFolderName"):
+            prefix += '_' + self.getInputFromPort("outputFolderName")
+        prefix += '_' 
+            
         if self.ModelAbbrev == "maxent":
             self.output_dname=self.MaxentPath
-        else: 
-            self.output_dname = utils.mknextdir(prefix=self.ModelAbbrev + '_')   
+        else:
+            self.output_dname = utils.mknextdir(prefix=prefix)
+               
         self.argsDict = utils.map_ports(self, self.port_map)
         
         mdsFile = utils.getFileRelativeToCurrentVT(self.argsDict['c'])
@@ -579,24 +548,30 @@ class Model(Module):
       
         self.argsDict['o'] = self.output_dname
         self.argsDict['rc'] = utils.MDSresponseCol(mdsFile)
-        self.argsDict['cur_processing_mode'] = configuration.cur_processing_mode
+        self.argsDict['cur_processing_mode'] = configuration.cur_processing_mode    
       
+        if not configuration.cur_processing_mode == "multiple models simultaneously (1 core each)":
+            #This give previously launched models time to finish writing their 
+            #logs so we don't get a lock
+            time.sleep(10)
+            
         utils.runRScript(self.name, self.argsDict, self)
         
-        if configuration.cur_processing_mode == "single thread":
-            if not self.argsDict.has_key('mes'):
-                self.argsDict['mes'] = 'FALSE'
-            self.setModelResult("_prob_map.tif", 'ProbabilityMap', 'mpt')
-            self.setModelResult("_bin_map.tif", 'BinaryMap', 'mbt')
-            self.setModelResult("_resid_map.tif", 'ResidualsMap', 'mes')
-            self.setModelResult("_mess_map.tif", 'MessMap', 'mes')
-            self.setModelResult("_MoD_map.tif", 'MoDMap', 'mes')
-            self.setModelResult("_output.txt", 'Text_Output')
-            self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot')
-            self.setModelResult("_variable.importance.jpg", 'ModelVariableImportance')  
-            writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
-        else:
+        if not configuration.cur_processing_mode == "single models sequentially (n - 1 cores each)":
             utils.launch_RunMonitorApp()
+        
+        #set our output ports
+        if not self.argsDict.has_key('mes'):
+            self.argsDict['mes'] = 'FALSE'
+        self.setModelResult("_prob_map.tif", 'ProbabilityMap', 'mpt')
+        self.setModelResult("_bin_map.tif", 'BinaryMap', 'mbt')
+        self.setModelResult("_resid_map.tif", 'ResidualsMap', 'mes')
+        self.setModelResult("_mess_map.tif", 'MessMap', 'mes')
+        self.setModelResult("_MoD_map.tif", 'MoDMap', 'mes')
+        self.setModelResult("_output.txt", 'Text_Output')
+        self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot')
+        self.setModelResult("_variable.importance.jpg", 'ModelVariableImportance')  
+        writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
         
         modelWorkspace = utils.create_dir_module(self.output_dname)
         self.setResult("modelWorkspace", modelWorkspace)
@@ -1120,9 +1095,6 @@ class FieldDataAggregateAndWeight(Module):
         writetolog("    output_fname=" + output_fname, True, False)
         FDAWParams['output'] = output_fname
         
-        output_fname = utils.mknextfile(prefix='FDAW_', suffix='.csv')
-        writetolog("    output_fname=" + output_fname, True, False)
-        
         ourFDAW = FDAW.FieldDataQuery()
         utils.PySAHM_instance_params(ourFDAW, FDAWParams) 
         ourFDAW.processCSV()
@@ -1140,7 +1112,8 @@ class PARC(Module):
                                 ('PredictorList', '(gov.usgs.sahm:PredictorList:Other)'),
                                 ('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                 ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
-                                ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True})]
+                                ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
+                                ('outputFolderName', '(edu.utah.sci.vistrails.basic:String)', {'optional':True}),]
 
     _output_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
     
@@ -1161,7 +1134,10 @@ class PARC(Module):
         if template_fname == 'hdr':
             template_fname = os.path.split(template_path)[1]
         
-        output_dname = os.path.join(utils.getrootdir(), 'PARC_' + template_fname)
+        if self.hasInputFromPort("outputFolderName"):
+            output_dname = os.path.join(utils.getrootdir(), 'PARC_' + self.getInputFromPort("outputFolderName"))
+        else:
+            output_dname = os.path.join(utils.getrootdir(), 'PARC_' + template_fname)
         if not os.path.exists(output_dname):
             os.mkdir(output_dname)
         
@@ -1175,6 +1151,8 @@ class PARC(Module):
 
         if self.hasInputFromPort("ignoreNonOverlap"):
             ourPARC.ignoreNonOverlap = self.getInputFromPort("ignoreNonOverlap")
+
+        
 
         workingCSV = os.path.join(output_dname, "tmpFilesToPARC.csv")
 
@@ -1231,7 +1209,7 @@ class Reclassifier(Module):
     '''
 #    __doc__ = GenModDoc.construct_module_doc('RasterFormatConverter')
 
-    _input_ports = [("inputRaster", "(edu.utah.sci.vistrails.basic:File)"),
+    _input_ports = [("inputRaster", "(edu.utah.sci.vistrails.basic:Path)"),
                     ('reclassFile', '(edu.utah.sci.vistrails.basic:File)'),
                     ('reclassFileContents', '(edu.utah.sci.vistrails.basic:String)'),
                     ]
@@ -1614,6 +1592,7 @@ class ModelSelectionCrossValidation(Module):
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('nFolds', '(edu.utah.sci.vistrails.basic:Integer)', 
                         {'defaults':'["10"]', 'optional':True}),
+                    ('SpatialSplit', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                     ('Stratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
                     ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
@@ -1629,6 +1608,7 @@ class ModelSelectionCrossValidation(Module):
         writetolog("\nGenerating Cross Validation split ", True)
         port_map = {'inputMDS':('i', utils.dir_path_value, True),
                     'nFolds':('nf', None, True),
+                    'SpatialSplit':('spt', utils.R_boolean, False),
                     'Stratify':('stra', utils.R_boolean, True)}
         
         argsDict = utils.map_ports(self, port_map)
@@ -1640,15 +1620,17 @@ class ModelSelectionCrossValidation(Module):
 
         if argsDict["nf"] <= 0:
             raise ModuleError(self, "Number of Folds must be greater than 0")
-        argsDict["es"] = "TRUE"
-
+ 
         if self.hasInputFromPort("Seed"):
             seed = str(self.getInputFromPort("Seed"))
         else:
             seed = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
+        if not argsDict.has_key('spt'):
+                argsDict['spt'] = 'FALSE'
+       
         writetolog("    seed used for Split = " + str(seed))
         argsDict["seed"] = str(seed)
-
+        
         utils.runRScript("CrossValidationSplit.r", argsDict, self)
         
         output = os.path.join(outputMDS)
@@ -2057,7 +2039,7 @@ def initialize():
     global layers_csv_fname
     
     writetolog("*" * 79)
-    writetolog("Initializing SAHM:", True, True)
+    writetolog("Initializing:", True, True)
     writetolog("  Locations of dependencies")
 #    writetolog("   Layers CSV = " + os.path.join(os.path.dirname(__file__), 'layers.csv'))
     writetolog("   Layers CSV = " + layers_csv_fname)
@@ -2067,6 +2049,7 @@ def initialize():
 #    writetolog("        Must contain subfolders qgis1.7.0, OSGeo4W")
     writetolog("    ")
     writetolog("*" * 79)
+    
     writetolog("*" * 79)
     writetolog(" output directory:   " + session_dir)
     writetolog("*" * 79)
@@ -2363,12 +2346,7 @@ _modules = generate_namespaces({'DataInput': [
                                            (BoostedRegressionTree, 
                                                 {
                                                  'moduleColor':model_color,
-                                                           'moduleFringe':model_fringe}),
-                                           (WaitX, 
-                                                {
-                                                 'moduleColor':model_color,
-                                                           'moduleFringe':model_fringe}),
-                                           
+                                                           'moduleFringe':model_fringe})
                                            ],
                                 'Other':  [(Model, {'abstract': True}),
                                            (ResampleMethod, {'abstract': True}),
@@ -2381,6 +2359,7 @@ _modules = generate_namespaces({'DataInput': [
                                            (ModelOutputType, {'abstract': True}),
                                            (RandomPointType, {'abstract': True}),
                                            (OutputRaster, {'abstract': True}),
+                                           (mpl_colormap, {'abstract': True}),
                                            (TextFile, {'configureWidgetType': TextFileConfiguration}),
                                            (CSVTextFile, {'configureWidgetType': CSVTextFileConfiguration})
                                            ],

@@ -114,6 +114,16 @@ Input Ports:
     def provide_output_port_documentation(cls, port_name):
          return utils.construct_port_msg(cls, port_name, 'out') 
      
+    def findFile(self, modelDir, suffix):
+        try:
+            files = os.listdir(modelDir)
+            for f in files:
+                if f.endswith(suffix):
+                    return os.path.join(modelDir, f)
+        except:
+            return "Couldn't find file"
+        return "Couldn't find file"
+    
     def compute(self):
         """ compute() -> None
         Dispatch the display event to the spreadsheet with images and labels
@@ -127,11 +137,11 @@ Input Ports:
             model_dir_full = os.path.normcase(model_workspace)
             model_dir = os.path.split(model_dir_full)[1]
             model_name = model_dir[:model_dir.index('_')]
-            auc_graph_path = os.path.join(model_dir_full, model_name + '_modelEvalPlot.jpg')
+            auc_graph_path = self.findFile(model_dir_full, '_modelEvalPlot.jpg')#os.path.join(model_dir_full, model_name + '_modelEvalPlot.jpg')
             if os.path.exists(auc_graph_path):
                 auc_graph = window.file_pool.make_local_copy(auc_graph_path)
             
-            text_output_path = os.path.join(model_dir_full, model_name + '_output.txt')
+            text_output_path = self.findFile(model_dir_full, '_output.txt')#os.path.join(model_dir_full, model_name + '_output.txt')
             if os.path.exists(text_output_path):
                 text_output = window.file_pool.make_local_copy(text_output_path)
             
@@ -145,19 +155,19 @@ Input Ports:
             else:
                 response_curves = []
             
-            calibration_graph_path = os.path.join(model_dir_full, model_name + '_CalibrationPlot.jpg')
+            calibration_graph_path = self.findFile(model_dir_full, '_CalibrationPlot.jpg')#os.path.join(model_dir_full, model_name + '_CalibrationPlot.jpg')
             if os.path.exists(calibration_graph_path):
                 calibration_graph = window.file_pool.make_local_copy(calibration_graph_path)
             
-            confusion_graph_path = os.path.join(model_dir_full, model_name + '.confusion.matrix.jpg')
+            confusion_graph_path = self.findFile(model_dir_full, '.confusion.matrix.jpg')#os.path.join(model_dir_full, model_name + '.confusion.matrix.jpg')
             if os.path.exists(confusion_graph_path):
                 confusion_graph = window.file_pool.make_local_copy(confusion_graph_path)
             
-            residuals_graph_path = os.path.join(model_dir_full, model_name + '.resid.plot.jpg')
+            residuals_graph_path = self.findFile(model_dir_full, '.resid.plot.jpg')#os.path.join(model_dir_full, model_name + '.resid.plot.jpg')
             if os.path.exists(residuals_graph_path):
                 residuals_graph = window.file_pool.make_local_copy(residuals_graph_path)
             
-            variable_imp_path = os.path.join(model_dir_full, model_name + '_variable.importance.jpg')
+            variable_imp_path = self.findFile(model_dir_full, '_variable.importance.jpg')#os.path.join(model_dir_full, model_name + '_variable.importance.jpg')
             if os.path.exists(variable_imp_path):
                 variable_graph = window.file_pool.make_local_copy(variable_imp_path)
                 

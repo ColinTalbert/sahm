@@ -51,7 +51,7 @@ make.auc.plot.jpg<-function(out=out){
  
 ########################################################################
 ######################### Calc threshold on train split #################
-          
+         
  if(out$input$model.family!="poisson"){
             inlst$train$thresh<-out$dat$ma$train$thresh<- as.numeric(optimal.thresholds(data.frame(ID=1:length(inlst$train$resp$response),pres.abs=inlst$train$resp,
                 pred=inlst$train$pred),opt.methods=out$input$opt.methods))[2]
@@ -73,12 +73,12 @@ make.auc.plot.jpg<-function(out=out){
     }
 ################# Calculate all statistics on test\train or train\cv splits
   
-   out$input$has.split<-(out$input$PsdoAbs & !out$input$script.name%in%c("glm","maxlike","maxent"))
+   out$input$has.split<-(out$input$PsdoAbs & !out$input$script.name%in%c("glm","maxent"))
   Stats<-lapply(inlst,calcStat,family=out$input$model.family,has.split=out$input$has.split)
 
 #################### Variable importance plots #####################
 
-    if(tolower(out$input$script.name)!="maxlike" & length(out$mods$vnames)>1 & out$input$model.family!="poisson"){
+    if(length(out$mods$vnames)>1 & out$input$model.family!="poisson"){
       jpeg(paste(out$dat$bname,"_variable.importance.jpg",sep=""),height=1000,width=1000)  
         VariableImportance(out$input$script.name,out=out,auc=lapply(Stats,"[",9)) 
       graphics.off()
@@ -159,7 +159,7 @@ make.auc.plot.jpg<-function(out=out){
                 #I'm not at all sure this is right but it would seem you can't change the ratio of pres to background between the test
                 #and train split so we can downsample abs or weight the predictions for the absence I'm not sure either of these are 
                 #appropriate
-                if(!(out$input$script.name%in%c("glm","maxlike"))){
+                if(!(out$input$script.name%in%c("glm"))){
                     absn<-which(a$pres.abs==0,arr.ind=TRUE)
                     samp<-sample(absn,size=min(table(a$pres.abs)),replace=FALSE) 
                 }
@@ -240,7 +240,6 @@ make.auc.plot.jpg<-function(out=out){
                             out$dat$input$OrigFieldData,out$dat$input$FieldDataTemp,out$dat$input$ParcOutputFolder,
                             basename(out$dat$input$ParcTemplate),ifelse(length(out$dat$input$CovSelectName)==0,"NONE",out$dat$input$CovSelectName),""))
                       
-                     if(out$input$script.name!="maxlike") 
                         AppendOut(compile.out=out$input$Append.Dir,Header,x,out,Parm.Len=length(stat.names),parent=parent,split.type=out$dat$split.type)
 
     return(list(thresh=train.stats$train$thresh,residual.smooth.fct=residual.smooth.fct))

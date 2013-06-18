@@ -428,21 +428,23 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
             self.all_layers[pointType]['x'] = []
             self.all_layers[pointType]['y'] = []
         
-        mdsReader = csv.reader(open(self.inputs["mds"], 'r'))
-        header = mdsReader.next()
-        header2 = mdsReader.next()
-        header3 = mdsReader.next()
         
-        for row in mdsReader:
-            if int(row[2]) > 0:
-                self.all_layers['pres_points']['x'].append(float(row[0]))
-                self.all_layers['pres_points']['y'].append(float(row[1]))
-            elif int(row[2]) == 0:
-                self.all_layers['abs_points']['x'].append(float(row[0]))
-                self.all_layers['abs_points']['y'].append(float(row[1]))
-            else:
-                self.all_layers['backs_points']['x'].append(float(row[0]))
-                self.all_layers['backs_points']['y'].append(float(row[1]))
+        if os.path.exists(self.inputs["mds"]):
+            mdsReader = csv.reader(open(self.inputs["mds"], 'r'))
+            header = mdsReader.next()
+            header2 = mdsReader.next()
+            header3 = mdsReader.next()
+        
+            for row in mdsReader:
+                if int(row[2]) > 0:
+                    self.all_layers['pres_points']['x'].append(float(row[0]))
+                    self.all_layers['pres_points']['y'].append(float(row[1]))
+                elif int(row[2]) == 0:
+                    self.all_layers['abs_points']['x'].append(float(row[0]))
+                    self.all_layers['abs_points']['y'].append(float(row[1]))
+                else:
+                    self.all_layers['backs_points']['x'].append(float(row[0]))
+                    self.all_layers['backs_points']['y'].append(float(row[1]))
                 
         for pointType in ['abs_points', 'pres_points', 'backs_points']:
             self.all_layers[pointType]["enabled"] = len(self.all_layers[pointType]['x']) > 0
@@ -572,8 +574,10 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 #        rmin = np.amin(raster_array)
 #        rmax = np.amax(raster_array)
 
-        if kwargs['categorical']:
+        if kwargs.get('categorical', False):
             raster_plot = self.axes.imshow(raster_array, interpolation="nearest", cmap=kwargs['cmap'], origin='upper', extent=self.getDataExtent())
+        elif kwargs.get('threeband', False):
+            raster_plot = self.axes.imshow(raster_array, origin='upper', extent=self.getDataExtent())
         else:
             rmin = kwargs['min']
             rmax = kwargs['max']
@@ -845,21 +849,39 @@ class RasterDisplay(object):
 
 #        print "rows, cols:  ", ncols, nrows
 #        print "pixelspulled: ", self.height, self.width
-
-        ary = ds.GetRasterBand(1).ReadAsArray(xoff=xOffset, yoff=yOffset,
-                                              win_xsize=ncols, win_ysize=nrows,
-                                              buf_ysize=self.height, buf_xsize=self.width)
-        
-        if self.NoDataValue == "ExtractFromFile":
-            ndval = utils.getNDVal(self.rasterfile)
+        if self.threeBand:
+            from PIL import Image
+            r = ds.GetRasterBand(1)
+            g = ds.GetRasterBand(2)
+            b = ds.GetRasterBand(3)
+            r1 = r.ReadAsArray(xoff=xOffset, yoff=yOffset,
+                                                  win_xsize=ncols, win_ysize=nrows,
+                                                  buf_ysize=self.height, buf_xsize=self.width)
+            b1 = b.ReadAsArray(xoff=xOffset, yoff=yOffset,
+                                                  win_xsize=ncols, win_ysize=nrows,
+                                                  buf_ysize=self.height, buf_xsize=self.width)
+            g1 = g.ReadAsArray(xoff=xOffset, yoff=yOffset,
+                                                  win_xsize=ncols, win_ysize=nrows,
+                                                  buf_ysize=self.height, buf_xsize=self.width)
+            imR = Image.fromarray(r1)
+            imG = Image.fromarray(g1)
+            imB = Image.fromarray(b1)
+            return Image.merge('RGB', (imR, imG, imB))
         else:
-            ndval = float(self.NoDataValue)
-
-        if ary is None or ary.size == 1:
-                print "raster_array is None!!!/n/n"
-                return np.empty([1960, 1080])
-        else:
-                return np.ma.masked_array(ary, mask=(ary==ndval))
+            ary = ds.GetRasterBand(1).ReadAsArray(xoff=xOffset, yoff=yOffset,
+                                                  win_xsize=ncols, win_ysize=nrows,
+                                                  buf_ysize=self.height, buf_xsize=self.width)
+            
+            if self.NoDataValue == "ExtractFromFile":
+                ndval = utils.getNDVal(self.rasterfile)
+            else:
+                ndval = float(self.NoDataValue)
+    
+            if ary is None or ary.size == 1:
+                    print "raster_array is None!!!/n/n"
+                    return np.empty([1960, 1080])
+            else:
+                    return np.ma.masked_array(ary, mask=(ary==ndval))
             
     @print_timing
     def setDims(self, ax):

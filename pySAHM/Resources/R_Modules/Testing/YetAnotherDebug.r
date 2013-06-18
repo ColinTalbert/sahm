@@ -1,6 +1,6 @@
 #debug branch
-setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
-ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
+setwd("N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\DevelopmentWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\DevelopmentWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
 dir.path<-"I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\Debug1.29"
 
 #master branch
@@ -30,6 +30,7 @@ source("CrossValidationSplit.r")
 
 rc=c(rep("responseBinary",times=8),rep("responseCount",times=2))
 input.file<-vector()
+input.dir<-"C:\\SAHMTesting\\TestDataSets"
 input.file=c(#used/available
        "I:\\VisTrails\\WorkingFiles\\workspace\\_condor\\rf_1\\modelSelection_cv_1.csv",
       "I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\CovariateCorrelationOutputMDS.csv",
@@ -37,14 +38,14 @@ input.file=c(#used/available
       "I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\NonSpatialData.csv",      
       
         #pres/abs
-      "I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\Split.csv",
-      "I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\SplitCrossVal.csv",
-      "I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\SplitFactor.csv",
-      "I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\Factor.csv",
-      "I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\NoSplit.csv", 
+      file.path(input.dir,"Split.csv"),
+      file.path(input.dir,"SplitCrossVal.csv"),
+      file.path(input.dir,"SplitFactor.csv"),
+      file.path(input.dir,"Factor.csv"),
+      file.path(input.dir,"NoSplit.csv"), 
        #count
-      "I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\Count.csv",
-      "I:\\VisTrails\\WorkingFiles\\workspace\\_DebugTesting\\mtalbert_20110504T132851\\readMaTests\\CountSplit.csv")
+      file.path(input.dir,"Count.csv"),
+      file.path(input.dir,"CountSplit.csv"))
 
 #I'm cutting these out of the standard test suite because they take a long time to run
 #and only test whether we run well on large datasets or big tiffs

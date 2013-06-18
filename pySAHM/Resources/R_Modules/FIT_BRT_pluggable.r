@@ -89,7 +89,7 @@ Args <- commandArgs(trailingOnly=FALSE)
  		  if(argSplit[[1]][1]=="tolm")  tolerance.method <- argSplit[[1]][2]
  		  if(argSplit[[1]][1]=="tol")  tolerance <- as.numeric(argSplit[[1]][2])
  		  if(argSplit[[1]][1]=="mes")  MESS <-as.logical(argSplit[[1]][2])
- 		   if(argSplit[[1]][1]=="mc")  multCore <- as.logical(argSplit[[1]][2])
+ 		   if(argSplit[[1]][1]=="multicore")  multCore <- as.logical(argSplit[[1]][2])
  			
     }
 

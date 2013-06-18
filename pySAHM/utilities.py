@@ -66,17 +66,16 @@ class logger(object):
         self.verbose = verbose
         
         #if we mistakenly get a output dir instead of a filename
-        if os.path.isdir(logfile):
+        if os.path.isdir(self.logfile):
             self.logfile = os.path.join(logfile, 'sessionLog.txt')
-        else:
-            self.logfile = logfile
             
         if os.path.exists(self.logfile):
             self.writetolog("\nSession continued\n", True, True)
         else:
             logDir = os.path.split(self.logfile)[0]
+            self.logfile = os.path.join(logDir, 'sessionLog.txt')
             if not os.path.exists(logDir):
-                raise RuntimeError('Directory of specified logfile does not exist.')
+                raise RuntimeError("\n".join([logDir, self.logfile, 'Directory of specified logfile does not exist.']))
             f = open(self.logfile, "a")
             del f
             self.writetolog("\nSession started\n", True, False)
@@ -165,7 +164,7 @@ def runCondorPythonJob(args, workspace, prefix, wholeMachine=False):
     submitFile.write("Should_transfer_files   = no\n")
     submitFile.write("transfer_executable     = false\n")
     
-    machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151a', 'igskbacbws425', 'igskbacbws108']
+    machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151a', 'igskbacbws425']
 #    machines = ['igskbacbwsvis3']
     reqsStr = 'Requirements            = (Machine == "'
     reqsStr += '.gs.doi.net" || Machine == "'.join(machines) + '.gs.doi.net")'
@@ -197,7 +196,7 @@ def runCondorPythonJob(args, workspace, prefix, wholeMachine=False):
     
     #launch condor job
     DEVNULL = open(os.devnull, 'wb')
-    p = subprocess.Popen(["condor_submit", "-n", 'igskbacbws108', submitFname], stderr=DEVNULL, stdout=DEVNULL)    
+    p = subprocess.Popen(["condor_submit", "-n", 'IGSKBACBWSCDRS3', submitFname], stderr=DEVNULL, stdout=DEVNULL)    
     
     os.chdir(curDir)        
     
@@ -256,14 +255,14 @@ def waitForProcessesToFinish(processQueue, maxCount=1):
     
 def getProcessCount(strProcessingMode):
     '''The number of concurrently running jobs is dependent on the currently 
-    selected processingMode.  This function returns the number of jobs to allow.
+    selected processingMode. 
+    If on Condor then send them all and let Condor manage the Queue.
+    else we will be running n-1 jobs (this function is only used by PARC now)
     '''
-    if strProcessingMode == "multiple cores asynchronously":
-        return multiprocessing.cpu_count() - 1 
-    elif strProcessingMode == "single thread":
-        return  1
-    elif strProcessingMode == "FORT Condor":
+    if strProcessingMode == "FORT Condor":
         return  2**32
+    else:
+        return multiprocessing.cpu_count() - 1
     
 #Spatial utilities
 def mosaicAllTifsInFolder(inDir, outFileName, gdal_merge):
@@ -272,3 +271,62 @@ def mosaicAllTifsInFolder(inDir, outFileName, gdal_merge):
     args = ["placeholder", "-o", outFileName] + onlyfiles
     gdal.DontUseExceptions()
     gdal_merge.main(args)
+
+
+#these two functions were pulled from: http://code.activestate.com/recipes/577124-approximately-equal/
+def _float_approx_equal(x, y, tol=1e-18, rel=1e-7):
+    if tol is rel is None:
+        raise TypeError('cannot specify both absolute and relative errors are None')
+    tests = []
+    if tol is not None: tests.append(tol)
+    if rel is not None: tests.append(rel*abs(x))
+    assert tests
+    return abs(x - y) <= max(tests)
+
+
+def approx_equal(x, y, *args, **kwargs):
+    """approx_equal(float1, float2[, tol=1e-18, rel=1e-7]) -> True|False
+    approx_equal(obj1, obj2[, *args, **kwargs]) -> True|False
+
+    Return True if x and y are approximately equal, otherwise False.
+
+    If x and y are floats, return True if y is within either absolute error
+    tol or relative error rel of x. You can disable either the absolute or
+    relative check by passing None as tol or rel (but not both).
+
+    For any other objects, x and y are checked in that order for a method
+    __approx_equal__, and the result of that is returned as a bool. Any
+    optional arguments are passed to the __approx_equal__ method.
+
+    __approx_equal__ can return NotImplemented to signal that it doesn't know
+    how to perform that specific comparison, in which case the other object is
+    checked instead. If neither object have the method, or both defer by
+    returning NotImplemented, approx_equal falls back on the same numeric
+    comparison used for floats.
+
+    >>> almost_equal(1.2345678, 1.2345677)
+    True
+    >>> almost_equal(1.234, 1.235)
+    False
+
+    """
+    if not (type(x) is type(y) is float):
+        # Skip checking for __approx_equal__ in the common case of two floats.
+        methodname = '__approx_equal__'
+        # Allow the objects to specify what they consider "approximately equal",
+        # giving precedence to x. If either object has the appropriate method, we
+        # pass on any optional arguments untouched.
+        for a,b in ((x, y), (y, x)):
+            try:
+                method = getattr(a, methodname)
+            except AttributeError:
+                continue
+            else:
+                result = method(b, *args, **kwargs)
+                if result is NotImplemented:
+                    continue
+                return bool(result)
+    # If we get here without returning, then neither x nor y knows how to do an
+    # approximate equal comparison (or are both floats). Fall back to a numeric
+    # comparison.
+    return _float_approx_equal(x, y, *args, **kwargs)

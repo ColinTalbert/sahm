@@ -1,5 +1,5 @@
 parRaster<-function(start.tile,dims,tr,MESS,nvars,fullnames,nvars.final,vnames,NAval,
-factor.levels,model,Model,pred.fct,make.binary.tif,RasterInfo,outfile.p,outfile.bin,
+factor.levels,model,Model,pred.fct,make.binary.tif,make.p.tif,RasterInfo,outfile.p,outfile.bin,
 thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template) {
     #loading code and libraries that are needed
     setwd(file.path(ScriptPath))
@@ -25,7 +25,14 @@ thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template) {
   
    continuousRaster<-raster(RasterInfo)
    outfile.p<-file.path(paste(substr(outfile.p,1,(nchar(outfile.p)-4)),ifelse(start.tile==1,"",start.tile),".tif",sep=""))
-   outtext<-paste(substr(outfile.p,1,(nchar(outfile.p)-4)),".txt",sep="")
+   #finding a folder that's been created so we can keep the user updated on the progress of creating the files
+   if(make.p.tif) outtext <- paste(substr(outfile.p,1,(nchar(outfile.p)-4)),".txt",sep="")
+       else if(make.bin.tif) outtext <- paste(substr(outfile.bin,1,(nchar(outfile.bin)-4)),".txt",sep="") 
+         else {
+         out.file<-sub("prob","mess",outfile.p)
+         outtext <- paste(substr(out.file,1,(nchar(out.file)-4)),".txt",sep="") 
+         
+         } 
    capture.output(cat(paste(nToDo,"tiles to do\n")),file=outtext,append=TRUE)
    if(make.binary.tif) outfile.bin<-(sub("ProbTiff","BinTiff",sub("prob","bin",outfile.p))) 
     #start up any rasters we need   
@@ -35,6 +42,7 @@ thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template) {
       binaryRaster <- writeStart(binaryRaster, filename=outfile.bin, overwrite=TRUE)
     }
     if(MESS) {
+    
       MessRaster<-raster(RasterInfo)
       ModRaster<-raster(RasterInfo)
       MessRaster <- writeStart(MessRaster, filename=sub("ProbTiff","MESSTiff",sub("prob","mess",outfile.p)), overwrite=TRUE)
@@ -43,19 +51,24 @@ thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template) {
         #order the training data so that we can consider the first and last row  only in mess calculations
         for(k in 1:nvars.final) train.dat[,k]<-sort(train.dat[,k])
     }
-    template<-raster(template)
-  
+   
+    templateRast<-try(raster(template),silent=TRUE) 
+    if(class(templateRast)=="try-error"){ #so that we can move a session folder to a new computer
+        template <- file.path(dirname(out$input$ma.name), basename(template))
+        templateRast <- try(raster(template),silent=TRUE) 
+        if(class(templateRast)=="try-error") stop("Cannot find template file if you have switched computers it must be placed at the same level as the MDS")
+    }
  for (i in start.tile:min(start.tile+nToDo-1,length(tr$row))){
  
    capture.output(cat(paste("starting tile", i,Sys.time(),"\n")),file=outtext,append=TRUE)
    #alter the write start location because we always start at position 1                                   
    writeLoc<-ifelse((start.tile-1)==0,tr$row[i],tr$row[i]-sum(tr$nrows[1:(start.tile-1)]))
-   TemplateMask<-getValuesBlock(template, row=tr$row[i], nrows=tr$nrows[i])
-  browser()
+   TemplateMask<-getValuesBlock(templateRast, row=tr$row[i], nrows=tr$nrows[i])
+
    if(all(is.na(TemplateMask))){
      #if the template is completely NA values, don't read in any other data
        temp<-rep(NA,times=tr$nrow[i]*dims[2])
-       if(MESS) pred.rng<-rep(NA,nrow(temp))
+       if(MESS) pred.rng<-rep(NA,length(temp))
         }
    else{     
          temp <- data.frame(matrix(ncol=nvars.final,nrow=tr$nrows[i]*dims[2]))
@@ -94,13 +107,16 @@ thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template) {
       ifelse(sum(complete.cases(temp))==0,  # does not calculate predictions if all predictors in the region are na
         preds<-matrix(data=NA,nrow=dims[2],ncol=tr$nrows[i]),
         preds <- t(matrix(pred.fct(model,temp,Model),ncol=dims[2],byrow=T)))
-        preds[is.na(preds)]<-NAval
+        
         
         if(MESS) {
           MessRaster<-writeValues(MessRaster,pred.rng, writeLoc)
+          if(is.null(names(pred.rng))) names(pred.rng)<-NA
           ModRaster<-writeValues(ModRaster,names(pred.rng), writeLoc)
         }
+       
           if(make.binary.tif) binaryRaster<-writeValues(binaryRaster,(preds>thresh),writeLoc)
+          #preds[is.na(preds)]<-NAval
        continuousRaster <- writeValues(continuousRaster,preds,writeLoc)
    } #end of the big for loop
 

@@ -42,55 +42,7 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
           if(full.fit) return(out)
           else return(out$mods$final.mod)
           }
-     if(Model=="maxlike"){
-  #Maxlike needs several major changes
-  #1. I need to define a method for extractAIC so that I can use step
-  #   and the user won't always have to speficy the exact formula
-  #   this might involve wrapping a maxlike in some class
-  #2. Maxlike shouldn't have to read in every value from every raster
-  #   but rather a sample and then reweight the likelihood
-  #3. Because it fits to every value in the raster I can't compare across models
-  #   it's fitting to a different data set than everything else so append output should
-  #   be blank
-  #
   
-  if(is.null(Formula)){
-        scope.maxlike <- list(lower=as.formula("~1"),
-                    upper=as.formula(paste("~",paste(out$dat$used.covs,collapse='+'))))
-        maxlike.fit<-step(maxlike(as.formula("~1"),rasters=stack(rast.lst),points=XY),
-                direction='both',scope=scope.maxlike,k=2,trace=1)
-     }
-    else{
-        #setting up the raster stack
-        rast.lst<-list()
-        for(i in 1:length(out$dat$tif.ind)){
-             rast.lst[[i]]<-raster(out$dat$tif.ind[i])
-             rast.lst[[i]]@layernames<-names(out$dat$tif.ind[i])
-        }
-
-   maxlike.fit<-maxlike(as.formula(Formula),rasters=stack(rast.lst),points=pts,removeDuplicates=T)
-   maxlike.fit$rast.lst<-rast.lst
-   #We don't fit on the training data so we reset the vlaues so they give the pres/available
-   #in the same order as they are extracted from the raster
-   npix<-prod(dim(stack(rast.lst))[1:2])
-   out$dat$ma$train$resp<-rep(0,times=npix)
-   out$dat$ma$train$resp[cellFromXY(stack(rast.lst), pts)]<-1
-  
-   #getting the data that was actually used into the model fit and removing incomplete cases
-   datFit<-as.data.frame(matrix(getValues(stack(rast.lst)),npix))
-   compl<-complete.cases(datFit)
-   out$dat$ma$train$dat<-cbind(out$dat$ma$train$resp,datFit)[compl,]
-   names(out$dat$ma$train$dat)<- c("response",names(out$dat$tif.ind))
-   out$dat$ma$train$weight=rep(1,sum(compl))
-   out$dat$ma$train$XY<-data.frame(cbind(xFromCell(stack(rast.lst),1:npix),yFromCell(stack(rast.lst),1:npix))[compl,])
-   names(out$dat$ma$train$XY)<-c("X","Y")
-   out$dat$ma$train$resp<-out$dat$ma$train$resp[compl]
-   out$dat$ma$train$compl<-compl
-   }
-   out$mods$final.mod<-maxlike.fit
-  
-   return(out)
- }
      
    SplitBackground(out,dat)
    out$dat$ma$train$Split<-c(Split,rep(0,times=sum(dat$response>0)))
