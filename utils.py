@@ -48,6 +48,7 @@ import csv
 import time
 import tempfile
 import subprocess
+import re
 
 import struct, datetime, decimal, itertools
 
@@ -315,6 +316,21 @@ def MDSresponseCol(MDSFile):
     responseCol = header[2]
     return responseCol 
    
+def checkModelCovariatenames(MDSFile):
+    """These R models break if any of the covariate names used
+    start with anything other than an alpha character
+    contain any special characters besides "." and "_"
+    """
+    MDSisOK = True
+    covariates = open(MDSFile, "r").readline().split(",")[3:]
+    for covariate in covariates:
+        if not covariate[0].isalpha():
+            return False
+        if not covariate.replace(".", "").replace("_", "").replace("\n", "").isalnum():
+            return False
+        
+    return True
+    
 def print_exc_plus( ):
     """ Print the usual traceback information, followed by a listing of
         all the local variables in each frame.
@@ -905,20 +921,25 @@ def getParentDir(f, x=None):
     return create_dir_module(parentdirf)
 
 def getFileRelativeToCurrentVT(fname):
+    #TODO this should be a three step approach
+    #if the file exists relative to the current VT we use that.
+    #if the file exists relative to the current SAHM folder let's use that.
+    #if both those fail return the fname as is and hope for the best.
     try:
-        open(r"c:\temp\test37.txt", "w").write("preApp")
         app = gui.application.get_vistrails_application()()
-        open(r"c:\temp\test37.txt", "w").write("postApp")
         curlocator = app.get_vistrail().locator.name
-        open(r"c:\temp\test37.txt", "w").write(curlocator)
         curVTdir = os.path.split(curlocator)[0]
-        print curVTdir
-        return os.path.abspath(os.path.join(curVTdir, fname))
+        relToVTfname = os.path.abspath(os.path.join(curVTdir, fname))
+        if os.path.exists(relToVTfname):
+            return relToVTfname
+        else:
+            relToSessionDirfname = os.path.abspath(os.path.join(getrootdir(), fname))
+            if os.path.exists(relToSessionDirfname):
+                return relToSessionDirfname
+            else:
+                return fname
+            
     except Exception, e:
         #if anything goes wrong with this convenience function 
         #just return their original file name
-        import traceback
-        exc_type, exc_value, exc_traceback = sys.exc_info()
-        traceback.print_exc(file=open(r"c:\temp\test37.txt", "w"))
-        #open(r"c:\temp\test37.txt", "w").write(str(e))
         return fname
