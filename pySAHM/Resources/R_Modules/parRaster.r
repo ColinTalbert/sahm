@@ -1,6 +1,6 @@
 parRaster<-function(start.tile,dims,tr,MESS,nvars,fullnames,nvars.final,vnames,NAval,
 factor.levels,model,Model,pred.fct,make.binary.tif,make.p.tif,RasterInfo,outfile.p,outfile.bin,
-thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template) {
+thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template,maDir) {
     #loading code and libraries that are needed
     setwd(file.path(ScriptPath))
     source("pred.fct.r")
@@ -51,26 +51,28 @@ thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template) {
         #order the training data so that we can consider the first and last row  only in mess calculations
         for(k in 1:nvars.final) train.dat[,k]<-sort(train.dat[,k])
     }
-   
+    HasTemplate = TRUE
+    TemplateMask = NA
     templateRast<-try(raster(template),silent=TRUE) 
     if(class(templateRast)=="try-error"){ #so that we can move a session folder to a new computer
-        template <- file.path(dirname(out$input$ma.name), basename(template))
+        template <- file.path(dirname(maDir), basename(template))
         templateRast <- try(raster(template),silent=TRUE) 
-        if(class(templateRast)=="try-error") stop("Cannot find template file if you have switched computers it must be placed at the same level as the MDS")
+        if(class(templateRast)=="try-error") HasTemplate=FALSE
     }
  for (i in start.tile:min(start.tile+nToDo-1,length(tr$row))){
  
    capture.output(cat(paste("starting tile", i,Sys.time(),"\n")),file=outtext,append=TRUE)
    #alter the write start location because we always start at position 1                                   
    writeLoc<-ifelse((start.tile-1)==0,tr$row[i],tr$row[i]-sum(tr$nrows[1:(start.tile-1)]))
-   TemplateMask<-getValuesBlock(templateRast, row=tr$row[i], nrows=tr$nrows[i])
+   if(HasTemplate){ TemplateMask<-getValuesBlock(templateRast, row=tr$row[i], nrows=tr$nrows[i])
 
-   if(all(is.na(TemplateMask))){
-     #if the template is completely NA values, don't read in any other data
-       temp<-rep(NA,times=tr$nrow[i]*dims[2])
-       if(MESS) pred.rng<-rep(NA,length(temp))
-        }
-   else{     
+       if(all(is.na(TemplateMask))){
+         #if the template is completely NA values, don't read in any other data
+           temp<-rep(NA,times=tr$nrow[i]*dims[2])
+           if(MESS) pred.rng<-rep(NA,length(temp))
+            }
+   }    
+   if(!HasTemplate | !all(is.na(TemplateMask))){ 
          temp <- data.frame(matrix(ncol=nvars.final,nrow=tr$nrows[i]*dims[2]))
          #Setting the first predictor equal to NA where ever the mask is NA
          
@@ -79,9 +81,9 @@ thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template) {
            temp[,k]<- getValuesBlock(raster(fullnames[match(vnames.final.mod[k],vnames)]), row=tr$row[i], nrows=tr$nrows[i])
          
          #so we won't write out predictions here
-         temp[is.na(TemplateMask),1]<-NA 
+         if(HasTemplate) temp[is.na(TemplateMask),1]<-NA 
          names(temp) <- vnames.final.mod
-         
+     
        if(MESS){
            pred.rng<-rep(NA,nrow(temp))
            names(pred.rng)<-NA

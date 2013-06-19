@@ -53,9 +53,13 @@ total.time
 #================================================================#
 #                   Evaluate New Data
 #================================================================#
-o=I:\VisTrails\WorkingFiles\workspace\CheatgrassApplyModel\ApplyModelResults\TestingNewVariableImportance\MDS1\ApplyModel_5 mpt=FALSE ws=J:\Projects\Climate_RS_Comparison\Cheatgrass_VisTrails\WUS\FEB2013\ParameterOptimization\brt_4\modelWorkspace mes=FALSE rc=responseBinary mbt=FALSE
+o=new.tiffs="I:\\VisTrails\\WorkingFiles\\workspace\\CheatgrassApplyModel\\ApplyModelResults\\TestingNewVariableImportance\\MDS1\\ApplyModel_5" mpt=FALSE ws=J:\Projects\Climate_RS_Comparison\ws="Cheatgrass_VisTrails\\WUS\\FEB2013\\ParameterOptimization\\brt_4\\modelWorkspace"
+output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
+rc="responseBinary"
 
-
+new.tiffs="J:\\Projects\\SurrogateSpecies\\SAHM_Demo\\DerivedData\\ClimateProjectionsDemo\\_testProjection.csv"
+output.dir="J:\\Projects\\SurrogateSpecies\\SAHM_Demo\\DerivedData\\ClimateProjectionsDemo\\ApplyModel_1" 
+ws="J:\\Projects\\SurrogateSpecies\\SAHM_Demo\\DerivedData\\ClimateProjectionsDemo\\brt_1\\modelWorkspace" 
 
 ws<-"J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\WUS\\FEB2013\\ParameterOptimization_SpatialCV2\\maxent_7\\modelWorkspace"
 output.dir="J:\\Projects\\Climate_RS_Comparison\\MarianTesting2\\ApplyModel_MDS1_KDEbin_maxent_2"
@@ -66,8 +70,8 @@ setwd("I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resource
 ScriptPath="I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
 source(file.path(ScriptPath,"LoadRequiredCode.r"))
 source(paste(toupper(out$input$script.name),".helper.fcts.r",sep=""))
-options(error=expression(if(interactive()) recover() else dump.calls()))
-EvaluateNewData(workspace=ws,out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=FALSE,out=out,produce.metrics=FALSE)
+#options(error=expression(if(interactive()) recover() else dump.calls()))
+EvaluateNewData(workspace=ws,out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=FALSE,out=out,produce.metrics=FALSE,new.tifs=new.tiffs)
 
 #================================================================#
 I:\VisTrails\VisTrails_SAHM_x64_debug\Central_R\R-2.14.1\bin\x64\Rterm.exe --vanilla -f I:\VisTrails\VisTrails_SAHM_x64_debug\VisTrails\vistrails\packages\sahm_MarianDev\pySAHM\Resources\R_Modules\EvaluateNewData.r --args mbt=TRUE mpt=TRUE ws="C:\temp\SAHM_workspace\rf_1\modelWorkspace" mes=FALSE o=C:\temp\SAHM_workspace\rf_3\modelWorkspace\rf_1
@@ -75,7 +79,8 @@ I:\VisTrails\VisTrails_SAHM_x64_debug\Central_R\R-2.14.1\bin\x64\Rterm.exe --van
 #================================================================#
 #                            GLM
 #================================================================#
-J:\Projects\Climate_RS_Comparison\MarianTesting\DebuggingMess\CovariateCorrelationOutputMDS_mds1_kde_bin.csv"
+input.file="J:\\Projects\\Climate_RS_Comparison\\MarianTesting\\DebuggingMess\\CovariateCorrelationOutputMDS_mds1_kde_bin.csv"
+
 FitModels(ma.name=input.file,
           tif.dir=NULL,
           output.dir=output.dir,

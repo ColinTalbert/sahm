@@ -97,7 +97,9 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
                       Xf[,j] <- pred.fct(out$mods$final.mod[[j]], as.data.frame(Xp1),Model)
                  }
                       y.lim<-c(0,1)
-                     #y.lim=range(apply(Xf,1,mean))
+                      #I'm not quite sure what the logical limits are for poisson but 0 1 doesn't work I might be able to take the max
+                      #of the predicted values but I'm not sure this would work for every situation
+                      if(out$input$model.family=="poisson") y.lim=range(apply(Xf,1,mean))
                        plot(Xp1[, i],apply(Xf,1,mean), ylim = y.lim, xlab = "",
                       ylab = "", type = "l", main = names(dat)[i],lwd=2,cex=3,cex.main=3,cex.axis=2.5)
                if(k==2) graphics.off() 
