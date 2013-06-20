@@ -268,7 +268,7 @@ class FieldData(Path):
          return GenModDoc.construct_port_doc(cls, port_name, 'out')
      
     def compute(self):
-        output_file = utils.create_file_module(self.getInputFromPort("value").name)
+        output_file = utils.create_file_module(self.getInputFromPort("value").name, module=self)
         self.setResult('value', output_file)
          
 class Predictor(Constant):
@@ -351,7 +351,7 @@ class PredictorList(Constant):
         if not b:
             raise ModuleError(self, "Internal Error: Constant failed validation")
         if len(v) > 0 and type(v[0]) == tuple:
-            f_list = [utils.create_file_module(v_elt[0]) for v_elt in v]
+            f_list = [utils.create_file_module(v_elt[0], module=self) for v_elt in v]
         else:
             f_list = v
         p_list += f_list
@@ -422,7 +422,7 @@ class PredictorListFile(Module):
 
         del csv_writer
         
-        output_file = utils.create_file_module(output_fname)
+        output_file = utils.create_file_module(output_fname, module=self)
         self.setResult('RastersWithPARCInfoCSV', output_file)
         
 class TemplateLayer(Path):
@@ -442,7 +442,7 @@ class TemplateLayer(Path):
         return GenModDoc.construct_port_doc(cls, port_name, 'out') 
     
     def compute(self):
-        output_file = utils.create_file_module(self.getInputFromPort("value").name)
+        output_file = utils.create_file_module(self.getInputFromPort("value").name, module=self)
         self.setResult('value', output_file)
 
 #class SingleInputPredictor(Predictor):
@@ -494,14 +494,13 @@ class Model(Module):
                      ('MessMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('MoDMap', '(edu.utah.sci.vistrails.basic:File)'),
                      ('modelEvalPlot', '(edu.utah.sci.vistrails.basic:File)'),
-#                     ('ResponseCurves', '(edu.utah.sci.vistrails.basic:File)'),
                      ('Text_Output', '(edu.utah.sci.vistrails.basic:File)'),
                      ('ModelVariableImportance', '(edu.utah.sci.vistrails.basic:File)')]
 
     port_map = {'mdsFile':('c', None, True),#These ports are for all Models
-                         'makeProbabilityMap':('mpt', utils.R_boolean, False),
-                         'makeBinMap':('mbt', utils.R_boolean, False),
-                         'makeMESMap':('mes', utils.R_boolean, False),
+                         'makeProbabilityMap':('mpt', utils.R_boolean, True),
+                         'makeBinMap':('mbt', utils.R_boolean, True),
+                         'makeMESMap':('mes', utils.R_boolean, True),
                          'ThresholdOptimizationMethod':('om', None, False),
                     }
 
@@ -535,7 +534,7 @@ class Model(Module):
                
         self.argsDict = utils.map_ports(self, self.port_map)
         
-        mdsFile = utils.getFileRelativeToCurrentVT(self.argsDict['c'])
+        mdsFile = utils.getFileRelativeToCurrentVT(self.argsDict['c'], self)
 
         if not utils.checkModelCovariatenames(mdsFile):
             msg = "These R models do not work with covariate names begining with non-letter characters or \n"
@@ -566,12 +565,12 @@ class Model(Module):
             
         utils.runRScript(self.name, self.argsDict, self)
         
-        if not configuration.cur_processing_mode == "single models sequentially (n - 1 cores each)":
-            utils.launch_RunMonitorApp()
+        utils.launch_RunMonitorApp()
         
         #set our output ports
         if not self.argsDict.has_key('mes'):
             self.argsDict['mes'] = 'FALSE'
+        self.outputRequired = configuration.cur_processing_mode == "single models sequentially (n - 1 cores each)"
         self.setModelResult("_prob_map.tif", 'ProbabilityMap', 'mpt')
         self.setModelResult("_bin_map.tif", 'BinaryMap', 'mbt')
         self.setModelResult("_resid_map.tif", 'ResidualsMap', 'mes')
@@ -587,23 +586,22 @@ class Model(Module):
         
     def setModelResult(self, filename, portname, arg_key=None):
         outFileName = os.path.join(self.output_dname, self.ModelAbbrev + filename)
-#        required = not (self.argsDict.has_key(arg_key) and 
-#                        self.argsDict[arg_key].lower() == 'false')
-#        
-#        if (self.ModelAbbrev == "ApplyModel" and portname == "ResidualsMap") \
-#            or (self.ModelAbbrev == "ApplyModel" and arg_key is None):
-#            required = False
-#        
-#        outfile_exists = len(glob.glob(outFileName)) > 0
-#        if required and not outfile_exists and not self.argsDict['RA']:
-#            msg = "Expected output from " + self.ModelAbbrev + " was not found."
-#            msg += "\nSpecifically " + self.ModelAbbrev + filename + " was missing."
-#            msg += "\nThis might indicate problems with the inputs to the R module."
-#            msg += "\nCheck the console output for additional R warnings "
-#            writetolog(msg, False, True)
-#            raise ModuleError(self, msg)
+        try:
+            thisOutputrequired = self.argsDict[arg_key]
+        except KeyError:
+            thisOutputrequired = True
             
-        output_file = utils.create_file_module(outFileName)
+        if self.outputRequired and thisOutputrequired:
+            if not os.path.exists(outFileName):
+                msg = "Expected output from this Model is missing:\n\t"
+                msg+= outFileName
+                writetolog(msg)
+                raise ModuleError(self, msg)
+            
+        output_file = File()
+        output_file.name = outFileName
+        output_file.upToDate
+    
         self.setResult(portname, output_file)
         
 class GLM(Model):
@@ -692,7 +690,7 @@ class ApplyModel(Model):
     def compute(self):
         #if the suplied mds has rows, observations then 
         #pass r code the flag to produce metrics
-        mdsfname = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('mdsFile').name)
+        mdsfname = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('mdsFile').name, self)
         mdsfile = open(mdsfname, "r")
         lines = 0 
         readline = mdsfile.readline 
@@ -797,7 +795,7 @@ class BackgroundSurfaceGenerator(Module):
         utils.runRScript("PseudoAbs.r", args, self)
         
         if os.path.exists(outputfName):
-            output_file = utils.create_file_module(outputfName)
+            output_file = utils.create_file_module(outputfName, module=self)
             writetolog("Finished KDE generation ", True)
         else:
             msg = "Problem encountered generating KDE.  Expected output file not found."
@@ -845,10 +843,10 @@ class MDSBuilder(Module):
             raise ModuleError(self, "Must supply at least one 'RastersWithPARCInfoCSV'/nThis is the output from the PARC module")
         if len(inputs_csvs) > 1:
             inputs_csv = utils.mknextfile(prefix='CombinedPARCFiles_', suffix='.csv')
-            inputs_names = [utils.getFileRelativeToCurrentVT(f.name) for f in inputs_csvs]
+            inputs_names = [utils.getFileRelativeToCurrentVT(f.name, self) for f in inputs_csvs]
             utils.merge_inputs_csvs(inputs_names, inputs_csv)
         else:
-            inputs_csv = utils.getFileRelativeToCurrentVT(inputs_csvs[0].name)
+            inputs_csv = utils.getFileRelativeToCurrentVT(inputs_csvs[0].name, self)
         MDSParams['inputsCSV'] = inputs_csv
         
         #inputsCSV = utils.path_port(self, 'RastersWithPARCInfoCSV')
@@ -867,7 +865,7 @@ class MDSBuilder(Module):
         except:
             utils.informative_untrapped_error(self, "MDSBuilder")
 
-        output_file = utils.create_file_module(ourMDSBuilder.outputMDS) 
+        output_file = utils.create_file_module(ourMDSBuilder.outputMDS, module=self)
         self.setResult('mdsFile', output_file)
 
 class MDSBuilder_vector(Module):
@@ -906,7 +904,7 @@ class MDSBuilder_vector(Module):
             raise ModuleError(self, "Must supply at least one 'RastersWithPARCInfoCSV'/nThis is the output from the PARC module")
         if len(inputs_csvs) > 1:
             inputs_csv = utils.mknextfile(prefix='CombinedPARCFiles_', suffix='.csv')
-            inputs_names = [utils.getFileRelativeToCurrentVT(f.name) for f in inputs_csvs]
+            inputs_names = [utils.getFileRelativeToCurrentVT(f.name, self) for f in inputs_csvs]
             utils.merge_inputs_csvs(inputs_names, inputs_csv)
         else:
             inputs_csv = inputs_csvs[0].name
@@ -928,7 +926,7 @@ class MDSBuilder_vector(Module):
         except:
             utils.informative_untrapped_error(self, "MDSBuilder")
 
-        output_file = utils.create_file_module(ourMDSBuilder.outputMDS) 
+        output_file = utils.create_file_module(ourMDSBuilder.outputMDS, self) 
         self.setResult('mdsFile', output_file)
 
 class FieldDataQuery(Module):
@@ -1030,7 +1028,7 @@ class FieldDataQuery(Module):
         del infile
         del outfile
         
-        output_file = utils.create_file_module(FDQOutput) 
+        output_file = utils.create_file_module(FDQOutput, module=self)
         self.setResult('fieldData', output_file) 
     
     
@@ -1108,7 +1106,7 @@ class FieldDataAggregateAndWeight(Module):
         utils.PySAHM_instance_params(ourFDAW, FDAWParams) 
         ourFDAW.processCSV()
         
-        output_file = utils.create_file_module(output_fname)
+        output_file = utils.create_file_module(output_fname, module=self)
         writetolog("Finished running FieldDataQuery", True)
         self.setResult('fieldData', output_file)
 
@@ -1137,7 +1135,7 @@ class PARC(Module):
         #writetolog("\nRunning PARC", True)
         
         ourPARC = parc.PARC()
-        template = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('templateLayer').name)
+        template = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('templateLayer').name, self)
         template_path, template_fname = os.path.split(template)
         template_fname = os.path.splitext(template_fname)[0]
         if template_fname == 'hdr':
@@ -1168,7 +1166,7 @@ class PARC(Module):
         #append additional inputs to the existing CSV if one was supplied
         #otherwise start a new CSV
         if self.hasInputFromPort("RastersWithPARCInfoCSV"):
-            inputCSV = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort("RastersWithPARCInfoCSV").name)
+            inputCSV = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort("RastersWithPARCInfoCSV").name, self)
             shutil.copy(inputCSV, workingCSV)
             f = open(workingCSV, "ab")
             csvWriter = csv.writer(f)
@@ -1181,12 +1179,12 @@ class PARC(Module):
             predictor_lists = self.forceGetInputListFromPort('PredictorList')
             for predictor_list in predictor_lists:
                 for predictor in predictor_list:
-                    csvWriter.writerow([utils.getFileRelativeToCurrentVT(predictor[0]), predictor[1], predictor[2], predictor[3]])
+                    csvWriter.writerow([utils.getFileRelativeToCurrentVT(predictor[0], self), predictor[1], predictor[2], predictor[3]])
         
         if self.hasInputFromPort("predictor"):
             predictor_list = self.forceGetInputListFromPort('predictor')
             for predictor in predictor_list:
-                csvWriter.writerow([utils.getFileRelativeToCurrentVT(predictor[0]), predictor[1], predictor[2], predictor[3]])
+                csvWriter.writerow([utils.getFileRelativeToCurrentVT(predictor[0], self), predictor[1], predictor[2], predictor[3]])
         f.close()
         del csvWriter
         ourPARC.inputs_CSV = workingCSV
@@ -1207,7 +1205,7 @@ class PARC(Module):
         
         predictorsDir = utils.create_dir_module(output_dname)
         outputCSV = os.path.join(output_dname, "PARC_Files.csv")
-        output_file = utils.create_file_module(outputCSV)
+        output_file = utils.create_file_module(outputCSV, self)
         
         
 #        writetolog("Finished running PARC", True)
@@ -1263,7 +1261,7 @@ class Reclassifier(Module):
 #        outFName = os.path.join(ourReclassifier.outDir, ourReclassifier.outName)
         ourReclassifier.run()
 
-        output_file = utils.create_file_module(ourReclassifier.outName)
+        output_file = utils.create_file_module(ourReclassifier.outName, self)
         
         
 #        writetolog("Finished running PARC", True)
@@ -1371,7 +1369,7 @@ class CategoricalToContinuous(Module):
 #         return GenModDoc.construct_port_doc(cls, port_name, 'out')
 
     def compute(self):
-        writetolog("\nRunning Reclassifier", True)
+        writetolog("\nCategoricalToContinuous", True)
         port_map = {'inputRaster':('inputRaster', utils.dir_path_value, True),
                     'templateFile':('templateFile', utils.dir_path_value, True)}
         
@@ -1388,7 +1386,7 @@ class CategoricalToContinuous(Module):
         
         ourC2C.run()
 
-        output_file = utils.create_file_module(ourC2C.outputPredictorsList) 
+        output_file = utils.create_file_module(ourC2C.outputPredictorsList, self) 
         self.setResult('outputsPredictorListFile', output_file)
 
 class RasterFormatConverter(Module):
@@ -1415,9 +1413,9 @@ class RasterFormatConverter(Module):
         writetolog("\nRunning TiffConverter", True)
         ourRFC = RFC.FormatConverter()
         if self.hasInputFromPort('inputMDS'):
-            ourRFC.MDSFile = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('inputMDS').name)
+            ourRFC.MDSFile = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('inputMDS').name, self)
         elif self.hasInputFromPort('inputDir'):
-            ourRFC.inputDir = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('inputDir').name)
+            ourRFC.inputDir = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('inputDir').name, self)
             
         if self.hasInputFromPort('format'):
             f = self.forceGetInputFromPort('format')
@@ -1468,7 +1466,7 @@ class ModelEvaluationSplit(Module):
     
     def compute(self):
         writetolog("\nGenerating Model Evaluation split ", True)
-        inputMDS = utils.getFileRelativeToCurrentVT(utils.dir_path_value(self.forceGetInputFromPort('inputMDS', [])))
+        inputMDS = utils.getFileRelativeToCurrentVT(utils.dir_path_value(self.forceGetInputFromPort('inputMDS', [])), self)
         outputMDS = utils.mknextfile(prefix='ModelEvaluation_Split_', suffix='.csv')
 
         global models_path
@@ -1508,14 +1506,8 @@ class ModelEvaluationSplit(Module):
 
         utils.runRScript("TestTrainSplit.r", args, self)
         
-        output = os.path.join(outputMDS)
-        if os.path.exists(output):
-            output_file = utils.create_file_module(output)
-            writetolog("Finished Model Evaluation split ", True)
-        else:
-            msg = "Problem encountered generating Model Evaluation split.  Expected output file not found."
-            writetolog(msg, False)
-            raise ModuleError(self, msg)
+        output_file = utils.create_file_module(outputMDS, module=self)
+        writetolog("Finished Model Evaluation split ", True)
         self.setResult("outputMDS", output_file)
         
 class ModelSelectionSplit(Module):
@@ -1540,7 +1532,7 @@ class ModelSelectionSplit(Module):
      
     def compute(self):
         writetolog("\nGenerating Model Selection split ", True)
-        inputMDS = utils.getFileRelativeToCurrentVT(utils.dir_path_value(self.forceGetInputFromPort('inputMDS', [])))
+        inputMDS = utils.getFileRelativeToCurrentVT(utils.dir_path_value(self.forceGetInputFromPort('inputMDS', []), self))
         outputMDS = utils.mknextfile(prefix='modelSelection_split_', suffix='.csv')
 
         global models_path
@@ -1582,14 +1574,8 @@ class ModelSelectionSplit(Module):
 
         utils.runRScript("TestTrainSplit.r", args, self)
         
-        output = os.path.join(outputMDS)
-        if os.path.exists(output):
-            output_file = utils.create_file_module(output)
-            writetolog("Finished Model Selection split ", True)
-        else:
-            msg = "Problem encountered generating Model Selection split.  Expected output file not found."
-            writetolog(msg, False)
-            raise ModuleError(self, msg)
+        output_file = utils.create_file_module(outputMDS, module=self)
+        writetolog("Finished Model Selection split ", True)
         self.setResult("outputMDS", output_file)
 
 class ModelSelectionCrossValidation(Module):
@@ -1642,14 +1628,8 @@ class ModelSelectionCrossValidation(Module):
         
         utils.runRScript("CrossValidationSplit.r", argsDict, self)
         
-        output = os.path.join(outputMDS)
-        if os.path.exists(output):
-            output_file = utils.create_file_module(output)
-            writetolog("Finished Cross Validation split ", True)
-        else:
-            msg = "Problem encountered generating Cross Validation split.  Expected output file not found."
-            writetolog(msg, False)
-            raise ModuleError(self, msg)
+        output_file = utils.create_file_module(outputMDS, module=self)
+        writetolog("Finished Cross Validation split ", True)
         self.setResult("outputMDS", output_file)
 
 
@@ -1714,7 +1694,7 @@ class CovariateCorrelationAndSelection(Module):
             self.callDisplayMDS(params)
                     
         
-        output_file = utils.create_file_module(params['outputMDS'])
+        output_file = utils.create_file_module(params['outputMDS'], module=self)
         writetolog("Finished Select Predictors Layers widget", True)
         self.setResult("outputMDS", output_file)
 
@@ -1787,13 +1767,13 @@ class ProjectionLayers(Module):
     
         writetolog("\nRunning make Projection Layers", True)
         
-        inputCSV = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('RastersWithPARCInfoCSV').name)
+        inputCSV = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('RastersWithPARCInfoCSV').name, self)
         
         template = self.forceGetInputFromPort('templateLayer', '')
         fromto = []
         
         if self.hasInputFromPort('directoryCrosswalkCSV'):
-            crosswalkCSVFname = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('directoryCrosswalkCSV'))
+            crosswalkCSVFname = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('directoryCrosswalkCSV'), self)
             crosswalkCSV = csv.reader(open(crosswalkCSVFname, 'r'))
             header = crosswalkCSV.next()
             fromto = []
@@ -1802,7 +1782,7 @@ class ProjectionLayers(Module):
             del crosswalkCSV    
             
         if self.hasInputFromPort('templateLayer'):
-            template = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('templateLayer'))
+            template = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('templateLayer'), self)
         else:
             template = ''
             
@@ -1864,7 +1844,7 @@ class ProjectionLayers(Module):
         outCSV.writerow(outHeader2)
         outCSV.writerow(outHeader3)
         
-        output_file = utils.create_file_module(outputMDS)
+        output_file = utils.create_file_module(outputMDS, module=self)
         self.setResult("MDS", output_file)
         writetolog("Finished Select Projection Layers widget", True)
 
@@ -1949,16 +1929,16 @@ class MAXENT(Model):
 #            return 
     #set outputs
         lambdasfile = os.path.join(ourMaxent.outputDir, ourMaxent.args["species_name"] + ".lambdas")
-        output_file = utils.create_file_module(lambdasfile)
-        self.setResult("lambdas", output_file)
+        output_file = utils.create_file_module(lambdasfile, self)
+        self.setResult("lambdas", output_file, module=self)
         
         rocfile = os.path.join(ourMaxent.outputDir, 'plots', ourMaxent.args["species_name"] + "_roc.png")
-        output_file = utils.create_file_module(rocfile)
+        output_file = utils.create_file_module(rocfile, module=self)
         self.setResult("roc", output_file)
 
         htmlfile = os.path.join(ourMaxent.outputDir, ourMaxent.args["species_name"] + ".html")
         print htmlfile
-        output_file = utils.create_file_module(htmlfile)
+        output_file = utils.create_file_module(htmlfile, module=self)
         self.setResult("report", output_file)
 
         writetolog("Finished Maxent widget", True)

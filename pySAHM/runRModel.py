@@ -25,7 +25,7 @@ def main(args_in):
     ret = p.communicate()
     
     print ret[0]#this sends it to the std out
-    sys.stderr.write(ret[1])
+#    sys.stderr.write(ret[1])
     
     msg = ""
     if 'Error' in ret[1]:

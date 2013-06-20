@@ -271,8 +271,8 @@ def path_port(module, portName):
     path.replace("/", os.path.sep)
     if os.path.exists(path):
         return path
-    elif os.path.exists(getFileRelativeToCurrentVT(path)):
-        return getFileRelativeToCurrentVT(path)
+    elif os.path.exists(getFileRelativeToCurrentVT(path), module):
+        return getFileRelativeToCurrentVT(path, module)
     else:
         raise RuntimeError, 'The indicated file or directory, ' + \
             path + ', does not exist on the file system.  Cannot continue!'
@@ -290,12 +290,13 @@ def R_boolean(value):
     else:
         return 'FALSE'
 
-def dir_path_value(value):
-    val = getFileRelativeToCurrentVT(value.name)
+def dir_path_value(value, module=None):
+    val = getFileRelativeToCurrentVT(value.name, module)
     sep = os.path.sep
     return val.replace("/", sep)
 
-def create_file_module(fname, f=None):
+def create_file_module(fname, f=None, module= None):
+    
     if f is None:
         f = File()
     f.name = getFileRelativeToCurrentVT(fname)
@@ -443,51 +444,59 @@ def runRScript(script, args_dict, module=None):
     runRModelPy = os.path.join(os.path.dirname(__file__), "pySAHM", "runRModel.py")
     command_arr = [sys.executable, runRModelPy] + command_arr
     processing_mode = args_dict.get("cur_processing_mode", "single models sequentially (n - 1 cores each)")
+    
+    if args_dict.has_key("o") and os.path.isdir(args_dict['o']):
+        stdErrFname = os.path.join(args_dict['o'], "stdErr.txt")
+        stdOutFname = os.path.join(args_dict['o'], "stdOut.txt")
+    else:
+        f = tempfile.NamedTemporaryFile(delete=False)
+        fname = f.name
+        f.close()
+        stdErrFname = fname+"stdErr.txt"
+        stdOutFname = fname+"stdOut.txt"
+    
+    stdErrFile = open(stdErrFname, 'w')
+    stdOutFile = open(stdOutFname, 'w')
+    
     if processing_mode == "single models sequentially (n - 1 cores each)":
         #we waiting for each model to finish before moving on.
         #but set the mc (multiple core) flag appropriately
         command_arr += ["multicore=TRUE"]
         writetolog("    command: " + " ".join(command_arr), False, False)
-        p = subprocess.Popen(command_arr, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        ret = p.communicate()
+        p = subprocess.Popen(command_arr, stderr=stdErrFile, stdout=stdOutFile)
+        p.communicate()
+        stdErrFile.close()
+        stdOutFile.close()
         
-        if 'Error' in ret[1]:
+        errMsg = "\n".join(open(stdErrFname, "r").readlines())
+        outMsg = "\n".join(open(stdOutFname, "r").readlines())
+        if 'Error' in errMsg:
             msg = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
             msg +="\n  An error was encountered in the R script for this module."
             msg += "\n     The R error message is below: \n"
-            msg += ret[1]
+            msg += errMsg
             writetolog(msg)
     
-        if 'Warning' in ret[1]:
+        if 'Warning' in errMsg:
             msg = "The R scipt returned the following warning(s).  The R warning message is below - \n"
-            msg += ret[1]
+            msg += errMsg
             writetolog(msg)
     
-        if 'Error' in ret[1]:
+        if 'Error' in errMsg:
             #also write the errors to a model specific log file in the model output dir
             #then raise an error
-            writeRErrorsToLog(args_dict, ret)
+            writeRErrorsToLog(args_dict, outMsg, errMsg)
             if module:
                 raise ModuleError(module, msg)
             else:
                 raise RuntimeError , msg
-        elif 'Warning' in ret[1]:
-            writeRErrorsToLog(args_dict, ret)
+        elif 'Warning' in errMsg:
+            writeRErrorsToLog(args_dict, outMsg, errMsg)
             
-        del(ret)
         writetolog("\nFinished R Processing of " + script, True)
     elif processing_mode == "multiple models simultaneously (1 core each)":
         command_arr += ["multicore=FALSE"]
         writetolog("    command: " + " ".join(command_arr), False, False)
-        if args_dict.has_key("o"):
-            stdErrFname = os.path.join(args_dict['o'], "stdErr.txt")
-            stdOutFname = os.path.join(args_dict['o'], "stdOut.txt")
-            stdErrFile = open(stdErrFname, 'w')
-            stdOutFile = open(stdOutFname, 'w')
-        else:
-            DEVNULL = open(os.devnull, 'wb')
-            stdErrFile = DEVNULL
-            stdOutFile = DEVNULL
         p = subprocess.Popen(command_arr, stderr=stdErrFile, stdout=stdOutFile)
         writetolog("\n R Processing launched asynchronously " + script, True) 
     elif processing_mode == "FORT Condor":
@@ -575,7 +584,7 @@ def getR_application(module=None):
     return program
     
 
-def writeRErrorsToLog(args, ret):
+def writeRErrorsToLog(args, outMsg, errMsg):
     #first check that this is a model run, or has a o= in the args.
     #If so write the output log file in the directory
     if os.path.isdir(args["o"]):
@@ -588,9 +597,9 @@ def writeRErrorsToLog(args, ret):
     outFileN = os.path.join(outputfolder, "errorLogFile.txt")
     outFile = open(outFileN, "w")
     outFile.write("standard out:\n\n")
-    outFile.write(ret[0] + "\n\n\n")
+    outFile.write(outMsg + "\n\n\n")
     outFile.write("standard error:\n\n")
-    outFile.write(ret[1])
+    outFile.write(errMsg)
     outFile.close()
 
 def merge_inputs_csvs(inputCSVs_list, outputFile):
@@ -920,26 +929,48 @@ def getParentDir(f, x=None):
     parentdirf = os.path.dirname(f.name)
     return create_dir_module(parentdirf)
 
-def getFileRelativeToCurrentVT(fname):
-    #TODO this should be a three step approach
-    #if the file exists relative to the current VT we use that.
-    #if the file exists relative to the current SAHM folder let's use that.
-    #if both those fail return the fname as is and hope for the best.
-    try:
-        app = gui.application.get_vistrails_application()()
-        curlocator = app.get_vistrail().locator.name
-        curVTdir = os.path.split(curlocator)[0]
-        relToVTfname = os.path.abspath(os.path.join(curVTdir, fname))
-        if os.path.exists(relToVTfname):
-            return relToVTfname
+
+def getFileRelativeToCurrentVT(fname, curModule=None):
+    #This is hree step approach:
+    #step 1: if fname exists assume it's the one we want and return it.
+    #step 2: Look for the file relative to the current VT.
+    #        In effect loop through all the sibling and descendant folders 
+    #        of the vt file and look for the base filename in each.
+    #        If we find an identically named file hope for the best and return it.
+    #step 3: Do what we did in step 2 but relative to the current session folder.
+    #
+    #If no fname is found in the above three steps raise an error.
+    def couldntFindFile():
+        msg = "Could not find file: ", fname, "\nPlease point to valid location for this file."
+        if curModule is None:
+            raise Exception(msg)
         else:
-            relToSessionDirfname = os.path.abspath(os.path.join(getrootdir(), fname))
-            if os.path.exists(relToSessionDirfname):
-                return relToSessionDirfname
-            else:
-                return fname
+            raise ModuleError(curModule, msg)
+        
+    try:
+        #step 1
+        if os.path.exists(fname):
+            return fname
+        #step 2 (and then step3)
+        
+        try:
+            app = gui.application.get_vistrails_application()()
+            curlocator = app.get_vistrail().locator.name
+            curVTdir = os.path.split(curlocator)[0]
+        except:
+            curVTdir = ""
+            
+        justfname = os.path.split(fname)[1]
+        for rootdir in [curVTdir, getrootdir()]:
+            if os.path.exists(os.path.join(rootdir, justfname)):
+                return os.path.join(rootdir, justfname)
+            for root, dirnames, filenames in os.walk(rootdir):
+                for dirname in dirnames:
+                    if os.path.exists(os.path.join(root, dirname, justfname)):
+                        return os.path.join(root, dirname, justfname)
+        #we did our best but couldn't find the file 
+        couldntFindFile()
             
     except Exception, e:
-        #if anything goes wrong with this convenience function 
-        #just return their original file name
-        return fname
+        #if something goes wrong we couldn't find the file throw an error
+        couldntFindFile()

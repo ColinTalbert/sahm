@@ -197,7 +197,6 @@ class categoricalToContinuousRasters(rasterProcessor):
             ans =  np.array(stats.mode(ndMask, 1)[0]).reshape(x, y)
             
             for uniqueVal in uniques:
-                print uniqueVal, type(uniqueVal)
                 if not type(uniqueVal) is np.ma.core.MaskedConstant:
                     ans = ((ndMask == uniqueVal).sum(1)/(pixelsPerBlock)).reshape(x, y) * 100
                 else:
@@ -209,7 +208,6 @@ class categoricalToContinuousRasters(rasterProcessor):
                 outputs[uniqueVal].putBlock(ans, int(self.tmpRaster.curCol / numSourcePerTarget), int(self.tmpRaster.curRow  / numSourcePerTarget))
         
         self.tmpRaster.close()
-        print tmpIntermediaryFname
         gdal.Unlink(tmpIntermediaryFname)
         
         #write our outputs to a PredictorListFile
