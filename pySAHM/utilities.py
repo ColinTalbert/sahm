@@ -264,13 +264,13 @@ def getProcessCount(strProcessingMode):
     else:
         return multiprocessing.cpu_count() - 1
     
-#Spatial utilities
-def mosaicAllTifsInFolder(inDir, outFileName, gdal_merge):
-    onlyfiles = [os.path.join(inDir,f) for f in os.listdir(inDir) 
-            if os.path.isfile(os.path.join(inDir,f)) and f.endswith(".tif") ]
-    args = ["placeholder", "-o", outFileName] + onlyfiles
-    gdal.DontUseExceptions()
-    gdal_merge.main(args)
+##Spatial utilities
+#def mosaicAllTifsInFolder(inDir, outFileName, gdal_merge):
+#    onlyfiles = [os.path.join(inDir,f) for f in os.listdir(inDir) 
+#            if os.path.isfile(os.path.join(inDir,f)) and f.endswith(".tif") ]
+#    args = ["placeholder", "-o", outFileName] + onlyfiles
+#    gdal.DontUseExceptions()
+#    gdal_merge.main(args)
 
 
 #these two functions were pulled from: http://code.activestate.com/recipes/577124-approximately-equal/
