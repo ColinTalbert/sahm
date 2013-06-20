@@ -33,20 +33,21 @@ input.file="C:\\temp\\TestDataSets\\modelSelection_split_1.csv"
 #================================================================#
 #                       Maxent
 #================================================================#
-
-input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\CovariateCorrelationOutputMDS.csv"
-lambdas.file="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\maxentFiles_94"
+input.file="I:\\SpeciesData\\Kansas\\prairie_chicken\\Rangewide_model\\Maxent\\Round2\\Background\\CovariateCorrelationOutputMDS_StateSplit_CV5.csv"
+input.file="J:\\Projects\\Lionfish\\May_22_2013\\Output\\modelSelection_cv_5.csv"
+lambdas.file="J:\\Projects\\Lionfish\\May_22_2013\\Output\\maxent_5"
 FitModels(ma.name=input.file,
             output.dir=output.dir,
             response.col=rc,make.p.tif=T,make.binary.tif=T,
-            debug.mode=T,script.name="maxent",opt.methods=2,MESS=T,lambdas=lambdas.file)
+            debug.mode=T,script.name="maxent",opt.methods=2,MESS=T,lambdas=lambdas.file,,multCore=TRUE,ScriptPath=ScriptPath)
 #================================================================#
 #                            MARS
 #================================================================#
-input.file="H:\\Desktop\\CheatgrassAnalysis\\BlockCV.csv"
+input.file="J:\\Projects\\SurrogateSpecies\\DerivedData\\InitialWorkspace\\MarianTesting\\VisTrailsOutput\\CovariateCorrelationOutputMDS_initial.csv"
+output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1\\rf"
 FitModels(ma.name=input.file,
             output.dir=output.dir,
-            response.col=rc,make.p.tif=F,make.binary.tif=F,
+            response.col=rc,make.p.tif=T,make.binary.tif=T,
             mars.degree=1,mars.penalty=2,debug.mode=T,script.name="mars",opt.methods=2,MESS=F,ScriptPath=ScriptPath,multCore=TRUE)
 total.time<-Sys.time()-start.time
 total.time
@@ -79,20 +80,21 @@ I:\VisTrails\VisTrails_SAHM_x64_debug\Central_R\R-2.14.1\bin\x64\Rterm.exe --van
 #================================================================#
 #                            GLM
 #================================================================#
-input.file="J:\\Projects\\Climate_RS_Comparison\\MarianTesting\\DebuggingMess\\CovariateCorrelationOutputMDS_mds1_kde_bin.csv"
 
+##Surrogate sp with template
+input.file="J:\\Projects\\SurrogateSpecies\\DerivedData\\InitialWorkspace\\modelSelection_split_testingPlot.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,
           output.dir=output.dir,
-          response.col=rc,make.p.tif=F,make.binary.tif=F,
+          response.col=rc,make.p.tif=T,make.binary.tif=T,
           simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=F,opt.methods=2,squared.terms=FALSE,ScriptPath=ScriptPath)
 
    
 #================================================================#
 #                            RF
 #================================================================#
-input.file<-"J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\WUS\\FEB2013\\ParameterOptimization_SpatialCV\\CovariateCorrelationOutputMDS_mds1_kde_cont.csv"
-
+input.file="J:\\Projects\\SurrogateSpecies\\DerivedData\\InitialWorkspace\\MarianTesting\\VisTrailsOutput\\CovariateCorrelationOutputMDS_initial2.csv"
+output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1\\rf"
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,

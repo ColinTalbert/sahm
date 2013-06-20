@@ -134,7 +134,6 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
   FactorInd<-which(!is.na(match(vnames,names(factor.levels))),arr.ind=TRUE)
     if((nvars-length(FactorInd))==0) MESS<-FALSE #turn this off if only one factor column was selected
     
-  
   #for debugging I'm always using multiple cores
   multCore<-out$input$multCore
   if(tr$n<10 | getRversion()<2.14) multCore<-FALSE #turn off multicore in certian circumstances
@@ -145,7 +144,7 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
       if(make.p.tif)
         dir.create(paste(out$input$output.dir,"\\ProbTiff",sep=""))
         outfile.p=paste(paste(out$input$output.dir,"\\ProbTiff\\",sep=""),"_prob_map.tif",sep="")
-      if(make.binary.tif)
+      if(make.binary.tif)                                                                                         
         outfile.bin=dir.create(paste(out$input$output.dir,"\\BinTiff",sep=""))
       if(MESS){
         dir.create(paste(out$input$output.dir,"\\MESSTiff",sep="")) 
@@ -168,7 +167,7 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
       tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
       model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,make.p.tif=make.p.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,outfile.bin=outfile.bin,thresh=thresh,nToDo=tr$n,ScriptPath=out$       
       input$ScriptPath,vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct,
-         template=out$dat$input$ParcTemplate,,maDir=out$input$ma.name)
+         template=out$dat$input$ParcTemplate,maDir=out$input$ma.name)
       }
      return(0)
    }
