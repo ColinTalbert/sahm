@@ -926,7 +926,7 @@ class MDSBuilder_vector(Module):
         except:
             utils.informative_untrapped_error(self, "MDSBuilder")
 
-        output_file = utils.create_file_module(ourMDSBuilder.outputMDS, self) 
+        output_file = utils.create_file_module(ourMDSBuilder.outputMDS, module=self) 
         self.setResult('mdsFile', output_file)
 
 class FieldDataQuery(Module):
@@ -1205,7 +1205,7 @@ class PARC(Module):
         
         predictorsDir = utils.create_dir_module(output_dname)
         outputCSV = os.path.join(output_dname, "PARC_Files.csv")
-        output_file = utils.create_file_module(outputCSV, self)
+        output_file = utils.create_file_module(outputCSV, module=self)
         
         
 #        writetolog("Finished running PARC", True)
@@ -1261,7 +1261,7 @@ class Reclassifier(Module):
 #        outFName = os.path.join(ourReclassifier.outDir, ourReclassifier.outName)
         ourReclassifier.run()
 
-        output_file = utils.create_file_module(ourReclassifier.outName, self)
+        output_file = utils.create_file_module(ourReclassifier.outName, module=self)
         
         
 #        writetolog("Finished running PARC", True)
@@ -1386,7 +1386,7 @@ class CategoricalToContinuous(Module):
         
         ourC2C.run()
 
-        output_file = utils.create_file_module(ourC2C.outputPredictorsList, self) 
+        output_file = utils.create_file_module(ourC2C.outputPredictorsList, module=self) 
         self.setResult('outputsPredictorListFile', output_file)
 
 class RasterFormatConverter(Module):
@@ -1929,7 +1929,7 @@ class MAXENT(Model):
 #            return 
     #set outputs
         lambdasfile = os.path.join(ourMaxent.outputDir, ourMaxent.args["species_name"] + ".lambdas")
-        output_file = utils.create_file_module(lambdasfile, self)
+        output_file = utils.create_file_module(lambdasfile, module=self)
         self.setResult("lambdas", output_file, module=self)
         
         rocfile = os.path.join(ourMaxent.outputDir, 'plots', ourMaxent.args["species_name"] + "_roc.png")
