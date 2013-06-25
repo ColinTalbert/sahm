@@ -763,7 +763,7 @@ class MyMapCanvas(FigureCanvas):
         FigureCanvas.__init__(self, fig)
         self._cursor = None
 
-    @print_timing
+#    @print_timing
     def resizeEvent(self, event):
         if not event.size().height() == 0:
             FigureCanvas.resizeEvent(self, event)

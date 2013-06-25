@@ -455,8 +455,8 @@ def runRScript(script, args_dict, module=None):
         stdErrFname = fname+"stdErr.txt"
         stdOutFname = fname+"stdOut.txt"
     
-    stdErrFile = open(stdErrFname, 'w')
-    stdOutFile = open(stdOutFname, 'w')
+    stdErrFile = open(stdErrFname, 'wb')
+    stdOutFile = open(stdOutFname, 'wb')
     
     if processing_mode == "single models sequentially (n - 1 cores each)":
         #we waiting for each model to finish before moving on.
