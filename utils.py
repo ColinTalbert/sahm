@@ -498,12 +498,15 @@ def runRScript(script, args_dict, module=None):
         command_arr += ["multicore=FALSE"]
         writetolog("    command: " + " ".join(command_arr), False, False)
         p = subprocess.Popen(command_arr, stderr=stdErrFile, stdout=stdOutFile)
-        writetolog("\n R Processing launched asynchronously " + script, True) 
+        writetolog("\n R Processing launched asynchronously " + script, True)
+#        from core.modules.vistrails_module import ModuleSuspended
+#        raise ModuleSuspended(module, 'test ModuleSuspended') 
     elif processing_mode == "FORT Condor":
         command_arr += ["multicore=True"]
         runModelOnCondor(script, args_dict, command_arr)
         writetolog("\n R Processing launched using Condor " + script, True)  
-
+#        from core.modules.vistrails_module import ModuleSuspended
+#        raise ModuleSuspended(module, 'test ModuleSuspended') 
                        
 
 def runModelOnCondor(script, args_dict, command_arr):

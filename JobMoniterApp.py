@@ -74,7 +74,7 @@ class Window(QtGui.QWidget):
                 result = self.checkIfModelFinished(subFolder)
                 
                 errorText = self.getText(subFolder, "stdErr.txt").strip()
-                warningCount = errorText.count("Warning:")
+                warningCount = errorText.count("Warning")
                 
                 if warningCount == 0:
                     resultText = result
