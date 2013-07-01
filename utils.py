@@ -58,7 +58,7 @@ import textwrap
 from PyQt4 import QtCore, QtGui
 
 from core.modules.basic_modules import File, Path, Directory, new_constant, Constant
-from core.modules.vistrails_module import ModuleError
+from core.modules.vistrails_module import ModuleError, ModuleSuspended
 import core.system
 import gui.application
 
@@ -430,82 +430,127 @@ def runRScript(script, args_dict, module=None):
     scriptFile = os.path.join(getModelsPath(), script)
 
     args = ["%s=%s" % pair for pair in args_dict.iteritems()]
-    args_str = ' '.join(args)
     
     command_arr = [program, '--vanilla', '-f', scriptFile, "--args"] + args
-    # command = program + " --vanilla -f " + scriptFile + " --args " + args
-    command = ' '.join(command_arr)
     
     writetolog("\nStarting R Processing of "  + script , True)
-    #writetolog("    args: " + args_str, False, False)
-    
-    #print "RUNNING COMMAND:", command_arr
     
     runRModelPy = os.path.join(os.path.dirname(__file__), "pySAHM", "runRModel.py")
     command_arr = [sys.executable, runRModelPy] + command_arr
     processing_mode = args_dict.get("cur_processing_mode", "single models sequentially (n - 1 cores each)")
     
     if args_dict.has_key("o") and os.path.isdir(args_dict['o']):
-        stdErrFname = os.path.join(args_dict['o'], "stdErr.txt")
-        stdOutFname = os.path.join(args_dict['o'], "stdOut.txt")
+        stderr_fname = os.path.join(args_dict['o'], "stdErr.txt")
+        stdout_fname = os.path.join(args_dict['o'], "stdOut.txt")
     else:
         f = tempfile.NamedTemporaryFile(delete=False)
         fname = f.name
         f.close()
-        stdErrFname = fname+"stdErr.txt"
-        stdOutFname = fname+"stdOut.txt"
+        stderr_fname = fname + "stdErr.txt"
+        stdout_fname = fname + "stdOut.txt"
     
-    stdErrFile = open(stdErrFname, 'w')
-    stdOutFile = open(stdOutFname, 'w')
+    stderr = open(stderr_fname, 'wb')
+    stdout = open(stdout_fname, 'wb')
     
-    if processing_mode == "single models sequentially (n - 1 cores each)":
-        #we waiting for each model to finish before moving on.
-        #but set the mc (multiple core) flag appropriately
-        command_arr += ["multicore=TRUE"]
-        writetolog("    command: " + " ".join(command_arr), False, False)
-        p = subprocess.Popen(command_arr, stderr=stdErrFile, stdout=stdOutFile)
-        p.communicate()
-        stdErrFile.close()
-        stdOutFile.close()
+    model_q = ModelQueue(args_dict['o'], module)
+    if not model_q.finished():
+        if processing_mode == "single models sequentially (n - 1 cores each)":
+            #we waiting for each model to finish before moving on.
+            #but set the mc (multiple core) flag appropriately
+            command_arr += ["multicore=TRUE"]
+            writetolog("    command: " + " ".join(command_arr), False, False)
+            p = subprocess.Popen(command_arr, stderr=stderr, stdout=stdout)
+            p.communicate()
+            stderr.close()
+            stderr.close()
+            check_model_error(model_q, module)
         
-        errMsg = "\n".join(open(stdErrFname, "r").readlines())
-        outMsg = "\n".join(open(stdOutFname, "r").readlines())
-        if 'Error' in errMsg:
-            msg = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-            msg +="\n  An error was encountered in the R script for this module."
-            msg += "\n     The R error message is below: \n"
-            msg += errMsg
-            writetolog(msg)
-    
-        if 'Warning' in errMsg:
-            msg = "The R scipt returned the following warning(s).  The R warning message is below - \n"
-            msg += errMsg
-            writetolog(msg)
-    
-        if 'Error' in errMsg:
-            #also write the errors to a model specific log file in the model output dir
-            #then raise an error
-            writeRErrorsToLog(args_dict, outMsg, errMsg)
-            if module:
-                raise ModuleError(module, msg)
-            else:
-                raise RuntimeError , msg
-        elif 'Warning' in errMsg:
-            writeRErrorsToLog(args_dict, outMsg, errMsg)
-            
-        writetolog("\nFinished R Processing of " + script, True)
-    elif processing_mode == "multiple models simultaneously (1 core each)":
-        command_arr += ["multicore=FALSE"]
-        writetolog("    command: " + " ".join(command_arr), False, False)
-        p = subprocess.Popen(command_arr, stderr=stdErrFile, stdout=stdOutFile)
-        writetolog("\n R Processing launched asynchronously " + script, True) 
-    elif processing_mode == "FORT Condor":
-        command_arr += ["multicore=True"]
-        runModelOnCondor(script, args_dict, command_arr)
-        writetolog("\n R Processing launched using Condor " + script, True)  
+        elif processing_mode == "multiple models simultaneously (1 core each)":
+            command_arr += ["multicore=FALSE"]
+            writetolog("    command: " + " ".join(command_arr), False, False)
+            p = subprocess.Popen(command_arr, stderr=stderr, stdout=stdout)
+            writetolog("\n R Processing launched asynchronously " + script, True) 
+            raise ModuleSuspended(module, 
+                'Model running asynchronously on single core', queue=model_q)
+        elif processing_mode == "FORT Condor":
+            command_arr += ["multicore=True"]
+            runModelOnCondor(script, args_dict, command_arr)
+            writetolog("\n R Processing launched using Condor " + script, True)  
+            raise ModuleSuspended(module, 
+                'Model running on Condor', queue=model_q)
+    else:
+        check_model_error(model_q, module)
+              
+def check_model_error(model_q, module=None):
+    if model_q.has_error:
+        msg = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        msg +="\n  An error was encountered in the R script for this module."
+        msg += "\n     The R error message is below: \n"
+        msg += model_q.stderr
+        writetolog(msg)
+        
+        if module:
+            raise ModuleError(module, msg)
+        else:
+            raise RuntimeError , msg
 
-                       
+    if 'Warning' in model_q.stderr:
+        msg = "The R scipt returned the following warning(s).  The R warning message is below - \n"
+        msg += model_q.stderr
+        writetolog(msg)
 
+class ModelQueue(object):
+    '''The queue object that checks for model run completion and errors.
+    The signal that a model is finished is that the last line in the 
+    model output text file starts with 'Total time'
+    The signal that a model failed is that either the last line starts with
+    'Model Failed' or the stderr (which is getting written to a text file in 
+    the model output directory) contains the word 'Error'.  
+    This file can contain warning messages.
+    '''
+    def __init__(self, outDir, module):
+        self.module = module
+        self.out_dir = outDir
+        self.model_suffix = os.path.split(self.out_dir)[1].split("_")[0]
+        self.stderr_fname = os.path.join(self.out_dir, "stdErr.txt")
+        self.stdout_fname = os.path.join(self.out_dir, "stdOut.txt")
+        self.out_fname = os.path.join(self.out_dir, 
+                                      self.model_suffix + "_output.txt")
+        self.stderr = ""
+        self.stdout = ""
+        self.has_error = False
+        
+    def finished(self):
+        self.store_stdout()
+        self.check_for_error()
+        return self.check_if_model_finished()
+    
+    def store_stdout(self):
+        self.stdout = open(self.stdout_fname, "r").read()
+    
+    def check_for_error(self):
+        try:
+            self.stderr = open(self.stderr_fname, "r").read()
+            if "Error" in self.stderr:
+                self.has_error = True
+        except:
+            #if this file hasn't been written we will assume no error has occurred
+            pass
+        
+    def check_if_model_finished(self):      
+        try: 
+            lastLine = open(self.out_fname, 'r').readlines()[-2]
+        except IndexError:
+            return False
+                 
+        if lastLine.startswith("Total time"):
+            return True
+        elif lastLine.startswith("Model Failed"):
+            self.has_error = True
+            return True
+        else:
+            return False
+        
 def runModelOnCondor(script, args_dict, command_arr):
     #copy MDS file and convert all refs to K:, I:, N:, J: to UNC paths
     mdsDir, mdsFile = os.path.split(args_dict["c"])

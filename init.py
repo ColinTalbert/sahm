@@ -511,6 +511,10 @@ class Model(Module):
     def provide_output_port_documentation(cls, port_name):
         return GenModDoc.construct_port_doc(cls, port_name, 'out') 
 
+    def __init__(self):
+        self.suspended_completed = False
+        Module.__init__(self)
+
     def compute(self):
         ModelOutput = {"FIT_BRT_pluggable.r":"brt",
                        "FIT_GLM_pluggable.r":"glm",
@@ -518,54 +522,55 @@ class Model(Module):
                        "FIT_MARS_pluggable.r":"mars",
                        "EvaluateNewData.r":"ApplyModel",
                        "WrapMaxent.r":"maxent",}
+        if not self.suspended_completed:
         
-        self.ModelAbbrev = ModelOutput[self.name]
-        
-        #maxent R and java output write to the same directory
-        prefix = self.ModelAbbrev
-        if self.hasInputFromPort("outputFolderName"):
-            prefix += '_' + self.getInputFromPort("outputFolderName")
-        prefix += '_' 
+            self.ModelAbbrev = ModelOutput[self.name]
             
-        if self.ModelAbbrev == "maxent":
-            self.output_dname=self.MaxentPath
-        else:
-            self.output_dname = utils.mknextdir(prefix=prefix)
-               
-        self.argsDict = utils.map_ports(self, self.port_map)
-        
-        mdsFile = utils.getFileRelativeToCurrentVT(self.argsDict['c'], self)
-
-        if not utils.checkModelCovariatenames(mdsFile):
-            msg = "These R models do not work with covariate names begining with non-letter characters or \n"
-            msg += "covariate names that contain non-alphanumeric characters other than '.' or '_'.\n"
-            msg += "Please check your covariate names and rename any that do not meet these constraints.\n"
-            msg += "Covaraiate names are found in the first line of the mds file: \n"
-            msg += "\t\t"+ mdsFile
-            writetolog(msg, False, True)
-            raise ModuleError(self, msg)
-
-        if self.ModelAbbrev == "maxent":
-            self.argsDict['lam'] = self.MaxentPath
-        
-        if self.ModelAbbrev == 'brt' or \
-            self.ModelAbbrev == 'rf':
-            if not "seed" in self.argsDict.keys():
-                self.argsDict['seed'] = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
-            writetolog("    seed used for " + self.ModelAbbrev + " = " + str(self.argsDict['seed']))
-      
-        self.argsDict['o'] = self.output_dname
-        self.argsDict['rc'] = utils.MDSresponseCol(mdsFile)
-        self.argsDict['cur_processing_mode'] = configuration.cur_processing_mode    
-      
-        if not configuration.cur_processing_mode == "multiple models simultaneously (1 core each)":
-            #This give previously launched models time to finish writing their 
-            #logs so we don't get a lock
-            time.sleep(10)
+            #maxent R and java output write to the same directory
+            prefix = self.ModelAbbrev
+            if self.hasInputFromPort("outputFolderName"):
+                prefix += '_' + self.getInputFromPort("outputFolderName")
+            prefix += '_' 
+                
+            if self.ModelAbbrev == "maxent":
+                self.output_dname=self.MaxentPath
+            else:
+                self.output_dname = utils.mknextdir(prefix=prefix)
+                   
+            self.argsDict = utils.map_ports(self, self.port_map)
             
-        utils.runRScript(self.name, self.argsDict, self)
-        
-        utils.launch_RunMonitorApp()
+            mdsFile = utils.getFileRelativeToCurrentVT(self.argsDict['c'], self)
+    
+            if not utils.checkModelCovariatenames(mdsFile):
+                msg = "These R models do not work with covariate names begining with non-letter characters or \n"
+                msg += "covariate names that contain non-alphanumeric characters other than '.' or '_'.\n"
+                msg += "Please check your covariate names and rename any that do not meet these constraints.\n"
+                msg += "Covaraiate names are found in the first line of the mds file: \n"
+                msg += "\t\t"+ mdsFile
+                writetolog(msg, False, True)
+                raise ModuleError(self, msg)
+    
+            if self.ModelAbbrev == "maxent":
+                self.argsDict['lam'] = self.MaxentPath
+            
+            if self.ModelAbbrev == 'brt' or \
+                self.ModelAbbrev == 'rf':
+                if not "seed" in self.argsDict.keys():
+                    self.argsDict['seed'] = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
+                writetolog("    seed used for " + self.ModelAbbrev + " = " + str(self.argsDict['seed']))
+          
+            self.argsDict['o'] = self.output_dname
+            self.argsDict['rc'] = utils.MDSresponseCol(mdsFile)
+            self.argsDict['cur_processing_mode'] = configuration.cur_processing_mode    
+          
+            if not configuration.cur_processing_mode == "multiple models simultaneously (1 core each)":
+                #This give previously launched models time to finish writing their 
+                #logs so we don't get a lock
+                time.sleep(10)
+                
+            utils.runRScript(self.name, self.argsDict, self)
+            
+#            utils.launch_RunMonitorApp()
         
         #set our output ports
         if not self.argsDict.has_key('mes'):
@@ -926,7 +931,7 @@ class MDSBuilder_vector(Module):
         except:
             utils.informative_untrapped_error(self, "MDSBuilder")
 
-        output_file = utils.create_file_module(ourMDSBuilder.outputMDS, self) 
+        output_file = utils.create_file_module(ourMDSBuilder.outputMDS, module=self) 
         self.setResult('mdsFile', output_file)
 
 class FieldDataQuery(Module):
@@ -1205,7 +1210,7 @@ class PARC(Module):
         
         predictorsDir = utils.create_dir_module(output_dname)
         outputCSV = os.path.join(output_dname, "PARC_Files.csv")
-        output_file = utils.create_file_module(outputCSV, self)
+        output_file = utils.create_file_module(outputCSV, module=self)
         
         
 #        writetolog("Finished running PARC", True)
@@ -1261,7 +1266,7 @@ class Reclassifier(Module):
 #        outFName = os.path.join(ourReclassifier.outDir, ourReclassifier.outName)
         ourReclassifier.run()
 
-        output_file = utils.create_file_module(ourReclassifier.outName, self)
+        output_file = utils.create_file_module(ourReclassifier.outName, module=self)
         
         
 #        writetolog("Finished running PARC", True)
@@ -1386,7 +1391,7 @@ class CategoricalToContinuous(Module):
         
         ourC2C.run()
 
-        output_file = utils.create_file_module(ourC2C.outputPredictorsList, self) 
+        output_file = utils.create_file_module(ourC2C.outputPredictorsList, module=self) 
         self.setResult('outputsPredictorListFile', output_file)
 
 class RasterFormatConverter(Module):
@@ -1929,7 +1934,7 @@ class MAXENT(Model):
 #            return 
     #set outputs
         lambdasfile = os.path.join(ourMaxent.outputDir, ourMaxent.args["species_name"] + ".lambdas")
-        output_file = utils.create_file_module(lambdasfile, self)
+        output_file = utils.create_file_module(lambdasfile, module=self)
         self.setResult("lambdas", output_file, module=self)
         
         rocfile = os.path.join(ourMaxent.outputDir, 'plots', ourMaxent.args["species_name"] + "_roc.png")
