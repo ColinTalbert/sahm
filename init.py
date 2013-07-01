@@ -522,56 +522,57 @@ class Model(Module):
                        "FIT_MARS_pluggable.r":"mars",
                        "EvaluateNewData.r":"ApplyModel",
                        "WrapMaxent.r":"maxent",}
-        if not self.suspended_completed:
         
-            self.ModelAbbrev = ModelOutput[self.name]
+        self.ModelAbbrev = ModelOutput[self.name]
+        
+        #maxent R and java output write to the same directory
+        prefix = self.ModelAbbrev
+        if self.hasInputFromPort("outputFolderName"):
+            prefix += '_' + self.getInputFromPort("outputFolderName")
+        prefix += '_'                
+        
+        self.argsDict = utils.map_ports(self, self.port_map)
+        
+        mdsFile = utils.getFileRelativeToCurrentVT(self.argsDict['c'], self)
+
+        if not utils.checkModelCovariatenames(mdsFile):
+            msg = "These R models do not work with covariate names begining with non-letter characters or \n"
+            msg += "covariate names that contain non-alphanumeric characters other than '.' or '_'.\n"
+            msg += "Please check your covariate names and rename any that do not meet these constraints.\n"
+            msg += "Covaraiate names are found in the first line of the mds file: \n"
+            msg += "\t\t"+ mdsFile
+            writetolog(msg, False, True)
+            raise ModuleError(self, msg)
+
+        if self.ModelAbbrev == "maxent":
+            self.argsDict['lam'] = self.MaxentPath
+        
+        if self.ModelAbbrev == "maxent":
+            self.output_dname=self.MaxentPath
+        else:
+            self.output_dname = utils.find_model_dir(prefix, self.argsDict)
+        
+        if self.ModelAbbrev == 'brt' or \
+            self.ModelAbbrev == 'rf':
+            if not "seed" in self.argsDict.keys():
+                self.argsDict['seed'] = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
+            writetolog("    seed used for " + self.ModelAbbrev + " = " + str(self.argsDict['seed']))
+      
+        self.argsDict['o'] = self.output_dname
+        self.argsDict['rc'] = utils.MDSresponseCol(mdsFile)
+        self.argsDict['cur_processing_mode'] = configuration.cur_processing_mode    
+        
+        
+      
+        if not configuration.cur_processing_mode == "multiple models simultaneously (1 core each)":
+            #This give previously launched models time to finish writing their 
+            #logs so we don't get a lock
+            time.sleep(10)
             
-            #maxent R and java output write to the same directory
-            prefix = self.ModelAbbrev
-            if self.hasInputFromPort("outputFolderName"):
-                prefix += '_' + self.getInputFromPort("outputFolderName")
-            prefix += '_' 
-                
-            if self.ModelAbbrev == "maxent":
-                self.output_dname=self.MaxentPath
-            else:
-                self.output_dname = utils.mknextdir(prefix=prefix)
-                   
-            self.argsDict = utils.map_ports(self, self.port_map)
-            
-            mdsFile = utils.getFileRelativeToCurrentVT(self.argsDict['c'], self)
-    
-            if not utils.checkModelCovariatenames(mdsFile):
-                msg = "These R models do not work with covariate names begining with non-letter characters or \n"
-                msg += "covariate names that contain non-alphanumeric characters other than '.' or '_'.\n"
-                msg += "Please check your covariate names and rename any that do not meet these constraints.\n"
-                msg += "Covaraiate names are found in the first line of the mds file: \n"
-                msg += "\t\t"+ mdsFile
-                writetolog(msg, False, True)
-                raise ModuleError(self, msg)
-    
-            if self.ModelAbbrev == "maxent":
-                self.argsDict['lam'] = self.MaxentPath
-            
-            if self.ModelAbbrev == 'brt' or \
-                self.ModelAbbrev == 'rf':
-                if not "seed" in self.argsDict.keys():
-                    self.argsDict['seed'] = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
-                writetolog("    seed used for " + self.ModelAbbrev + " = " + str(self.argsDict['seed']))
-          
-            self.argsDict['o'] = self.output_dname
-            self.argsDict['rc'] = utils.MDSresponseCol(mdsFile)
-            self.argsDict['cur_processing_mode'] = configuration.cur_processing_mode    
-          
-            if not configuration.cur_processing_mode == "multiple models simultaneously (1 core each)":
-                #This give previously launched models time to finish writing their 
-                #logs so we don't get a lock
-                time.sleep(10)
-                
-            utils.runRScript(self.name, self.argsDict, self)
-            
+        utils.runRScript(self.name, self.argsDict, self)
+        
 #            utils.launch_RunMonitorApp()
-        
+    
         #set our output ports
         if not self.argsDict.has_key('mes'):
             self.argsDict['mes'] = 'FALSE'

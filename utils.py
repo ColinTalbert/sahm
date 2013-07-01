@@ -62,11 +62,7 @@ from core.modules.vistrails_module import ModuleError, ModuleSuspended
 import core.system
 import gui.application
 
-#from osgeo import gdalconst
-#from osgeo import gdal
-#from osgeo import osr
-import numpy
-
+import init as sahm
 import pySAHM.utilities as utilities
 import getpass
 
@@ -186,6 +182,29 @@ def mknextfile(prefix, suffix="", directory=""):
     file.close()
     return filename
 
+def find_model_dir(prefix, args_dict):
+    global _roottempdir
+    hash_val = hash(frozenset(args_dict))
+    
+    subdirs = [o for o in os.listdir(_roottempdir) 
+               if os.path.isdir(os.path.join(_roottempdir, o))]
+    matchdirs = [os.path.join(_roottempdir, o) for o in subdirs
+                 if o.startswith(prefix)]
+    
+    for d in matchdirs:
+        hash_id = os.path.join(d, "hash_id.txt")
+        if os.path.exists(hash_id):
+            if open(hash_id, "r").read() == str(hash_val):
+                return d
+    #we didn't find a matching run folder
+    next_dir = mknextdir(prefix)
+    #save our hash_val so we can id this directory again.
+    hash_id = os.path.join(next_dir, "hash_id.txt")
+    f = open(hash_id, "w")
+    f.write(str(hash_val))
+    f.close()
+    return next_dir
+    
 def mknextdir(prefix, directory="", skipSequence=False):
     global _roottempdir
     if directory == "":
@@ -452,7 +471,12 @@ def runRScript(script, args_dict, module=None):
     stderr = open(stderr_fname, 'wb')
     stdout = open(stdout_fname, 'wb')
     
-    model_q = ModelQueue(args_dict['o'], module)
+    if isinstance(module, sahm.Model):
+        model_prefix = os.path.split(args_dict['o'])[1].split("_")[0]
+        output_txt = os.path.join(args_dict['o'], model_prefix + "_output.txt")
+    else:
+        output_txt = None
+    model_q = ModelQueue(module, stdout_fname, stderr_fname, output_txt)
     if not model_q.finished():
         if processing_mode == "single models sequentially (n - 1 cores each)":
             #we waiting for each model to finish before moving on.
@@ -463,6 +487,8 @@ def runRScript(script, args_dict, module=None):
             p.communicate()
             stderr.close()
             stderr.close()
+            #this call to finished stores the contents of the stdout, stderr.
+            model_q.finished()
             check_model_error(model_q, module)
         
         elif processing_mode == "multiple models simultaneously (1 core each)":
@@ -508,14 +534,11 @@ class ModelQueue(object):
     the model output directory) contains the word 'Error'.  
     This file can contain warning messages.
     '''
-    def __init__(self, outDir, module):
+    def __init__(self, module, stdout_fname, stderr_fname, output_txt=None):
         self.module = module
-        self.out_dir = outDir
-        self.model_suffix = os.path.split(self.out_dir)[1].split("_")[0]
-        self.stderr_fname = os.path.join(self.out_dir, "stdErr.txt")
-        self.stdout_fname = os.path.join(self.out_dir, "stdOut.txt")
-        self.out_fname = os.path.join(self.out_dir, 
-                                      self.model_suffix + "_output.txt")
+        self.stderr_fname = stderr_fname
+        self.stdout_fname = stdout_fname
+        self.out_fname = output_txt
         self.stderr = ""
         self.stdout = ""
         self.has_error = False
@@ -537,10 +560,16 @@ class ModelQueue(object):
             #if this file hasn't been written we will assume no error has occurred
             pass
         
-    def check_if_model_finished(self):      
+    def check_if_model_finished(self):
+        if self.out_fname is None:
+            #this script run is not one of our models and doesn't have a
+            #model output file to parse for a 'Total time:' but since these models
+            #are not run asyncronously we can assume it's done now.
+            return False
+    
         try: 
             lastLine = open(self.out_fname, 'r').readlines()[-2]
-        except IndexError:
+        except (IndexError, IOError):
             return False
                  
         if lastLine.startswith("Total time"):
