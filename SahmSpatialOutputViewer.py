@@ -109,7 +109,7 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
             'initial_raster_display': ("initial_raster", None, True),
             "model_workspace": ("model_workspace", None, True)}
 
-    @print_timing
+#    @print_timing
     def compute(self):
         inputs = {}
 
@@ -166,7 +166,7 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
         if utils.checkIfModelFinished(inputs["model_dir"]):
             self.local_displayAndWait(inputs)
 
-    @print_timing
+#    @print_timing
     def local_displayAndWait(self, inputs):
         self.displayAndWait(SAHMSpatialOutputViewerCellWidget,
                             inputs)       
@@ -231,7 +231,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         self.displayTL = True
         self.pointsLoaded = False
 
-    @print_timing
+#    @print_tming
     def updateContents(self, inputs):
         """ updateContents(inputs: dictionary) -> None
         Update the widget contents based on the input data
@@ -252,7 +252,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         self.fig.canvas.draw()
         self.update()
 
-    @print_timing
+#    @print_timing
     def create_main_frame(self):
         self.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.dpi = 100
@@ -265,7 +265,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 #        self.connect(self, QtCore.SIGNAL('keyPressEvent(QString)'),
 #             self.key_press)
         self.map_canvas.mpl_connect('button_release_event', self.button_up)
-        self.map_canvas.mpl_connect('resize_event', self.resize)
+        self.map_canvas.mpl_connect('resize_event', self._resize)
         self.add_axis()
 
         self.mpl_toolbar = NavigationToolbar(self.map_canvas, None)
@@ -297,7 +297,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
     def getRasterParams(self, rasterfile):
         return getRasterParams(rasterfile)
 
-    @print_timing
+#    @print_timing
     def wheel_zoom(self, event):
         #zoom in or out centered on the current cursor position
 
@@ -339,16 +339,19 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 #            self.pull_pixels()
             self.sync_extents()
 
-    @print_timing
-    def resize(self):
+#    @print_timing
+    def _resize(self, event):
         self.pull_pixels()
 
-    @print_timing
+#    @print_timing
     def pull_pixels(self):
 #        print "SAHMSpatialOutputViewerCellWidget _pull_pixels"
-        self.rasterlayer.ax_update(self.axes)
+        try:
+            self.rasterlayer.ax_update(self.axes)
+        except AttributeError:
+            pass
 
-    @print_timing
+#    @print_timing
     def keyPressEvent(self, event):
         if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_T:
             active_cells = self.getSelectedCellWidgets()
@@ -371,7 +374,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 
         QCellWidget.deleteLater(self)
 
-    @print_timing
+#    @print_timing
     def load_layers(self):
 #        print "SAHMSpatialOutputViewerCellWidget load_layers"
         self.all_layers = {"prob_map":{"type":"raster", "title":"Probability" ,"categorical":False, "min":0, "max":1, 'cmap':matplotlib.cm.jet, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
@@ -421,7 +424,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 #        
 #        self.maxExtent = [ulx, lrx, lry, uly]
 
-    @print_timing
+#    @print_timing
     def loadPoints(self):
         #initialize our arrays
         for pointType in ['abs_points', 'pres_points', 'backs_points']:
@@ -507,7 +510,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         kwargs['cbar_labels'] = labels
         return matplotlib.cm.get_cmap('Accent', len(uniques))
     
-    @print_timing
+#    @print_timing
     def on_draw(self, UseMaxExt=False, passedExtent=None):
         """ Completely clears then redraws the figure
         There's probably a more efficient way to do this.
@@ -542,7 +545,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         if self.displayTL:
             self.add_title(title)
     
-    @print_timing
+#    @print_timing
     def add_vector(self, layername):
         kwargs = self.all_layers[layername]
         if not self.pointsLoaded or not kwargs.has_key("x"):
@@ -552,7 +555,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         if self.all_layers[layername]['enabled']:
             self.axes.scatter(kwargs['x'], kwargs['y'], s=10, c=kwargs['color'], linewidth=0.5, antialiased=True)
     
-    @print_timing
+#    @print_timing
     def add_raster(self, kwargs, curExtents):
         rasterfile = kwargs['file']
 
@@ -721,7 +724,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         return None
     
     #Functions dealing with managing extents
-    @print_timing
+#    @print_timing
     def set_extent(self, ylim, xlim):
 #        print "_set_extent"
         self.axes.set_ylim(ylim, emit=False)
@@ -731,7 +734,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
         self.fig.canvas.draw()
         self.update()
         
-    @print_timing        
+#    @print_timing        
     def get_extent(self):
 #        print "_get_extent"
         return list(self.axes.get_xlim()) + list(self.axes.get_ylim())
@@ -795,12 +798,12 @@ class RasterDisplay(object):
         self.threeBand = threeBand
         self.NoDataValue = NoDataValue
 
-    @print_timing
+#    @prit_timing
     def switch_raster(self, rasterfile):
         self.rasterfile = rasterfile
         self.rasterparams = getRasterParams(rasterfile)
 
-    @print_timing
+#    @print_timing
     def __call__(self, xstart, xend, ystart, yend):
 #        print "RasterDisplay __call__"
         self.x = np.linspace(xstart, xend, self.width)
@@ -883,7 +886,7 @@ class RasterDisplay(object):
             else:
                     return np.ma.masked_array(ary, mask=(ary==ndval))
             
-    @print_timing
+#    @print_timing
     def setDims(self, ax):
         #Get the number of points from the number of pixels in the window
         dims = ax.axesPatch.get_window_extent().bounds
@@ -891,7 +894,7 @@ class RasterDisplay(object):
         self.width = int(dims[2] + 0.5)
         self.height = int(dims[3] + 0.5)
 
-    @print_timing
+#    @print_timing
     def ax_update(self, ax):
         ax.set_autoscale_on(False) # Otherwise, infinite loop
         self.setDims(ax)
