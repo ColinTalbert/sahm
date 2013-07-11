@@ -1893,7 +1893,7 @@ class MAXENT(Model):
                         port[1] == "(edu.utah.sci.vistrails.basic:Directory)"):
                         port_val = port_val.name
                     argWriter.writerow([port[0], port_val])
-                else:
+                elif not port in list(Model._input_ports):
                     kwargs = port[2]
                     try:
                         if port[1] == "(edu.utah.sci.vistrails.basic:Boolean)":
@@ -1949,7 +1949,7 @@ def load_max_ent_params():
     csv_reader = csv.reader(open(maxent_fname, 'rU'))
     # pass on header
     csv_reader.next()
-    input_ports = []
+    input_ports = list(Model._input_ports)
     
     #input_ports.append(('inputMDS', '(gov.usgs.sahm:MergedDataSet:Other)'))
     
