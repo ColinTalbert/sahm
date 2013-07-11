@@ -245,7 +245,8 @@ def map_ports(module, port_map):
                     port + '.  Only single entry handled.  Please remove extraneous items.')
             elif len(value) == 0:
                 try:
-                    value = eval([item for item in module._input_ports if item[0] == port][0][2]['defaults'])[0]
+                    port_tuple = [item for item in module._input_ports if item[0] == port][0]
+                    value = eval(port_tuple[2]['defaults'])[0]
                 except:
                     raise ModuleError(module, 'No items found from Port ' + 
                         port + '.  Input is required.')
