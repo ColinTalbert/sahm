@@ -1,43 +1,60 @@
 Flag ,Abbrv ,Type ,Default ,Meaning ,VisTrailsNotes
-environmentallayers,e,directory ,,"If this is not supplied we will create a SWD version of this from the background points generated from sahm, i.e. -9998 or -9999 in the MDS response column.",
-biasfile,,file ,,"Sampling is assumed to be biased according to the sampling distribution given in this grid file.
+environmentallayers,e,Directory ,,"If this is not supplied we will create a SWD version of this from the background points generated from sahm, i.e. -9998 or -9999 in the MDS response column.",
+biasfile,,File ,,"Sampling is assumed to be biased according to the sampling distribution given in this grid file.
 Values in this file must not be zero or negative. MaxEnt will factor out the bias.
 Requires environmental data to be in grids, rather than a SWD format file 
 ",This will be ignored if environmentallayers is not selected.
-randomtestpoints ,X ,integer ,0,"Percentage of presence localities to be randomly set aside as test points, used to compute AUC, omission etc. ","If the MDS input is from the test training split the will not be used, but instead this file will be generated from the input MDS Split column where it equals 'test'"
-betamultiplier ,b ,double ,1,Multiply all automatic regularization parameters by this number. A higher number gives a more spread-out distribution. ,
-maximumbackground ,MB ,integer ,10000,"If the number of background points / grid cells is larger than this number, then this number of cells is chosen randomly for background points ",
-testsamplesfile ,T ,file ,,"Use the presence localities in this file to compute statistics (AUC, omission etc.)The file can contain different localities for different species.It takes precedence over the random test percentage. ",
-replicates ,,integer ,1,"Number of replicate runs to do when cross-validating, bootstrapping or doing sampling with replacement runs ",If we supply the testsamples file or generate one from our testtraining split data can this also supplied?  I think not.
-replicatetype ,,string ,subsample,"If replicates > 1, do multiple runs of this type:Crossvalidate: samples divided into replicates folds; each fold in turn used for test data.Bootstrap: replicate sample sets chosen by sampling with replacement.Subsample: replicate sample sets chosen by removing random test percentage without replacement to be used for evaluation. (Options)",same as above
-writebackgroundpredictions ,,boolean ,false ,Write .csv file with predictions at background points ,
-linear ,l ,boolean ,true ,Allow linear features to be used ,
-quadratic ,q ,boolean ,true ,Allow quadratic features to be used ,
-product ,p ,boolean ,true ,Allow product features to be used ,
-threshold ,,boolean ,true ,Allow threshold features to be used ,
-hinge ,h ,boolean ,true ,Allow hinge features to be used ,
-writeplotdata ,,boolean ,false ,"Write output files containing the data used to make response curves, for import into external plotting software ",
-fadebyclamping ,,boolean ,false ,"Reduce prediction at each point in projections by the difference betweenclamped and non-clamped output at that point ",
-extrapolate ,,boolean ,true ,Predict to regions of environmental space outside the limits encountered during training ,
-autofeature ,A ,boolean ,true ,"Automatically select which feature classes to use, based on number of training samples ",
-doclamp ,,boolean ,true ,Apply clamping when projecting ,
-maximumiterations ,m ,integer ,5000,Stop training after this many iterations of the optimization algorithm ,
-convergencethreshold ,c ,double ,1.00E-05,Stop training when the drop in log loss per iteration drops below this number ,
-beta_threshold ,,double ,-1,Regularization parameter to be applied to all threshold features; negative value enables automatic setting ,
-beta_categorical ,,double ,-1,Regularization parameter to be applied to all categorical features; negative value enables automatic setting ,
-beta_lqp ,,double ,-1,"Regularization parameter to be applied to all linear, quadratic and product features; negative value enables automatic setting ",
-beta_hinge ,,double ,-1,Regularization parameter to be applied to all hinge features; negative value enables automatic setting ,
-applythresholdrule ,,string ,,"Apply a threshold rule, generating a binary output grid in addition to the regular prediction grid. Options:·      Fixed cumulative value 1·      Fixed cumulative value 5·      Fixed cumulative value 10·      Minimum training presence·      10 percentile training presence·      Equal training sensitivity and specificity·      Maximum training sensitivity plus specificity",
-prefixes,,boolean ,false ,,
-species_name,,string ,species,Used only by VisTrails to set the species name,
-responsecurves,p ,boolean ,true ,Create graphs showing how predicted relative probability of occurrence depends on the value of each environmental variable,
-jackknife,,boolean ,true ,Do jackknife to measure variable importance,
-writeclampgrid,,boolean ,false ,Do not create clamping grids when projecting,
-writemess,,boolean ,false ,Do not do MESS analysis when projecting,
-outputgrids,X ,boolean ,true ,"Write output grids. Turning this off when doing replicate runs causes only the summary grids (average, std deviation etc.) to be written, not those for the individual runs. ",
-threads ,,integer ,1,"Number of processor threads to use. Matching this number to the number of cores on your computer speeds up some operations, especially variable jackknifing. ",
-visible ,z ,boolean ,true ,Make the Maxent user interface visible ,
-warnings ,,boolean ,true ,"Pop up windows to warn about potential problems with input data. Regardless of this setting, warnings are always printed to the log file. ",
-writeclampgrid ,,boolean ,false ,"Write a grid that shows the spatial distribution of clamping. At each point, the value is the absolute difference between prediction values with and without clamping. ",
-plots ,,boolean ,true ,Write various plots for inclusion in .html output ,
-projectionlayers ,j ,directory ,,"Location of an alternate set of environmental variables. Maxent models will be projected onto these variables.Can be a .csv file (in SWD format) or a directory containing one file per variable.Multiple projection files/directories can be separated by commas. ",
+randomtestpoints ,X ,Integer ,0,"Percentage of presence localities to be randomly set aside as test points, used to compute AUC, omission etc. ","If the MDS input is from the test training split the will not be used, but instead this file will be generated from the input MDS Split column where it equals 'test'"
+betamultiplier ,b ,Float ,1.0,Multiply all automatic regularization parameters by this number. A higher number gives a more spread-out distribution. ,
+maximumbackground ,MB ,Integer ,10000,"If the number of background points / grid cells is larger than this number, then this number of cells is chosen randomly for background points ",
+testsamplesfile ,T ,File ,,"Use the presence localities in this file to compute statistics (AUC, omission etc.)
+The file can contain different localities for different species.
+It takes precedence over the random test percentage. ",
+replicates ,,Integer ,1,"Number of replicate runs to do when cross-validating, bootstrapping or doing sampling with replacement runs ",If we supply the testsamples file or generate one from our testtraining split data can this also supplied?  I think not.
+replicatetype ,,String ,"'subsample'","If replicates > 1, do multiple runs of this type:
+Crossvalidate: samples divided into replicates folds; each fold in turn used for test data.
+Bootstrap: replicate sample sets chosen by sampling with replacement.
+Subsample: replicate sample sets chosen by removing random test percentage without replacement to be used for evaluation. 
+(Options)",same as above
+writebackgroundpredictions ,,Boolean ,False ,Write .csv file with predictions at background points ,
+linear ,l ,Boolean ,True ,Allow linear features to be used ,
+quadratic ,q ,Boolean ,True ,Allow quadratic features to be used ,
+product ,p ,Boolean ,True ,Allow product features to be used ,
+threshold ,,Boolean ,True ,Allow threshold features to be used ,
+hinge ,h ,Boolean ,True ,Allow hinge features to be used ,
+writeplotdata ,,Boolean ,False ,"Write output files containing the data used to make response curves, for import into external plotting software ",
+fadebyclamping ,,Boolean ,False ,"Reduce prediction at each point in projections by the difference between
+clamped and non-clamped output at that point ",
+extrapolate ,,Boolean ,True ,Predict to regions of environmental space outside the limits encountered during training ,
+autofeature ,A ,Boolean ,True ,"Automatically select which feature classes to use, based on number of training samples ",
+doclamp ,,Boolean ,True ,Apply clamping when projecting ,
+maximumiterations ,m ,Integer ,5000,Stop training after this many iterations of the optimization algorithm ,
+convergencethreshold ,c ,Float ,1.00E-05,Stop training when the drop in log loss per iteration drops below this number ,
+beta_threshold ,,Float ,-1.0,Regularization parameter to be applied to all threshold features; negative value enables automatic setting ,
+beta_categorical ,,Float ,-1.0,Regularization parameter to be applied to all categorical features; negative value enables automatic setting ,
+beta_lqp ,,Float ,-1.0,"Regularization parameter to be applied to all linear, quadratic and product features; negative value enables automatic setting ",
+beta_hinge ,,Float ,-1.0,Regularization parameter to be applied to all hinge features; negative value enables automatic setting ,
+applythresholdrule ,,String ,,"Apply a threshold rule, generating a binary output grid in addition to the regular prediction grid. Options:
+·      Fixed cumulative value 1
+·      Fixed cumulative value 5
+·      Fixed cumulative value 10
+·      Minimum training presence
+·      10 percentile training presence
+·      Equal training sensitivity and specificity
+·      Maximum training sensitivity plus specificity
+",
+prefixes,,Boolean ,False ,,
+species_name,,String ,"'species'",Used only by VisTrails to set the species name,
+responsecurves,p ,Boolean ,True ,Create graphs showing how predicted relative probability of occurrence depends on the value of each environmental variable,
+jackknife,,Boolean ,True ,Do jackknife to measure variable importance,
+writeclampgrid,,Boolean ,False ,Do not create clamping grids when projecting,
+writemess,,Boolean ,False ,Do not do MESS analysis when projecting,
+outputgrids,X ,Boolean ,True ,"Write output grids. Turning this off when doing replicate runs causes only the summary grids (average, std deviation etc.) to be written, not those for the individual runs. ",
+threads ,,Integer ,1,"Number of processor threads to use. Matching this number to the number of cores on your computer speeds up some operations, especially variable jackknifing. ",
+visible ,z ,Boolean ,True ,Make the Maxent user interface visible ,
+warnings ,,Boolean ,True ,"Pop up windows to warn about potential problems with input data. Regardless of this setting, warnings are always printed to the log file. ",
+writeclampgrid ,,Boolean ,False ,"Write a grid that shows the spatial distribution of clamping. At each point, the value is the absolute difference between prediction values with and without clamping. ",
+plots ,,Boolean ,True ,Write various plots for inclusion in .html output ,
+projectionlayers ,j ,Directory ,,"Location of an alternate set of environmental variables. Maxent models will be projected onto these variables.
+Can be a .csv file (in SWD format) or a directory containing one file per variable.
+Multiple projection files/directories can be separated by commas. ",

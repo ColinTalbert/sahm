@@ -219,8 +219,6 @@ class MAXENTRunner(object):
                 self.args['outputgrids'] = 'false'
             return 
 
-
-
     def convertNA(self, vals):
         """Switches the NA value used in our R models
         to the value expected by Maxent
@@ -228,9 +226,6 @@ class MAXENTRunner(object):
         for (index, item,) in enumerate(vals):
             if item == 'NA':
                 vals[index] = '-9999'
-
-
-
 
     def usedIndexes(self, header1, header2):
         covariateIndexes = []
@@ -240,16 +235,12 @@ class MAXENTRunner(object):
 
         return covariateIndexes
 
-
-
     def usedValues(self, values, indexes):
         usedvals = []
         for i in indexes:
             usedvals.append(values[i])
 
         return usedvals
-
-
 
     def pullCategoricals(self, headerline):
         for item in headerline:
@@ -290,4 +281,3 @@ def main(argv):
     ourMaxent.maxentpath = options.maxentExecutable
     ourMaxent.mdsFile = options.mdsFile
     ourMaxent.outputDir = options.outputDir
-    ou

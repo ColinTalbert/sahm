@@ -265,7 +265,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 #        self.connect(self, QtCore.SIGNAL('keyPressEvent(QString)'),
 #             self.key_press)
         self.map_canvas.mpl_connect('button_release_event', self.button_up)
-        self.map_canvas.mpl_connect('resize_event', self.resize)
+        self.map_canvas.mpl_connect('resize_event', self._resize)
         self.add_axis()
 
         self.mpl_toolbar = NavigationToolbar(self.map_canvas, None)
@@ -340,13 +340,16 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
             self.sync_extents()
 
 #    @print_timing
-    def resize(self):
+    def _resize(self, event):
         self.pull_pixels()
 
 #    @print_timing
     def pull_pixels(self):
 #        print "SAHMSpatialOutputViewerCellWidget _pull_pixels"
-        self.rasterlayer.ax_update(self.axes)
+        try:
+            self.rasterlayer.ax_update(self.axes)
+        except AttributeError:
+            pass
 
 #    @print_timing
     def keyPressEvent(self, event):
