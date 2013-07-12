@@ -529,7 +529,8 @@ class Model(Module):
         prefix = self.ModelAbbrev
         if self.hasInputFromPort("outputFolderName"):
             prefix += '_' + self.getInputFromPort("outputFolderName")
-        prefix += '_'                
+        else:   
+            prefix += '_'                
         
         self.argsDict = utils.map_ports(self, self.port_map)
         
@@ -595,6 +596,8 @@ class Model(Module):
         outFileName = os.path.join(self.output_dname, self.ModelAbbrev + filename)
         try:
             thisOutputrequired = self.argsDict[arg_key]
+            if thisOutputrequired == "FALSE":
+                thisOutputrequired = False
         except KeyError:
             thisOutputrequired = True
             
@@ -1877,7 +1880,12 @@ class MAXENT(Model):
         global maxent_path
 
         ourMaxent = MaxentRunner.MAXENTRunner()
-        ourMaxent.outputDir = utils.mknextdir(prefix='maxent_')
+        
+        if self.hasInputFromPort("outputFolderName"):
+            p= 'maxent_' + self.getInputFromPort("outputFolderName") + "_"
+        else:   
+            p = 'maxent_'
+        ourMaxent.outputDir = utils.mknextdir(prefix=p)
         
         ourMaxent.mdsFile = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('mdsFile').name)
         
@@ -1941,7 +1949,7 @@ class MAXENT(Model):
     #set outputs
         lambdasfile = os.path.join(ourMaxent.outputDir, ourMaxent.args["species_name"] + ".lambdas")
         output_file = utils.create_file_module(lambdasfile, module=self)
-        self.setResult("lambdas", output_file, module=self)
+        self.setResult("lambdas", output_file)
         
         rocfile = os.path.join(ourMaxent.outputDir, 'plots', ourMaxent.args["species_name"] + "_roc.png")
         output_file = utils.create_file_module(rocfile, module=self)
