@@ -550,7 +550,8 @@ class Model(Module):
         if self.ModelAbbrev == "maxent":
             self.output_dname=self.MaxentPath
         else:
-            self.output_dname = utils.find_model_dir(prefix, self.argsDict)
+            self.output_dname = utils.mknextdir(prefix)
+#            self.output_dname = utils.find_model_dir(prefix, self.argsDict)
         
         if self.ModelAbbrev == 'brt' or \
             self.ModelAbbrev == 'rf':
@@ -571,7 +572,7 @@ class Model(Module):
             
         utils.runRScript(self.name, self.argsDict, self)
         
-#            utils.launch_RunMonitorApp()
+        utils.launch_RunMonitorApp()
     
         #set our output ports
         if not self.argsDict.has_key('mes'):
@@ -1974,7 +1975,6 @@ def load_max_ent_params():
             kwargs['defaults'] = str([default])
         if p_type == 'Boolean':
             kwargs['optional'] = True
-        print (name, '(' + basic_pkg + ':' + p_type + ')', kwargs)
         input_ports.append((name, '(' + basic_pkg + ':' + p_type + ')', kwargs))
         docs[name] = doc
 
