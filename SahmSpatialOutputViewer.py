@@ -764,23 +764,27 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 class MyMapCanvas(FigureCanvas):
     def __init__(self, fig):
         FigureCanvas.__init__(self, fig)
-        self._cursor = None
+#        self._cursorx = None
 
 #    @print_timing
     def resizeEvent(self, event):
         if not event.size().height() == 0:
             FigureCanvas.resizeEvent(self, event)
 
-    def enterEvent(self, event):
-        if (self._cursor is not None and
-            QtGui.QApplication.overrideCursor() is None):
-            QtGui.QApplication.setOverrideCursor(self._cursor)
-        FigureCanvas.enterEvent(self, event)
+#these are not currently working so they will need to be commented out
+#    def enterEvent(self, event):
+#        FigureCanvas.enterEvent(self, event)
+#        if (self._cursorx is not None and
+#            QtGui.QApplication.overrideCursor() is None):
+#            QtGui.QApplication.setOverrideCursor(self._cursorx)
+        
 
-    def leaveEvent(self, event):
-        self._cursor = QtGui.QCursor(QtGui.QApplication.overrideCursor())
-        QtGui.QApplication.restoreOverrideCursor()
-        FigureCanvas.leaveEvent(self, event)
+#    def leaveEvent(self, event):
+#
+##        FigureCanvas.leaveEvent(self, event)
+#        self._cursorx = QtGui.QCursor(QtGui.QApplication.overrideCursor())
+#        QtGui.QApplication.restoreOverrideCursor()
+
 
 class RasterDisplay(object):
     '''The idea behind this is from
