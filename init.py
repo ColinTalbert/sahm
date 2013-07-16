@@ -57,6 +57,7 @@ import copy
 import multiprocessing
 import time
 
+import core.system
 from core.modules.vistrails_module import Module, ModuleError, ModuleConnector
 from core.modules.basic_modules import File, Directory, Path, new_constant, Constant
 from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
@@ -2000,10 +2001,7 @@ def initialize():
        
     global maxent_path, color_breaks_csv
     global session_dir 
-    
-    utils.r_path = os.path.abspath(configuration.r_path)
-    maxent_path = os.path.abspath(configuration.maxent_path)   
-    
+        
     session_dir = configuration.cur_session_folder
     if not os.path.exists(session_dir):
         import tempfile
@@ -2018,6 +2016,14 @@ def initialize():
     utils.setrootdir(session_dir)
     utils.importOSGEO() 
     utils.createLogger(session_dir, configuration.verbose)
+        
+    utils.r_path = os.path.abspath(configuration.r_path)
+    if not os.path.exists(configuration.r_path) and \
+        core.system.systemType in ['Microsoft', 'Windows']:
+        #they don't have a decent R path, let's see if we can pull one from the registry
+        utils.r_path = utils.pull_R_install_from_reg()
+                
+    maxent_path = os.path.abspath(configuration.maxent_path)
 
     gdal_data = os.path.join(os.path.dirname(__file__), "GDAL_Resources", "gdal-data")
     os.environ['GDAL_DATA'] = gdal_data

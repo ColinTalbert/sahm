@@ -584,6 +584,23 @@ def getR_application(module=None):
         
     return program
     
+def pull_R_install_from_reg():
+    #searches in the registry for an installation of R and returns the path
+    #to the bin folder within it if that folder exists
+    regCmd = r'reg query "HKEY_LOCAL_MACHINE\SOFTWARE\R-core\R" /v "InstallPath"'
+    startupinfo = subprocess.STARTUPINFO()
+    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    regValue = subprocess.Popen(regCmd, startupinfo=startupinfo, stdout=subprocess.PIPE).stdout.read()
+    
+    for line in regValue.split("\n"):
+        if line.strip() and os.path.isdir(line.split("    ")[-1].strip()):
+            R_path = os.path.abspath(os.path.join(line.split("    ")[-1].strip(), "bin"))
+            if os.path.exists(R_path):
+                msg = "The specified installation of R in the sahm configuration parameter is not valid\n"
+                msg += "Using the installation location found in the registry:\n"
+                msg += R_path
+                writetolog(msg, True, True)
+            return R_path
 
 def writeRErrorsToLog(args, outMsg, errMsg):
     #first check that this is a model run, or has a o= in the args.
