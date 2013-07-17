@@ -949,7 +949,7 @@ def getParentDir(f, x=None):
 
 
 def getFileRelativeToCurrentVT(fname, curModule=None):
-    #This is hree step approach:
+    #This is three step approach:
     #step 1: if fname exists assume it's the one we want and return it.
     #step 2: Look for the file relative to the current VT.
     #        In effect loop through all the sibling and descendant folders 
@@ -978,7 +978,9 @@ def getFileRelativeToCurrentVT(fname, curModule=None):
         except:
             curVTdir = ""
             
-        justfname = os.path.split(fname)[1]
+        root_dir, justfname = os.path.split(fname)
+        if justfname.lower() == "hdr.adf":
+            justfname = os.path.sep.join([os.path.split(root_dir)[1], justfname])
         for rootdir in [curVTdir, getrootdir()]:
             if os.path.exists(os.path.join(rootdir, justfname)):
                 return os.path.join(rootdir, justfname)
@@ -986,6 +988,7 @@ def getFileRelativeToCurrentVT(fname, curModule=None):
                 for dirname in dirnames:
                     if os.path.exists(os.path.join(root, dirname, justfname)):
                         return os.path.join(root, dirname, justfname)
+                    
         #we did our best but couldn't find the file 
         couldntFindFile()
             

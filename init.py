@@ -269,7 +269,8 @@ class FieldData(Path):
          return GenModDoc.construct_port_doc(cls, port_name, 'out')
      
     def compute(self):
-        output_file = utils.create_file_module(self.getInputFromPort("value").name, module=self)
+        out_fname = utils.getFileRelativeToCurrentVT(self.getInputFromPort("value").name, self)
+        output_file = utils.create_file_module(out_fname, module=self)
         self.setResult('value', output_file)
          
 class Predictor(Constant):
@@ -316,7 +317,8 @@ class Predictor(Constant):
             categorical = '0'
         
         if (self.hasInputFromPort("file")):
-            inFile = utils.getRasterName(self.getInputFromPort("file").name)
+            out_fname = utils.getFileRelativeToCurrentVT(self.getInputFromPort("file").name, self)
+            inFile = utils.getRasterName(out_fname)
         else:
             raise ModuleError(self, "No input file specified")
         self.setResult('value', (inFile, categorical, resampleMethod, aggregationMethod))
@@ -398,11 +400,15 @@ class PredictorListFile(Module):
             raise ModuleError(self, "No inputs or CSV file provided")
 
         output_fname = utils.mknextfile(prefix='PredictorList_', suffix='.csv')
-        if (self.hasInputFromPort("csvFileList") and 
-            os.path.exists(self.getInputFromPort("csvFileList").name)):
-            shutil.copy(self.getInputFromPort("csvFileList").name, 
-                output_fname)
-            csv_writer = csv.writer(open(output_fname, 'ab'))
+        if self.hasInputFromPort("csvFileList"):
+            csv_input = utils.getFileRelativeToCurrentVT(self.getInputFromPort("csvFileList").name, self)
+            if os.path.exists(csv_input):
+                shutil.copy(csv_input, output_fname)
+                csv_writer = csv.writer(open(output_fname, 'ab'))
+            else:
+                #create an empty file to start with.
+                csv_writer = csv.writer(open(output_fname, 'wb'))
+                csv_writer.writerow(["file", "Resampling", "Aggregation"])
         else:
             #create an empty file to start with.
             csv_writer = csv.writer(open(output_fname, 'wb'))
@@ -443,7 +449,8 @@ class TemplateLayer(Path):
         return GenModDoc.construct_port_doc(cls, port_name, 'out') 
     
     def compute(self):
-        output_file = utils.create_file_module(self.getInputFromPort("value").name, module=self)
+        out_fname = utils.getFileRelativeToCurrentVT(self.getInputFromPort("value").name, self)
+        output_file = utils.create_file_module(out_fname, module=self)
         self.setResult('value', output_file)
 
 #class SingleInputPredictor(Predictor):
@@ -1174,17 +1181,16 @@ class PARC(Module):
 
         workingCSV = os.path.join(output_dname, "tmpFilesToPARC.csv")
 
-        #append additional inputs to the existing CSV if one was supplied
-        #otherwise start a new CSV
+        f = open(workingCSV, "wb")
+        csvWriter = csv.writer(f)
+        csvWriter.writerow(["FilePath", "Categorical", "Resampling", "Aggregation"])
+        
         if self.hasInputFromPort("RastersWithPARCInfoCSV"):
             inputCSV = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort("RastersWithPARCInfoCSV").name, self)
-            shutil.copy(inputCSV, workingCSV)
-            f = open(workingCSV, "ab")
-            csvWriter = csv.writer(f)
-        else:
-            f = open(workingCSV, "wb")
-            csvWriter = csv.writer(f)
-            csvWriter.writerow(["FilePath", "Categorical", "Resampling", "Aggregation"])
+            csvReader = csv.reader(open(inputCSV), delimiter=",")
+            header = csvReader.next()
+            for row in csvReader:
+                csvWriter.writerow([utils.getFileRelativeToCurrentVT(row[0]), row[1], row[2], row[3]])
         
         if self.hasInputFromPort("PredictorList"):
             predictor_lists = self.forceGetInputListFromPort('PredictorList')
