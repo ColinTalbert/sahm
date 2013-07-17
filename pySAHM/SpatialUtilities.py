@@ -403,7 +403,7 @@ def extentMatch(raster1, raster2):
     if not utilities.approx_equal(raster1.height, raster2.height): answer = False
     if not utilities.approx_equal(raster1.east, raster2.east): answer = False
     if not utilities.approx_equal(raster1.north, raster2.north): answer = False
-    if raster1.prj != raster2.prj: answer = False
+    if raster2.srs.ExportToProj4() != raster1.srs.ExportToProj4(): answer = False
 
     return answer
 
