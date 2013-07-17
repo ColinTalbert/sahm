@@ -583,7 +583,7 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         elif self.sync_changes == "sel":
             return self.getSelectedCellWidgets()
         else:
-            retn [self]    
+            return [self]    
 
 class ImageViewerFitToCellAction(QtGui.QAction):
     """
