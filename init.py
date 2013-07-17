@@ -674,7 +674,7 @@ class MARS(Model):
     _input_ports = list(Model._input_ports)
     _input_ports.extend([('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'[False]', 'optional':False}),
                          ('MarsDegree', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'[1]', 'optional':True}),
-                          ('MarsPenalty', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'[2]', 'optional':True}),
+                          ('MarsPenalty', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'[2.0]', 'optional':True}),
                           ])
     def __init__(self):
         global models_path        
