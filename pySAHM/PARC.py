@@ -437,10 +437,7 @@ class PARC:
         
         #if valid values were returned from each of our points then
         #the template falls entirely within the Source image.
-        if badPoint:
-            return False
-        else:
-            return True
+        return not badPoint
         
     def shrink_template_extent(self, sourceRaster):
         '''The template extent will be reduced by the extent of 
@@ -462,6 +459,11 @@ class PARC:
             smallest_south = self.minSouth(sourceRaster)
             largest_east = self.maxEast(sourceRaster)
             smallest_west = self.minWest(sourceRaster)
+        
+            if smallest_west > largest_east:
+                #We're assuming their data goes around the world more than once.
+                #We're going to zap the overlaping area, too bad, so sad.
+                smallest_west, largest_east = largest_east, smallest_west        
         
             #Now for each direction step through the pixels until we have one smaller
             #or larger than our min/max source extent.
@@ -517,6 +519,92 @@ class PARC:
             
             #set the template geotransform to be our modified one.
             self.templateRaster.gt = tuple(gt)
+
+    def shrink_template_extent_naive(self, sourceRaster):
+        '''The template extent will be reduced by the extent of 
+        an individual source layer if the layer has a smaller extent
+        This results in the intersection of the grids being used.
+        '''
+        if self.ImageCoversTemplate(sourceRaster):
+            #the template is already smaller than the image in question
+            #Do nothing
+            return False
+        else:
+            gt = list(self.templateRaster.gt)
+            
+            #because the translation of a rectangle between crs's results 
+            #in a paralellogram (or worse) I'm taking the four corner points in 
+            #source projection and transforming these to template crs and then 
+            #using the maximum/minimum for each extent.          
+            largest_north = SpatialUtilities.transformPoint(0, sourceRaster.north, 
+                        sourceRaster.srs, self.templateRaster.srs)[1]
+            smallest_south = SpatialUtilities.transformPoint(0, sourceRaster.south, 
+                        sourceRaster.srs, self.templateRaster.srs)[1]
+            largest_east = SpatialUtilities.transformPoint(sourceRaster.east, 0, 
+                        sourceRaster.srs, self.templateRaster.srs)[0]
+            smallest_west = SpatialUtilities.transformPoint(sourceRaster.west, 0, 
+                        sourceRaster.srs, self.templateRaster.srs)[0]
+        
+            if smallest_west > largest_east:
+                #We're assuming their data goes around the world more than once.
+                #We're going to zap the overlaping area, too bad, so sad.
+                smallest_west, largest_east = largest_east, smallest_west
+        
+            #Now for each direction step through the pixels until we have one smaller
+            #or larger than our min/max source extent.
+            orig_tNorth = self.templateRaster.north
+            shrinkN = 0
+            while self.templateRaster.north > largest_north:
+                #yScale is negative
+                self.templateRaster.north += self.templateRaster.yScale
+                self.templateRaster.height -= 1
+                shrinkN += 1
+            if orig_tNorth <> self.templateRaster.north:
+                msg = "Northern edge of template reduced " + str(shrinkN) + " pixels due to, "
+                msg += "the extent of " + sourceRaster.source
+                self.writetolog(msg) 
+            
+            orig_tSouth = self.templateRaster.south
+            shrinkN = 0    
+            while self.templateRaster.south < smallest_south:
+                self.templateRaster.south -= self.templateRaster.yScale
+                self.templateRaster.height -= 1
+                shrinkN += 1
+            if orig_tSouth <> self.templateRaster.south:
+                msg = "NSouthern edge of template reduced " + str(shrinkN) + " pixels due to, "
+                msg += "the extent of " + sourceRaster.source
+                self.writetolog(msg)
+            
+            gt[3] = self.templateRaster.north
+            
+            
+            orig_tWest = self.templateRaster.west
+            shrinkN = 0
+            while self.templateRaster.west < smallest_west:
+                #yScale is negative
+                self.templateRaster.west += self.templateRaster.xScale
+                self.templateRaster.width -= 1
+                shrinkN += 1
+            if orig_tWest <> self.templateRaster.west:
+                msg = "Western edge of template reduced " + str(shrinkN) + " pixels due to, "
+                msg += "the extent of " + sourceRaster.source   
+                self.writetolog(msg)
+            
+            orig_tEast = self.templateRaster.east
+            shrinkN = 0
+            while self.templateRaster.east > largest_east:
+                self.templateRaster.east -= self.templateRaster.xScale
+                self.templateRaster.width -= 1
+                shrinkN += 1
+            gt[0] = self.templateRaster.west
+            if orig_tEast <> self.templateRaster.east:
+                msg = "Eastern edge of template reduced " + str(shrinkN) + " pixels due to, "
+                msg += "the extent of " + sourceRaster.source
+                self.writetolog(msg)
+            
+            #set the template geotransform to be our modified one.
+            self.templateRaster.gt = tuple(gt)
+
 
     def maxNorth(self, sourceRaster):
         northWidth = sourceRaster.east - sourceRaster.west
