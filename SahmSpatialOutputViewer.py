@@ -93,9 +93,9 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
     """
     _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
-                    ('display_presense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'[False]', 'optional':False}),
-                    ('display_absense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'[False]', 'optional':False}),
-                    ('display_background_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'[False]', 'optional':False}),
+                    ('display_presense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+                    ('display_absense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+                    ('display_background_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                     ('initial_raster_display', '(gov.usgs.sahm:OutputRaster:Other)', {'defaults':'["Probability"]'}),
                     ('model_workspace', '(edu.utah.sci.vistrails.basic:Directory)')]
     #all inputs are determined relative to the model_workspace

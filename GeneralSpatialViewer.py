@@ -95,8 +95,8 @@ class GeneralSpatialViewer(SpreadsheetCell):
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("rasterFile", '(edu.utah.sci.vistrails.basic:Path)'),
                     ("colorRamp", '(gov.usgs.sahm:mpl_colormap:Other)', {'defaults':'["jet"]'}),
-                    ('categorical', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'[False]', 'optional':False}),
-                    ('threeBand', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'[False]', 'optional':False}),
+                    ('categorical', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+                    ('threeBand', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                     ('dataMin', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('dataMax', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('NoDataValue', '(edu.utah.sci.vistrails.basic:Float)'),]

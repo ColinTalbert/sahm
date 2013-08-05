@@ -246,7 +246,12 @@ def map_ports(module, port_map):
             elif len(value) == 0:
                 try:
                     port_tuple = [item for item in module._input_ports if item[0] == port][0]
-                    value = eval(port_tuple[2]['defaults'])[0]
+                    port_info = [port_type for port_type in module._input_ports if port_type[0] == port]
+                    port_type = re.split("\.|:", port_info[0][1])[-1][:-1]
+                    if port_type in ['Float', 'Integer', 'Boolean']:
+                        value = eval(eval(port_tuple[2]['defaults'])[0])
+                    else:
+                        value = eval(port_tuple[2]['defaults'])[0]
                 except:
                     raise ModuleError(module, 'No items found from Port ' + 
                         port + '.  Input is required.')
