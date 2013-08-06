@@ -95,11 +95,11 @@ class MAXENTRunner(object):
             if ret[1] is not None:
                 msg = 'An error was encountered running the Maxent jar file.  The error message is below - \n'
                 msg += ret[1]
-                writetolog(msg)
-                raise RuntimeError, msg
+                self.writetolog(msg)
+                raise RuntimeError(self, msg)
             del ret
         else:
-             return subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            return subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         
     def loadArgs(self):
         argsReader = csv.reader(open(self.argsCSV, 'r'))
@@ -121,8 +121,8 @@ class MAXENTRunner(object):
             raise RuntimeError(self, 'Input environmentallayers directory, ' + self.args['environmentallayers'] + ', could not be found on file system')
         if self.args['projectionlayers'] != '':
             dirs = self.args['projectionlayers'].split(',')
-            for dir in dirs:
-                if not os.path.isdir(dir):
+            for d in dirs:
+                if not os.path.isdir(d):
                     raise RuntimeError(self, "Input 'projectionlayers' must be a directory")
 
         if not utilities.isMDSFile(self.mdsFile):
@@ -130,7 +130,7 @@ class MAXENTRunner(object):
         if not os.path.exists(self.outputDir):
             raise RuntimeError(self, 'Output directory, ' + self.outputDir + ', could not be found on file system')
         if self.logger is None:
-            self.logger = utilities.logger(outDir, self.verbose)
+            self.logger = utilities.logger(self.outputDir, self.verbose)
         self.writetolog = self.logger.writetolog
 
     def prepInputs(self):
@@ -241,30 +241,30 @@ class MAXENTRunner(object):
             cvList=["NA"]
             #find the first line of the mds that isn't na to determine if test/train or cv split 
             while newLine[header1.index("Split")]=="NA":
-               newLine = MDSreader.next()
+                newLine = MDSreader.next()
                
-              #loop through the mds and fit a maxent model withholding each new cv fold
+            #loop through the mds and fit a maxent model withholding each new cv fold
             if (not newLine[header1.index("Split")] in ttList): 
-               cvMaxent = copy.deepcopy(self)
-               cvMaxent.subRun=True
-               for row in MDSreader:
-                   if (not row[header1.index("Split")] in cvList):
-                       cvMaxent.testKey = row[header1.index("Split")]
-                       cvMaxent.outputDir = os.path.join(self.outputDir, "cvSplit" + cvMaxent.testKey)
-                       os.mkdir(cvMaxent.outputDir)
-                       cvList.append(row[header1.index("Split")])
-                       try:
-                           #if we're running to many jobs wait for one to finish
-                           utilities.waitForProcessesToFinish(processQueue, coreCount)
-                           #if cvMaxent is set to singleThread = false run returns a running process
-                           cvMaxent.singleThread = False
-                           processQueue.append(cvMaxent.run())
-                       except utilities.TrappedError as e:
-                           raise ModuleError(self, e.message)  
-     
-#               #here we need to run Maxent without the test split csv which breaks it 
-               self.testKey = None
-               utilities.waitForProcessesToFinish(processQueue, 1)
+                cvMaxent = copy.deepcopy(self)
+                cvMaxent.subRun=True
+                for row in MDSreader:
+                    if (not row[header1.index("Split")] in cvList):
+                        cvMaxent.testKey = row[header1.index("Split")]
+                        cvMaxent.outputDir = os.path.join(self.outputDir, "cvSplit" + cvMaxent.testKey)
+                        os.mkdir(cvMaxent.outputDir)
+                        cvList.append(row[header1.index("Split")])
+                        try:
+                            #if we're running to many jobs wait for one to finish
+                            utilities.waitForProcessesToFinish(processQueue, coreCount)
+                            #if cvMaxent is set to singleThread = false run returns a running process
+                            cvMaxent.singleThread = False
+                            processQueue.append(cvMaxent.run())
+                        except utilities.TrappedError as e:
+                            raise RuntimeError(self, e.message)  
+         
+                    #here we need to run Maxent without the test split csv which breaks it 
+                    self.testKey = None
+                    utilities.waitForProcessesToFinish(processQueue, 1)
         
 #        self.hasCrossValidation = len(cvList) > 1
         #maxentrunner will remove a regular test split on it's own 
@@ -299,12 +299,12 @@ class MAXENTRunner(object):
                 if item not in self.categoricals:
                     self.categoricals.append(item)
 
-    def isSWD(self, file):
+    def isSWD(self, f):
         """Checks the format of a file to see if it is in the 
         Maxent samples with data (SWD) format.
         """
-        if os.path.exists(file):
-            reader = csv.reader(open(file, 'r'))
+        if os.path.exists(f):
+            reader = csv.reader(open(f, 'r'))
             header = reader.next()
             if header[0].lower() in ('species', 'full_name', 'fullname'):
                 return True
