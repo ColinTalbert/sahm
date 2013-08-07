@@ -12,9 +12,10 @@ PseudoAbsGen<-function(input.file,outfile,method="KDE",bw.otim="adhoc",isopleth=
         chk.libs("GenPsdAbs")
               
     #Read input data and remove any columns to be excluded
-              dat.in<-read.csv(input.file,header=FALSE,as.is=TRUE)
-              dat<-as.data.frame(dat.in[4:dim(dat.in)[1],])
-               names(dat)<-dat.in[1,]
+              dat.in<-read.csv(input.file,header=TRUE,as.is=TRUE)
+              #this should happen before the extra rows get added
+              #dat<-as.data.frame(dat.in[4:dim(dat.in)[1],])
+             #  names(dat)<-dat.in[1,]
                                                                                                                               
                 xy<-data.frame(cbind(as.numeric(as.character(dat$X)),as.numeric(as.character(dat$Y))))
     
