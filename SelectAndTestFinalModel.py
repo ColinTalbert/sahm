@@ -348,7 +348,7 @@ class SelectAndTestFinalModel(QtGui.QDialog):
                 else:
                     args["mes"] = "FALSE"
                 
-                utils.runRScript("EvaluateNewData.r", args)
+                utils.run_R_script("EvaluateNewData.r", args)
                 writetolog("Finished running R for: " + str(item.text(0)) , False, True)
             treeviewIter += 1
         

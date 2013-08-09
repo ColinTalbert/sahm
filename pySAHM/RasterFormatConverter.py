@@ -90,7 +90,7 @@ class FormatConverter(object):
         argProblem = ""
         
         if self.logger is None:
-            self.logger = utilities.logger(outDir, self.verbose)
+            self.logger = utilities.logger(self.outputDir, self.verbose)
         self.writetolog = self.logger.writetolog
         
         if os.path.isdir(self.inputDir):
@@ -177,27 +177,29 @@ class FormatConverter(object):
             execDir = os.path.split(__file__)[0]
             executable = os.path.join(execDir, 'singleRasterFormatConverter.py')
             
-            pyEx = '"' + sys.executable + '"' 
-            # command = ' '.join([pyEx, executable, args])
             command_arr = [sys.executable, executable] + args
             self.logger.writetolog(' '.join(command_arr), False, False)
-            proc = subprocess.Popen( command_arr )
-            thread.start_new_thread(utilities.process_waiter,
-                    (proc, f_name, results))
-            process_count+= 1
+#            proc = subprocess.Popen( command_arr )
+#            thread.start_new_thread(utilities.process_waiter,
+#                    (proc, f_name, results))
             
-        while process_count > 0:
-            description, rc= results.get()
+            utilities.add_process_to_pool(utilities.launch_cmd, 
+                                    [command_arr])
             
-            if rc == 0:
-                if self.verbose:
-                    msg = "    " + description + " finished successfully:  " + \
-                        str(len(files) - process_count + 1)  + " done out of " \
-                        + str(len(files))
-                    self.logger.writetolog(msg, True, True)
-            else:
-                self.logger.writetolog("There was a problem with: " + description , True, True)
-            process_count-= 1
+            
+        utilities.wait_for_pool_to_finish()
+#        while process_count > 0:
+#            description, rc= results.get()
+#            
+#            if rc == 0:
+#                if self.verbose:
+#                    msg = "    " + description + " finished successfully:  " + \
+#                        str(len(files) - process_count + 1)  + " done out of " \
+#                        + str(len(files))
+#                    self.logger.writetolog(msg, True, True)
+#            else:
+#                self.logger.writetolog("There was a problem with: " + description , True, True)
+#            process_count-= 1
         
         
     def convertFormat(self, file, outfile, driver):
