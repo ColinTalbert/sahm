@@ -147,18 +147,14 @@ class PARC:
         self.logger.writetolog("Finished PARC", True, True)
         
     def processFiles(self):
-        processQueue = []
-        coreCount = utilities.getProcessCount(self.processingMode)
-            
+        
         # Clip and reproject each source image.
-        for image in self.inputs:
-            #if we're running to many jobs wait for one to finish
-            utilities.waitForProcessesToFinish(processQueue, coreCount)
-                        
+        for image in self.inputs:                       
             inPath, inFileName = os.path.split(image[0])          
             outFile, ext = os.path.splitext(inFileName)
             outFile = os.path.join(self.out_dir, outFile + ".tif")
             
+            processQueue = []
             if os.path.exists(outFile):
                 try: 
                     gdal.Open(outFile)
@@ -168,7 +164,6 @@ class PARC:
                 except:
                     #we bombed trying to open the outFile with gdal. Lets rerun it.
                     processQueue.append(self.gen_singlePARC_thread(image, outFile))
-                    pass
                 
             else:
                 processQueue.append(self.gen_singlePARC_thread(image, outFile))
@@ -177,40 +172,43 @@ class PARC:
         if self.processingMode == "FORT Condor":
             self.waitForCondorProcessesToFinish(processQueue)
         else:
-            utilities.waitForProcessesToFinish(processQueue)
+            utilities.wait_for_pool_to_finish()
             
         print "done"
-            
+        
     def gen_singlePARC_thread(self, image, outFile):
-            image_short_name = os.path.split(image[0])[1]
-
-            args = ['-s', os.path.abspath(image[0]),
-                    '-c', image[1],
-                    '-d', os.path.abspath(outFile),
-                    '-t', os.path.abspath(self.template),
-                    '-r', image[2],
-                    '-a', image[3]]
-
-            if self.ignoreNonOverlap:
-                args.extend(['-i'])
-    
-            execDir = os.path.split(__file__)[0]
-            executable = os.path.abspath(os.path.join(execDir, 'runSinglePARC.py'))
-            pyEx = sys.executable
-            command_arr = [pyEx, executable] + args
-            command = ' '.join(command_arr)
-            self.logger.writetolog(command, False, False)
+            command_arr = self.gen_singlePARC_cmd(image, outFile)
             
             if self.processingMode == "FORT Condor":
                 workspace, fname = os.path.split(os.path.abspath(outFile))
                 prefix = os.path.splitext(fname)[0]
                 utilities.runCondorPythonJob(command_arr, workspace, prefix)
-                return os.path.abspath(outFile)
             else:
-                proc = subprocess.Popen( command_arr )
-                return  proc
-#                thread.start_new_thread(utilities.process_waiter,
-#                        (proc, image_short_name, results))
+                utilities.add_process_to_pool(utilities.launch_cmd, 
+                                    [self.gen_singlePARC_cmd(image, outFile)])
+                
+            return os.path.abspath(outFile)
+           
+    def gen_singlePARC_cmd(self, image, outFile):       
+        image_short_name = os.path.split(image[0])[1]
+
+        args = ['-s', os.path.abspath(image[0]),
+                '-c', image[1],
+                '-d', os.path.abspath(outFile),
+                '-t', os.path.abspath(self.template),
+                '-r', image[2],
+                '-a', image[3]]
+
+        if self.ignoreNonOverlap:
+            args.extend(['-i'])
+
+        execDir = os.path.split(__file__)[0]
+        executable = os.path.abspath(os.path.join(execDir, 'runSinglePARC.py'))
+        pyEx = sys.executable
+        command_arr = [pyEx, executable] + args
+        command = ' '.join(command_arr)
+        self.logger.writetolog(command, False, False)
+        return command_arr
 
     def log_result(self, result):
         print result
@@ -218,8 +216,6 @@ class PARC:
     def waitForCondorProcessesToFinish(self, outputs):
         errors = []
         originalCount = len(outputs)
-        successes = 0
-        failures = 0
         while outputs:
             for process in outputs:
                 result = self.jobFinished(process)

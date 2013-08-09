@@ -437,7 +437,7 @@ class SelectListDialog(QtGui.QDialog):
         if os.path.exists(os.path.join(self.outputDir, "Predictor_Correlation.jpg")):
             os.remove(os.path.join(self.outputDir, "Predictor_Correlation.jpg"))
             
-        utils.runRScript('PairsExplore.r', args)
+        utils.run_R_script('PairsExplore.r', args)
         
         if os.path.exists(os.path.join(self.outputDir, "devinfo.csv")):
             self.loadDeviances()
@@ -485,7 +485,7 @@ class SelectListDialog(QtGui.QDialog):
         if os.path.exists(output_fname):
             os.remove(output_fname)
             
-        utils.runRScript('Predictor.inspection.r', args)
+        utils.run_R_script('Predictor.inspection.r', args)
         
         if os.path.exists(output_fname):
             return output_fname
