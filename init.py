@@ -596,20 +596,6 @@ class Model(Module):
         '''sets a single output port value
         '''
         outFileName = os.path.join(self.output_dname, self.abbrev + filename)
-        try:
-            thisOutputrequired = self.args_dict[arg_key]
-            if thisOutputrequired == "FALSE":
-                thisOutputrequired = False
-        except KeyError:
-            thisOutputrequired = True
-            
-        if self.outputRequired and thisOutputrequired:
-            if not os.path.exists(outFileName):
-                msg = "Expected output from this Model is missing:\n\t"
-                msg+= outFileName
-                writetolog(msg)
-                raise ModuleError(self, msg)
-            
         output_file = File()
         output_file.name = outFileName
         output_file.upToDate
