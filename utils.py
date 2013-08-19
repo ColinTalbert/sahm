@@ -507,15 +507,16 @@ def run_model_script(script, args_dict, module=None, runner_script="runRModel.py
     writetolog("\nStarting processing of "  + script , True)
     writetolog("    command used: \n" + utilities.convert_list_to_cmd_str(cmd), False, False)
     
-    if processing_mode == "single models sequentially (n - 1 cores each)":
-        #we are waiting for each model to finish before moving on.
-        #but set the mc (multiple core) flag appropriately
-        stdout, stderr = utilities.launch_cmd(cmd, stdout_fname, stderr_fname)
-        check_R_output(stdout, stderr, module, args_dict)
-        writetolog("\nFinished processing of "  + script , True)
-        return stdout, stderr
-    
-    elif processing_mode == "multiple models simultaneously (1 core each)":
+#    if processing_mode == "single models sequentially (n - 1 cores each)":
+#        #we are waiting for each model to finish before moving on.
+#        #but set the mc (multiple core) flag appropriately
+#        stdout, stderr = utilities.launch_cmd(cmd, stdout_fname, stderr_fname)
+#        check_R_output(stdout, stderr, module, args_dict)
+#        writetolog("\nFinished processing of "  + script , True)
+#        return stdout, stderr
+#    
+#    el
+    if processing_mode == "multiple models simultaneously (1 core each)":
         utilities.add_process_to_pool(utilities.launch_cmd, 
                                 [cmd, stdout_fname, stderr_fname])
         writetolog("\n R Processing launched asynchronously " + script, True) 
