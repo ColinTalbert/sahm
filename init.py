@@ -524,6 +524,7 @@ class Model(Module):
     def __init__(self):
         self.suspended_completed = False
         self.pywrapper = "runRModel.py"
+        self.port_map = copy.deepcopy(Model.port_map)
         Module.__init__(self)
 
     def compute(self):
@@ -579,26 +580,26 @@ class Model(Module):
         if not self.args_dict.has_key('mes'):
             self.args_dict['mes'] = 'FALSE'
         self.outputRequired = configuration.cur_processing_mode == "single models sequentially (n - 1 cores each)"
-        self.setModelResult("_prob_map.tif", 'ProbabilityMap', 'mpt')
-        self.setModelResult("_bin_map.tif", 'BinaryMap', 'mbt')
-        self.setModelResult("_resid_map.tif", 'ResidualsMap', 'mes')
-        self.setModelResult("_mess_map.tif", 'MessMap', 'mes')
-        self.setModelResult("_MoD_map.tif", 'MoDMap', 'mes')
-        self.setModelResult("_output.txt", 'Text_Output')
-        self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot')
-        self.setModelResult("_variable.importance.jpg", 'ModelVariableImportance')  
+        self.setModelResult("_prob_map.tif", 'ProbabilityMap', self.abbrev)
+        self.setModelResult("_bin_map.tif", 'BinaryMap', self.abbrev)
+        self.setModelResult("_resid_map.tif", 'ResidualsMap', self.abbrev)
+        self.setModelResult("_mess_map.tif", 'MessMap', self.abbrev)
+        self.setModelResult("_MoD_map.tif", 'MoDMap', self.abbrev)
+        self.setModelResult("_output.txt", 'Text_Output', self.abbrev)
+        self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot', self.abbrev)
+        self.setModelResult("_variable.importance.jpg", 'ModelVariableImportance', self.abbrev)  
         writetolog("Finished " + self.abbrev   +  " builder\n", True, True)
         
         modelWorkspace = utils.create_dir_module(self.output_dname)
         self.setResult("modelWorkspace", modelWorkspace)  
     
-    def setModelResult(self, filename, portname, arg_key=None):
+    def setModelResult(self, filename, portname, abbrev):
         '''sets a single output port value
         '''
-        outFileName = os.path.join(self.output_dname, self.abbrev + filename)
+        outFileName = os.path.join(self.output_dname, abbrev + filename)
         output_file = File()
         output_file.name = outFileName
-        output_file.upToDate
+        output_file.upToDate = True
     
         self.setResult(portname, output_file)
         
@@ -685,7 +686,6 @@ class ApplyModel(Model):
         Model.__init__(self)
         self.name = 'EvaluateNewData.r'
         self.abbrev = 'ApplyModel'
-        self.port_map = copy.deepcopy(self.port_map)
         self.port_map.update({'modelWorkspace':('ws', 
                 lambda x: os.path.join(utils.dir_path_value(x), "modelWorkspace"), True),})
         
@@ -764,27 +764,7 @@ class MAXENT(Model):
                               })
         
     def compute(self):
-
-#        self.args_dict = utils.map_ports(self, self.port_map)
-#        mds = utils.getFileRelativeToCurrentVT(self.args_dict['c'], self)
-#        self.args_dict['c'] = mds
-#        
-##        ourMaxent = MaxentRunner.MAXENTRunner()
-#        if self.hasInputFromPort("outputFolderName"):
-#            p= 'maxent_' + self.getInputFromPort("outputFolderName") + "_"
-#        else:   
-#            p = 'maxent_'
         
-#        self.args_dict['o'] = utils.mknextdir(prefix=p)
-
-#        ourMaxent.outputDir = utils.mknextdir(prefix=p)
-#        ourMaxent.mdsFile = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('mdsFile').name)
-#        ourMaxent.maxentpath = maxent_path
-
-#        MaxentArgsCSV = os.path.join(ourMaxent.outputDir, "MaxentArgs.csv")
-#        
-#        argWriter = csv.writer(open(MaxentArgsCSV, 'wb'))
-#        argWriter.writerow(['parameter','value'])
         self.maxent_args = {}
         for port in self._input_ports:
 
@@ -819,42 +799,18 @@ class MAXENT(Model):
             projlayers = ','.join([path.name for path in value])
             self.maxent_args['projectionlayers']=projlayers
             
-        
-#        args_dict['mdsFile']=projlayers    
-#        argWriter.writerow(['mdsFile', ourMaxent.mdsFile])
-#        del argWriter
-#        ourMaxent.argsCSV = MaxentArgsCSV
-#        ourMaxent.logger = utils.getLogger()
-#        ourMaxent.cur_processing_mode = configuration.cur_processing_mode
-#        ourMaxent.args = self.args_dict
-
-        
-#        try:
-#            ourMaxent.run()
-#        except TrappedError as e:
-#            raise ModuleError(self, e.message)  
-#        except:
-#            utils.informative_untrapped_error(self, "Maxent")
-#        self.MaxentPath =  ourMaxent.outputDir 
-        #for now display R output only if there was a cv split we might want options
         Model.compute(self)
-#            return 
-    #set outputs
-        self.args_dict['species_name'] = self.args_dict['species_name'].replace(' ', '_')
-        lambdasfile = os.path.join(self.args_dict['o'], 
-                    self.args_dict["species_name"] + ".lambdas")
-        output_file = utils.create_file_module(lambdasfile, module=self)
-        self.setResult("lambdas", output_file)
-        
-        rocfile = os.path.join(self.args_dict['o'], 'plots', 
-                    self.args_dict["species_name"] + "_roc.png")
-        output_file = utils.create_file_module(rocfile, module=self)
-        self.setResult("roc", output_file)
 
-        htmlfile = os.path.join(self.args_dict['o'], 
-                        self.args_dict["species_name"] + ".html")
-        output_file = utils.create_file_module(htmlfile, module=self)
-        self.setResult("report", output_file)
+#       set some Maxent specific outputs
+        self.args_dict['species_name'] = self.args_dict['species_name'].replace(' ', '_')
+        lambdasfile = self.args_dict["species_name"] + ".lambdas"
+        self.setModelResult(lambdasfile, "lambdas", "")
+        
+        rocfile = "plots" + os.sep + self.args_dict["species_name"] + "_roc.png"
+        self.setModelResult(rocfile, "roc", "")
+
+        htmlfile = self.args_dict["species_name"] + ".html"
+        self.setModelResult(htmlfile, "report", "")
 
         writetolog("Finished Maxent", True)
    
