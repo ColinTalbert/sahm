@@ -186,7 +186,7 @@ def menu_items():
                                 return
                             
                         configuration.write_to_dom(dom, element)
-                        utilities.start_new_pool(utilities.getProcessCount(widget.text()))
+                        utilities.start_new_pool(utilities.get_process_count(widget.text()))
 
     def isFortCondorAvailible():
         try:
@@ -1988,7 +1988,7 @@ def initialize():
     global utilities
     import pySAHM.utilities as utilities
     utilities.storeUNCDrives()
-    utilities.start_new_pool(utilities.getProcessCount(configuration.cur_processing_mode))
+    utilities.start_new_pool(utilities.get_process_count(configuration.cur_processing_mode))
     
     global layers_csv_fname
     

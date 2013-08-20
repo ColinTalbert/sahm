@@ -68,6 +68,7 @@ import scipy.stats.stats as stats
 
 import utilities
 import SpatialUtilities
+import multiprocessing
 
 def main(args_in):
     """
@@ -147,6 +148,11 @@ class PARC:
         self.logger.writetolog("Finished PARC", True, True)
         
     def processFiles(self):
+        if self.processingMode == "FORT Condor":
+            self.process_pool = multiprocessing.Pool(2**32)
+        else:
+            self.process_pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
+        self.pool_processes = []
         
         # Clip and reproject each source image.
         for image in self.inputs:                       
@@ -172,7 +178,8 @@ class PARC:
         if self.processingMode == "FORT Condor":
             self.waitForCondorProcessesToFinish(processQueue)
         else:
-            utilities.wait_for_pool_to_finish()
+            for process in self.pool_processes:
+                process.get()
             
         print "done"
         
@@ -184,8 +191,9 @@ class PARC:
                 prefix = os.path.splitext(fname)[0]
                 utilities.runCondorPythonJob(command_arr, workspace, prefix)
             else:
-                utilities.add_process_to_pool(utilities.launch_cmd, 
-                                    [self.gen_singlePARC_cmd(image, outFile)])
+                self.pool_processes.append(self.process_pool.apply_async(
+                                    utilities.launch_cmd, 
+                                    [self.gen_singlePARC_cmd(image, outFile)]))
                 
             return os.path.abspath(outFile)
            

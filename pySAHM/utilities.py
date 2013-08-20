@@ -255,7 +255,7 @@ def checkIfFolderIsOnNetwork(dirname):
 #                if process.poll() is not None:
 #                    processQueue.remove(process)
     
-def getProcessCount(strProcessingMode):
+def get_process_count(strProcessingMode):
     '''The number of concurrently running jobs is dependent on the currently 
     selected processingMode. 
     If on Condor then send them all and let Condor manage the Queue.
@@ -263,8 +263,10 @@ def getProcessCount(strProcessingMode):
     '''
     if strProcessingMode == "FORT Condor":
         return  2**32
-    else:
+    elif strProcessingMode == "multiple models simultaneously (1 core each)":
         return multiprocessing.cpu_count() - 1
+    else:
+        return 1
     
 def getModelsPath():
     return os.path.join(os.path.dirname(__file__), "Resources", "R_Modules")
@@ -281,7 +283,7 @@ def start_new_pool(processes=1):
     if _process_pool:
         _process_pool.terminate()
     _process_pool = multiprocessing.Pool(processes)
-    
+
 def wait_for_pool_to_finish():
     global _process_pool
     global _pool_processes
