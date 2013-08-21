@@ -545,7 +545,7 @@ class Model(Module):
                       "Threshold=observed prevalence":7,
                       "Mean predicted probability":8,
                       "Minimizes distance between ROC plot and (0,1)":9}
-        thresholds.get(self.args_dict.get("om", "Sensitivity=Specificity"))
+        self.args_dict["om"] = thresholds.get(self.args_dict.get("om", "Sensitivity=Specificity"))
 
         if not utils.checkModelCovariatenames(mdsFile):
             msg = "These R models do not work with covariate names begining with non-letter characters or \n"
