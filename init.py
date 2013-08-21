@@ -91,7 +91,7 @@ from SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
 from GeneralSpatialViewer import GeneralSpatialViewer
 from sahm_picklists import ResponseType, AggregationMethod, \
         ResampleMethod, PointAggregationMethod, ModelOutputType, RandomPointType, \
-        OutputRaster, mpl_colormap
+        OutputRaster, mpl_colormap, T_O_M
 
 from utils import writetolog
 from pySAHM.utilities import TrappedError
@@ -489,7 +489,7 @@ class Model(Module):
     SAHM package. It is not intended for direct use or incorporation into
     the VisTrails workflow by the user.
     '''
-    _input_ports = [('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["2"]', 'optional':False}),
+    _input_ports = [('ThresholdOptimizationMethod', '(gov.usgs.sahm:T_O_M:Other)', {'defaults':'["Sensitivity=Specificity"]', 'optional':False}),
                     ('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)'),
                     ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
@@ -534,6 +534,18 @@ class Model(Module):
         self.args_dict = utils.map_ports(self, self.port_map)
         
         mdsFile = utils.getFileRelativeToCurrentVT(self.args_dict['c'], self)
+
+        #convert threshold optimization string to the expected integer
+        thresholds = {"Threshold=0.5":1,
+                      "Sensitivity=Specificity":2,
+                      "Maximizes (sensitivity+specificity)/2":3,
+                      "Maximizes Cohen's Kappa":4,
+                      "Maximizes PCC (percent correctly classified)":5,
+                      "Predicted prevalence=observed prevalence":6,
+                      "Threshold=observed prevalence":7,
+                      "Mean predicted probability":8,
+                      "Minimizes distance between ROC plot and (0,1)":9}
+        thresholds.get(self.args_dict.get("om", "Sensitivity=Specificity"))
 
         if not utils.checkModelCovariatenames(mdsFile):
             msg = "These R models do not work with covariate names begining with non-letter characters or \n"
@@ -2314,6 +2326,7 @@ _modules = generate_namespaces({'DataInput': [
                                            (RandomPointType, {'abstract': True}),
                                            (OutputRaster, {'abstract': True}),
                                            (mpl_colormap, {'abstract': True}),
+                                           (T_O_M, {'abstract': True}),
 #                                           (TextFile, {'configureWidgetType': TextFileConfiguration}),
 #                                           (CSVTextFile, {'configureWidgetType': CSVTextFileConfiguration})
                                            ],
