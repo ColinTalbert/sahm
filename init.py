@@ -2314,8 +2314,8 @@ _modules = generate_namespaces({'DataInput': [
                                            (RandomPointType, {'abstract': True}),
                                            (OutputRaster, {'abstract': True}),
                                            (mpl_colormap, {'abstract': True}),
-                                           (TextFile, {'configureWidgetType': TextFileConfiguration}),
-                                           (CSVTextFile, {'configureWidgetType': CSVTextFileConfiguration})
+#                                           (TextFile, {'configureWidgetType': TextFileConfiguration}),
+#                                           (CSVTextFile, {'configureWidgetType': CSVTextFileConfiguration})
                                            ],
                                 'Output': [(SAHMModelOutputViewerCell, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe}),
