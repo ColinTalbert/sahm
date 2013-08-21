@@ -962,13 +962,13 @@ def getFileRelativeToCurrentVT(fname, curModule=None):
     #step 1: if fname exists assume it's the one we want and return it.
     #step 2: Look for the file relative to the current VT.
     #        In effect loop through all the sibling and descendant folders 
-    #        of the vt file and look for the base filename in each.
+    #        of the vt file's parent directory and look for the base filename in each.
     #        If we find an identically named file hope for the best and return it.
     #step 3: Do what we did in step 2 but relative to the current session folder.
     #
     #If no fname is found in the above three steps raise an error.
     def couldntFindFile():
-        msg = "Could not find file: ", fname, "\nPlease point to valid location for this file."
+        msg = "Could not find file: " + fname + "\nPlease point to valid location for this file."
         if curModule is None:
             raise Exception(msg)
         else:
@@ -978,8 +978,8 @@ def getFileRelativeToCurrentVT(fname, curModule=None):
         #step 1
         if os.path.exists(fname):
             return fname
-        #step 2 (and then step3)
         
+        #step 2 (and then step3)
         try:
             app = gui.application.get_vistrails_application()()
             curlocator = app.get_vistrail().locator.name
