@@ -562,6 +562,9 @@ class Model(Module):
             self.args_dict['maxent_args'] = self.maxent_args
             
         self.output_dname = utils.mknextdir(prefix)
+        #make a copy of the mds file used in the output folder
+        copy_mds_fname = os.path.join(self.output_dname, os.path.split(mdsFile)[1])
+        shutil.copyfile(mdsFile, copy_mds_fname)
 #            self.output_dname = utils.find_model_dir(prefix, self.args_dict)
         
         if self.abbrev == 'brt' or \
