@@ -405,14 +405,17 @@ class PredictorListFile(Module):
             csv_input = utils.getFileRelativeToCurrentVT(self.getInputFromPort("csvFileList").name, self)
             if os.path.exists(csv_input):
                 shutil.copy(csv_input, output_fname)
-                csv_writer = csv.writer(open(output_fname, 'ab'))
+                output_file = open(output_fname, 'ab')
+                csv_writer = csv.writer(output_file)
             else:
                 #create an empty file to start with.
-                csv_writer = csv.writer(open(output_fname, 'wb'))
+                output_file = open(output_fname, 'wb')
+                csv_writer = csv.writer(output_file)
                 csv_writer.writerow(["file", "Resampling", "Aggregation"])
         else:
             #create an empty file to start with.
-            csv_writer = csv.writer(open(output_fname, 'wb'))
+            output_file = open(output_fname, 'wb')
+            csv_writer = csv.writer(output_file)
             csv_writer.writerow(["file", "Resampling", "Aggregation"])
         
         if self.hasInputFromPort("addPredictor"):
@@ -427,7 +430,7 @@ class PredictorListFile(Module):
                 else:
                     aggMethod = "Mean"  
                 csv_writer.writerow([os.path.normpath(p.name), resMethod, aggMethod])
-
+        output_file.close()
         del csv_writer
         
         output_file = utils.create_file_module(output_fname, module=self)
