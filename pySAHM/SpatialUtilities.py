@@ -416,13 +416,13 @@ def defaultNoData(GDALdatatype, signedByte=False):
     
     crossWalk = {"Unknown":0,
                  "Byte":255,
-                "Int16":32767,
+                "Int16":-32768,
                 "UInt32":4294967295,
-                "Int32":2147483647,
+                "Int32":-2147483648,
                 "Float32":-3.4028235e+038,
                 "Float64":2.2250738585072014e-308,
-                "CInt16":32767,
-                "CInt32":2147483647,
+                "CInt16":-32768,
+                "CInt32":-2147483648,
                 "CFloat32":-3.4028235e+038,
                 "CFloat64":2.2250738585072014e-308,
                 }

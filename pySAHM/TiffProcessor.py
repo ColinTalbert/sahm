@@ -91,7 +91,7 @@ class rasterReclassifier(rasterProcessor):
         outputRaster = SpatialUtilities.SAHMRaster(outputFName)
         outputRaster.pullParamsFromRaster(self.inputFname)
         outputRaster.pixelType = gdal.GetDataTypeByName("int32")
-        outputRaster.NoData = self.inputRaster.NoData
+        outputRaster.NoData = SpatialUtilities.defaultNoData(outputRaster.pixelType)
         outputRaster.createNewRaster()
         
         if self.templateFName != "":
@@ -141,11 +141,11 @@ class rasterReclassifier(rasterProcessor):
             if not splitLine[0].startswith("#"):
                 if splitLine[1] == ":":
                     if splitLine[0] == "NoData":
-                        outDict[(splitLine[0],)] = int(splitLine[2])
+                        outDict[(splitLine[0],)] = float(splitLine[2])
                     else:
-                        outDict[(int(splitLine[0]),)] = int(splitLine[2])
+                        outDict[(float(splitLine[0]),)] = float(splitLine[2])
                 elif splitLine[2] == ":":
-                    outDict[(int(splitLine[0]), int(splitLine[1]))] = int(splitLine[3])
+                    outDict[(float(splitLine[0]), float(splitLine[1]))] = float(splitLine[3])
                     
         return outDict 
 
