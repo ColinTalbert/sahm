@@ -463,13 +463,16 @@ class SelectListDialog(QtGui.QDialog):
         devreader = csv.reader(devcsv)
         header = devreader.next()
         for line in devreader:
-            deviance = "%.1f" %float(line[1])
-            deviance = deviance.rjust(7)
             try:
-                item = self.treeview.findItems(QtCore.QString(line[0]), QtCore.Qt.MatchFlags())
-                item[0].setData(1, 0, deviance)
+                deviance = "%.1f" %float(line[1])
+                deviance = deviance.rjust(7)
+                try:
+                    item = self.treeview.findItems(QtCore.QString(line[0]), QtCore.Qt.MatchFlags())
+                    item[0].setData(1, 0, deviance)
+                except:
+                    print "Problem encountered with item: ", line[0]
             except:
-                print "Problem encountered with item: ", line[0]
+                print "problem loading deviances"
         del devcsv
 
 
