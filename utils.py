@@ -136,6 +136,7 @@ def getNDVal(filename):
         if approx_equal(NDValue, upperLeftPixVal):
             NDValue = band.ReadAsArray(0, 0, 1, 1, 1, 1)[0][0]
     
+    
 #    if min is None or min == band.GetNoDataValue():
 #            min = band.ComputeRasterMinMax(0)[0]
 
@@ -269,10 +270,10 @@ def path_port(module, portName):
                           portName + '.  Only single entry handled.  Please remove extraneous items.')
     value = value[0]
     path = value.name 
-    path.replace("/", os.path.sep)
+    path = path.replace("/", os.path.sep)
     if os.path.exists(path):
         return path
-    elif os.path.exists(getFileRelativeToCurrentVT(path), module):
+    elif os.path.exists(getFileRelativeToCurrentVT(path, module)):
         return getFileRelativeToCurrentVT(path, module)
     else:
         raise RuntimeError, 'The indicated file or directory, ' + \
