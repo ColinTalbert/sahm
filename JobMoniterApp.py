@@ -87,6 +87,9 @@ class Window(QtGui.QWidget):
                     child_item.setBackgroundColor(1, QtGui.QColor(223, 131, 125))
                     
                 errorText = self.getText(subFolder, "stdErr.txt").strip()
+                errorText += "\n" +  self.getText(subFolder, "stdErr_R.txt").strip()
+                if itemName.startswith("Maxent"):
+                    errorText += "\n" +  self.getText(subFolder, "stdErr_max.txt").strip()  
                     
                 error_item = QtGui.QTreeWidgetItem(["stdError", errorText])
                 error_item.setTextAlignment(0, QtCore.Qt.AlignJustify)
@@ -111,10 +114,11 @@ class Window(QtGui.QWidget):
                     
     def checkIfModelFinished(self, model_dir):
         try:
-            out_err = os.path.join(model_dir, "stdErr.txt")
-            stdErrLines = "\n".join(open(out_err, "r").readlines())
-            if "Error" in stdErrLines:
-                return "Error in model"
+            for err_fname in ['stdErr.txt', 'stdErr_R.txt', 'stdErr_max.txt']:
+                out_err = os.path.join(model_dir, err_fname)
+                stdErrLines = "\n".join(open(out_err, "r").readlines())
+                if "Error" in stdErrLines:
+                    return "Error in model"
         except:
             pass
     
