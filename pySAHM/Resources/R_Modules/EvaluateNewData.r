@@ -82,14 +82,19 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                   }
              if(produce.metrics){   
                    if(is.null(new.tifs)){ 
+                                 
                    #Determine if we will be evaluating a holdout set if so rename it to the split portion so evaluation metrics will be caluclated and reported
                    #Switching the name Eval.Split to split so we evaluate on final holdout data
                            if(!is.na(Eval.split<-match("evalsplit",tolower(unlist(hl))))){
-                                  if(!is.na(Split<-match("split",tolower(unlist(hl))))) {hl[[1]][Split]<-"Unused"
+                                  if(!is.na(Split<-match("split",tolower(unlist(hl))))) {
+                                    hl[[1]][Split]<-"Unused"
                                     include[Split]<-0
                                   }
                                   hl[[1]][Eval.split]<-"Split"
-                                  out$dat$split.type="eval"
+                                   out <- read.ma(out,hl=hl,include=include,evalNew=TRUE)
+                                    out$dat$split.type=out$dat$split.label="eval"
+                                    out$dat$bname<-paste(out$input$output.dir,paste("/",Model,sep=""),sep="")
+                                  
                          }
                    }
                                 
