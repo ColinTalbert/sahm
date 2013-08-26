@@ -91,7 +91,7 @@ from SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
 from GeneralSpatialViewer import GeneralSpatialViewer
 from sahm_picklists import ResponseType, AggregationMethod, \
         ResampleMethod, PointAggregationMethod, ModelOutputType, RandomPointType, \
-        OutputRaster, mpl_colormap
+        OutputRaster, mpl_colormap, T_O_M
 
 from utils import writetolog
 from pySAHM.utilities import TrappedError
@@ -405,14 +405,17 @@ class PredictorListFile(Module):
             csv_input = utils.getFileRelativeToCurrentVT(self.getInputFromPort("csvFileList").name, self)
             if os.path.exists(csv_input):
                 shutil.copy(csv_input, output_fname)
-                csv_writer = csv.writer(open(output_fname, 'ab'))
+                output_file = open(output_fname, 'ab')
+                csv_writer = csv.writer(output_file)
             else:
                 #create an empty file to start with.
-                csv_writer = csv.writer(open(output_fname, 'wb'))
+                output_file = open(output_fname, 'wb')
+                csv_writer = csv.writer(output_file)
                 csv_writer.writerow(["file", "Resampling", "Aggregation"])
         else:
             #create an empty file to start with.
-            csv_writer = csv.writer(open(output_fname, 'wb'))
+            output_file = open(output_fname, 'wb')
+            csv_writer = csv.writer(output_file)
             csv_writer.writerow(["file", "Resampling", "Aggregation"])
         
         if self.hasInputFromPort("addPredictor"):
@@ -427,7 +430,7 @@ class PredictorListFile(Module):
                 else:
                     aggMethod = "Mean"  
                 csv_writer.writerow([os.path.normpath(p.name), resMethod, aggMethod])
-
+        output_file.close()
         del csv_writer
         
         output_file = utils.create_file_module(output_fname, module=self)
@@ -489,7 +492,7 @@ class Model(Module):
     SAHM package. It is not intended for direct use or incorporation into
     the VisTrails workflow by the user.
     '''
-    _input_ports = [('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["2"]', 'optional':False}),
+    _input_ports = [('ThresholdOptimizationMethod', '(gov.usgs.sahm:T_O_M:Other)', {'defaults':'["Sensitivity=Specificity"]', 'optional':False}),
                     ('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)'),
                     ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
@@ -535,6 +538,18 @@ class Model(Module):
         
         mdsFile = utils.getFileRelativeToCurrentVT(self.args_dict['c'], self)
 
+        #convert threshold optimization string to the expected integer
+        thresholds = {"Threshold=0.5":1,
+                      "Sensitivity=Specificity":2,
+                      "Maximizes (sensitivity+specificity)/2":3,
+                      "Maximizes Cohen's Kappa":4,
+                      "Maximizes PCC (percent correctly classified)":5,
+                      "Predicted prevalence=observed prevalence":6,
+                      "Threshold=observed prevalence":7,
+                      "Mean predicted probability":8,
+                      "Minimizes distance between ROC plot and (0,1)":9}
+        self.args_dict["om"] = thresholds.get(self.args_dict.get("om", "Sensitivity=Specificity"))
+
         if not utils.checkModelCovariatenames(mdsFile):
             msg = "These R models do not work with covariate names begining with non-letter characters or \n"
             msg += "covariate names that contain non-alphanumeric characters other than '.' or '_'.\n"
@@ -550,6 +565,9 @@ class Model(Module):
             self.args_dict['maxent_args'] = self.maxent_args
             
         self.output_dname = utils.mknextdir(prefix)
+        #make a copy of the mds file used in the output folder
+        copy_mds_fname = os.path.join(self.output_dname, os.path.split(mdsFile)[1])
+        shutil.copyfile(mdsFile, copy_mds_fname)
 #            self.output_dname = utils.find_model_dir(prefix, self.args_dict)
         
         if self.abbrev == 'brt' or \
@@ -2314,8 +2332,9 @@ _modules = generate_namespaces({'DataInput': [
                                            (RandomPointType, {'abstract': True}),
                                            (OutputRaster, {'abstract': True}),
                                            (mpl_colormap, {'abstract': True}),
-                                           (TextFile, {'configureWidgetType': TextFileConfiguration}),
-                                           (CSVTextFile, {'configureWidgetType': CSVTextFileConfiguration})
+                                           (T_O_M, {'abstract': True}),
+#                                           (TextFile, {'configureWidgetType': TextFileConfiguration}),
+#                                           (CSVTextFile, {'configureWidgetType': CSVTextFileConfiguration})
                                            ],
                                 'Output': [(SAHMModelOutputViewerCell, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe}),

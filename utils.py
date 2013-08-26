@@ -136,6 +136,7 @@ def getNDVal(filename):
         if approx_equal(NDValue, upperLeftPixVal):
             NDValue = band.ReadAsArray(0, 0, 1, 1, 1, 1)[0][0]
     
+    
 #    if min is None or min == band.GetNoDataValue():
 #            min = band.ComputeRasterMinMax(0)[0]
 
@@ -269,10 +270,10 @@ def path_port(module, portName):
                           portName + '.  Only single entry handled.  Please remove extraneous items.')
     value = value[0]
     path = value.name 
-    path.replace("/", os.path.sep)
+    path = path.replace("/", os.path.sep)
     if os.path.exists(path):
         return path
-    elif os.path.exists(getFileRelativeToCurrentVT(path), module):
+    elif os.path.exists(getFileRelativeToCurrentVT(path, module)):
         return getFileRelativeToCurrentVT(path, module)
     else:
         raise RuntimeError, 'The indicated file or directory, ' + \
@@ -962,13 +963,13 @@ def getFileRelativeToCurrentVT(fname, curModule=None):
     #step 1: if fname exists assume it's the one we want and return it.
     #step 2: Look for the file relative to the current VT.
     #        In effect loop through all the sibling and descendant folders 
-    #        of the vt file and look for the base filename in each.
+    #        of the vt file's parent directory and look for the base filename in each.
     #        If we find an identically named file hope for the best and return it.
     #step 3: Do what we did in step 2 but relative to the current session folder.
     #
     #If no fname is found in the above three steps raise an error.
     def couldntFindFile():
-        msg = "Could not find file: ", fname, "\nPlease point to valid location for this file."
+        msg = "Could not find file: " + fname + "\nPlease point to valid location for this file."
         if curModule is None:
             raise Exception(msg)
         else:
@@ -978,8 +979,8 @@ def getFileRelativeToCurrentVT(fname, curModule=None):
         #step 1
         if os.path.exists(fname):
             return fname
-        #step 2 (and then step3)
         
+        #step 2 (and then step3)
         try:
             app = gui.application.get_vistrails_application()()
             curlocator = app.get_vistrail().locator.name

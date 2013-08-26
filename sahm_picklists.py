@@ -183,3 +183,27 @@ class mpl_colormap(String):
     @staticmethod
     def get_widget_class():
         return mpl_colormap._widget_class
+    
+class T_O_M(String):
+    '''
+    This module is a required class for other modules and scripts within the
+    SAHM package. It is not intended for direct use or incorporation into
+    the VisTrails workflow by the user.
+    '''
+    _input_ports = [('value', '(gov.usgs.sahm:T_O_M:Other)')]
+    _output_ports = [('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
+    _widget_class = build_enum_widget('T_O_M', 
+                                      ["Threshold=0.5",
+                                       "Sensitivity=Specificity",
+                                       "Maximizes (sensitivity+specificity)/2",
+                                       "Maximizes Cohen's Kappa",
+                                       "Maximizes PCC (percent correctly classified)",
+                                       "Predicted prevalence=observed prevalence",
+                                       "Threshold=observed prevalence",
+                                       "Mean predicted probability",
+                                       "Minimizes distance between ROC plot and (0,1)",
+                                       ])
+
+    @staticmethod
+    def get_widget_class():
+        return T_O_M._widget_class

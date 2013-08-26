@@ -83,7 +83,7 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
     # Start of function #
   
     if(is.null(factor.levels)) factor.levels<-NA
-    MESS=out$input$MESS
+    MESS=MOD=out$input$MESS
     if(is.null(thresh)) thresh<-.5
     nvars<-length(vnames)
     vnames.final.mod<-out$mods$vnames
@@ -95,8 +95,8 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
             goodfiles <- file.access(fullnames)==0
             if(!all(goodfiles)) stop(paste("ERROR: the following image files are missing:",paste(fullnames[!goodfiles],collapse=", ")))
   
-  if(nvars.final<=1) MESS=FALSE
-   
+  if(nvars.final<1) MESS=FALSE
+  if(nvars.final==1) MOD=FALSE #because you can make a mess with one predictor but not a mod
    ######################################
    # get spatial reference info from existing image file
    options(warn=-1)
@@ -112,7 +112,7 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
   NAval<- -3.399999999999999961272e+38
   
   #To remove use of the Raster package I need to see if rgdal handles area or point correctly
-  if(!is.na(match("AREA_OR_POINT=Point",attr(gi,"mdata")))){
+  if(!is.na(match("AREA_OR_POINT=Point",attr(gi,"mdata")))){                                                                          
      xx<-RasterInfo  #this shifts by a half pixel
   nrow(xx) <- nrow(xx) - 1
   ncol(xx) <- ncol(xx) - 1
@@ -132,12 +132,12 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
       tr<-blockSize(RasterInfo,chunksize=chunksize)
   
   FactorInd<-which(!is.na(match(vnames,names(factor.levels))),arr.ind=TRUE)
-    if((nvars-length(FactorInd))==0) MESS<-FALSE #turn this off if only one factor column was selected
+    if((nvars-length(FactorInd))==0) MESS<-MOD<-FALSE #turn this off if only one factor column was selected
     
   #for debugging I'm always using multiple cores
   multCore<-out$input$multCore
   if(tr$n<10 | getRversion()<2.14) multCore<-FALSE #turn off multicore in certian circumstances
-
+  
   if(multCore){
       library(parallel)
       #create some temporary folders    
@@ -146,16 +146,15 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
         outfile.p=paste(paste(out$input$output.dir,"\\ProbTiff\\",sep=""),"_prob_map.tif",sep="")
       if(make.binary.tif)                                                                                         
         outfile.bin=dir.create(paste(out$input$output.dir,"\\BinTiff",sep=""))
-      if(MESS){
-        dir.create(paste(out$input$output.dir,"\\MESSTiff",sep="")) 
-        dir.create(paste(out$input$output.dir,"\\ModTiff",sep=""))       
-            }
+      if(MESS) dir.create(paste(out$input$output.dir,"\\MESSTiff",sep="")) 
+      if(MOD)  dir.create(paste(out$input$output.dir,"\\ModTiff",sep=""))       
+           
        if(out$input$ResidMaps)
         dir.create(paste(out$input$output.dir,"\\ResidTiff",sep=""))
         tile.start<-seq(from=1,to=tr$n,by=ceiling(tr$n/(detectCores()-1))) 
       cl <- makeCluster(detectCores()) 
       parLapply(cl,X=tile.start,fun=parRaster,dims=dims,
-         tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
+         tr=tr,MESS=MESS,MOD=MOD,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
          model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,make.p.tif=make.p.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,
          outfile.bin=outfile.bin,thresh=thresh,nToDo= ceiling(tr$n/(detectCores()-1)),ScriptPath=out$input$ScriptPath,
          vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct,
@@ -164,7 +163,7 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
   }  else{  #multicore is slower for small tiffs so we won't do it and the library is not available prior to 2.14
             #also due to multicore multiinstance R issues we're currently only running it on condor or when running synchronously
     parRaster(start.tile=1,dims=dims,
-      tr=tr,MESS=MESS,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
+      tr=tr,MESS=MESS,MOD=MOD,nvars=nvars,fullnames=fullnames,nvars.final=nvars.final,vnames=vnames,NAval=NAval,factor.levels=factor.levels,
       model=model,Model=Model,pred.fct=pred.fct,make.binary.tif=make.binary.tif,make.p.tif=make.p.tif,RasterInfo=RasterInfo,outfile.p=outfile.p,outfile.bin=outfile.bin,thresh=thresh,nToDo=tr$n,ScriptPath=out$       
       input$ScriptPath,vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct,
          template=out$dat$input$ParcTemplate,maDir=out$input$ma.name)

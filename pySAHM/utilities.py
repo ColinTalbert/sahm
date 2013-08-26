@@ -391,3 +391,31 @@ def approx_equal(x, y, *args, **kwargs):
     # approximate equal comparison (or are both floats). Fall back to a numeric
     # comparison.
     return _float_approx_equal(x, y, *args, **kwargs)
+
+def checkIfModelFinished(model_dir):
+    try:
+        out_err = os.path.join(model_dir, "stdErr.txt")
+        stdErrLines = "\n".join(open(out_err, "r").readlines())
+        if "Error" in stdErrLines:
+            return "Error in model"
+    except:
+        pass
+
+    try:
+        outText = [file_name for file_name in os.listdir(model_dir)
+                                     if file_name.endswith("_output.txt")][0]
+    except IndexError:
+        return "Starting ..."
+    
+    model_text = os.path.join(model_dir, outText)
+    try:
+        lastLine = open(model_text, 'r').readlines()[-2]
+    except IndexError:
+        return "Running ..."
+     
+    if lastLine.startswith("Total time"):
+        return "Completed successfully in " + lastLine[lastLine.find(" = ")+3:]
+    elif lastLine.startswith("Model Failed"):
+        return "Error in model"
+    else:
+        return "Running ..."
