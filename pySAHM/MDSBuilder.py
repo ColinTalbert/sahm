@@ -303,7 +303,7 @@ class MDSBuilder(object):
         '''
         #determine what value we'll be using (background/pseudoabsense)
 #        if self.pointType == 'Background':
-        pointval = '-9999'
+        pointval = '-9998'
 #        else:
 #            pointval = '-9998'
         
