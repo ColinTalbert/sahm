@@ -75,9 +75,11 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                  include<-as.numeric(temp)
              #if a new mds was supplied switch out the tiffs for map production    
                  if(!is.null(new.tifs)){
-                 paths<-paths[include==1,]
-                 path.check(paths)
-                  out$dat$tif.ind<-paths}
+                     paths<-paths[include==1,]
+                     path.check(paths)
+                      out$dat$tif.ind<-paths
+                      out$dat$input$ParcTemplate<-tif.info[[3]][1]
+                  }
              if(produce.metrics){   
                    if(is.null(new.tifs)){ 
                    #Determine if we will be evaluating a holdout set if so rename it to the split portion so evaluation metrics will be caluclated and reported
