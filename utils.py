@@ -130,11 +130,12 @@ def getNDVal(filename):
     
     NDValue = band.GetNoDataValue()
     
-    min = band.GetMinimum()
-    if min is not None and approx_equal(NDValue, min):
-        upperLeftPixVal = band.ReadAsArray(0, 0, 1, 1, 1, 1)[0][0]
-        if approx_equal(NDValue, upperLeftPixVal):
+    min_pixel = band.GetMinimum()
+    upperLeftPixVal = band.ReadAsArray(0, 0, 1, 1, 1, 1)[0][0]
+    if min_pixel is not None and approx_equal(NDValue, min_pixel) or \
+        approx_equal(NDValue, upperLeftPixVal):
             NDValue = band.ReadAsArray(0, 0, 1, 1, 1, 1)[0][0]
+    
     
     
 #    if min is None or min == band.GetNoDataValue():
