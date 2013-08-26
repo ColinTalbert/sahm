@@ -68,7 +68,7 @@ class MDSBuilder(object):
         self.inputs = []
         self.fieldData = ''
         self.outputMDS = ''
-        self.pointType = 'Background'
+#        self.pointType = 'Background'
         self.probSurfacefName = ''
         self.probSurface = None
         self.templateSurface = None
@@ -302,10 +302,10 @@ class MDSBuilder(object):
         Each pixel is sampled only once.
         '''
         #determine what value we'll be using (background/pseudoabsense)
-        if self.pointType == 'Background':
-            pointval = '-9999'
-        else:
-            pointval = '-9998'
+#        if self.pointType == 'Background':
+        pointval = '-9999'
+#        else:
+#            pointval = '-9998'
         
         #initialize the random seed in case one was passed
         if not self.seed:
