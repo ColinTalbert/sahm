@@ -628,26 +628,6 @@ Several options are available for fitting BRTs when run using VisTrails special 
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
-      <Port>
-        <PortName>doTrace</PortName>
-        <Definition>See the randomForest documentation on the CRAN website for details http://cran.r-project.org/web/packages/randomForest/index.html.</Definition>
-        <Mandatory>FALSE</Mandatory>
-        <Default>randomForest function default</Default>
-        <Options>
-          <Option>See randomForest documentation for valid input</Option>
-        </Options>
-        <Connections>Does not connect to any other module.</Connections>
-      </Port>
-      <Port>
-        <PortName>keepForest</PortName>
-        <Definition>See the randomForest documentation on the CRAN website for details http://cran.r-project.org/web/packages/randomForest/index.html.</Definition>
-        <Mandatory>FALSE</Mandatory>
-        <Default>randomForest function default</Default>
-        <Options>
-          <Option>See randomForest documentation for valid input</Option>
-        </Options>
-        <Connections>Does not connect to any other module.</Connections>
-      </Port>
     </InputPorts>
     <OutputPorts>
       <Port>
@@ -1946,14 +1926,6 @@ It is not valid to select models based on their performance on the reserved port
         <Connections>Does not connect to any other module.</Connections>
       </Port>
       <Port>
-        <PortName>RatioPresAbs</PortName>
-        <Definition>This optional field is populated with a number corresponding to the desired ratio of presence to  absence points to be used in the analysis. If not populated then all occurrence records (not background points) will be portioned into either the test or training split with no reduction in the total number of points.  If populated, this entry should be a number greater than zero. (A value of '1' will result in an equal number of both presence and absence points being used, a value of '2' indicates that twice as many presence points will be used, a value of ‘0.5' indicates that twice as many absence points will be used, etc.). All field data points with a value equal to or greater than 1 are interpreted as presence points. Although the original field data is unmodified, this option will reduce the sample size as the merged dataset containing sample points will have points deleted from it to achieve the specified ratio as such it should be used with caution. A warning will be generated if more than 50% of either the presence or absence points will be deleted based on the ratio specified by the user. Background points are ignored by this module (they are read in and written out, but not assigned to either the test or training split).</Definition>
-        <Mandatory>FALSE</Mandatory>
-        <Default>NA</Default>
-        <Options>A floating point most likely in the range .5 to 2</Options>
-        <Connections>Does not connect to any other module.</Connections>
-      </Port>
-      <Port>
         <PortName>Seed</PortName>
         <Definition>The random number seed used by split the data.  If one desires to reproduce results from a previous split fit, one must enter the random number seed that is reported in the console output from that split step.  </Definition>
         <Mandatory>FALSE</Mandatory>
@@ -2006,14 +1978,6 @@ It is not valid to select models based on their performance on the reserved port
         <Mandatory>FALSE</Mandatory>
         <Default>NA</Default>
         <Options>Most commonly values in the .5 to .9 range but other values between 0 and 1 are accepted </Options>
-        <Connections>Does not connect to any other module.</Connections>
-      </Port>
-      <Port>
-        <PortName>RatioPresAbs</PortName>
-        <Definition>This optional field is populated with a number corresponding to the desired ratio of presence to  absence points to be used in the analysis. If not populated then all occurrence records (not background points) will be portioned into either the test or training split with no reduction in the total number of points.  If populated, this entry should be a number greater than zero. (A value of '1' will result in an equal number of both presence and absence points being used, a value of '2' indicates that twice as many presence points will be used, a value of ‘0.5' indicates that twice as many absence points will be used, etc.). All field data points with a value equal to or greater than 1 are interpreted as presence points. Although the original field data is unmodified, this option will reduce the sample size as the merged dataset containing sample points will have points deleted from it to achieve the specified ratio as such it should be used with caution. A warning will be generated if more than 50% of either the presence or absence points will be deleted based on the ratio specified by the user. Background points are ignored by this module (they are read in and written out, but not assigned to either the test or training split).</Definition>
-        <Mandatory>FALSE</Mandatory>
-        <Default>NA</Default>
-        <Options>A floating point most likely in the range .5 to 2</Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
       <Port>
