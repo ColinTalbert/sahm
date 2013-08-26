@@ -68,6 +68,7 @@ import scipy.stats.stats as stats
 
 import utilities
 import SpatialUtilities
+import multiprocessing
 
 def main(args_in):
     """
@@ -147,18 +148,19 @@ class PARC:
         self.logger.writetolog("Finished PARC", True, True)
         
     def processFiles(self):
-        processQueue = []
-        coreCount = utilities.getProcessCount(self.processingMode)
-            
+        if self.processingMode == "FORT Condor":
+            self.process_pool = multiprocessing.Pool(2**32)
+        else:
+            self.process_pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
+        self.pool_processes = []
+        
         # Clip and reproject each source image.
-        for image in self.inputs:
-            #if we're running to many jobs wait for one to finish
-            utilities.waitForProcessesToFinish(processQueue, coreCount)
-                        
+        for image in self.inputs:                       
             inPath, inFileName = os.path.split(image[0])          
             outFile, ext = os.path.splitext(inFileName)
             outFile = os.path.join(self.out_dir, outFile + ".tif")
             
+            processQueue = []
             if os.path.exists(outFile):
                 try: 
                     gdal.Open(outFile)
@@ -168,7 +170,6 @@ class PARC:
                 except:
                     #we bombed trying to open the outFile with gdal. Lets rerun it.
                     processQueue.append(self.gen_singlePARC_thread(image, outFile))
-                    pass
                 
             else:
                 processQueue.append(self.gen_singlePARC_thread(image, outFile))
@@ -177,40 +178,45 @@ class PARC:
         if self.processingMode == "FORT Condor":
             self.waitForCondorProcessesToFinish(processQueue)
         else:
-            utilities.waitForProcessesToFinish(processQueue)
+            for process in self.pool_processes:
+                process.get()
             
         print "done"
-            
+        
     def gen_singlePARC_thread(self, image, outFile):
-            image_short_name = os.path.split(image[0])[1]
-
-            args = ['-s', os.path.abspath(image[0]),
-                    '-c', image[1],
-                    '-d', os.path.abspath(outFile),
-                    '-t', os.path.abspath(self.template),
-                    '-r', image[2],
-                    '-a', image[3]]
-
-            if self.ignoreNonOverlap:
-                args.extend(['-i'])
-    
-            execDir = os.path.split(__file__)[0]
-            executable = os.path.abspath(os.path.join(execDir, 'runSinglePARC.py'))
-            pyEx = sys.executable
-            command_arr = [pyEx, executable] + args
-            command = ' '.join(command_arr)
-            self.logger.writetolog(command, False, False)
+            command_arr = self.gen_singlePARC_cmd(image, outFile)
             
             if self.processingMode == "FORT Condor":
                 workspace, fname = os.path.split(os.path.abspath(outFile))
                 prefix = os.path.splitext(fname)[0]
                 utilities.runCondorPythonJob(command_arr, workspace, prefix)
-                return os.path.abspath(outFile)
             else:
-                proc = subprocess.Popen( command_arr )
-                return  proc
-#                thread.start_new_thread(utilities.process_waiter,
-#                        (proc, image_short_name, results))
+                self.pool_processes.append(self.process_pool.apply_async(
+                                    utilities.launch_cmd, 
+                                    [self.gen_singlePARC_cmd(image, outFile)]))
+                
+            return os.path.abspath(outFile)
+           
+    def gen_singlePARC_cmd(self, image, outFile):       
+        image_short_name = os.path.split(image[0])[1]
+
+        args = ['-s', os.path.abspath(image[0]),
+                '-c', image[1],
+                '-d', os.path.abspath(outFile),
+                '-t', os.path.abspath(self.template),
+                '-r', image[2],
+                '-a', image[3]]
+
+        if self.ignoreNonOverlap:
+            args.extend(['-i'])
+
+        execDir = os.path.split(__file__)[0]
+        executable = os.path.abspath(os.path.join(execDir, 'runSinglePARC.py'))
+        pyEx = sys.executable
+        command_arr = [pyEx, executable] + args
+        command = ' '.join(command_arr)
+        self.logger.writetolog(command, False, False)
+        return command_arr
 
     def log_result(self, result):
         print result
@@ -218,8 +224,6 @@ class PARC:
     def waitForCondorProcessesToFinish(self, outputs):
         errors = []
         originalCount = len(outputs)
-        successes = 0
-        failures = 0
         while outputs:
             for process in outputs:
                 result = self.jobFinished(process)
@@ -437,10 +441,7 @@ class PARC:
         
         #if valid values were returned from each of our points then
         #the template falls entirely within the Source image.
-        if badPoint:
-            return False
-        else:
-            return True
+        return not badPoint
         
     def shrink_template_extent(self, sourceRaster):
         '''The template extent will be reduced by the extent of 
@@ -462,6 +463,11 @@ class PARC:
             smallest_south = self.minSouth(sourceRaster)
             largest_east = self.maxEast(sourceRaster)
             smallest_west = self.minWest(sourceRaster)
+        
+            if smallest_west > largest_east:
+                #We're assuming their data goes around the world more than once.
+                #We're going to zap the overlaping area, too bad, so sad.
+                smallest_west, largest_east = largest_east, smallest_west        
         
             #Now for each direction step through the pixels until we have one smaller
             #or larger than our min/max source extent.
@@ -517,6 +523,92 @@ class PARC:
             
             #set the template geotransform to be our modified one.
             self.templateRaster.gt = tuple(gt)
+
+    def shrink_template_extent_naive(self, sourceRaster):
+        '''The template extent will be reduced by the extent of 
+        an individual source layer if the layer has a smaller extent
+        This results in the intersection of the grids being used.
+        '''
+        if self.ImageCoversTemplate(sourceRaster):
+            #the template is already smaller than the image in question
+            #Do nothing
+            return False
+        else:
+            gt = list(self.templateRaster.gt)
+            
+            #because the translation of a rectangle between crs's results 
+            #in a paralellogram (or worse) I'm taking the four corner points in 
+            #source projection and transforming these to template crs and then 
+            #using the maximum/minimum for each extent.          
+            largest_north = SpatialUtilities.transformPoint(0, sourceRaster.north, 
+                        sourceRaster.srs, self.templateRaster.srs)[1]
+            smallest_south = SpatialUtilities.transformPoint(0, sourceRaster.south, 
+                        sourceRaster.srs, self.templateRaster.srs)[1]
+            largest_east = SpatialUtilities.transformPoint(sourceRaster.east, 0, 
+                        sourceRaster.srs, self.templateRaster.srs)[0]
+            smallest_west = SpatialUtilities.transformPoint(sourceRaster.west, 0, 
+                        sourceRaster.srs, self.templateRaster.srs)[0]
+        
+            if smallest_west > largest_east:
+                #We're assuming their data goes around the world more than once.
+                #We're going to zap the overlaping area, too bad, so sad.
+                smallest_west, largest_east = largest_east, smallest_west
+        
+            #Now for each direction step through the pixels until we have one smaller
+            #or larger than our min/max source extent.
+            orig_tNorth = self.templateRaster.north
+            shrinkN = 0
+            while self.templateRaster.north > largest_north:
+                #yScale is negative
+                self.templateRaster.north += self.templateRaster.yScale
+                self.templateRaster.height -= 1
+                shrinkN += 1
+            if orig_tNorth <> self.templateRaster.north:
+                msg = "Northern edge of template reduced " + str(shrinkN) + " pixels due to, "
+                msg += "the extent of " + sourceRaster.source
+                self.writetolog(msg) 
+            
+            orig_tSouth = self.templateRaster.south
+            shrinkN = 0    
+            while self.templateRaster.south < smallest_south:
+                self.templateRaster.south -= self.templateRaster.yScale
+                self.templateRaster.height -= 1
+                shrinkN += 1
+            if orig_tSouth <> self.templateRaster.south:
+                msg = "NSouthern edge of template reduced " + str(shrinkN) + " pixels due to, "
+                msg += "the extent of " + sourceRaster.source
+                self.writetolog(msg)
+            
+            gt[3] = self.templateRaster.north
+            
+            
+            orig_tWest = self.templateRaster.west
+            shrinkN = 0
+            while self.templateRaster.west < smallest_west:
+                #yScale is negative
+                self.templateRaster.west += self.templateRaster.xScale
+                self.templateRaster.width -= 1
+                shrinkN += 1
+            if orig_tWest <> self.templateRaster.west:
+                msg = "Western edge of template reduced " + str(shrinkN) + " pixels due to, "
+                msg += "the extent of " + sourceRaster.source   
+                self.writetolog(msg)
+            
+            orig_tEast = self.templateRaster.east
+            shrinkN = 0
+            while self.templateRaster.east > largest_east:
+                self.templateRaster.east -= self.templateRaster.xScale
+                self.templateRaster.width -= 1
+                shrinkN += 1
+            gt[0] = self.templateRaster.west
+            if orig_tEast <> self.templateRaster.east:
+                msg = "Eastern edge of template reduced " + str(shrinkN) + " pixels due to, "
+                msg += "the extent of " + sourceRaster.source
+                self.writetolog(msg)
+            
+            #set the template geotransform to be our modified one.
+            self.templateRaster.gt = tuple(gt)
+
 
     def maxNorth(self, sourceRaster):
         northWidth = sourceRaster.east - sourceRaster.west

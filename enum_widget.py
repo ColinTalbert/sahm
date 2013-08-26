@@ -79,7 +79,7 @@ class EnumWidget(QtGui.QComboBox, ConstantWidgetMixin):
         if curIdx == -1:
             print '*** ""'
             return ''
-        print '*** "%s"' % str(self.itemText(curIdx))
+#        print '*** "%s"' % str(self.itemText(curIdx))
         return str(self.itemText(curIdx))
 
 

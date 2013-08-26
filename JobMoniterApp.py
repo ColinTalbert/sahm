@@ -59,7 +59,7 @@ class Window(QtGui.QWidget):
         
         
         subFolders = [x[0] for x in os.walk(self.sessionDir)]
-        models = ["brt", "rf_", "mar", "glm", "max", "App"]
+        models = ["brt", "rf_", "mar", "glm", "Max", "App"]
         self.data = []
         
         expandedNodes = []
@@ -74,7 +74,7 @@ class Window(QtGui.QWidget):
                 result = self.checkIfModelFinished(subFolder)
                 
                 errorText = self.getText(subFolder, "stdErr.txt").strip()
-                warningCount = errorText.count("Warning:")
+                warningCount = errorText.count("Warning")
                 
                 if warningCount == 0:
                     resultText = result
@@ -110,6 +110,13 @@ class Window(QtGui.QWidget):
             return ""
                     
     def checkIfModelFinished(self, model_dir):
+        try:
+            out_err = os.path.join(model_dir, "stdErr.txt")
+            stdErrLines = "\n".join(open(out_err, "r").readlines())
+            if "Error" in stdErrLines:
+                return "Error in model"
+        except:
+            pass
     
         try:
             outText = self.find_file(model_dir, "_output.txt")

@@ -104,6 +104,12 @@ def main(args_in):
     
     if options.ignoreNonOverlap:
         ourPARC.shrink_template_extent(SpatialUtilities.SAHMRaster(options.source))
+    if ourPARC.templateRaster.width < 1 or \
+        ourPARC.templateRaster.height < 1:
+        #the sophisticated method of shrinking the raster blew up.  
+        #reset the template raster and try the naive method
+        ourPARC.templateRaster = SpatialUtilities.SAHMRaster(options.template)
+        ourPARC.shrink_template_extent_naive(SpatialUtilities.SAHMRaster(options.source))
     
     ourPARC.parcFile([options.source, options.categorical, options.resampling, options.aggregation], options.dest)
 

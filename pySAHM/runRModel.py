@@ -20,6 +20,18 @@ def main(args_in):
             print "outDir=", outDir
             logger = utilities.logger(os.path.join(outDir, "logfile.txt"), True)
     
+#   if this is an ApplyModel we need to wait for the preceeding model to finish
+#   up before launching R
+    print "args_in[3]", args_in[3]
+    if "EvaluateNewData.r" in args_in[3]:
+        inDir = [os.path.split(d[3:])[0] for d in args_in if d.startswith("ws=")][0]
+        while True:
+            check = utilities.checkIfModelFinished(inDir)
+            if  check == "Error in model":
+                sys.stderr.write("Error in original model that this ApplyModel needs")
+                sys.exit("Error in original model could not apply model")
+            elif check.startswith("Completed successfully"):
+                break
     
     p = subprocess.Popen(args_in, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     ret = p.communicate()

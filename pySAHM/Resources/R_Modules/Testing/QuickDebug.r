@@ -4,8 +4,8 @@
 #setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
 #ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
 
-setwd("I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
-ScriptPath="I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
+setwd("N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\DevelopmentWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\DevelopmentWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
 
 #setwd("I:\\VisTrails\\DevWorkspace\\Colin\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
 #ScriptPath="I:\\VisTrails\\DevWorkspace\\Colin\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
@@ -15,7 +15,7 @@ source("GLM.helper.fcts.r")
 source("BRT.helper.fcts.r")
 source("RF.helper.fcts.r")
 source("MAXENT.helper.fcts.r")
-output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
+output.dir="C:\\temp\\SAHM_workspace"
 rc="responseBinary"
 #Testing GitHub again Another commit
 #options(warn=2)
@@ -33,9 +33,13 @@ input.file="C:\\temp\\TestDataSets\\modelSelection_split_1.csv"
 #================================================================#
 #                       Maxent
 #================================================================#
+ -f N:\Research\nccsc\Private\Projects\VisTrails\DevelopmentWorkspace\Nick\userpackages\..\userpackages\sahm\pySAHM\Resources\R_Modules\WrapMaxent.r --args
+  lam=C:\Users\ctalbert\AppData\Local\Temp\sahm_testing\maxent_8 
+  c=C:\Users\ctalbert\AppData\Local\Temp\sahm_testing\MergedDataset_5.csv cur_processing_mode=multiple models simultaneously (1 core each) 
+  o=C:\Users\ctalbert\AppData\Local\Temp\sahm_testing\maxent_8 mpt=TRUE mes=FALSE rc=responseBinary mbt=TRUE multicore=FALSE
 input.file="I:\\SpeciesData\\Kansas\\prairie_chicken\\Rangewide_model\\Maxent\\Round2\\Background\\CovariateCorrelationOutputMDS_StateSplit_CV5.csv"
-input.file="J:\\Projects\\Lionfish\\May_22_2013\\Output\\modelSelection_cv_5.csv"
-lambdas.file="J:\\Projects\\Lionfish\\May_22_2013\\Output\\maxent_5"
+input.file="N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\junk\\sahm_testing\\MergedDataset_5.csv"
+lambdas.file="N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\junk\\sahm_testing\\maxent_8"
 FitModels(ma.name=input.file,
             output.dir=output.dir,
             response.col=rc,make.p.tif=T,make.binary.tif=T,

@@ -57,6 +57,7 @@ import copy
 import multiprocessing
 import time
 
+import core.system
 from core.modules.vistrails_module import Module, ModuleError, ModuleConnector
 from core.modules.basic_modules import File, Directory, Path, new_constant, Constant
 from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
@@ -84,12 +85,13 @@ import pySAHM.MDSBuilder_vector as MDSB_V
 import pySAHM.PARC as parc
 import pySAHM.RasterFormatConverter as RFC
 import pySAHM.runMaxent as MaxentRunner
+import pySAHM.utilities as utilities
 from SahmOutputViewer import SAHMModelOutputViewerCell
 from SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
 from GeneralSpatialViewer import GeneralSpatialViewer
 from sahm_picklists import ResponseType, AggregationMethod, \
         ResampleMethod, PointAggregationMethod, ModelOutputType, RandomPointType, \
-        OutputRaster, mpl_colormap
+        OutputRaster, mpl_colormap, T_O_M
 
 from utils import writetolog
 from pySAHM.utilities import TrappedError
@@ -184,6 +186,7 @@ def menu_items():
                                 return
                             
                         configuration.write_to_dom(dom, element)
+                        utilities.start_new_pool(utilities.get_process_count(widget.text()))
 
     def isFortCondorAvailible():
         try:
@@ -252,7 +255,6 @@ def menu_items():
 
 class FieldData(Path): 
     '''
-    
     '''
     __doc__ = GenModDoc.construct_module_doc('FieldData')
     
@@ -268,8 +270,9 @@ class FieldData(Path):
          return GenModDoc.construct_port_doc(cls, port_name, 'out')
      
     def compute(self):
-        output_file = utils.create_file_module(self.getInputFromPort("value").name, module=self)
-        self.setResult('value', output_file)
+        out_fname = utils.getFileRelativeToCurrentVT(self.getInputFromPort("value").name, self)
+        output_file = utils.create_file_module(out_fname, module=self)
+        self.setResult('value', output_file)      
          
 class Predictor(Constant):
     '''
@@ -315,7 +318,8 @@ class Predictor(Constant):
             categorical = '0'
         
         if (self.hasInputFromPort("file")):
-            inFile = utils.getRasterName(self.getInputFromPort("file").name)
+            out_fname = utils.getFileRelativeToCurrentVT(self.getInputFromPort("file").name, self)
+            inFile = utils.getRasterName(out_fname)
         else:
             raise ModuleError(self, "No input file specified")
         self.setResult('value', (inFile, categorical, resampleMethod, aggregationMethod))
@@ -397,14 +401,21 @@ class PredictorListFile(Module):
             raise ModuleError(self, "No inputs or CSV file provided")
 
         output_fname = utils.mknextfile(prefix='PredictorList_', suffix='.csv')
-        if (self.hasInputFromPort("csvFileList") and 
-            os.path.exists(self.getInputFromPort("csvFileList").name)):
-            shutil.copy(self.getInputFromPort("csvFileList").name, 
-                output_fname)
-            csv_writer = csv.writer(open(output_fname, 'ab'))
+        if self.hasInputFromPort("csvFileList"):
+            csv_input = utils.getFileRelativeToCurrentVT(self.getInputFromPort("csvFileList").name, self)
+            if os.path.exists(csv_input):
+                shutil.copy(csv_input, output_fname)
+                output_file = open(output_fname, 'ab')
+                csv_writer = csv.writer(output_file)
+            else:
+                #create an empty file to start with.
+                output_file = open(output_fname, 'wb')
+                csv_writer = csv.writer(output_file)
+                csv_writer.writerow(["file", "Resampling", "Aggregation"])
         else:
             #create an empty file to start with.
-            csv_writer = csv.writer(open(output_fname, 'wb'))
+            output_file = open(output_fname, 'wb')
+            csv_writer = csv.writer(output_file)
             csv_writer.writerow(["file", "Resampling", "Aggregation"])
         
         if self.hasInputFromPort("addPredictor"):
@@ -419,7 +430,7 @@ class PredictorListFile(Module):
                 else:
                     aggMethod = "Mean"  
                 csv_writer.writerow([os.path.normpath(p.name), resMethod, aggMethod])
-
+        output_file.close()
         del csv_writer
         
         output_file = utils.create_file_module(output_fname, module=self)
@@ -442,7 +453,8 @@ class TemplateLayer(Path):
         return GenModDoc.construct_port_doc(cls, port_name, 'out') 
     
     def compute(self):
-        output_file = utils.create_file_module(self.getInputFromPort("value").name, module=self)
+        out_fname = utils.getFileRelativeToCurrentVT(self.getInputFromPort("value").name, self)
+        output_file = utils.create_file_module(out_fname, module=self)
         self.setResult('value', output_file)
 
 #class SingleInputPredictor(Predictor):
@@ -480,7 +492,7 @@ class Model(Module):
     SAHM package. It is not intended for direct use or incorporation into
     the VisTrails workflow by the user.
     '''
-    _input_ports = [('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':"['2']", 'optional':False}),
+    _input_ports = [('ThresholdOptimizationMethod', '(gov.usgs.sahm:T_O_M:Other)', {'defaults':'["Sensitivity=Specificity"]', 'optional':False}),
                     ('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)'),
                     ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
@@ -504,6 +516,7 @@ class Model(Module):
                          'ThresholdOptimizationMethod':('om', None, False),
                     }
 
+
     @classmethod
     def provide_input_port_documentation(cls, port_name):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
@@ -511,30 +524,31 @@ class Model(Module):
     def provide_output_port_documentation(cls, port_name):
         return GenModDoc.construct_port_doc(cls, port_name, 'out') 
 
+    def __init__(self):
+        self.suspended_completed = False
+        self.pywrapper = "runRModel.py"
+        self.port_map = copy.deepcopy(Model.port_map)
+        Module.__init__(self)
+
     def compute(self):
-        ModelOutput = {"FIT_BRT_pluggable.r":"brt",
-                       "FIT_GLM_pluggable.r":"glm",
-                       "FIT_RF_pluggable.r":"rf",
-                       "FIT_MARS_pluggable.r":"mars",
-                       "EvaluateNewData.r":"ApplyModel",
-                       "WrapMaxent.r":"maxent",}
+        out_folder = self.forceGetInputFromPort("outputFolderName", "")
+        prefix = self.abbrev + ("_" + out_folder + "_" if out_folder else "_")              
         
-        self.ModelAbbrev = ModelOutput[self.name]
+        self.args_dict = utils.map_ports(self, self.port_map)
         
-        #maxent R and java output write to the same directory
-        prefix = self.ModelAbbrev
-        if self.hasInputFromPort("outputFolderName"):
-            prefix += '_' + self.getInputFromPort("outputFolderName")
-        prefix += '_' 
-            
-        if self.ModelAbbrev == "maxent":
-            self.output_dname=self.MaxentPath
-        else:
-            self.output_dname = utils.mknextdir(prefix=prefix)
-               
-        self.argsDict = utils.map_ports(self, self.port_map)
-        
-        mdsFile = utils.getFileRelativeToCurrentVT(self.argsDict['c'], self)
+        mdsFile = utils.getFileRelativeToCurrentVT(self.args_dict['c'], self)
+
+        #convert threshold optimization string to the expected integer
+        thresholds = {"Threshold=0.5":1,
+                      "Sensitivity=Specificity":2,
+                      "Maximizes (sensitivity+specificity)/2":3,
+                      "Maximizes Cohen's Kappa":4,
+                      "Maximizes PCC (percent correctly classified)":5,
+                      "Predicted prevalence=observed prevalence":6,
+                      "Threshold=observed prevalence":7,
+                      "Mean predicted probability":8,
+                      "Minimizes distance between ROC plot and (0,1)":9}
+        self.args_dict["om"] = thresholds.get(self.args_dict.get("om", "Sensitivity=Specificity"))
 
         if not utils.checkModelCovariatenames(mdsFile):
             msg = "These R models do not work with covariate names begining with non-letter characters or \n"
@@ -545,62 +559,65 @@ class Model(Module):
             writetolog(msg, False, True)
             raise ModuleError(self, msg)
 
-        if self.ModelAbbrev == "maxent":
-            self.argsDict['lam'] = self.MaxentPath
+        if self.abbrev == "Maxent":
+            global maxent_path
+            self.args_dict['maxent_path'] = maxent_path
+            self.args_dict['maxent_args'] = self.maxent_args
+            
+        self.output_dname = utils.mknextdir(prefix)
+        #make a copy of the mds file used in the output folder
+        copy_mds_fname = os.path.join(self.output_dname, os.path.split(mdsFile)[1])
+        shutil.copyfile(mdsFile, copy_mds_fname)
+#            self.output_dname = utils.find_model_dir(prefix, self.args_dict)
         
-        if self.ModelAbbrev == 'brt' or \
-            self.ModelAbbrev == 'rf':
-            if not "seed" in self.argsDict.keys():
-                self.argsDict['seed'] = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
-            writetolog("    seed used for " + self.ModelAbbrev + " = " + str(self.argsDict['seed']))
+        if self.abbrev == 'brt' or \
+            self.abbrev == 'rf':
+            if not "seed" in self.args_dict.keys():
+                self.args_dict['seed'] = random.randint(-1 * ((2**32)/2 - 1), (2**32)/2 - 1)
+            writetolog("    seed used for " + self.abbrev + " = " + str(self.args_dict['seed']))
       
-        self.argsDict['o'] = self.output_dname
-        self.argsDict['rc'] = utils.MDSresponseCol(mdsFile)
-        self.argsDict['cur_processing_mode'] = configuration.cur_processing_mode    
-      
+        self.args_dict['o'] = self.output_dname
+        self.args_dict['rc'] = utils.MDSresponseCol(mdsFile)
+        self.args_dict['cur_processing_mode'] = configuration.cur_processing_mode    
+        
         if not configuration.cur_processing_mode == "multiple models simultaneously (1 core each)":
             #This give previously launched models time to finish writing their 
             #logs so we don't get a lock
-            time.sleep(10)
+            time.sleep(5)
             
-        utils.runRScript(self.name, self.argsDict, self)
+        utils.run_model_script(self.name, self.args_dict, self, self.pywrapper)
         
         utils.launch_RunMonitorApp()
-        
+    
+        self.set_model_results()
+    
+    def set_model_results(self, ):
         #set our output ports
-        if not self.argsDict.has_key('mes'):
-            self.argsDict['mes'] = 'FALSE'
+        #if an output is expected and we're running in syncronously then throw
+        #an error
+        if not self.args_dict.has_key('mes'):
+            self.args_dict['mes'] = 'FALSE'
         self.outputRequired = configuration.cur_processing_mode == "single models sequentially (n - 1 cores each)"
-        self.setModelResult("_prob_map.tif", 'ProbabilityMap', 'mpt')
-        self.setModelResult("_bin_map.tif", 'BinaryMap', 'mbt')
-        self.setModelResult("_resid_map.tif", 'ResidualsMap', 'mes')
-        self.setModelResult("_mess_map.tif", 'MessMap', 'mes')
-        self.setModelResult("_MoD_map.tif", 'MoDMap', 'mes')
-        self.setModelResult("_output.txt", 'Text_Output')
-        self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot')
-        self.setModelResult("_variable.importance.jpg", 'ModelVariableImportance')  
-        writetolog("Finished " + self.ModelAbbrev   +  " builder\n", True, True)
+        self.setModelResult("_prob_map.tif", 'ProbabilityMap', self.abbrev)
+        self.setModelResult("_bin_map.tif", 'BinaryMap', self.abbrev)
+        self.setModelResult("_resid_map.tif", 'ResidualsMap', self.abbrev)
+        self.setModelResult("_mess_map.tif", 'MessMap', self.abbrev)
+        self.setModelResult("_MoD_map.tif", 'MoDMap', self.abbrev)
+        self.setModelResult("_output.txt", 'Text_Output', self.abbrev)
+        self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot', self.abbrev)
+        self.setModelResult("_variable.importance.jpg", 'ModelVariableImportance', self.abbrev)  
+        writetolog("Finished " + self.abbrev   +  " builder\n", True, True)
         
         modelWorkspace = utils.create_dir_module(self.output_dname)
-        self.setResult("modelWorkspace", modelWorkspace)
-        
-    def setModelResult(self, filename, portname, arg_key=None):
-        outFileName = os.path.join(self.output_dname, self.ModelAbbrev + filename)
-        try:
-            thisOutputrequired = self.argsDict[arg_key]
-        except KeyError:
-            thisOutputrequired = True
-            
-        if self.outputRequired and thisOutputrequired:
-            if not os.path.exists(outFileName):
-                msg = "Expected output from this Model is missing:\n\t"
-                msg+= outFileName
-                writetolog(msg)
-                raise ModuleError(self, msg)
-            
+        self.setResult("modelWorkspace", modelWorkspace)  
+    
+    def setModelResult(self, filename, portname, abbrev):
+        '''sets a single output port value
+        '''
+        outFileName = os.path.join(self.output_dname, abbrev + filename)
         output_file = File()
         output_file.name = outFileName
-        output_file.upToDate
+        output_file.upToDate = True
     
         self.setResult(portname, output_file)
         
@@ -616,6 +633,7 @@ class GLM(Model):
         global models_path
         Model.__init__(self) 
         self.name = 'FIT_GLM_pluggable.r'
+        self.abbrev = 'glm'
         self.port_map.update({'SimplificationMethod':('sm', None, False), #This is a GLM specific port
                          'SquaredTerms':('sqt', utils.R_boolean, False), #This is a GLM specific port
                          })
@@ -643,6 +661,7 @@ class RandomForest(Model):
         global models_path
         Model.__init__(self)
         self.name = 'FIT_RF_pluggable.r'
+        self.abbrev = 'rf'
         self.port_map.update({'Seed':('seed', None, False), #This is a BRT specific port
                          'mTry': ('mtry', None, False), #This is a Random Forest specific port
                          'nodesize': ('nodeS', None, False), #This is a Random Forest specific port
@@ -663,12 +682,13 @@ class MARS(Model):
     _input_ports = list(Model._input_ports)
     _input_ports.extend([('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                          ('MarsDegree', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["1"]', 'optional':True}),
-                          ('MarsPenalty', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["2"]', 'optional':True}),
+                          ('MarsPenalty', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["2.0"]', 'optional':True}),
                           ])
     def __init__(self):
         global models_path        
         Model.__init__(self)
         self.name = 'FIT_MARS_pluggable.r'
+        self.abbrev = 'mars'
         self.port_map.update({'MarsDegree':('deg', None, False), #This is a MARS specific port
                          'MarsPenalty':('pen', None, False), #This is a MARS specific port
                          })
@@ -683,7 +703,7 @@ class ApplyModel(Model):
         global models_path       
         Model.__init__(self)
         self.name = 'EvaluateNewData.r'
-        self.port_map = copy.deepcopy(self.port_map)
+        self.abbrev = 'ApplyModel'
         self.port_map.update({'modelWorkspace':('ws', 
                 lambda x: os.path.join(utils.dir_path_value(x), "modelWorkspace"), True),})
         
@@ -706,8 +726,7 @@ class ApplyModel(Model):
             self.args = 'pmt=FALSE '
         
         Model.compute(self)
-
-        
+ 
 class BoostedRegressionTree(Model):
     __doc__ = GenModDoc.construct_module_doc('BoostedRegressionTree')
     
@@ -717,7 +736,7 @@ class BoostedRegressionTree(Model):
                               ('TreeComplexity', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ('BagFraction', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.5"]', 'optional':True}),
                               ('NumberOfFolds', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["3"]', 'optional':True}),
-                              ('Alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["1"]', 'optional':True}),
+                              ('Alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'[1]', 'optional':True}),
                               ('PrevalenceStratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
                               ('ToleranceMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["auto"]', 'optional':True}),
                               ('Tolerance', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.001"]', 'optional':True}),
@@ -728,6 +747,7 @@ class BoostedRegressionTree(Model):
         global models_path
         Model.__init__(self)
         self.name = 'FIT_BRT_pluggable.r'
+        self.abbrev = 'brt'
         self.port_map.update({'Seed':('seed', None, False), #This is a BRT specific port
                          'TreeComplexity':('tc', None, False), #This is a BRT specific port
                          'BagFraction':('bf', None, False), #This is a BRT specific port
@@ -739,6 +759,78 @@ class BoostedRegressionTree(Model):
                          'LearningRate':('lr', None, False), #This is a BRT specific port
                          'MaximumTrees':('mt', None, False), #This is a BRT specific port
                          })
+   
+class MAXENT(Model):
+    '''
+    
+    '''
+    _input_ports = list(Model._input_ports)
+    _input_ports.extend([('UseRMetrics', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
+                         ])
+    _output_ports = list(Model._output_ports)
+    _output_ports.extend([("lambdas", "(edu.utah.sci.vistrails.basic:File)"),
+                     ("report", "(edu.utah.sci.vistrails.basic:File)"),
+                     ("roc", "(edu.utah.sci.vistrails.basic:File)")])
+    
+    def __init__(self):
+        global models_path
+        Model.__init__(self) 
+        self.name = 'WrapMaxent.r'
+        self.pywrapper = "runMaxent.py"
+        self.abbrev = 'Maxent'
+        self.port_map.update({'species_name':('species_name', None, True), #This is a Maxent specific port
+                              })
+        
+    def compute(self):
+        
+        self.maxent_args = {}
+        for port in self._input_ports:
+
+            if not port in list(Model._input_ports) and \
+                port[0] <> 'projectionlayers' and \
+                port[0] <> 'UseRMetrics' and \
+                port[0] <> 'species_name':
+                if self.hasInputFromPort(port[0]):
+                    port_val = self.getInputFromPort(port[0])
+                    if port[1] == "(edu.utah.sci.vistrails.basic:Boolean)":
+                        port_val = str(port_val).lower()
+                    elif (port[1] == "(edu.utah.sci.vistrails.basic:Path)" or \
+                        port[1] == "(edu.utah.sci.vistrails.basic:File)" or \
+                        port[1] == "(edu.utah.sci.vistrails.basic:Directory)"):
+                        port_val = port_val.name
+                    self.maxent_args[port[0]] =port_val
+                else:
+                    kwargs = port[2]
+                    try:
+                        if port[1] == "(edu.utah.sci.vistrails.basic:Boolean)":
+                            default = kwargs['defaults'][1:-1].lower()
+                        elif port[1] == "(edu.utah.sci.vistrails.basic:String)":
+                            default = kwargs['defaults'][1:-1]
+                        else:
+                            default = kwargs['defaults'][1:-1]
+                        #args[port[0]] = default
+                        self.maxent_args[port[0]] = default[1:-1]
+                    except KeyError:
+                        pass
+        if self.hasInputFromPort('projectionlayers'):
+            value = self.forceGetInputListFromPort('projectionlayers')
+            projlayers = ','.join([path.name for path in value])
+            self.maxent_args['projectionlayers']=projlayers
+            
+        Model.compute(self)
+
+#       set some Maxent specific outputs
+        self.args_dict['species_name'] = self.args_dict['species_name'].replace(' ', '_')
+        lambdasfile = self.args_dict["species_name"] + ".lambdas"
+        self.setModelResult(lambdasfile, "lambdas", "")
+        
+        rocfile = "plots" + os.sep + self.args_dict["species_name"] + "_roc.png"
+        self.setModelResult(rocfile, "roc", "")
+
+        htmlfile = self.args_dict["species_name"] + ".html"
+        self.setModelResult(htmlfile, "report", "")
+
+        writetolog("Finished Maxent", True)
    
 class BackgroundSurfaceGenerator(Module):
     '''
@@ -792,7 +884,7 @@ class BackgroundSurfaceGenerator(Module):
                 "ispt":str(kde_params["isopleth"]),
                 "continuous":kde_params["continuous"]}
 
-        utils.runRScript("PseudoAbs.r", args, self)
+        utils.run_R_script("PseudoAbs.r", args, self)
         
         if os.path.exists(outputfName):
             output_file = utils.create_file_module(outputfName, module=self)
@@ -926,7 +1018,7 @@ class MDSBuilder_vector(Module):
         except:
             utils.informative_untrapped_error(self, "MDSBuilder")
 
-        output_file = utils.create_file_module(ourMDSBuilder.outputMDS, self) 
+        output_file = utils.create_file_module(ourMDSBuilder.outputMDS, module=self) 
         self.setResult('mdsFile', output_file)
 
 class FieldDataQuery(Module):
@@ -1007,9 +1099,9 @@ class FieldDataQuery(Module):
                 
             if include_row:
                 response = row[res_key]
-                if response.lower() in ["1", "true", "t", "present", "presence", FDQParams['res_pres_val'].lower()]:
+                if response.lower() in ["1", "true", "t", "present", "presence", str(FDQParams['res_pres_val']).lower()]:
                     response = 1
-                elif response.lower() in ["0", "false", "f", "absent", "absense", FDQParams['res_abs_val'].lower()]:
+                elif response.lower() in ["0", "false", "f", "absent", "absense", str(FDQParams['res_abs_val']).lower()]:
                     response = 0
                 elif responsetype == 'responseBinary': 
                     try:
@@ -1066,9 +1158,7 @@ class FieldDataQuery(Module):
             msg += 'For example:  "[SourceType]" == "Expert"  instead of  [SourceType] == "Expert"' 
             writetolog(msg, True, True)
             raise ModuleError(self, msg)
-
-            
-     
+   
 class FieldDataAggregateAndWeight(Module):
     '''
     Sanity!
@@ -1159,21 +1249,18 @@ class PARC(Module):
         if self.hasInputFromPort("ignoreNonOverlap"):
             ourPARC.ignoreNonOverlap = self.getInputFromPort("ignoreNonOverlap")
 
-        
-
         workingCSV = os.path.join(output_dname, "tmpFilesToPARC.csv")
 
-        #append additional inputs to the existing CSV if one was supplied
-        #otherwise start a new CSV
+        f = open(workingCSV, "wb")
+        csvWriter = csv.writer(f)
+        csvWriter.writerow(["FilePath", "Categorical", "Resampling", "Aggregation"])
+        
         if self.hasInputFromPort("RastersWithPARCInfoCSV"):
             inputCSV = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort("RastersWithPARCInfoCSV").name, self)
-            shutil.copy(inputCSV, workingCSV)
-            f = open(workingCSV, "ab")
-            csvWriter = csv.writer(f)
-        else:
-            f = open(workingCSV, "wb")
-            csvWriter = csv.writer(f)
-            csvWriter.writerow(["FilePath", "Categorical", "Resampling", "Aggregation"])
+            csvReader = csv.reader(open(inputCSV), delimiter=",")
+            header = csvReader.next()
+            for row in csvReader:
+                csvWriter.writerow([utils.getFileRelativeToCurrentVT(row[0]), row[1], row[2], row[3]])
         
         if self.hasInputFromPort("PredictorList"):
             predictor_lists = self.forceGetInputListFromPort('PredictorList')
@@ -1205,10 +1292,8 @@ class PARC(Module):
         
         predictorsDir = utils.create_dir_module(output_dname)
         outputCSV = os.path.join(output_dname, "PARC_Files.csv")
-        output_file = utils.create_file_module(outputCSV, self)
+        output_file = utils.create_file_module(outputCSV, module=self)
         
-        
-#        writetolog("Finished running PARC", True)
         self.setResult('RastersWithPARCInfoCSV', output_file)
         
 class Reclassifier(Module):
@@ -1261,13 +1346,12 @@ class Reclassifier(Module):
 #        outFName = os.path.join(ourReclassifier.outDir, ourReclassifier.outName)
         ourReclassifier.run()
 
-        output_file = utils.create_file_module(ourReclassifier.outName, self)
+        output_file = utils.create_file_module(ourReclassifier.outName, module=self)
         
         
 #        writetolog("Finished running PARC", True)
         self.setResult('outputRaster', output_file)
         
-
 class ReclassifierConfiguration(StandardModuleConfigurationWidget):
     # FIXME add available_dict as parameter to allow config
     def __init__(self, module, controller, parent=None):
@@ -1348,8 +1432,6 @@ class ReclassifierConfiguration(StandardModuleConfigurationWidget):
         elif self.getPortValue('reclassFile'):
             curContents = open(self.getPortValue('reclassFile'), 'r').readlines()
         
-    
-
 class CategoricalToContinuous(Module):
     '''
     '''
@@ -1386,7 +1468,7 @@ class CategoricalToContinuous(Module):
         
         ourC2C.run()
 
-        output_file = utils.create_file_module(ourC2C.outputPredictorsList, self) 
+        output_file = utils.create_file_module(ourC2C.outputPredictorsList, module=self) 
         self.setResult('outputsPredictorListFile', output_file)
 
 class RasterFormatConverter(Module):
@@ -1504,7 +1586,7 @@ class ModelEvaluationSplit(Module):
         writetolog("    seed used for Split = " + str(seed))
         args['seed'] = str(seed)
 
-        utils.runRScript("TestTrainSplit.r", args, self)
+        utils.run_R_script("TestTrainSplit.r", args, self)
         
         output_file = utils.create_file_module(outputMDS, module=self)
         writetolog("Finished Model Evaluation split ", True)
@@ -1572,7 +1654,7 @@ class ModelSelectionSplit(Module):
         # args += " seed=" + str(seed)
         args['seed'] = str(seed)
 
-        utils.runRScript("TestTrainSplit.r", args, self)
+        utils.run_R_script("TestTrainSplit.r", args, self)
         
         output_file = utils.create_file_module(outputMDS, module=self)
         writetolog("Finished Model Selection split ", True)
@@ -1626,7 +1708,7 @@ class ModelSelectionCrossValidation(Module):
         writetolog("    seed used for Split = " + str(seed))
         argsDict["seed"] = str(seed)
         
-        utils.runRScript("CrossValidationSplit.r", argsDict, self)
+        utils.run_R_script("CrossValidationSplit.r", argsDict, self)
         
         output_file = utils.create_file_module(outputMDS, module=self)
         writetolog("Finished Cross Validation split ", True)
@@ -1848,100 +1930,7 @@ class ProjectionLayers(Module):
         self.setResult("MDS", output_file)
         writetolog("Finished Select Projection Layers widget", True)
 
-class MAXENT(Model):
-    '''
-    
-    '''
-    _input_ports = list(Model._input_ports)
-    _input_ports.extend([('UseRMetrics', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
-                         ])
-    _output_ports = list(Model._output_ports)
-    _output_ports.extend([("lambdas", "(edu.utah.sci.vistrails.basic:File)"),
-                     ("report", "(edu.utah.sci.vistrails.basic:File)"),
-                     ("roc", "(edu.utah.sci.vistrails.basic:File)")])
-    
-    def __init__(self):
-        global models_path
-        Model.__init__(self) 
-        self.name = 'WrapMaxent.r'
-        self.MaxentPath=""
-        
-    def compute(self):
-        global maxent_path
 
-        ourMaxent = MaxentRunner.MAXENTRunner()
-        ourMaxent.outputDir = utils.mknextdir(prefix='maxent_')
-        
-        ourMaxent.mdsFile = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('mdsFile').name)
-        
-        ourMaxent.maxentpath = maxent_path
-        
-        MaxentArgsCSV = os.path.join(ourMaxent.outputDir, "MaxentArgs.csv")
-        
-            
-        argWriter = csv.writer(open(MaxentArgsCSV, 'wb'))
-        argWriter.writerow(['parameter','value'])
-        for port in self._input_ports:
-            #print port
-            if port[0] <> 'mdsFile' and port[0] <> 'projectionlayers':
-                if self.hasInputFromPort(port[0]):
-                    port_val = self.getInputFromPort(port[0])
-                    if port[1] == "(edu.utah.sci.vistrails.basic:Boolean)":
-                        port_val = str(port_val).lower()
-                    elif (port[1] == "(edu.utah.sci.vistrails.basic:Path)" or \
-                        port[1] == "(edu.utah.sci.vistrails.basic:File)" or \
-                        port[1] == "(edu.utah.sci.vistrails.basic:Directory)"):
-                        port_val = port_val.name
-                    argWriter.writerow([port[0], port_val])
-                else:
-                    kwargs = port[2]
-                    try:
-                        if port[1] == "(edu.utah.sci.vistrails.basic:Boolean)":
-                            default = kwargs['defaults'][2:-2].lower()
-                        else:
-                            default = kwargs['defaults'][2:-2]
-                        #args[port[0]] = default
-                        argWriter.writerow([port[0], default])
-                    except KeyError:
-                        pass
-        if self.hasInputFromPort('projectionlayers'):
-            value = self.forceGetInputListFromPort('projectionlayers')
-            projlayers = ','.join([path.name for path in value])
-            argWriter.writerow(['projectionlayers', projlayers])
-            
-        argWriter.writerow(['mdsFile', ourMaxent.mdsFile])
-        del argWriter
-        ourMaxent.argsCSV = MaxentArgsCSV
-        ourMaxent.logger = utils.getLogger()
-        ourMaxent.cur_processing_mode = configuration.cur_processing_mode
-
-        try:
-                ourMaxent.run()
-        except TrappedError as e:
-            raise ModuleError(self, e.message)  
-        except:
-            utils.informative_untrapped_error(self, "Maxent")
-            #for debugging use this directory             
-#        ourMaxent.outputDir="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\maxent_20"
-        self.MaxentPath =  ourMaxent.outputDir 
-        #for now display R output only if there was a cv split we might want options
-        Model.compute(self)
-#            return 
-    #set outputs
-        lambdasfile = os.path.join(ourMaxent.outputDir, ourMaxent.args["species_name"] + ".lambdas")
-        output_file = utils.create_file_module(lambdasfile, self)
-        self.setResult("lambdas", output_file, module=self)
-        
-        rocfile = os.path.join(ourMaxent.outputDir, 'plots', ourMaxent.args["species_name"] + "_roc.png")
-        output_file = utils.create_file_module(rocfile, module=self)
-        self.setResult("roc", output_file)
-
-        htmlfile = os.path.join(ourMaxent.outputDir, ourMaxent.args["species_name"] + ".html")
-        print htmlfile
-        output_file = utils.create_file_module(htmlfile, module=self)
-        self.setResult("report", output_file)
-
-        writetolog("Finished Maxent widget", True)
         
        
 def load_max_ent_params():    
@@ -1949,34 +1938,22 @@ def load_max_ent_params():
     csv_reader = csv.reader(open(maxent_fname, 'rU'))
     # pass on header
     csv_reader.next()
-    input_ports = []
-    
-    #input_ports.append(('inputMDS', '(gov.usgs.sahm:MergedDataSet:Other)'))
+    input_ports = list(MAXENT._input_ports)
     
     docs = {}
     basic_pkg = 'edu.utah.sci.vistrails.basic'
-    p_type_map = {'file/directory': 'Path',
-                  'directory':'Directory',
-                  'double': 'Float'}
     for row in csv_reader:
         [name, flag, p_type, default, doc, notes] = row
         name = name.strip()
         p_type = p_type.strip()
-        if p_type in p_type_map:
-            p_type = p_type_map[str(p_type)]
-        else:
-            p_type = str(p_type).capitalize()
         kwargs = {}
         default = default.strip()
         if default:
-            if p_type == 'Boolean':
-                default = default.capitalize()
-            kwargs['defaults'] = str([default])
+            default = eval(default)
+            kwargs['defaults'] = str([str(default)])
         if p_type == 'Boolean':
             kwargs['optional'] = True
         input_ports.append((name, '(' + basic_pkg + ':' + p_type + ')', kwargs))
-        # FIXME set documentation
-        #print 'port:', (name, '(' + basic_pkg + ':' + p_type + ')', kwargs)
         docs[name] = doc
 
 
@@ -1993,10 +1970,7 @@ def initialize():
        
     global maxent_path, color_breaks_csv
     global session_dir 
-    
-    utils.r_path = os.path.abspath(configuration.r_path)
-    maxent_path = os.path.abspath(configuration.maxent_path)   
-    
+        
     session_dir = configuration.cur_session_folder
     if not os.path.exists(session_dir):
         import tempfile
@@ -2011,6 +1985,14 @@ def initialize():
     utils.setrootdir(session_dir)
     utils.importOSGEO() 
     utils.createLogger(session_dir, configuration.verbose)
+        
+    utils.r_path = os.path.abspath(configuration.r_path)
+    if not os.path.exists(configuration.r_path) and \
+        core.system.systemType in ['Microsoft', 'Windows']:
+        #they don't have a decent R path, let's see if we can pull one from the registry
+        utils.r_path = utils.pull_R_install_from_reg()
+                
+    maxent_path = os.path.abspath(configuration.maxent_path)
 
     gdal_data = os.path.join(os.path.dirname(__file__), "GDAL_Resources", "gdal-data")
     os.environ['GDAL_DATA'] = gdal_data
@@ -2024,6 +2006,7 @@ def initialize():
     global utilities
     import pySAHM.utilities as utilities
     utilities.storeUNCDrives()
+    utilities.start_new_pool(utilities.get_process_count(configuration.cur_processing_mode))
     
     global layers_csv_fname
     
@@ -2349,8 +2332,9 @@ _modules = generate_namespaces({'DataInput': [
                                            (RandomPointType, {'abstract': True}),
                                            (OutputRaster, {'abstract': True}),
                                            (mpl_colormap, {'abstract': True}),
-                                           (TextFile, {'configureWidgetType': TextFileConfiguration}),
-                                           (CSVTextFile, {'configureWidgetType': CSVTextFileConfiguration})
+                                           (T_O_M, {'abstract': True}),
+#                                           (TextFile, {'configureWidgetType': TextFileConfiguration}),
+#                                           (CSVTextFile, {'configureWidgetType': CSVTextFileConfiguration})
                                            ],
                                 'Output': [(SAHMModelOutputViewerCell, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe}),

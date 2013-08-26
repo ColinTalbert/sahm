@@ -56,6 +56,9 @@ _verbose = False
 import subprocess
 import multiprocessing
 
+_process_pool = None
+_pool_processes = []
+
 from PyQt4 import QtCore, QtGui
 
 mosaicAllTifsInFolder = None
@@ -136,13 +139,13 @@ def find_key(dic, val):
     return [k for k, v in dic.iteritems() if v == val][0]
 
 #parallelization, remote processing, etc utilites
-def process_waiter(popen, description, que):
-    '''This needs to be replaced with something that allow
-    '''
-    try: 
-        popen.wait()     
-    finally: 
-        que.put( (description, popen.returncode) ) 
+#def process_waiter(popen, description, que):
+#    '''This needs to be replaced with something that allow
+#    '''
+#    try: 
+#        popen.wait()     
+#    finally: 
+#        que.put( (description, popen.returncode) ) 
 
 def runCondorPythonJob(args, workspace, prefix, wholeMachine=False):
     #replace all mappedDriveLetters in the argsDict with UNC paths
@@ -189,7 +192,6 @@ def runCondorPythonJob(args, workspace, prefix, wholeMachine=False):
     submitFile.write("Notification            = Never\n")
     submitFile.write("Queue\n")
     submitFile.close()
-    
     
     curDir = os.getcwd()
     os.chdir(os.path.split(curDir)[0])
@@ -242,18 +244,18 @@ def checkIfFolderIsOnNetwork(dirname):
     else:
         return True
 
-def waitForProcessesToFinish(processQueue, maxCount=1):
-    '''Given a list of running processes and a maximum number of running processes
-    this function waits for enough of the processes have finished to have
-    the number of running jobs be less that the maximum number of jobs we want.
-    '''
-    while len(processQueue) > maxCount:
-            time.sleep(1)
-            for process in processQueue:
-                if process.poll() is not None:
-                    processQueue.remove(process)
+#def waitForProcessesToFinish(processQueue, maxCount=1):
+#    '''Given a list of running processes and a maximum number of running processes
+#    this function waits for enough of the processes have finished to have
+#    the number of running jobs be less that the maximum number of jobs we want.
+#    '''
+#    while len(processQueue) > maxCount:
+#            time.sleep(1)
+#            for process in processQueue:
+#                if process.poll() is not None:
+#                    processQueue.remove(process)
     
-def getProcessCount(strProcessingMode):
+def get_process_count(strProcessingMode):
     '''The number of concurrently running jobs is dependent on the currently 
     selected processingMode. 
     If on Condor then send them all and let Condor manage the Queue.
@@ -261,17 +263,76 @@ def getProcessCount(strProcessingMode):
     '''
     if strProcessingMode == "FORT Condor":
         return  2**32
-    else:
+    elif strProcessingMode == "multiple models simultaneously (1 core each)":
         return multiprocessing.cpu_count() - 1
+    else:
+        return 1
     
-##Spatial utilities
-#def mosaicAllTifsInFolder(inDir, outFileName, gdal_merge):
-#    onlyfiles = [os.path.join(inDir,f) for f in os.listdir(inDir) 
-#            if os.path.isfile(os.path.join(inDir,f)) and f.endswith(".tif") ]
-#    args = ["placeholder", "-o", outFileName] + onlyfiles
-#    gdal.DontUseExceptions()
-#    gdal_merge.main(args)
+def getModelsPath():
+    return os.path.join(os.path.dirname(__file__), "Resources", "R_Modules")
 
+#These three functions are used to manage the process pool
+def get_pool():
+    '''The _pool is a global multiprocessing pool that is used to queue jobs
+    '''
+    global _process_pool
+    return _process_pool
+
+def start_new_pool(processes=1):      
+    global _process_pool
+    if _process_pool:
+        _process_pool.terminate()
+    _process_pool = multiprocessing.Pool(processes)
+
+def wait_for_pool_to_finish():
+    global _process_pool
+    global _pool_processes
+    for process in _pool_processes:
+        process.get()
+        
+def add_process_to_pool(worker, arglist):
+    '''
+    '''
+    global _process_pool
+    global _pool_processes
+    _pool_processes.append(_process_pool.apply_async(worker, arglist))
+
+def convert_list_to_cmd_str(inlist):
+    '''return a string equivalent to the command line used.
+    notably it escapes quotes and wraps elements with spaces in double quotes.
+    '''
+    outlist = []
+    for item in inlist:
+        item = item.replace('"', '\"')
+        if ' ' in item:
+            item =  '"' + item + '"'
+        outlist.append(item)
+    return " ".join(outlist)
+    
+
+def launch_cmd(cmd, stdout_fname="", stderr_fname="", async=False):
+    #open the text files we'll be writing our stdOut and stdErr to
+    if not stdout_fname or not stderr_fname:
+        f = tempfile.NamedTemporaryFile(delete=False)
+        fname = f.name
+        f.close()
+        if not stdout_fname:
+            stdout_fname = fname+"stdout.txt"
+        if not stderr_fname:
+            stderr_fname = fname+"stderr.txt"
+                    
+    stdErrFile = open(stderr_fname, 'wb')
+    stdOutFile = open(stdout_fname, 'wb')
+
+    p = subprocess.Popen(cmd, stderr=stdErrFile, stdout=stdOutFile)
+    if not async:
+        p.wait()
+        
+    stdErrFile.close()
+    stdOutFile.close()
+    errMsg = "\n".join(open(stderr_fname, "r").readlines())
+    outMsg = "\n".join(open(stdout_fname, "r").readlines())
+    return outMsg, errMsg
 
 #these two functions were pulled from: http://code.activestate.com/recipes/577124-approximately-equal/
 def _float_approx_equal(x, y, tol=1e-18, rel=1e-7):
@@ -330,3 +391,31 @@ def approx_equal(x, y, *args, **kwargs):
     # approximate equal comparison (or are both floats). Fall back to a numeric
     # comparison.
     return _float_approx_equal(x, y, *args, **kwargs)
+
+def checkIfModelFinished(model_dir):
+    try:
+        out_err = os.path.join(model_dir, "stdErr.txt")
+        stdErrLines = "\n".join(open(out_err, "r").readlines())
+        if "Error" in stdErrLines:
+            return "Error in model"
+    except:
+        pass
+
+    try:
+        outText = [file_name for file_name in os.listdir(model_dir)
+                                     if file_name.endswith("_output.txt")][0]
+    except IndexError:
+        return "Starting ..."
+    
+    model_text = os.path.join(model_dir, outText)
+    try:
+        lastLine = open(model_text, 'r').readlines()[-2]
+    except IndexError:
+        return "Running ..."
+     
+    if lastLine.startswith("Total time"):
+        return "Completed successfully in " + lastLine[lastLine.find(" = ")+3:]
+    elif lastLine.startswith("Model Failed"):
+        return "Error in model"
+    else:
+        return "Running ..."

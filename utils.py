@@ -48,6 +48,7 @@ import csv
 import time
 import tempfile
 import subprocess
+import multiprocessing
 import re
 
 import struct, datetime, decimal, itertools
@@ -90,7 +91,6 @@ def importOSGEO():
     from osgeo import osr as osr
     global gdal_merge
     from GDAL_Resources.Utilities import gdal_merge as gdal_merge
-
 
 def getpixelsize(filename):
     dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
@@ -136,6 +136,7 @@ def getNDVal(filename):
         if approx_equal(NDValue, upperLeftPixVal):
             NDValue = band.ReadAsArray(0, 0, 1, 1, 1, 1)[0][0]
     
+    
 #    if min is None or min == band.GetNoDataValue():
 #            min = band.ComputeRasterMinMax(0)[0]
 
@@ -162,10 +163,6 @@ def getNDVal(filename):
     dataset = None
     return NDValue
    
-
- 
- 
-
 def mknextfile(prefix, suffix="", directory=""):
     global _roottempdir
     if directory == "":
@@ -199,10 +196,10 @@ def mknextdir(prefix, directory="", skipSequence=False):
         files = os.listdir(directory)
         seq = 0
         for f in files:
-            if (f.startswith(prefix) and
+            if (f.lower().startswith(prefix.lower()) and
                 not os.path.isfile(f)):
                 try:
-                    f_seq = int(f.replace(prefix, ''))
+                    f_seq = int(f.lower().replace(prefix.lower(), ''))
                     if f_seq > seq:
                         seq = f_seq
                 except ValueError:
@@ -217,7 +214,6 @@ def setrootdir(session_dir):
     global _roottempdir
     _roottempdir = session_dir
     
-
 def getrootdir():
     global _roottempdir
     return _roottempdir
@@ -245,7 +241,13 @@ def map_ports(module, port_map):
                     port + '.  Only single entry handled.  Please remove extraneous items.')
             elif len(value) == 0:
                 try:
-                    value = eval([item for item in module._input_ports if item[0] == port][0][2]['defaults'])[0]
+                    port_tuple = [item for item in module._input_ports if item[0] == port][0]
+                    port_info = [port_type for port_type in module._input_ports if port_type[0] == port]
+                    port_type = re.split("\.|:", port_info[0][1])[-1][:-1]
+                    if port_type in ['Float', 'Integer', 'Boolean']:
+                        value = eval(eval(port_tuple[2]['defaults'])[0])
+                    else:
+                        value = eval(port_tuple[2]['defaults'])[0]
                 except:
                     raise ModuleError(module, 'No items found from Port ' + 
                         port + '.  Input is required.')
@@ -268,10 +270,10 @@ def path_port(module, portName):
                           portName + '.  Only single entry handled.  Please remove extraneous items.')
     value = value[0]
     path = value.name 
-    path.replace("/", os.path.sep)
+    path = path.replace("/", os.path.sep)
     if os.path.exists(path):
         return path
-    elif os.path.exists(getFileRelativeToCurrentVT(path), module):
+    elif os.path.exists(getFileRelativeToCurrentVT(path, module)):
         return getFileRelativeToCurrentVT(path, module)
     else:
         raise RuntimeError, 'The indicated file or directory, ' + \
@@ -379,13 +381,6 @@ def informative_untrapped_error(instance, name):
     writetolog(print_exc_plus(), False, False)
     raise ModuleError(instance, errorMsg)
 
-def breakpoint():
-    ''' open up the python debugger here and poke around
-    Very helpful, I should have figured this out ages ago!
-    '''
-    QtCore.pyqtRemoveInputHook()
-    import pdb; pdb.set_trace()
-
 def writetolog(*args, **kwargs):
     '''Uses the SAHM log file writting function
     but appends our known logfile to the kwargs.
@@ -415,96 +410,112 @@ def getRasterName(fullPathName):
         rastername = os.path.split(fullPathName)[0]
     else:
         rastername = fullPathName
-    return getFileRelativeToCurrentVT(rastername)
+    return getFileRelativeToCurrentVT(rastername)    
 
-def getModelsPath():
-    return os.path.join(os.path.dirname(__file__), "pySAHM", "Resources", "R_Modules")
-
-def runRScript(script, args_dict, module=None):
-    global r_path
-        
+def gen_R_cmd(script, args_dict):
+    '''Formats the cmd used to launch a SAHM R script
+    Returns a list of the cmd elements
+    '''
+    #get the path to the R exe 
+    global r_path   
     if core.system.systemType in ['Microsoft', 'Windows']:
-        program = getR_application()  #-q prevents program from running
+        R_exe = getR_application()  #-q prevents R_exe from running
     else:
-        program = r_path
-    scriptFile = os.path.join(getModelsPath(), script)
-
-    args = ["%s=%s" % pair for pair in args_dict.iteritems()]
-    args_str = ' '.join(args)
-    
-    command_arr = [program, '--vanilla', '-f', scriptFile, "--args"] + args
-    # command = program + " --vanilla -f " + scriptFile + " --args " + args
-    command = ' '.join(command_arr)
-    
-    writetolog("\nStarting R Processing of "  + script , True)
-    #writetolog("    args: " + args_str, False, False)
-    
-    #print "RUNNING COMMAND:", command_arr
-    
-    runRModelPy = os.path.join(os.path.dirname(__file__), "pySAHM", "runRModel.py")
-    command_arr = [sys.executable, runRModelPy] + command_arr
-    processing_mode = args_dict.get("cur_processing_mode", "single models sequentially (n - 1 cores each)")
-    
-    if args_dict.has_key("o") and os.path.isdir(args_dict['o']):
-        stdErrFname = os.path.join(args_dict['o'], "stdErr.txt")
-        stdOutFname = os.path.join(args_dict['o'], "stdOut.txt")
-    else:
-        f = tempfile.NamedTemporaryFile(delete=False)
-        fname = f.name
-        f.close()
-        stdErrFname = fname+"stdErr.txt"
-        stdOutFname = fname+"stdOut.txt"
-    
-    stdErrFile = open(stdErrFname, 'w')
-    stdOutFile = open(stdOutFname, 'w')
-    
-    if processing_mode == "single models sequentially (n - 1 cores each)":
-        #we waiting for each model to finish before moving on.
-        #but set the mc (multiple core) flag appropriately
-        command_arr += ["multicore=TRUE"]
-        writetolog("    command: " + " ".join(command_arr), False, False)
-        p = subprocess.Popen(command_arr, stderr=stdErrFile, stdout=stdOutFile)
-        p.communicate()
-        stdErrFile.close()
-        stdOutFile.close()
+        R_exe = r_path
         
-        errMsg = "\n".join(open(stdErrFname, "r").readlines())
-        outMsg = "\n".join(open(stdOutFname, "r").readlines())
-        if 'Error' in errMsg:
-            msg = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-            msg +="\n  An error was encountered in the R script for this module."
-            msg += "\n     The R error message is below: \n"
-            msg += errMsg
-            writetolog(msg)
-    
-        if 'Warning' in errMsg:
-            msg = "The R scipt returned the following warning(s).  The R warning message is below - \n"
-            msg += errMsg
-            writetolog(msg)
-    
-        if 'Error' in errMsg:
-            #also write the errors to a model specific log file in the model output dir
-            #then raise an error
-            writeRErrorsToLog(args_dict, outMsg, errMsg)
-            if module:
-                raise ModuleError(module, msg)
-            else:
-                raise RuntimeError , msg
-        elif 'Warning' in errMsg:
-            writeRErrorsToLog(args_dict, outMsg, errMsg)
-            
-        writetolog("\nFinished R Processing of " + script, True)
-    elif processing_mode == "multiple models simultaneously (1 core each)":
-        command_arr += ["multicore=FALSE"]
-        writetolog("    command: " + " ".join(command_arr), False, False)
-        p = subprocess.Popen(command_arr, stderr=stdErrFile, stdout=stdOutFile)
-        writetolog("\n R Processing launched asynchronously " + script, True) 
-    elif processing_mode == "FORT Condor":
-        command_arr += ["multicore=True"]
-        runModelOnCondor(script, args_dict, command_arr)
-        writetolog("\n R Processing launched using Condor " + script, True)  
+    #get the path the the SAHM specific R script that we'll be running
+    sahm_R_script = os.path.join(utilities.getModelsPath(), script)
 
-                       
+    #reformat are args into the form expected by our R scripts 
+    args = ["%s=%s" % pair for pair in args_dict.iteritems()]
+    
+    command_arr = [R_exe, '--vanilla', '-f', sahm_R_script, "--args"] + args
+    return command_arr
+
+def run_R_script(script, args_dict, module=None, async=False, 
+               stdout_fname=None, stderr_fname=None):
+    '''Runs a SAHM R script
+    if async is False it waits for the script to finish processing and checks
+    the output for warning and error messages.
+    
+    if async is True it launches the script on the global queue and immediately
+    returns.
+    
+    if stdout_fname or stderr_fname are provided these files will receive the
+    output, which is helpful for debugging/logging
+    '''
+    cmd = gen_R_cmd(script, args_dict)
+    
+    writetolog("\nStarting processing of "  + script , True)
+    writetolog("    command used: \n" + utilities.convert_list_to_cmd_str(cmd), False, False)
+    
+    #run our script
+    if async:
+        utilities.add_process_to_pool(utilities.launch_cmd, 
+                                [cmd, stdout_fname, stderr_fname])
+        writetolog("\nLaunched asynchronously "  + script , True)
+    else:
+        stdout, stderr = utilities.launch_cmd(cmd, stdout_fname, stderr_fname)
+        check_R_output(stdout, stderr, module, args_dict)
+        writetolog("\nFinished processing of "  + script , True)
+        return stdout, stderr
+    
+#    runRModelPy = os.path.join(os.path.dirname(__file__), "pySAHM", runner_script)
+#    command_arr = [sys.executable, runRModelPy] + command_arr
+
+def check_R_output(stdout, stderr, module=None, args_dict=None):
+    #handle the errors and warnings
+    if 'Error' in stderr:
+        msg = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        msg +="\n  An error was encountered in the R script for this module."
+        msg += "\n     The R error message is below: \n"
+        msg += stderr
+        writetolog(msg)
+
+    if 'Warning' in stderr:
+        msg = "The R scipt returned the following warning(s).  The R warning message is below - \n"
+        msg += stderr
+        writetolog(msg)
+
+    if 'Error' in stderr:
+        #also write the errors to a model specific log file in the model output dir
+        #then raise an error
+        writeRErrorsToLog(args_dict, stdout, stderr)
+        if module:
+            raise ModuleError(module, msg)
+        else:
+            raise RuntimeError , msg
+    elif 'Warning' in stderr:
+        writeRErrorsToLog(args_dict, stdout, stderr)
+
+def run_model_script(script, args_dict, module=None, runner_script="runRModel.py"):
+    '''Our SAHM R model scripts now require a python wrapper to handle complications
+    introduced by multiprocessing.  Additionally these model scripts require 
+    specific processing depending on the current processing mode.
+    '''
+    processing_mode = args_dict.get("cur_processing_mode", 
+                                "single models sequentially (n - 1 cores each)")
+    args_dict["multicore"]=R_boolean(not processing_mode == 
+                                "multiple models simultaneously (1 core each)")
+    
+    stderr_fname = os.path.join(args_dict['o'], "stdErr.txt")
+    stdout_fname = os.path.join(args_dict['o'], "stdOut.txt")
+    
+    cmd = gen_R_cmd(script, args_dict)
+    runRModelPy = os.path.join(os.path.dirname(__file__), "pySAHM", runner_script)
+    cmd = [sys.executable, runRModelPy] + cmd
+    
+    writetolog("\nStarting processing of "  + script , True)
+    writetolog("    command used: \n" + utilities.convert_list_to_cmd_str(cmd), False, False)
+    
+    if processing_mode == "FORT Condor":
+        runModelOnCondor(script, args_dict)
+        writetolog("\n R Processing launched using Condor " + script, True)
+    else:
+        utilities.add_process_to_pool(utilities.launch_cmd, 
+                                [cmd, stdout_fname, stderr_fname])
+        writetolog("\n R Processing launched asynchronously " + script, True)  
+      
 
 def runModelOnCondor(script, args_dict, command_arr):
     #copy MDS file and convert all refs to K:, I:, N:, J: to UNC paths
@@ -583,6 +594,23 @@ def getR_application(module=None):
         
     return program
     
+def pull_R_install_from_reg():
+    #searches in the registry for an installation of R and returns the path
+    #to the bin folder within it if that folder exists
+    regCmd = r'reg query "HKEY_LOCAL_MACHINE\SOFTWARE\R-core\R" /v "InstallPath"'
+    startupinfo = subprocess.STARTUPINFO()
+    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    regValue = subprocess.Popen(regCmd, startupinfo=startupinfo, stdout=subprocess.PIPE).stdout.read()
+    
+    for line in regValue.split("\n"):
+        if line.strip() and os.path.isdir(line.split("    ")[-1].strip()):
+            R_path = os.path.abspath(os.path.join(line.split("    ")[-1].strip(), "bin"))
+            if os.path.exists(R_path):
+                msg = "The specified installation of R in the sahm configuration parameter is not valid\n"
+                msg += "Using the installation location found in the registry:\n"
+                msg += R_path
+                writetolog(msg, True, True)
+            return R_path
 
 def writeRErrorsToLog(args, outMsg, errMsg):
     #first check that this is a model run, or has a o= in the args.
@@ -931,17 +959,17 @@ def getParentDir(f, x=None):
 
 
 def getFileRelativeToCurrentVT(fname, curModule=None):
-    #This is hree step approach:
+    #This is three step approach:
     #step 1: if fname exists assume it's the one we want and return it.
     #step 2: Look for the file relative to the current VT.
     #        In effect loop through all the sibling and descendant folders 
-    #        of the vt file and look for the base filename in each.
+    #        of the vt file's parent directory and look for the base filename in each.
     #        If we find an identically named file hope for the best and return it.
     #step 3: Do what we did in step 2 but relative to the current session folder.
     #
     #If no fname is found in the above three steps raise an error.
     def couldntFindFile():
-        msg = "Could not find file: ", fname, "\nPlease point to valid location for this file."
+        msg = "Could not find file: " + fname + "\nPlease point to valid location for this file."
         if curModule is None:
             raise Exception(msg)
         else:
@@ -951,8 +979,8 @@ def getFileRelativeToCurrentVT(fname, curModule=None):
         #step 1
         if os.path.exists(fname):
             return fname
-        #step 2 (and then step3)
         
+        #step 2 (and then step3)
         try:
             app = gui.application.get_vistrails_application()()
             curlocator = app.get_vistrail().locator.name
@@ -960,7 +988,9 @@ def getFileRelativeToCurrentVT(fname, curModule=None):
         except:
             curVTdir = ""
             
-        justfname = os.path.split(fname)[1]
+        root_dir, justfname = os.path.split(fname)
+        if justfname.lower() == "hdr.adf":
+            justfname = os.path.sep.join([os.path.split(root_dir)[1], justfname])
         for rootdir in [curVTdir, getrootdir()]:
             if os.path.exists(os.path.join(rootdir, justfname)):
                 return os.path.join(rootdir, justfname)
@@ -968,6 +998,7 @@ def getFileRelativeToCurrentVT(fname, curModule=None):
                 for dirname in dirnames:
                     if os.path.exists(os.path.join(root, dirname, justfname)):
                         return os.path.join(root, dirname, justfname)
+                    
         #we did our best but couldn't find the file 
         couldntFindFile()
             

@@ -437,7 +437,7 @@ class SelectListDialog(QtGui.QDialog):
         if os.path.exists(os.path.join(self.outputDir, "Predictor_Correlation.jpg")):
             os.remove(os.path.join(self.outputDir, "Predictor_Correlation.jpg"))
             
-        utils.runRScript('PairsExplore.r', args)
+        utils.run_R_script('PairsExplore.r', args)
         
         if os.path.exists(os.path.join(self.outputDir, "devinfo.csv")):
             self.loadDeviances()
@@ -463,13 +463,16 @@ class SelectListDialog(QtGui.QDialog):
         devreader = csv.reader(devcsv)
         header = devreader.next()
         for line in devreader:
-            deviance = "%.1f" %float(line[1])
-            deviance = deviance.rjust(7)
             try:
-                item = self.treeview.findItems(QtCore.QString(line[0]), QtCore.Qt.MatchFlags())
-                item[0].setData(1, 0, deviance)
+                deviance = "%.1f" %float(line[1])
+                deviance = deviance.rjust(7)
+                try:
+                    item = self.treeview.findItems(QtCore.QString(line[0]), QtCore.Qt.MatchFlags())
+                    item[0].setData(1, 0, deviance)
+                except:
+                    print "Problem encountered with item: ", line[0]
             except:
-                print "Problem encountered with item: ", line[0]
+                print "problem loading deviances"
         del devcsv
 
 
@@ -485,7 +488,7 @@ class SelectListDialog(QtGui.QDialog):
         if os.path.exists(output_fname):
             os.remove(output_fname)
             
-        utils.runRScript('Predictor.inspection.r', args)
+        utils.run_R_script('Predictor.inspection.r', args)
         
         if os.path.exists(output_fname):
             return output_fname

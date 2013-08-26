@@ -249,9 +249,9 @@ class FieldDataQuery(object):
                 #    if there were any 'hits' not equal to 0
                 #    otherwise if there were any absences the value is 0
                 #    what's left is background points
-                #for presense/absense data
+                #for presence/absence data
                 #    The value is 1 if there were any 1s in our points
-                #    Or 0 if there were any zeros (absenses)
+                #    Or 0 if there were any zeros (absences)
                 #    Otherwise it's a background pixel.
                 total = 0
                 count = 0
@@ -271,7 +271,7 @@ class FieldDataQuery(object):
                 outputLine[1] = y
                 
                 if self.countdata and total > 0:
-                    outputLine[2] = total / float(count)
+                    outputLine[2] = total
                 elif total > 0:
                     outputLine[2] = 1
                 elif numAbsense > 0:

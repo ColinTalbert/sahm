@@ -81,7 +81,7 @@ source(file.path(ScriptPath,"MAXENT.helper.fcts.r"))
 		response.col=responseCol,
 		make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
 		script.name="maxent",
-    opt.methods=opt.methods,MESS=MESS,lambdas=lambdas,ScriptPath=ScriptPath,multCore=multCore)
+    opt.methods=opt.methods,MESS=MESS,lambdas=lambdas,ScriptPath=ScriptPath,multCore=multCore,debug.mode=FALSE)
 
 
 
