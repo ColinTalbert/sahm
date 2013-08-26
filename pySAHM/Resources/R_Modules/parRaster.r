@@ -1,4 +1,4 @@
-parRaster<-function(start.tile,dims,tr,MESS,nvars,fullnames,nvars.final,vnames,NAval,
+parRaster<-function(start.tile,dims,tr,MESS,MOD,nvars,fullnames,nvars.final,vnames,NAval,
 factor.levels,model,Model,pred.fct,make.binary.tif,make.p.tif,RasterInfo,outfile.p,outfile.bin,
 thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template,maDir) {
     #loading code and libraries that are needed
@@ -44,9 +44,9 @@ thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template,maDir) {
     if(MESS) {
     
       MessRaster<-raster(RasterInfo)
-      ModRaster<-raster(RasterInfo)
+      if(MOD) ModRaster<-raster(RasterInfo)
       MessRaster <- writeStart(MessRaster, filename=sub("ProbTiff","MESSTiff",sub("prob","mess",outfile.p)), overwrite=TRUE)
-      ModRaster <- writeStart(ModRaster, filename=sub("ProbTiff","ModTiff",sub("prob","MoD",outfile.p)), overwrite=TRUE)
+      if(MOD) ModRaster <- writeStart(ModRaster, filename=sub("ProbTiff","ModTiff",sub("prob","MoD",outfile.p)), overwrite=TRUE)
         train.dat<-train.dat[,match(vnames.final.mod,names(train.dat))]
         #order the training data so that we can consider the first and last row  only in mess calculations
         for(k in 1:nvars.final) train.dat[,k]<-sort(train.dat[,k])
@@ -59,13 +59,14 @@ thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template,maDir) {
         templateRast <- try(raster(template),silent=TRUE) 
         if(class(templateRast)=="try-error") HasTemplate=FALSE
     }
+    
  for (i in start.tile:min(start.tile+nToDo-1,length(tr$row))){
  
    capture.output(cat(paste("starting tile", i,Sys.time(),"\n")),file=outtext,append=TRUE)
    #alter the write start location because we always start at position 1                                   
    writeLoc<-ifelse((start.tile-1)==0,tr$row[i],tr$row[i]-sum(tr$nrows[1:(start.tile-1)]))
    if(HasTemplate){ TemplateMask<-getValuesBlock(templateRast, row=tr$row[i], nrows=tr$nrows[i])
-
+     
        if(all(is.na(TemplateMask))){
          #if the template is completely NA values, don't read in any other data
            temp<-rep(NA,times=tr$nrow[i]*dims[2])
@@ -114,7 +115,7 @@ thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template,maDir) {
         if(MESS) {
           MessRaster<-writeValues(MessRaster,pred.rng, writeLoc)
           if(is.null(names(pred.rng))) names(pred.rng)<-NA
-          ModRaster<-writeValues(ModRaster,names(pred.rng), writeLoc)
+          if(MOD) ModRaster<-writeValues(ModRaster,names(pred.rng), writeLoc)
         }
        
           if(make.binary.tif) binaryRaster<-writeValues(binaryRaster,(preds>thresh),writeLoc)
@@ -129,9 +130,9 @@ thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template,maDir) {
   if(make.binary.tif) {
     writeStop(binaryRaster)
   }
-  if(MESS) {
-    writeStop(MessRaster)
-    writeStop(ModRaster)
+  if(MESS) writeStop(MessRaster)
+  if(MOD) {
+     writeStop(ModRaster)
    
       #I need to uncomment this later but for now I'd like it not to break
     d<-data.frame(as.integer(seq(1:length(train.dat))),names(train.dat))
