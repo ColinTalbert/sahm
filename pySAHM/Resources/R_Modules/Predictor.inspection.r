@@ -17,7 +17,7 @@ Predictor.inspection<-function(predictor,input.file,output.dir,response.col="Res
 
      abs.lab<-"Abs"
      pres.lab<-"Pres" 
-     if(any(unique(response)%in%c(-9999,-9998)) & !any(unique(response)==0)){
+     if(any(unique(response)%in%c(-9999,-9998))){
           abs.lab<-"PsedoAbs"
           response[response%in%c(-9999,-9998)]<-0
      }
