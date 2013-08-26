@@ -62,46 +62,17 @@ from core.packagemanager import get_package_manager
 
 import os
 import itertools
+
+import GenerateModuleDoc as GenModDoc
+doc_file = os.path.abspath(os.path.join(os.path.dirname(__file__),  "documentation.xml"))
+GenModDoc.load_documentation(doc_file)
+
 ################################################################################
 
 class SAHMModelOutputViewerCell(SpreadsheetCell):
     """
-SAHMModelOutputViewerCell
-
-Description:
-        The SAHM Spatial Output Viewer Cell provides a convenient means for viewing the numerous
-    spatial outputs produced by individual model runs as well as the input presence and absence
-    points and background points if applicable.  The spatial viewer displays the outputs in an
-    interactive Matplotlib chart which functions much like a full GIS.
-
-        Attached to each cell is a toolbar that allows changing of the displayed layer and the
-    overlaid points
-
-Input Ports:
-    row:  (optional)
-        The spread sheet row that the output will be placed in. Counts start from 1 not 0.
-        Default value = VisTrails will default to the next availible cell on the spreadsheet.
-
-    column:  (optional)
-        The spread sheet column that the output will be placed in. Counts start from 1 not 0.
-        Default value = VisTrails will default to the next availible cell on the spreadsheet.
-
-    ModelWorkspace:  (mandatory)
-        The ModelWorkspace is a file titled modelWorkspace (no extension) that is saved in each
-        model output folder.  All the individual outputs will be identified relative to the location
-        of this file.
-
-    InitialModelOutputDisplay:  (optional)
-        The display tab to show initially.
-        Options are:
-            Text
-            Response Curves
-            AUC Curves
-            Calibration
-            Confusion
-            Residuals
-            Variable Importance
     """
+    __doc__ = GenModDoc.construct_module_doc('SAHMModelOutputViewerCell')
     _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ('ModelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'),

@@ -83,6 +83,10 @@ from core.packagemanager import get_package_manager
 
 from sahm_picklists import mpl_colormap
 
+import GenerateModuleDoc as GenModDoc
+doc_file = os.path.abspath(os.path.join(os.path.dirname(__file__),  "documentation.xml"))
+GenModDoc.load_documentation(doc_file)
+
 class GeneralSpatialViewer(SpreadsheetCell):
     """
     SAHMModelOutputViewerCell is a VisTrails Module that
@@ -91,6 +95,7 @@ class GeneralSpatialViewer(SpreadsheetCell):
     colorRamp values can be found at:
 
     """
+    __doc__ = GenModDoc.construct_module_doc('GeneralSpatialViewer')
     _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("rasterFile", '(edu.utah.sci.vistrails.basic:Path)'),
@@ -101,6 +106,12 @@ class GeneralSpatialViewer(SpreadsheetCell):
                     ('dataMax', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('NoDataValue', '(edu.utah.sci.vistrails.basic:Float)'),]
 
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return GenModDoc.construct_port_doc(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+        return GenModDoc.construct_port_doc(cls, port_name, 'out') 
 
     def __init__(self):
         SpreadsheetCell.__init__(self)

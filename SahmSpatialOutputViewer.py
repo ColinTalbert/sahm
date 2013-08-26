@@ -85,12 +85,17 @@ from core.packagemanager import get_package_manager
 
 import utils
 
+import GenerateModuleDoc as GenModDoc
+doc_file = os.path.abspath(os.path.join(os.path.dirname(__file__),  "documentation.xml"))
+GenModDoc.load_documentation(doc_file)
+
 class SAHMSpatialOutputViewerCell(SpreadsheetCell):
     """
     SAHMModelOutputViewerCell is a VisTrails Module that
     displays the various output from a SAHM Model run in a single cell
 
     """
+    __doc__ = GenModDoc.construct_module_doc('SAHMSpatialOutputViewerCell')
     _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ('display_presense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
@@ -99,6 +104,12 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
                     ('initial_raster_display', '(gov.usgs.sahm:OutputRaster:Other)', {'defaults':'["Probability"]'}),
                     ('model_workspace', '(edu.utah.sci.vistrails.basic:Directory)')]
     #all inputs are determined relative to the model_workspace
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return GenModDoc.construct_port_doc(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+        return GenModDoc.construct_port_doc(cls, port_name, 'out') 
 
     def __init__(self):
         SpreadsheetCell.__init__(self)
