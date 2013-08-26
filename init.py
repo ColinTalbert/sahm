@@ -654,8 +654,6 @@ class RandomForest(Model):
                          ('proximity', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
                          ('oobProx', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
                          ('normVotes', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
-                         ('doTrace', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
-                         ('keepForest', '(edu.utah.sci.vistrails.basic:Boolean)', {'optional':True}),
                          ]) 
     def __init__(self):
         global models_path
@@ -1535,7 +1533,6 @@ class ModelEvaluationSplit(Module):
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('trainingProportion', '(edu.utah.sci.vistrails.basic:Float)', 
                         {'defaults':'["0.7"]'}),
-                    ('RatioPresAbs', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
     
@@ -1601,7 +1598,6 @@ class ModelSelectionSplit(Module):
     _input_ports = [("inputMDS", "(gov.usgs.sahm:MergedDataSet:Other)"),
                     ('trainingProportion', '(edu.utah.sci.vistrails.basic:Float)', 
                         {'defaults':'["0.7"]'}),
-                    ('RatioPresAbs', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('Seed', '(edu.utah.sci.vistrails.basic:Integer)'),]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
 
