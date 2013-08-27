@@ -243,7 +243,7 @@ class SelectAndTestFinalModel(QtGui.QDialog):
         
     def okTriggered(self):
         self.runR()
-        self.done(0)
+        #self.done(0)
 
     def cancel(self):
         self.done(1)
@@ -342,7 +342,7 @@ class SelectAndTestFinalModel(QtGui.QDialog):
             msgbox.exec_()
         
         else:
-            output_disp = os.path.join(finalFolder, "somethinghere")
+            output_disp = os.path.join(finalFolder, "FinalEvaluationBinom.jpg")
             self.load_picture(output_disp)
 
         
