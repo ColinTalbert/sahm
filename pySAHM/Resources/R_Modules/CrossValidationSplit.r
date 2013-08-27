@@ -76,7 +76,7 @@ options(warn=1)
            response[response==-9998]<-0
            }
            
-          if(sum(as.numeric(response)==0)==0 && !is.null(stratify)) stop("The ratio of presence to absence cannot be set with only presence data")
+          if(sum(as.numeric(response)==0)==0 && !is.null(stratify)) stop("Cross Validation requires absence data")
 
       #Ignoring background data that might be present in the mds
 
