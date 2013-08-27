@@ -603,7 +603,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
                 if kwargs["min"] == "pullfromdata":
                     rmin = min
 
-            norm = colors.normalize(rmin, rmax)
+            norm = colors.Normalize(rmin, rmax)
 #            print "raster_array is None:", raster_array is None
 #            print "raster_array.size:", raster_array.size
 #            print "type(raster_array):", type(raster_array)
