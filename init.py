@@ -568,6 +568,8 @@ class Model(Module):
         #make a copy of the mds file used in the output folder
         copy_mds_fname = os.path.join(self.output_dname, os.path.split(mdsFile)[1])
         shutil.copyfile(mdsFile, copy_mds_fname)
+        self.args_dict["c"] = copy_mds_fname
+        
 #            self.output_dname = utils.find_model_dir(prefix, self.args_dict)
         
         if self.abbrev == 'brt' or \
@@ -1766,8 +1768,6 @@ class CovariateCorrelationAndSelection(Module):
             os.remove(params['outputMDS'])
             shutil.copy2(params['inputMDS'], params['outputMDS'])
             writetolog("    Applying previous selection but not showing GUI", False, True)
-        elif not os.path.exists(params['outputMDS']) and not params['ShowGUI']:
-            raise ModuleError(self, "Show GUI deselected but no previous output detected.\n\nCan not continue!")
         else:
             self.callDisplayMDS(params)
                     
