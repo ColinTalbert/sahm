@@ -582,10 +582,9 @@ class Model(Module):
         self.args_dict['rc'] = utils.MDSresponseCol(mdsFile)
         self.args_dict['cur_processing_mode'] = configuration.cur_processing_mode    
         
-        if not configuration.cur_processing_mode == "multiple models simultaneously (1 core each)":
-            #This give previously launched models time to finish writing their 
-            #logs so we don't get a lock
-            time.sleep(5)
+        #This give previously launched models time to finish writing their 
+        #logs so we don't get a lock
+        time.sleep(2)
             
         utils.run_model_script(self.name, self.args_dict, self, self.pywrapper)
         
