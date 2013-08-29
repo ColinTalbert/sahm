@@ -598,20 +598,27 @@ def getR_application(module=None):
 def pull_R_install_from_reg():
     #searches in the registry for an installation of R and returns the path
     #to the bin folder within it if that folder exists
-    regCmd = r'reg query "HKEY_LOCAL_MACHINE\SOFTWARE\R-core\R" /v "InstallPath"'
+    regCmds = [r'reg query "HKEY_LOCAL_MACHINE\SOFTWARE\R-core\R" /v "InstallPath"',
+               r'reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\R-core\R" /v "InstallPath"']
     startupinfo = subprocess.STARTUPINFO()
     startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-    regValue = subprocess.Popen(regCmd, startupinfo=startupinfo, stdout=subprocess.PIPE).stdout.read()
-    
-    for line in regValue.split("\n"):
-        if line.strip() and os.path.isdir(line.split("    ")[-1].strip()):
-            R_path = os.path.abspath(os.path.join(line.split("    ")[-1].strip(), "bin"))
-            if os.path.exists(R_path):
-                msg = "The specified installation of R in the sahm configuration parameter is not valid\n"
-                msg += "Using the installation location found in the registry:\n"
-                msg += R_path
-                writetolog(msg, True, True)
-            return R_path
+    for regCmd in regCmds:
+        regValue = subprocess.Popen(regCmd, startupinfo=startupinfo, stdout=subprocess.PIPE).stdout.read()
+        
+        for line in regValue.split("\n"):
+            if line.strip() and os.path.isdir(line.split("    ")[-1].strip()):
+                R_path = os.path.abspath(os.path.join(line.split("    ")[-1].strip(), "bin"))
+                if os.path.exists(R_path):
+                    msg = "The specified installation of R in the sahm configuration parameter is not valid\n"
+                    msg += "Using the installation location found in the registry:\n"
+                    msg += R_path
+                    writetolog(msg, True, True)
+                    return R_path
+                
+    msgbox = QtGui.QMessageBox(self)
+    msgbox.setText("SAHM is unable to autodetect an installation of R on this machine\nYou must manually set the 'r_path' configuration value\n\nSee the SAHM installation section of the user manual for details. pg ")
+    msgbox.exec_()
+    return "R not found!"
 
 def writeRErrorsToLog(args, outMsg, errMsg):
     #first check that this is a model run, or has a o= in the args.
