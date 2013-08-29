@@ -1986,6 +1986,11 @@ def initialize():
         core.system.systemType in ['Microsoft', 'Windows']:
         #they don't have a decent R path, let's see if we can pull one from the registry
         utils.r_path = utils.pull_R_install_from_reg()
+        configuration.r_path = utils.r_path
+        package_manager = get_package_manager()
+        package = package_manager.get_package(identifier)
+        dom, element = package.find_own_dom_element()
+        configuration.write_to_dom(dom, element)
                 
     maxent_path = os.path.abspath(configuration.maxent_path)
 
