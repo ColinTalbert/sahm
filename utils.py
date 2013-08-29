@@ -609,14 +609,13 @@ def pull_R_install_from_reg():
             if line.strip() and os.path.isdir(line.split("    ")[-1].strip()):
                 R_path = os.path.abspath(os.path.join(line.split("    ")[-1].strip(), "bin"))
                 if os.path.exists(R_path):
-                    msg = "The specified installation of R in the sahm configuration parameter is not valid\n"
-                    msg += "Using the installation location found in the registry:\n"
+                    msg = "Using the autodetected R installation location found in the registry:\n"
                     msg += R_path
                     writetolog(msg, True, True)
                     return R_path
                 
-    msgbox = QtGui.QMessageBox(self)
-    msgbox.setText("SAHM is unable to autodetect an installation of R on this machine\nYou must manually set the 'r_path' configuration value\n\nSee the SAHM installation section of the user manual for details. pg ")
+    msgbox = QtGui.QMessageBox()
+    msgbox.setText("SAHM is unable to autodetect an installation of R on this machine\nYou must manually set the 'r_path' configuration value\n\nSee the SAHM installation section of the user manual for details.")
     msgbox.exec_()
     return "R not found!"
 
