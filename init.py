@@ -1754,6 +1754,7 @@ class CovariateCorrelationAndSelection(Module):
         params['outputMDS'] = os.path.join(session_dir, "CovariateCorrelationOutputMDS_" + params['selectionName'] + ".csv")
         params['displayJPEG'] = os.path.join(session_dir, "CovariateCorrelationDisplay.jpg")
         params['r_path'] = utils.get_r_path()
+        params['module'] = self
         writetolog("    inputMDS = " + params['inputMDS'], False, False)
         writetolog("    displayJPEG = " + params['displayJPEG'], False, False)
         writetolog("    outputMDS = " + params['outputMDS'], False, False)
