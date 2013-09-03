@@ -53,7 +53,7 @@ def package_dependencies():
 
 configuration = \
     ConfigurationObject(output_dir= r'C:\temp\SAHM_workspace',
-                        r_path = r'SAHM will pull this from the registry',
+                        r_path = r'..\\..\\Central_R\R-2.14.1\bin',
                         maxent_path = r'C:\Maxent',
                         cur_session_folder = r"C:\temp\SAHM_workspace",
                         cur_processing_mode = "single models sequentially (n - 1 cores each)",

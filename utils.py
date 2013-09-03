@@ -553,10 +553,16 @@ def runModelOnCondor(script, args_dict, command_arr):
     DEVNULL = open(os.devnull, 'wb')
     p = subprocess.Popen(["condor_submit", "-n", 'IGSKBACBWSCDRS3', submitFname], stderr=DEVNULL, stdout=DEVNULL)
     
-    
-def getR_application(module=None):
+def get_r_path():
     global r_path
+    return str(r_path)
+
+def  set_r_path(r_bin_path):
+    global r_path
+    r_path = str(r_bin_path)
     
+def getR_application(module):
+    global r_path
     #are we in 64 or 32 bit?  If 64 use the 64 bit install of R otherwise 32 bit.
     #if we don't have the matching version and the other exists use it.
     version_dirs = ["i386", "x64"]
@@ -595,6 +601,7 @@ def pull_R_install_from_reg():
                     msg = "Using the autodetected R installation location found in the registry:\n"
                     msg += R_path
                     writetolog(msg, True, True)
+                                       
                     return R_path
                 
     msgbox = QtGui.QMessageBox()
