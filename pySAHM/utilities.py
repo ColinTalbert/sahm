@@ -226,14 +226,20 @@ def storeUNCDrives():
     '''
     global UNCDrives
     UNCDrives = {}
-    ret = subprocess.Popen(["net","use"], stdout=subprocess.PIPE, 
-                           universal_newlines=True).communicate()[0].split("\n")
-    for line in ret:
-        line = line.split()
-        if line and line[0] in ["OK", "Disconnected"]:
-            if len(line) > 2 and \
-                os.path.exists(line[2]):
-                UNCDrives[line[1].lower() + '\\'] = line[2] + "\\"
+    try:
+        ret = subprocess.Popen(["net","use"], stdout=subprocess.PIPE, 
+                               universal_newlines=True).communicate()[0].split("\n")
+        for line in ret:
+            line = line.split()
+            if line and line[0] in ["OK", "Disconnected"]:
+                if len(line) > 2 and \
+                    os.path.exists(line[2]):
+                    UNCDrives[line[1].lower() + '\\'] = line[2] + "\\"
+    except:
+        #this is only intended for Condor jobs running 
+        #at the Fort Collins Scienc Center.  
+        #If this throws any error move along silently.
+        pass
 
 def checkIfFolderIsOnNetwork(dirname):
     global UNCDrives

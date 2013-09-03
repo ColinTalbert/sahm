@@ -117,22 +117,22 @@ class SelectAndTestFinalModel(QtGui.QDialog):
         self.treeview.setBaseSize(QtCore.QSize(0, 0))
         self.treeview.setObjectName(_fromUtf8("treeview"))
         self.verticalLayout.addWidget(self.treeview)
-        self.horizontalLayout_3 = QtGui.QHBoxLayout()
-        self.horizontalLayout_3.setSizeConstraint(QtGui.QLayout.SetDefaultConstraint)
-        self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
-        self.btnRunR = QtGui.QPushButton(self.widget)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.btnRunR.sizePolicy().hasHeightForWidth())
-#        self.btnRunR.setSizePolicy(sizePolicy)
-#        self.btnRunR.setObjectName(_fromUtf8("btnRunR"))
-        self.horizontalLayout_3.addWidget(self.btnRunR)
-        spacerItem = QtGui.QSpacerItem(10, 0, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_3.addItem(spacerItem)
-
-        
-        self.verticalLayout.addLayout(self.horizontalLayout_3)
+#        self.horizontalLayout_3 = QtGui.QHBoxLayout()
+#        self.horizontalLayout_3.setSizeConstraint(QtGui.QLayout.SetDefaultConstraint)
+#        self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
+#        self.btnRunR = QtGui.QPushButton(self.widget)
+#        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+#        sizePolicy.setHorizontalStretch(0)
+#        sizePolicy.setVerticalStretch(0)
+#        sizePolicy.setHeightForWidth(self.btnRunR.sizePolicy().hasHeightForWidth())
+##        self.btnRunR.setSizePolicy(sizePolicy)
+##        self.btnRunR.setObjectName(_fromUtf8("btnRunR"))
+#        self.horizontalLayout_3.addWidget(self.btnRunR)
+#        spacerItem = QtGui.QSpacerItem(10, 0, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+#        self.horizontalLayout_3.addItem(spacerItem)
+#
+#        
+#        self.verticalLayout.addLayout(self.horizontalLayout_3)
         
         self.scene = QtGui.QGraphicsScene() 
         self.view = QtGui.QGraphicsView(self.scene)
@@ -152,33 +152,33 @@ class SelectAndTestFinalModel(QtGui.QDialog):
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setContentsMargins(-1, 3, -1, 3)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
-        self.chkEvalHoldout = QtGui.QCheckBox()
-        self.chkEvalHoldout.setText("Evaluate Hold Out")
-        self.chkEvalHoldout.setObjectName(_fromUtf8('chkEvalHoldout'))
-        self.lblProduceMaps = QtGui.QLabel()
-        self.lblProduceMaps.setText("Produce maps")
-        self.chkProb = QtGui.QCheckBox()
-        self.chkProb.setText("Probability")
-        self.chkProb.setObjectName(_fromUtf8('chkProb'))
-        self.chkBin = QtGui.QCheckBox()
-        self.chkBin.setText("Binary")
-        self.chkBin.setObjectName(_fromUtf8('chkBin'))
-        self.chkMess = QtGui.QCheckBox()
-        self.chkMess.setText("MESS")
-        self.chkMess.setObjectName(_fromUtf8('chkMess'))
+#        self.chkEvalHoldout = QtGui.QCheckBox()
+#        self.chkEvalHoldout.setText("Evaluate Hold Out")
+#        self.chkEvalHoldout.setObjectName(_fromUtf8('chkEvalHoldout'))
+#        self.lblProduceMaps = QtGui.QLabel()
+#        self.lblProduceMaps.setText("Produce maps")
+#        self.chkProb = QtGui.QCheckBox()
+#        self.chkProb.setText("Probability")
+#        self.chkProb.setObjectName(_fromUtf8('chkProb'))
+#        self.chkBin = QtGui.QCheckBox()
+#        self.chkBin.setText("Binary")
+#        self.chkBin.setObjectName(_fromUtf8('chkBin'))
+#        self.chkMess = QtGui.QCheckBox()
+#        self.chkMess.setText("MESS")
+#        self.chkMess.setObjectName(_fromUtf8('chkMess'))
         
         self.btnOK = QtGui.QPushButton()
         self.btnOK.setObjectName(_fromUtf8("btnOK"))
-        self.btnOK.setText(_fromUtf8("OK"))
+        self.btnOK.setText(_fromUtf8("Evaluate Holdout for Selected Models"))
         self.btnCancel = QtGui.QPushButton()
         self.btnCancel.setText(_fromUtf8("Cancel"))
         self.btnCancel.setObjectName(_fromUtf8("btnCancel"))
         
-        self.horizontalLayout.addWidget(self.chkEvalHoldout)
-        self.horizontalLayout.addWidget(self.lblProduceMaps)
-        self.horizontalLayout.addWidget(self.chkProb)
-        self.horizontalLayout.addWidget(self.chkBin)
-        self.horizontalLayout.addWidget(self.chkMess)
+#        self.horizontalLayout.addWidget(self.chkEvalHoldout)
+#        self.horizontalLayout.addWidget(self.lblProduceMaps)
+#        self.horizontalLayout.addWidget(self.chkProb)
+#        self.horizontalLayout.addWidget(self.chkBin)
+#        self.horizontalLayout.addWidget(self.chkMess)
         self.horizontalLayout.addWidget(self.btnOK)
         self.horizontalLayout.addWidget(self.btnCancel)
         
@@ -206,7 +206,7 @@ class SelectAndTestFinalModel(QtGui.QDialog):
         
         self.horizontalLayout_4.addLayout(self.verticalLayout_3)
 
-        self.setWindowTitle(_fromUtf8("Evaluate Holdout data and/or produce maps"))
+        self.setWindowTitle(_fromUtf8("Evaluate Holdout data"))
         self.label_2.setText(_fromUtf8("Models"))
 #        self.btnRunR.setText(_fromUtf8("Run Final Test"))
 #        self.label.setText(_fromUtf8("Threshold"))
@@ -243,7 +243,7 @@ class SelectAndTestFinalModel(QtGui.QDialog):
         
     def okTriggered(self):
         self.runR()
-        self.done(0)
+        #self.done(0)
 
     def cancel(self):
         self.done(1)
@@ -289,33 +289,31 @@ class SelectAndTestFinalModel(QtGui.QDialog):
             i += 1
             
         csvfile.close()
-        self.label_2.setText(_fromUtf8("Models previously run:"))
+        self.label_2.setText(_fromUtf8("Evaluate holdout for:"))
         
    
         
     def runR(self):
 #       
-        evaluation=False
-        if self.chkEvalHoldout.checkState() == QtCore.Qt.Checked:
-            #create a finalModelEvaluation folder
-            evaluation=True
-            eval_type = os.path.split(self.findModel.csv_file)[1]
-            eval_type = os.path.splitext(eval_type)[0]
-            eval_type = eval_type.replace("AcrossModel", "")
-            finalFolder = os.path.join(self.session_folder, "FinalModelEvaluation_" + eval_type)
-            if os.path.exists(finalFolder):
-                msg = "The folder " + "'FinalModelEvaluation_" + eval_type + "' already exists in this session folder."
-                msg += "\nThis indicates that the final evaluation metrics have already been calculated."
-                msg += "\nThese final statistics are only valid for the first time run."
-                msg += "\nThe previous run of statistics will be displayed now."
-                msg += "\nIf you really want to re-run these metrics, manually delete the previously created folder 'FinalModelEvaluation_" + eval_type + "'."
-                msg += "But from a statistical standpoint this is not advised!"
-                msgbox = QtGui.QMessageBox(self)
-                msgbox.setText(msg)
-                msgbox.exec_()
-                return None
-            else:
-                os.mkdir(finalFolder)
+
+        #create a finalModelEvaluation folder
+        eval_type = os.path.split(self.findModel.csv_file)[1]
+        eval_type = os.path.splitext(eval_type)[0]
+        eval_type = eval_type.replace("AcrossModel", "")
+        finalFolder = os.path.join(self.session_folder, "FinalModelEvaluation_" + eval_type)
+        if os.path.exists(finalFolder):
+            msg = "The folder " + "'FinalModelEvaluation_" + eval_type + "' already exists in this session folder."
+            msg += "\nThis indicates that the final evaluation metrics have already been calculated."
+            msg += "\nThese final statistics are only valid for the first time run."
+            msg += "\nThe previous run of statistics will be displayed now."
+            msg += "\nIf you really want to re-run these metrics, manually delete the previously created folder 'FinalModelEvaluation_" + eval_type + "'."
+            msg += "But from a statistical standpoint this is not advised!"
+            msgbox = QtGui.QMessageBox(self)
+            msgbox.setText(msg)
+            msgbox.exec_()
+            return None
+        else:
+            os.mkdir(finalFolder)
         
         treeviewIter = QtGui.QTreeWidgetItemIterator(self.treeview)
         checked_count = 0
@@ -326,27 +324,12 @@ class SelectAndTestFinalModel(QtGui.QDialog):
                 
                 checked_count += 1
                 origWS = os.path.join(self.session_folder, str(item.text(0)), "modelWorkspace")
-                if not evaluation:
-                    finalFolder=self.session_folder
-                outfolder = os.path.join(finalFolder, str(item.text(0)))
-                if evaluation: 
-                    os.mkdir(outfolder)
+                outfolder = os.path.join(finalFolder, "evaluate_holdout_" + str(item.text(0)))
+                os.mkdir(outfolder)
                 
                 args = {"ws":origWS,
                         "o":outfolder}
                         
-                if self.chkProb.checkState() == QtCore.Qt.Checked:
-                    args["mpt"] = "TRUE"
-                else:
-                    args["mpt"] = "FALSE"
-                if self.chkBin.checkState() == QtCore.Qt.Checked:
-                    args["mbt"] = "TRUE"
-                else:
-                    args["mbt"] = "FALSE"
-                if self.chkMess.checkState() == QtCore.Qt.Checked:
-                    args["mes"] = "TRUE"
-                else:
-                    args["mes"] = "FALSE"
                 
                 utils.run_R_script("EvaluateNewData.r", args)
                 writetolog("Finished running R for: " + str(item.text(0)) , False, True)
@@ -358,14 +341,10 @@ class SelectAndTestFinalModel(QtGui.QDialog):
             msgbox.setText(msg)
             msgbox.exec_()
         
-        elif self.chkEvalHoldout.checkState() == QtCore.Qt.Checked:
-            output_disp = os.path.join(finalFolder, "somethinghere")
-            self.load_picture(output_disp)
         else:
-            msg = "All map production finished."
-            msgbox = QtGui.QMessageBox(self)
-            msgbox.setText(msg)
-            msgbox.exec_()
+            output_disp = os.path.join(finalFolder, "FinalEvaluationBinom.jpg")
+            self.load_picture(output_disp)
+
         
         
         

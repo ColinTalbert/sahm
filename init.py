@@ -568,6 +568,8 @@ class Model(Module):
         #make a copy of the mds file used in the output folder
         copy_mds_fname = os.path.join(self.output_dname, os.path.split(mdsFile)[1])
         shutil.copyfile(mdsFile, copy_mds_fname)
+        self.args_dict["c"] = copy_mds_fname
+        
 #            self.output_dname = utils.find_model_dir(prefix, self.args_dict)
         
         if self.abbrev == 'brt' or \
@@ -580,10 +582,9 @@ class Model(Module):
         self.args_dict['rc'] = utils.MDSresponseCol(mdsFile)
         self.args_dict['cur_processing_mode'] = configuration.cur_processing_mode    
         
-        if not configuration.cur_processing_mode == "multiple models simultaneously (1 core each)":
-            #This give previously launched models time to finish writing their 
-            #logs so we don't get a lock
-            time.sleep(5)
+        #This give previously launched models time to finish writing their 
+        #logs so we don't get a lock
+        time.sleep(2)
             
         utils.run_model_script(self.name, self.args_dict, self, self.pywrapper)
         
@@ -901,7 +902,7 @@ class MDSBuilder(Module):
 
     _input_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
-                                 ('backgroundPointType', '(gov.usgs.sahm:RandomPointType:Other)', {'defaults':'["Background"]'}),
+#                                 ('backgroundPointType', '(gov.usgs.sahm:RandomPointType:Other)', {'defaults':'["Background"]'}),
                                  ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
                                  ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)'),
                                  ('Seed', '(edu.utah.sci.vistrails.basic:Integer)')]
@@ -918,7 +919,7 @@ class MDSBuilder(Module):
 
     def compute(self):
         port_map = {'fieldData': ('fieldData', None, False),
-                    'backgroundPointType': ('pointType', None, False),
+#                    'backgroundPointType': ('pointType', None, False),
                     'backgroundPointCount': ('pointCount', None, False),
                     'backgroundProbSurf': ('probSurfacefName', None, False),
                     'Seed': ('seed', None, False)}
@@ -1766,8 +1767,6 @@ class CovariateCorrelationAndSelection(Module):
             os.remove(params['outputMDS'])
             shutil.copy2(params['inputMDS'], params['outputMDS'])
             writetolog("    Applying previous selection but not showing GUI", False, True)
-        elif not os.path.exists(params['outputMDS']) and not params['ShowGUI']:
-            raise ModuleError(self, "Show GUI deselected but no previous output detected.\n\nCan not continue!")
         else:
             self.callDisplayMDS(params)
                     
@@ -1785,146 +1784,146 @@ class CovariateCorrelationAndSelection(Module):
             raise ModuleError(self, "Cancel or Close selected (not OK) workflow halted.")
 
 
-class ProjectionLayers(Module):
-    '''
-    Projection Layers
-
-    Note: as of June 2011, this module offers some functionality that is only available
-    to users running the SAHM package within the USGS Fort Collins Science Center (FORT).
-
-    The ProjectionLayers module provides the option to prepare a separate set of predictor
-    layers so that the results of a model developed from one set of environmental predictors
-    can be projected onto a new modeled space. This second set of environmental predictors
-    (corresponding to the "projection target") most often contains the same environmental
-    predictors but represents data captured at a different temporal or spatial location. For
-    example, a user could generate a model predicting habitat suitability using recorded
-    presence points and certain environmental predictors such as elevation, landcover, and
-    proximity to water in one geographic location. Based on the training from this information,
-    the modeled results could be generated for (or "projected to") a new location based on the
-    range of values seen in elevation, landcover, and proximity to water in the second geographic
-    area. Similarly, modeling predicted results through time is also possible. A model trained
-    using field data and a set of predictor layers representative of one time period could be
-    projected onto the same geographical area using a new set of predictor layers corresponding
-    to the same predictors but representing data from a different time period (e.g., different
-    climate data). 
-
-    The output of this module is subsequently used as the projection target in the ApplyModel module.
-
-    (As part of the process of preparing the layers for modeling, the ProjectionLayers module runs
-    the PARC module internally on the inputs. Outputs from the ProjectionLayers module will possess
-    matching coordinate systems, cell sizes, and extents and do not need to be run through PARC
-    before being used downstream in the workflow.)
-
-    Six parameters can be set by the user:
-
-    1. Directory Crosswalk CSV: This is a .csv file containing two columns designating
-    the layers that should be swapped out in the projected model. The first column
-    contains a list of the full paths to the predictor layers used to develop the original
-    model that will be replaced in the projection process. The second column contains the
-    full paths to the new predictor layers that will substitute the respective layers used
-    in the original model. Each original layer in the first column should be paired with
-    its replacement in the second column (e.g., Column 1 = C:\ModelLayers\Precipitation1980.tif,
-    Column 2 = C:\ModelLayers\Precipitation2000.tif). In the case of any file used to develop
-    the first model that is not expressly listed in the Directory Crosswalk CSV with a
-    replacement, the original file will be used in the new model projection. The module
-    anticipates a header row in this .csv file (thus, the first row of data will be ignored).
-    
-    2. File List CSV: This is a .csv file containing the list of predictor files used to
-    develop the first model. Effectively, this file will be updated based on the information
-    provided in the directory crosswalk .csv and used as the input to the training process
-    for the projected model. The output of the PARC module from the first model iteration
-    should be used as the input to this parameter.
-        '''
-    _input_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
-                    ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
-                    ('directoryCrosswalkCSV', '(edu.utah.sci.vistrails.basic:File)')
-                    ]
-    _output_ports = [("MDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
-
-    def compute(self):
-    
-        writetolog("\nRunning make Projection Layers", True)
-        
-        inputCSV = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('RastersWithPARCInfoCSV').name, self)
-        
-        template = self.forceGetInputFromPort('templateLayer', '')
-        fromto = []
-        
-        if self.hasInputFromPort('directoryCrosswalkCSV'):
-            crosswalkCSVFname = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('directoryCrosswalkCSV'), self)
-            crosswalkCSV = csv.reader(open(crosswalkCSVFname, 'r'))
-            header = crosswalkCSV.next()
-            fromto = []
-            for row in crosswalkCSV:
-                fromto.append(row[0], row[1])
-            del crosswalkCSV    
-            
-        if self.hasInputFromPort('templateLayer'):
-            template = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('templateLayer'), self)
-        else:
-            template = ''
-            
-        #write out the outputs to an empty MDS file (just the header is needed to PARC the outputs)
-        inCSV = csv.reader(open(inputCSV, 'r'))
-        inCSV.next() #skip header
-        workingCSV = utils.mknextfile(prefix='tmpFilesToPARC_', suffix='.csv')
-        tmpCSV = csv.writer(open(workingCSV, 'wb'))
-        tmpCSV.writerow(["FilePath", "Categorical", "Resampling", "Aggregation"])
-        outHeader1 = ['X', 'Y', 'response']
-        outHeader2 = ['', '', '']
-        outHeader3 = ['', '', '']
-        
-        output_dname = utils.mknextdir(prefix='ProjectionLayers_')
-        
-        for row in inCSV:
-            if template == '':
-                template = row[0]
-            fileShortName = utils.getShortName(row[0])
-            if row[1] == 1:
-                outHeader1.append(fileShortName + '_categorical')
-            else:
-                outHeader1.append(fileShortName)
-            outHeader2.append('1')
-            outHeader3.append(os.path.join(output_dname, fileShortName + '.tif'))
-
-            origFile = row[4]
-            newOrigFile = origFile
-            for lookup in fromto:
-                if lookup[0] in origFile:
-                    newOrigFile = origFile.replace(lookup[0], lookup[1])
-            tmpCSV.writerow([newOrigFile,] + row[1:4])
-        del tmpCSV
-        
-        #PARC the files here
-        ourPARC = parc.PARC()
-        
-        
-        if configuration.verbose:
-            ourPARC.verbose = True
-        writetolog("    output_dname=" + output_dname, False, False)
-        ourPARC.outDir = output_dname
-        ourPARC.inputsCSV = workingCSV
-        ourPARC.template = template
-
-        try:
-            ourPARC.parcFiles()
-        except TrappedError as e:
-            raise ModuleError(self, e.message)
-        except :
-            utils.informative_untrapped_error(self, "PARC")
-        
-        #loop through our workingCSV and format it into an MDS header
-        
-        #outputMDS = utils.mknextfile(prefix='ProjectionLayersMDS_', suffix = '.csv')
-        outputMDS = os.path.join(output_dname, 'ProjectionLayersMDS.csv')
-        outCSV = csv.writer(open(outputMDS, 'wb'))
-        outCSV.writerow(outHeader1)
-        outCSV.writerow(outHeader2)
-        outCSV.writerow(outHeader3)
-        
-        output_file = utils.create_file_module(outputMDS, module=self)
-        self.setResult("MDS", output_file)
-        writetolog("Finished Select Projection Layers widget", True)
+#class ProjectionLayers(Module):
+#    '''
+#    Projection Layers
+#
+#    Note: as of June 2011, this module offers some functionality that is only available
+#    to users running the SAHM package within the USGS Fort Collins Science Center (FORT).
+#
+#    The ProjectionLayers module provides the option to prepare a separate set of predictor
+#    layers so that the results of a model developed from one set of environmental predictors
+#    can be projected onto a new modeled space. This second set of environmental predictors
+#    (corresponding to the "projection target") most often contains the same environmental
+#    predictors but represents data captured at a different temporal or spatial location. For
+#    example, a user could generate a model predicting habitat suitability using recorded
+#    presence points and certain environmental predictors such as elevation, landcover, and
+#    proximity to water in one geographic location. Based on the training from this information,
+#    the modeled results could be generated for (or "projected to") a new location based on the
+#    range of values seen in elevation, landcover, and proximity to water in the second geographic
+#    area. Similarly, modeling predicted results through time is also possible. A model trained
+#    using field data and a set of predictor layers representative of one time period could be
+#    projected onto the same geographical area using a new set of predictor layers corresponding
+#    to the same predictors but representing data from a different time period (e.g., different
+#    climate data). 
+#
+#    The output of this module is subsequently used as the projection target in the ApplyModel module.
+#
+#    (As part of the process of preparing the layers for modeling, the ProjectionLayers module runs
+#    the PARC module internally on the inputs. Outputs from the ProjectionLayers module will possess
+#    matching coordinate systems, cell sizes, and extents and do not need to be run through PARC
+#    before being used downstream in the workflow.)
+#
+#    Six parameters can be set by the user:
+#
+#    1. Directory Crosswalk CSV: This is a .csv file containing two columns designating
+#    the layers that should be swapped out in the projected model. The first column
+#    contains a list of the full paths to the predictor layers used to develop the original
+#    model that will be replaced in the projection process. The second column contains the
+#    full paths to the new predictor layers that will substitute the respective layers used
+#    in the original model. Each original layer in the first column should be paired with
+#    its replacement in the second column (e.g., Column 1 = C:\ModelLayers\Precipitation1980.tif,
+#    Column 2 = C:\ModelLayers\Precipitation2000.tif). In the case of any file used to develop
+#    the first model that is not expressly listed in the Directory Crosswalk CSV with a
+#    replacement, the original file will be used in the new model projection. The module
+#    anticipates a header row in this .csv file (thus, the first row of data will be ignored).
+#    
+#    2. File List CSV: This is a .csv file containing the list of predictor files used to
+#    develop the first model. Effectively, this file will be updated based on the information
+#    provided in the directory crosswalk .csv and used as the input to the training process
+#    for the projected model. The output of the PARC module from the first model iteration
+#    should be used as the input to this parameter.
+#        '''
+#    _input_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
+#                    ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
+#                    ('directoryCrosswalkCSV', '(edu.utah.sci.vistrails.basic:File)')
+#                    ]
+#    _output_ports = [("MDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
+#
+#    def compute(self):
+#    
+#        writetolog("\nRunning make Projection Layers", True)
+#        
+#        inputCSV = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('RastersWithPARCInfoCSV').name, self)
+#        
+#        template = self.forceGetInputFromPort('templateLayer', '')
+#        fromto = []
+#        
+#        if self.hasInputFromPort('directoryCrosswalkCSV'):
+#            crosswalkCSVFname = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('directoryCrosswalkCSV'), self)
+#            crosswalkCSV = csv.reader(open(crosswalkCSVFname, 'r'))
+#            header = crosswalkCSV.next()
+#            fromto = []
+#            for row in crosswalkCSV:
+#                fromto.append(row[0], row[1])
+#            del crosswalkCSV    
+#            
+#        if self.hasInputFromPort('templateLayer'):
+#            template = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('templateLayer'), self)
+#        else:
+#            template = ''
+#            
+#        #write out the outputs to an empty MDS file (just the header is needed to PARC the outputs)
+#        inCSV = csv.reader(open(inputCSV, 'r'))
+#        inCSV.next() #skip header
+#        workingCSV = utils.mknextfile(prefix='tmpFilesToPARC_', suffix='.csv')
+#        tmpCSV = csv.writer(open(workingCSV, 'wb'))
+#        tmpCSV.writerow(["FilePath", "Categorical", "Resampling", "Aggregation"])
+#        outHeader1 = ['X', 'Y', 'response']
+#        outHeader2 = ['', '', '']
+#        outHeader3 = ['', '', '']
+#        
+#        output_dname = utils.mknextdir(prefix='ProjectionLayers_')
+#        
+#        for row in inCSV:
+#            if template == '':
+#                template = row[0]
+#            fileShortName = utils.getShortName(row[0])
+#            if row[1] == 1:
+#                outHeader1.append(fileShortName + '_categorical')
+#            else:
+#                outHeader1.append(fileShortName)
+#            outHeader2.append('1')
+#            outHeader3.append(os.path.join(output_dname, fileShortName + '.tif'))
+#
+#            origFile = row[4]
+#            newOrigFile = origFile
+#            for lookup in fromto:
+#                if lookup[0] in origFile:
+#                    newOrigFile = origFile.replace(lookup[0], lookup[1])
+#            tmpCSV.writerow([newOrigFile,] + row[1:4])
+#        del tmpCSV
+#        
+#        #PARC the files here
+#        ourPARC = parc.PARC()
+#        
+#        
+#        if configuration.verbose:
+#            ourPARC.verbose = True
+#        writetolog("    output_dname=" + output_dname, False, False)
+#        ourPARC.outDir = output_dname
+#        ourPARC.inputsCSV = workingCSV
+#        ourPARC.template = template
+#
+#        try:
+#            ourPARC.parcFiles()
+#        except TrappedError as e:
+#            raise ModuleError(self, e.message)
+#        except :
+#            utils.informative_untrapped_error(self, "PARC")
+#        
+#        #loop through our workingCSV and format it into an MDS header
+#        
+#        #outputMDS = utils.mknextfile(prefix='ProjectionLayersMDS_', suffix = '.csv')
+#        outputMDS = os.path.join(output_dname, 'ProjectionLayersMDS.csv')
+#        outCSV = csv.writer(open(outputMDS, 'wb'))
+#        outCSV.writerow(outHeader1)
+#        outCSV.writerow(outHeader2)
+#        outCSV.writerow(outHeader3)
+#        
+#        output_file = utils.create_file_module(outputMDS, module=self)
+#        self.setResult("MDS", output_file)
+#        writetolog("Finished Select Projection Layers widget", True)
 
 
         
@@ -2292,7 +2291,7 @@ _modules = generate_namespaces({'DataInput': [
 #                                          MDSBuilder_vector,
                                           PARC,
                                           RasterFormatConverter,
-                                          ProjectionLayers,
+#                                          ProjectionLayers,
                                           ModelEvaluationSplit,
                                           ModelSelectionSplit,
                                           ModelSelectionCrossValidation,
@@ -2349,7 +2348,8 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                           {'dst_port_remap': {'bias': 'continuous'} })],
                     'Tools|MDSBuilder':
                      [(None, '1.0.2', 'Tools|MDSBuilder', 
-                          {'dst_port_remap': {'backgroundpointCount': 'backgroundPointCount'} })],
+                          {'dst_port_remap': {'backgroundpointCount': 'backgroundPointCount',
+                                              'backgroundPointType':''} })],
                     'Tools|PARC':
                      [(None, '1.0.2', 'Tools|PARC', 
                           {'dst_port_remap': {'bias': '',

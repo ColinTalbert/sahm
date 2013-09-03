@@ -85,12 +85,17 @@ from core.packagemanager import get_package_manager
 
 import utils
 
+import GenerateModuleDoc as GenModDoc
+doc_file = os.path.abspath(os.path.join(os.path.dirname(__file__),  "documentation.xml"))
+GenModDoc.load_documentation(doc_file)
+
 class SAHMSpatialOutputViewerCell(SpreadsheetCell):
     """
     SAHMModelOutputViewerCell is a VisTrails Module that
     displays the various output from a SAHM Model run in a single cell
 
     """
+    __doc__ = GenModDoc.construct_module_doc('SAHMSpatialOutputViewerCell')
     _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ('display_presense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
@@ -99,6 +104,12 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
                     ('initial_raster_display', '(gov.usgs.sahm:OutputRaster:Other)', {'defaults':'["Probability"]'}),
                     ('model_workspace', '(edu.utah.sci.vistrails.basic:Directory)')]
     #all inputs are determined relative to the model_workspace
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return GenModDoc.construct_port_doc(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+        return GenModDoc.construct_port_doc(cls, port_name, 'out') 
 
     def __init__(self):
         SpreadsheetCell.__init__(self)
@@ -196,11 +207,11 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
                 
 
             fname = os.path.split(originalMDS)[1]
-            result = os.path.join(session_folder, fname)
-            if os.path.exists(result):
-                return result
-            elif os.path.exists(originalMDS):
+            mds_in_root = os.path.join(session_folder, fname)
+            if os.path.exists(originalMDS):
                 return originalMDS
+            elif os.path.exists(mds_in_root):
+                return mds_in_root
             else:
                 raise RuntimeError('Valid input MDS file not found in Model text output.')
         except IndexError:
@@ -592,7 +603,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
                 if kwargs["min"] == "pullfromdata":
                     rmin = min
 
-            norm = colors.normalize(rmin, rmax)
+            norm = colors.Normalize(rmin, rmax)
 #            print "raster_array is None:", raster_array is None
 #            print "raster_array.size:", raster_array.size
 #            print "type(raster_array):", type(raster_array)

@@ -354,6 +354,14 @@ Several options are available for fitting BRTs when run using VisTrails special 
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
+      <Port>
+        <PortName>outputFolderName</PortName>
+        <Definition>Adds an indentifier to the output folder name for the purpose of data organization.  The folder name is still preficed with 'ApplyModel_' and suffixed with and auto-incremented counter.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>Does not connect to any other module.</Connections>
+      </Port>
     </InputPorts>
     <OutputPorts>
       <Port>
@@ -628,6 +636,14 @@ Several options are available for fitting BRTs when run using VisTrails special 
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
+      <Port>
+        <PortName>outputFolderName</PortName>
+        <Definition>Adds an indentifier to the output folder name for the purpose of data organization.  The folder name is still preficed with 'ApplyModel_' and suffixed with and auto-incremented counter.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>Does not connect to any other module.</Connections>
+      </Port>
     </InputPorts>
     <OutputPorts>
       <Port>
@@ -822,6 +838,14 @@ Several options are available for fitting BRTs when run using VisTrails special 
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
+      <Port>
+        <PortName>outputFolderName</PortName>
+        <Definition>Adds an indentifier to the output folder name for the purpose of data organization.  The folder name is still preficed with 'ApplyModel_' and suffixed with and auto-incremented counter.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>Does not connect to any other module.</Connections>
+      </Port>
     </InputPorts>
     <OutputPorts>
       <Port>
@@ -1000,6 +1024,14 @@ Several options are available for fitting BRTs when run using VisTrails special 
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
+      <Port>
+        <PortName>outputFolderName</PortName>
+        <Definition>Adds an indentifier to the output folder name for the purpose of data organization.  The folder name is still preficed with 'ApplyModel_' and suffixed with and auto-incremented counter.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>Does not connect to any other module.</Connections>
+      </Port>
     </InputPorts>
     <OutputPorts>
       <Port>
@@ -1102,6 +1134,90 @@ Several options are available for fitting BRTs when run using VisTrails special 
   </Module>
   <Output />
   <Module>
+    <Title>GeneralSpatialViewer</Title>
+    <Description>
+    GeneralSpatialViewer is a stripped down version of a SAHMModelOutputViewerCell that displays a single raster layer.
+
+    </Description>
+    <InputPorts>
+      <Port>
+        <PortName>row</PortName>
+        <Definition>Entering a value here forces the output for this cell to appear on the row specified on the output spreadsheet.
+Row counts start from 1.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>VisTrails will autoselect the next empty cell, but you do not have control over which outputs appear where.</Default>
+        <Options>Any positive integer.</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>column</PortName>
+        <Definition>Entering a value here forces the output for this cell to appear on the column specified on the output spreadsheet.
+Row counts start from 1.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>Any positive integer.</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>NoDataValue</PortName>
+        <Definition>Used to specify the NoDataValue used in the input raster.  By default this value is pulled from the input layer's metadata but this allows you to override that value in case the metadata has the wrong value.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections></Connections>
+      </Port>
+      <Port>
+        <PortName>dataMin</PortName>
+        <Definition>The minimum value in the input raster.  By default this value is pulled from the input layer's metadata but this allows you to override that value in case the metadata has the wrong value.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections></Connections>
+      </Port>
+      <Port>
+        <PortName>dataMax</PortName>
+        <Definition>The maximum value in the raster.  By default this value is pulled from the input layer's metadata but this allows you to override that value in case the metadata has the wrong value.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections></Connections>
+      </Port>
+      <Port>
+        <PortName>rasterFile</PortName>
+        <Definition>The path to the raster file that will be displayed in the output cell. </Definition>
+        <Mandatory>True</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>threeBand</PortName>
+        <Definition>Boolean indicating that the input is a three band raster (i.e. an image file) so that the viewer can adjust the display properties appropriately.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>False</Default>
+        <Options>NA</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>categorical</PortName>
+        <Definition>Boolean indicating that the input is a categorical raster so that the viewer can adjust the display properties appropriately.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>False</Default>
+        <Options>NA</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>colorRamp</PortName>
+        <Definition>The matplotlib colorRamp to display the data with.  See http://wiki.scipy.org/Cookbook/Matplotlib/Show_colormaps for more information.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>Jet</Default>
+        <Options>See http://wiki.scipy.org/Cookbook/Matplotlib/Show_colormaps for descriptions.</Options>
+        <Connections>NA</Connections>
+      </Port>
+    </InputPorts>
+    <OutputPorts />
+  </Module>
+  <Module>
     <Title>SAHMSpatialOutputViewerCell</Title>
     <Description>
     SAHMModelOutputViewerCell is a VisTrails Module that
@@ -1136,14 +1252,6 @@ Row counts start from 1.</Definition>
         <Connections>
           <Connection>Connects to the output port 'modelWorkspace' on any of the R models (MARS, BRT, RandomForest, or GLM)</Connection>
         </Connections>
-      </Port>
-      <Port>
-        <PortName>max_cells_dimension</PortName>
-        <Definition>For very large GIS datasets the Matplotlib based viewer used to display GIS data runs into memory issues.  To get around this limitation we downsample the full resolution and only display the resampled image.  This number represents the number of resampled pixels that will be displayed in the largest dimension.  For example if your template layer is 20,000 by 10,000 pixels and the max_cells_dimension is set at 5000 your output will be displayed at 5,000 by 2,500 resolution.  Zooming in the map does cause the resampled cells to be displayed at their original resolution as is the case in most GIS programs.  If the resampled resolution is not sufficient for your needs you will need to display the final outputs in an external GIS program.</Definition>
-        <Mandatory>False</Mandatory>
-        <Default>5000</Default>
-        <Options>Any positive integer.  </Options>
-        <Connections>NA</Connections>
       </Port>
     </InputPorts>
     <OutputPorts />
@@ -1298,7 +1406,11 @@ Row counts start from 1.</Definition>
   </Module>
   <Module>
     <Title>ApplyModel</Title>
-    <Description>This module takes a previously run model and applies it to new data.  This can be used to explore different temporal data, different scenarios, or different spatial areas.  It requires the output workspace from a previous model run as well as an MDS which specifies the new covariate layers to use.  Note that this input MDS only needs the header rows and can be generated by the the MDSBuilder with no field data input used.</Description>
+    <Description>This module takes a previously run model and applies it to new data.  ApplyModel requires the output workspace from a previous model run.  It can be used in one of two ways:
+
+1) Applying a model to new covariate grids.  These could be of a different spatial area, new temporal data (projecting a model into the future for example), or different scenarios (pre vs post treatment for example).   Used for this purpose ApplyModel also requires an MDS which specifies the new covariate layers to use.  Note that this input MDS only needs the header rows and can be generated by the the MDSBuilder with no field data input used.  Also note that the previously new covariate layer names must match exactly the previous names.
+
+2) ApplyModel can alternately be used to evaluate a model using new independent species location data.  In this case the MDS supplied will also need to have the species data.</Description>
     <InputPorts>
       <Port>
         <PortName>mdsFile</PortName>
@@ -1359,6 +1471,14 @@ Row counts start from 1.</Definition>
           <Option>8:  Mean predicted probability</Option>
           <Option>9:  Minimizes distance between ROC plot and (0,1)</Option>
         </Options>
+        <Connections>Does not connect to any other module.</Connections>
+      </Port>
+      <Port>
+        <PortName>outputFolderName</PortName>
+        <Definition>Adds an indentifier to the output folder name for the purpose of data organization.  The folder name is still preficed with 'ApplyModel_' and suffixed with and auto-incremented counter.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
     </InputPorts>
@@ -2167,6 +2287,79 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
       </Port>
     </OutputPorts>
     <References></References>
+    <SeeAlso />
+  </Module>
+  <GeospatialTools />
+  <Module>
+    <Title>CategoricalToContinuous</Title>
+    <Description>This module will convert a categorical resolution with a smaller resolution to a series of continuous rasters at a larger resolution.  It does this by creating an output grid for each unique value in the input grid.  The value in the output will be the percentage (0-100) of the input pixels with that value in the larger output pixel area.  The module will produse an output folder in your session directory with the name of the input raster that is being converted prefixed with '_c2c'.  Within this folder will be a series of output grid layers named &lt;inputGridName&gt;_&lt;uniquePixelValue&gt; with the percentage contribution for that particular pixel value. An ...'_NoData' grid will be produced as well if there are noData values in the input.
+
+Be cautious when using the output layers from this tool as input to models as the high prevalence of zeros in many outputs can cause problems in the model fitting. </Description>
+    <InputPorts>
+      <Port>
+        <PortName>inputRaster</PortName>
+        <Definition>The categorical input raster that you will be producing summary continuous layer from.</Definition>
+        <Mandatory>True</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>templateFile</PortName>
+        <Definition>The layer that will be used to determine the ouput cell size, as well as the projection information.  This will likely be the same as your overall workflow template layer but does not need to be.</Definition>
+        <Mandatory>True</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>Will likely connect with the TemplateLayer specified elsewhere in your workflow.</Connections>
+      </Port>
+    </InputPorts>
+    <OutputPorts>
+      <Port>
+        <PortName>outputsPredictListFile</PortName>
+        <Definition>A RastersWithPARCInfoCSV file that lists the outputs from this module.</Definition>
+        <Mandatory>True</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>
+          <Connection>This port can connect to either the RastersWithPARCInfoCSV input port of an MDSBuilder or a PARC module.</Connection>
+        </Connections>
+      </Port>
+    </OutputPorts>
+    <SeeAlso />
+  </Module>
+  <Module>
+    <Title>Reclassifier</Title>
+    <Description>This module will reclassify an input raster according to a specific remapping.  Note that this tool currently only produces integer data type output.   </Description>
+    <InputPorts>
+      <Port>
+        <PortName>inputRaster</PortName>
+        <Definition>The categorical input raster that you will be producing summary continuous layer from.</Definition>
+        <Mandatory>True</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>templateFile</PortName>
+        <Definition>The layer that will be used to determine the ouput cell size, as well as the projection information.  This will likely be the same as your overall workflow template layer but does not need to be.</Definition>
+        <Mandatory>True</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>Will likely connect with the TemplateLayer specified elsewhere in your workflow.</Connections>
+      </Port>
+    </InputPorts>
+    <OutputPorts>
+      <Port>
+        <PortName>outputsPredictListFile</PortName>
+        <Definition>A RastersWithPARCInfoCSV file that lists the outputs from this module.</Definition>
+        <Mandatory>True</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>
+          <Connection>This port can connect to either the RastersWithPARCInfoCSV input port of an MDSBuilder or a PARC module.</Connection>
+        </Connections>
+      </Port>
+    </OutputPorts>
     <SeeAlso />
   </Module>
   <Other />
