@@ -561,7 +561,7 @@ def  set_r_path(r_bin_path):
     global r_path
     r_path = str(r_bin_path)
     
-def getR_application(module):
+def getR_application(module=None):
     global r_path
     #are we in 64 or 32 bit?  If 64 use the 64 bit install of R otherwise 32 bit.
     #if we don't have the matching version and the other exists use it.
