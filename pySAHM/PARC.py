@@ -149,7 +149,7 @@ class PARC:
         
     def processFiles(self):
         if self.processingMode == "FORT Condor":
-            self.process_pool = multiprocessing.Pool(2**32)
+            self.process_pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
         else:
             self.process_pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
         self.pool_processes = []

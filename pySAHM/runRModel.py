@@ -95,7 +95,7 @@ def mosaicTiledOutputs(outputDirectory):
                              if os.path.isfile(os.path.join(tilesFolder,f)) and f.endswith(".tif") ]
                 
                 NDValue = getNDVal(onlyfiles[0])
-                
+                 
                 args = ["placeholder", "-o", outFname] + onlyfiles
                 gdal.DontUseExceptions()
                 gdal_merge.main(args)

@@ -100,11 +100,16 @@ def getpixelsize(filename):
 def getrasterminmax(filename):
     dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
     band = dataset.GetRasterBand(1)
+    nodata = getNDVal(filename)
     
-    min = band.GetMinimum()
-    max = band.GetMaximum()
-    if min is None or max is None or min == band.GetNoDataValue():
-            (min,max) = band.ComputeRasterMinMax(1)
+    _min = band.GetMinimum()
+    _max = band.GetMaximum()
+    
+    if _min is None or _max is None or _min == band.GetNoDataValue() or \
+    _min == nodata:
+        band.SetNoDataValue(float(nodata))
+        band.ComputeStatistics(True)
+        _min, _max = band.ComputeRasterMinMax(1)
 
     
 
@@ -118,10 +123,10 @@ def getrasterminmax(filename):
 #            band.SetNoDataValue(min)
 #            (min,max) = band.ComputeRasterMinMax(0)
         
-    if min == band.GetNoDataValue():
-        min = 0
+    if _min == band.GetNoDataValue():
+        _min = 0
             
-    return (min, max)
+    return (_min, _max)
     dataset = None
     
 def getNDVal(filename):
@@ -129,36 +134,14 @@ def getNDVal(filename):
     band = dataset.GetRasterBand(1)
     
     NDValue = band.GetNoDataValue()
-    
+    band.ComputeStatistics(True)
     min_pixel = band.GetMinimum()
-    upperLeftPixVal = band.ReadAsArray(0, 0, 1, 1, 1, 1)[0][0]
-    if min_pixel is not None and approx_equal(NDValue, min_pixel) or \
-        approx_equal(NDValue, upperLeftPixVal):
-            NDValue = band.ReadAsArray(0, 0, 1, 1, 1, 1)[0][0]
     
+    if approx_equal(min_pixel, -3.399999999999999961272e+38):
+        NDValue = min_pixel
+        band.SetNoDataValue(float(min_pixel))
+        band.ComputeStatistics(True)  
     
-    
-#    if min is None or min == band.GetNoDataValue():
-#            min = band.ComputeRasterMinMax(0)[0]
-
-    
-#    try:
-#        #our output rasters have approx nodata values
-#        #which don't equal the specified nodata.
-#        #set the specified to equal what is actually used.
-##        if (abs(band.GetNoDataValue() - min) < 1e-9 and 
-##            band.GetNoDataValue() <> min) or \
-##            ( min == band.GetNoDataValue()):
-##            min, max = band.ComputeRasterMinMax(0)
-##            band.SetNoDataValue(min)
-##            (min,max) = band.ComputeRasterMinMax(0)
-#        
-#        
-#        if approx_equal(NDValue, min):
-#            NDValue = min
-#        
-#    except:
-#        pass
     
     
     dataset = None
@@ -570,10 +553,16 @@ def runModelOnCondor(script, args_dict, command_arr):
     DEVNULL = open(os.devnull, 'wb')
     p = subprocess.Popen(["condor_submit", "-n", 'IGSKBACBWSCDRS3', submitFname], stderr=DEVNULL, stdout=DEVNULL)
     
-    
-def getR_application(module=None):
+def get_r_path():
     global r_path
+    return str(r_path)
+
+def  set_r_path(r_bin_path):
+    global r_path
+    r_path = str(r_bin_path)
     
+def getR_application(module):
+    global r_path
     #are we in 64 or 32 bit?  If 64 use the 64 bit install of R otherwise 32 bit.
     #if we don't have the matching version and the other exists use it.
     version_dirs = ["i386", "x64"]
@@ -598,20 +587,27 @@ def getR_application(module=None):
 def pull_R_install_from_reg():
     #searches in the registry for an installation of R and returns the path
     #to the bin folder within it if that folder exists
-    regCmd = r'reg query "HKEY_LOCAL_MACHINE\SOFTWARE\R-core\R" /v "InstallPath"'
+    regCmds = [r'reg query "HKEY_LOCAL_MACHINE\SOFTWARE\R-core\R" /v "InstallPath"',
+               r'reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\R-core\R" /v "InstallPath"']
     startupinfo = subprocess.STARTUPINFO()
     startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-    regValue = subprocess.Popen(regCmd, startupinfo=startupinfo, stdout=subprocess.PIPE).stdout.read()
-    
-    for line in regValue.split("\n"):
-        if line.strip() and os.path.isdir(line.split("    ")[-1].strip()):
-            R_path = os.path.abspath(os.path.join(line.split("    ")[-1].strip(), "bin"))
-            if os.path.exists(R_path):
-                msg = "The specified installation of R in the sahm configuration parameter is not valid\n"
-                msg += "Using the installation location found in the registry:\n"
-                msg += R_path
-                writetolog(msg, True, True)
-            return R_path
+    for regCmd in regCmds:
+        regValue = subprocess.Popen(regCmd, startupinfo=startupinfo, stdout=subprocess.PIPE).stdout.read()
+        
+        for line in regValue.split("\n"):
+            if line.strip() and os.path.isdir(line.split("    ")[-1].strip()):
+                R_path = os.path.abspath(os.path.join(line.split("    ")[-1].strip(), "bin"))
+                if os.path.exists(R_path):
+                    msg = "Using the autodetected R installation location found in the registry:\n"
+                    msg += R_path
+                    writetolog(msg, True, True)
+                                       
+                    return R_path
+                
+    msgbox = QtGui.QMessageBox()
+    msgbox.setText("SAHM is unable to autodetect an installation of R on this machine\nYou must manually set the 'r_path' configuration value\n\nSee the SAHM installation section of the user manual for details.")
+    msgbox.exec_()
+    return "R not found!"
 
 def writeRErrorsToLog(args, outMsg, errMsg):
     #first check that this is a model run, or has a o= in the args.

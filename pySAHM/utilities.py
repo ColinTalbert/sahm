@@ -268,7 +268,7 @@ def get_process_count(strProcessingMode):
     else we will be running n-1 jobs (this function is only used by PARC now)
     '''
     if strProcessingMode == "FORT Condor":
-        return  2**32
+        return multiprocessing.cpu_count() - 1
     elif strProcessingMode == "multiple models simultaneously (1 core each)":
         return multiprocessing.cpu_count() - 1
     else:

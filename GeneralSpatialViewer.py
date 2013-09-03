@@ -224,7 +224,7 @@ class SpatialViewerCellWidget(QCellWidget):
 #        self.connect(self, QtCore.SIGNAL('keyPressEvent(QString)'),
 #             self.key_press)
         self.map_canvas.mpl_connect('button_release_event', self.button_up)
-        self.map_canvas.mpl_connect('resize_event', self.resize)
+        self.map_canvas.mpl_connect('resize_event', self._resize)
         self.add_axis()
 
         self.mpl_toolbar = NavigationToolbar(self.map_canvas, None)
@@ -297,12 +297,14 @@ class SpatialViewerCellWidget(QCellWidget):
 #            self.pull_pixels()
             self.sync_extents()
 
-    def resize(self):
+    def _resize(self, event):
         self.pull_pixels()
 
     def pull_pixels(self):
-        print "\n_pull_pixels"
-        self.rasterlayer.ax_update(self.axes)
+        try:
+            self.rasterlayer.ax_update(self.axes)
+        except:
+            pass
 
     def keyPressEvent(self, event):
         if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_T:
@@ -370,7 +372,6 @@ class SpatialViewerCellWidget(QCellWidget):
         """ Completely clears then redraws the figure
         There's probably a more efficient way to do this.
         """
-        print "GeneralOutputViewerCellWidget _on_draw"
         if passedExtent is not None:
             curExtent = passedExtent
         elif UseMaxExt:
@@ -378,7 +379,6 @@ class SpatialViewerCellWidget(QCellWidget):
         else:
             curExtents = self.get_extent()
             
-        print "curExtents: ", curExtents
 
         self.fig.clear()
         self.add_axis()
@@ -396,7 +396,6 @@ class SpatialViewerCellWidget(QCellWidget):
         self.rasterlayer.setDims(self.axes)
         self.rasterlayer.switch_raster(self.rasterFile)
 
-        print "\n_addraster"
         raster_array = self.rasterlayer(*curExtents)
 
         if self.categorical and not self.threeBand:
@@ -413,7 +412,7 @@ class SpatialViewerCellWidget(QCellWidget):
             rmax = max
             rmin = min
 
-            norm = colors.normalize(rmin, rmax)
+            norm = colors.Normalize(rmin, rmax)
             raster_plot = self.axes.imshow(raster_array,interpolation="nearest", cmap=self.cmap, norm=norm, origin='upper', extent=self.getDataExtent())
             
 
@@ -506,7 +505,6 @@ class SpatialViewerCellWidget(QCellWidget):
 
     #Functions dealing with managing extents
     def set_extent(self, ylim, xlim):
-        print "_set_extent"
         self.axes.set_ylim(ylim, emit=False)
         self.axes.set_xlim(xlim, emit=False)
 
@@ -515,7 +513,6 @@ class SpatialViewerCellWidget(QCellWidget):
         self.update()
         
     def get_extent(self):
-        print "_get_extent"
         return list(self.axes.get_xlim()) + list(self.axes.get_ylim())
 
     def getMaxExtent(self):
@@ -533,7 +530,6 @@ class SpatialViewerCellWidget(QCellWidget):
         self.sync_extents()
         
     def sync_extents(self):
-        print "_sync_extents"
         for spatialViewer in self.get_active_cells():
             spatialViewer.set_extent(self.axes.get_ylim(), self.axes.get_xlim())
             spatialViewer.pull_pixels()

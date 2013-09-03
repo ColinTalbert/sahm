@@ -137,7 +137,7 @@ def menu_items():
     def select_test_final_model():
         global session_dir
         
-        STFM  = SelectAndTestFinalModel(session_dir, configuration.r_path) 
+        STFM  = SelectAndTestFinalModel(session_dir, utils.get_r_path()) 
         retVal = STFM.exec_()
         
     def selectProcessingMode():
@@ -1753,7 +1753,7 @@ class CovariateCorrelationAndSelection(Module):
         global session_dir
         params['outputMDS'] = os.path.join(session_dir, "CovariateCorrelationOutputMDS_" + params['selectionName'] + ".csv")
         params['displayJPEG'] = os.path.join(session_dir, "CovariateCorrelationDisplay.jpg")
-        params['r_path'] = configuration.r_path
+        params['r_path'] = utils.get_r_path()
         writetolog("    inputMDS = " + params['inputMDS'], False, False)
         writetolog("    displayJPEG = " + params['displayJPEG'], False, False)
         writetolog("    outputMDS = " + params['outputMDS'], False, False)
@@ -1981,11 +1981,32 @@ def initialize():
     utils.importOSGEO() 
     utils.createLogger(session_dir, configuration.verbose)
         
-    utils.r_path = os.path.abspath(configuration.r_path)
-    if not os.path.exists(configuration.r_path) and \
+    utils.set_r_path(os.path.abspath(configuration.r_path))
+    if not os.path.exists(utils.get_r_path()) and \
         core.system.systemType in ['Microsoft', 'Windows']:
-        #they don't have a decent R path, let's see if we can pull one from the registry
-        utils.r_path = utils.pull_R_install_from_reg()
+        #they don't have a decent R path, let's see if we can pull one from the  
+        utils.set_r_path(utils.pull_R_install_from_reg())
+        configuration.r_path = utils.get_r_path()
+        package_manager = get_package_manager()
+        package = package_manager.get_package(identifier)
+        dom, element = package.find_own_dom_element()
+        configuration.write_to_dom(dom, element)
+                
+    try:
+        testfname = os.path.join(utils.get_r_path(), "CanSAHMWriteToR.txt")
+        open(testfname, "wb")
+        os.remove(testfname)
+    except:
+        msg = ("!"*79+"\n")*3
+        msg += "The current directory that R  is installed in:\n\t"
+        msg += utils.get_r_path()
+        msg += "\nIs not writeable!  This will cause errors in the\n"
+        msg += "R modules unless all required packages are already installed!!!\n"
+        msg += "Either point to an installation of R that is writeable or \n"
+        msg += "Run VisTrails as administrator until all R packages have been downloaded.\n"
+        msg += "\n  See page 4 of the user manual for more information!\n"
+        msg += ("!"*79+"\n")*3
+        writetolog(msg, True, True)
                 
     maxent_path = os.path.abspath(configuration.maxent_path)
 
@@ -2010,7 +2031,7 @@ def initialize():
     writetolog("  Locations of dependencies")
 #    writetolog("   Layers CSV = " + os.path.join(os.path.dirname(__file__), 'layers.csv'))
     writetolog("   Layers CSV = " + layers_csv_fname)
-    writetolog("   R path = " + utils.r_path)
+    writetolog("   R path = " + utils.get_r_path())
     writetolog("   Maxent folder = " + maxent_path)
 #    writetolog("   QGIS folder = " + os.path.abspath(configuration.qgis_path))
 #    writetolog("        Must contain subfolders qgis1.7.0, OSGeo4W")
