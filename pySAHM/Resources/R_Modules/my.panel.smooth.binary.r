@@ -13,8 +13,6 @@ my.panel.smooth<-function (x, y, col = par("col"), bg = NA, pch = par("pch"),fam
     o<-order(x)
     x<-x[o]
     y<-y[o]
-    col<-col[o]
-    bg<-bg[o]
     
       if(sum(y==0)/sum(y==1)>1.2 & famly!="poisson") wgt<-c(sum(y==1)/sum(y==0),1)[factor(y,levels=c(0,1))]
       else wgt<-rep(1,times=length(y))
