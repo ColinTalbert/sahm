@@ -61,7 +61,8 @@ chk.libs <- function(Model){
             install.packages(unlist(libs[!lib.mssg]), repos = "http://cran.r-project.org")
             lib.mssg <- unlist(suppressMessages(suppressWarnings(lapply(libs,require,quietly = T, warn.conflicts=F,character.only=T))))
             }
-        if(any(!lib.mssg)) stop(paste("\nthe following package(s) could not be loaded: ",paste(unlist(libs[!lib.mssg]),sep="")))
+        if(any(!lib.mssg)) stop(paste(paste("\n\nthe following package(s) could not be loaded: ",paste(unlist(libs[!lib.mssg]),sep="")),
+        "\n THIS IS GENERALLY BECAUSE YOU DID NOT FOLLOW THE INSTALL INSTRUCTIONS ON PAGE 4 OF THE SAHM MANUAL\nINSTALL R IN A LOCATION WHERE YOU HAVE WRITE PERMISSION (Often NOT Program Files)!!!!",sep=""))
 
       }
 
