@@ -2010,7 +2010,22 @@ def initialize():
         msg += ("!"*79+"\n")*3
         writetolog(msg, True, True)
                 
+                
     maxent_path = os.path.abspath(configuration.maxent_path)
+    if not os.path.exists(maxent_path) and os.path.exists(r"C:\Maxent\maxent.jar"):
+        maxent_path = r"C:\Maxent"
+        configuration.maxent_path = maxent_path
+    elif not os.path.exists(maxent_path) and maxent_path == r"..\\..\\Central_Maxent":
+        maxent_path = "Not specified"
+        
+    if not os.path.exists(maxent_path):
+        msg = ("!"*79+"\n")*3
+        msg += "The current installation of Maxent could not be found:\n\t"
+        msg += maxent_path
+        msg += "\nThe Maxent model will not work until this has been set correctly!\n"
+        msg += "\n  See page 5 of the user manual for more information!\n"
+        msg += ("!"*79+"\n")*3
+        writetolog(msg, True, True)
 
     gdal_data = os.path.join(os.path.dirname(__file__), "GDAL_Resources", "gdal-data")
     os.environ['GDAL_DATA'] = gdal_data
