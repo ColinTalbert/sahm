@@ -63,7 +63,8 @@ from sahm_picklists import OutputRaster
 from utils import map_ports
 from SahmSpatialOutputViewer import AnchoredText, MyMapCanvas, \
     RasterDisplay, fullExtent, viewTitleLegend, sync_changes, MPL_action 
-from utils import dbfreader, getRasterParams
+from utils import getRasterParams
+from pySAHM.utilities import dbfreader as dbfreader
 
 import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
