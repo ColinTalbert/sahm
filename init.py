@@ -883,7 +883,7 @@ class BackgroundSurfaceGenerator(Module):
                 "ispt":str(kde_params["isopleth"]),
                 "continuous":kde_params["continuous"]}
 
-        utils.run_R_script("PseudoAbs.r", args, self)
+        utils.run_R_script("PseudoAbs.r", args, self, new_r_path=configuration.r_path)
         
         if os.path.exists(outputfName):
             output_file = utils.create_file_module(outputfName, module=self)
@@ -1584,7 +1584,7 @@ class ModelEvaluationSplit(Module):
         writetolog("    seed used for Split = " + str(seed))
         args['seed'] = str(seed)
 
-        utils.run_R_script("TestTrainSplit.r", args, self)
+        utils.run_R_script("TestTrainSplit.r", args, self, new_r_path=configuration.r_path)
         
         output_file = utils.create_file_module(outputMDS, module=self)
         writetolog("Finished Model Evaluation split ", True)
@@ -1651,7 +1651,7 @@ class ModelSelectionSplit(Module):
         # args += " seed=" + str(seed)
         args['seed'] = str(seed)
 
-        utils.run_R_script("TestTrainSplit.r", args, self)
+        utils.run_R_script("TestTrainSplit.r", args, self, new_r_path=configuration.r_path)
         
         output_file = utils.create_file_module(outputMDS, module=self)
         writetolog("Finished Model Selection split ", True)
@@ -1705,7 +1705,7 @@ class ModelSelectionCrossValidation(Module):
         writetolog("    seed used for Split = " + str(seed))
         argsDict["seed"] = str(seed)
         
-        utils.run_R_script("CrossValidationSplit.r", argsDict, self)
+        utils.run_R_script("CrossValidationSplit.r", argsDict, self, new_r_path=configuration.r_path)
         
         output_file = utils.create_file_module(outputMDS, module=self)
         writetolog("Finished Cross Validation split ", True)
@@ -1753,7 +1753,7 @@ class CovariateCorrelationAndSelection(Module):
         global session_dir
         params['outputMDS'] = os.path.join(session_dir, "CovariateCorrelationOutputMDS_" + params['selectionName'] + ".csv")
         params['displayJPEG'] = os.path.join(session_dir, "CovariateCorrelationDisplay.jpg")
-        params['r_path'] = utils.get_r_path()
+        params['r_path'] = configuration.r_path
         params['module'] = self
         writetolog("    inputMDS = " + params['inputMDS'], False, False)
         writetolog("    displayJPEG = " + params['displayJPEG'], False, False)
