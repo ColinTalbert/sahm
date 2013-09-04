@@ -2006,7 +2006,7 @@ def initialize():
         msg += "R modules unless all required packages are already installed!!!\n"
         msg += "Either point to an installation of R that is writeable or \n"
         msg += "Run VisTrails as administrator until all R packages have been downloaded.\n"
-        msg += "\n  See page 4 of the user manual for more information!\n"
+        msg += "\n  See page 3 of the user manual for more information!\n"
         msg += ("!"*79+"\n")*3
         writetolog(msg, True, True)
                 
@@ -2015,8 +2015,8 @@ def initialize():
     if not os.path.exists(maxent_path) and os.path.exists(r"C:\Maxent\maxent.jar"):
         maxent_path = r"C:\Maxent"
         configuration.maxent_path = maxent_path
-    elif not os.path.exists(maxent_path) and maxent_path == r"..\\..\\Central_Maxent":
-        maxent_path = "Not specified"
+    if not os.path.exists(maxent_path) and maxent_path == r"..\\..\\Central_Maxent":
+        maxent_path = r"C:\Maxent\maxent.jar"
         
     if not os.path.exists(maxent_path):
         msg = ("!"*79+"\n")*3
