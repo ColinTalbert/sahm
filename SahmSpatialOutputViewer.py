@@ -517,7 +517,7 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
             f.close()
             for record in db[2:]:
                 uniques.append(record[0])
-                labels.append(record[1])
+                labels.append(record[1].strip())
 
         kwargs['cbar_ticks'] = uniques
         kwargs['cbar_labels'] = labels
