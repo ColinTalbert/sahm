@@ -696,6 +696,7 @@ class ApplyModel(Model):
     __doc__ = GenModDoc.construct_module_doc('ApplyModel')
     _input_ports = list(Model._input_ports)
     _input_ports.insert(0, ('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'))
+#    _input_ports.insert(1, ('evaluateHoldout', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}))
 #    _input_ports.extend([('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)')])
                          
     def __init__(self):
