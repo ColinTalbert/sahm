@@ -716,6 +716,7 @@ class PARC:
                          os.path.abspath(self.out_dir)])
         
         inputs = []
+        had_to_shrink = False  
         for row in inputsCSV:
             inputFile = row[0]
             input_just_file = os.path.splitext(os.path.split(inputFile)[1])[0]
@@ -732,13 +733,11 @@ class PARC:
                 inputs.append(input_just_file)
                 
                 
-            sourceRaster = SpatialUtilities.SAHMRaster(inputFile)                
-                
+            sourceRaster = SpatialUtilities.SAHMRaster(inputFile)                  
             if len(sourceRaster.Error) > 0:
                 strInputFileErrors += ("  " + os.path.split(inputFile)[1] + " had the following errors:\n" + 
                                     "    " + "\n    ".join(sourceRaster.Error)) + "\n"
             else:
-                pass
                 if not self.ignoreNonOverlap and not self.ImageCoversTemplate(sourceRaster):
                     strInputFileErrors += "\n  Some part of the template image falls outside of " + input_just_file
                     strInputFileErrors += "\n        template upper left  = (" + str(self.templateRaster.west) + ", " + str(self.templateRaster.north) + ")"
@@ -752,7 +751,10 @@ class PARC:
 
                 if self.ignoreNonOverlap:
                     #if this input is smaller in any of the dimensions
-                    pass
+                    if not self.ImageCoversTemplate(sourceRaster):
+                        self.shrink_template_extent(sourceRaster)
+                        had_to_shrink = True
+            
 
             if len(row) < 2 or not row[1] in ['0', '1']:
                 self.writetolog("  " + os.path.split(inputFile)[1] + " categorical either missing or not 0 or 1:\n   Defaulting to 0 (continuous)")
@@ -793,6 +795,24 @@ class PARC:
             outputrow = [fileName] + row[1:4] + [os.path.abspath(row[0]), os.path.abspath(self.out_dir)]
             output.writerow(outputrow)
         del output
+        
+        if had_to_shrink:
+            old_template = SpatialUtilities.SAHMRaster(self.template)
+            new_template_fname = os.path.join(self.out_dir, os.path.split(self.template)[1])
+            
+            SpatialUtilities.intermediaryReprojection(old_template, 
+                            self.templateRaster, new_template_fname, gdalconst.GRA_NearestNeighbour, True)
+            
+            outputCSV = open(os.path.join(self.out_dir, "PARC_Files.csv"))
+            first_line, remainder = outputCSV.readline(), outputCSV.read()
+            outputCSV = open(os.path.join(self.out_dir, "PARC_Files.csv"),"w")
+            replacement_line = first_line.split(",")
+            replacement_line[5] = new_template_fname
+            replacement_line = ",".join(replacement_line)
+            outputCSV.write(replacement_line)
+            outputCSV.write(remainder)
+            outputCSV.close()
+        
         
         if strInputFileErrors <> "":
             self.writetolog(strInputFileErrors, False, False)
