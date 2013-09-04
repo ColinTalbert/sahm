@@ -696,6 +696,7 @@ class ApplyModel(Model):
     __doc__ = GenModDoc.construct_module_doc('ApplyModel')
     _input_ports = list(Model._input_ports)
     _input_ports.insert(0, ('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'))
+#    _input_ports.insert(1, ('evaluateHoldout', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}))
 #    _input_ports.extend([('modelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)')])
                          
     def __init__(self):
@@ -733,7 +734,7 @@ class BoostedRegressionTree(Model):
     _input_ports.extend([('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                          ('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ('TreeComplexity', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
-                              ('BagFraction', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.5"]', 'optional':True}),
+                              ('BagFraction', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.75"]', 'optional':True}),
                               ('NumberOfFolds', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["3"]', 'optional':True}),
                               ('Alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'[1]', 'optional':True}),
                               ('PrevalenceStratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
@@ -883,7 +884,7 @@ class BackgroundSurfaceGenerator(Module):
                 "ispt":str(kde_params["isopleth"]),
                 "continuous":kde_params["continuous"]}
 
-        utils.run_R_script("PseudoAbs.r", args, self)
+        utils.run_R_script("PseudoAbs.r", args, self, new_r_path=configuration.r_path)
         
         if os.path.exists(outputfName):
             output_file = utils.create_file_module(outputfName, module=self)
@@ -1584,7 +1585,7 @@ class ModelEvaluationSplit(Module):
         writetolog("    seed used for Split = " + str(seed))
         args['seed'] = str(seed)
 
-        utils.run_R_script("TestTrainSplit.r", args, self)
+        utils.run_R_script("TestTrainSplit.r", args, self, new_r_path=configuration.r_path)
         
         output_file = utils.create_file_module(outputMDS, module=self)
         writetolog("Finished Model Evaluation split ", True)
@@ -1651,7 +1652,7 @@ class ModelSelectionSplit(Module):
         # args += " seed=" + str(seed)
         args['seed'] = str(seed)
 
-        utils.run_R_script("TestTrainSplit.r", args, self)
+        utils.run_R_script("TestTrainSplit.r", args, self, new_r_path=configuration.r_path)
         
         output_file = utils.create_file_module(outputMDS, module=self)
         writetolog("Finished Model Selection split ", True)
@@ -1705,7 +1706,7 @@ class ModelSelectionCrossValidation(Module):
         writetolog("    seed used for Split = " + str(seed))
         argsDict["seed"] = str(seed)
         
-        utils.run_R_script("CrossValidationSplit.r", argsDict, self)
+        utils.run_R_script("CrossValidationSplit.r", argsDict, self, new_r_path=configuration.r_path)
         
         output_file = utils.create_file_module(outputMDS, module=self)
         writetolog("Finished Cross Validation split ", True)
@@ -1753,7 +1754,8 @@ class CovariateCorrelationAndSelection(Module):
         global session_dir
         params['outputMDS'] = os.path.join(session_dir, "CovariateCorrelationOutputMDS_" + params['selectionName'] + ".csv")
         params['displayJPEG'] = os.path.join(session_dir, "CovariateCorrelationDisplay.jpg")
-        params['r_path'] = utils.get_r_path()
+        params['r_path'] = configuration.r_path
+        params['module'] = self
         writetolog("    inputMDS = " + params['inputMDS'], False, False)
         writetolog("    displayJPEG = " + params['displayJPEG'], False, False)
         writetolog("    outputMDS = " + params['outputMDS'], False, False)
@@ -2004,11 +2006,26 @@ def initialize():
         msg += "R modules unless all required packages are already installed!!!\n"
         msg += "Either point to an installation of R that is writeable or \n"
         msg += "Run VisTrails as administrator until all R packages have been downloaded.\n"
-        msg += "\n  See page 4 of the user manual for more information!\n"
+        msg += "\n  See page 3 of the user manual for more information!\n"
         msg += ("!"*79+"\n")*3
         writetolog(msg, True, True)
                 
+                
     maxent_path = os.path.abspath(configuration.maxent_path)
+    if not os.path.exists(maxent_path) and os.path.exists(r"C:\Maxent\maxent.jar"):
+        maxent_path = r"C:\Maxent"
+        configuration.maxent_path = maxent_path
+    if not os.path.exists(maxent_path) and maxent_path == r"..\\..\\Central_Maxent":
+        maxent_path = r"C:\Maxent\maxent.jar"
+        
+    if not os.path.exists(maxent_path):
+        msg = ("!"*79+"\n")*3
+        msg += "The current installation of Maxent could not be found:\n\t"
+        msg += maxent_path
+        msg += "\nThe Maxent model will not work until this has been set correctly!\n"
+        msg += "\n  See page 5 of the user manual for more information!\n"
+        msg += ("!"*79+"\n")*3
+        writetolog(msg, True, True)
 
     gdal_data = os.path.join(os.path.dirname(__file__), "GDAL_Resources", "gdal-data")
     os.environ['GDAL_DATA'] = gdal_data

@@ -71,7 +71,7 @@ class SelectListDialog(QtGui.QDialog):
         self.selection_name = os.path.split(kwargs['outputMDS'])[1]
         self.selection_name = os.path.splitext(self.selection_name)[0]
         self.selection_name = self.selection_name.split('_')[-1]
-        
+        self.module = self.kwargs['module']
         self.displayJPEG = kwargs['displayJPEG']
         
         QtGui.QDialog.__init__(self, parent)
@@ -437,7 +437,7 @@ class SelectListDialog(QtGui.QDialog):
         if os.path.exists(os.path.join(self.outputDir, "Predictor_Correlation.jpg")):
             os.remove(os.path.join(self.outputDir, "Predictor_Correlation.jpg"))
             
-        utils.run_R_script('PairsExplore.r', args)
+        utils.run_R_script('PairsExplore.r', args, self.module, new_r_path=self.kwargs['r_path'])
         
         if os.path.exists(os.path.join(self.outputDir, "devinfo.csv")):
             self.loadDeviances()

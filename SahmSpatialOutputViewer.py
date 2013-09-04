@@ -65,8 +65,9 @@ from packages.spreadsheet.spreadsheet_controller import spreadsheetController
 from sahm_picklists import OutputRaster
 from utils import map_ports
 
-from utils import dbfreader, getRasterParams
+from utils import getRasterParams
 from utils import print_timing
+from pySAHM.utilities import dbfreader as dbfreader
 
 import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -84,6 +85,7 @@ from osgeo import gdal, gdalconst
 from core.packagemanager import get_package_manager
 
 import utils
+import pySAHM.utilities as utilities
 
 import GenerateModuleDoc as GenModDoc
 doc_file = os.path.abspath(os.path.join(os.path.dirname(__file__),  "documentation.xml"))
@@ -506,16 +508,16 @@ class SAHMSpatialOutputViewerCellWidget(QCellWidget):
 #        vals = self.rasterlayer()
 #        uniques = np.unique(vals)
         uniques = []
+        labels = []
         vatdbf = kwargs['file'] + ".vat.dbf"
         if os.path.exists(vatdbf):
             #we'll pull labels from this file
             f = open(vatdbf, 'rb')
             db = list(dbfreader(f))
             f.close()
-            labels = []
             for record in db[2:]:
                 uniques.append(record[0])
-                labels.append(record[1])
+                labels.append(record[1].strip())
 
         kwargs['cbar_ticks'] = uniques
         kwargs['cbar_labels'] = labels

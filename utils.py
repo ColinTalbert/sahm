@@ -51,8 +51,6 @@ import subprocess
 import multiprocessing
 import re
 
-import struct, datetime, decimal, itertools
-
 import xml.dom.minidom
 import textwrap
 
@@ -417,7 +415,7 @@ def gen_R_cmd(script, args_dict):
     return command_arr
 
 def run_R_script(script, args_dict, module=None, async=False, 
-               stdout_fname=None, stderr_fname=None):
+               stdout_fname=None, stderr_fname=None, new_r_path=None):
     '''Runs a SAHM R script
     if async is False it waits for the script to finish processing and checks
     the output for warning and error messages.
@@ -428,6 +426,11 @@ def run_R_script(script, args_dict, module=None, async=False,
     if stdout_fname or stderr_fname are provided these files will receive the
     output, which is helpful for debugging/logging
     '''
+    global r_path
+    if not new_r_path is None and \
+       os.path.abspath(new_r_path) != r_path:
+        set_r_path(new_r_path)
+    
     cmd = gen_R_cmd(script, args_dict)
     
     writetolog("\nStarting processing of "  + script , True)
@@ -686,64 +689,8 @@ def applyMDS_selection(oldMDS, newMDS):
     
 
 
-#taken from http://code.activestate.com/recipes/362715-dbf-reader-and-writer/
-def dbfreader(f):
-    """Returns an iterator over records in a Xbase DBF file.
-
-    The first row returned contains the field names.
-    The second row contains field specs: (type, size, decimal places).
-    Subsequent rows contain the data records.
-    If a record is marked as deleted, it is skipped.
-
-    File should be opened for binary reads.
-
-    """
-    # See DBF format spec at:
-    #     http://www.pgts.com.au/download/public/xbase.htm#DBF_STRUCT
-
-    numrec, lenheader = struct.unpack('<xxxxLH22x', f.read(32))    
-    numfields = (lenheader - 33) // 32
-
-    fields = []
-    for fieldno in xrange(numfields):
-        name, typ, size, deci = struct.unpack('<11sc4xBB14x', f.read(32))
-        name = name.replace('\0', '')       # eliminate NULs from string   
-        fields.append((name, typ, size, deci))
-    yield [field[0] for field in fields]
-    yield [tuple(field[1:]) for field in fields]
-
-    terminator = f.read(1)
-    assert terminator == '\r'
-
-    fields.insert(0, ('DeletionFlag', 'C', 1, 0))
-    fmt = ''.join(['%ds' % fieldinfo[2] for fieldinfo in fields])
-    fmtsiz = struct.calcsize(fmt)
-    for i in xrange(numrec):
-        record = struct.unpack(fmt, f.read(fmtsiz))
-        if record[0] != ' ':
-            continue                        # deleted record
-        result = []
-        for (name, typ, size, deci), value in itertools.izip(fields, record):
-            if name == 'DeletionFlag':
-                continue
-            if typ == "N":
-                value = value.replace('\0', '').lstrip()
-                if value == '':
-                    value = 0
-                elif deci:
-                    value = decimal.Decimal(value)
-                else:
-                    value = int(value)
-            elif typ == 'D':
-                y, m, d = int(value[:4]), int(value[4:6]), int(value[6:8])
-                value = datetime.date(y, m, d)
-            elif typ == 'L':
-                value = (value in 'YyTt' and 'T') or (value in 'NnFf' and 'F') or '?'
-            elif typ == 'F':
-                value = float(value)
-            result.append(value)
-        yield result
     
+
 def getRasterParams(rasterFile):
     """
     Extracts a series of bits of information from a passed raster
@@ -920,7 +867,7 @@ def checkIfModelFinished(model_dir):
 def find_file(model_dir, suffix):
     try:
         return [file_name for file_name in os.listdir(model_dir)
-                                 if file_name.endswith(suffix)][0]
+                                 if file_name.lower().endswith(suffix.lower())][0]
     except IndexError:
         raise RuntimeError('The expected model output '
                                + suffix + ' was not found in the model output directory')

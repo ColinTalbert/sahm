@@ -37,7 +37,7 @@ def main(args_in):
     ret = p.communicate()
     
     print ret[0]#this sends it to the std out
-#    sys.stderr.write(ret[1])
+    sys.stderr.write(ret[1])
     
     msg = ""
     if 'Error' in ret[1]:
@@ -103,6 +103,32 @@ def mosaicTiledOutputs(outputDirectory):
                 dataset = gdal.Open( outFname, gdal.GA_Update )
                 dataset.GetRasterBand(1).SetNoDataValue(float(NDValue))
                 dataset.GetRasterBand(1).ComputeStatistics(1)
+                
+                if m == 'Mod':
+                    #we must merge the dbf files as well.  ugg.
+                    only_dbf_files = [os.path.join(tilesFolder,f) for f in os.listdir(tilesFolder) 
+                             if os.path.isfile(os.path.join(tilesFolder,f)) and f.endswith(".vat.dbf") ]
+                    dbf_0_f = open(only_dbf_files[0], "rb")
+                    dbf_0 = list(utilities.dbfreader(dbf_0_f))
+                    dbf_0_f.close()
+                    
+                    fieldnames, fieldspecs = (dbf_0)[:2]
+                    all_values = set([val[1].strip() for val in dbf_0[2:]])
+                    
+                    for dbf_file in only_dbf_files[1:]:
+                        dbf_f = open(dbf_file, 'rb')
+                        dbf_list = list(utilities.dbfreader(dbf_f))
+                        dbf_f.close()
+                    
+                        dbf_n_values = set([val[1].strip() for val in dbf_list[2:]])
+                        all_values = all_values | dbf_n_values
+                        
+                    dbf_out_fname = outFname.replace(".tif", ".tif.vat.dbf")
+                    dbf_out_f = open(dbf_out_fname, 'wb')
+                    all_values = zip(range(1, len(all_values) + 1), list(all_values))
+                    utilities.dbfwriter(dbf_out_f, fieldnames, fieldspecs, all_values)
+                    dbf_out_f.close()
+                    
                 try:
                     shutil.rmtree(tilesFolder)
                 except:
