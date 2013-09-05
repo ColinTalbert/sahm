@@ -336,13 +336,21 @@ class SAHMOutputViewerCellWidget(QCellWidget):
 #                                       self.ui.gv_response,
 #                                       max_size]
         self.ui.crv_combobox.clear()
+        curindex = 0
         if self.response_curves:
             for response_curve in self.response_curves:
                 shortName = os.path.split(response_curve)[1]
                 shortName = os.path.splitext(shortName)[0]
                 if shortName != "Thumbs": 
                     self.ui.crv_combobox.addItem(shortName)
-                
+                if shortName == "all_response_curves":
+                    all_curves_index = curindex
+                curindex += 1
+            try:
+                self.ui.crv_combobox.setCurrentIndex(all_curves_index)
+            except:
+                pass
+            
 
         
         if calibration_graph:
