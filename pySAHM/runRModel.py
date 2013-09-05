@@ -2,6 +2,7 @@ import os, sys
 import subprocess
 import utilities
 import shutil
+import time
 
 from osgeo import gdal as gdal
 from osgeo import gdalconst as gdalconst
@@ -31,6 +32,7 @@ def main(args_in):
                 sys.stderr.write("Error in original model that this ApplyModel needs")
                 sys.exit("Error in original model could not apply model")
             elif check.startswith("Completed successfully"):
+                time.sleep(5)
                 break
     
     p = subprocess.Popen(args_in, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
