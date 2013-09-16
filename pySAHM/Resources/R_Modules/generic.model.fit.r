@@ -108,9 +108,13 @@ on.exit(detach(out$input))
            out$mods$n.vars.final<-nrow(out$mods$summary)
            out$mods$vnames<-rownames(out$mods$summary)
 
-          
+          txt0 <- paste("\n\n","Settings:\n",
+                      "\n\trandom seed used =            ",out$input$seed,
+                      "\n\tmars degree      =            ",out$input$mars.degree,
+                      "\n\tmars penalty     =            ",out$input$mars.penalty,"\n\n",sep="")
           cat("\n","Storing output...","\n","\n")
-          capture.output(cat("\n\nSummary of Model:\n"),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
+          capture.output(cat(txt0),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
+          capture.output(cat("\n\nSummary of Model:\n"),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)  
           capture.output(print(out$mods$summary),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
 
       }

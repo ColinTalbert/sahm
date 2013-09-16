@@ -4,11 +4,12 @@
 #setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
 #ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
 
-setwd("N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\DevelopmentWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
-ScriptPath="N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\DevelopmentWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
+#setwd("N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\DevelopmentWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
+#ScriptPath="N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\DevelopmentWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
 
-#setwd("I:\\VisTrails\\DevWorkspace\\Colin\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
-#ScriptPath="I:\\VisTrails\\DevWorkspace\\Colin\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
+setwd("I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
+
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
 source("GLM.helper.fcts.r")
@@ -47,8 +48,8 @@ FitModels(ma.name=input.file,
 #================================================================#
 #                            MARS
 #================================================================#
-input.file="J:\\Projects\\SurrogateSpecies\\DerivedData\\InitialWorkspace\\MarianTesting\\VisTrailsOutput\\CovariateCorrelationOutputMDS_initial.csv"
-output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1\\rf"
+input.file="J:\\Projects\\Hybrids\\Tamarisk_genotype_Aug\\CovariateCorrelationOutputMDS_TamGenotype_geno1.csv"
+output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
 FitModels(ma.name=input.file,
             output.dir=output.dir,
             response.col=rc,make.p.tif=T,make.binary.tif=T,
