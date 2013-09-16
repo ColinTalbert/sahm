@@ -1,7 +1,7 @@
 '''Original from:
 http://stackoverflow.com/questions/8786136/pyqt-how-to-detect-and-close-ui-if-its-already-running
 '''
-import os
+import os, sys
 from PyQt4 import QtGui, QtCore, QtNetwork
 
 class SingleApplication(QtGui.QApplication):
@@ -25,6 +25,14 @@ class Window(QtGui.QWidget):
     def __init__(self, workspace):
     
         QtGui.QWidget.__init__(self)
+        try:
+            #Try to set the window icon.  This might not be cross-platform
+            vistrailsdir = os.path.dirname(os.path.dirname(sys.executable))
+            app_icon = QtGui.QIcon(vistrailsdir +
+                '/gui/resources/images/vistrails_icon_small.png')
+            self.setWindowIcon(app_icon)
+        except:
+            pass
         
         self.sessionDir = workspace
         
@@ -64,8 +72,8 @@ class Window(QtGui.QWidget):
         
         expandedNodes = []
         for index in range(self.treeView.topLevelItemCount()):
-             if self.treeView.topLevelItem(index).isExpanded():
-                 expandedNodes.append(index)
+            if self.treeView.topLevelItem(index).isExpanded():
+                expandedNodes.append(index)
         
         self.treeView.clear()
         for subFolder in subFolders:

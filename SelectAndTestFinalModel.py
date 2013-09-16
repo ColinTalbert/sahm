@@ -311,6 +311,8 @@ class SelectAndTestFinalModel(QtGui.QDialog):
             msgbox = QtGui.QMessageBox(self)
             msgbox.setText(msg)
             msgbox.exec_()
+            output_disp = os.path.join(finalFolder, "FinalEvaluationBinom.jpg")
+            self.load_picture(output_disp)
             return None
         else:
             os.mkdir(finalFolder)
@@ -328,21 +330,29 @@ class SelectAndTestFinalModel(QtGui.QDialog):
                 os.mkdir(outfolder)
                 
                 args = {"ws":origWS,
-                        "o":outfolder}
+                        "o":outfolder,
+                        'mpt':"FALSE",
+                        'mbt':"FALSE",
+                        'mes':"FALSE",
+                        "pmt":"FALSE"}
                         
                 
                 utils.run_R_script("EvaluateNewData.r", args)
                 writetolog("Finished running R for: " + str(item.text(0)) , False, True)
             treeviewIter += 1
         
+        if checked_count == 1:
+            utils.run_R_script("EvaluateNewData.r", args)
+            writetolog("Finished running R for: " + str(item.text(0)) , False, True)
+        
         if checked_count == 0:
             msg = "No models selected for final evaluation/map production."
             msgbox = QtGui.QMessageBox(self)
             msgbox.setText(msg)
-            msgbox.exec_()
-        
+            msgbox.exec_()        
         else:
             output_disp = os.path.join(finalFolder, "FinalEvaluationBinom.jpg")
+            self.display_jpeg = output_disp
             self.load_picture(output_disp)
 
         

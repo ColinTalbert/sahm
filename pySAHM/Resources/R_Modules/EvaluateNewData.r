@@ -25,13 +25,13 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
        out<-out1
        out$input$ScriptPath=ScriptPath #this might not have been in the original, it's a new requirement
      
-       on.exit(capture.output(cat("Model Failed\n\n"),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE))  
+       on.exit(capture.output(cat("Model Failed\n\n"),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE))
        source(file.path(ScriptPath,paste(toupper(out$input$script.name),".helper.fcts.r",sep="")))
     # generate a filename for output #
                 out$input$output.dir<-out.dir
                 out$input$MESS<-mess
                 Model<-out$input$script.name
-              out$dat$bname<-paste(out$input$output.dir,paste("/","ApplyModel",sep=""),sep="")
+              out$dat$bname<-paste(out$input$output.dir,paste("/",Model,sep=""),sep="")
                if(!produce.metrics & !is.null(new.tifs)) out$input$NoResidMaps=TRUE
          
     #write a few details on the data to the output txt document
