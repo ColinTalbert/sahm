@@ -268,12 +268,18 @@ def get_process_count(strProcessingMode):
     If on Condor then send them all and let Condor manage the Queue.
     else we will be running n-1 jobs (this function is only used by PARC now)
     '''
+    
     if strProcessingMode == "FORT Condor":
-        return multiprocessing.cpu_count() - 1
+        process_count = multiprocessing.cpu_count() - 1
     elif strProcessingMode == "multiple models simultaneously (1 core each)":
-        return multiprocessing.cpu_count() - 1
+        process_count = multiprocessing.cpu_count() - 1
     else:
-        return 1
+        process_count = 1
+    
+    if process_count < 1:
+        process_count = 1
+
+    return process_count
     
 def getModelsPath():
     return os.path.join(os.path.dirname(__file__), "Resources", "R_Modules")
