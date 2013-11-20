@@ -835,10 +835,16 @@ my.model.matrix.mars<-function (object, x, which = object$selected.terms, full =
     cut <- object$cuts[which,match(names(used.predictors),colnames(object$factor))]
     n<-nrow(x)
     p<-ncol(x)
+   
+    if(is.null(dim(dir))){ 
+        dir<-as.matrix(dir)
+        x<-as.matrix(x)
+        cut<-as.matrix(cut)
+    }
    bx <- matrix(1, nrow = n, ncol = nterms)
         for (i in seq(along = which)) {
         j <- which[i]
-        if (all(dir[i, ] == 0)) {
+        if(all(dir[i, ] == 0)) {
             stop("error in factor or which")
         }
         temp1 <- 1
