@@ -151,8 +151,8 @@ Args <- commandArgs(trailingOnly=FALSE)
     }
 
 ScriptPath<-dirname(ScriptPath)
-source(paste(ScriptPath,"chk.libs.r",sep="\\"))
-source(paste(ScriptPath,"my.panel.smooth.binary.r",sep="\\"))
+source(file.path(ScriptPath,"chk.libs.r"))
+source(file.path(ScriptPath,"my.panel.smooth.binary.r"))
 
 CompareBkgdDists(file.list,num.reps,num.pts)
 Predictor.inspection(predictor=predictor,input.file=infile,output.dir=output,response.col=responseCol,pres=TRUE,absn=TRUE,bgd=TRUE)

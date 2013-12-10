@@ -71,14 +71,14 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
             }
     }
        
-     dir.create(paste(out$input$output.dir,"\\responseCurves",sep=""))
+     dir.create(file.path(out$input$output.dir,"responseCurves"))
      rsp.dat<-NA
       
       for (k in c(1,2)){
-          if(k==1){ jpeg(paste(out$input$output.dir,"\\responseCurves\\","all_response_curves.jpg",sep=""),width=2000,height=2000,quality=100)
+          if(k==1){ jpeg(file.path(out$input$output.dir,"responseCurves","all_response_curves.jpg"),width=2000,height=2000,quality=100)
                     par(oma=c(2,2,4,2),mfrow=c(prow,pcol))}                   
          for (i in sort(match(out$mods$vnames,names(dat)))) {
-                if (k==2) jpeg(filename=paste(out$input$output.dir,"\\responseCurves\\",names(dat)[i],".jpg",sep=""),width=2000,height=2000,quality=100)
+                if (k==2) jpeg(filename=file.path(out$input$output.dir,"responseCurves",paste(names(dat)[i],".jpg",sep="")),width=2000,height=2000,quality=100)
                 if (!is.factor(dat[, i])) {
                     xr <- range(dat[, i])
                     Xp1 <- Xp
