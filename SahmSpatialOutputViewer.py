@@ -54,9 +54,6 @@ import utils
 import math
 
 from PyQt4 import QtCore, QtGui
-from core.system import systemType
-if systemType in ['Microsoft', 'Windows']:
-    from PyQt4 import QAxContainer
 from core.modules.vistrails_module import Module
 from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
 from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
