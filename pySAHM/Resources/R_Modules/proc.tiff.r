@@ -142,15 +142,14 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
       library(parallel)
       #create some temporary folders    
       if(make.p.tif)
-        dir.create(paste(out$input$output.dir,"\\ProbTiff",sep=""))
-        outfile.p=paste(paste(out$input$output.dir,"\\ProbTiff\\",sep=""),"_prob_map.tif",sep="")
+        dir.create(file.path(out$input$output.dir,"ProbTiff"))
+        outfile.p=file.path(out$input$output.dir,"ProbTiff","_prob_map.tif")
       if(make.binary.tif)                                                                                         
-        outfile.bin=dir.create(paste(out$input$output.dir,"\\BinTiff",sep=""))
-      if(MESS) dir.create(paste(out$input$output.dir,"\\MESSTiff",sep="")) 
-      if(MOD)  dir.create(paste(out$input$output.dir,"\\ModTiff",sep=""))       
-           
+        outfile.bin=dir.create(file.path(out$input$output.dir,"BinTiff"))
+      if(MESS) dir.create(file.path(out$input$output.dir,"MESSTiff"))
+      if(MOD)  dir.create(file.path(out$input$output.dir,"ModTiff"))
        if(out$input$ResidMaps)
-        dir.create(paste(out$input$output.dir,"\\ResidTiff",sep=""))
+        dir.create(file.path(out$input$output.dir,"ResidTiff"))
         tile.start<-seq(from=1,to=tr$n,by=ceiling(tr$n/(detectCores()-1))) 
       cl <- makeCluster(detectCores()) 
       parLapply(cl,X=tile.start,fun=parRaster,dims=dims,
