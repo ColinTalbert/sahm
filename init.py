@@ -563,8 +563,19 @@ class Model(Module):
             global maxent_path
             self.args_dict['maxent_path'] = maxent_path
             self.args_dict['maxent_args'] = self.maxent_args
-            
-        self.output_dname = utils.mknextdir(prefix)
+
+        # set output_dname to last correct execution if one exists
+        # otherwise create a new execution
+        # FIXME: this is bad if we change params
+        self.output_dname = None
+        output_dname = utils.get_last_dir(prefix)
+        if output_dname is not None:
+            monitor = utils.get_job_monitor(self, output_dname)
+            if monitor.finished():
+                self.output_dname = output_dname
+        if self.output_dname is None:
+            self.output_dname = utils.mknextdir(prefix)
+
         #make a copy of the mds file used in the output folder
         copy_mds_fname = os.path.join(self.output_dname, os.path.split(mdsFile)[1])
         shutil.copyfile(mdsFile, copy_mds_fname)
@@ -588,8 +599,6 @@ class Model(Module):
             
         utils.run_model_script(self.name, self.args_dict, self, self.pywrapper)
         
-        utils.launch_RunMonitorApp()
-    
         self.set_model_results()
     
     def set_model_results(self, ):
