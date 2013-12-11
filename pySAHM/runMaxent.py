@@ -110,6 +110,10 @@ class MAXENTRunner(object):
         else:
             #no other models should be running, we get to use all the cores
             process_count = multiprocessing.cpu_count() - 1
+        
+        if process_count < 1:
+            process_count = 1
+            
         utilities.start_new_pool(process_count)
 
     def gen_maxent_cmd(self):

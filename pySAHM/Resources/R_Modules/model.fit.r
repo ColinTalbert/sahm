@@ -7,6 +7,9 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
 
     attach(out$input)
     on.exit(detach(out$input))
+#================================================================
+#                        GLM
+#================================================================= 
    
     if(Model=="glm") {
     mymodel.glm.step<-list()
@@ -26,13 +29,21 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
                    paste("(",paste(out$dat$used.covs[cont.mask],collapse=" + "),")^2",sep=""),
                    paste("I(",out$dat$used.covs[cont.mask],"^2)",sep="")),collapse=" + "),sep="")))
              }
-            mymodel.glm.step[[1]] <- step(glm(as.formula(paste("response","~1")),family=model.family,data=dat,weights=weight,na.action="na.exclude"),
-            direction='both',scope=scope.glm,k=penalty,trace=1)
+             
+             if(predSelect){
+                mymodel.glm.step[[1]] <- step(glm(as.formula(paste("response","~1")),family=model.family,data=dat,weights=weight,na.action="na.exclude"),
+                direction='both',scope=scope.glm,k=penalty,trace=1)
+            } else {
+             mymodel.glm.step[[1]] <- glm(scope.glm$upper,family=model.family,data=dat,weights=weight,na.action="na.exclude")
+            }
+            
             out$mods$final.mod<-mymodel.glm.step
             if(full.fit) return(out)
             else return(mymodel.glm.step)
      }
-     
+#================================================================
+#                        MAXENT
+#================================================================= 
      if(Model=="maxent"){
           #this is a bit confusing because the files is something.lambdas and I don't necessarilly know what something is
           if(missing(Fold)) lambdasFile=list.files(out$input$lambdas,full.names=TRUE)[grep("lambdas",list.files(out$input$lambdas))]
@@ -46,11 +57,13 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
      
    SplitBackground(out,dat)
    out$dat$ma$train$Split<-c(Split,rep(0,times=sum(dat$response>0)))
- 
+#================================================================
+#                        MARS
+#================================================================= 
     if(Model=="mars") {
           fit_contribs<-list()
           mars.model<-list()
-        
+       
           for(i in 1:num.splits){
                 mars.model[[i]]<-mars.glm(data=dat[c(Split,rep(i,times=sum(dat$response>0)))==i,], mars.x=c(2:ncol(dat)), mars.y=1, mars.degree=mars.degree, family=model.family,
                                        penalty=mars.penalty)
@@ -65,13 +78,14 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
                 return(out)
            } else return(mars.model)
     }
-    
-    if(Model=="brt"){
-
-          brt.full<-list()
-          lr.list<-list()
-          mod.simp<-list()
-
+#================================================================
+#                        BRT
+#=================================================================
+ if(Model=="brt"){
+           brt.full<-list()
+           lr.list<-list()          
+           mod.simp<-list()
+           
           if(model.family=="binomial")  out$input$model.family<-model.family<-"bernoulli"
             if(!is.null(tc)) out$mods$parms$tc.full<-out$mods$parms$tc.sub<-tc
              
@@ -105,15 +119,20 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
                         # remove variables with <1% relative influence and re-fit model
                             if(length(out$mods$lr.mod$good.cols)<=1) stop("BRT must have at least two independent variables")
                             max.trees<-NULL
+                            #learning rate estimation removes columns with low contributions to fit for removal 
+                            #here we put specify use all if no predictor selection was to occur
+                            if(!predSelect) out$mods$lr.mod$good.cols<-seq(from=2,to=ncol(out$dat$Subset$dat))
                         m0 <- gbm.step.fast(dat=out$dat$Subset$dat,gbm.x=out$mods$lr.mod$good.cols,gbm.y=1,family=model.family,
                               n.trees = c(300,600,800,1000,1200,1500,1800),step.size=step.size,max.trees=max.trees,
                               tolerance.method=tolerance.method,tolerance=tolerance, n.folds=n.folds,prev.stratify=prev.stratify,
                               tree.complexity=out$mods$parms$tc.sub,learning.rate=out$mods$lr.mod$lr0,bag.fraction=bag.fraction,site.weights=out$dat$Subset$weight,
                               autostop=T,debug.mode=F,silent=!debug.mode,
                               plot.main=F,superfast=F)
-                        mod.simp[[i]] <- gbm.simplify(m0,n.folds=n.folds,plot=F,verbose=F,alpha=alpha) # this step is very slow #
-                     }
-                              out$mods$simp.mod$good.cols <- unique(unlist(lapply(mod.simp,function(lst){lst$pred.list[[length(lst$pred.list)]]})))
+                        if(predSelect) mod.simp[[i]] <- gbm.simplify(m0,n.folds=n.folds,plot=F,verbose=F,alpha=alpha) # this step is very slow #
+                   
+                     }        #if we removed bad predictors the good predictor list otherwise make sure we specify include all again
+                              if(predSelect) out$mods$simp.mod$good.cols <- unique(unlist(lapply(mod.simp,function(lst){lst$pred.list[[length(lst$pred.list)]]})))
+                              else out$mods$simp.mod$good.cols <- seq(from=2,to=ncol(out$dat$Subset$dat))
                               out$mods$simp.mod$good.vars <- names(dat)[out$mods$simp.mod$good.cols]
                              {cat("\n");cat("50%\n")}
                 }
@@ -164,6 +183,9 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
           }
           else return(final.mod)
    }
+#================================================================
+#                        RF
+#================================================================= 
   if(Model=="rf"){
       
           psd.abs<-dat[dat$response==0,]

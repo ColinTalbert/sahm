@@ -627,6 +627,7 @@ class GLM(Model):
     
     _input_ports = list(Model._input_ports)
     _input_ports.extend([('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+                         ('SelectBestPredSubset', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
                          ('SimplificationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["AIC"]', 'optional':True}),
                          ('SquaredTerms', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
                          ])
@@ -637,6 +638,7 @@ class GLM(Model):
         self.abbrev = 'glm'
         self.port_map.update({'SimplificationMethod':('sm', None, False), #This is a GLM specific port
                          'SquaredTerms':('sqt', utils.R_boolean, False), #This is a GLM specific port
+                         'SelectBestPredSubset':('pst', utils.R_boolean, False), #This is a GLM specific port
                          })
 
 class RandomForest(Model):
@@ -681,7 +683,7 @@ class MARS(Model):
     _input_ports = list(Model._input_ports)
     _input_ports.extend([('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                          ('MarsDegree', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["1"]', 'optional':True}),
-                          ('MarsPenalty', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["2.0"]', 'optional':True}),
+                         ('MarsPenalty', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["2.0"]', 'optional':True}),
                           ])
     def __init__(self):
         global models_path        
@@ -742,6 +744,7 @@ class BoostedRegressionTree(Model):
                               ('Tolerance', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.001"]', 'optional':True}),
                               ('LearningRate', '(edu.utah.sci.vistrails.basic:Float)', {'optional':True}),
                               ('MaximumTrees', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
+                              ('SelectBestPredSubset', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
                               ])
     def __init__(self):
         global models_path
@@ -758,6 +761,7 @@ class BoostedRegressionTree(Model):
                          'Tolerance':('tol', None, False), #This is a BRT specific port
                          'LearningRate':('lr', None, False), #This is a BRT specific port
                          'MaximumTrees':('mt', None, False), #This is a BRT specific port
+                         'SelectBestPredSubset':('pst', utils.R_boolean, False), #This is a BRT specific port
                          })
    
 class MAXENT(Model):

@@ -19,9 +19,9 @@ calibplot <- function(pred, negrug, posrug, ideal, ylim=c(0,1),capuci=TRUE, xlab
 
 smoothingdf <- 6
 smoothdist <- function(pred, res) {
-  require(splines)
+
   gam1 <- try(glm(res ~ ns(pred, df=smoothingdf), weights=rep(1, length(pred)), family=binomial),silent=TRUE)
-  if("try-error"%in%class(gam1)) gam1 <- try(glm(res ~ ns(pred, df=2), weights=rep(1, length(pred)), family=binomial),silent=TRUE)
+  if("try-error"%in%class(gam1)) gam1 <- try(glm(res ~ ns(pred, df=1), weights=rep(1, length(pred)), family=binomial),silent=TRUE)
   x <- seq(min(pred), max(pred), length = 512)
   y <- predict(gam1, newdata = data.frame(pred = x), se.fit = TRUE,
     type = "response")
