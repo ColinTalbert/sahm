@@ -60,9 +60,9 @@ on.exit(detach(out$input))
   if(Model=="glm") {
      
       #post processing to get a common output for all model fits
-            txt0<-paste("\n\n","Settings:\n","\n\t model family =          ",model.family,
-                                             "\n\t simplification method = ",simp.method,
-            "\n\n\n","Results:\n\t ","number covariates in final model=",length(attr(terms(formula(out$mods$final.mod[[1]])),"term.labels")),"\n",sep="")
+            txt0<-paste("\n\n","Settings:\n","\n\t model family          : ",model.family,
+                                             "\n\t simplification method : ",simp.method,
+            "\n\n\n","Results:\n\t ","number covariates in final model   : ",length(attr(terms(formula(out$mods$final.mod[[1]])),"term.labels")),"\n",sep="")
             print(out$mods$final.mod[[1]]$summary <- summary(out$mods$final.mod[[1]]))
              
             capture.output(cat(txt0),out$mods$final.mod[[1]]$summary,file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
@@ -108,9 +108,13 @@ on.exit(detach(out$input))
            out$mods$n.vars.final<-nrow(out$mods$summary)
            out$mods$vnames<-rownames(out$mods$summary)
 
-          
+          txt0 <- paste("\n\n","Settings:\n",
+                      "\n\trandom seed used             : ",out$input$seed,
+                      "\n\tmars degree                  : ",out$input$mars.degree,
+                      "\n\tmars penalty                 : ",out$input$mars.penalty,"\n\n",sep="")
           cat("\n","Storing output...","\n","\n")
-          capture.output(cat("\n\nSummary of Model:\n"),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
+          capture.output(cat(txt0),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
+          capture.output(cat("\n\nSummary of Model:\n"),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)  
           capture.output(print(out$mods$summary),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)
 
       }
@@ -119,13 +123,13 @@ on.exit(detach(out$input))
                
            txt0 <- paste("\n\n","Settings:\n",
                       if(out$input$PsdoAbs) "(Averaged across available splits)\n", 
-                      "\n\trandom seed used =            ",out$input$seed,
-                      "\n\ttree complexity =             ",out$mods$parms$tc.full,
-                      "\n\tlearning rate =               ",round(out$mods$lr.mod$lr,4),
-                      "\n\tn(trees) =                    ",mean(unlist(lapply(out$mods$final.mod,function(lst){lst$n.trees}))),
-                      "\n\tmodel simplification =        ",simp.method,
-                      "\n\tn folds =                     ",n.folds,
-                      "\n\tn covariates in final model = ",out$mods$n.vars.final,
+                      "\n\trandom seed used             : ",out$input$seed,
+                      "\n\ttree complexity              : ",out$mods$parms$tc.full,
+                      "\n\tlearning rate                : ",round(out$mods$lr.mod$lr,4),
+                      "\n\tn(trees)                     : ",mean(unlist(lapply(out$mods$final.mod,function(lst){lst$n.trees}))),
+                      "\n\tmodel simplification         : ",simp.method,
+                      "\n\tn folds                      : ",n.folds,
+                      "\n\tn covariates in final model  : ",out$mods$n.vars.final,
              sep="")
           txt1 <- "\nRelative influence of predictors in final model:\n\n"
           txt2 <- if(!out$input$PsdoAbs) "\nImportant interactions in final model:\n\n"
@@ -139,10 +143,10 @@ on.exit(detach(out$input))
    if(Model=="rf"){
               
               txt0 <- paste("\n\n","Settings:",
-              "\n\trandom seed used =                      ",out$input$seed,
-              "\n\tn covariates considered at each split = ", mean(unlist(lapply(out$mods$final.mod,"[",14))),
+              "\n\trandom seed used                       : ",out$input$seed,
+              "\n\tn covariates considered at each split  : ", mean(unlist(lapply(out$mods$final.mod,"[",14))),
                 if(out$input$PsdoAbs==TRUE) "\n\t   (averaged over each used available split)\n",
-              "\n\tn trees =                               ",n.trees,
+              "\n\tn trees                                : ",n.trees,
                  if(out$input$PsdoAbs==TRUE) "\n\t   (for each used available split)\n",
               sep="")
           txt1 <- "\n\nRelative performance of predictors in final model:\n\n"
