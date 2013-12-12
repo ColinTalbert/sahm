@@ -234,6 +234,6 @@ Args <- commandArgs(trailingOnly=FALSE)
 
 if(method=="MCP") continuous=FALSE
 ScriptPath<-dirname(ScriptPath)
-source(paste(ScriptPath,"chk.libs.r",sep="\\"))
+source(file.path(ScriptPath,"chk.libs.r"))
 
 PseudoAbsGen(input.file=infile,outfile=output,method=method,bw.otim=bw.opt,isopleth=ispt,bias=continuous,template=template)

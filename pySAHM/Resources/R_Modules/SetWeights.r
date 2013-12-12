@@ -56,8 +56,9 @@ SetWeights<-function(input.file,output.file,response.col="ResponseBinary",method
 #Written by Marian Talbert 12/7/2011
 
          #strip the directory out of the output file and replace with the weights.map (name of the map produced)
+       # DAK: this looks problematic for cross-platform operation
        last.dir<-strsplit(output.file,split="\\\\")
-       plot.name<-paste(sub(paste("\\\\",last.dir[[1]][length(last.dir[[1]])],sep=""),"",output.file),"weights.map.jpg",sep="\\")
+       plot.name<-file.path(sub(paste("\\\\",last.dir[[1]][length(last.dir[[1]])],sep=""),"",output.file),"weights.map.jpg")
    #Read input data and remove any columns to be excluded
           dat.in<-read.csv(input.file,header=FALSE,as.is=TRUE)
           dat<-as.data.frame(dat.in[4:dim(dat.in)[1],])
