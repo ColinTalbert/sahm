@@ -57,6 +57,8 @@ import copy
 import multiprocessing
 import time
 
+
+from core.cache.hasher import sha_hash
 import core.system
 from core.modules.vistrails_module import Module, ModuleError, ModuleConnector
 from core.modules.basic_modules import File, Directory, Path, new_constant, Constant
@@ -528,6 +530,7 @@ class Model(Module):
         self.suspended_completed = False
         self.pywrapper = "runRModel.py"
         self.port_map = copy.deepcopy(Model.port_map)
+        self.output_dname = None
         Module.__init__(self)
 
     def compute(self):
@@ -564,17 +567,20 @@ class Model(Module):
             self.args_dict['maxent_path'] = maxent_path
             self.args_dict['maxent_args'] = self.maxent_args
 
-        # set output_dname to last correct execution if one exists
-        # otherwise create a new execution
-        # FIXME: this is bad if we change params
-        self.output_dname = None
-        output_dname = utils.get_last_dir(prefix)
-        if output_dname is not None:
-            monitor = utils.get_job_monitor(self, output_dname)
-            if monitor.finished():
-                self.output_dname = output_dname
+        # FIXME this should eventually be done by VisTrails itself,
+        # but there is an issue where self.signature is not recomputed
+        # for loops
+        h = sha_hash()
+        h.update(self.signature)
+        for key in sorted(self.inputPorts):
+            if self.hasInputFromPort(key):
+                h.update(bytes(self.getInputFromPort(key)))
+        signature = h.hexdigest()
+
+        self.output_dname = utils.get_dir_from_hash(signature)
         if self.output_dname is None:
             self.output_dname = utils.mknextdir(prefix)
+            utils.write_hash_entry(signature, self.output_dname)
 
         #make a copy of the mds file used in the output folder
         copy_mds_fname = os.path.join(self.output_dname, os.path.split(mdsFile)[1])

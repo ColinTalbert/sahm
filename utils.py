@@ -216,6 +216,31 @@ def mknextdir(prefix, directory="", skipSequence=False):
     os.mkdir(dirname)
     return dirname
 
+def get_hash_filename(directory=""):
+    global _roottempdir
+    if directory == "":
+        directory = _roottempdir
+    fname = os.path.join(directory, "vt_hashmap.dat")
+    return fname
+
+def write_hash_entry(hashname, dirname, directory=""):
+    fname = get_hash_filename(directory)
+    with open(fname, 'a') as f:
+        print >>f, hashname, os.path.basename(dirname)
+
+def get_dir_from_hash(hashname, directory=""):
+    global _roottempdir
+    if directory == "":
+        directory = _roottempdir    
+    fname = get_hash_filename(directory)
+    if os.path.exists(fname):
+        with open(fname, 'r') as f:
+            for line in f:
+                arr = line.strip().split()
+                if arr[0] == hashname:
+                    return os.path.join(directory, arr[1])
+    return None
+
 def setrootdir(session_dir):
     global _roottempdir
     _roottempdir = session_dir
