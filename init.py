@@ -745,7 +745,7 @@ class BoostedRegressionTree(Model):
                               ('TreeComplexity', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ('BagFraction', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.75"]', 'optional':True}),
                               ('NumberOfFolds', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["3"]', 'optional':True}),
-                              ('Alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'[1]', 'optional':True}),
+                              ('Alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["1"]', 'optional':True}),
                               ('PrevalenceStratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
                               ('ToleranceMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["auto"]', 'optional':True}),
                               ('Tolerance', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.001"]', 'optional':True}),
