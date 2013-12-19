@@ -519,6 +519,16 @@ def dbfwriter(f, fieldnames, fieldspecs, records):
     # End of file
     f.write('\x1A')
 
+def covariate_name_is_ok(covname):
+    '''Checks if the passed string will work for a covariate name
+    Must start with a letter and not have any special characters except '.', '_'
+    '''
+    if not covname[0].isalpha():
+        return False
+    if not covname.replace(".", "").replace("_", "").replace("\n", "").isalnum():
+        return False
+    return True
+
 def checkIfModelFinished(model_dir):
     try:
         out_err = os.path.join(model_dir, "stdErr.txt")
