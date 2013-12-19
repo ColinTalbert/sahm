@@ -56,14 +56,19 @@ import textwrap
 
 from PyQt4 import QtCore, QtGui
 
-from core.modules.basic_modules import File, Path, Directory, new_constant, Constant
-from core.modules.vistrails_module import ModuleError
-import core.system
-import gui.application
+try:
+    #2.0.3 
+    from core.modules.basic_modules import File, Path, Directory, new_constant, Constant
+    from core.modules.vistrails_module import ModuleError
+    import core.system
+    import gui.application
+except ImportError:
+    #2.1beta
+    from vistrails.core.modules.basic_modules import File, Path, Directory, new_constant, Constant
+    from vistrails.core.modules.vistrails_module import ModuleError
+    import vistrails.core.system
+    import vistrails.gui.application
 
-#from osgeo import gdalconst
-#from osgeo import gdal
-#from osgeo import osr
 import numpy
 
 import pySAHM.utilities as utilities
@@ -306,16 +311,12 @@ def checkModelCovariatenames(MDSFile):
     start with anything other than an alpha character
     contain any special characters besides "." and "_"
     """
-    MDSisOK = True
     covariates = open(MDSFile, "r").readline().strip().split(",")[3:]
     for covariate in covariates:
-        if not covariate[0].isalpha():
+        if not utilities.covariate_name_is_ok(covariate[0]):
             return False
-        if not covariate.replace(".", "").replace("_", "").replace("\n", "").isalnum():
-            return False
-        
     return True
-    
+
 def print_exc_plus( ):
     """ Print the usual traceback information, followed by a listing of
         all the local variables in each frame.
@@ -630,12 +631,23 @@ def writeRErrorsToLog(args, outMsg, errMsg):
     outFile.write(errMsg)
     outFile.close()
 
-def merge_inputs_csvs(inputCSVs_list, outputFile):
+def merge_inputs_csvs(input_csvs, outputFile):
+    '''This function takes a list of inputCSV and merges them into a single
+    file.  The template from the first will be used
+    '''
+    #get the first template specified
+    templatefname = "None specified"
+    forinput_csv
+    infile1 = open(input_csvs[0], "rb")
+    infile1csv = csv.reader(infile1)
+    firstline = infile1csv.next()
+    templatefname =
+    
     oFile = open(outputFile, "wb")
     outputCSV = csv.writer(oFile)
     outputCSV.writerow(["PARCOutputFile", "Categorical",
                          "Resampling", "Aggregation", "OriginalFile"])
-    for inputCSV in inputCSVs_list:
+    for inputCSV in input_csvs:
         iFile = open(inputCSV, "rb")
         inputreader = csv.reader(iFile)
         inputreader.next()
