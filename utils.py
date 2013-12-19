@@ -56,10 +56,19 @@ import textwrap
 
 from PyQt4 import QtCore, QtGui
 
-from core.modules.basic_modules import File, Path, Directory, new_constant, Constant
-from core.modules.vistrails_module import ModuleError
-import core.system
-import gui.application
+try:
+    #2.0.3 
+    from core.modules.basic_modules import File, Path, Directory, new_constant, Constant
+    from core.modules.vistrails_module import ModuleError
+    import core.system
+    import gui.application
+except ImportError:
+    #2.1beta
+    from vistrails.core.modules.basic_modules import File, Path, Directory, new_constant, Constant
+    from vistrails.core.modules.vistrails_module import ModuleError
+    import vistrails.core.system
+    import vistrails.gui.application
+
 
 #from osgeo import gdalconst
 #from osgeo import gdal

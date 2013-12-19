@@ -42,7 +42,12 @@
 ## and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
-from core.configuration import ConfigurationObject
+try:
+    #2.0.3 
+    from core.configuration import ConfigurationObject
+except ImportError:
+    #2.1beta
+    from vistrails.core.configuration import ConfigurationObject
 
 name = "SAHM"
 identifier = "gov.usgs.sahm"
