@@ -45,8 +45,12 @@
 from PyQt4 import QtCore, QtGui
 import os
 
-from core.modules.module_configure import StandardModuleConfigurationWidget
-from core.modules.constant_configuration import ConstantWidgetMixin
+try:
+    from vistrails.core.modules.module_configure import StandardModuleConfigurationWidget
+    from vistrails.core.modules.constant_configuration import ConstantWidgetMixin
+except:
+    from core.modules.module_configure import StandardModuleConfigurationWidget
+    from core.modules.constant_configuration import ConstantWidgetMixin  
 
 class PredictorListWidget(QtGui.QTreeWidget):
     
@@ -200,7 +204,7 @@ class PredictorListConfigurationWidget(PredictorListWidget,
                                        ConstantWidgetMixin):
     
     def __init__(self, param, available_tree, parent=None):
-        """__init__(param: core.vistrail.module_param.ModuleParam,
+        """__init__(param: vistrails.core.vistrail.module_param.ModuleParam,
                     parent: QWidget)
 
         Initialize the line edit with its contents. Content type is limited

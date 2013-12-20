@@ -42,16 +42,21 @@
 ## and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
-from core.modules.vistrails_module import Module
 from PyQt4 import QtCore, QtGui
 import csv
 import utils
 from utils import writetolog
 import shutil
 import os
-from core.system import execute_cmdline
 import subprocess
 import glob
+
+try:
+    from vistrails.core.modules.vistrails_module import Module
+    from vistrails.core.system import execute_cmdline
+except ImportError:
+    from core.modules.vistrails_module import Module
+    from core.system import execute_cmdline
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8

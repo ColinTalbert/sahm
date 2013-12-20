@@ -57,17 +57,17 @@ import textwrap
 from PyQt4 import QtCore, QtGui
 
 try:
-    #2.0.3 
-    from core.modules.basic_modules import File, Path, Directory, new_constant, Constant
-    from core.modules.vistrails_module import ModuleError
-    import core.system
-    import gui.application
-except ImportError:
-    #2.1beta
     from vistrails.core.modules.basic_modules import File, Path, Directory, new_constant, Constant
     from vistrails.core.modules.vistrails_module import ModuleError
-    import vistrails.core.system
-    import vistrails.gui.application
+    from vistrails.core import system
+    from vistrails.gui import application
+except:
+    from core.modules.basic_modules import File, Path, Directory, new_constant, Constant
+    from core.modules.vistrails_module import ModuleError
+    from core import system
+    from gui import application
+    
+
 
 import numpy
 
@@ -401,7 +401,7 @@ def gen_R_cmd(script, args_dict):
     '''
     #get the path to the R exe 
     global r_path   
-    if core.system.systemType in ['Microsoft', 'Windows']:
+    if system.systemType in ['Microsoft', 'Windows']:
         R_exe = getR_application()  #-q prevents R_exe from running
     else:
         R_exe = r_path
@@ -637,16 +637,23 @@ def merge_inputs_csvs(input_csvs, outputFile):
     '''
     #get the first template specified
     templatefname = "None specified"
-    forinput_csv
-    infile1 = open(input_csvs[0], "rb")
-    infile1csv = csv.reader(infile1)
-    firstline = infile1csv.next()
-    templatefname =
+    for input_csv in input_csvs:
+        infile1 = open(input_csv, "rb")
+        infile1csv = csv.reader(infile1)
+        firstline = infile1csv.next()
+        templatefname =  firstline[-2]
+        if getFileRelativeToCurrentVT(templatefname):
+            infile1.close()
+            break
+        infile1.close()
     
+    #open a csv we will write all the outputs into
     oFile = open(outputFile, "wb")
     outputCSV = csv.writer(oFile)
     outputCSV.writerow(["PARCOutputFile", "Categorical",
                          "Resampling", "Aggregation", "OriginalFile"])
+    
+    #write all the inputs out to this file
     for inputCSV in input_csvs:
         iFile = open(inputCSV, "rb")
         inputreader = csv.reader(iFile)
@@ -938,7 +945,7 @@ def getFileRelativeToCurrentVT(fname, curModule=None):
         
         #step 2 (and then step3)
         try:
-            app = gui.application.get_vistrails_application()()
+            app = application.get_vistrails_application()()
             curlocator = app.get_vistrail().locator.name
             curVTdir = os.path.split(curlocator)[0]
         except:

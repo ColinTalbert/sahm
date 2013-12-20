@@ -41,8 +41,11 @@
 ## Any use of trade, firm, or product names is for descriptive purposes only 
 ## and does not imply endorsement by the U.S. Government.
 ###############################################################################
-
-from core.modules.basic_modules import String
+try:
+    from vistrails.core.modules.basic_modules import String
+except ImportError:
+    from core.modules.basic_modules import String
+    
 from enum_widget import build_enum_widget
 
 import pylab

@@ -57,16 +57,28 @@ import copy
 import multiprocessing
 import time
 
-import core.system
-from core.modules.vistrails_module import Module, ModuleError, ModuleConnector
-from core.modules.basic_modules import File, Directory, Path, new_constant, Constant
-from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
-from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
-
-from core.modules.module_configure import StandardModuleConfigurationWidget
-
-from core.modules.basic_modules import String
-from core.packagemanager import get_package_manager
+try:
+    from vistrails.core import system
+    from vistrails.core.modules.vistrails_module import Module, ModuleError, ModuleConnector
+    from vistrails.core.modules.basic_modules import File, Directory, Path, new_constant, Constant
+    from vistrails.packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
+    from vistrails.packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
+    from vistrails.core.modules.module_configure import StandardModuleConfigurationWidget
+    from vistrails.core.modules.basic_modules import String
+    from vistrails.core.packagemanager import get_package_manager
+    from vistrails.core.modules.module_configure import StandardModuleConfigurationWidget
+    from vistrails.core.upgradeworkflow import UpgradeWorkflowHandler
+except ImportError:
+    from core import system
+    from core.modules.vistrails_module import Module, ModuleError, ModuleConnector
+    from core.modules.basic_modules import File, Directory, Path, new_constant, Constant
+    from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
+    from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
+    from core.modules.module_configure import StandardModuleConfigurationWidget
+    from core.modules.basic_modules import String
+    from core.packagemanager import get_package_manager
+    from core.modules.module_configure import StandardModuleConfigurationWidget
+    from core.upgradeworkflow import UpgradeWorkflowHandler    
 
 from PyQt4 import QtCore, QtGui
 
@@ -1985,7 +1997,7 @@ def initialize():
         
     utils.set_r_path(os.path.abspath(configuration.r_path))
     if not os.path.exists(utils.get_r_path()) and \
-        core.system.systemType in ['Microsoft', 'Windows']:
+        system.systemType in ['Microsoft', 'Windows']:
         #they don't have a decent R path, let's see if we can pull one from the  
         utils.set_r_path(utils.pull_R_install_from_reg())
         configuration.r_path = utils.get_r_path()
@@ -2145,7 +2157,6 @@ def build_predictor_modules():
     return modules
 
 ###################################
-from core.modules.module_configure import StandardModuleConfigurationWidget
 class TextFile(File):
     pass
 
@@ -2377,8 +2388,6 @@ _modules = generate_namespaces({'DataInput': [
                                                            'moduleFringe':output_fringe})
                                           ]
                                 })
-
-from core.upgradeworkflow import UpgradeWorkflowHandler
 
 def handle_module_upgrade_request(controller, module_id, pipeline):    
     module_remap = {'Tools|BackgroundSurfaceGenerator':

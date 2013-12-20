@@ -42,16 +42,22 @@
 ## and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
-from core.modules.vistrails_module import Module
+
 from PyQt4 import QtCore, QtGui
 import csv
 import utils
 from utils import writetolog
 import shutil
 import os
-from core.system import execute_cmdline
 import subprocess
 
+try:
+    from vistrails.core.modules.vistrails_module import Module
+    from vistrails.core.system import execute_cmdline
+except:
+    from core.modules.vistrails_module import Module
+    from core.system import execute_cmdline
+    
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -358,7 +364,7 @@ class SelectListDialog(QtGui.QDialog):
         noncovariate_columns = ['Split', 'EvalSplit']
         for item in headerList[3:]:
             if not item[0] in noncovariate_columns:
-                child_item = QtGui.QTreeWidgetItem([item[0], "0"])
+                child_item = QtGui.QTreeWidgetItem([_fromUtf8(item[0]), "0"])
                 child_item.setFlags(QtCore.Qt.ItemIsUserCheckable |
                                 QtCore.Qt.ItemIsEnabled)
                 checked = True
@@ -467,7 +473,7 @@ class SelectListDialog(QtGui.QDialog):
                 deviance = "%.1f" %float(line[1])
                 deviance = deviance.rjust(7)
                 try:
-                    item = self.treeview.findItems(QtCore.QString(line[0]), QtCore.Qt.MatchFlags())
+                    item = self.treeview.findItems(_fromUtf8(line[0]), QtCore.Qt.MatchFlags())
                     item[0].setData(1, 0, deviance)
                 except:
                     print "Problem encountered with item: ", line[0]
