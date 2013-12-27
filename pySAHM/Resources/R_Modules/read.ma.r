@@ -129,6 +129,7 @@
       if(length(factor.cols)==0){
           out.list$factor.levels <- NA
           } else {
+                if(out$input$MESS) stop("MESS is not currently implemented for categorical predictors \n please remove categorical predictors or unselect MESS")
                 names(dat) <- dat.names <-  sub("_categorical","",dat.names)
                 factor.names <- dat.names[factor.cols]
                 factor.levels <- list()
