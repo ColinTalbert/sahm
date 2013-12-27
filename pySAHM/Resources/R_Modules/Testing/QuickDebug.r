@@ -1,14 +1,7 @@
-#setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
-#ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
+setwd("C:\\GoogleDrive\\Python\\DevWorkspace\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="C:\\GoogleDrive\\Python\\DevWorkspace\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
 
-#setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
-#ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
 
-setwd("N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\DevelopmentWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
-ScriptPath="N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\DevelopmentWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
-
-#setwd("I:\\VisTrails\\DevWorkspace\\Colin\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
-#ScriptPath="I:\\VisTrails\\DevWorkspace\\Colin\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
 source("GLM.helper.fcts.r")
@@ -47,12 +40,17 @@ FitModels(ma.name=input.file,
 #================================================================#
 #                            MARS
 #================================================================#
-input.file="J:\\Projects\\SurrogateSpecies\\DerivedData\\InitialWorkspace\\MarianTesting\\VisTrailsOutput\\CovariateCorrelationOutputMDS_initial.csv"
-output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1\\rf"
+input.file="J:\\Projects\\GypsyMoth\\SAHM_Output\\e2013c\\mars_Intro_APHIS_GenBckgrnd_2\\CovariateCorrelationOutputMDS_test.csv" 
+
+output.dir="C:\\temp\\SAHM_workspace\\MARS2"
+input.file="J:\\Projects\\NormalsComparison\\SAHM4\\AHB\\MergedDataset_1.csv"
+om=3 "cur_processing_mode=single models sequentially (n - 1 cores each)" c=J:\Projects\GypsyMoth\SAHM_Output\e2013c\mars_Intro_APHIS_GenBckgrnd_2\CovariateCorrelationOutputMDS_test.csv mpt=TRUE o=J:\Projects\GypsyMoth\SAHM_Output\e2013c\mars_Intro_APHIS_GenBckgrnd_2 pen=2.0 multicore=TRUE mes=TRUE rc=responseBinary mbt=TRUE deg=2
+
+
 FitModels(ma.name=input.file,
             output.dir=output.dir,
             response.col=rc,make.p.tif=T,make.binary.tif=T,
-            mars.degree=1,mars.penalty=2,debug.mode=T,script.name="mars",opt.methods=2,MESS=F,ScriptPath=ScriptPath,multCore=TRUE)
+            mars.degree=2,mars.penalty=2,debug.mode=T,script.name="mars",opt.methods=2,MESS=F,ScriptPath=ScriptPath,multCore=FALSE,predSelect=TRUE)
 total.time<-Sys.time()-start.time
 total.time
 #================================================================#
@@ -97,17 +95,17 @@ FitModels(ma.name=input.file,
 #================================================================#
 #                            RF
 #================================================================#
-input.file="J:\\Projects\\SurrogateSpecies\\DerivedData\\InitialWorkspace\\MarianTesting\\VisTrailsOutput\\CovariateCorrelationOutputMDS_initial2.csv"
+input.file = "J:\\Projects\\GypsyMoth\\SAHM_Output\\e2013c\\mars_Intro_APHIS_GenBckgrnd_2\\CovariateCorrelationOutputMDS_test.csv"
 output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1\\rf"
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,
-      response.col=rc,make.p.tif=F,make.binary.tif=F,
+      response.col=rc,make.p.tif=T,make.binary.tif=T,
           debug.mode=T,opt.methods=2,script.name="rf",
 responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
 samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
 localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=NULL,norm.votes=TRUE,
-do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,MESS=F,ScriptPath=ScriptPath)
+do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,MESS=T,ScriptPath=ScriptPath,multCore=FALSE)
 total.time<-Sys.time()-start.time
 total.time
 
@@ -115,15 +113,15 @@ rc="responseBinary"
 #================================================================#
 #                            BRT
 #================================================================#
-input.file="J:\\Projects\\NormalsComparison\\SAHM4\\AHB\\modelSelection_cv_2.csv"
+input.file="J:\Projects\NormalsComparison\SAHM4\AHB\MergedDataset_1.csv"
 #input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_FinalTest\\CovariateCorrelationOutputMDS_initial.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,output.dir=output.dir,
-          response.col=rc,make.p.tif=T,make.binary.tif=T,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
+          response.col=rc,make.p.tif=F,make.binary.tif=F,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
       family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
   tolerance = 0.001,seed=1,opt.methods=2,
           simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
-          bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,MESS=T,ScriptPath=ScriptPath,multCore=FALSE)
+          bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,MESS=F,ScriptPath=ScriptPath,multCore=FALSE,predSelect=FALSE)
 
 "I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\RFDebug\\modelWorkspace"
 EvaluateNewData(workspace="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\RFDebug\\modelWorkspace",out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=FALSE,produce.metrics=TRUE)

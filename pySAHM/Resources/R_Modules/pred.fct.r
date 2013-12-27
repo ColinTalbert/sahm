@@ -44,6 +44,10 @@
 
 pred.fct<-function(model,x,Model){
 #Written by Marian Talbert to predict given a dataframe of input (with the expeption of maxlike which works on full rasters)
+# model = the model fit object
+# x     = a data frame without the response column obviously
+# Model = one of mars, glm, rf, brt, maxlike at present 
+
   y <- rep(NA,nrow(x))
 
   if(Model=="glm"){
