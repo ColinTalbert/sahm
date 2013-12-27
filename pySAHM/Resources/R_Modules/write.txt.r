@@ -7,9 +7,10 @@ write.txt<-function(out,t0){
     maxent="\nMAXENT\n")
 
   txt0 <- paste(model.label,"\n",
-              "Data:\n",out$input$ma.name,"\n",
-              "\n\t n(pres)=                       ",out$dat$nPresAbs$train[2],
-              if(out$input$script.name!="maxlike")"\n\t n(abs) =                       ",
+                      "Data:\n",out$input$ma.name,"\n",
+                           "\n\t n(pres) =                       ",out$dat$nPresAbs$train[2],
+              if(!PsdoAbs) "\n\t n(abs)  =                       ",
+              if(PsdoAbs)  "\n\t n(bkgd) =                       ",
                  out$dat$nPresAbs$train[1],
               "\n\t n covariates considered =      ",length(out$dat$used.covs),"\n",
               if(out$input$script.name!="maxent")"\n\t total time for model fitting = ",
