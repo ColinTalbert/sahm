@@ -307,7 +307,7 @@ def checkModelCovariatenames(MDSFile):
     contain any special characters besides "." and "_"
     """
     MDSisOK = True
-    covariates = open(MDSFile, "r").readline().split(",")[3:]
+    covariates = open(MDSFile, "r").readline().strip().split(",")[3:]
     for covariate in covariates:
         if not covariate[0].isalpha():
             return False

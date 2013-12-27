@@ -215,10 +215,10 @@ Args <- commandArgs(trailingOnly=FALSE)
     }
  
  ScriptPath<-dirname(ScriptPath)
-source(paste(ScriptPath,"my.panel.smooth.binary.r",sep="\\"))
-source(paste(ScriptPath,"read.dat.r",sep="\\"))
-source(paste(ScriptPath,"chk.libs.r",sep="\\"))
-source(paste(ScriptPath,"PairsExploreHelperFcts.r",sep="\\"))
+source(file.path(ScriptPath, "my.panel.smooth.binary.r"))
+source(file.path(ScriptPath,"read.dat.r"))
+source(file.path(ScriptPath, "chk.libs.r"))
+source(file.path(ScriptPath,"PairsExploreHelperFcts.r"))
 	#Run the Pairs Explore function with these parameters
     Pairs.Explore(num.plots=num.plots,
     min.cor=min.cor,

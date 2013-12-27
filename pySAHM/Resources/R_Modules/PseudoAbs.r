@@ -45,7 +45,7 @@ PseudoAbsGen<-function(input.file,outfile,method="KDE",bw.otim="adhoc",isopleth=
                
                  
               }
-              
+             
               if(method=="MCP"){
                   ver<-mcp(xy, percent=isopleth)
               }
@@ -56,7 +56,11 @@ PseudoAbsGen<-function(input.file,outfile,method="KDE",bw.otim="adhoc",isopleth=
                           x<-y<-vector()
                           x<-ver@polygons[[1]]@Polygons[[j]]@coords[,1]
                           y<-ver@polygons[[1]]@Polygons[[j]]@coords[,2]
-                           MyWindow<-owin(poly=list(x=x[(length(x)-2):1],y=y[(length(x)-2):1]))
+                          xy<-paste(x,y,sep="")
+                          x<-x[!(duplicated(xy))]
+                          y<-y[!(duplicated(xy))]
+                           MyWindow<-try(owin(poly=list(x=x[length(x):1],y=y[length(x):1])),silent=TRUE)
+                           if(class(MyWindow)=="try-error") MyWindow<-owin(poly=list(x=x[1:length(x)],y=y[1:length(x)]))
                            ifelse(j==1,WindowList<-MyWindow,{
                             ifelse(is.subset.owin(MyWindow,WindowList),
                                 WindowList<-setminus.owin(WindowList,MyWindow),
@@ -230,6 +234,6 @@ Args <- commandArgs(trailingOnly=FALSE)
 
 if(method=="MCP") continuous=FALSE
 ScriptPath<-dirname(ScriptPath)
-source(paste(ScriptPath,"chk.libs.r",sep="\\"))
+source(file.path(ScriptPath,"chk.libs.r"))
 
 PseudoAbsGen(input.file=infile,outfile=output,method=method,bw.otim=bw.opt,isopleth=ispt,bias=continuous,template=template)

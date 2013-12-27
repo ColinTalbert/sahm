@@ -232,10 +232,13 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         self.gs_variable_graph.wheelEvent = self.wheel_event_variable
         
         #add in ie browsers for the text and response
-        self.text_browser = QAxContainer.QAxWidget(self)
-        self.text_browser.setFocusPolicy(QtCore.Qt.StrongFocus)
-        self.text_browser.setControl("{8856F961-340A-11D0-A96B-00C04FD705A2}")
-        self.ui.text_output_layout.addWidget(self.text_browser)
+        if systemType in ['Microsoft', 'Windows']:
+            self.text_browser = QAxContainer.QAxWidget(self)
+            self.text_browser.setFocusPolicy(QtCore.Qt.StrongFocus)
+            self.text_browser.setControl("{8856F961-340A-11D0-A96B-00C04FD705A2}")
+            self.ui.text_output_layout.addWidget(self.text_browser)
+        else:
+            self.text_browser = None
         self.text_urlSrc = None
         
 #        layout = QtGui.QVBoxLayout()
@@ -404,10 +407,11 @@ class SAHMOutputViewerCellWidget(QCellWidget):
                                        max_size]
 
         self.text_urlSrc = QtCore.QUrl.fromLocalFile(text_output.name)
-        if self.text_urlSrc!=None:
-            self.text_browser.dynamicCall('Navigate(const QString&)', self.text_urlSrc.toString())
-        else:
-            self.text_browser.dynamicCall('Navigate(const QString&)', QtCore.QString('about:blank'))
+        if self.text_browser is not None:
+            if self.text_urlSrc!=None:
+                self.text_browser.dynamicCall('Navigate(const QString&)', self.text_urlSrc.toString())
+            else:
+                self.text_browser.dynamicCall('Navigate(const QString&)', QtCore.QString('about:blank'))
         
        
         choices = ['Text', 'Response Curves', 'AUC', 'Calibration', 'Confusion', 'Residuals','Variable Importance']
