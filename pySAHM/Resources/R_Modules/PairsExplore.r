@@ -73,9 +73,21 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
   match("site.weights",tolower(names(dat))),match(tolower(response.col),tolower(names(dat))),match("Split",names(dat)),match("EvalSplit",names(dat)))))
        
   missing.summary<-1-apply(apply(dat,2,complete.cases),2,sum)/nrow(dat)
-     
+ 
+  #subsample the data so we can calculate correlations quickly
+     response.table<-table(response)
+     max.points<-1500
+     if(any(response.table> max.points)){
+       for(i in names(response.table[response.table> max.points])){
+             s<-sample(which(response==i,arr.ind=TRUE),size=(sum(response==i)- max.points))
+             dat<-dat[-c(s),]
+             response<-response[-c(s)]
+             TrueResponse<-TrueResponse[-c(s)]
+       }
+     }   
   #the deviance calculation requires even columns which will be removed for the pairs explore
   #but to get the same answer for the plot I need the same subsample
+    
        for.dev<-list(dat=dat[-c(rm.cols)],response=TrueResponse)  
        
        rm.cols<-unique(c(rm.cols,which(include==0,arr.ind=TRUE)))
@@ -98,17 +110,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
 
           #after calculating the deviance for all predictors we have to remove the excluded predictors for the following plots
       for.dev$dat=dat 
-     #subsample the data so we can calculate correlations quickly
-     response.table<-table(response)
-     max.points<-1500
-     if(any(response.table> max.points)){
-       for(i in names(response.table[response.table> max.points])){
-             s<-sample(which(response==i,arr.ind=TRUE),size=(sum(response==i)- max.points))
-             dat<-dat[-c(s),]
-             response<-response[-c(s)]
-             TrueResponse<-TrueResponse[-c(s)]
-       }
-     }
+     
      
     
   #Remove columns with only one unique value
@@ -213,10 +215,10 @@ Args <- commandArgs(trailingOnly=FALSE)
     }
  
  ScriptPath<-dirname(ScriptPath)
-source(paste(ScriptPath,"my.panel.smooth.binary.r",sep="\\"))
-source(paste(ScriptPath,"read.dat.r",sep="\\"))
-source(paste(ScriptPath,"chk.libs.r",sep="\\"))
-source(paste(ScriptPath,"PairsExploreHelperFcts.r",sep="\\"))
+source(file.path(ScriptPath, "my.panel.smooth.binary.r"))
+source(file.path(ScriptPath,"read.dat.r"))
+source(file.path(ScriptPath, "chk.libs.r"))
+source(file.path(ScriptPath,"PairsExploreHelperFcts.r"))
 	#Run the Pairs Explore function with these parameters
     Pairs.Explore(num.plots=num.plots,
     min.cor=min.cor,
