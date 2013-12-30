@@ -79,34 +79,51 @@ on.exit(detach(out$input))
                }
                
  if(Model=="mars"){        
-          
-       #post processing steps  
+           
+       #post processing steps to aggregate and summarize ouput 
             if(out$input$PsdoAbs){ 
-                 fc<-function(x){x[2][[1]]}
-                 dev.data<-do.call("rbind",lapply(fit_contribs,fc))
-                  dev.data<-dev.data[dev.data$df!=0,]
-                 delta_dev<-aggregate(dev.data[,2],list(Var=dev.data$variable),FUN=mean)
-                 mod.df<-aggregate(dev.data[,3],list(Var=dev.data$variable),FUN=mean)
-                 mod.pval<-aggregate(dev.data[,4],list(Var=dev.data$variable),FUN=mean)
-                 var.count<-table(dev.data[,1])
-                 fit_contribs$deviance.table<-data.frame(cbind("mean delta dev"=round(delta_dev[,2],digits=4),
-                            "mean df"=-round(mod.df[,2],digits=2),"mean p-value"=signif(mod.pval[,2],digits=6),"times in model"=var.count[match(delta_dev$Var,names(var.count))]))
-                 x<-fit_contribs$deviance.table
+                 varIp <- do.call("rbind",fit_contribs)
+                 TimesIncl <- table(rownames(varIp))
+                 varIp <- aggregate(varIp,list(rownames(varIp)),FUN=mean)
+                 varIp$TimesIncl <- TimesIncl
+                 varIp <- varIp[order(varIp$nsubsets,decreasing =TRUE),c(1,4,5,7,9)] #ordering by most important and removing columns I don't want
+                 varIp <- format(varIp,digits=3) #formatting
+                 rownames(varIp)<-varIp[,1]; varIp<-varIp[,-1]
+                 if(length(grep("-unused",rownames(varIp)))!=0) varIp<-varIp[-c(grep("-unused",rownames(varIp))),]
+                 x<-varIp
+                 
           } else{
-                x<-fit_contribs[[1]][[2]]
+                x<-varIp<-fit_contribs
                 x <- x[x[,2]!=0,]
                 x <- x[order(x[,4]),]
                 row.names(x) <- x[,1]
                 x$df <- -1*x$df
                 x <- x[,-1]
           }
+          #if there are factors the new mars gives them names based on pred.name and level so we have go remove these names and
+                 #record this as just one predictor I'm not really sure how this will work if there are multiple factors or multiple levels of a factor
+                 if(any(badName<-is.na(match(rownames(varIp),names(out$dat$ma$train$dat))))){
+                     indx<-which(badName==TRUE,arr.ind=TRUE)
+                     origNames<-vector()
+                     for(i in 1:length(indx)){
+                            origNames<-which(!is.na(pmatch(names(out$dat$ma$train$dat),rownames(varIp)[indx[i]])),arr.ind=TRUE)
+                     }
+                     origNames<-names(out$dat$ma$train$dat)[unique(origNames)]
+                     varIp<-varIp[-c(indx),]#I have to remove these because with multiple factor levels they will have multiple rows
+                     NewNames<-c(rownames(varIp),origNames)
+                     varIp<-rbind(as.matrix(varIp),matrix(data=NA,nrow=length(origNames),ncol=4))
+                     varIp<- apply(varIp,2,as.numeric)  
+                     rownames(varIp)<-NewNames
+                         
+                 }
+                 
       #caputuring output
           cat("Summary of Model:","\n")
           print(out$mods$summary <- x)
-
+           
            out$mods$contributions$var<-names(dat)[-1]
-           out$mods$n.vars.final<-nrow(out$mods$summary)
-           out$mods$vnames<-rownames(out$mods$summary)
+           out$mods$n.vars.final<-nrow(varIp)
+           out$mods$vnames<-rownames(varIp)
 
           txt0 <- paste("\n\n","Settings:\n",
                       "\n\trandom seed used             : ",out$input$seed,

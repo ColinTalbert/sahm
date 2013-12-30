@@ -50,25 +50,12 @@ pred.fct<-function(model,x,Model){
 
   y <- rep(NA,nrow(x))
 
-  if(Model=="glm"){
+  if(Model%in%c("glm","mars")){
    if("list"%in%class(model)) y[complete.cases(x)] <- try(as.vector(predict(model[[1]],x[complete.cases(x),],type="response")),silent=TRUE)
         else  y[complete.cases(x)] <- try(as.vector(predict(model,x[complete.cases(x),],type="response")),silent=TRUE)
      }
      
-  if(Model=="mars"){
-        # retrieve key items from the global environment #
-        # make predictions.
-         if(class(model[[1]])=="list") {
-         prd<-function(model,x){
-                              preds <- rep(NA,nrow(x))
-                              preds[complete.cases(x)]<-mars.predict(model,new.data=x[complete.cases(x),])$prediction[,1]
-                              return(preds)
-                              }          
-           lst.preds<-lapply(model,FUN=prd,x=x)
-           y<-try(apply(do.call("rbind",lst.preds),2,mean))
-         } else y[complete.cases(x)] <- try(as.vector(mars.predict(model,x[complete.cases(x),])$prediction[,1]),silent=TRUE)
-         
-  }          
+ 
   if(Model=="brt"){
          # retrieve key items from the global environment #
           # make predictions from complete data only #

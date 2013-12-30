@@ -63,14 +63,12 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
     if(Model=="mars") {
           fit_contribs<-list()
           mars.model<-list()
-       
           for(i in 1:num.splits){
-                mars.model[[i]]<-mars.glm(data=dat[c(Split,rep(i,times=sum(dat$response>0)))==i,], mars.x=c(2:ncol(dat)), mars.y=1, mars.degree=mars.degree, family=model.family,
-                                       penalty=mars.penalty)
-                 mars.model[[i]]$fit.dat<-dat[c(Split,rep(i,times=sum(dat$response>0)))==i,]                      
+                mars.model[[i]]<-earth(response~.,data=dat[c(Split,rep(i,times=sum(dat$response>0)))==i,],degree=mars.degree,penalty=mars.penalty,glm=list(family=model.family))
+                
                  #
                 if(full.fit) {out$mods$final.mod[[i]]<-mars.model[[i]]
-                              fit_contribs[[i]] <- mars.contribs(out$mods$final.mod[[i]])
+                              fit_contribs[[i]] <- evimp(mars.model[[i]],trim=TRUE)
                              }
            }
            if(full.fit){

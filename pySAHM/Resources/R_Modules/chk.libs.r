@@ -48,7 +48,7 @@ chk.libs <- function(Model){
 #Written by Marian Talbert 2/2012
      if(Model=="PairsExplore") libs=list("gam")
      if(Model=="Pred.inspect") libs=list("raster","gam")
-     if(Model=="mars")        libs<-list("PresenceAbsence","rgdal","sp","survival","mda","raster","tcltk2","foreign","ade4","ROCR","ncf")
+     if(Model=="mars")        libs<-list("PresenceAbsence","rgdal","sp","survival","mda","raster","tcltk2","foreign","ade4","ROCR","ncf","earth","plotrix")
      if(Model=="glm")         libs<-list("PresenceAbsence","rgdal","sp","survival","tools","raster","tcltk2","foreign","ade4","ROCR","ncf")
      if(Model=="rf")          libs<-list("randomForest","PresenceAbsence","rgdal","sp","raster","tcltk2","foreign","ade4","ROCR","ncf")
      if(Model=="gam")          libs<-list("gam","PresenceAbsence","rgdal","sp","raster","tcltk2","foreign","ade4","ROCR","ncf")
