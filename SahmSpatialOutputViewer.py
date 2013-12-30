@@ -54,10 +54,18 @@ import utils
 import math
 
 from PyQt4 import QtCore, QtGui
-from core.modules.vistrails_module import Module
-from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
-from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
-from packages.spreadsheet.spreadsheet_controller import spreadsheetController
+try:
+    from vistrails.core.modules.vistrails_module import Module
+    from vistrails.packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
+    from vistrails.packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
+    from vistrails.packages.spreadsheet.spreadsheet_controller import spreadsheetController
+    from vistrails.core.packagemanager import get_package_manager
+except ImportError:
+    from core.modules.vistrails_module import Module
+    from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
+    from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
+    from packages.spreadsheet.spreadsheet_controller import spreadsheetController
+    from core.packagemanager import get_package_manager 
 
 from sahm_picklists import OutputRaster
 from utils import map_ports
@@ -78,8 +86,6 @@ import matplotlib.colors as colors
 import numpy as np
 
 from osgeo import gdal, gdalconst
-
-from core.packagemanager import get_package_manager
 
 import utils
 import pySAHM.utilities as utilities

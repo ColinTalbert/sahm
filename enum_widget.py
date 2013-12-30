@@ -43,12 +43,15 @@
 ###############################################################################
 
 from PyQt4 import QtCore, QtGui
-from core.modules.constant_configuration import ConstantWidgetMixin
-
+try:
+    from vistrails.core.modules.constant_configuration import ConstantWidgetMixin
+except ImportError:
+    from core.modules.constant_configuration import ConstantWidgetMixin
+    
 class EnumWidget(QtGui.QComboBox, ConstantWidgetMixin):
     param_values = []
     def __init__(self, param, parent=None):
-        """__init__(param: core.vistrail.module_param.ModuleParam,
+        """__init__(param: vistrails.core.vistrail.module_param.ModuleParam,
                     parent: QWidget)
 
 

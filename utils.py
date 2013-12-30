@@ -56,14 +56,19 @@ import textwrap
 
 from PyQt4 import QtCore, QtGui
 
-from core.modules.basic_modules import File, Path, Directory, new_constant, Constant
-from core.modules.vistrails_module import ModuleError
-import core.system
-import gui.application
+try:
+    from vistrails.core.modules.basic_modules import File, Path, Directory, new_constant, Constant
+    from vistrails.core.modules.vistrails_module import ModuleError
+    from vistrails.core import system
+    from vistrails.gui import application
+except:
+    from core.modules.basic_modules import File, Path, Directory, new_constant, Constant
+    from core.modules.vistrails_module import ModuleError
+    from core import system
+    from gui import application
+    
 
-#from osgeo import gdalconst
-#from osgeo import gdal
-#from osgeo import osr
+
 import numpy
 
 import pySAHM.utilities as utilities
@@ -306,16 +311,12 @@ def checkModelCovariatenames(MDSFile):
     start with anything other than an alpha character
     contain any special characters besides "." and "_"
     """
-    MDSisOK = True
     covariates = open(MDSFile, "r").readline().strip().split(",")[3:]
     for covariate in covariates:
-        if not covariate[0].isalpha():
+        if not utilities.covariate_name_is_ok(covariate[0]):
             return False
-        if not covariate.replace(".", "").replace("_", "").replace("\n", "").isalnum():
-            return False
-        
     return True
-    
+
 def print_exc_plus( ):
     """ Print the usual traceback information, followed by a listing of
         all the local variables in each frame.
@@ -400,7 +401,7 @@ def gen_R_cmd(script, args_dict):
     '''
     #get the path to the R exe 
     global r_path   
-    if core.system.systemType in ['Microsoft', 'Windows']:
+    if system.systemType in ['Microsoft', 'Windows']:
         R_exe = getR_application()  #-q prevents R_exe from running
     else:
         R_exe = r_path
@@ -630,12 +631,30 @@ def writeRErrorsToLog(args, outMsg, errMsg):
     outFile.write(errMsg)
     outFile.close()
 
-def merge_inputs_csvs(inputCSVs_list, outputFile):
+def merge_inputs_csvs(input_csvs, outputFile):
+    '''This function takes a list of inputCSV and merges them into a single
+    file.  The template from the first will be used
+    '''
+    #get the first template specified
+    templatefname = "None specified"
+    for input_csv in input_csvs:
+        infile1 = open(input_csv, "rb")
+        infile1csv = csv.reader(infile1)
+        firstline = infile1csv.next()
+        templatefname =  firstline[-2]
+        if getFileRelativeToCurrentVT(templatefname):
+            infile1.close()
+            break
+        infile1.close()
+    
+    #open a csv we will write all the outputs into
     oFile = open(outputFile, "wb")
     outputCSV = csv.writer(oFile)
     outputCSV.writerow(["PARCOutputFile", "Categorical",
                          "Resampling", "Aggregation", "OriginalFile"])
-    for inputCSV in inputCSVs_list:
+    
+    #write all the inputs out to this file
+    for inputCSV in input_csvs:
         iFile = open(inputCSV, "rb")
         inputreader = csv.reader(iFile)
         inputreader.next()
@@ -926,7 +945,7 @@ def getFileRelativeToCurrentVT(fname, curModule=None):
         
         #step 2 (and then step3)
         try:
-            app = gui.application.get_vistrails_application()()
+            app = application.get_vistrails_application()()
             curlocator = app.get_vistrail().locator.name
             curVTdir = os.path.split(curlocator)[0]
         except:

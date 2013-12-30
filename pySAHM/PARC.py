@@ -139,7 +139,7 @@ class PARC(object):
 
         self.logger.writetolog("Starting PARC", True, True)
         self.validateArgs()
-        self.logger.writetolog("    Arguments validated successfully", 
+        self.logger.writetolog("    Arguments validated successfully",
                                True, True)
         self.processFiles()
 
@@ -154,16 +154,14 @@ class PARC(object):
 
         # Clip and reproject each source image.
         for image in self.inputs:
-            in_path, in_fname = os.path.split(image[0])
-            out_file, ext = os.path.splitext(in_fname)
-            out_file = os.path.join(self.out_dir, out_file + ".tif")
+            in_fname = SpatialUtilities.getRasterShortName(image[0])
+            out_file = os.path.join(self.out_dir, in_fname + ".tif")
 
             process_queue = []
             if os.path.exists(out_file):
                 try:
                     gdal.Open(out_file)
-                    shortname = SpatialUtilities.getRasterShortName(out_file)
-                    msg = "The output " + shortname + \
+                    msg = "The output " + in_fname + \
                         " already exists. \tSkipping this file."
                     self.logger.writetolog(msg, True, True)
                 except:
@@ -303,9 +301,9 @@ class PARC(object):
             self.writetolog(msg)
 
             target_cell_size, num_source_per_target = \
-                SpatialUtilities.getAggregateTargetCellSize(source_raster, 
+                SpatialUtilities.getAggregateTargetCellSize(source_raster,
                                                             self.templateRaster)
-            tmpOutput = os.path.join(os.path.dirname(dest), "tmp_" + 
+            tmpOutput = os.path.join(os.path.dirname(dest), "tmp_" +
                                          os.path.basename(dest))
 
             SpatialUtilities.intermediaryReprojection(source_raster,
@@ -313,7 +311,7 @@ class PARC(object):
             self.writetolog("   Starting on Aggregating: " + short_name)
 
             tmp_output_raster = SpatialUtilities.SAHMRaster(tmpOutput)
-            self.Aggregate(tmp_output_raster, dest, source[3], 
+            self.Aggregate(tmp_output_raster, dest, source[3],
                            num_source_per_target)
 
             self.writetolog("   Finished Aggregating: " + short_name)
@@ -700,6 +698,13 @@ class PARC(object):
         if not os.path.exists(self.template):
             raise utilities.TrappedError("Template file, " + self.template + ", does not exist on file system")
 
+        template_in_parc_folder = os.path.join(self.out_dir,
+                    SpatialUtilities.getRasterShortName(self.template) + ".tif")
+        if os.path.exists(template_in_parc_folder):
+            # This template must have already been shrunk.
+            # we will use the preshrunk version stored in the parc folder
+            self.template = template_in_parc_folder
+
         self.templateRaster = SpatialUtilities.SAHMRaster(self.template)
         if len(self.templateRaster.Error) != 0:
             raise utilities.TrappedError("There was a problem with the provided template: \n    " +
@@ -721,22 +726,24 @@ class PARC(object):
         input_file_errors = ""
 
         output_csv = os.path.join(self.out_dir, "PARC_Files.csv")
-        output = csv.writer(open(output_csv, "wb"))
-        output.writerow(["PARCOutputFile", "Categorical", "Resampling",
-                         "Aggregation", "OriginalFile",
-                         os.path.abspath(self.template),
-                         os.path.abspath(self.out_dir)])
+        if os.path.exists(output_csv):
+            output = csv.writer(open(output_csv, "ab"))
+        else:
+            output = csv.writer(open(output_csv, "wb"))
+            output.writerow(["PARCOutputFile", "Categorical", "Resampling",
+                             "Aggregation", "OriginalFile",
+                             os.path.abspath(self.template),
+                             os.path.abspath(self.out_dir)])
 
         inputs = []
         had_to_shrink = False
         for row in inputs_csv:
             input_file = row[0]
-            input_just_file = os.path.splitext(os.path.split(input_file)[1])[0]
+            input_just_file = SpatialUtilities.getRasterShortName(input_file)
 
-            if input_just_file == "hdr":
-                input_file = os.path.split(input_file)[0]
-                row[0] = input_file
-                input_just_file = os.path.split(input_file)[1]
+            if not utilities.covariate_name_is_ok(input_just_file):
+                input_file_errors += "\n  Input Covariate, " + input_just_file
+                input_file_errors += "begins with a number or has a special character in it"
 
             if input_just_file in inputs:
                 input_file_errors += "\n  PARC not currently set up to handle identically named inputs."
@@ -819,9 +826,13 @@ class PARC(object):
         del output
 
         if had_to_shrink:
+            # if we need to shrink any previous output in the parc folder
+            # must be deleted
+            self.empty_old_parc_folder(self.out_dir)
+
             old_template = SpatialUtilities.SAHMRaster(self.template)
             new_template_fname = os.path.join(self.out_dir,
-                                              os.path.split(self.template)[1])
+                    SpatialUtilities.getRasterShortName(self.template)) + ".tif"
             SpatialUtilities.intermediaryReprojection(old_template,
                             self.templateRaster, new_template_fname,
                             gdalconst.GRA_NearestNeighbour, True)
@@ -843,6 +854,10 @@ class PARC(object):
             self.writetolog(input_file_errors, False, False)
             raise utilities.TrappedError("There was one or more problems with "
                                + "your input rasters: \n" + input_file_errors)
+    def empty_old_parc_folder(self, parc_dir):
+        '''Deletes all tif files from the parc_folder
+        '''
+
 
 
 if __name__ == "__main__":

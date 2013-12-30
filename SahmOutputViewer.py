@@ -46,18 +46,29 @@
 # ImageViewer widgets/toolbar implementation
 ################################################################################
 from PyQt4 import QtCore, QtGui
-from core.system import systemType
+  
+try:  
+    from vistrails.core.system import systemType
+    from vistrails.core.modules.vistrails_module import Module
+    from vistrails.packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
+    from vistrails.packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
+    from vistrails.packages.spreadsheet.spreadsheet_controller import spreadsheetController
+    from vistrails.core.packagemanager import get_package_manager
+except ImportError:
+    from core.system import systemType
+    from core.modules.vistrails_module import Module
+    from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
+    from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
+    from packages.spreadsheet.spreadsheet_controller import spreadsheetController
+    from core.packagemanager import get_package_manager
+
 if systemType in ['Microsoft', 'Windows']:
     from PyQt4 import QAxContainer
-from core.modules.vistrails_module import Module
-from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
-from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
-from packages.spreadsheet.spreadsheet_controller import spreadsheetController
 
 from sahm_picklists import ModelOutputType
 import utils
 
-from core.packagemanager import get_package_manager
+
 
 
 import os
