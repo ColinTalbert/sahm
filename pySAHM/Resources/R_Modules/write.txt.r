@@ -5,7 +5,7 @@ write.txt<-function(out,t0){
     rf="Random Forest Modeling Results\n",
     brt="\nBoosted Regression Tree Modeling Results\n",
     maxent="\nMAXENT\n")
-              browser()
+             
   txt0 <- paste(model.label,"\n",
                       "Data:\n",out$input$ma.name,"\n",
                            "\n\t n(pres)                 =      ",out$dat$nPresAbs$train[2],
