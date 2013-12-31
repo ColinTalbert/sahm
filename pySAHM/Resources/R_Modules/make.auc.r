@@ -60,14 +60,14 @@ make.auc.plot.jpg<-function(out=out){
                 pred=inlst$test$pred),opt.methods=out$input$opt.methods))[2]
             }
             else inlst$train$thresh=NULL
-
+  
 ##################################################################
 ### Standard residual analysis plots for glm
     if(out$input$script.name%in%c("glm","mars") & out$dat$split.type!="eval" & !(out$input$script.name=="mars" & out$input$PsdoAbs==TRUE)){
           jpeg(paste(out$dat$bname,"_stand.resid.plots.jpeg",sep=""),height=1000,width=1000)
           par(mfrow=c(2,2))
           if(out$input$script.name=="glm") plot(out$mods$final.mod[[1]],cex=1.5,lwd=1.5,cex.main=1.5,cex.lab=1.5)
-          if(out$input$script.name=="mars") plot(out$mods$final.mod[[1]]$model.glm,cex=1.5,lwd=1.5,cex.main=1.5,cex.lab=1.5)
+          if(out$input$script.name=="mars") plot(out$mods$final.mod[[1]]$glm.list[[1]],cex=1.5,lwd=1.5,cex.main=1.5,cex.lab=1.5)
           par(mfrow=c(1,1))
           graphics.off()
     }
