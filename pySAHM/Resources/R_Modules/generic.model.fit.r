@@ -81,7 +81,7 @@ on.exit(detach(out$input))
  if(Model=="mars"){        
            
        #post processing steps to aggregate and summarize ouput 
-            if(out$input$PsdoAbs){ 
+         if(out$input$PsdoAbs){ 
                  varIp <- do.call("rbind",fit_contribs)
                  TimesIncl <- table(rownames(varIp))
                  varIp <- aggregate(varIp,list(rownames(varIp)),FUN=mean)
@@ -89,20 +89,15 @@ on.exit(detach(out$input))
                  varIp <- varIp[order(varIp$nsubsets,decreasing =TRUE),c(1,4,5,7,9)] #ordering by most important and removing columns I don't want
                  varIp <- format(varIp,digits=3) #formatting
                  rownames(varIp)<-varIp[,1]; varIp<-varIp[,-1]
-                 if(length(grep("-unused",rownames(varIp)))!=0) varIp<-varIp[-c(grep("-unused",rownames(varIp))),]
-                 x<-varIp
-                 
-          } else{
-                x<-varIp<-fit_contribs
-                x <- x[x[,2]!=0,]
-                x <- x[order(x[,4]),]
-                row.names(x) <- x[,1]
-                x$df <- -1*x$df
-                x <- x[,-1]
-          }
+          } else varIp<-fit_contribs[[1]]
+         
+          if(length(grep("-unused",rownames(varIp)))!=0) varIp<-varIp[-c(grep("-unused",rownames(varIp))),]
+          
+          x<-varIp
+          
           #if there are factors the new mars gives them names based on pred.name and level so we have go remove these names and
                  #record this as just one predictor I'm not really sure how this will work if there are multiple factors or multiple levels of a factor
-                 if(any(badName<-is.na(match(rownames(varIp),names(out$dat$ma$train$dat))))){
+          if(any(badName<-is.na(match(rownames(varIp),names(out$dat$ma$train$dat))))){
                      indx<-which(badName==TRUE,arr.ind=TRUE)
                      origNames<-vector()
                      for(i in 1:length(indx)){
@@ -115,7 +110,7 @@ on.exit(detach(out$input))
                      varIp<- apply(varIp,2,as.numeric)  
                      rownames(varIp)<-NewNames
                          
-                 }
+          }
                  
       #caputuring output
           cat("Summary of Model:","\n")

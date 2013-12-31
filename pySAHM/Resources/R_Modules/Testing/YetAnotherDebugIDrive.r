@@ -1,83 +1,63 @@
-#debug branch
-setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules")
-ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm_MarianDev\\pySAHM\\Resources\\R_Modules"
-dir.path<-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\AcrossModelPerformance\\Debug10.29"
+#==============================================================
+#   Testing is controled through an TestList path 
+#        where all input mds' can be found
+#   An output directory where output is to be written
+#   and a code path where souce code can be read
+#  as long as input file names have the word count or PseudoAbs
+# the code will sort out responses and only fit appropriate models 
+#==============================================================
+#set this path to a directory where output is to be writtend
+Outdir<-"I:\\VisTrails\\MarianTesting\\Output\\Debug12_30_13"
+TestList<-list.files("I:\\VisTrails\\MarianTesting\\BrewersSparrowTests",full.name=TRUE,recursive=FALSE,pattern=".csv")
+CodePath<-"C:\\GoogleDrive\\Python\\DevWorkspace\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
+#master code path until Colin changes it again...
+CodePath<-"K:\\USERS\\ISS\\VisTrails_SAHM_x64_1.1.0\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
+#==============================================================
+#sourcecode path
+setwd(CodePath)
+ScriptPath=CodePath
 
-#master branch
-setwd("I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
-ScriptPath="I:\\VisTrails\\VisTrails_SAHM_x64_debug\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
-dir.path<-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\AcrossModelPerformance\\Master10.15"
-#For Model tests
-source("LoadRequiredCode.r")
-source("MARS.helper.fcts.r")
-source("GLM.helper.fcts.r")
-source("BRT.helper.fcts.r")
-source("RF.helper.fcts.r")
+#Load the code
+source("Testing\\LoadTestCode.r")
 
-#For Apply Model Tests
-source("EvaluateNewData.r")
-
-#For PairsExplore and parameter inspection
-source("PairsExplore.r")
-source("Predictor.inspection.r")
-source("my.panel.smooth.binary.r")
-
-#For Data Splitting
-source("TestTrainSplit.r")
-source("CrossValidationSplit.r")
-
-
-file.list<-list.files("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite")
-rc=c(rep("responseCount",times=3),rep("responseBinary",times=10))
-input.file<-vector() 
-input.file=c("I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\CountFactorCVEvaluation.csv",
-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\CountFactorEvaluation.csv",
-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\CountFactorSplit.csv",
-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\ElithPsdoAbs.csv",
-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\ElithSyntheticPresAbsLargeDat.csv",
-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\ElithSynthPresAbsTestTrainEval.csv",
-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\PresAbsEval.csv",
-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\PresAbsFactorCVEvaluation.csv",
-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\PresAbsNonSpatial.csv",
-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\PresAbsNoSplit.csv",
-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\PresAbsSelectionEval.csv",
-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\UsedAvailableSp1CV.csv",
-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\UsedAvailableSp1NoCV.csv")
+#determine the response
+rc=c(rep("responseBinary",times=length(TestList)))
+rc[grep("count",TestList,ignore.case=TRUE)]<-"responseCount"
+runMaxent<-grep("PseudoAbs",TestList,ignore.case=TRUE,value=TRUE) #return the indicies here
 
 predictor<-c("NDVI_annualMinimumValue_2005","NDVI_browndownrates1_2009","romoveg_rc_categorical","Temperature","Noise2Rast","NDVI_amplitudes1_2006","ppt_1971_2000_06_800m",
 "NDVI_annualMeanValue_2006","NDVI_greenuprates1_2003")
-responseCol<-c(rep("responseBinary",times=6),rep("responseCount",times=1))
+grep("count",TestList,ignore.case=TRUE)
 
-#I'm cutting these out of the standard test suite because they take a long time to run
-#and only test whether we run well on large datasets or big tiffs
-#"C:/VisTrails/mtalbert_20110504T132851/readMaTests/CanadaThistleNewFormat.csv"
-#"C:/VisTrails/mtalbert_20110504T132851/readMaTests/LargeSplit.csv"
-#add a missing data csv and maybe a couple with pseudo absence
+
+#creating output directories
+dir.create(Outdir)
 output.dir<-vector()
-output.dir[1]<-paste(dir.path,"\\rf",sep="")
-output.dir[2]<-paste(dir.path,"\\brt",sep="")
-output.dir[3]<-paste(dir.path,"\\mars",sep="")
-output.dir[4]<-paste(dir.path,"\\glm",sep="")
-output.dir[5]<-paste(dir.path,"\\maxlike",sep="")                                                                                          
+output.dir[1]<-file.path(Outdir,"rf")
+output.dir[2]<-file.path(Outdir,"brt")
+output.dir[3]<-file.path(Outdir,"mars")
+output.dir[4]<-file.path(Outdir,"glm")
+output.dir[5]<-file.path(Outdir,"maxent")                                                                                          
 
+for(i in 1:length(output.dir)) dir.create(output.dir[i])
 
 ########   Model Fit Test  ###########
         ##BRT
-         for(i in 1:length(input.file)){
-              try(FitModels(ma.name=input.file[i],
+         for(i in 1:length(TestList)){
+              try(FitModels(ma.name=TestList[i],
                         tif.dir=NULL,output.dir=output.dir[2],
                         response.col=rc[i],make.p.tif=T,make.binary.tif=F,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
                     family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
                 tolerance = 0.001,seed=1,opt.methods=2,
                         simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
-                        learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,MESS=F))
+                        learning.rate =NULL, bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,MESS=F,multCore=FALSE,predSelect=FALSE))
                         try(rm(out),silent=TRUE)
                       }
               
               
               ##MARS
-              for(i in 1:length(input.file)){
-                  try(FitModels(ma.name=input.file[i],
+              for(i in 1:length(TestList)){
+                  try(FitModels(ma.name=TestList[i],
                           tif.dir=NULL,output.dir=output.dir[3],
                           response.col=rc[i],make.p.tif=T,make.binary.tif=T,
                           mars.degree=1,mars.penalty=2,debug.mode=T,responseCurveForm="pdf",script.name="mars",opt.methods=2,MESS=TRUE))
@@ -85,18 +65,18 @@ output.dir[5]<-paste(dir.path,"\\maxlike",sep="")
                 
               
               ##GLM
-              for(i in 1:length(input.file)){
-                  try(FitModels(ma.name=input.file[i],
+              for(i in 1:length(TestList)){
+                  try(FitModels(ma.name=TestList[i],
                         tif.dir=NULL,
                         output.dir=output.dir[4],
                         response.col=rc[i],make.p.tif=T,make.binary.tif=F,
-                        simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=TRUE))
+                        simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=FALSE,opt.methods=2,squared.terms=TRUE,predSelect=FALSE))
                         }
               
               ### Random Forest
-              for(i in 1:length(input.file)){
+              for(i in 1:length(TestList)){
               proximity=NULL
-              try(FitModels(ma.name=input.file[i],
+              try(FitModels(ma.name=TestList[i],
                     tif.dir=NULL,
                     output.dir=output.dir[1],
                     response.col=rc[i],make.p.tif=T,make.binary.tif=F,
@@ -107,27 +87,10 @@ output.dir[5]<-paste(dir.path,"\\maxlike",sep="")
               do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,MESS=F,seed=1))
                  }
  
-              ### Maxlike
-              Formula="~bio_06_2000_2km + bio_14_2000_4km + NDVI_annualMaximumValue_2009 + NDVI_greenuprates1_2003 + NDVI_peakdates1_2003"
-            
-               for(i in 1:2){
-                try(FitModels(ma.name=input.file[i],
-                		tif.dir=NULL,
-                		output.dir=output.dir[5],
-                		response.col=rc[i],
-                		make.p.tif=T,make.binary.tif=T,
-                		debug.mode=T,responseCurveForm="pdf",script.name="maxlike",
-                		opt.methods=2,MESS=T,Formula=Formula,UseTiffs=FALSE))
-              }
+              ### Maxent
+              
               		
-### Pairs Explore Tests  #####
-source("PairsExplore.r")
-source("PairsExploreHelperFcts.r")
-source("read.dat.r")
-source("chk.libs.r")
-source("read.dat.r")
-source("my.panel.smooth.binary.r")
-source("Predictor.inspection.r")
+
 
 
 
@@ -135,24 +98,24 @@ for(i in 1:length(predictor)){
    if(i==1) { 
        try(Pairs.Explore(num.plots=5,
                 min.cor=.5,
-                input.file=input.file[i],
-            		output.file=paste(dir.path,"\\",i,"Par1",".jpg",sep=""),
+                 input.file=TestList[i],
+            		output.file=paste(Outdir,"\\",i,"Par1",".jpg",sep=""),
             		response.col=rc[i],
             		pres=TRUE,
             		absn=TRUE,
             		bgd=TRUE))
         try(Pairs.Explore(num.plots=10,
                 min.cor=.5,
-                input.file=input.file[i],
-            		output.file=paste(dir.path,"\\",i,"Par2",".jpg",sep=""),
+                input.file=TestList[i],
+            		output.file=paste(Outdir,"\\",i,"Par2",".jpg",sep=""),
             		response.col=rc[i],
             		pres=TRUE,
             		absn=FALSE,
             		bgd=FALSE,
                 cors.w.highest=TRUE))
        try(Predictor.inspection(predictor[i],
-                input.file=input.file[i],
-            		output.dir=dir.path,
+                input.file=TestList[i],
+            		output.dir=Outdir,
             		response.col=rc[i],
             		pres=TRUE,
             		absn=TRUE,
@@ -160,16 +123,16 @@ for(i in 1:length(predictor)){
     }		
  try(Pairs.Explore(num.plots=15,
     min.cor=min.cor,
-    input.file=input.file[i],
-		output.file=paste(dir.path,"\\",i,".jpg",sep=""),
+    input.file=TestList[i],
+		output.file=paste(Outdir,"\\",i,".jpg",sep=""),
 		response.col=rc[i],
 		pres=TRUE,
 		absn=TRUE,
 		bgd=TRUE))
 		
 	try(Predictor.inspection(predictor[i],
-    input.file[i],
-		output.dir=paste(dir.path,"\\",sep=""),
+    TestList[i],
+		output.dir=paste(Outdir,"\\",sep=""),
 		response.col=rc[i],
 		pres=TRUE,
 		absn=TRUE,
@@ -177,12 +140,12 @@ for(i in 1:length(predictor)){
 		}
 
 
-input.file<-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\PairsExploreManyPredictors.csv"
+TestList<-"I:\\VisTrails\\VisTrails_SAHM_x32_debug\\VisTrails\\vistrails\\packages\\TestingRCode2\\TestSuite\\PairsExploreManyPredictors.csv"
 for (i in 1:25){ 
  try(Pairs.Explore(num.plots=i,
                 min.cor=.5,
-                input.file=input.file,
-            		output.file=paste(dir.path,"\\",i,"NumPlotsTest",".jpg",sep=""),
+                input.file=TestList,
+            		output.file=paste(Outdir,"\\",i,"NumPlotsTest",".jpg",sep=""),
             		response.col=rc[4],
             		pres=TRUE,
             		absn=TRUE,

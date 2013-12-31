@@ -40,12 +40,9 @@ FitModels(ma.name=input.file,
 #================================================================#
 #                            MARS
 #================================================================#
-input.file="J:\\Projects\\GypsyMoth\\SAHM_Output\\e2013c\\mars_Intro_APHIS_GenBckgrnd_2\\CovariateCorrelationOutputMDS_test.csv" 
-
+ 
+input.file="I:\\VisTrails\\MarianTesting\\BrewersSparrowTests\\BinomialCV.csv"
 output.dir="C:\\temp\\SAHM_workspace\\MARS2"
-input.file="J:\\Projects\\NormalsComparison\\SAHM4\\AHB\\MergedDataset_1.csv"
-om=3 "cur_processing_mode=single models sequentially (n - 1 cores each)" c=J:\Projects\GypsyMoth\SAHM_Output\e2013c\mars_Intro_APHIS_GenBckgrnd_2\CovariateCorrelationOutputMDS_test.csv mpt=TRUE o=J:\Projects\GypsyMoth\SAHM_Output\e2013c\mars_Intro_APHIS_GenBckgrnd_2 pen=2.0 multicore=TRUE mes=TRUE rc=responseBinary mbt=TRUE deg=2
-
 
 FitModels(ma.name=input.file,
             output.dir=output.dir,
