@@ -1282,12 +1282,14 @@ class PARC(Module):
         csvWriter = csv.writer(f)
         csvWriter.writerow(["FilePath", "Categorical", "Resampling", "Aggregation"])
         
+        
         if self.hasInputFromPort("RastersWithPARCInfoCSV"):
-            inputCSV = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort("RastersWithPARCInfoCSV").name, self)
-            csvReader = csv.reader(open(inputCSV), delimiter=",")
-            header = csvReader.next()
-            for row in csvReader:
-                csvWriter.writerow([utils.getFileRelativeToCurrentVT(row[0]), row[1], row[2], row[3]])
+            for input_rasters_csv in self.forceGetInputListFromPort('RastersWithPARCInfoCSV'):
+                csvReader = csv.reader(open(input_rasters_csv.name), delimiter=",")
+                header = csvReader.next()
+                for row in csvReader:
+                    csvWriter.writerow([utils.getFileRelativeToCurrentVT(row[0]), row[1], row[2], row[3]])
+            
         
         if self.hasInputFromPort("PredictorList"):
             predictor_lists = self.forceGetInputListFromPort('PredictorList')
