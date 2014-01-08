@@ -48,7 +48,7 @@ Pred.Surface<-function(object, model, filename="", na.rm=TRUE,NAval) {
 			firstrow <- 1
 			firstcol <- 1
 		ncols <- ncol(predrast)
-		lyrnames <- layerNames(object)
+		lyrnames <- names(object)
 		xylyrnames <- c('x', 'y', lyrnames)
 		v <- matrix(NA, ncol=nrow(predrast), nrow=ncol(predrast))
       na.rm <- FALSE
