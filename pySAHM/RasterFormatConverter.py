@@ -72,7 +72,7 @@ class FormatConverter(object):
         self.format = 'asc'
         self.logger = None
         self.multicore = True
-        self.driverExt = {'asc':'AAIGrid', 'bil':'EHdr', 'img':'HFA', 'jpg':'JPEG'}
+        self.driverExt = {'asc':'AAIGrid', 'bil':'EHdr', 'img':'HFA', 'jpg':'JPEG', 'rst':'RST'}
         
     def run(self):
         self.validateArgs()
