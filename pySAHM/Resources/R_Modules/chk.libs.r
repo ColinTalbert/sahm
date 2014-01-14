@@ -48,13 +48,15 @@ chk.libs <- function(Model){
 #Written by Marian Talbert 2/2012
      if(Model=="PairsExplore") libs=list("gam")
      if(Model=="Pred.inspect") libs=list("raster","gam")
-     if(Model=="mars")        libs<-list("PresenceAbsence","rgdal","sp","survival","mda","raster","tcltk2","foreign","ade4","ROCR","ncf","earth","plotrix")
-     if(Model=="glm")         libs<-list("PresenceAbsence","rgdal","sp","survival","tools","raster","tcltk2","foreign","ade4","ROCR","ncf")
-     if(Model=="rf")          libs<-list("randomForest","PresenceAbsence","rgdal","sp","raster","tcltk2","foreign","ade4","ROCR","ncf")
-     if(Model=="gam")          libs<-list("gam","PresenceAbsence","rgdal","sp","raster","tcltk2","foreign","ade4","ROCR","ncf")
-     if(Model=="ann")          libs<-list("nnet","PresenceAbsence","rgdal","sp","raster","tcltk2","foreign","ade4","ROCR","ncf")
-     if(Model=="brt")         libs<-list("PresenceAbsence","rgdal","sp","survival","lattice","raster","tcltk2","foreign","ade4","gbm","ROCR","ncf")
-     if(Model=="maxent")         libs<-list("PresenceAbsence","rgdal","sp","survival","lattice","raster","tcltk2","foreign","ade4","ROCR","ncf")
+     if(Model%in%c("mars","glm","rf","gam","ann","brt","maxent")) libs <- c("PresenceAbsence","rgdal","sp","survival","tools","raster","tcltk2","foreign","ade4","ROCR","ncf","splines")
+    
+     if(Model=="mars")               libs<-as.list(c("mda","earth","plotrix",libs))
+     if(Model%in%c("glm","maxent"))  libs<-as.list(libs)
+     if(Model=="rf")                 libs<-as.list(c("randomForest",libs))
+     if(Model=="gam")                libs<-as.list(c("gam",libs))
+     if(Model=="ann")                libs<-as.list(c("nnet",libs))
+     if(Model=="brt")                libs<-as.list(c("lattice","gbm",libs))
+    
      if(Model=="GenPsdAbs")   libs<-list("adehabitatHR","ks","raster","rgdal","sp","spatstat")
       lib.mssg <- unlist(suppressMessages(suppressWarnings(lapply(libs,require,quietly = T, warn.conflicts=F,character.only=T))))
       if(any(!lib.mssg)){
@@ -62,7 +64,7 @@ chk.libs <- function(Model){
             lib.mssg <- unlist(suppressMessages(suppressWarnings(lapply(libs,require,quietly = T, warn.conflicts=F,character.only=T))))
             }
         if(any(!lib.mssg)) stop(paste(paste("\n\nthe following package(s) could not be loaded: ",paste(unlist(libs[!lib.mssg]),sep="")),
-        "\n THIS IS GENERALLY BECAUSE YOU DID NOT FOLLOW THE INSTALL INSTRUCTIONS ON PAGE 4 OF THE SAHM MANUAL\nINSTALL R IN A LOCATION WHERE YOU HAVE WRITE PERMISSION (Often NOT Program Files)!!!!",sep=""))
+        "\n THIS IS OFTEN BECAUSE YOU DID NOT FOLLOW THE INSTALL INSTRUCTIONS ON PAGE 4 OF THE SAHM MANUAL\nINSTALL R IN A LOCATION WHERE YOU HAVE WRITE PERMISSION (Often NOT Program Files)!!!!",sep=""))
 
       }
 
