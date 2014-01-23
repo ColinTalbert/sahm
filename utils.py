@@ -563,6 +563,8 @@ def get_r_path():
 
 def  set_r_path(r_bin_path):
     global r_path
+    if os.path.exists(os.path.abspath(r_bin_path)):
+        r_bin_path = os.path.abspath(r_bin_path)
     r_path = str(r_bin_path)
     
 def getR_application(module=None):
@@ -939,6 +941,7 @@ def getFileRelativeToCurrentVT(fname, curModule=None):
             raise ModuleError(curModule, msg)
         
     try:
+        fname = fname.replace ("\\", "/")
         #step 1
         if os.path.exists(fname):
             return fname

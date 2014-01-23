@@ -1999,7 +1999,7 @@ def initialize():
     utils.importOSGEO() 
     utils.createLogger(session_dir, configuration.verbose)
         
-    utils.set_r_path(os.path.abspath(configuration.r_path))
+    utils.set_r_path(configuration.r_path)
     if not os.path.exists(utils.get_r_path()) and \
         system.systemType in ['Microsoft', 'Windows']:
         #they don't have a decent R path, let's see if we can pull one from the  
