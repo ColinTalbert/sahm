@@ -313,7 +313,7 @@ def checkModelCovariatenames(MDSFile):
     """
     covariates = open(MDSFile, "r").readline().strip().split(",")[3:]
     for covariate in covariates:
-        if not utilities.covariate_name_is_ok(covariate[0]):
+        if not utilities.covariate_name_is_ok(covariate):
             return False
     return True
 
