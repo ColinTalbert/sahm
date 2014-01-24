@@ -164,9 +164,11 @@ produce.metrics=TRUE
 # Make Function Call #
 Args <- commandArgs(trailingOnly=FALSE)
 
-    for (i in 1:length(Args)){
-     if(Args[i]=="-f") ScriptPath<-Args[i+1]
-     }
+for (i in 1:length(Args)){
+	if(Args[i]=="-f") ScriptPath<-Args[i+1]
+	argSplit <- strsplit(Args[i], "=")
+	if(argSplit[[1]][1]=="--file") ScriptPath <- argSplit[[1]][2]
+}
 
     for (arg in Args) {
     	argSplit <- strsplit(arg, "=")
