@@ -412,7 +412,11 @@ def gen_R_cmd(script, args_dict):
     #reformat are args into the form expected by our R scripts 
     args = ["%s=%s" % pair for pair in args_dict.iteritems()]
     
-    command_arr = [R_exe, '--vanilla', '-f', sahm_R_script, "--args"] + args
+    if system.systemType in ['Microsoft', 'Windows']:
+        command_arr = [R_exe, '--vanilla', '-f', sahm_R_script, "--args"] + args
+    else:
+        command_arr = [R_exe, '--vanilla', sahm_R_script] + args
+    
     return command_arr
 
 def run_R_script(script, args_dict, module=None, async=False, 
