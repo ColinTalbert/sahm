@@ -45,7 +45,7 @@
 ################################################################################
 # ImageViewer widgets/toolbar implementation
 ################################################################################
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore, QtGui, QtWebKit
   
 try:  
     from vistrails.core.system import systemType
@@ -199,32 +199,19 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         self.setLayout(centralLayout)
         centralLayout.setMargin(0)
         centralLayout.setSpacing(0)
-
-        
-#        self.setAnimationEnabled(True)
         
         self.Frame = QtGui.QFrame()
         self.ui = Ui_Frame()
         self.ui.setupUi(self.Frame)
         
-#        #add scenes to our graphicViews
-#        self.gs_prob_map = QtGui.QGraphicsScene()
-#        self.ui.gv_prob_map.setScene(self.gs_prob_map)
-#        self.gs_prob_map.wheelEvent = self.wheel_event_prob
-        
         self.gs_crv_graph = QtGui.QGraphicsScene()
         self.ui.gv_crv.setScene(self.gs_crv_graph)
         QtCore.QObject.connect(self.ui.crv_combobox, QtCore.SIGNAL("currentIndexChanged(QString)"), self.changeResponseCurve)
-#        self.ui.crv_combobox.currentIndexChanged = self.changeResponseCurve
         self.gs_crv_graph.wheelEvent = self.wheel_event_crv
         
         self.gs_auc_graph = QtGui.QGraphicsScene()
         self.ui.gv_auc.setScene(self.gs_auc_graph)
         self.gs_auc_graph.wheelEvent = self.wheel_event_auc
-        
-#        self.gs_response_graph = QtGui.QGraphicsScene()
-#        self.ui.gv_response.setScene(self.gs_response_graph)
-#        self.gs_response_graph.wheelEvent = self.wheel_event_response
         
         self.gs_calibration_graph = QtGui.QGraphicsScene()
         self.ui.gv_calibration.setScene(self.gs_calibration_graph)
@@ -242,29 +229,12 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         self.ui.gv_variable.setScene(self.gs_variable_graph)
         self.gs_variable_graph.wheelEvent = self.wheel_event_variable
         
-        #add in ie browsers for the text and response
-        if systemType in ['Microsoft', 'Windows']:
-            self.text_browser = QAxContainer.QAxWidget(self)
-            self.text_browser.setFocusPolicy(QtCore.Qt.StrongFocus)
-            self.text_browser.setControl("{8856F961-340A-11D0-A96B-00C04FD705A2}")
-            self.ui.text_output_layout.addWidget(self.text_browser)
-        else:
-            self.text_browser = None
+        self.text_browser = QtWebKit.QWebView()
+        self.text_browser.setMouseTracking(True)    
+        self.ui.text_output_layout.addWidget(self.text_browser)
+        
         self.text_urlSrc = None
         
-#        layout = QtGui.QVBoxLayout()
-#        self.response_frame = QtGui.QFrame(self)
-#        self.response_graph = QtGui.QGraphicsScene()
-#        self.ui.gv_response.setScene(self.response_graph)
-#        self.response_graph.wheelEvent = self.wheel_event_response
-        
-        
-        
-#        self.response_browser = QAxContainer.QAxWidget(self)
-#        self.response_browser.setFocusPolicy(QtCore.Qt.StrongFocus)
-#        self.response_browser.setControl("{8856F961-340A-11D0-A96B-00C04FD705A2}")
-#        self.ui.response_curves_layout.addWidget(self.response_browser)
-#        self.response_urlSrc = None
         
         self.connect(self.ui.tabWidget,QtCore.SIGNAL('currentChanged(int)'), self.tabChanged)
         
@@ -331,24 +301,7 @@ class SAHMOutputViewerCellWidget(QCellWidget):
                                        self.gs_auc_graph,
                                        self.ui.gv_auc,
                                        max_size]
-#        if response_curves:
-#            for response_curve in response_curves:
-#                shortName = os.path.split(response_curve)[1]
-#                shortName = os.path.splitext(shortName)[0]
-##                if shortName != "Thumbs": 
-##                    self.ui.response_combobox.addItem(shortName)
-#                
-#            pixmap_response = QtGui.QPixmap(response_curves[0])
-#            max_size = self.getMaxSize(self.ui.gv_response)
-#            scaled_pixmap_response = pixmap_response.scaled(max_size, max_size, 
-#                                            QtCore.Qt.KeepAspectRatio, 
-#                                            QtCore.Qt.SmoothTransformation)
-#            
-#            self.images['response_graph'] = [pixmap_response,
-#                                       scaled_pixmap_response,
-#                                       self.gs_response_graph,
-#                                       self.ui.gv_response,
-#                                       max_size]
+
         self.ui.crv_combobox.clear()
         curindex = 0
         if self.response_curves:
@@ -418,12 +371,7 @@ class SAHMOutputViewerCellWidget(QCellWidget):
                                        max_size]
 
         self.text_urlSrc = QtCore.QUrl.fromLocalFile(text_output.name)
-        if self.text_browser is not None:
-            if self.text_urlSrc!=None:
-                self.text_browser.dynamicCall('Navigate(const QString&)', self.text_urlSrc.toString())
-            else:
-                self.text_browser.dynamicCall('Navigate(const QString&)', QtCore.QString('about:blank'))
-        
+        self.text_browser.load(self.text_urlSrc)
        
         choices = ['Text', 'Response Curves', 'AUC', 'Calibration', 'Confusion', 'Residuals','Variable Importance']
         selected_index = choices.index(inital_display)
