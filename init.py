@@ -101,6 +101,7 @@ import pySAHM.utilities as utilities
 from SahmOutputViewer import SAHMModelOutputViewerCell
 from SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
 from GeneralSpatialViewer import GeneralSpatialViewer
+from GeneralSpatialViewer import PointShapefile, PolyShapefile
 from sahm_picklists import ResponseType, AggregationMethod, \
         ResampleMethod, PointAggregationMethod, ModelOutputType, RandomPointType, \
         OutputRaster, mpl_colormap, T_O_M
@@ -2389,7 +2390,11 @@ _modules = generate_namespaces({'DataInput': [
                                           (SAHMSpatialOutputViewerCell, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe}),
                                            (GeneralSpatialViewer, {'moduleColor':output_color,
-                                                           'moduleFringe':output_fringe})
+                                                           'moduleFringe':output_fringe}),
+                                           (PointShapefile, {'moduleColor':output_color,
+                                                           'moduleFringe':output_fringe}),
+#                                            (PolyShapefile, {'moduleColor':output_color,
+#                                                            'moduleFringe':output_fringe}),  #not ready for prime time yet
                                           ]
                                 })
 

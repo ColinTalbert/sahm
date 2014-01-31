@@ -87,6 +87,7 @@ import matplotlib.colors as colors
 import numpy as np
 
 from osgeo import gdal, gdalconst
+from osgeo import ogr
 
 from sahm_picklists import mpl_colormap
 
@@ -111,7 +112,11 @@ class GeneralSpatialViewer(SpreadsheetCell):
                     ('threeBand', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                     ('dataMin', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('dataMax', '(edu.utah.sci.vistrails.basic:Float)'),
-                    ('NoDataValue', '(edu.utah.sci.vistrails.basic:Float)'),]
+                    ('NoDataValue', '(edu.utah.sci.vistrails.basic:Float)'),
+                    ('shape_display', '(edu.utah.sci.vistrails.basic:Dictionary)')]
+#                     ("pointsCSV", '(edu.utah.sci.vistrails.basic:Path)'),
+#                     ("pointsColor", '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["Red"]', 'optional':False}),
+#                     ("pointsLineOrPoints", '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["points"]', 'optional':False}),]
 
     @classmethod
     def provide_input_port_documentation(cls, port_name):
@@ -150,6 +155,10 @@ class GeneralSpatialViewer(SpreadsheetCell):
         if self.inputPorts.has_key('Location'):
             self.location =  self.inputPorts['Location'][0].obj
 
+        inputs['shape_displays'] = []
+        for shape_display in self.forceGetInputListFromPort('shape_display'):
+           inputs['shape_displays'].append(shape_display)
+            
         self.local_displayAndWait(inputs)       
     
     def local_displayAndWait(self, inputs):
@@ -181,7 +190,7 @@ class SpatialViewerCellWidget(QCellWidget):
         self.categorical = False
         self.threeBand = False
         self.dataMin = "ExtractFromFile"
-        self.dataMax = "ExtractFromFile"
+        self.dataMax = "pointsColor"
         self.NoDataValue = "ExtractFromFile"
 
     def updateContents(self, inputs):
@@ -208,13 +217,19 @@ class SpatialViewerCellWidget(QCellWidget):
                 self.__dict__[input] = inputs[input]
             else:
                 self.__dict__[input] = "ExtractFromFile"  
-
+        
         self.load_layers()
+        self.shapefiles = inputs.get("shape_displays", [])
         self.on_draw(UseMaxExt=True)
+
+        
 
         self.maxXlim, self.maxYlim = self.getMaxDisplayExtent()
         self.axes.set_ylim(self.maxYlim, emit=False)
         self.axes.set_xlim(self.maxXlim, emit=False)
+        
+        
+        
         self.fig.canvas.draw()
         self.update()
 
@@ -297,7 +312,6 @@ class SpatialViewerCellWidget(QCellWidget):
         self.axes.set_ylim((newB, newT))
 
         self.sync_extents()
-
 
     def button_up(self, event):
         if event.button == 1:
@@ -391,6 +405,7 @@ class SpatialViewerCellWidget(QCellWidget):
         self.add_axis()
         
         self.add_raster(curExtents)
+        self.add_shapes()
         
         title = os.path.splitext(os.path.split(self.rasterFile)[1])[0]
         
@@ -421,8 +436,33 @@ class SpatialViewerCellWidget(QCellWidget):
 
             norm = colors.Normalize(rmin, rmax)
             raster_plot = self.axes.imshow(raster_array,interpolation="nearest", cmap=self.cmap, norm=norm, origin='upper', extent=self.getDataExtent())
-            
-
+              
+    def add_shapes(self):
+        """Adds all overlaying shapefiles to our map
+        """
+        for shape_dict in self.shapefiles:
+            if shape_dict['shapetype']  == 'point':
+                self.add_point_shapefile(shape_dict)
+            elif shape_dict['shapetype']  == 'poly':
+                self.add_poly_shapefile(shape_dict)
+        
+    def add_point_shapefile(self, shapefile_dict):
+        driver = ogr.GetDriverByName('ESRI Shapefile')
+        dataSource = driver.Open(shapefile_dict['shapefname'], 0)
+        layer = dataSource.GetLayer()
+        
+        feature = layer.GetNextFeature()
+        Xs, Ys = [], []
+        while feature:
+            x, y, z = feature.geometry().GetPoint()
+            Xs.append(x)
+            Ys.append(y)
+            feature = layer.GetNextFeature()
+        
+        self.axes.plot(Xs, Ys, alpha=shapefile_dict['alpha'],
+                       markersize=shapefile_dict['size'],
+                       color=shapefile_dict['clr'].tuple,
+                       marker=shapefile_dict['marker'])
 #        if self.displayTL:
 #            if self.categorical:
 #                cb = self.fig.colorbar(raster_plot, orientation='vertical', pad=0.01, shrink=.9, fraction=.3, aspect=15)
@@ -436,6 +476,65 @@ class SpatialViewerCellWidget(QCellWidget):
 #                    t.set_rotation(90)
 #                else:
 #                    t.set_fontsize(7)
+
+    def add_poly_shapefile(self, shapefile_dict):
+        driver = ogr.GetDriverByName('ESRI Shapefile')
+        dataSource = driver.Open(shapefile_dict['shapefname'], 0)
+        layer = dataSource.GetLayer()
+        
+        facec = shapefile_dict['fill_color'].tuple + (shapefile_dict['fill_alpha'],)
+        linec = shapefile_dict['line_color'].tuple + (shapefile_dict['line_alpha'],)
+        
+        clr = shapefile_dict['line_color'].tuple
+        alpha = shapefile_dict['line_alpha']
+        width = shapefile_dict['line_width']
+        
+        # Read all features in layer and store as paths
+        paths = []
+        for feat in layer:
+            for geom in feat.GetGeometryRef():
+                # check if geom is polygon
+                if geom.GetGeometryType() == ogr.wkbPolygon:
+                    codes = []
+                    all_x = []
+                    all_y = []
+                    for i in range(geom.GetGeometryCount()):
+                        # Read ring geometry and create path
+                        r = geom.GetGeometryRef(i)
+                        x = [r.GetX(j) for j in range(r.GetPointCount())]
+                        y = [r.GetY(j) for j in range(r.GetPointCount())]
+#                         # skip boundary between individual rings
+#                         codes += [matplotlib.path.Path.MOVETO] + \
+#                                      (len(x)-1)*[matplotlib.path.Path.LINETO]
+                        all_x += x
+                        all_y += y
+                        
+                    self.axes.plot(all_x, all_y, '-', alpha=alpha,
+                       markersize=width,
+                       color=clr)
+#                     path = matplotlib.path.Path(np.column_stack((all_x,all_y)), codes)
+#                     paths.append(path)
+                elif geom.GetGeometryType() == ogr.wkbLineString:
+                    points =  geom.GetPoints()
+                    codes = [matplotlib.path.Path.MOVETO] + \
+                                     (len(points)-1)*[matplotlib.path.Path.LINETO]
+                    path = matplotlib.path.Path(points, codes)
+                    self.axes.plot(zip(*points), "-", alpha=alpha,
+                       markersize=width,
+                       color=clr)
+        
+        
+
+#         # Add paths as patches to axes
+#         for path in paths:
+#             patch = matplotlib.patches.PathPatch(path, \
+#                     facecolor=facec, 
+#                     edgecolor=linec,
+#                     linewidth=shapefile_dict['line_width']
+#                     )
+#             self.axes.add_patch(patch)
+        
+
 
     def dumpToFile(self, filename):
         pass
@@ -542,229 +641,6 @@ class SpatialViewerCellWidget(QCellWidget):
             spatialViewer.pull_pixels()
             spatialViewer.map_canvas.draw()
 
-#class AnchoredText(AnchoredOffsetbox):
-#    def __init__(self, s, loc, pad=0.4, borderpad=0.5, prop=None, frameon=True):
-#
-#        self.txt = TextArea(s, minimumdescent=False)
-#
-#        super(AnchoredText, self).__init__(loc, pad=pad, borderpad=borderpad,
-#                                           child=self.txt,
-#                                           prop=prop,
-#                                           frameon=frameon)
-
-#class MyMapCanvas(FigureCanvas):
-#    def __init__(self, fig):
-#        FigureCanvas.__init__(self, fig)
-#        self._cursor = None
-#
-#    def resizeEvent(self, event):
-#        if not event.size().height() == 0:
-#            FigureCanvas.resizeEvent(self, event)
-#
-#    def enterEvent(self, event):
-#        if (self._cursor is not None and
-#            QtGui.QApplication.overrideCursor() is None):
-#            QtGui.QApplication.setOverrideCursor(self._cursor)
-#        FigureCanvas.enterEvent(self, event)
-#
-#    def leaveEvent(self, event):
-#        self._cursor = QtGui.QCursor(QtGui.QApplication.overrideCursor())
-#        QtGui.QApplication.restoreOverrideCursor()
-#        FigureCanvas.leaveEvent(self, event)
-
-#class RasterDisplay(object):
-#    '''The idea behind this is from
-#    http://matplotlib.sourceforge.net/examples/event_handling/viewlims.py
-#    basically we want to only query as much data as we have screen pixels for.
-#    When the user zooms, pans, resizes we'll go back to the original display
-#    and get another set of pixels.
-#
-#    This object has a pointer to the original raster and functions
-#    for switching the input file or getting an array of pixel values
-#    '''
-#    def __init__(self, threeBand=False, width=300, height=300):
-#        self.height = height
-#        self.width = width
-#        self.threeBand = threeBand
-#
-#    def switch_raster(self, rasterfile):
-#        self.rasterfile = rasterfile
-#        self.rasterparams = getRasterParams(rasterfile)
-#
-#
-#    def __call__(self, xstart, xend, ystart, yend):
-#        print "RasterDisplay __call__"
-#        self.x = np.linspace(xstart, xend, self.width)
-#        self.y = np.linspace(ystart, yend, self.height).reshape(-1,1)
-#
-#         #pull the pixels we need, no more
-#        ds = gdal.Open(self.rasterfile, gdal.GA_ReadOnly)
-#
-#        xform  = ds.GetGeoTransform()
-#
-#        if xstart < xform[0]:
-#            xstart = xform[0]
-#        if xend > (xform[0] + (ds.RasterXSize * xform[1])):
-#            xend = (xform[0] + (ds.RasterXSize * xform[1]))
-#        if ystart < (xform[3] + (ds.RasterYSize * xform[5])):
-#            ystart = xform[3]
-#        if yend > xform[3]:
-#            xend = xform[3]
-#        
-#
-#        ncols = int((xend - xstart) / xform[1])
-#        nrows = int((yend - ystart) / abs(xform[5]))
-#
-#        xOffset = int((xstart - xform[0]) / xform[1])
-#        yOffset = int((yend- xform[3]) / xform[5])
-#
-#        if xOffset + ncols > ds.RasterXSize:
-#            xOffset = max(0, ds.RasterXSize - xOffset)
-#        if xOffset < 0:
-#            xOffset = 0
-#
-#        if yOffset + nrows > ds.RasterYSize:
-#            yOffset = 0
-#        if yOffset < 0:
-#            yOffset = 0
-#
-#        if ncols + xOffset > ds.RasterXSize:
-#            ncols = ds.RasterXSize - xOffset
-#        if ncols < 0:
-#            ncols = ds.RasterXSize
-#
-#        if nrows + yOffset > ds.RasterYSize:
-#            nrows = ds.RasterYSize - yOffset
-#        if nrows < 0:
-#            nrows = ds.RasterYSize
-#
-#        print "rows, cols:  ", ncols, nrows
-#        print "pixelspulled: ", self.height, self.width
-#
-#        ary = ds.GetRasterBand(1).ReadAsArray(xoff=xOffset, yoff=yOffset,
-#                                              win_xsize=ncols, win_ysize=nrows,
-#                                              buf_ysize=self.height, buf_xsize=self.width)
-#        
-#        ndval = ds.GetRasterBand(1).GetNoDataValue()
-#
-#        return np.ma.masked_array(ary, mask=(ary==ndval))
-#
-#    def setDims(self, ax):
-#        #Get the number of points from the number of pixels in the window
-#        dims = ax.axesPatch.get_window_extent().bounds
-#        print "RasterDisplay setDims:   ", dims
-#        self.width = int(dims[2] + 0.5)
-#        self.height = int(dims[3] + 0.5)
-#
-#    def ax_update(self, ax):
-#        ax.set_autoscale_on(False) # Otherwise, infinite loop
-#        self.setDims(ax)
-#        print "RasterDisplay ax_update"
-#
-#        #Get the range for the new area
-#        xstart,ystart,xdelta,ydelta = ax.axes.viewLim.bounds
-#        xend = xstart + xdelta
-#        yend = ystart + ydelta
-#
-#        factor = 0.1 #we want to pull more pixels than we absolutely need
-#        #so that we don't get white edges
-#        xBuff = (xend - xstart) * factor
-#        yBuff = (yend - ystart) * factor
-#        xstart = xstart - xBuff
-#        ystart = ystart - yBuff
-#        xend = xend + xBuff
-#        yend = yend + yBuff
-#
-#        print "   Before: "
-#        print "     xlim: ", int(xstart), int(xend)
-#        print "     ylim: ", int(ystart), int(yend)
-#
-#        #reel these values in if they are outside our bounds
-#        for bound in ['xstart', 'xend']:
-#            if eval(bound) < self.rasterparams["ulx"]:
-#                exec(bound + " = " + str(self.rasterparams["ulx"]))
-#            if eval(bound) > self.rasterparams["lrx"]:
-#                exec(bound + " = " + str(self.rasterparams["lrx"]))
-#            
-#        for bound in ['ystart', 'yend']:
-#            if eval(bound) < self.rasterparams["lry"]:
-#                exec(bound + " = " + str(self.rasterparams["lry"]))
-#            if eval(bound) > self.rasterparams["uly"]:
-#                exec(bound + " = " + str(self.rasterparams["uly"]))
-#
-#        # Update the image object with our new data and extent
-#        im = ax.images[-1]
-#        print "   After: "
-#        print "     xlim: ", int(xstart), int(xend)
-#        print "     ylim: ", int(ystart), int(yend)
-#        im.set_data(self.__call__(xstart, xend, ystart, yend))
-#        im.set_extent((xstart, xend, ystart, yend))
-#        ax.figure.canvas.draw_idle()
-#
-##class fullExtent(QtGui.QAction):
-##    def __init__(self, parent=None):
-##        icon = os.path.abspath(os.path.join(
-##                    os.path.dirname(__file__), "Images", "world.png"))
-##        QtGui.QAction.__init__(self,
-##                               QtGui.QIcon(icon),
-##                               "Full Extent",
-##                               parent)
-##        self.setCheckable(False)
-##
-##    def triggeredSlot(self):
-##        cellWidget = self.toolBar.getSnappedWidget()
-##        cellWidget.zoomFull()
-#
-#class viewTitleLegend(QtGui.QAction):
-#    def __init__(self, parent=None):
-#        icon = os.path.abspath(os.path.join(
-#                    os.path.dirname(__file__), "Images", "titlelegend.png"))
-#        QtGui.QAction.__init__(self,
-#                               QtGui.QIcon(icon),
-#                               "Show/Hide Title and Legend",
-#                               parent)
-#        self.setCheckable(True)
-#        self.setChecked(True)
-#
-#    def triggeredSlot(self):
-#        cellWidget = self.toolBar.getSnappedWidget()
-#
-#        active_cells = cellWidget.get_active_cells()
-#        for cell in active_cells:
-#
-#            xlim = cell.axes.get_xlim()
-#            ylim = cell.axes.get_ylim()
-#            cell.displayTL = self.isChecked()
-#            cell.on_draw()
-#            cell.fig.canvas.draw()
-#            cell.update()
-#            cell.axes.set_xlim(xlim)
-#            cell.axes.set_ylim(ylim)
-#
-#class sync_changes(QtGui.QAction):
-#
-#    def __init__(self, parent=None):
-#        self.sync_options = itertools.cycle(["all", "sel", "one"])
-#
-#        QtGui.QAction.__init__(self,
-#                               self.getIcon(self.sync_options.next()),
-#                               r"Apply changes to all / selected / single cell",
-#                               parent)
-#        self.setCheckable(True)
-#        self.setChecked(True)
-#
-#
-#    def getIcon(self, tag):
-#        icon = os.path.abspath(os.path.join(
-#                    os.path.dirname(__file__), "Images", tag + ".png"))
-#        return QtGui.QIcon(icon)
-#
-#    def triggeredSlot(self):
-#        cellWidget = self.toolBar.getSnappedWidget()
-#        next_option = self.sync_options.next()
-#        self.setIcon(self.getIcon(next_option))
-#        cellWidget.sync_changes = next_option
-
 class ViewLayerAction(QtGui.QAction):
     def __init__(self, action_dict, parent=None):
         icon = os.path.abspath(os.path.join(
@@ -822,62 +698,6 @@ class ViewLayerAction(QtGui.QAction):
                 raise MemoryError
 
             cell.update()
-
-#class MPL_action(QtGui.QAction):
-#
-#    def __init__(self, action_dict, parent=None):
-#        icon = os.path.abspath(os.path.join(
-#                    os.path.dirname(__file__), "Images", action_dict["icon"]))
-#        QtGui.QAction.__init__(self,
-#                               QtGui.QIcon(icon),
-#                               action_dict["label"],
-#                               parent)
-#        self.setToolTip(action_dict["tooltip"])
-#        self.setCheckable(action_dict["checkable"])
-#        self.setChecked(action_dict["checked"])
-#        self.actionfunc = action_dict["actionfunc"]
-#        self.tag = action_dict["label"]
-#
-#    def triggeredSlot(self, checked=False):
-#
-#        cellWidget = self.toolBar.getSnappedWidget()
-#
-#        if self.tag in self.tag in ["Pan", "Zoom"]:
-#            if self.isChecked():
-#                cursor = self.tag
-#            elif self.tag == 'Pan':
-#                cursor = "Zoom"
-#            elif self.tag == 'Zoom':
-#                cursor = "Pan"
-#
-#        active_cells = cellWidget.get_active_cells()
-#        for cell in active_cells:
-#
-#            if self.tag in ["Pan", "Zoom"]:
-#                zoomaction = cell.getActionByTag("Zoom")
-#                panaction = cell.getActionByTag("Pan")
-#
-#                if cursor == "Zoom" and \
-#                    (not zoomaction.isChecked() or cellWidget is cell):
-#                    cell.mpl_toolbar.zoom()
-#                elif cursor == "Pan" and \
-#                    (not panaction.isChecked() or cellWidget is cell):
-#                    cell.mpl_toolbar.pan()
-#
-#                zoomaction.setChecked(cursor=="Zoom")
-#                panaction.setChecked(cursor=="Pan")
-#
-#            else:
-#                eval("cell.mpl_toolbar." + self.actionfunc + "()")
-#                cell.pull_pixels()
-#
-#    def getAction(self, name):
-#        for action in self.parent().actions():
-#            if hasattr(action, "actionfunc") and \
-#                action.actionfunc == name:
-#                return action
-#        return None
-
 
 class GeneralSpatialViewerToolBar(QCellToolBar):
     """
@@ -977,43 +797,70 @@ class GeneralSpatialViewerToolBar(QCellToolBar):
 
         return popmenu
 
+class PointShapefile(Module):
+    _input_ports = [('shapefile', '(edu.utah.sci.vistrails.basic:File)', {'optional':False}),
+                    ('color', '(edu.utah.sci.vistrails.basic:Color)', {'optional':False}),
+                    ('size', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["5"]', 'optional':False}),
+                    ('alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["1.0"]', 'optional':False}),
+                    ('query', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'[""]', 'optional':False}),
+                    ('marker', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["o-"]', 'optional':False})]
+    
+    _output_ports = [('display_dict', '(edu.utah.sci.vistrails.basic:Dictionary)')]
 
-#class AnchoredText(AnchoredOffsetbox):
-#    def __init__(self, s, loc, pad=0.4, borderpad=0.5, prop=None, frameon=True):
-#
-#        self.txt = TextArea(s, minimumdescent=False)
-#
-#        super(AnchoredText, self).__init__(loc, pad=pad, borderpad=borderpad,
-#                                           child=self.txt,
-#                                           prop=prop,
-#                                           frameon=frameon)
+    port_map = {'shapefile':('shapefname', None, True),#These ports are for all Models
+                         'color':('clr', None, True),
+                         'size':('size', None, True),
+                         'alpha':('alpha', None, True),
+                         'query':('query', None, False),
+                         'marker':('marker', None, True),
+                    }
 
-#class popup_menu(QtGui.QMenu):
-#    def __init__(self, parent=None, mpl_toolbar=None):
-#
-#        QtGui.QMenu.__init__(self, parent)
-#
-#        toolbar = QtGui.QToolBar()
-#        for action in mpl_toolbar.actions():
-#            action.setIconVisibleInMenu(True)
-#            self.addAction(action)
-#
-#        # Actions
-#        icon = os.path.abspath(os.path.join(os.path.dirname(__file__), "Images", "RedPoints.png"))
-#        self.actionPresence = QtGui.QAction(QtGui.QIcon(icon), "Presence points", self)
-#        self.actionPresence.setStatusTip("Display/hide presence points")
-#        self.connect(self.actionPresence, QtCore.SIGNAL("triggered()"), self.on_pointsclick)
-#        self.actionPresence.setIconVisibleInMenu(True)
-#
-#        self.actionAbsence = QtGui.QAction(QtGui.QIcon("GreenPoints.png"), "Presence points", self)
-#        self.actionAbsence.setStatusTip("Display/hide absence points")
-#
-#
-#        # create context menu
-#        self.addAction(self.actionPresence)
-#        self.addAction(self.actionAbsence)
-#        self.addSeparator()
-#
-#
-#    def on_pointsclick(self):
-#        QtGui.QMessageBox.about(self, "I do nothing", "no really")
+
+#     @classmethod
+#     def provide_input_port_documentation(cls, port_name):
+#         return GenModDoc.construct_port_doc(cls, port_name, 'in')
+#     @classmethod
+#     def provide_output_port_documentation(cls, port_name):
+#         return GenModDoc.construct_port_doc(cls, port_name, 'out') 
+
+
+    def compute(self):
+        self.args_dict = utils.map_ports(self, self.port_map)
+        self.args_dict['shapetype'] = "point"
+        self.setResult('display_dict', self.args_dict) 
+        
+    
+class PolyShapefile(Module):
+    _input_ports = [('shapefile', '(edu.utah.sci.vistrails.basic:File)', {'optional':False}),
+                    ('line_color', '(edu.utah.sci.vistrails.basic:Color)', {'optional':False}),
+                    ('fill_color', '(edu.utah.sci.vistrails.basic:Color)', {'optional':False}),
+                    ('line_width', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["2"]', 'optional':False}),
+                    ('line_alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["1.0"]', 'optional':False}),
+                    ('fill_alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["1.0"]', 'optional':False}),
+                    ('query', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'[""]', 'optional':False}),]
+    
+    _output_ports = [('display_dict', '(edu.utah.sci.vistrails.basic:Dictionary)')]
+
+    port_map = {'shapefile':('shapefname', None, True),#These ports are for all Models
+                         'line_color':('line_color', None, True),
+                         'fill_color':('fill_color', None, True),
+                         'line_width':('line_width', None, True),
+                         'fill_alpha':('fill_alpha', None, True),
+                         'line_alpha':('line_alpha', None, True),
+                         'query':('query', None, False),
+                    }
+
+
+#     @classmethod
+#     def provide_input_port_documentation(cls, port_name):
+#         return GenModDoc.construct_port_doc(cls, port_name, 'in')
+#     @classmethod
+#     def provide_output_port_documentation(cls, port_name):
+#         return GenModDoc.construct_port_doc(cls, port_name, 'out') 
+
+
+    def compute(self):
+        self.args_dict = utils.map_ports(self, self.port_map)
+        self.args_dict['shapetype'] = "poly"
+        self.setResult('display_dict', self.args_dict) 
+        
