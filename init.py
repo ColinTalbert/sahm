@@ -2404,8 +2404,9 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                           {'dst_port_remap': {'bias': 'continuous'} })],
                     'Tools|MDSBuilder':
                      [(None, '1.0.2', 'Tools|MDSBuilder', 
-                          {'dst_port_remap': {'backgroundpointCount': 'backgroundPointCount',
-                                              'backgroundPointType':''} })],
+                          {'dst_port_remap': {'backgroundpointCount': 'backgroundPointCount',} }),
+                      (None, '1.2.0', 'Tools|MDSBuilder', 
+                          {'dst_port_remap': {'backgroundPointType':None,} })],
                     'Tools|PARC':
                      [(None, '1.0.2', 'Tools|PARC', 
                           {'dst_port_remap': {'bias': '',
@@ -2426,9 +2427,9 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                           {'dst_port_remap': {'modelWorkspace': utils.getParentDir} })]
     
     module_remap['Output|SAHMSpatialOutputViewerCell'] = [(None, '1.0.2', 'Output|SAHMSpatialOutputViewerCell', 
-                          {'src_port_remap': {'model_workspace': utils.getParentDir} })]
+                          {'dst_port_remap': {'model_workspace': utils.getParentDir} })]
     module_remap['Output|SAHMModelOutputViewerCell'] = [(None, '1.0.2', 'Output|SAHMModelOutputViewerCell', 
-                          {'src_port_remap': {'ModelWorkspace': utils.getParentDir} })]
+                          {'dst_port_remap': {'ModelWorkspace': utils.getParentDir} })]
 #    
 #    for m in ['SAHMSpatialOutputViewerCell', 'SAHMModelOutputViewerCell']:
 #        module_remap['Output|' + m] = [(None, '1.0.2', 'Output|' + m, 

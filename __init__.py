@@ -48,7 +48,7 @@ except ImportError:
     
 name = "SAHM"
 identifier = "gov.usgs.sahm"
-version = '1.1.0'
+version = '1.2.0'
 
 def package_dependencies():
     return ['edu.utah.sci.vistrails.matplotlib']
