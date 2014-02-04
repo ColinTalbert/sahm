@@ -42,7 +42,7 @@
 ## and does not imply endorsement by the U.S. Government.
 ###############################################################################
 try:
-    from vistrails.core.modules.basic_modules import String
+    from vistrails.gui.modules.basic_modules import String
 except ImportError:
     from core.modules.basic_modules import String
     

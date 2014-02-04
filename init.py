@@ -58,16 +58,15 @@ import multiprocessing
 import time
 
 try:
-    from vistrails.core import system
     from vistrails.core.modules.vistrails_module import Module, ModuleError, ModuleConnector
     from vistrails.core.modules.basic_modules import File, Directory, Path, new_constant, Constant
     from vistrails.packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
     from vistrails.packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
-    from vistrails.core.modules.module_configure import StandardModuleConfigurationWidget
+    from vistrails.gui.modules.module_configure import StandardModuleConfigurationWidget
     from vistrails.core.modules.basic_modules import String
     from vistrails.core.packagemanager import get_package_manager
-    from vistrails.core.modules.module_configure import StandardModuleConfigurationWidget
     from vistrails.core.upgradeworkflow import UpgradeWorkflowHandler
+    from vistrails.core import system
 except ImportError:
     from core import system
     from core.modules.vistrails_module import Module, ModuleError, ModuleConnector
@@ -77,8 +76,8 @@ except ImportError:
     from core.modules.module_configure import StandardModuleConfigurationWidget
     from core.modules.basic_modules import String
     from core.packagemanager import get_package_manager
-    from core.modules.module_configure import StandardModuleConfigurationWidget
-    from core.upgradeworkflow import UpgradeWorkflowHandler    
+    from core.upgradeworkflow import UpgradeWorkflowHandler
+    from core import system  
 
 from PyQt4 import QtCore, QtGui
 

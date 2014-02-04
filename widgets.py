@@ -46,8 +46,8 @@ from PyQt4 import QtCore, QtGui
 import os
 
 try:
-    from vistrails.core.modules.module_configure import StandardModuleConfigurationWidget
-    from vistrails.core.modules.constant_configuration import ConstantWidgetMixin
+    from vistrails.gui.modules.module_configure import StandardModuleConfigurationWidget
+    from vistrails.gui.modules.constant_configuration import ConstantWidgetMixin
 except:
     from core.modules.module_configure import StandardModuleConfigurationWidget
     from core.modules.constant_configuration import ConstantWidgetMixin  
