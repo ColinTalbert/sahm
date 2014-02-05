@@ -58,6 +58,7 @@ import multiprocessing
 import time
 
 try:
+    from vistrails.core.cache.hasher import sha_hash
     from vistrails.core.modules.vistrails_module import Module, ModuleError, ModuleConnector
     from vistrails.core.modules.basic_modules import File, Directory, Path, new_constant, Constant
     from vistrails.packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
@@ -69,6 +70,7 @@ try:
     from vistrails.core import system
 except ImportError:
     from core import system
+    from core.cache.hasher import sha_hash
     from core.modules.vistrails_module import Module, ModuleError, ModuleConnector
     from core.modules.basic_modules import File, Directory, Path, new_constant, Constant
     from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
@@ -540,6 +542,7 @@ class Model(Module):
         self.suspended_completed = False
         self.pywrapper = "runRModel.py"
         self.port_map = copy.deepcopy(Model.port_map)
+        self.output_dname = None
         Module.__init__(self)
 
     def compute(self):
@@ -575,8 +578,22 @@ class Model(Module):
             global maxent_path
             self.args_dict['maxent_path'] = maxent_path
             self.args_dict['maxent_args'] = self.maxent_args
-            
-        self.output_dname = utils.mknextdir(prefix)
+
+        # FIXME this should eventually be done by VisTrails itself,
+        # but there is an issue where self.signature is not recomputed
+        # for loops
+        h = sha_hash()
+        h.update(self.signature)
+        for key in sorted(self.inputPorts):
+            if self.hasInputFromPort(key):
+                h.update(bytes(self.getInputFromPort(key)))
+        signature = h.hexdigest()
+
+        self.output_dname = utils.get_dir_from_hash(signature)
+        if self.output_dname is None:
+            self.output_dname = utils.mknextdir(prefix)
+            utils.write_hash_entry(signature, self.output_dname)
+
         #make a copy of the mds file used in the output folder
         copy_mds_fname = os.path.join(self.output_dname, os.path.split(mdsFile)[1])
         shutil.copyfile(mdsFile, copy_mds_fname)
@@ -600,8 +617,6 @@ class Model(Module):
             
         utils.run_model_script(self.name, self.args_dict, self, self.pywrapper)
         
-        utils.launch_RunMonitorApp()
-    
         self.set_model_results()
     
     def set_model_results(self, ):
@@ -750,7 +765,7 @@ class BoostedRegressionTree(Model):
                               ('TreeComplexity', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ('BagFraction', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.75"]', 'optional':True}),
                               ('NumberOfFolds', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["3"]', 'optional':True}),
-                              ('Alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'[1]', 'optional':True}),
+                              ('Alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["1"]', 'optional':True}),
                               ('PrevalenceStratify', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
                               ('ToleranceMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["auto"]', 'optional':True}),
                               ('Tolerance', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.001"]', 'optional':True}),
@@ -1271,12 +1286,14 @@ class PARC(Module):
         csvWriter = csv.writer(f)
         csvWriter.writerow(["FilePath", "Categorical", "Resampling", "Aggregation"])
         
+        
         if self.hasInputFromPort("RastersWithPARCInfoCSV"):
-            inputCSV = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort("RastersWithPARCInfoCSV").name, self)
-            csvReader = csv.reader(open(inputCSV), delimiter=",")
-            header = csvReader.next()
-            for row in csvReader:
-                csvWriter.writerow([utils.getFileRelativeToCurrentVT(row[0]), row[1], row[2], row[3]])
+            for input_rasters_csv in self.forceGetInputListFromPort('RastersWithPARCInfoCSV'):
+                csvReader = csv.reader(open(input_rasters_csv.name), delimiter=",")
+                header = csvReader.next()
+                for row in csvReader:
+                    csvWriter.writerow([utils.getFileRelativeToCurrentVT(row[0]), row[1], row[2], row[3]])
+            
         
         if self.hasInputFromPort("PredictorList"):
             predictor_lists = self.forceGetInputListFromPort('PredictorList')

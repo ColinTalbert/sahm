@@ -99,17 +99,17 @@ def main(args_in):
     ourPARC.templateRaster = SpatialUtilities.SAHMRaster(options.template)
     outDir = os.path.split(options.dest)[0]
     ourPARC.outDir = outDir
-    ourPARC.logger = utilities.logger(outDir, ourPARC.verbose)
+    ourPARC.logger = utilities.logger(os.path.dirname(outDir), ourPARC.verbose, False)
     ourPARC.writetolog = ourPARC.logger.writetolog
     
-    if options.ignoreNonOverlap:
-        ourPARC.shrink_template_extent(SpatialUtilities.SAHMRaster(options.source))
-    if ourPARC.templateRaster.width < 1 or \
-        ourPARC.templateRaster.height < 1:
-        #the sophisticated method of shrinking the raster blew up.  
-        #reset the template raster and try the naive method
-        ourPARC.templateRaster = SpatialUtilities.SAHMRaster(options.template)
-        ourPARC.shrink_template_extent_naive(SpatialUtilities.SAHMRaster(options.source))
+#     if options.ignoreNonOverlap:
+#         ourPARC.shrink_template_extent(SpatialUtilities.SAHMRaster(options.source))
+#     if ourPARC.templateRaster.width < 1 or \
+#         ourPARC.templateRaster.height < 1:
+#         #the sophisticated method of shrinking the raster blew up.  
+#         #reset the template raster and try the naive method
+#         ourPARC.templateRaster = SpatialUtilities.SAHMRaster(options.template)
+#         ourPARC.shrink_template_extent_naive(SpatialUtilities.SAHMRaster(options.source))
     
     ourPARC.parcFile([options.source, options.categorical, options.resampling, options.aggregation], options.dest)
 

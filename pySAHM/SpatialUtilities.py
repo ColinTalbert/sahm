@@ -5,6 +5,7 @@ import string
 
 from math import floor
 import numpy as np
+import itertools
 
 from osgeo import gdalconst
 from osgeo import gdal
@@ -525,3 +526,37 @@ def intermediaryReprojection(sourceRaster, templateRaster, outRasterFName,
                               sourceRaster.srs.ExportToWkt(),
                               templateRaster.srs.ExportToWkt(), resamplingType)
 
+
+def average_nparrays(arrays):
+    '''return the average of a list of np arrays
+    These arrays must be 2d and have the same shape
+    '''
+    dstack = np.dstack(arrays)
+    return np.mean(dstack, axis = 2)
+
+def average_geotifs(raster_fnames, outfname):
+    '''takes a list of raster fnames and saves 
+    the average of their pixel values to a new raster 
+    with the outfname
+    '''
+    # load our rasters
+    # we end up with a list of data iterators on each
+    rasters = []
+    for fname in raster_fnames:
+        rasters.append(SAHMRaster(fname).iterBlocks())
+
+    # create our output raster
+    out_raster = SAHMRaster(outfname)
+    out_raster.pullParamsFromRaster(raster_fnames[0])
+    out_raster.createNewRaster()
+
+    # loop though the blocks in our output raster
+    # calculate the cooresponding block from the inputs
+    # and put this value in the output blockd
+#     average = itertools.imap(average_nparrays, zip(rasters))
+    rasters.insert(0, out_raster.iterBlocks())
+    for block in zip(*rasters):
+        d = average_nparrays(block[1:])
+        out_raster.putBlock(d, out_raster.curCol, out_raster.curRow)
+
+    out_raster.close()

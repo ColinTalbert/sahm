@@ -65,7 +65,7 @@ from PyQt4 import QtCore, QtGui
 mosaicAllTifsInFolder = None
 
 class logger(object):
-    def __init__(self, logfile, verbose):
+    def __init__(self, logfile, verbose, write_continued=True):
         self.logfile = logfile
         self.verbose = verbose
         
@@ -74,7 +74,8 @@ class logger(object):
             self.logfile = os.path.join(logfile, 'sessionLog.txt')
             
         if os.path.exists(self.logfile):
-            self.writetolog("\nSession continued\n", True, True)
+            if write_continued:
+                self.writetolog("\nSession continued\n", True, True)
         else:
             logDir = os.path.split(self.logfile)[0]
             self.logfile = os.path.join(logDir, 'sessionLog.txt')

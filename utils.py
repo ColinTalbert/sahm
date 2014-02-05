@@ -58,12 +58,13 @@ from PyQt4 import QtCore, QtGui
 
 try:
     from vistrails.core.modules.basic_modules import File, Path, Directory, new_constant, Constant
+    from vistrails.core.modules.vistrails_module import ModuleError, ModuleSuspended
     from vistrails.core.modules.vistrails_module import ModuleError
     from vistrails.core import system
     from vistrails.gui import application
 except:
     from core.modules.basic_modules import File, Path, Directory, new_constant, Constant
-    from core.modules.vistrails_module import ModuleError
+    from core.modules.vistrails_module import ModuleError, ModuleSuspended
     from core import system
     from gui import application
     
@@ -170,6 +171,30 @@ def mknextfile(prefix, suffix="", directory=""):
     file.close()
     return filename
 
+def get_last_dir(prefix, directory=""):
+    global _roottempdir
+    if directory == "":
+        directory = _roottempdir
+
+    files = os.listdir(directory)
+    seq = 0
+    found = False
+    for f in files:
+        if (f.lower().startswith(prefix.lower()) and
+            os.path.isdir(os.path.join(directory,f))):
+            try:
+                f_seq = int(f.lower().replace(prefix.lower(), ''))
+                if f_seq > seq:
+                    found = True
+                    seq = f_seq
+            except ValueError:
+                #someone has renamed a folder to a non-numeric string
+                pass
+
+    if found:
+        return os.path.join(directory, prefix + str(seq))
+    return None
+
 def mknextdir(prefix, directory="", skipSequence=False):
     global _roottempdir
     if directory == "":
@@ -184,7 +209,7 @@ def mknextdir(prefix, directory="", skipSequence=False):
         seq = 0
         for f in files:
             if (f.lower().startswith(prefix.lower()) and
-                not os.path.isfile(f)):
+                os.path.isdir(os.path.join(directory,f))):
                 try:
                     f_seq = int(f.lower().replace(prefix.lower(), ''))
                     if f_seq > seq:
@@ -196,6 +221,31 @@ def mknextdir(prefix, directory="", skipSequence=False):
         dirname = os.path.join(directory, prefix + str(seq))
     os.mkdir(dirname)
     return dirname
+
+def get_hash_filename(directory=""):
+    global _roottempdir
+    if directory == "":
+        directory = _roottempdir
+    fname = os.path.join(directory, "vt_hashmap.dat")
+    return fname
+
+def write_hash_entry(hashname, dirname, directory=""):
+    fname = get_hash_filename(directory)
+    with open(fname, 'a') as f:
+        print >>f, hashname, os.path.basename(dirname)
+
+def get_dir_from_hash(hashname, directory=""):
+    global _roottempdir
+    if directory == "":
+        directory = _roottempdir    
+    fname = get_hash_filename(directory)
+    if os.path.exists(fname):
+        with open(fname, 'r') as f:
+            for line in f:
+                arr = line.strip().split()
+                if arr[0] == hashname:
+                    return os.path.join(directory, arr[1])
+    return None
 
 def setrootdir(session_dir):
     global _roottempdir
@@ -480,6 +530,68 @@ def check_R_output(stdout, stderr, module=None, args_dict=None):
     elif 'Warning' in stderr:
         writeRErrorsToLog(args_dict, stdout, stderr)
 
+class ModelJobMonitor(object):
+    '''The job monitor object that checks for model run completion and
+    errors.  The signal that a model is finished is that the last line
+    in the model output text file starts with 'Total time' The signal
+    that a model failed is that either the last line starts with
+    'Model Failed' or the stderr (which is getting written to a text
+    file in the model output directory) contains the word 'Error'.
+    This file can contain warning messages.
+
+    '''
+    def __init__(self, module, stdout_fname, stderr_fname, output_txt=None):
+        self.module = module
+        self.stderr_fname = stderr_fname
+        self.stdout_fname = stdout_fname
+        self.out_fname = output_txt
+        self.stderr = ""
+        self.stdout = ""
+        self.has_error = False
+        
+    def finished(self):
+        self.store_stdout()
+        self.check_for_error()
+        return self.check_if_model_finished()
+    
+    def store_stdout(self):
+        if os.path.exists(self.stdout_fname):
+            self.stdout = open(self.stdout_fname, "r").read()
+    
+    def check_for_error(self):
+        if os.path.exists(self.stderr_fname):
+            self.stderr = open(self.stderr_fname, "r").read()
+        if "Error" in self.stderr:
+            self.has_error = True
+        
+    def check_if_model_finished(self):
+        if self.out_fname is None:
+            #this script run is not one of our models and doesn't have a
+            #model output file to parse for a 'Total time:' but since these models
+            #are not run asyncronously we can assume it's done now.
+            return False
+    
+        try: 
+            lastLine = open(self.out_fname, 'r').readlines()[-2]
+        except (IndexError, IOError):
+            return False
+                 
+        if lastLine.startswith("Total time"):
+            return True
+        elif lastLine.startswith("Model Failed"):
+            self.has_error = True
+            return True
+        else:
+            return False
+
+def get_job_monitor(module, output_dir):
+    stdout_fname = os.path.join(output_dir, "stdOut.txt")
+    stderr_fname = os.path.join(output_dir, "stdErr.txt")
+    model_prefix = os.path.split(output_dir)[1].split("_")[0]
+    output_txt = os.path.join(output_dir, model_prefix + "_output.txt")
+    
+    return ModelJobMonitor(module, stdout_fname, stderr_fname, output_txt)
+
 def run_model_script(script, args_dict, module=None, runner_script="runRModel.py"):
     '''Our SAHM R model scripts now require a python wrapper to handle complications
     introduced by multiprocessing.  Additionally these model scripts require 
@@ -497,16 +609,28 @@ def run_model_script(script, args_dict, module=None, runner_script="runRModel.py
     runRModelPy = os.path.join(os.path.dirname(__file__), "pySAHM", runner_script)
     cmd = [sys.executable, runRModelPy] + cmd
     
-    writetolog("\nStarting processing of "  + script , True)
-    writetolog("    command used: \n" + utilities.convert_list_to_cmd_str(cmd), False, False)
-    
-    if processing_mode == "FORT Condor":
-        runModelOnCondor(script, args_dict)
-        writetolog("\n R Processing launched using Condor " + script, True)
+    job_monitor = get_job_monitor(module, args_dict['o'])
+    if not job_monitor.finished():
+        writetolog("\nStarting processing of "  + script , True)
+        writetolog("    command used: \n" + utilities.convert_list_to_cmd_str(cmd), False, False)
+
+        if processing_mode == "FORT Condor":
+            runModelOnCondor(script, args_dict)
+            writetolog("\n R Processing launched using Condor " + script, True)
+            raise ModuleSuspended(module, 'Model running on Condor', 
+                                  queue=job_monitor)
+        else:
+            # utilities.add_process_to_pool(utilities.launch_cmd, 
+            #                         [cmd, stdout_fname, stderr_fname])
+            out_msg, err_msg = utilities.launch_cmd(cmd, stdout_fname, 
+                                                    stderr_fname, True)
+            writetolog("\n R Processing launched asynchronously " + script, 
+                       True)
+            raise ModuleSuspended(module, 'Model running asynchronously',
+                                  queue=job_monitor)
     else:
-        utilities.add_process_to_pool(utilities.launch_cmd, 
-                                [cmd, stdout_fname, stderr_fname])
-        writetolog("\n R Processing launched asynchronously " + script, True)  
+        check_R_output(job_monitor.stdout, job_monitor.stderr, 
+                       module, args_dict)
       
 
 def runModelOnCondor(script, args_dict, command_arr):
