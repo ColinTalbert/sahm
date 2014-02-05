@@ -993,7 +993,7 @@ def print_timing(func):
         return res
     return wrapper
 
-def checkIfModelFinished(model_dir):
+def check_if_model_finished(model_dir):
     
     try:
         outText = find_file(model_dir, "_output.txt")

@@ -223,50 +223,6 @@ def menu_items():
     lst.append(("Check Asynchronous model runs", checkAsyncModels))
     return(lst)
 
-
-#
-#def expand_ports(port_list):
-#    new_port_list = []
-#    for port in port_list:
-#        port_spec = port[1]
-#        if type(port_spec) == str: # or unicode...
-#            if port_spec.startswith('('):
-#                port_spec = port_spec[1:]
-#            if port_spec.endswith(')'):
-#                port_spec = port_spec[:-1]
-#            new_spec_list = []
-#            for spec in port_spec.split(','):
-#                spec = spec.strip()
-#                parts = spec.split(':', 1)
-##                print 'parts:', parts
-#                namespace = None
-#                if len(parts) > 1:
-#                    mod_parts = parts[1].rsplit('|', 1)
-#                    if len(mod_parts) > 1:
-#                        namespace, module_name = mod_parts
-#                    else:
-#                        module_name = parts[1]
-#                    if len(parts[0].split('.')) == 1:
-#                        id_str = 'edu.utah.sci.vistrails.' + parts[0]
-#                    else:
-#                        id_str = parts[0]
-#                else:
-#                    mod_parts = spec.rsplit('|', 1)
-#                    if len(mod_parts) > 1:
-#                        namespace, module_name = mod_parts
-#                    else:
-#                        module_name = spec
-#                    id_str = identifier
-#                if namespace:
-#                    new_spec_list.append(id_str + ':' + module_name + ':' + \
-#                                             namespace)
-#                else:
-#                    new_spec_list.append(id_str + ':' + module_name)
-#            port_spec = '(' + ','.join(new_spec_list) + ')'
-#        new_port_list.append((port[0], port_spec) + port[2:])
-##    print new_port_list
-#    return new_port_list
-
 class FieldData(Path): 
     '''
     '''

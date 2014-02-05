@@ -112,7 +112,7 @@ class SAHMModelOutputViewerCell(SpreadsheetCell):
         
         """
         if self.hasInputFromPort("ModelWorkspace") and \
-            utils.checkIfModelFinished(self.getInputFromPort("ModelWorkspace").name):
+            utils.check_if_model_finished(self.getInputFromPort("ModelWorkspace").name):
             window = spreadsheetController.findSpreadsheetWindow()
             model_workspace = self.getInputFromPort("ModelWorkspace").name
 

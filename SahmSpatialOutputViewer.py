@@ -179,7 +179,7 @@ class SAHMSpatialOutputViewerCell(SpreadsheetCell):
 #        else:
 #            inputs["max_cells_dimension"] = [item for item in self._input_ports if item[0] == 'max_cells_dimension'][0][2]['defaults']
 
-        if utils.checkIfModelFinished(inputs["model_dir"]):
+        if utils.check_if_model_finished(inputs["model_dir"]):
             self.local_displayAndWait(inputs)
 
 #    @print_timing
