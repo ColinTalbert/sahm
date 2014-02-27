@@ -18,20 +18,20 @@ gdal.UseExceptions()
 gdal.AllRegister()
 
 class SAHMRaster():
-    '''An extension to a GDAL raster that contains convenience methods for 
+    '''An extension to a GDAL raster that contains convenience methods for
     some of the operations we use use.
     '''
     def __init__(self, rasterFile):
         self.source = rasterFile
 
         self.resetBlocks()
-        # default values
+        #  default values
         self.blockSize = 2048
         self.driverName = "GTiff"
         self.pixelType = gdalconst.GDT_Int32
         self.NoData = -2147483647
         self.signedByte = False
-        # Must be supplied for new rasters or read from input
+        #  Must be supplied for new rasters or read from input
         self.xScale = None
         self.yScale = None
         self.width = None
@@ -39,7 +39,7 @@ class SAHMRaster():
         self.east = None
         self.north = None
         self.prj = None
-        # convenience values pulled or calculated
+        #  convenience values pulled or calculated
         self.west = None
         self.south = None
         self.gt = None
@@ -60,10 +60,10 @@ class SAHMRaster():
 
     def createNewRaster(self):
         self.Error = []
-        # delete the output if it exists
+        #  delete the output if it exists
         gdal.Unlink(self.source)
 
-        # register the gdal driver
+        #  register the gdal driver
         driver = gdal.GetDriverByName(self.driverName)
         if self.signedByte:
             self.ds = driver.Create(self.source,
@@ -87,13 +87,13 @@ class SAHMRaster():
 
     def pullParamsFromRaster(self, otherRasterFile):
         if not os.path.exists(otherRasterFile):
-               raise utilities.TrappedError("Raster does not appear to be a valid raster.\nThe input file (" + otherRasterFile + ") does not exist on the file system.")
+            raise utilities.TrappedError("Raster does not appear to be a valid raster.\nThe input file (" + otherRasterFile + ") does not exist on the file system.")
 
-        # Get the PARC parameters from the rasterFile.
+        #  Get the PARC parameters from the rasterFile.
         otherDS = gdal.Open(otherRasterFile, gdalconst.GA_ReadOnly)
         self.getParams(otherDS)
 
-    def getParams(self, ds = None):
+    def getParams(self, ds=None):
         """
         Extracts properties from a passed raster
         All values are stored as instance variables
@@ -101,7 +101,7 @@ class SAHMRaster():
         be returned as a list in the 'Error' element.
         """
         try:
-            # initialize our params dictionary to have None for all parma
+            #  initialize our params dictionary to have None for all parma
             allRasterParams = ["Error", "xScale", "yScale", "width", "height",
                             "east", "north", "west", "south",
                             "gEast", "gNorth", "gWest", "gSouth",
@@ -146,7 +146,7 @@ class SAHMRaster():
                     except:
                         pass
             except:
-                # print "We ran into problems getting the projection information for " +  rasterFile
+                #  print "We ran into problems getting the projection information for " +  rasterFile
                 self.Error.append("Undefined problems extracting the projection information")
 
             try:
@@ -162,7 +162,7 @@ class SAHMRaster():
                 self.Error.append("Could not identify pixel type (bit depth)")
 
         except:
-            # print "We ran into problems extracting raster parameters from " + rasterFile
+            #  print "We ran into problems extracting raster parameters from " + rasterFile
             self.Error.append("Some untrapped error was encountered")
 
     def getRandomPixel(self):
@@ -170,7 +170,7 @@ class SAHMRaster():
         row = random.randint(0, self.height - 1)
         return col, row
 
-    def convertColRowToCoords(self, col, row, pixelCenter = True):
+    def convertColRowToCoords(self, col, row, pixelCenter=True):
         x = self.west + col * self.xScale
 
         y = self.north + row * self.yScale
@@ -194,7 +194,7 @@ class SAHMRaster():
 
     def getBlock(self, row, col, numCols, numRows):
         data = self.band.ReadAsArray(row, col, numCols, numRows)
-        ndMask = np.ma.masked_array(data, mask = (data == self.NoData))
+        ndMask = np.ma.masked_array(data, mask=(data == self.NoData))
         return ndMask
 
     def putBlock(self, data, col, row):
@@ -237,7 +237,7 @@ class SAHMRaster():
 
 #        histogram = self.band.GetDefaultHistogram()
 #        self.band.SetDefaultHistogram(histogram[0], histogram[1], histogram[3])
-        self.ds.BuildOverviews(overviewlist = [2, 4, 8, 16, 32, 64, 128])
+        self.ds.BuildOverviews(overviewlist=[2, 4, 8, 16, 32, 64, 128])
         self.band.FlushCache()
         self.band.GetStatistics(0, 1)
         histogram = self.band.GetDefaultHistogram()
@@ -249,10 +249,10 @@ class SAHMRaster():
 
 def mds_to_shape(MDSFile, outputfolder):
 
-    # bit of a hack but currently saving the shape file as
-    # three shape files presence, absence, and background
-    # as I'm having trouble getting QGIS to display points
-    # with categorical symbology
+    #  bit of a hack but currently saving the shape file as
+    #  three shape files presence, absence, and background
+    #  as I'm having trouble getting QGIS to display points
+    #  with categorical symbology
 
     h, t = os.path.split(MDSFile)
     t_no_ext = os.path.splitext(t)[0]
@@ -280,20 +280,20 @@ def mds_to_shape(MDSFile, outputfolder):
     ds = driver.CreateDataSource(h)
 
     preslayer = ds.CreateLayer(t_no_ext + "_pres",
-                           geom_type = ogr.wkbPoint)
+                           geom_type=ogr.wkbPoint)
     abslayer = ds.CreateLayer(t_no_ext + "_abs",
-                           geom_type = ogr.wkbPoint)
+                           geom_type=ogr.wkbPoint)
     backslayer = ds.CreateLayer(t_no_ext + "_backs",
-                           geom_type = ogr.wkbPoint)
+                           geom_type=ogr.wkbPoint)
 
-    # cycle through the items in the header and add
-    # these to each output shapefile attribute table
+    #  cycle through the items in the header and add
+    #  these to each output shapefile attribute table
     fields = {}
     for field in header1:
         field_name = Normalized_field_name(field, fields)
         fields[field_name] = field
         if field == "Split":
-            # this is the test training split field that we add
+            #  this is the test training split field that we add
             fieldDefn = ogr.FieldDefn(field_name, ogr.OFTString)
         else:
             fieldDefn = ogr.FieldDefn(field_name, ogr.OFTReal)
@@ -304,8 +304,8 @@ def mds_to_shape(MDSFile, outputfolder):
 
     featureDefn = preslayer.GetLayerDefn()
 
-    # cycle through the rows and add each geometry to the
-    # appropriate shapefile
+    #  cycle through the rows and add each geometry to the
+    #  appropriate shapefile
     for row in MDSreader:
         feature = ogr.Feature(featureDefn)
         point = ogr.Geometry(ogr.wkbPoint)
@@ -313,7 +313,7 @@ def mds_to_shape(MDSFile, outputfolder):
         point.SetPoint_2D(0, float(row[0]), float(row[1]))
         feature.SetGeometry(point)
 
-        # for this feature add in each of the attributes from the row
+        #  for this feature add in each of the attributes from the row
         header_num = 0
         for field in header1:
             short_field = utilities.find_key(fields, field)
@@ -336,14 +336,14 @@ def mds_to_shape(MDSFile, outputfolder):
             abs(response - -9998.0) < 1e-9:
             backslayer.CreateFeature(feature)
 
-    # close the data sources
+    #  close the data sources
     del MDSreader
     ds.Destroy()
 
 def Normalized_field_name(field_name, previous_fields):
     short_name = field_name[:10]
 
-    # remove Non alpha numeric characters
+    #  remove Non alpha numeric characters
     short_name = ''.join(ch for ch in short_name if ch in (string.ascii_letters + string.digits + '_'))
 
     if previous_fields.has_key(short_name):
@@ -408,8 +408,8 @@ def extentMatch(raster1, raster2):
 
     return answer
 
-def defaultNoData(GDALdatatype, signedByte = False):
-    '''returns a reasonable default NoData value for a given 
+def defaultNoData(GDALdatatype, signedByte=False):
+    '''returns a reasonable default NoData value for a given
     GDAL data type.
     '''
     if signedByte:
@@ -429,7 +429,7 @@ def defaultNoData(GDALdatatype, signedByte = False):
                 }
     return crossWalk[gdal.GetDataTypeName(GDALdatatype)]
 
-def GDALToNPDataType(GDALdatatype, signedByte = False):
+def GDALToNPDataType(GDALdatatype, signedByte=False):
     '''returns the coresponding numpy data time for a gdal data type
     '''
     if signedByte:
@@ -452,19 +452,19 @@ def GDALToNPDataType(GDALdatatype, signedByte = False):
 def getAggregateTargetCellSize(sourceRaster, templateRaster):
     """
     This function determines the appropriate cell size to
-    reproject/resample our source raster into before 
+    reproject/resample our source raster into before
     aggregating.
-    This size is the cell size that results in a template 
-    cell containing a whole number of cells which are as 
-    close as possible to the cell dimension that would 
-    result if you reprojected the source cells into the 
+    This size is the cell size that results in a template
+    cell containing a whole number of cells which are as
+    close as possible to the cell dimension that would
+    result if you reprojected the source cells into the
     target srs without changing cell size.
     """
-    # first determine what cell size we are going to use for the initial reproject/resample
-    # step 1:  Determine the native cell size in the template coordinate system.
+    #  first determine what cell size we are going to use for the initial reproject/resample
+    #  step 1:  Determine the native cell size in the template coordinate system.
     templateSRSCellSize = getTemplateSRSCellSize(sourceRaster, templateRaster)
-    # step 2:  round this up or down to an even fraction of the template cell size
-    # for example source = 30, target = 250 resampledSource = 250/round(250/30)
+    #  step 2:  round this up or down to an even fraction of the template cell size
+    #  for example source = 30, target = 250 resampledSource = 250/round(250/30)
     sourcePixelsPerTarget = round(templateRaster.xScale / templateSRSCellSize)
     nearestWholeCellSize = (templateRaster.xScale / sourcePixelsPerTarget)
     return nearestWholeCellSize, sourcePixelsPerTarget
@@ -473,10 +473,10 @@ def getTemplateSRSCellSize(sourceRaster, templateRaster):
     """
     Calculate what size our source image pixels would be in the template SRS
     """
-    # first convert our template origin into the source srs
+    #  first convert our template origin into the source srs
     tOriginX, tOriginY = transformPoint(templateRaster.west, templateRaster.north,
                                     templateRaster.srs, sourceRaster.srs)
-    # next add the source xScale to the converted origin x and convert that back to template srs
+    #  next add the source xScale to the converted origin x and convert that back to template srs
     tOriginX1 = transformPoint (tOriginX + sourceRaster.xScale, tOriginY,
                                             sourceRaster.srs, templateRaster.srs)[0]
 
@@ -492,8 +492,8 @@ def getTemplateSRSCellSize(sourceRaster, templateRaster):
     return templateSRSCellSize
 
 def intermediaryReprojection(sourceRaster, templateRaster, outRasterFName,
-                             resamplingType, matchTemplateCellSize = False):
-    '''Reprojects the sourceRaster into the templateRaster projection, datum 
+                             resamplingType, matchTemplateCellSize=False):
+    '''Reprojects the sourceRaster into the templateRaster projection, datum
     and extent.  The output cell size is determined to be the closest dimension
     to the sourceRaster cell size that will evenly go into the template raster
     cell size
@@ -532,27 +532,27 @@ def average_nparrays(arrays):
     These arrays must be 2d and have the same shape
     '''
     dstack = np.dstack(arrays)
-    return np.mean(dstack, axis = 2)
+    return np.mean(dstack, axis=2)
 
 def average_geotifs(raster_fnames, outfname):
-    '''takes a list of raster fnames and saves 
-    the average of their pixel values to a new raster 
+    '''takes a list of raster fnames and saves
+    the average of their pixel values to a new raster
     with the outfname
     '''
-    # load our rasters
-    # we end up with a list of data iterators on each
+    #  load our rasters
+    #  we end up with a list of data iterators on each
     rasters = []
     for fname in raster_fnames:
         rasters.append(SAHMRaster(fname).iterBlocks())
 
-    # create our output raster
+    #  create our output raster
     out_raster = SAHMRaster(outfname)
     out_raster.pullParamsFromRaster(raster_fnames[0])
     out_raster.createNewRaster()
 
-    # loop though the blocks in our output raster
-    # calculate the cooresponding block from the inputs
-    # and put this value in the output blockd
+    #  loop though the blocks in our output raster
+    #  calculate the cooresponding block from the inputs
+    #  and put this value in the output blockd
 #     average = itertools.imap(average_nparrays, zip(rasters))
     rasters.insert(0, out_raster.iterBlocks())
     for block in zip(*rasters):
