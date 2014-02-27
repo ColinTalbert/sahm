@@ -1021,15 +1021,6 @@ def find_file(model_dir, suffix):
         raise RuntimeError('The expected model output '
                                + suffix + ' was not found in the model output directory')
         
-def launch_RunMonitorApp():
-        sessionDir = getrootdir()
-        DEVNULL = open(os.devnull, 'wb')
-        pyExe = sys.executable
-        curDir = os.path.split(__file__)[0]
-        monitorApp = os.path.join(curDir, "JobMoniterApp.py")
-        
-        subprocess.Popen([pyExe, monitorApp, sessionDir], stderr=DEVNULL, stdout=DEVNULL)
-        
         
 def mosaicAllTifsInFolder(inDir, outFileName):
     onlyfiles = [os.path.join(inDir,f) for f in os.listdir(inDir) 
