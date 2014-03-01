@@ -291,6 +291,7 @@ def mds_to_shape(MDSFile, outputfolder):
     fields = {}
     for field in header1:
         field_name = Normalized_field_name(field, fields)
+        print field_name
         fields[field_name] = field
         if field == "Split":
             #  this is the test training split field that we add
@@ -352,6 +353,7 @@ def Normalized_field_name(field_name, previous_fields):
         short_name = shorter_name + "_" + str(i)
         while previous_fields.has_key(short_name):
             i += 1
+            shorter_name = short_name[:9 - len(str(i))]
             short_name = shorter_name + "_" + str(i)
     return short_name
 
