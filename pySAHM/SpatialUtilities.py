@@ -200,6 +200,7 @@ class SAHMRaster():
     def putBlock(self, data, col, row):
         '''this only works on rasters we've opened for writing
         '''
+        data = np.where(data.mask, self.NoData, data)
         self.band.WriteArray(data, col, row)
 
     def iterBlocks(self):
@@ -533,8 +534,8 @@ def average_nparrays(arrays):
     '''return the average of a list of np arrays
     These arrays must be 2d and have the same shape
     '''
-    dstack = np.dstack(arrays)
-    return np.mean(dstack, axis=2)
+    dstack = np.ma.dstack(arrays)
+    return np.ma.mean(dstack, axis=2)
 
 def average_geotifs(raster_fnames, outfname):
     '''takes a list of raster fnames and saves
