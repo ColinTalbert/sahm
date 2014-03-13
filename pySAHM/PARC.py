@@ -1,46 +1,46 @@
 #!/usr/bin/python
 ###############################################################################
-# #
-# # Copyright (C) 2010-2012, USGS Fort Collins Science Center.
-# # All rights reserved.
-# # Contact: talbertc@usgs.gov
-# #
-# # This file is part of the Software for Assisted Habitat Modeling package
-# # for VisTrails.
-# #
-# # "Redistribution and use in source and binary forms, with or without
-# # modification, are permitted provided that the following conditions are met:
-# #
-# #  - Redistributions of source code must retain the above copyright notice,
-# #    this list of conditions and the following disclaimer.
-# #  - Redistributions in binary form must reproduce the above copyright
-# #    notice, this list of conditions and the following disclaimer in the
-# #    documentation and/or other materials provided with the distribution.
-# #  - Neither the name of the University of Utah nor the names of its
-# #    contributors may be used to endorse or promote products derived from
-# #    this software without specific prior written permission.
-# #
-# # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-# # THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-# # PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
-# # CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-# # EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-# # PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
-# # OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-# # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-# # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-# # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
-# #
-# # Although this program has been used by the U.S. Geological Survey (USGS),
-# # no warranty, expressed or implied, is made by the USGS or the
-# # U.S. Government as to the accuracy and functioning of the program and
-# # related program material nor shall the fact of distribution constitute
-# # any such warranty, and no responsibility is assumed by the USGS
-# # in connection therewith.
-# #
-# # Any use of trade, firm, or product names is for descriptive purposes only
-# # and does not imply endorsement by the U.S. Government.
+#  #
+#  # Copyright (C) 2010-2012, USGS Fort Collins Science Center.
+#  # All rights reserved.
+#  # Contact: talbertc@usgs.gov
+#  #
+#  # This file is part of the Software for Assisted Habitat Modeling package
+#  # for VisTrails.
+#  #
+#  # "Redistribution and use in source and binary forms, with or without
+#  # modification, are permitted provided that the following conditions are met:
+#  #
+#  #  - Redistributions of source code must retain the above copyright notice,
+#  #    this list of conditions and the following disclaimer.
+#  #  - Redistributions in binary form must reproduce the above copyright
+#  #    notice, this list of conditions and the following disclaimer in the
+#  #    documentation and/or other materials provided with the distribution.
+#  #  - Neither the name of the University of Utah nor the names of its
+#  #    contributors may be used to endorse or promote products derived from
+#  #    this software without specific prior written permission.
+#  #
+#  # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+#  # THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+#  # PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+#  # CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+#  # EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+#  # PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+#  # OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+#  # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+#  # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+#  # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+#  #
+#  # Although this program has been used by the U.S. Geological Survey (USGS),
+#  # no warranty, expressed or implied, is made by the USGS or the
+#  # U.S. Government as to the accuracy and functioning of the program and
+#  # related program material nor shall the fact of distribution constitute
+#  # any such warranty, and no responsibility is assumed by the USGS
+#  # in connection therewith.
+#  #
+#  # Any use of trade, firm, or product names is for descriptive purposes only
+#  # and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
 import os
@@ -66,20 +66,20 @@ def main(args_in):
     Create an instance of PARC with the Variables,
     Kick off the parkFiles function of our PARC instance
     """
-    # Process command-line args.
+    #  Process command-line args.
     usage_stmt = "usage:  %prog [options] <template image> <input dir or " + \
         "list of input files>"
     desc = "This application projects, aggregates, resamples, and clips" + \
         " imagery."
 
-    parser = OptionParser(usage = usage_stmt, description = desc)
-    parser.add_option("-l", dest = "listMethodFlag", default = False, action = "store_true", help = "print the names of all known aggregation methods")
-    parser.add_option("-o", dest = "out_dir", default = "./", help = "directory in which to put processed images, defaults to current directory")
-    parser.add_option("-v", dest = "verbose", default = False, action = "store_true", help = "the verbose flag causes diagnostic output to print")
-    parser.add_option("-t", dest = "templateRaster", help = "The template raster used for projection, origin, cell size and extent")
-    parser.add_option("-i", dest = "inputs_CSV", help = "The CSV containing the list of files to process.  Format is 'FilePath, Categorical, Resampling, Aggreagtion")
-    parser.add_option("-m", dest = "multicore", default = False, action = "store_true", help = "Flag indicating to use multiple cores")
-    parser.add_option("-n", dest = "ignoreNonOverlap", default = False, action = "store_true", help = "Flag indicating to use ignore non-overlapping area")
+    parser = OptionParser(usage=usage_stmt, description=desc)
+    parser.add_option("-l", dest="listMethodFlag", default=False, action="store_true", help="print the names of all known aggregation methods")
+    parser.add_option("-o", dest="out_dir", default="./", help="directory in which to put processed images, defaults to current directory")
+    parser.add_option("-v", dest="verbose", default=False, action="store_true", help="the verbose flag causes diagnostic output to print")
+    parser.add_option("-t", dest="templateRaster", help="The template raster used for projection, origin, cell size and extent")
+    parser.add_option("-i", dest="inputs_CSV", help="The CSV containing the list of files to process.  Format is 'FilePath, Categorical, Resampling, Aggreagtion")
+    parser.add_option("-m", dest="multicore", default=False, action="store_true", help="Flag indicating to use multiple cores")
+    parser.add_option("-n", dest="ignoreNonOverlap", default=False, action="store_true", help="Flag indicating to use ignore non-overlapping area")
 
     (options, args) = parser.parse_args(args_in)
 
@@ -100,17 +100,17 @@ class PARC(object):
       The workflow on this beast is as follows:
             For each dataset
             Step 1: RePrject the source raster into a tmp raster using
-                the projection info from the template and the method if 
+                the projection info from the template and the method if
                 supplied or the default of nearest if not.
                 At this stage the tmp output will have a cell size about
-                the same as the input.  We just use the default for this 
+                the same as the input.  We just use the default for this
                 setting.
-            Step 2: Aggregate the tmpRaster to have the same origin, 
+            Step 2: Aggregate the tmpRaster to have the same origin,
                 cell size and extent as our template.
     '''
 
     def __init__(self):
-        # instance level variables
+        #  instance level variables
         self.verbose = False
         self.template = ""
         self.templateRaster = None
@@ -152,7 +152,7 @@ class PARC(object):
             self.process_pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
         self.pool_processes = []
 
-        # Clip and reproject each source image.
+        #  Clip and reproject each source image.
         for image in self.inputs:
             in_fname = SpatialUtilities.getRasterShortName(image[0])
             out_file = os.path.join(self.out_dir, in_fname + ".tif")
@@ -165,13 +165,13 @@ class PARC(object):
                         " already exists. \tSkipping this file."
                     self.logger.writetolog(msg, True, True)
                 except:
-                    # we bombed trying to open the outFile with gdal. Lets rerun it.
+                    #  we bombed trying to open the outFile with gdal. Lets rerun it.
                     process_queue.append(self.gen_singlePARC_thread(image, out_file))
 
             else:
                 process_queue.append(self.gen_singlePARC_thread(image, out_file))
 
-        # wait for the last set of processes to finish up
+        #  wait for the last set of processes to finish up
         if self.processingMode == "FORT Condor":
             self.waitForCondorProcessesToFinish(process_queue)
         else:
@@ -227,7 +227,7 @@ class PARC(object):
                 if result == "finished":
                     outputs.remove(process)
 
-                    # cleanup some condor files
+                    #  cleanup some condor files
                     success = False
                     while not success:
                         try:
@@ -288,14 +288,14 @@ class PARC(object):
         self.writetolog(msg)
 
         if cell_ratio > 0.5:
-            # The source cell size is close enough to our template cell size,
-            # or smaller so that all we need to do is reproject and resample.
+            #  The source cell size is close enough to our template cell size,
+            #  or smaller so that all we need to do is reproject and resample.
             self.logger.writetolog("  cell ratio > .5: reprojecting and resampling to template parameters only")
             SpatialUtilities.intermediaryReprojection(source_raster,
                             self.templateRaster, dest, gdal_type, True)
         else:
-            # Our Target cell size is much bigger than our source we need to do
-            # some aggregation to make things work.
+            #  Our Target cell size is much bigger than our source we need to do
+            #  some aggregation to make things work.
             msg = '  cell ratio <= .5: reprojecting and resampling to template parameters'
             msg += '    then aggregating the reprojected raster to match template parameters'
             self.writetolog(msg)
@@ -347,7 +347,7 @@ class PARC(object):
         return gdal_type
 
     def Aggregate(self, sourceRaster, outFName,
-                  method = None, numSourcePerTarget = 10):
+                  method=None, numSourcePerTarget=10):
 
         tmpOutput = os.path.splitext(outFName)[0] + ".tif"
         tmpOutDataset = SpatialUtilities.SAHMRaster(tmpOutput)
@@ -357,9 +357,9 @@ class PARC(object):
         rows = int(sourceRaster.height)
         cols = int(sourceRaster.width)
 
-        # loop of 'blocks' of data maybe.
-        bSize = 2048  # source pixels
-        # convert this to the nearest whole number of target pixels
+        #  loop of 'blocks' of data maybe.
+        bSize = 2048  #  source pixels
+        #  convert this to the nearest whole number of target pixels
         bSize = int(round(bSize / numSourcePerTarget) * numSourcePerTarget)
         if bSize == 0:
             bSize = int(numSourcePerTarget)
@@ -412,12 +412,12 @@ class PARC(object):
 
     def image_covers_template(self, source_raster):
         """
-        Checks to see if the template images 
+        Checks to see if the template images
         falls completely inside the source raster
-        
+
         it does this by generating a list of 25 coordinate
         pairs equally distributed across the template,
-        including the four absolute corners.  
+        including the four absolute corners.
         These points are in the CRS of the image.
         If all of these points have a valid data or nodata
         value in the image, then the image covers the template.
@@ -452,176 +452,9 @@ class PARC(object):
             except:
                 bad_point = True
 
-        # if valid values were returned from each of our points then
-        # the template falls entirely within the Source image.
+        #  if valid values were returned from each of our points then
+        #  the template falls entirely within the Source image.
         return not bad_point
-
-#     def shrink_template_extent(self, sourceRaster):
-#         '''The template extent will be reduced by the extent of 
-#         an individual source layer if the layer has a smaller extent
-#         This results in the intersection of the grids being used.
-#         '''
-#         if self.image_covers_template(sourceRaster):
-#             # the template is already smaller than the image in question
-#             # Do nothing
-#             return False
-#         else:
-#             gt = list(self.templateRaster.gt)
-# 
-#             # because the translation of a rectangle between crs's results
-#             # in a paralellogram (or worse) I'm taking the four corner points in
-#             # source projection and transforming these to template crs and then
-#             # using the maximum/minimum for each extent.
-#             largest_north = self.maxNorth(sourceRaster)
-#             smallest_south = self.minSouth(sourceRaster)
-#             largest_east = self.maxEast(sourceRaster)
-#             smallest_west = self.minWest(sourceRaster)
-# 
-#             if smallest_west > largest_east:
-#                 # We're assuming their data goes around the world more than once.
-#                 # We're going to zap the overlaping area, too bad, so sad.
-#                 smallest_west, largest_east = largest_east, smallest_west
-# 
-#             # Now for each direction step through the pixels until we have one smaller
-#             # or larger than our min/max source extent.
-#             orig_tNorth = self.templateRaster.north
-#             shrinkN = 0
-#             while self.templateRaster.north > largest_north:
-#                 # yScale is negative
-#                 self.templateRaster.north += self.templateRaster.yScale
-#                 self.templateRaster.height -= 1
-#                 shrinkN += 1
-#             if orig_tNorth != self.templateRaster.north:
-#                 msg = "Northern edge of template reduced " + str(shrinkN) + " pixels due to, "
-#                 msg += "the extent of " + sourceRaster.source
-#                 self.writetolog(msg)
-# 
-#             orig_tSouth = self.templateRaster.south
-#             shrinkN = 0
-#             while self.templateRaster.south < smallest_south:
-#                 self.templateRaster.south -= self.templateRaster.yScale
-#                 self.templateRaster.height -= 1
-#                 shrinkN += 1
-#             if orig_tSouth != self.templateRaster.south:
-#                 msg = "Southern edge of template reduced " + str(shrinkN) + " pixels due to, "
-#                 msg += "the extent of " + sourceRaster.source
-#                 self.writetolog(msg)
-# 
-#             gt[3] = self.templateRaster.north
-# 
-# 
-#             orig_tWest = self.templateRaster.west
-#             shrinkN = 0
-#             while self.templateRaster.west < smallest_west:
-#                 # yScale is negative
-#                 self.templateRaster.west += self.templateRaster.xScale
-#                 self.templateRaster.width -= 1
-#                 shrinkN += 1
-#             if orig_tWest != self.templateRaster.west:
-#                 msg = "Western edge of template reduced " + str(shrinkN) + " pixels due to, "
-#                 msg += "the extent of " + sourceRaster.source
-#                 self.writetolog(msg)
-# 
-#             orig_tEast = self.templateRaster.east
-#             shrinkN = 0
-#             while self.templateRaster.east > largest_east:
-#                 self.templateRaster.east -= self.templateRaster.xScale
-#                 self.templateRaster.width -= 1
-#                 shrinkN += 1
-#             gt[0] = self.templateRaster.west
-#             if orig_tEast != self.templateRaster.east:
-#                 msg = "Eastern edge of template reduced " + str(shrinkN) + " pixels due to, "
-#                 msg += "the extent of " + sourceRaster.source
-#                 self.writetolog(msg)
-# 
-#             # set the template geotransform to be our modified one.
-#             self.templateRaster.gt = tuple(gt)
-# 
-# 
-#     def shrink_template_extent_naive(self, sourceRaster):
-#         '''The template extent will be reduced by the extent of 
-#         an individual source layer if the layer has a smaller extent
-#         This results in the intersection of the grids being used.
-#         '''
-#         if self.image_covers_template(sourceRaster):
-#             # the template is already smaller than the image in question
-#             # Do nothing
-#             return False
-#         else:
-#             gt = list(self.templateRaster.gt)
-# 
-#             # because the translation of a rectangle between crs's results
-#             # in a paralellogram (or worse) I'm taking the four corner points in
-#             # source projection and transforming these to template crs and then
-#             # using the maximum/minimum for each extent.
-#             largest_north = SpatialUtilities.transformPoint(0, sourceRaster.north,
-#                         sourceRaster.srs, self.templateRaster.srs)[1]
-#             smallest_south = SpatialUtilities.transformPoint(0, sourceRaster.south,
-#                         sourceRaster.srs, self.templateRaster.srs)[1]
-#             largest_east = SpatialUtilities.transformPoint(sourceRaster.east, 0,
-#                         sourceRaster.srs, self.templateRaster.srs)[0]
-#             smallest_west = SpatialUtilities.transformPoint(sourceRaster.west, 0,
-#                         sourceRaster.srs, self.templateRaster.srs)[0]
-# 
-#             if smallest_west > largest_east:
-#                 # We're assuming their data goes around the world more than once
-#                 # We're going to zap the overlaping area, too bad, so sad.
-#                 smallest_west, largest_east = largest_east, smallest_west
-# 
-#             # Now for each direction step through the pixels
-#             # until we have one smaller or larger than our min/max source extent.
-#             orig_template_n = self.templateRaster.north
-#             shrink_rows = 0
-#             while self.templateRaster.north > largest_north:
-#                 # yScale is negative
-#                 self.templateRaster.north += self.templateRaster.yScale
-#                 self.templateRaster.height -= 1
-#                 shrink_rows += 1
-#             if orig_template_n != self.templateRaster.north:
-#                 msg = "Northern edge of template reduced " + str(shrink_rows) + " pixels due to, "
-#                 msg += "the extent of " + sourceRaster.source
-#                 self.writetolog(msg)
-# 
-#             orig_template_s = self.templateRaster.south
-#             shrink_rows = 0
-#             while self.templateRaster.south < smallest_south:
-#                 self.templateRaster.south -= self.templateRaster.yScale
-#                 self.templateRaster.height -= 1
-#                 shrink_rows += 1
-#             if orig_template_s != self.templateRaster.south:
-#                 msg = "NSouthern edge of template reduced " + str(shrink_rows) + " pixels due to, "
-#                 msg += "the extent of " + sourceRaster.source
-#                 self.writetolog(msg)
-# 
-#             gt[3] = self.templateRaster.north
-# 
-# 
-#             orig_tWest = self.templateRaster.west
-#             shrink_rows = 0
-#             while self.templateRaster.west < smallest_west:
-#                 # yScale is negative
-#                 self.templateRaster.west += self.templateRaster.xScale
-#                 self.templateRaster.width -= 1
-#                 shrink_rows += 1
-#             if orig_tWest != self.templateRaster.west:
-#                 msg = "Western edge of template reduced " + str(shrink_rows) + " pixels due to, "
-#                 msg += "the extent of " + sourceRaster.source
-#                 self.writetolog(msg)
-# 
-#             orig_tEast = self.templateRaster.east
-#             shrink_rows = 0
-#             while self.templateRaster.east > largest_east:
-#                 self.templateRaster.east -= self.templateRaster.xScale
-#                 self.templateRaster.width -= 1
-#                 shrink_rows += 1
-#             gt[0] = self.templateRaster.west
-#             if orig_tEast != self.templateRaster.east:
-#                 msg = "Eastern edge of template reduced " + str(shrink_rows) + " pixels due to, "
-#                 msg += "the extent of " + sourceRaster.source
-#                 self.writetolog(msg)
-# 
-#             # set the template geotransform to be our modified one.
-#             self.templateRaster.gt = tuple(gt)
 
     def maxNorth(self, sourceRaster):
         northWidth = sourceRaster.east - sourceRaster.west
@@ -691,33 +524,26 @@ class PARC(object):
             self.logger = utilities.logger(self.out_dir, self.verbose)
         self.writetolog = self.logger.writetolog
 
-        # Validate template image.
+        #  Validate template image.
         if self.template is None:
             raise utilities.TrappedError("template raster not provided.")
 
         if not os.path.exists(self.template):
             raise utilities.TrappedError("Template file, " + self.template + ", does not exist on file system")
 
-#         template_in_parc_folder = os.path.join(self.out_dir,
-#                     SpatialUtilities.getRasterShortName(self.template) + ".tif")
-#         if os.path.exists(template_in_parc_folder):
-#             # This template must have already been shrunk.
-#             # we will use the preshrunk version stored in the parc folder
-#             self.template = template_in_parc_folder
-
         self.templateRaster = SpatialUtilities.SAHMRaster(self.template)
         if len(self.templateRaster.Error) != 0:
             raise utilities.TrappedError("There was a problem with the provided template: \n    " +
                                     "    " + "\n    ".join(self.templateRaster.Error))
 
-        # Ensure the template has square pixels.
+        #  Ensure the template has square pixels.
         if abs(abs(self.templateRaster.xScale) - abs(self.templateRaster.yScale)) > 1e-6:
             raise utilities.TrappedError("template image must have square pixels." +
                             "/n    x pixel scale = " + str(abs(self.templateRaster.xScale)) +
                             "/n    y pixel scale = " + str(abs(self.templateRaster.yScale)))
 
 
-        # Validate input rasters
+        #  Validate input rasters
         if not os.path.exists(self.inputs_CSV):
             raise utilities.TrappedError("Inputs CSV, " + self.inputs_CSV + ", does not exist on file system.")
 
@@ -736,7 +562,6 @@ class PARC(object):
                              os.path.abspath(self.out_dir)])
 
         inputs = []
-        had_to_shrink = False
         for row in inputs_csv:
             input_file = row[0]
             input_just_file = SpatialUtilities.getRasterShortName(input_file)
@@ -761,19 +586,9 @@ class PARC(object):
                     input_file_errors += "\n  Some part of the template image falls outside of " + input_just_file
                     input_file_errors += "\n        template upper left  = (" + str(self.templateRaster.west) + ", " + str(self.templateRaster.north) + ")"
                     input_file_errors += "\n        template lower right = (" + str(self.templateRaster.east) + ", " + str(self.templateRaster.south) + ")"
-                    upperLeftX, upperLeftY = SpatialUtilities.transformPoint(sourceRaster.west,
-                                                        sourceRaster.north, sourceRaster.srs,
-                                                        self.templateRaster.srs)
                     input_file_errors += "\n        image    upper left  = (" + \
                         str(sourceRaster.west) + ", " + str(sourceRaster.north) + ")"
                     input_file_errors += "\n        image    lower right = (" + str(sourceRaster.east) + ", " + str(sourceRaster.south) + ")"
-
-                if self.ignoreNonOverlap:
-                    # if this input is smaller in any of the dimensions
-                    if not self.image_covers_template(sourceRaster):
-#                         self.shrink_template_extent(sourceRaster)
-                        had_to_shrink = True
-
 
             if len(row) < 2 or not row[1] in ['0', '1']:
                 self.writetolog("  " + os.path.split(input_file)[1] +
@@ -816,7 +631,7 @@ class PARC(object):
                     row[3] = default
 
             self.inputs.append(row)
-            # also write the output row, reconfigured to our output file
+            #  also write the output row, reconfigured to our output file
             short_name = SpatialUtilities.getRasterShortName(row[0])
             file_name = os.path.abspath(os.path.join(self.out_dir,
                                                     short_name + ".tif"))
@@ -824,30 +639,6 @@ class PARC(object):
                                                  os.path.abspath(self.out_dir)]
             output.writerow(outputrow)
         del output
-
-#         if had_to_shrink:
-#             # if we need to shrink any previous output in the parc folder
-#             # must be deleted
-#             self.empty_old_parc_folder(self.out_dir)
-#             old_template = SpatialUtilities.SAHMRaster(self.template)
-#             new_template_fname = os.path.join(self.out_dir,
-#                     SpatialUtilities.getRasterShortName(self.template)) + ".tif"
-#             SpatialUtilities.intermediaryReprojection(old_template,
-#                             self.templateRaster, new_template_fname,
-#                             gdalconst.GRA_NearestNeighbour, True)
-# 
-#             self.template = new_template_fname
-#             self.templateRaster = SpatialUtilities.SAHMRaster(self.template)
-# 
-#             output_csv = open(os.path.join(self.out_dir, "PARC_Files.csv"))
-#             first_line, rest_of_lines = output_csv.readline(), output_csv.read()
-#             output_csv = open(os.path.join(self.out_di r, "PARC_Files.csv"), "w")
-#             replacement_line = first_line.split(",")
-#             replacement_line[5] = new_template_fname
-#             replacement_line = ",".join(replacement_line)
-#             output_csv.write(replacement_line)
-#             output_csv.write(rest_of_lines)
-#             output_csv.close()
 
         if input_file_errors != "":
             self.writetolog(input_file_errors, False, False)
