@@ -1,49 +1,49 @@
 ###############################################################################
-##
-## Copyright (C) 2010-2012, USGS Fort Collins Science Center.
-## All rights reserved.
-## Contact: talbertc@usgs.gov
-##
-## This file is part of the Software for Assisted Habitat Modeling package
-## for VisTrails.
-##
-## "Redistribution and use in source and binary forms, with or without
-## modification, are permitted provided that the following conditions are met:
-##
-##  - Redistributions of source code must retain the above copyright notice,
-##    this list of conditions and the following disclaimer.
-##  - Redistributions in binary form must reproduce the above copyright
-##    notice, this list of conditions and the following disclaimer in the
-##    documentation and/or other materials provided with the distribution.
-##  - Neither the name of the University of Utah nor the names of its
-##    contributors may be used to endorse or promote products derived from
-##    this software without specific prior written permission.
-##
-## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-## AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-## THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-## PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
-## CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-## EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-## PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
-## OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-## WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-## OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-## ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
-##
-## Although this program has been used by the U.S. Geological Survey (USGS),
-## no warranty, expressed or implied, is made by the USGS or the
-## U.S. Government as to the accuracy and functioning of the program and
-## related program material nor shall the fact of distribution constitute
-## any such warranty, and no responsibility is assumed by the USGS
-## in connection therewith.
-##
-## Any use of trade, firm, or product names is for descriptive purposes only
-## and does not imply endorsement by the U.S. Government.
+#  #
+#  # Copyright (C) 2010-2012, USGS Fort Collins Science Center.
+#  # All rights reserved.
+#  # Contact: talbertc@usgs.gov
+#  #
+#  # This file is part of the Software for Assisted Habitat Modeling package
+#  # for VisTrails.
+#  #
+#  # "Redistribution and use in source and binary forms, with or without
+#  # modification, are permitted provided that the following conditions are met:
+#  #
+#  #  - Redistributions of source code must retain the above copyright notice,
+#  #    this list of conditions and the following disclaimer.
+#  #  - Redistributions in binary form must reproduce the above copyright
+#  #    notice, this list of conditions and the following disclaimer in the
+#  #    documentation and/or other materials provided with the distribution.
+#  #  - Neither the name of the University of Utah nor the names of its
+#  #    contributors may be used to endorse or promote products derived from
+#  #    this software without specific prior written permission.
+#  #
+#  # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+#  # THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+#  # PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+#  # CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+#  # EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+#  # PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+#  # OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+#  # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+#  # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+#  # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+#  #
+#  # Although this program has been used by the U.S. Geological Survey (USGS),
+#  # no warranty, expressed or implied, is made by the USGS or the
+#  # U.S. Government as to the accuracy and functioning of the program and
+#  # related program material nor shall the fact of distribution constitute
+#  # any such warranty, and no responsibility is assumed by the USGS
+#  # in connection therewith.
+#  #
+#  # Any use of trade, firm, or product names is for descriptive purposes only
+#  # and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
 ################################################################################
-# ImageViewer widgets/toolbar implementation
+#  ImageViewer widgets/toolbar implementation
 ################################################################################
 import os
 import csv
@@ -52,6 +52,15 @@ import itertools
 
 import utils
 import math
+
+try:
+    import fiona
+    from fiona import crs
+    from shapely.geometry import shape
+    from matplotlib.patches import Polygon
+except ImportError:
+    fiona = None
+
 
 from PyQt4 import QtCore, QtGui
 try:
@@ -66,19 +75,19 @@ except ImportError:
     from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
     from packages.spreadsheet.spreadsheet_controller import spreadsheetController
     from core.packagemanager import get_package_manager
-    
+
 from sahm_picklists import OutputRaster
 from utils import map_ports
 from SahmSpatialOutputViewer import AnchoredText, MyMapCanvas, \
-    RasterDisplay, fullExtent, viewTitleLegend, sync_changes, MPL_action 
+    RasterDisplay, fullExtent, view_title_legend, sync_changes, MPL_action
 from utils import getRasterParams
 from pySAHM.utilities import dbfreader as dbfreader
 
 import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-#from matplotlib.backends.backend_qt4 import FigureCanvasQT as FigureCanvas
-#from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
+#  from matplotlib.backends.backend_qt4 import FigureCanvasQT as FigureCanvas
+#  from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
 
 from matplotlib.figure import Figure
 from matplotlib.offsetbox import AnchoredOffsetbox, TextArea
@@ -90,9 +99,10 @@ from osgeo import gdal, gdalconst
 from osgeo import ogr
 
 from sahm_picklists import mpl_colormap
+import pySAHM.SpatialUtilities as SpatialUtilities
 
 import GenerateModuleDoc as GenModDoc
-doc_file = os.path.abspath(os.path.join(os.path.dirname(__file__),  "documentation.xml"))
+doc_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "documentation.xml"))
 GenModDoc.load_documentation(doc_file)
 
 class GeneralSpatialViewer(SpreadsheetCell):
@@ -106,35 +116,33 @@ class GeneralSpatialViewer(SpreadsheetCell):
     __doc__ = GenModDoc.construct_module_doc('GeneralSpatialViewer')
     _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
-                    ("rasterFile", '(edu.utah.sci.vistrails.basic:Path)'),
+                    ("raster_fname", '(edu.utah.sci.vistrails.basic:Path)'),
                     ("colorRamp", '(gov.usgs.sahm:mpl_colormap:Other)', {'defaults':'["jet"]'}),
                     ('categorical', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                     ('threeBand', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                     ('dataMin', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('dataMax', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('NoDataValue', '(edu.utah.sci.vistrails.basic:Float)'),
-                    ('shape_display', '(edu.utah.sci.vistrails.basic:Dictionary)')]
-#                     ("pointsCSV", '(edu.utah.sci.vistrails.basic:Path)'),
-#                     ("pointsColor", '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["Red"]', 'optional':False}),
-#                     ("pointsLineOrPoints", '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["points"]', 'optional':False}),]
+                    ('display_states', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}), ]
 
     @classmethod
     def provide_input_port_documentation(cls, port_name):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-        return GenModDoc.construct_port_doc(cls, port_name, 'out') 
+        return GenModDoc.construct_port_doc(cls, port_name, 'out')
 
     def __init__(self):
         SpreadsheetCell.__init__(self)
 
-        self.port_map = {'rasterFile': ("rasterFile", None, True),
+        self.port_map = {'raster_fname': ("raster_fname", None, True),
             'colorRamp': ("colorRamp", None, True),
             'categorical': ("categorical", None, True),
             'threeBand': ("threeBand", None, True),
             'dataMin': ("dataMin", None, False),
             'dataMax': ("dataMax", None, False),
             'NoDataValue': ("NoDataValue", None, False),
+            "display_states": ("display_states", None, True)
             }
 
     def compute(self):
@@ -153,14 +161,14 @@ class GeneralSpatialViewer(SpreadsheetCell):
             self.location.col = self.getInputFromPort('column') - 1
 
         if self.inputPorts.has_key('Location'):
-            self.location =  self.inputPorts['Location'][0].obj
+            self.location = self.inputPorts['Location'][0].obj
 
         inputs['shape_displays'] = []
         for shape_display in self.forceGetInputListFromPort('shape_display'):
            inputs['shape_displays'].append(shape_display)
-            
-        self.local_displayAndWait(inputs)       
-    
+
+        self.local_displayAndWait(inputs)
+
     def local_displayAndWait(self, inputs):
         self.displayAndWait(SpatialViewerCellWidget, inputs)
 
@@ -192,6 +200,7 @@ class SpatialViewerCellWidget(QCellWidget):
         self.dataMin = "ExtractFromFile"
         self.dataMax = "pointsColor"
         self.NoDataValue = "ExtractFromFile"
+        self.display_states = True
 
     def updateContents(self, inputs):
         """ updateContents(inputs: dictionary) -> None
@@ -199,8 +208,10 @@ class SpatialViewerCellWidget(QCellWidget):
         """
         self.toolBarType = GeneralSpatialViewerToolBar
         self.controlBarType = GeneralSpatialViewerToolBar
-        self.rasterFile = inputs["rasterFile"]
+        self.raster_fname = inputs["raster_fname"]
         self.cmap = eval("matplotlib.cm." + inputs["colorRamp"])
+
+        self.display_states = inputs["display_states"]
 
         for input in ['categorical' , 'threeBand']:
             if type(inputs[input]) is str:
@@ -216,20 +227,20 @@ class SpatialViewerCellWidget(QCellWidget):
             elif inputs.has_key(input):
                 self.__dict__[input] = inputs[input]
             else:
-                self.__dict__[input] = "ExtractFromFile"  
-        
+                self.__dict__[input] = "ExtractFromFile"
+
         self.load_layers()
-        self.shapefiles = inputs.get("shape_displays", [])
         self.on_draw(UseMaxExt=True)
 
-        
-
         self.maxXlim, self.maxYlim = self.getMaxDisplayExtent()
+        self.maxXlim = [self.getMaxExtent()[0], self.getMaxExtent()[1]]
+        self.maxYlim = [self.getMaxExtent()[2], self.getMaxExtent()[3]]
+
         self.axes.set_ylim(self.maxYlim, emit=False)
         self.axes.set_xlim(self.maxXlim, emit=False)
-        
-        
-        
+        self.fig.canvas.draw()
+        self.update()
+
         self.fig.canvas.draw()
         self.update()
 
@@ -240,7 +251,7 @@ class SpatialViewerCellWidget(QCellWidget):
         self.fig = Figure((5.0, 4.0), dpi=self.dpi)
 
 #        self.fig.subplots_adjust(left = 0.01, right=0.99, top=0.99, bottom=0.001)
-        self.fig.subplots_adjust(left = 0, right=1, top=1, bottom=0)
+        self.fig.subplots_adjust(left=0, right=1, top=1, bottom=0)
         self.map_canvas = MyMapCanvas(self.fig)
         self.map_canvas.mpl_connect('scroll_event', self.wheel_zoom)
 #        self.connect(self, QtCore.SIGNAL('keyPressEvent(QString)'),
@@ -258,7 +269,7 @@ class SpatialViewerCellWidget(QCellWidget):
 #        self.popMenu = popup_menu(self, self.mpl_toolbar)
         self.popMenu = None
 
-        self.map_canvas.setContextMenuPolicy( QtCore.Qt.CustomContextMenu )
+        self.map_canvas.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.connect(self.map_canvas, QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'), self.on_context_menu)
 
         self.layout().addWidget(self.map_canvas)
@@ -279,7 +290,7 @@ class SpatialViewerCellWidget(QCellWidget):
         return getRasterParams(rasterfile)
 
     def wheel_zoom(self, event):
-        #zoom in or out centered on the current cursor position
+        #  zoom in or out centered on the current cursor position
 
         inv = self.axes.transData.inverted()
         curX, curY = inv.transform((event.x, event.y))
@@ -290,7 +301,7 @@ class SpatialViewerCellWidget(QCellWidget):
         height = curT - curB
         steps = -1 * event.step / 0.25
         factor = steps / 35
-        #sanity check
+        #  sanity check
         if factor > 0.5:
             factor = 0.5
         if factor < -0.5:
@@ -299,13 +310,13 @@ class SpatialViewerCellWidget(QCellWidget):
         newWidth = width * (1.0 - factor)
         newHeight = height * (1.0 - factor)
         dWidth = width - newWidth
-        dHeight = height -newHeight
+        dHeight = height - newHeight
 
-        pcntLofX =  1 - (width - (curX - curL)) / width
+        pcntLofX = 1 - (width - (curX - curL)) / width
         pcntUnderTop = (height - (curT - curY)) / height
 
         newL = curL + (dWidth * pcntLofX)
-        newR = curR - (dWidth*(1-pcntLofX))
+        newR = curR - (dWidth * (1 - pcntLofX))
         newB = curB + (dHeight * pcntUnderTop)
         newT = curT - (dWidth * (1 - pcntUnderTop))
         self.axes.set_xlim((newL, newR))
@@ -350,8 +361,8 @@ class SpatialViewerCellWidget(QCellWidget):
         QCellWidget.deleteLater(self)
 
     def load_layers(self):
-        rasterparams = getRasterParams(self.rasterFile)
-        self.maxExtent = [rasterparams["ulx"],rasterparams["lrx"],rasterparams["lry"],rasterparams["uly"]]
+        rasterparams = getRasterParams(self.raster_fname)
+        self.maxExtent = [rasterparams["ulx"], rasterparams["lrx"], rasterparams["lry"], rasterparams["uly"]]
 
     def add_axis(self):
         self.axes = self.fig.add_subplot(111, aspect='equal', adjustable='datalim')
@@ -376,7 +387,7 @@ class SpatialViewerCellWidget(QCellWidget):
         uniques = []
         vatdbf = kwargs['file'] + ".vat.dbf"
         if os.path.exists(vatdbf):
-            #we'll pull labels from this file
+            #  we'll pull labels from this file
             f = open(vatdbf, 'rb')
             db = list(dbfreader(f))
             f.close()
@@ -389,34 +400,68 @@ class SpatialViewerCellWidget(QCellWidget):
         kwargs['cbar_labels'] = labels
         return matplotlib.cm.get_cmap('Accent', len(uniques))
 
-    def on_draw(self, UseMaxExt=False, passedExtent=None):
+    def on_draw(self, UseMaxExt=False, display_extent=None):
         """ Completely clears then redraws the figure
         There's probably a more efficient way to do this.
         """
-        if passedExtent is not None:
-            curExtent = passedExtent
-        elif UseMaxExt:
-            curExtents = self.getMaxExtent()
-        else:
-            curExtents = self.get_extent()
-            
+        if UseMaxExt:
+            display_extent = self.getMaxExtent()
+
+        if not display_extent:
+            display_extent = self.get_extent()
+
 
         self.fig.clear()
         self.add_axis()
-        
-        self.add_raster(curExtents)
-        self.add_shapes()
-        
-        title = os.path.splitext(os.path.split(self.rasterFile)[1])[0]
-        
-#        if self.displayTL:
-#            self.add_title(title)
-            
+
+        self.add_raster(display_extent)
+
+        title = os.path.splitext(os.path.split(self.raster_fname)[1])[0]
+
+        if fiona and self.display_states:
+            #  only attempt to draw the state boundaries if
+            #  fiona was successfully imported
+            self.first_layer = SpatialUtilities.SAHMRaster(self.raster_fname)
+            self.add_states()
+        self.set_extent(display_extent[2:], display_extent[:2])
+
+    def add_states(self):
+        '''Add simplified state boundaries to the output map
+        The file that we're displaying is stored in the sahm/data/
+        '''
+        sahm_dir = os.path.dirname(os.path.abspath(__file__))
+        shp_fname = os.path.join(sahm_dir, "data", "states_110m", "ne_110m_admin_1_states_provinces_lakes.shp")
+
+        with fiona.open(shp_fname) as fiona_shp:
+            driver = ogr.GetDriverByName('ESRI Shapefile')
+            dataset = driver.Open(shp_fname)
+            layer = dataset.GetLayer()
+            prj = layer.GetSpatialRef()
+            for rec in fiona_shp:
+                self.plot_multipolygon(self.axes, shape(rec['geometry']),
+                                       alpha=".5", prj=prj)
+
+    def plot_polygon(self, ax, poly, alpha=0.0, prj=None):
+        '''Adds an outline to the ax with the given geometry
+        '''
+        a = np.asarray(poly.exterior)
+        a = np.asarray([SpatialUtilities.transformPoint(x, y, prj, self.first_layer.srs) for (x, y) in a])
+        ax.plot(a[:, 0], a[:, 1], color='0.25')
+
+    def plot_multipolygon(self, ax, geom, alpha=0.0, prj=None):
+        """ Can safely call with either Polygon or Multipolygon geometry
+        """
+        if geom.type == 'Polygon':
+            self.plot_polygon(ax, geom, alpha, prj)
+        elif geom.type == 'MultiPolygon':
+            for poly in geom.geoms:
+                self.plot_polygon(ax, poly, alpha, prj)
+
 
     def add_raster(self, curExtents):
         self.rasterlayer = RasterDisplay(self.threeBand, self.NoDataValue)
         self.rasterlayer.setDims(self.axes)
-        self.rasterlayer.switch_raster(self.rasterFile)
+        self.rasterlayer.switch_raster(self.raster_fname)
 
         raster_array = self.rasterlayer(*curExtents)
 
@@ -425,48 +470,48 @@ class SpatialViewerCellWidget(QCellWidget):
         elif self.threeBand:
             raster_plot = self.axes.imshow(raster_array, origin='lower', extent=self.getDataExtent())
         else:
-            min, max = utils.getrasterminmax(self.rasterFile)
+            min, max = utils.getrasterminmax(self.raster_fname)
             if not self.dataMin == "ExtractFromFile":
                 min = float(self.dataMin)
             if not self.dataMax == "ExtractFromFile":
                 max = float(self.dataMax)
-                
+
             rmax = max
             rmin = min
 
             norm = colors.Normalize(rmin, rmax)
-            raster_plot = self.axes.imshow(raster_array,interpolation="nearest", cmap=self.cmap, norm=norm, origin='upper', extent=self.getDataExtent())
-              
-    def add_shapes(self):
-        """Adds all overlaying shapefiles to our map
-        """
-        for shape_dict in self.shapefiles:
-            if shape_dict['shapetype']  == 'point':
-                self.add_point_shapefile(shape_dict)
-            elif shape_dict['shapetype']  == 'poly':
-                self.add_poly_shapefile(shape_dict)
-        
-    def add_point_shapefile(self, shapefile_dict):
-        driver = ogr.GetDriverByName('ESRI Shapefile')
-        dataSource = driver.Open(shapefile_dict['shapefname'], 0)
-        layer = dataSource.GetLayer()
-        
-        feature = layer.GetNextFeature()
-        Xs, Ys = [], []
-        while feature:
-            x, y, z = feature.geometry().GetPoint()
-            Xs.append(x)
-            Ys.append(y)
-            feature = layer.GetNextFeature()
-        
-        self.axes.plot(Xs, Ys, alpha=shapefile_dict['alpha'],
-                       markersize=shapefile_dict['size'],
-                       color=shapefile_dict['clr'].tuple,
-                       marker=shapefile_dict['marker'])
+            raster_plot = self.axes.imshow(raster_array, interpolation="nearest", cmap=self.cmap, norm=norm, origin='upper', extent=self.getDataExtent())
+
+#      def add_shapes(self):
+#          """Adds all overlaying shapefiles to our map
+#          """
+#          for shape_dict in self.shapefiles:
+#              if shape_dict['shapetype'] == 'point':
+#                  self.add_point_shapefile(shape_dict)
+#              elif shape_dict['shapetype'] == 'poly':
+#                  self.add_poly_shapefile(shape_dict)
+#
+#      def add_point_shapefile(self, shapefile_dict):
+#          driver = ogr.GetDriverByName('ESRI Shapefile')
+#          dataSource = driver.Open(shapefile_dict['shapefname'], 0)
+#          layer = dataSource.GetLayer()
+#
+#          feature = layer.GetNextFeature()
+#          Xs, Ys = [], []
+#          while feature:
+#              x, y, z = feature.geometry().GetPoint()
+#              Xs.append(x)
+#              Ys.append(y)
+#              feature = layer.GetNextFeature()
+#
+#          self.axes.plot(Xs, Ys, alpha=shapefile_dict['alpha'],
+#                         markersize=shapefile_dict['size'],
+#                         color=shapefile_dict['clr'].tuple,
+#                         marker=shapefile_dict['marker'])
 #        if self.displayTL:
 #            if self.categorical:
 #                cb = self.fig.colorbar(raster_plot, orientation='vertical', pad=0.01, shrink=.9, fraction=.3, aspect=15)
-##                cb.ax.set_yticklabels(kwargs['cbar_labels'])
+#  #                cb.ax.set_yticklabels(kwargs['cbar_labels'])
 #            else:
 #                cb = self.fig.colorbar(raster_plot, orientation='vertical', pad=0.01, fraction=.1, shrink=.9, aspect=30)
 #
@@ -476,64 +521,64 @@ class SpatialViewerCellWidget(QCellWidget):
 #                    t.set_rotation(90)
 #                else:
 #                    t.set_fontsize(7)
+#
+#      def add_poly_shapefile(self, shapefile_dict):
+#          driver = ogr.GetDriverByName('ESRI Shapefile')
+#          dataSource = driver.Open(shapefile_dict['shapefname'], 0)
+#          layer = dataSource.GetLayer()
+#
+#          facec = shapefile_dict['fill_color'].tuple + (shapefile_dict['fill_alpha'],)
+#          linec = shapefile_dict['line_color'].tuple + (shapefile_dict['line_alpha'],)
+#
+#          clr = shapefile_dict['line_color'].tuple
+#          alpha = shapefile_dict['line_alpha']
+#          width = shapefile_dict['line_width']
+#
+#          #  Read all features in layer and store as paths
+#          paths = []
+#          for feat in layer:
+#              for geom in feat.GetGeometryRef():
+#                  #  check if geom is polygon
+#                  if geom.GetGeometryType() == ogr.wkbPolygon:
+#                      codes = []
+#                      all_x = []
+#                      all_y = []
+#                      for i in range(geom.GetGeometryCount()):
+#                          #  Read ring geometry and create path
+#                          r = geom.GetGeometryRef(i)
+#                          x = [r.GetX(j) for j in range(r.GetPointCount())]
+#                          y = [r.GetY(j) for j in range(r.GetPointCount())]
+#  #                         # skip boundary between individual rings
+#  #                         codes += [matplotlib.path.Path.MOVETO] + \
+#  #                                      (len(x)-1)*[matplotlib.path.Path.LINETO]
+#                          all_x += x
+#                          all_y += y
+#
+#                      self.axes.plot(all_x, all_y, '-', alpha=alpha,
+#                         markersize=width,
+#                         color=clr)
+#  #                     path = matplotlib.path.Path(np.column_stack((all_x,all_y)), codes)
+#  #                     paths.append(path)
+#                  elif geom.GetGeometryType() == ogr.wkbLineString:
+#                      points = geom.GetPoints()
+#                      codes = [matplotlib.path.Path.MOVETO] + \
+#                                       (len(points) - 1) * [matplotlib.path.Path.LINETO]
+#                      path = matplotlib.path.Path(points, codes)
+#                      self.axes.plot(zip(*points), "-", alpha=alpha,
+#                         markersize=width,
+#                         color=clr)
 
-    def add_poly_shapefile(self, shapefile_dict):
-        driver = ogr.GetDriverByName('ESRI Shapefile')
-        dataSource = driver.Open(shapefile_dict['shapefname'], 0)
-        layer = dataSource.GetLayer()
-        
-        facec = shapefile_dict['fill_color'].tuple + (shapefile_dict['fill_alpha'],)
-        linec = shapefile_dict['line_color'].tuple + (shapefile_dict['line_alpha'],)
-        
-        clr = shapefile_dict['line_color'].tuple
-        alpha = shapefile_dict['line_alpha']
-        width = shapefile_dict['line_width']
-        
-        # Read all features in layer and store as paths
-        paths = []
-        for feat in layer:
-            for geom in feat.GetGeometryRef():
-                # check if geom is polygon
-                if geom.GetGeometryType() == ogr.wkbPolygon:
-                    codes = []
-                    all_x = []
-                    all_y = []
-                    for i in range(geom.GetGeometryCount()):
-                        # Read ring geometry and create path
-                        r = geom.GetGeometryRef(i)
-                        x = [r.GetX(j) for j in range(r.GetPointCount())]
-                        y = [r.GetY(j) for j in range(r.GetPointCount())]
-#                         # skip boundary between individual rings
-#                         codes += [matplotlib.path.Path.MOVETO] + \
-#                                      (len(x)-1)*[matplotlib.path.Path.LINETO]
-                        all_x += x
-                        all_y += y
-                        
-                    self.axes.plot(all_x, all_y, '-', alpha=alpha,
-                       markersize=width,
-                       color=clr)
-#                     path = matplotlib.path.Path(np.column_stack((all_x,all_y)), codes)
-#                     paths.append(path)
-                elif geom.GetGeometryType() == ogr.wkbLineString:
-                    points =  geom.GetPoints()
-                    codes = [matplotlib.path.Path.MOVETO] + \
-                                     (len(points)-1)*[matplotlib.path.Path.LINETO]
-                    path = matplotlib.path.Path(points, codes)
-                    self.axes.plot(zip(*points), "-", alpha=alpha,
-                       markersize=width,
-                       color=clr)
-        
-        
+
 
 #         # Add paths as patches to axes
 #         for path in paths:
 #             patch = matplotlib.patches.PathPatch(path, \
-#                     facecolor=facec, 
+#                     facecolor=facec,
 #                     edgecolor=linec,
 #                     linewidth=shapefile_dict['line_width']
 #                     )
 #             self.axes.add_patch(patch)
-        
+
 
 
     def dumpToFile(self, filename):
@@ -550,7 +595,7 @@ class SpatialViewerCellWidget(QCellWidget):
         p = self.parent()
         while p:
             if hasattr(p, 'isSheetTabWidget'):
-                if p.isSheetTabWidget()==True:
+                if p.isSheetTabWidget() == True:
                     return p
             p = p.parent()
         return None
@@ -609,7 +654,7 @@ class SpatialViewerCellWidget(QCellWidget):
                 pass
         return None
 
-    #Functions dealing with managing extents
+    #  Functions dealing with managing extents
     def set_extent(self, ylim, xlim):
         self.axes.set_ylim(ylim, emit=False)
         self.axes.set_xlim(xlim, emit=False)
@@ -617,7 +662,7 @@ class SpatialViewerCellWidget(QCellWidget):
         self.pull_pixels()
         self.fig.canvas.draw()
         self.update()
-        
+
     def get_extent(self):
         return list(self.axes.get_xlim()) + list(self.axes.get_ylim())
 
@@ -629,12 +674,12 @@ class SpatialViewerCellWidget(QCellWidget):
 
     def getMaxDisplayExtent(self):
         return self.axes.get_xlim(), self.axes.get_ylim()
-    
+
     def zoomFull(self):
         self.axes.set_xlim(self.maxXlim)
         self.axes.set_ylim(self.maxYlim)
         self.sync_extents()
-        
+
     def sync_extents(self):
         for spatialViewer in self.get_active_cells():
             spatialViewer.set_extent(self.axes.get_ylim(), self.axes.get_xlim())
@@ -644,7 +689,7 @@ class SpatialViewerCellWidget(QCellWidget):
 class ViewLayerAction(QtGui.QAction):
     def __init__(self, action_dict, parent=None):
         icon = os.path.abspath(os.path.join(
-                    os.path.dirname(__file__), "Images", action_dict["icon"]))
+                    os.path.dirname(__file__), "data", "Images", action_dict["icon"]))
         QtGui.QAction.__init__(self,
                                QtGui.QIcon(icon),
                                action_dict["label"],
@@ -678,16 +723,16 @@ class ViewLayerAction(QtGui.QAction):
 
         for cell in active_cells:
 
-            #set all to not displayed
+            #  set all to not displayed
             for k, v in cell.all_layers.items():
                 v['displayed'] = False
-            #turn on the selected layers
+            #  turn on the selected layers
             for action in self.toolBar.actions():
                 try:
                     if action.isChecked() and cell.all_layers.has_key(action.tag):
                         cell.all_layers[action.tag]['displayed'] = True
                 except AttributeError:
-                    pass #ignore buttons that don't have a tag set
+                    pass  #  ignore buttons that don't have a tag set
             cell.on_draw()
             try:
                 cell.fig.canvas.draw()
@@ -698,6 +743,33 @@ class ViewLayerAction(QtGui.QAction):
                 raise MemoryError
 
             cell.update()
+
+class view_states(QtGui.QAction):
+    def __init__(self, parent=None):
+        icon = os.path.abspath(os.path.join(
+                    os.path.dirname(__file__), "data", "Images", "states.png"))
+        QtGui.QAction.__init__(self,
+                               QtGui.QIcon(icon),
+                               "Show/Hide State Boundaries",
+                               parent)
+        self.setCheckable(True)
+        self.setChecked(True)
+        self.setEnabled(not fiona is None)
+
+    def triggeredSlot(self):
+        cellWidget = self.toolBar.getSnappedWidget()
+
+        active_cells = cellWidget.get_active_cells()
+        for cell in active_cells:
+
+            xlim = cell.axes.get_xlim()
+            ylim = cell.axes.get_ylim()
+            cell.display_states = self.isChecked()
+            cell.on_draw()
+            cell.fig.canvas.draw()
+            cell.update()
+            cell.axes.set_xlim(xlim)
+            cell.axes.set_ylim(ylim)
 
 class GeneralSpatialViewerToolBar(QCellToolBar):
     """
@@ -716,6 +788,7 @@ class GeneralSpatialViewerToolBar(QCellToolBar):
         actions = []
 
         self.appendAction(sync_changes(self))
+        self.appendAction(view_states(self))
         lyrs_label = QtGui.QLabel()
 #        lyrs_label.setText("Layers:")
 #        self.appendWidget(lyrs_label)
@@ -748,7 +821,7 @@ class GeneralSpatialViewerToolBar(QCellToolBar):
                      "checkable":False, "actionfunc":"forward"},
                       {"icon":"filesave.png", "checked":False, "label":"Save",
                      "tooltip":"Save the figure", "checkable":False,
-                     "actionfunc":"save_figure"},]
+                     "actionfunc":"save_figure"}, ]
         for action_dict in mplActions:
             self.appendAction(MPL_action(action_dict, self))
 
@@ -762,7 +835,7 @@ class GeneralSpatialViewerToolBar(QCellToolBar):
 #                #disenable all action refering to data we don't have
 #                action.setEnabled(sw.all_layers[action.tag]['enabled'])
 
-        #Strip out the unused actions
+        #  Strip out the unused actions
         keep_actions = ['Zoom', 'Save', 'Back', 'Forward', 'Pan']
         keep_actions = []
         for action in sw.mpl_toolbar.actions():
@@ -770,10 +843,13 @@ class GeneralSpatialViewerToolBar(QCellToolBar):
                 continue
             if action.text() == 'Zoom':
                 icon = os.path.abspath(os.path.join(
-                    os.path.dirname(__file__), "Images", "zoom.png"))
+                    os.path.dirname(__file__), "data", "Images", "zoom.png"))
                 action.setIcon(QtGui.QIcon(icon))
-            if action.text()  == 'Pan':
+            if action.text() == 'Pan':
                 action.setChecked(True)
+            elif type(action) == view_states:
+                action.setEnabled(not fiona is None)
+                action.setChecked(sw.display_states)
             self.appendAction(action)
 
         sw.popMenu = self.gen_popup_menu()
@@ -797,70 +873,69 @@ class GeneralSpatialViewerToolBar(QCellToolBar):
 
         return popmenu
 
-class PointShapefile(Module):
-    _input_ports = [('shapefile', '(edu.utah.sci.vistrails.basic:File)', {'optional':False}),
-                    ('color', '(edu.utah.sci.vistrails.basic:Color)', {'optional':False}),
-                    ('size', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["5"]', 'optional':False}),
-                    ('alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["1.0"]', 'optional':False}),
-                    ('query', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'[""]', 'optional':False}),
-                    ('marker', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["o-"]', 'optional':False})]
-    
-    _output_ports = [('display_dict', '(edu.utah.sci.vistrails.basic:Dictionary)')]
-
-    port_map = {'shapefile':('shapefname', None, True),#These ports are for all Models
-                         'color':('clr', None, True),
-                         'size':('size', None, True),
-                         'alpha':('alpha', None, True),
-                         'query':('query', None, False),
-                         'marker':('marker', None, True),
-                    }
-
-
-#     @classmethod
-#     def provide_input_port_documentation(cls, port_name):
-#         return GenModDoc.construct_port_doc(cls, port_name, 'in')
-#     @classmethod
-#     def provide_output_port_documentation(cls, port_name):
-#         return GenModDoc.construct_port_doc(cls, port_name, 'out') 
-
-
-    def compute(self):
-        self.args_dict = utils.map_ports(self, self.port_map)
-        self.args_dict['shapetype'] = "point"
-        self.setResult('display_dict', self.args_dict) 
-        
-    
-class PolyShapefile(Module):
-    _input_ports = [('shapefile', '(edu.utah.sci.vistrails.basic:File)', {'optional':False}),
-                    ('line_color', '(edu.utah.sci.vistrails.basic:Color)', {'optional':False}),
-                    ('fill_color', '(edu.utah.sci.vistrails.basic:Color)', {'optional':False}),
-                    ('line_width', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["2"]', 'optional':False}),
-                    ('line_alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["1.0"]', 'optional':False}),
-                    ('fill_alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["1.0"]', 'optional':False}),
-                    ('query', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'[""]', 'optional':False}),]
-    
-    _output_ports = [('display_dict', '(edu.utah.sci.vistrails.basic:Dictionary)')]
-
-    port_map = {'shapefile':('shapefname', None, True),#These ports are for all Models
-                         'line_color':('line_color', None, True),
-                         'fill_color':('fill_color', None, True),
-                         'line_width':('line_width', None, True),
-                         'fill_alpha':('fill_alpha', None, True),
-                         'line_alpha':('line_alpha', None, True),
-                         'query':('query', None, False),
-                    }
-
-
-#     @classmethod
-#     def provide_input_port_documentation(cls, port_name):
-#         return GenModDoc.construct_port_doc(cls, port_name, 'in')
-#     @classmethod
-#     def provide_output_port_documentation(cls, port_name):
-#         return GenModDoc.construct_port_doc(cls, port_name, 'out') 
-
-
-    def compute(self):
-        self.args_dict = utils.map_ports(self, self.port_map)
-        self.args_dict['shapetype'] = "poly"
-        self.setResult('display_dict', self.args_dict) 
-        
+#  class PointShapefile(Module):
+#      _input_ports = [('shapefile', '(edu.utah.sci.vistrails.basic:File)', {'optional':False}),
+#                      ('color', '(edu.utah.sci.vistrails.basic:Color)', {'optional':False}),
+#                      ('size', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["5"]', 'optional':False}),
+#                      ('alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["1.0"]', 'optional':False}),
+#                      ('query', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'[""]', 'optional':False}),
+#                      ('marker', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["o-"]', 'optional':False})]
+#
+#      _output_ports = [('display_dict', '(edu.utah.sci.vistrails.basic:Dictionary)')]
+#
+#      port_map = {'shapefile':('shapefname', None, True),  #  These ports are for all Models
+#                           'color':('clr', None, True),
+#                           'size':('size', None, True),
+#                           'alpha':('alpha', None, True),
+#                           'query':('query', None, False),
+#                           'marker':('marker', None, True),
+#                      }
+#
+#
+#  #     @classmethod
+#  #     def provide_input_port_documentation(cls, port_name):
+#  #         return GenModDoc.construct_port_doc(cls, port_name, 'in')
+#  #     @classmethod
+#  #     def provide_output_port_documentation(cls, port_name):
+#  #         return GenModDoc.construct_port_doc(cls, port_name, 'out')
+#
+#
+#      def compute(self):
+#          self.args_dict = utils.map_ports(self, self.port_map)
+#          self.args_dict['shapetype'] = "point"
+#          self.setResult('display_dict', self.args_dict)
+#
+#
+#  class PolyShapefile(Module):
+#      _input_ports = [('shapefile', '(edu.utah.sci.vistrails.basic:File)', {'optional':False}),
+#                      ('line_color', '(edu.utah.sci.vistrails.basic:Color)', {'optional':False}),
+#                      ('fill_color', '(edu.utah.sci.vistrails.basic:Color)', {'optional':False}),
+#                      ('line_width', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["2"]', 'optional':False}),
+#                      ('line_alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["1.0"]', 'optional':False}),
+#                      ('fill_alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["1.0"]', 'optional':False}),
+#                      ('query', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'[""]', 'optional':False}), ]
+#
+#      _output_ports = [('display_dict', '(edu.utah.sci.vistrails.basic:Dictionary)')]
+#
+#      port_map = {'shapefile':('shapefname', None, True),  #  These ports are for all Models
+#                           'line_color':('line_color', None, True),
+#                           'fill_color':('fill_color', None, True),
+#                           'line_width':('line_width', None, True),
+#                           'fill_alpha':('fill_alpha', None, True),
+#                           'line_alpha':('line_alpha', None, True),
+#                           'query':('query', None, False),
+#                      }
+#
+#
+#  #     @classmethod
+#  #     def provide_input_port_documentation(cls, port_name):
+#  #         return GenModDoc.construct_port_doc(cls, port_name, 'in')
+#  #     @classmethod
+#  #     def provide_output_port_documentation(cls, port_name):
+#  #         return GenModDoc.construct_port_doc(cls, port_name, 'out')
+#
+#
+#      def compute(self):
+#          self.args_dict = utils.map_ports(self, self.port_map)
+#          self.args_dict['shapetype'] = "poly"
+#          self.setResult('display_dict', self.args_dict)

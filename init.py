@@ -93,10 +93,10 @@ import pySAHM.PARC as parc
 import pySAHM.RasterFormatConverter as RFC
 import pySAHM.runMaxent as MaxentRunner
 import pySAHM.utilities as utilities
+import pySAHM.SpatialUtilities as SpatialUtilities
 from SahmOutputViewer import SAHMModelOutputViewerCell
 from SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
 from GeneralSpatialViewer import GeneralSpatialViewer
-from GeneralSpatialViewer import PointShapefile, PolyShapefile
 from sahm_picklists import ResponseType, AggregationMethod, \
         ResampleMethod, PointAggregationMethod, ModelOutputType, RandomPointType, \
         OutputRaster, mpl_colormap, T_O_M
@@ -1301,7 +1301,6 @@ class Reclassifier(Module):
         argsDict = utils.map_ports(self, port_map)
 
         from pySAHM.TiffProcessor import rasterReclassifier
-        import pySAHM.SpatialUtilities as SpatialUtilities
         ourReclassifier = rasterReclassifier()
         ourReclassifier.inputFname = argsDict['inputRaster']
 
@@ -1435,7 +1434,6 @@ class CategoricalToContinuous(Module):
         argsDict = utils.map_ports(self, port_map)
 
         from pySAHM.TiffProcessor import categoricalToContinuousRasters
-        import pySAHM.SpatialUtilities as SpatialUtilities
         ourC2C = categoricalToContinuousRasters()
         ourC2C.inputFname = argsDict['inputRaster']
         ourC2C.templateFName = argsDict['templateFile']
@@ -2013,8 +2011,6 @@ def initialize():
 
     load_max_ent_params()
 
-    global utilities
-    import pySAHM.utilities as utilities
     utilities.storeUNCDrives()
     utilities.start_new_pool(utilities.get_process_count(configuration.cur_processing_mode))
 
@@ -2350,8 +2346,8 @@ _modules = generate_namespaces({'DataInput': [
                                                            'moduleFringe':output_fringe}),
                                            (GeneralSpatialViewer, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe}),
-                                           (PointShapefile, {'moduleColor':output_color,
-                                                           'moduleFringe':output_fringe}),
+#                                             (PointShapefile, {'moduleColor':output_color,
+#                                                             'moduleFringe':output_fringe}),
 #                                            (PolyShapefile, {'moduleColor':output_color,
 #                                                            'moduleFringe':output_fringe}),  #not ready for prime time yet
                                           ]
