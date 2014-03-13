@@ -1016,7 +1016,7 @@ class sync_changes(QtGui.QAction):
 
     def getIcon(self, tag):
         icon = os.path.abspath(os.path.join(
-                    os.path.dirname(__file__), "Images", tag + ".png"))
+                    os.path.dirname(__file__), "data", "Images", tag + ".png"))
         return QtGui.QIcon(icon)
 
     def triggeredSlot(self):
@@ -1087,7 +1087,7 @@ class MPL_action(QtGui.QAction):
 
     def __init__(self, action_dict, parent=None):
         icon = os.path.abspath(os.path.join(
-                    os.path.dirname(__file__), "Images", action_dict["icon"]))
+                    os.path.dirname(__file__), "data", "Images", action_dict["icon"]))
         QtGui.QAction.__init__(self,
                                QtGui.QIcon(icon),
                                action_dict["label"],
