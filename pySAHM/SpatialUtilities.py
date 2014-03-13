@@ -322,7 +322,7 @@ def mds_to_shape(MDSFile, outputfolder):
                 feature.SetField(short_field, row[header_num])
             else:
                 if row[header_num] == 'NA':
-                    feature.SetField(short_field, float(-9998))
+                    feature.SetField(short_field, float(-9999))
                 else:
                     feature.SetField(short_field, float(row[header_num]))
             header_num += 1
