@@ -1,46 +1,46 @@
 #!/usr/bin/python
 ###############################################################################
-##
-## Copyright (C) 2010-2012, USGS Fort Collins Science Center. 
-## All rights reserved.
-## Contact: talbertc@usgs.gov
-##
-## This file is part of the Software for Assisted Habitat Modeling package
-## for VisTrails.
-##
-## "Redistribution and use in source and binary forms, with or without 
-## modification, are permitted provided that the following conditions are met:
-##
-##  - Redistributions of source code must retain the above copyright notice, 
-##    this list of conditions and the following disclaimer.
-##  - Redistributions in binary form must reproduce the above copyright 
-##    notice, this list of conditions and the following disclaimer in the 
-##    documentation and/or other materials provided with the distribution.
-##  - Neither the name of the University of Utah nor the names of its 
-##    contributors may be used to endorse or promote products derived from 
-##    this software without specific prior written permission.
-##
-## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-## AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, 
-## THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
-## PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
-## CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
-## EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
-## PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
-## OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-## WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-## OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
-## ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
-##
-## Although this program has been used by the U.S. Geological Survey (USGS), 
-## no warranty, expressed or implied, is made by the USGS or the 
-## U.S. Government as to the accuracy and functioning of the program and 
-## related program material nor shall the fact of distribution constitute 
-## any such warranty, and no responsibility is assumed by the USGS 
-## in connection therewith.
-##
-## Any use of trade, firm, or product names is for descriptive purposes only 
-## and does not imply endorsement by the U.S. Government.
+#  #
+#  # Copyright (C) 2010-2012, USGS Fort Collins Science Center.
+#  # All rights reserved.
+#  # Contact: talbertc@usgs.gov
+#  #
+#  # This file is part of the Software for Assisted Habitat Modeling package
+#  # for VisTrails.
+#  #
+#  # "Redistribution and use in source and binary forms, with or without
+#  # modification, are permitted provided that the following conditions are met:
+#  #
+#  #  - Redistributions of source code must retain the above copyright notice,
+#  #    this list of conditions and the following disclaimer.
+#  #  - Redistributions in binary form must reproduce the above copyright
+#  #    notice, this list of conditions and the following disclaimer in the
+#  #    documentation and/or other materials provided with the distribution.
+#  #  - Neither the name of the University of Utah nor the names of its
+#  #    contributors may be used to endorse or promote products derived from
+#  #    this software without specific prior written permission.
+#  #
+#  # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+#  # THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+#  # PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+#  # CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+#  # EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+#  # PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+#  # OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+#  # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+#  # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+#  # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+#  #
+#  # Although this program has been used by the U.S. Geological Survey (USGS),
+#  # no warranty, expressed or implied, is made by the USGS or the
+#  # U.S. Government as to the accuracy and functioning of the program and
+#  # related program material nor shall the fact of distribution constitute
+#  # any such warranty, and no responsibility is assumed by the USGS
+#  # in connection therewith.
+#  #
+#  # Any use of trade, firm, or product names is for descriptive purposes only
+#  # and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
 import os, sys
@@ -68,11 +68,11 @@ class logger(object):
     def __init__(self, logfile, verbose, write_continued=True):
         self.logfile = logfile
         self.verbose = verbose
-        
-        #if we mistakenly get a output dir instead of a filename
+
+        #  if we mistakenly get a output dir instead of a filename
         if os.path.isdir(self.logfile):
             self.logfile = os.path.join(logfile, 'sessionLog.txt')
-            
+
         if os.path.exists(self.logfile):
             if write_continued:
                 self.writetolog("\nSession continued\n", True, True)
@@ -84,8 +84,8 @@ class logger(object):
             f = open(self.logfile, "a")
             del f
             self.writetolog("\nSession started\n", True, False)
-            
-            
+
+
     def writetolog(self, msg, addtime=False, printtoscreen=True):
         '''Opens the log file and writes the passed msg.
     Optionally adds a time slot to the message and
@@ -99,7 +99,7 @@ class logger(object):
             msg = ' at: '.join([msg, time.strftime("%m/%d/%Y %H:%M")])
         msg = "\n" + msg
         f.write(msg)
-        del f  
+        del f
 
 class TrappedError(Exception):
     """Exception class indicating that an anticipated problem
@@ -117,14 +117,14 @@ def isMDSFile(MDSFile):
         second: '0', '0', '0', 0 or blanks and 0 or 1 for each covariate indicate use or ignore
         third: '', '', '', the full path and filename of the tiff covariate layer.
     2 - additionally lines contain individual occurance location, response, covariate attributes at that location, and test\train for the Split column
-    
+
         Values of -9999 in the response column indicate a background point.
         covariate names ending in '*_categorical' indicate a categorical variable
-        
+
     The test used in this check are by no means thorough in checking for covariate files
-    existing on the file system, missing values in any columns, appropriate values in 
-    the response or Split columns, etc.  Instead this function is intended to just give a 
-    best guess as to to if this is an MDS.    
+    existing on the file system, missing values in any columns, appropriate values in
+    the response or Split columns, etc.  Instead this function is intended to just give a
+    best guess as to to if this is an MDS.
     '''
     MDSreader = csv.reader(open(MDSFile, 'r'))
     header1 = MDSreader.next()
@@ -134,32 +134,31 @@ def isMDSFile(MDSFile):
     return True
     del MDSreader
 
-
 def find_key(dic, val):
     """return the key of dictionary dic given the value
-    from: http://www.daniweb.com/software-development/python/code/217019"""    
+    from: http://www.daniweb.com/software-development/python/code/217019"""
     return [k for k, v in dic.iteritems() if v == val][0]
 
-#parallelization, remote processing, etc utilites
-#def process_waiter(popen, description, que):
+#  parallelization, remote processing, etc utilites
+#  def process_waiter(popen, description, que):
 #    '''This needs to be replaced with something that allow
 #    '''
-#    try: 
-#        popen.wait()     
-#    finally: 
-#        que.put( (description, popen.returncode) ) 
+#    try:
+#        popen.wait()
+#    finally:
+#        que.put( (description, popen.returncode) )
 
 def runCondorPythonJob(args, workspace, prefix, wholeMachine=False):
-    #replace all mappedDriveLetters in the argsDict with UNC paths
+    #  replace all mappedDriveLetters in the argsDict with UNC paths
     global UNCDrives
     for item in args:
         args[args.index(item)] = replaceMappedDrives(item)
-         
+
     if prefix[0].isdigit():
         prefix = "_" + prefix
-               
-    #create submit file
-        #create condorSubmit file
+
+    #  create submit file
+        #  create condorSubmit file
     submitFname = os.path.join(workspace, prefix + "_CondorSubmit.txt")
     submitFile = open(submitFname, 'w')
     submitFile.write("Universe                = vanilla\n")
@@ -168,7 +167,7 @@ def runCondorPythonJob(args, workspace, prefix, wholeMachine=False):
     submitFile.write("Getenv                  = true\n")
     submitFile.write("Should_transfer_files   = no\n")
     submitFile.write("transfer_executable     = false\n")
-    
+
     machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151a', 'igskbacbws425']
 #    machines = ['igskbacbwsvis3']
     reqsStr = 'Requirements            = (Machine == "'
@@ -179,13 +178,13 @@ def runCondorPythonJob(args, workspace, prefix, wholeMachine=False):
     else:
         reqsStr += "\n"
     submitFile.write(reqsStr)
-    
+
     stdErrFname = os.path.join(workspace, prefix + "_stdErr.txt")
     stdOutFname = os.path.join(workspace, prefix + "_stdOut.txt")
     logFname = os.path.join(workspace, prefix + "_log.txt")
-    submitFile.write("Output                  = " + replaceMappedDrives(stdOutFname) +"\n")
-    submitFile.write("error                   = " + replaceMappedDrives(stdErrFname) +"\n")
-    submitFile.write("log                     = " + replaceMappedDrives(logFname) +"\n")
+    submitFile.write("Output                  = " + replaceMappedDrives(stdOutFname) + "\n")
+    submitFile.write("error                   = " + replaceMappedDrives(stdErrFname) + "\n")
+    submitFile.write("log                     = " + replaceMappedDrives(logFname) + "\n")
     argsStr = 'Arguments               = "/c pushd ' + "'"
     argsStr += "' '".join(args) + "'" + '"\n'
     argsStr = replaceMappedDrives(argsStr)
@@ -194,42 +193,42 @@ def runCondorPythonJob(args, workspace, prefix, wholeMachine=False):
     submitFile.write("Notification            = Never\n")
     submitFile.write("Queue\n")
     submitFile.close()
-    
+
     curDir = os.getcwd()
     os.chdir(os.path.split(curDir)[0])
-    
-    #launch condor job
+
+    #  launch condor job
     DEVNULL = open(os.devnull, 'wb')
-    p = subprocess.Popen(["condor_submit", "-n", 'IGSKBACBWSCDRS3', submitFname], stderr=DEVNULL, stdout=DEVNULL)    
-    
-    os.chdir(curDir)        
-    
+    p = subprocess.Popen(["condor_submit", "-n", 'IGSKBACBWSCDRS3', submitFname], stderr=DEVNULL, stdout=DEVNULL)
+
+    os.chdir(curDir)
+
 def replaceMappedDrives(inStr):
-    '''This function replaces all instances of each stored drive letter 
+    '''This function replaces all instances of each stored drive letter
     in the format  'i:\' with the full unc path.
-    Caution should be used with this function, especially with long input 
+    Caution should be used with this function, especially with long input
     strings as the combination could occur in other contexts.
     '''
     global UNCDrives
     for drive in UNCDrives.keys():
         inStr = inStr.replace(drive.upper(), UNCDrives[drive])
-    
+
     return inStr
-    
-   
+
+
 def storeUNCDrives():
     '''Condor jobs are run on remote computers which are dynamically logged into.
-    Since this method does not map the the current users lettered drives we 
+    Since this method does not map the the current users lettered drives we
     needed to implement a means of replacing the mapped drive letters in file names
     with the fullly qualified unc path (ie replacing i:\ with \\igskbacb...\)
-    To do this we run the storeUNCDrives once when the sahm package loads.  
+    To do this we run the storeUNCDrives once when the sahm package loads.
     This function parses the 'net use' windows command line utility output to
     extract and store the unc paths to all of the currently mapped unc drives.
     '''
     global UNCDrives
     UNCDrives = {}
     try:
-        ret = subprocess.Popen(["net","use"], stdout=subprocess.PIPE, 
+        ret = subprocess.Popen(["net", "use"], stdout=subprocess.PIPE,
                                universal_newlines=True).communicate()[0].split("\n")
         for line in ret:
             line = line.split()
@@ -238,9 +237,9 @@ def storeUNCDrives():
                     os.path.exists(line[2]):
                     UNCDrives[line[1].lower() + '\\'] = line[2] + "\\"
     except:
-        #this is only intended for Condor jobs running 
-        #at the Fort Collins Scienc Center.  
-        #If this throws any error move along silently.
+        #  this is only intended for Condor jobs running
+        #  at the Fort Collins Scienc Center.
+        #  If this throws any error move along silently.
         pass
 
 def checkIfFolderIsOnNetwork(dirname):
@@ -252,7 +251,7 @@ def checkIfFolderIsOnNetwork(dirname):
     else:
         return True
 
-#def waitForProcessesToFinish(processQueue, maxCount=1):
+#  def waitForProcessesToFinish(processQueue, maxCount=1):
 #    '''Given a list of running processes and a maximum number of running processes
 #    this function waits for enough of the processes have finished to have
 #    the number of running jobs be less that the maximum number of jobs we want.
@@ -262,37 +261,37 @@ def checkIfFolderIsOnNetwork(dirname):
 #            for process in processQueue:
 #                if process.poll() is not None:
 #                    processQueue.remove(process)
-    
+
 def get_process_count(strProcessingMode):
-    '''The number of concurrently running jobs is dependent on the currently 
-    selected processingMode. 
+    '''The number of concurrently running jobs is dependent on the currently
+    selected processingMode.
     If on Condor then send them all and let Condor manage the Queue.
     else we will be running n-1 jobs (this function is only used by PARC now)
     '''
-    
+
     if strProcessingMode == "FORT Condor":
         process_count = multiprocessing.cpu_count() - 1
     elif strProcessingMode == "multiple models simultaneously (1 core each)":
         process_count = multiprocessing.cpu_count() - 1
     else:
         process_count = 1
-    
+
     if process_count < 1:
         process_count = 1
 
     return process_count
-    
+
 def getModelsPath():
     return os.path.join(os.path.dirname(__file__), "Resources", "R_Modules")
 
-#These three functions are used to manage the process pool
+#  These three functions are used to manage the process pool
 def get_pool():
     '''The _pool is a global multiprocessing pool that is used to queue jobs
     '''
     global _process_pool
     return _process_pool
 
-def start_new_pool(processes=1):      
+def start_new_pool(processes=1):
     global _process_pool
     if _process_pool:
         _process_pool.terminate()
@@ -303,7 +302,7 @@ def wait_for_pool_to_finish():
     global _pool_processes
     for process in _pool_processes:
         process.get()
-        
+
 def add_process_to_pool(worker, arglist):
     '''
     '''
@@ -319,42 +318,42 @@ def convert_list_to_cmd_str(inlist):
     for item in inlist:
         item = item.replace('"', '\"')
         if ' ' in item:
-            item =  '"' + item + '"'
+            item = '"' + item + '"'
         outlist.append(item)
     return " ".join(outlist)
-    
+
 
 def launch_cmd(cmd, stdout_fname="", stderr_fname="", async=False):
-    #open the text files we'll be writing our stdOut and stdErr to
+    #  open the text files we'll be writing our stdOut and stdErr to
     if not stdout_fname or not stderr_fname:
         f = tempfile.NamedTemporaryFile(delete=False)
         fname = f.name
         f.close()
         if not stdout_fname:
-            stdout_fname = fname+"stdout.txt"
+            stdout_fname = fname + "stdout.txt"
         if not stderr_fname:
-            stderr_fname = fname+"stderr.txt"
-                    
+            stderr_fname = fname + "stderr.txt"
+
     stdErrFile = open(stderr_fname, 'wb')
     stdOutFile = open(stdout_fname, 'wb')
 
     p = subprocess.Popen(cmd, stderr=stdErrFile, stdout=stdOutFile)
     if not async:
         p.wait()
-        
+
     stdErrFile.close()
     stdOutFile.close()
     errMsg = "\n".join(open(stderr_fname, "r").readlines())
     outMsg = "\n".join(open(stdout_fname, "r").readlines())
     return outMsg, errMsg
 
-#these two functions were pulled from: http://code.activestate.com/recipes/577124-approximately-equal/
+#  these two functions were pulled from: http://code.activestate.com/recipes/577124-approximately-equal/
 def _float_approx_equal(x, y, tol=1e-18, rel=1e-7):
     if tol is rel is None:
         raise TypeError('cannot specify both absolute and relative errors are None')
     tests = []
     if tol is not None: tests.append(tol)
-    if rel is not None: tests.append(rel*abs(x))
+    if rel is not None: tests.append(rel * abs(x))
     assert tests
     return abs(x - y) <= max(tests)
 
@@ -386,12 +385,12 @@ def approx_equal(x, y, *args, **kwargs):
 
     """
     if not (type(x) is type(y) is float):
-        # Skip checking for __approx_equal__ in the common case of two floats.
+        #  Skip checking for __approx_equal__ in the common case of two floats.
         methodname = '__approx_equal__'
-        # Allow the objects to specify what they consider "approximately equal",
-        # giving precedence to x. If either object has the appropriate method, we
-        # pass on any optional arguments untouched.
-        for a,b in ((x, y), (y, x)):
+        #  Allow the objects to specify what they consider "approximately equal",
+        #  giving precedence to x. If either object has the appropriate method, we
+        #  pass on any optional arguments untouched.
+        for a, b in ((x, y), (y, x)):
             try:
                 method = getattr(a, methodname)
             except AttributeError:
@@ -401,12 +400,12 @@ def approx_equal(x, y, *args, **kwargs):
                 if result is NotImplemented:
                     continue
                 return bool(result)
-    # If we get here without returning, then neither x nor y knows how to do an
-    # approximate equal comparison (or are both floats). Fall back to a numeric
-    # comparison.
+    #  If we get here without returning, then neither x nor y knows how to do an
+    #  approximate equal comparison (or are both floats). Fall back to a numeric
+    #  comparison.
     return _float_approx_equal(x, y, *args, **kwargs)
 
-#taken from http://code.activestate.com/recipes/362715-dbf-reader-and-writer/
+#  taken from http://code.activestate.com/recipes/362715-dbf-reader-and-writer/
 def dbfreader(f):
     """Returns an iterator over records in a Xbase DBF file.
 
@@ -418,16 +417,16 @@ def dbfreader(f):
     File should be opened for binary reads.
 
     """
-    # See DBF format spec at:
+    #  See DBF format spec at:
     #     http://www.pgts.com.au/download/public/xbase.htm#DBF_STRUCT
 
-    numrec, lenheader = struct.unpack('<xxxxLH22x', f.read(32))    
+    numrec, lenheader = struct.unpack('<xxxxLH22x', f.read(32))
     numfields = (lenheader - 33) // 32
 
     fields = []
     for fieldno in xrange(numfields):
         name, typ, size, deci = struct.unpack('<11sc4xBB14x', f.read(32))
-        name = name.replace('\0', '')       # eliminate NULs from string   
+        name = name.replace('\0', '')  #  eliminate NULs from string
         fields.append((name, typ, size, deci))
     yield [field[0] for field in fields]
     yield [tuple(field[1:]) for field in fields]
@@ -441,7 +440,7 @@ def dbfreader(f):
     for i in xrange(numrec):
         record = struct.unpack(fmt, f.read(fmtsiz))
         if record[0] != ' ':
-            continue                        # deleted record
+            continue  #  deleted record
         result = []
         for (name, typ, size, deci), value in itertools.izip(fields, record):
             if name == 'DeletionFlag':
@@ -463,7 +462,7 @@ def dbfreader(f):
                 value = float(value)
             result.append(value)
         yield result
-    
+
 def dbfwriter(f, fieldnames, fieldspecs, records):
     """ Return a string suitable for writing directly to a binary dbf file.
 
@@ -480,31 +479,31 @@ def dbfwriter(f, fieldnames, fieldspecs, records):
         size is the field width
         deci is the number of decimal places in the provided decimal object
     Records can be an iterable over the records (sequences of field values).
-    
+
     """
-    # header info
+    #  header info
     ver = 3
     now = datetime.datetime.now()
-    yr, mon, day = now.year-1900, now.month, now.day
+    yr, mon, day = now.year - 1900, now.month, now.day
     numrec = len(records)
     numfields = len(fieldspecs)
     lenheader = numfields * 32 + 33
     lenrecord = sum(field[1] for field in fieldspecs) + 1
     hdr = struct.pack('<BBBBLHH20x', ver, yr, mon, day, numrec, lenheader, lenrecord)
     f.write(hdr)
-                      
-    # field specs
+
+    #  field specs
     for name, (typ, size, deci) in itertools.izip(fieldnames, fieldspecs):
         name = name.ljust(11, '\x00')
         fld = struct.pack('<11sc4xBB14x', name, typ, size, deci)
         f.write(fld)
 
-    # terminator
+    #  terminator
     f.write('\r')
 
-    # records
+    #  records
     for record in records:
-        f.write(' ')                        # deletion flag
+        f.write(' ')  #  deletion flag
         for (typ, size, deci), value in itertools.izip(fieldspecs, record):
             if typ == "N":
                 value = str(value).rjust(size, ' ')
@@ -517,7 +516,7 @@ def dbfwriter(f, fieldnames, fieldspecs, records):
             assert len(value) == size
             f.write(value)
 
-    # End of file
+    #  End of file
     f.write('\x1A')
 
 def covariate_name_is_ok(covname):
@@ -544,15 +543,15 @@ def checkIfModelFinished(model_dir):
                                      if file_name.endswith("_output.txt")][0]
     except IndexError:
         return "Starting ..."
-    
+
     model_text = os.path.join(model_dir, outText)
     try:
         lastLine = open(model_text, 'r').readlines()[-2]
     except IndexError:
         return "Running ..."
-     
+
     if lastLine.startswith("Total time"):
-        return "Completed successfully in " + lastLine[lastLine.find(" = ")+3:]
+        return "Completed successfully in " + lastLine[lastLine.find(" = ") + 3:]
     elif lastLine.startswith("Model Failed"):
         return "Error in model"
     else:

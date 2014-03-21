@@ -79,7 +79,7 @@ except ImportError:
 from sahm_picklists import OutputRaster
 from utils import map_ports
 from SahmSpatialOutputViewer import AnchoredText, MyMapCanvas, \
-    RasterDisplay, fullExtent, view_title_legend, sync_changes, MPL_action
+    RasterDisplay, FullExtentButton, view_title_legend, sync_changes, MPL_action
 from utils import getRasterParams
 from pySAHM.utilities import dbfreader as dbfreader
 
@@ -120,8 +120,8 @@ class GeneralSpatialViewer(SpreadsheetCell):
                     ("colorRamp", '(gov.usgs.sahm:mpl_colormap:Other)', {'defaults':'["jet"]'}),
                     ('categorical', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                     ('threeBand', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
-                    ('dataMin', '(edu.utah.sci.vistrails.basic:Float)'),
-                    ('dataMax', '(edu.utah.sci.vistrails.basic:Float)'),
+                    ('display_min', '(edu.utah.sci.vistrails.basic:Float)'),
+                    ('display_max', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('NoDataValue', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('display_states', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}), ]
 
@@ -139,8 +139,8 @@ class GeneralSpatialViewer(SpreadsheetCell):
             'colorRamp': ("colorRamp", None, True),
             'categorical': ("categorical", None, True),
             'threeBand': ("threeBand", None, True),
-            'dataMin': ("dataMin", None, False),
-            'dataMax': ("dataMax", None, False),
+            'display_min': ("display_min", None, False),
+            'display_max': ("display_max", None, False),
             'NoDataValue': ("NoDataValue", None, False),
             "display_states": ("display_states", None, True)
             }
@@ -165,7 +165,7 @@ class GeneralSpatialViewer(SpreadsheetCell):
 
         inputs['shape_displays'] = []
         for shape_display in self.forceGetInputListFromPort('shape_display'):
-           inputs['shape_displays'].append(shape_display)
+            inputs['shape_displays'].append(shape_display)
 
         self.local_displayAndWait(inputs)
 
@@ -176,7 +176,7 @@ class SpatialViewerCellWidget(QCellWidget):
     """
 
     """
-    def __init__(self, parent=None):
+    def display_max_min_(self, parent=None):
         """ QGISCellWidget(parent: QWidget) -> QGISCellWidget
         Initialize the widget with its central layout
 
@@ -197,8 +197,8 @@ class SpatialViewerCellWidget(QCellWidget):
         self.cmap = matplotlib.cm.jet
         self.categorical = False
         self.threeBand = False
-        self.dataMin = "ExtractFromFile"
-        self.dataMax = "pointsColor"
+        self.display_min = "ExtractFromFile"
+        self.display_max = "pointsColor"
         self.NoDataValue = "ExtractFromFile"
         self.display_states = True
 
@@ -219,7 +219,7 @@ class SpatialViewerCellWidget(QCellWidget):
             else:
                 self.__dict__[input] = inputs[input]
 
-        for input in ['dataMin' , 'dataMax', 'NoDataValue']:
+        for input in ['display_min' , 'display_max', 'NoDataValue']:
             if inputs.has_key(input) and \
             type(inputs[input]) is str and \
             inputs[input] != "ExtractFromFile":
@@ -470,11 +470,11 @@ class SpatialViewerCellWidget(QCellWidget):
         elif self.threeBand:
             raster_plot = self.axes.imshow(raster_array, origin='lower', extent=self.getDataExtent())
         else:
-            min, max = utils.getrasterminmax(self.raster_fname)
-            if not self.dataMin == "ExtractFromFile":
-                min = float(self.dataMin)
-            if not self.dataMax == "ExtractFromFile":
-                max = float(self.dataMax)
+            min, max = SpatialUtilities.get_raster_minmax(self.raster_fname)
+            if not self.display_min == "ExtractFromFile":
+                min = float(self.display_min)
+            if not self.display_max == "ExtractFromFile":
+                max = float(self.display_max)
 
             rmax = max
             rmin = min
@@ -744,7 +744,7 @@ class ViewLayerAction(QtGui.QAction):
 
             cell.update()
 
-class view_states(QtGui.QAction):
+class ViewStateBoundariesButton(QtGui.QAction):
     def __init__(self, parent=None):
         icon = os.path.abspath(os.path.join(
                     os.path.dirname(__file__), "data", "Images", "states.png"))
@@ -788,7 +788,7 @@ class GeneralSpatialViewerToolBar(QCellToolBar):
         actions = []
 
         self.appendAction(sync_changes(self))
-        self.appendAction(view_states(self))
+        self.appendAction(ViewStateBoundariesButton(self))
         lyrs_label = QtGui.QLabel()
 #        lyrs_label.setText("Layers:")
 #        self.appendWidget(lyrs_label)
@@ -805,7 +805,7 @@ class GeneralSpatialViewerToolBar(QCellToolBar):
 
 
 #        self.appendAction(viewTitleLegend(self))
-        self.appendAction(fullExtent(self))
+        self.appendAction(FullExtentButton(self))
 
         mplActions = [{"icon":"move.png", "checked":True, "label":"Pan",
                      "tooltip":"Pan axes with left mouse, zoom with right",
@@ -847,7 +847,7 @@ class GeneralSpatialViewerToolBar(QCellToolBar):
                 action.setIcon(QtGui.QIcon(icon))
             if action.text() == 'Pan':
                 action.setChecked(True)
-            elif type(action) == view_states:
+            elif type(action) == ViewStateBoundariesButton:
                 action.setEnabled(not fiona is None)
                 action.setChecked(sw.display_states)
             self.appendAction(action)

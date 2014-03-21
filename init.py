@@ -51,6 +51,8 @@ import random
 import copy
 import time
 
+import numpy as np
+
 try:
     from vistrails.core.cache.hasher import sha_hash
     from vistrails.core.modules.vistrails_module import Module, ModuleError, ModuleConnector
@@ -361,38 +363,48 @@ class PredictorListFile(Module):
                 self.hasInputFromPort("addPredictor")):
             raise ModuleError(self, "No inputs or CSV file provided")
 
-        output_fname = utils.mknextfile(prefix='PredictorList_', suffix='.csv')
         if self.hasInputFromPort("csvFileList"):
-            csv_input = utils.getFileRelativeToCurrentVT(self.getInputFromPort("csvFileList").name, self)
-            if os.path.exists(csv_input):
-                shutil.copy(csv_input, output_fname)
-                output_file = open(output_fname, 'ab')
-                csv_writer = csv.writer(output_file)
+            key_inputs = [utils.getFileRelativeToCurrentVT(self.getInputFromPort("csvFileList").name, self)]
+        else:
+            key_inputs = []
+        output_fname, already_run = utils.make_next_file_complex(self,
+                                    prefix='PredictorList_', suffix='.csv',
+                                    key_inputs=key_inputs)
+
+        if already_run:
+            writetolog("No change in inputs or paramaters using previous run of PredictorListFile", True)
+        else:
+            if self.hasInputFromPort("csvFileList"):
+                csv_input = utils.getFileRelativeToCurrentVT(self.getInputFromPort("csvFileList").name, self)
+                if os.path.exists(csv_input):
+                    shutil.copy(csv_input, output_fname)
+                    output_file = open(output_fname, 'ab')
+                    csv_writer = csv.writer(output_file)
+                else:
+                    #  create an empty file to start with.
+                    output_file = open(output_fname, 'wb')
+                    csv_writer = csv.writer(output_file)
+                    csv_writer.writerow(["file", "Resampling", "Aggregation"])
             else:
                 #  create an empty file to start with.
                 output_file = open(output_fname, 'wb')
                 csv_writer = csv.writer(output_file)
                 csv_writer.writerow(["file", "Resampling", "Aggregation"])
-        else:
-            #  create an empty file to start with.
-            output_file = open(output_fname, 'wb')
-            csv_writer = csv.writer(output_file)
-            csv_writer.writerow(["file", "Resampling", "Aggregation"])
 
-        if self.hasInputFromPort("addPredictor"):
-            p_list = self.forceGetInputListFromPort("addPredictor")
-            for p in p_list:
-                if p.hasInputFromPort('resampleMethod'):
-                    resMethod = p.getInputFromPort('resampleMethod')
-                else:
-                    resMethod = "NearestNeighbor"
-                if p.hasInputFromPort('aggregationMethod'):
-                    aggMethod = p.getInputFromPort('aggregationMethod')
-                else:
-                    aggMethod = "Mean"
-                csv_writer.writerow([os.path.normpath(p.name), resMethod, aggMethod])
-        output_file.close()
-        del csv_writer
+            if self.hasInputFromPort("addPredictor"):
+                p_list = self.forceGetInputListFromPort("addPredictor")
+                for p in p_list:
+                    if p.hasInputFromPort('resampleMethod'):
+                        resMethod = p.getInputFromPort('resampleMethod')
+                    else:
+                        resMethod = "NearestNeighbor"
+                    if p.hasInputFromPort('aggregationMethod'):
+                        aggMethod = p.getInputFromPort('aggregationMethod')
+                    else:
+                        aggMethod = "Mean"
+                    csv_writer.writerow([os.path.normpath(p.name), resMethod, aggMethod])
+            output_file.close()
+            del csv_writer
 
         output_file = utils.create_file_module(output_fname, module=self)
         self.setResult('RastersWithPARCInfoCSV', output_file)
@@ -526,23 +538,13 @@ class Model(Module):
             self.args_dict['maxent_path'] = maxent_path
             self.args_dict['maxent_args'] = self.maxent_args
 
-        #  FIXME this should eventually be done by VisTrails itself,
-        #  but there is an issue where self.signature is not recomputed
-        #  for loops
-        h = sha_hash()
-        h.update(self.signature)
-        for key in sorted(self.inputPorts):
-            if self.hasInputFromPort(key):
-                h.update(bytes(self.getInputFromPort(key)))
-        signature = h.hexdigest()
+        self.args_dict['rc'] = utils.MDSresponseCol(mdsFile)
+        self.args_dict['cur_processing_mode'] = configuration.cur_processing_mode
 
-        self.output_dname = utils.get_dir_from_hash(signature)
-        if self.output_dname is None:
-            self.output_dname = utils.mknextdir(prefix)
-            utils.write_hash_entry(signature, self.output_dname)
 
-        #  make a copy of the mds file used in the output folder
+        self.output_dname, already_run = utils.make_next_file_complex(self, prefix, file_or_dir='dir')
         copy_mds_fname = os.path.join(self.output_dname, os.path.split(mdsFile)[1])
+
         shutil.copyfile(mdsFile, copy_mds_fname)
         self.args_dict["c"] = copy_mds_fname
 
@@ -555,8 +557,6 @@ class Model(Module):
             writetolog("    seed used for " + self.abbrev + " = " + str(self.args_dict['seed']))
 
         self.args_dict['o'] = self.output_dname
-        self.args_dict['rc'] = utils.MDSresponseCol(mdsFile)
-        self.args_dict['cur_processing_mode'] = configuration.cur_processing_mode
 
         #  This give previously launched models time to finish writing their
         #  logs so we don't get a lock
@@ -603,7 +603,7 @@ class GLM(Model):
     _input_ports.extend([('UsePseudoAbs', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                          ('SelectBestPredSubset', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
                          ('SimplificationMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["AIC"]', 'optional':True}),
-                         ('SquaredTerms', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
+                         ('SquaredTerms', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
                          ])
     def __init__(self):
         global models_path
@@ -904,10 +904,7 @@ class MDSBuilder(Module):
                     'Seed': ('seed', None, False)}
 
         MDSParams = utils.map_ports(self, port_map)
-        MDSParams['outputMDS'] = utils.mknextfile(prefix='MergedDataset_', suffix='.csv')
 
-        #  allow multiple CSV of inputs to be provided.
-        #  if more than one then combine into a single CSV before sending to MDSBuilder
         inputs_csvs = self.forceGetInputListFromPort('RastersWithPARCInfoCSV')
         if len(inputs_csvs) == 0:
             raise ModuleError(self, "Must supply at least one 'RastersWithPARCInfoCSV'/nThis is the output from the PARC module")
@@ -919,23 +916,34 @@ class MDSBuilder(Module):
             inputs_csv = utils.getFileRelativeToCurrentVT(inputs_csvs[0].name, self)
         MDSParams['inputsCSV'] = inputs_csv
 
-        #  inputsCSV = utils.path_port(self, 'RastersWithPARCInfoCSV')
+            #  inputsCSV = utils.path_port(self, 'RastersWithPARCInfoCSV')
+        key_inputs = []
+        for input in ['fieldData', 'inputsCSV']:
+            if MDSParams.has_key(input):
+                key_inputs.append(MDSParams[input])
 
-        ourMDSBuilder = MDSB.MDSBuilder()
-        utils.PySAHM_instance_params(ourMDSBuilder, MDSParams)
+        MDSParams['outputMDS'], already_run = utils.make_next_file_complex(self,
+                                        prefix='MergedDataset_', suffix='.csv',
+                                        key_inputs=key_inputs)
 
-        writetolog("    inputsCSV=" + ourMDSBuilder.inputsCSV, False, False)
-        writetolog("    fieldData=" + ourMDSBuilder.fieldData, False, False)
-        writetolog("    outputMDS=" + ourMDSBuilder.outputMDS, False, False)
+        if already_run:
+            writetolog("No change in inputs or paramaters using previous run of MDS Builder", True)
+        else:
+            ourMDSBuilder = MDSB.MDSBuilder()
+            utils.PySAHM_instance_params(ourMDSBuilder, MDSParams)
 
-        try:
-            ourMDSBuilder.run()
-        except TrappedError as e:
-            raise ModuleError(self, e.message)
-        except:
-            utils.informative_untrapped_error(self, "MDSBuilder")
+            writetolog("    inputsCSV=" + ourMDSBuilder.inputsCSV, False, False)
+            writetolog("    fieldData=" + ourMDSBuilder.fieldData, False, False)
+            writetolog("    outputMDS=" + ourMDSBuilder.outputMDS, False, False)
 
-        output_file = utils.create_file_module(ourMDSBuilder.outputMDS, module=self)
+            try:
+                ourMDSBuilder.run()
+            except TrappedError as e:
+                raise ModuleError(self, e.message)
+            except:
+                utils.informative_untrapped_error(self, "MDSBuilder")
+
+        output_file = utils.create_file_module(MDSParams['outputMDS'], module=self)
         self.setResult('mdsFile', output_file)
 
 class MDSBuilder_vector(Module):
@@ -1036,67 +1044,74 @@ class FieldDataQuery(Module):
             'Query': ('query', None, False), }
 
         FDQParams = utils.map_ports(self, port_map)
-        FDQOutput = utils.mknextfile(prefix='FDQ_', suffix='.csv')
+#          FDQOutput = utils.mknextfile(prefix='FDQ_', suffix='.csv')
 
         infile = open(FDQParams['fieldData'], "rb")
         csvReader = csv.DictReader(infile)
 
-        outfile = open(FDQOutput, "wb")
-        csvwriter = csv.writer(outfile)
-        if FDQParams["response_type"] == 'Count':
-            responsetype = 'responseCount'
+        FDQOutput, already_run = utils.make_next_file_complex(self,
+                                        prefix='FDQ_', suffix='.csv',
+                                        key_inputs=[FDQParams['fieldData']])
+
+        if already_run:
+            writetolog("No change in inputs or paramaters using previous run of FieldDataQuery", True)
         else:
-            responsetype = 'responseBinary'
-
-        csvwriter.writerow(['X', 'Y', responsetype, "input=" + infile.name])
-
-        header = csvReader.fieldnames
-        x_key = self.find_column(header, FDQParams['x_col'])
-        y_key = self.find_column(header, FDQParams['y_col'])
-        res_key = self.find_column(header, FDQParams['res_col'])
-
-        use_query = False
-        if self.hasInputFromPort('Query'):
-            use_query = True
-            query = FDQParams['query']
-            #  check if we're using a simple (equality) or complex (python syntax) query
-            use_complex = any(s in query for s in ['[' + s + ']' for s in header])
-
-        if self.hasInputFromPort('Query_column'):
-            query_col_key = self.find_column(header, FDQParams['query_col'])
-        else:
-            query_col_key = None
-
-        for row in csvReader:
-            if not use_query:
-                include_row = True
-            elif use_complex:
-                include_row = self.complex_query(row, query)
+            outfile = open(FDQOutput, "wb")
+            csvwriter = csv.writer(outfile)
+            if FDQParams["response_type"] == 'Count':
+                responsetype = 'responseCount'
             else:
-                include_row = self.simple_query(row, query, query_col_key)
+                responsetype = 'responseBinary'
 
-            if include_row:
-                response = row[res_key]
-                if response.lower() in ["1", "true", "t", "present", "presence", str(FDQParams['res_pres_val']).lower()]:
-                    response = 1
-                elif response.lower() in ["0", "false", "f", "absent", "absense", str(FDQParams['res_abs_val']).lower()]:
-                    response = 0
-                elif responsetype == 'responseBinary':
-                    try:
-                        response = int(response)
-                        if response > 0:
-                            response = 1
-                    except ValueError:
-                        response = row[res_key]
+            csvwriter.writerow(['X', 'Y', responsetype, "input=" + infile.name])
+
+            header = csvReader.fieldnames
+            x_key = self.find_column(header, FDQParams['x_col'])
+            y_key = self.find_column(header, FDQParams['y_col'])
+            res_key = self.find_column(header, FDQParams['res_col'])
+
+            use_query = False
+            if self.hasInputFromPort('Query'):
+                use_query = True
+                query = FDQParams['query']
+                #  check if we're using a simple (equality) or complex (python syntax) query
+                use_complex = any(s in query for s in ['[' + s + ']' for s in header])
+
+            if self.hasInputFromPort('Query_column'):
+                query_col_key = self.find_column(header, FDQParams['query_col'])
+            else:
+                query_col_key = None
+
+            for row in csvReader:
+                if not use_query:
+                    include_row = True
+                elif use_complex:
+                    include_row = self.complex_query(row, query)
                 else:
+                    include_row = self.simple_query(row, query, query_col_key)
+
+                if include_row:
                     response = row[res_key]
+                    if response.lower() in ["1", "true", "t", "present", "presence", str(FDQParams['res_pres_val']).lower()]:
+                        response = 1
+                    elif response.lower() in ["0", "false", "f", "absent", "absense", str(FDQParams['res_abs_val']).lower()]:
+                        response = 0
+                    elif responsetype == 'responseBinary':
+                        try:
+                            response = int(response)
+                            if response > 0:
+                                response = 1
+                        except ValueError:
+                            response = row[res_key]
+                    else:
+                        response = row[res_key]
 
-                csvwriter.writerow([row[x_key],
-                                    row[y_key],
-                                    response])
+                    csvwriter.writerow([row[x_key],
+                                        row[y_key],
+                                        response])
 
-        del infile
-        del outfile
+            del infile
+            del outfile
 
         output_file = utils.create_file_module(FDQOutput, module=self)
         self.setResult('fieldData', output_file)
@@ -1166,16 +1181,27 @@ class FieldDataAggregateAndWeight(Module):
             'FD_EPSG_projection': ('epsg', None, False)}
 
         FDAWParams = utils.map_ports(self, port_map)
-        output_fname = utils.mknextfile(prefix='FDAW_', suffix='.csv')
-        writetolog("    output_fname=" + output_fname, True, False)
-        FDAWParams['output'] = output_fname
+#          output_fname = utils.mknextfile(prefix='FDAW_', suffix='.csv')
 
-        ourFDAW = FDAW.FieldDataQuery()
-        utils.PySAHM_instance_params(ourFDAW, FDAWParams)
-        ourFDAW.processCSV()
+        template_fname = FDAWParams['templatefName']
+        if os.path.isdir(template_fname):
+            template_fname = os.path.join(template_fname, "hdr.adf")
+        output_fname, already_run = utils.make_next_file_complex(self,
+                                        prefix='FDAW_', suffix='.csv',
+                                        key_inputs=[FDAWParams['csv'], template_fname])
+
+        if already_run:
+            writetolog("No change in inputs or paramaters using previous run of FieldDataAggregateAndWeight", True)
+        else:
+            writetolog("    output_fname=" + output_fname, True, False)
+            FDAWParams['output'] = output_fname
+
+            ourFDAW = FDAW.FieldDataQuery()
+            utils.PySAHM_instance_params(ourFDAW, FDAWParams)
+            ourFDAW.processCSV()
 
         output_file = utils.create_file_module(output_fname, module=self)
-        writetolog("Finished running FieldDataQuery", True)
+        writetolog("Finished running FieldDataAggregateAndWeight", True)
         self.setResult('fieldData', output_file)
 
 class PARC(Module):
@@ -1526,14 +1552,13 @@ class ModelEvaluationSplit(Module):
     def compute(self):
         writetolog("\nGenerating Model Evaluation split ", True)
         inputMDS = utils.getFileRelativeToCurrentVT(utils.dir_path_value(self.forceGetInputFromPort('inputMDS', [])), self)
-        outputMDS = utils.mknextfile(prefix='ModelEvaluation_Split_', suffix='.csv')
 
         global models_path
 
         #  args = "i=" + '"' + inputMDS + '"' + " o=" + '"' + outputMDS + '"'
         #  args += " rc=" + utils.MDSresponseCol(inputMDS)
         args = {'i': inputMDS,
-                'o': outputMDS,
+
                 'rc': utils.MDSresponseCol(inputMDS)}
         if (self.hasInputFromPort("trainingProportion")):
             try:
@@ -1563,7 +1588,12 @@ class ModelEvaluationSplit(Module):
         writetolog("    seed used for Split = " + str(seed))
         args['seed'] = str(seed)
 
-        utils.run_R_script("TestTrainSplit.r", args, self, new_r_path=configuration.r_path)
+        outputMDS, already_run = utils.make_next_file_complex(self,
+                                prefix='ModelEvaluation_Split_', suffix='.csv', key_inputs=[inputMDS])
+        args['o'] = outputMDS
+
+        if not already_run:
+            utils.run_R_script("TestTrainSplit.r", args, self, new_r_path=configuration.r_path)
 
         output_file = utils.create_file_module(outputMDS, module=self)
         writetolog("Finished Model Evaluation split ", True)
@@ -1591,14 +1621,12 @@ class ModelSelectionSplit(Module):
     def compute(self):
         writetolog("\nGenerating Model Selection split ", True)
         inputMDS = utils.getFileRelativeToCurrentVT(utils.dir_path_value(self.forceGetInputFromPort('inputMDS', []), self))
-        outputMDS = utils.mknextfile(prefix='modelSelection_split_', suffix='.csv')
 
         global models_path
 
         #  args = "i=" + '"' + inputMDS + '"' + " o=" + '"' + outputMDS + '"'
         #  args += " rc=" + utils.MDSresponseCol(inputMDS)
         args = {'i': inputMDS,
-                'o': outputMDS,
                 'rc': utils.MDSresponseCol(inputMDS)}
         if (self.hasInputFromPort("trainingProportion")):
             try:
@@ -1630,7 +1658,12 @@ class ModelSelectionSplit(Module):
         #  args += " seed=" + str(seed)
         args['seed'] = str(seed)
 
-        utils.run_R_script("TestTrainSplit.r", args, self, new_r_path=configuration.r_path)
+        outputMDS, already_run = utils.make_next_file_complex(self,
+                                prefix='modelSelection_split_', suffix='.csv', key_inputs=[inputMDS])
+        args['o'] = outputMDS
+
+        if not already_run:
+            utils.run_R_script("TestTrainSplit.r", args, self, new_r_path=configuration.r_path)
 
         output_file = utils.create_file_module(outputMDS, module=self)
         writetolog("Finished Model Selection split ", True)
@@ -1666,9 +1699,6 @@ class ModelSelectionCrossValidation(Module):
 
         argsDict = utils.map_ports(self, port_map)
 
-        outputMDS = utils.mknextfile(prefix='modelSelection_cv_', suffix='.csv')
-
-        argsDict["o"] = outputMDS
         argsDict["rc"] = utils.MDSresponseCol(argsDict["i"])
 
         if argsDict["nf"] <= 0:
@@ -1683,8 +1713,12 @@ class ModelSelectionCrossValidation(Module):
 
         writetolog("    seed used for Split = " + str(seed))
         argsDict["seed"] = str(seed)
+        outputMDS, already_run = utils.make_next_file_complex(self,
+                                prefix='modelSelection_cv_', suffix='.csv', key_inputs=[argsDict['i']])
+        argsDict["o"] = outputMDS
 
-        utils.run_R_script("CrossValidationSplit.r", argsDict, self, new_r_path=configuration.r_path)
+        if not already_run:
+            utils.run_R_script("CrossValidationSplit.r", argsDict, self, new_r_path=configuration.r_path)
 
         output_file = utils.create_file_module(outputMDS, module=self)
         writetolog("Finished Cross Validation split ", True)

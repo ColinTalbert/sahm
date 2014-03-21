@@ -403,9 +403,9 @@ class PARC(object):
         if method == "Mean":
             return a.reshape(sh).mean(-1).mean(1)
         elif method == "Min":
-            return a.reshape(sh).min(-1).min(1)
+            return a.reshape(sh).data_min(-1).data_min(1)
         elif method == "Max":
-            return a.reshape(sh).max(-1).max(1)
+            return a.reshape(sh).data_max(-1).data_max(1)
         elif method == "STD":
             sh2 = sh[0], sh[2], sh[1] * sh[3]
             return np.rollaxis(a.reshape(sh), 1, -1).reshape(sh2).std(-1)
@@ -553,8 +553,11 @@ class PARC(object):
 
         output_csv = os.path.join(self.out_dir, "PARC_Files.csv")
         if os.path.exists(output_csv):
+            existing_files = np.genfromtxt(output_csv, dtype='S1000', delimiter=",", skip_header=True)[:, 4]
+            existing_files = [os.path.abspath(f) for f in existing_files]
             output = csv.writer(open(output_csv, "ab"))
         else:
+            existing_files = []
             output = csv.writer(open(output_csv, "wb"))
             output.writerow(["PARCOutputFile", "Categorical", "Resampling",
                              "Aggregation", "OriginalFile",
@@ -637,7 +640,8 @@ class PARC(object):
                                                     short_name + ".tif"))
             outputrow = [file_name] + row[1:4] + [os.path.abspath(row[0]),
                                                  os.path.abspath(self.out_dir)]
-            output.writerow(outputrow)
+            if input_file not in existing_files:
+                output.writerow(outputrow)
         del output
 
         if input_file_errors != "":
