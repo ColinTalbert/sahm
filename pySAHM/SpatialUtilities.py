@@ -192,8 +192,42 @@ class SAHMRaster():
         col, row = self.convertCoordsToColRow(x, y)
         return self.getPixelValueFromIndex(col, row)
 
-    def getBlock(self, row, col, numCols, numRows):
-        data = self.band.ReadAsArray(row, col, numCols, numRows)
+    def get_block_bbox(self, bbox, win_xsize=None, win_ysize=None):
+        '''returns a chunk of data specified with a bbox
+        bbox format is [minX, minY, maxX, maxY]
+        the optional win size variables allow for downsampling of data returned
+        nodata values are masked off
+        '''
+        leftcol, bottomrow = self.convertCoordsToColRow(bbox[0], bbox[1])
+        rightcol, toprow = self.convertCoordsToColRow(bbox[2], bbox[3])
+
+        return self.getBlock(toprow, leftcol,
+                             rightcol - leftcol, bottomrow - toprow,
+                             win_xsize, win_ysize)
+
+    def get_bbox_data_bounds(self, bbox):
+        '''returns a bbox of the pixels returned from a get_block_bbox call
+        '''
+        leftcol, bottomrow = self.convertCoordsToColRow(bbox[0], bbox[1])
+        rightcol, toprow = self.convertCoordsToColRow(bbox[2], bbox[3])
+
+        west, north = self.convertColRowToCoords(leftcol, toprow)
+        east, south = self.convertColRowToCoords(rightcol, bottomrow)
+
+        east += self.xScale
+        south += self.yScale
+
+        return west, east, south, north
+
+
+    def getBlock(self, row, col, numCols, numRows,
+                                                win_xsize=None, win_ysize=None):
+        '''Gets a specified chunk of data from our raster
+        the optional win size variables allow for downsampling of data returned
+        nodata values are masked off
+        '''
+        data = self.band.ReadAsArray(col, row, numCols, numRows,
+                                                        win_xsize, win_ysize)
         ndMask = np.ma.masked_array(data, mask=(data == self.NoData))
         return ndMask
 
@@ -292,7 +326,6 @@ def mds_to_shape(MDSFile, outputfolder):
     fields = {}
     for field in header1:
         field_name = Normalized_field_name(field, fields)
-        print field_name
         fields[field_name] = field
         if field == "Split":
             #  this is the test training split field that we add
@@ -451,6 +484,48 @@ def GDALToNPDataType(GDALdatatype, signedByte=False):
                 "CFloat64":np.float64,
                 }
     return crossWalk[gdal.GetDataTypeName(GDALdatatype)]
+
+def get_raster_minmax(filename):
+    '''return the min and max value from a raster.
+    This is not nearly as easy as it should be.
+    This routine tries a variety of strategies to get these
+    '''
+    dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
+    band = dataset.GetRasterBand(1)
+    nodata = getNDVal(filename)
+
+    _min = band.GetMinimum()
+    _max = band.GetMaximum()
+
+    if _min is None or _max is None or _min == band.GetNoDataValue() or \
+    _min == nodata:
+        band.SetNoDataValue(float(nodata))
+        band.ComputeStatistics(True)
+        _min, _max = band.ComputeRasterMinMax(1)
+
+    if _min == band.GetNoDataValue():
+        _min = 0
+
+    return (_min, _max)
+    dataset = None
+
+def getNDVal(filename):
+    dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
+    band = dataset.GetRasterBand(1)
+
+    NDValue = band.GetNoDataValue()
+    band.ComputeStatistics(True)
+    min_pixel = band.GetMinimum()
+
+    if utilities.approx_equal(min_pixel, -3.399999999999999961272e+38):
+        NDValue = min_pixel
+        band.SetNoDataValue(float(min_pixel))
+        band.ComputeStatistics(True)
+
+
+
+    dataset = None
+    return NDValue
 
 def getAggregateTargetCellSize(sourceRaster, templateRaster):
     """

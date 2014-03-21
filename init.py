@@ -96,7 +96,10 @@ import pySAHM.utilities as utilities
 import pySAHM.SpatialUtilities as SpatialUtilities
 from SahmOutputViewer import SAHMModelOutputViewerCell
 from SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
-from GeneralSpatialViewer import GeneralSpatialViewer
+#  from GeneralSpatialViewer import GeneralSpatialViewer
+
+from spatial_modules import BaseGeoViewerCell, GeoSpatialViewerCell, RasterLayer, \
+                            VectorLayer, PolyLayer, PointLayer, LineLayer
 from sahm_picklists import ResponseType, AggregationMethod, \
         ResampleMethod, PointAggregationMethod, ModelOutputType, RandomPointType, \
         OutputRaster, mpl_colormap, T_O_M
@@ -2309,7 +2312,17 @@ _modules = generate_namespaces({'DataInput': [
                                           BackgroundSurfaceGenerator
                                           ],
                                 'GeospatialTools': [(Reclassifier, {'configureWidgetType': ReclassifierConfiguration}),
-                                                    CategoricalToContinuous
+                                                    CategoricalToContinuous,
+                                                    (GeoSpatialViewerCell, {'moduleColor':output_color,
+                                                           'moduleFringe':output_fringe}),
+                                                    (RasterLayer, {'moduleColor':INPUT_COLOR,
+                                                           'moduleFringe':INPUT_FRINGE}),
+                                                    (PolyLayer, {'moduleColor':INPUT_COLOR,
+                                                           'moduleFringe':INPUT_FRINGE}),
+                                                    (PointLayer, {'moduleColor':INPUT_COLOR,
+                                                           'moduleFringe':INPUT_FRINGE}),
+#                                                      (LineLayer, {'moduleColor':INPUT_COLOR,
+#                                                             'moduleFringe':INPUT_FRINGE}),
                                                     ],
                                 'Models': [(GLM, {'moduleColor':model_color,
                                                            'moduleFringe':model_fringe}),
@@ -2325,6 +2338,7 @@ _modules = generate_namespaces({'DataInput': [
                                                            'moduleFringe':model_fringe})
                                            ],
                                 'Other':  [(Model, {'abstract': True}),
+                                           (VectorLayer, {'abstract': True}),
                                            (ResampleMethod, {'abstract': True}),
                                            (AggregationMethod, {'abstract': True}),
                                            (PredictorList, {'abstract': True}),
@@ -2337,6 +2351,7 @@ _modules = generate_namespaces({'DataInput': [
                                            (OutputRaster, {'abstract': True}),
                                            (mpl_colormap, {'abstract': True}),
                                            (T_O_M, {'abstract': True}),
+                                           (BaseGeoViewerCell, {'abstract': True}),
 #                                           (TextFile, {'configureWidgetType': TextFileConfiguration}),
 #                                           (CSVTextFile, {'configureWidgetType': CSVTextFileConfiguration})
                                            ],
@@ -2344,8 +2359,8 @@ _modules = generate_namespaces({'DataInput': [
                                                            'moduleFringe':output_fringe}),
                                           (SAHMSpatialOutputViewerCell, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe}),
-                                           (GeneralSpatialViewer, {'moduleColor':output_color,
-                                                           'moduleFringe':output_fringe}),
+#                                             (GeneralSpatialViewer, {'moduleColor':output_color,
+#                                                             'moduleFringe':output_fringe}),
 #                                             (PointShapefile, {'moduleColor':output_color,
 #                                                             'moduleFringe':output_fringe}),
 #                                            (PolyShapefile, {'moduleColor':output_color,
