@@ -167,7 +167,7 @@ class GeoSpatialViewerCell(BaseGeoViewerCell):
     _input_ports.extend([ ("raster_layers",
                            "(edu.utah.sci.vistrails.basic:Dictionary)")])
 
-class SpatialViewerCellWidget(QCellWidget):
+class SpatialViewerCellWidgetBase(QCellWidget):
     """
 
     """
@@ -210,7 +210,7 @@ class SpatialViewerCellWidget(QCellWidget):
 
         self.display_states = inputs["display_states"]
 
-        self.on_draw(view_extent=self.get_max_extent())
+        self.on_draw_base(view_extent=self.get_max_extent())
 
 #          self.maxXlim, self.maxYlim = self.getMaxDisplayExtent()
 #          self.maxXlim = [self.getMaxExtent()[0], self.getMaxExtent()[1]]
@@ -221,15 +221,7 @@ class SpatialViewerCellWidget(QCellWidget):
         self.fig.canvas.draw()
         self.update()
 
-    def load_layers(self):
-        self.vector_layers = self.inputs['vector_layers']
-
-        self.set_raster(self.inputs['raster_layers'][0])
-#          self.cur_raster = SpatialUtilities.SAHMRaster(self.raster_layer['raster_file'])
-#          self.maxExtent = [self.cur_raster.west, self.cur_raster.east,
-#                                 self.cur_raster.south, self.cur_raster.north]
-
-    def on_draw(self, view_extent=None):
+    def on_draw_base(self, view_extent=None):
         """ Completely clears then redraws the figure
         There's probably a more efficient way to do this.
         """
@@ -284,7 +276,7 @@ class SpatialViewerCellWidget(QCellWidget):
 #          self.axes.set_ylim(display_extent[2:], emit=False)
 #          self.axes.set_xlim(display_extent[:2], emit=False)
 
-    def set_raster(self, raster_kwargs):
+    def set_raster_base(self, raster_kwargs):
         '''The raster being displayed sets the data_max extent and projection for our
         map.  There can be only one and switching it requires recreating the
         whole shooting match. Set it up here
@@ -319,10 +311,6 @@ class SpatialViewerCellWidget(QCellWidget):
                                             cmap=self.rasterdisplay_layer.cmap,
                                             norm=norm, origin='upper',
                                             extent=xlim_clip + ylim_clip)
-
-    def set_toolbars(self):
-        self.toolBarType = GeneralSpatialViewerToolBar
-        self.controlBarType = GeneralSpatialViewerToolBar
 
     def create_main_frame(self):
         self.setFocusPolicy(QtCore.Qt.ClickFocus)
@@ -623,7 +611,7 @@ class SpatialViewerCellWidget(QCellWidget):
         SAHMspatials = []
         for (row, col) in cells:
             cell = sheet.getCell(row, col)
-            if isinstance(cell, SpatialViewerCellWidget):
+            if isinstance(cell, SpatialViewerCellWidgetBase):
                 SAHMspatials.append(cell)
         return SAHMspatials
 
@@ -690,6 +678,24 @@ class SpatialViewerCellWidget(QCellWidget):
         for spatialViewer in self.get_active_cells():
             spatialViewer.set_extent(self.axes.get_xlim(), self.axes.get_ylim())
             spatialViewer.map_canvas.draw()
+
+
+
+
+class SpatialViewerCellWidget(SpatialViewerCellWidgetBase):
+    '''
+    '''
+    def set_toolbars(self):
+        self.toolBarType = GeneralSpatialViewerToolBar
+        self.controlBarType = GeneralSpatialViewerToolBar
+
+    def load_layers(self):
+        self.vector_layers = self.inputs['vector_layers']
+
+        self.set_raster_base(self.inputs['raster_layers'][0])
+
+    def on_draw(self, view_extent=None):
+        SpatialViewerCellWidgetBase.on_draw_base(self, view_extent)
 
 class ViewLayerAction(QtGui.QAction):
     def __init__(self, action_dict, parent=None):
@@ -1020,7 +1026,7 @@ class RasterLayer(Module):
     _input_ports = [("raster_file", '(edu.utah.sci.vistrails.basic:Path)'),
                     ("cmap", '(gov.usgs.sahm:mpl_colormap:Other)', {'defaults':'["jet"]'}),
                     ('categorical', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
-                    ('threeBand', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+#                      ('threeBand', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                     ('display_min', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('display_max', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('NoDataValue', '(edu.utah.sci.vistrails.basic:Float)'), ]
@@ -1030,7 +1036,7 @@ class RasterLayer(Module):
     port_map = {'raster_file':('raster_file', utils.get_filename_relative, True),
                     'cmap': ("cmap", None, True),
                     'categorical': ("categorical", None, True),
-                    'threeBand': ("threeBand", None, True),
+#                      'threeBand': ("threeBand", None, True),
                     'display_min': ("display_min", None, False),
                     'display_max': ("display_max", None, False),
                     'NoDataValue': ("NoDataValue", None, False),
@@ -1049,12 +1055,12 @@ class VectorLayer(Module):
     that can be added to a GeneralSpatialViewerCell as an overlay to a RasterFile
     '''
     _input_ports = [('input_file', '(edu.utah.sci.vistrails.basic:File)', {'optional':False}),
-                    ('line_color', '(edu.utah.sci.vistrails.basic:Color)', {'optional':False}),
-                    ('fill_color', '(edu.utah.sci.vistrails.basic:Color)', {'optional':False}),
-                    ('line_width', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["2"]', 'optional':False}),
+                    ('line_color', '(edu.utah.sci.vistrails.basic:Color)', {'optional':True}),
+                    ('fill_color', '(edu.utah.sci.vistrails.basic:Color)', {'optional':True}),
+                    ('line_width', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["1"]', 'optional':False}),
                     ('alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["1.0"]', 'optional':False}),
-                    ('query', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'[""]', 'optional':False}),
-                    ('draw_order', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["1"]', 'optional':False}), ]
+                    ('query', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'[""]', 'optional':True}),
+                    ('draw_order', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["1"]', 'optional':True}), ]
     _output_ports = [('display_dict', '(edu.utah.sci.vistrails.basic:Dictionary)')]
 
     def __init__(self):
@@ -1088,14 +1094,14 @@ class PointLayer(VectorLayer):
     _input_ports.extend([('marker', '(edu.utah.sci.vistrails.basic:String)',
                           {'defaults':'["o"]', 'optional':False}),
                          ('markersize', '(edu.utah.sci.vistrails.basic:Float)',
-                          {'defaults':'["75.0"]', 'optional':False}), ])
+                          {'defaults':'["50.0"]', 'optional':False}), ])
 
     def __init__(self):
         VectorLayer.__init__(self)
         self.port_map.update({'marker':('marker', None, True),
                               'markersize':('s', None, True)
                          })
-        self.port_map['line_color'] = ('edgecolor', utils.vt_color_to_tuple, True)
+        self.port_map['line_color'] = ('edgecolor', utils.vt_color_to_tuple, False)
         self.port_map['line_width'] = ('lw', None, True)
 
     def compute(self):
@@ -1113,7 +1119,7 @@ class LineLayer(VectorLayer):
     '''A vector file with polygon or multi-polygon geometry
     '''
     _input_ports = list(VectorLayer._input_ports)
-    _input_ports.remove(('fill_color', '(edu.utah.sci.vistrails.basic:Color)', {'optional':False}))
+    _input_ports.remove(('fill_color', '(edu.utah.sci.vistrails.basic:Color)', {'optional':True}))
 
     def compute(self):
         self.args_dict['shapetype'] = "line"

@@ -103,7 +103,7 @@ doc_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "documentatio
 GenModDoc.load_documentation(doc_file)
 
 import spatial_modules
-from spatial_modules import BaseGeoViewerCell, GeoSpatialViewerCell, SpatialViewerCellWidget, \
+from spatial_modules import BaseGeoViewerCell, GeoSpatialViewerCell, SpatialViewerCellWidgetBase, \
     GeneralSpatialViewerToolBar, ViewStateBoundariesButton
 
 class SAHMSpatialOutputViewerCell(BaseGeoViewerCell):
@@ -217,139 +217,18 @@ class SAHMSpatialOutputViewerCell(BaseGeoViewerCell):
             raise RuntimeError('Valid input MDS file not found in Model text output.')
 
 
-class SAHMSpatialOutputViewerCellWidget(SpatialViewerCellWidget):
+class SAHMSpatialOutputViewerCellWidget(SpatialViewerCellWidgetBase):
     """
 
     """
     def __init__(self, parent=None):
-        SpatialViewerCellWidget.__init__(self, parent)
+        SpatialViewerCellWidgetBase.__init__(self, parent)
         self.display_title = True
 
     def set_toolbars(self):
         self.toolBarType = SAHMSpatialViewerToolBar
         self.controlBarType = SAHMSpatialViewerToolBar
 
-#  #    @print_timing
-#      def create_main_frame(self):
-#          self.setFocusPolicy(QtCore.Qt.ClickFocus)
-#          self.dpi = 100
-#          self.fig = Figure((5.0, 4.0), dpi=self.dpi)
-#
-#  #        self.fig.subplots_adjust(left = 0.01, right=0.99, top=0.99, bottom=0.001)
-#          self.fig.subplots_adjust(left=0, right=1, top=1, bottom=0)
-#          self.map_canvas = MyMapCanvas(self.fig)
-#          self.map_canvas.mpl_connect('scroll_event', self.wheel_zoom)
-#  #        self.connect(self, QtCore.SIGNAL('keyPressEvent(QString)'),
-#  #             self.key_press)
-#          self.map_canvas.mpl_connect('button_release_event', self.button_up)
-#          self.map_canvas.mpl_connect('resize_event', self._resize)
-#          self.add_axis()
-#
-#          self.mpl_toolbar = NavigationToolbar(self.map_canvas, None)
-#          self.mpl_toolbar.pan()
-#
-#  #        self.popMenu = popup_menu(self, self.mpl_toolbar)
-#          self.popMenu = None
-#
-#          self.map_canvas.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-#          self.connect(self.map_canvas, QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'), self.on_context_menu)
-#
-#          self.layout().addWidget(self.map_canvas)
-#
-#      def on_context_menu(self, point):
-#          if self.popMenu is None:
-#              self.popMenu = self.createPopupMenu()
-#          self.popMenu.exec_(self.map_canvas.mapToGlobal(point))
-#
-#      def createPopupMenu(self):
-#          sheet = self.findSheetTabWidget()
-#          toolbar = SAHMSpatialViewerToolBar(sheet)
-#          row, col = self.findCurrentCell()
-#          toolbar.snapTo(row, col)
-#          return toolbar.gen_popup_menu()
-#
-#      def getRasterParams(self, raster_fname):
-#          raster = SpatialUtilities.SAHMRaster(raster_fname)
-#          pass
-#
-#  #    @print_timing
-#      def wheel_zoom(self, event):
-#          #  zoom in or out centered on the current cursor position
-#
-#          inv = self.axes.transData.inverted()
-#          curX, curY = inv.transform((event.x, event.y))
-#
-#          curL, curR = self.axes.get_xlim()
-#          curB, curT = self.axes.get_ylim()
-#          width = curR - curL
-#          height = curT - curB
-#          steps = -1 * event.step / 0.25
-#          factor = steps / 35
-#          #  sanity check
-#          if factor > 0.5:
-#              factor = 0.5
-#          if factor < -0.5:
-#              factor = -0.5
-#
-#          newWidth = width * (1.0 - factor)
-#          newHeight = height * (1.0 - factor)
-#          dWidth = width - newWidth
-#          dHeight = height - newHeight
-#
-#          pcntLofX = 1 - (width - (curX - curL)) / width
-#          pcntUnderTop = (height - (curT - curY)) / height
-#
-#          newL = curL + (dWidth * pcntLofX)
-#          newR = curR - (dWidth * (1 - pcntLofX))
-#          newB = curB + (dHeight * pcntUnderTop)
-#          newT = curT - (dWidth * (1 - pcntUnderTop))
-#          self.axes.set_xlim((newL, newR))
-#          self.axes.set_ylim((newB, newT))
-#
-#          self.sync_extents()
-#
-#
-#      def button_up(self, event):
-#          if event.button == 1:
-#  #            self.pull_pixels()
-#              self.sync_extents()
-#
-#  #    @print_timing
-#      def _resize(self, event):
-#          self.pull_pixels()
-#
-#  #    @print_timing
-#      def pull_pixels(self):
-#  #        print "SAHMSpatialOutputViewerCellWidget _pull_pixels"
-#          try:
-#              self.rasterlayer.ax_update(self.axes)
-#          except AttributeError:
-#              pass
-#
-#  #    @print_timing
-#      def keyPressEvent(self, event):
-#          if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_T:
-#              active_cells = self.getSelectedCellWidgets()
-#
-#              displayed = not self.displayTL
-#              for cell in active_cells:
-#                  cell.displayTL = displayed
-#                  cell.on_draw()
-#                  cell.fig.canvas.draw()
-#                  cell.update()
-#
-#      def deleteLater(self):
-#          """ deleteLater() -> None
-#          Overriding PyQt deleteLater to free up resources
-#
-#          """
-#          self.fig.clf()
-#          self.map_canvas.close()
-#          gc.collect()
-#
-#          QCellWidget.deleteLater(self)
-
-#    @print_timing
     def load_layers(self):
 #        print "SAHMSpatialOutputViewerCellWidget load_layers"
         self.all_layers = {"prob_map":{"type":"raster", "title":"Probability" , "categorical":False, "display_min":0, "display_max":1, 'cmap':matplotlib.cm.jet, "displayorder":9999, "displayed":False, "enabled":False, "file":""},
@@ -402,7 +281,7 @@ class SAHMSpatialOutputViewerCellWidget(SpatialViewerCellWidget):
             raster_kwargs['unique_vals'] = uniques
             raster_kwargs['unique_labels'] = labels
 
-        SpatialViewerCellWidget.set_raster(self, raster_kwargs)
+        SpatialViewerCellWidgetBase.set_raster_base(self, raster_kwargs)
 
     def loadPoints(self):
         #  initialize our arrays
@@ -430,15 +309,6 @@ class SAHMSpatialOutputViewerCellWidget(SpatialViewerCellWidget):
 
         for pointType in ['abs_points', 'pres_points', 'backs_points']:
             self.all_layers[pointType]["enabled"] = len(self.all_layers[pointType]['x']) > 0
-
-#      def add_axis(self):
-#          self.axes = self.fig.add_subplot(111, aspect='equal', adjustable='datalim')
-#          self.axes.spines['right'].set_color('none')
-#          self.axes.spines['top'].set_color('none')
-#          self.axes.spines['bottom'].set_color('none')
-#          self.axes.spines['left'].set_color('none')
-#          self.axes.get_xaxis().set_visible(False)
-#          self.axes.get_yaxis().set_visible(False)
 
     def add_title(self, title):
         at = AnchoredText(title,
@@ -526,7 +396,7 @@ class SAHMSpatialOutputViewerCellWidget(SpatialViewerCellWidget):
         except IndexError:
             pass
 
-        SpatialViewerCellWidget.on_draw(self, view_extent=view_extent)
+        SpatialViewerCellWidgetBase.on_draw_base(self, view_extent=view_extent)
 
         displayed_points = [r for r in displayed_keys if self.all_layers[r]["type"] == "Vector"]
         for point_type in displayed_points:
@@ -660,7 +530,7 @@ class ViewTitleButton(QtGui.QAction):
             xlim = cell.axes.get_xlim()
             ylim = cell.axes.get_ylim()
             cell.display_title = self.isChecked()
-            cell.on_draw()
+            cell.on_draw_base()
             cell.fig.canvas.draw()
             cell.update()
             cell.axes.set_xlim(xlim)

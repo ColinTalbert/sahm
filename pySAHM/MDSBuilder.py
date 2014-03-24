@@ -302,7 +302,7 @@ class MDSBuilder(object):
         Each pixel is sampled only once.
         '''
         #  determine what value we'll be using (background/pseudoabsense)
-        pointval = '-9999'
+        pointval = '-9998'
 
         #  initialize the random seed in case one was passed
         if not self.seed:

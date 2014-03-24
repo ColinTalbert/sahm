@@ -75,7 +75,7 @@ Pred.Surface<-function(object, model, filename="", na.rm=TRUE,NAval) {
 				} else {
 
 				predv <- predict(model, blockvals)
-				predv[is.na(predv)]<-NAval
+				predv[is.na(predv)]<-NA
    	}
 				if (na.rm) {  
 					naind <- as.vector(attr(blockvals, "na.action"))

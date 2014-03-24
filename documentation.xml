@@ -1134,90 +1134,6 @@ Several options are available for fitting BRTs when run using VisTrails special 
   </Module>
   <Output />
   <Module>
-    <Title>GeneralSpatialViewer</Title>
-    <Description>
-    GeneralSpatialViewer is a stripped down version of a SAHMModelOutputViewerCell that displays a single raster layer.
-
-    </Description>
-    <InputPorts>
-      <Port>
-        <PortName>row</PortName>
-        <Definition>Entering a value here forces the output for this cell to appear on the row specified on the output spreadsheet.
-Row counts start from 1.</Definition>
-        <Mandatory>False</Mandatory>
-        <Default>VisTrails will autoselect the next empty cell, but you do not have control over which outputs appear where.</Default>
-        <Options>Any positive integer.</Options>
-        <Connections>NA</Connections>
-      </Port>
-      <Port>
-        <PortName>column</PortName>
-        <Definition>Entering a value here forces the output for this cell to appear on the column specified on the output spreadsheet.
-Row counts start from 1.</Definition>
-        <Mandatory>False</Mandatory>
-        <Default>NA</Default>
-        <Options>Any positive integer.</Options>
-        <Connections>NA</Connections>
-      </Port>
-      <Port>
-        <PortName>NoDataValue</PortName>
-        <Definition>Used to specify the NoDataValue used in the input raster.  By default this value is pulled from the input layer's metadata but this allows you to override that value in case the metadata has the wrong value.</Definition>
-        <Mandatory>False</Mandatory>
-        <Default>NA</Default>
-        <Options>NA</Options>
-        <Connections></Connections>
-      </Port>
-      <Port>
-        <PortName>dataMin</PortName>
-        <Definition>The minimum value in the input raster.  By default this value is pulled from the input layer's metadata but this allows you to override that value in case the metadata has the wrong value.</Definition>
-        <Mandatory>False</Mandatory>
-        <Default>NA</Default>
-        <Options>NA</Options>
-        <Connections></Connections>
-      </Port>
-      <Port>
-        <PortName>dataMax</PortName>
-        <Definition>The maximum value in the raster.  By default this value is pulled from the input layer's metadata but this allows you to override that value in case the metadata has the wrong value.</Definition>
-        <Mandatory>False</Mandatory>
-        <Default>NA</Default>
-        <Options>NA</Options>
-        <Connections></Connections>
-      </Port>
-      <Port>
-        <PortName>rasterFile</PortName>
-        <Definition>The path to the raster file that will be displayed in the output cell. </Definition>
-        <Mandatory>True</Mandatory>
-        <Default>NA</Default>
-        <Options>NA</Options>
-        <Connections>NA</Connections>
-      </Port>
-      <Port>
-        <PortName>threeBand</PortName>
-        <Definition>Boolean indicating that the input is a three band raster (i.e. an image file) so that the viewer can adjust the display properties appropriately.</Definition>
-        <Mandatory>False</Mandatory>
-        <Default>False</Default>
-        <Options>NA</Options>
-        <Connections>NA</Connections>
-      </Port>
-      <Port>
-        <PortName>categorical</PortName>
-        <Definition>Boolean indicating that the input is a categorical raster so that the viewer can adjust the display properties appropriately.</Definition>
-        <Mandatory>False</Mandatory>
-        <Default>False</Default>
-        <Options>NA</Options>
-        <Connections>NA</Connections>
-      </Port>
-      <Port>
-        <PortName>colorRamp</PortName>
-        <Definition>The matplotlib colorRamp to display the data with.  See http://wiki.scipy.org/Cookbook/Matplotlib/Show_colormaps for more information.</Definition>
-        <Mandatory>False</Mandatory>
-        <Default>Jet</Default>
-        <Options>See http://wiki.scipy.org/Cookbook/Matplotlib/Show_colormaps for descriptions.</Options>
-        <Connections>NA</Connections>
-      </Port>
-    </InputPorts>
-    <OutputPorts />
-  </Module>
-  <Module>
     <Title>SAHMSpatialOutputViewerCell</Title>
     <Description>
     SAHMModelOutputViewerCell is a VisTrails Module that
@@ -2311,6 +2227,305 @@ Be cautious when using the output layers from this tool as input to models as th
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Will likely connect with the TemplateLayer specified elsewhere in your workflow.</Connections>
+      </Port>
+    </InputPorts>
+    <OutputPorts>
+      <Port>
+        <PortName>outputsPredictListFile</PortName>
+        <Definition>A RastersWithPARCInfoCSV file that lists the outputs from this module.</Definition>
+        <Mandatory>True</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>
+          <Connection>This port can connect to either the RastersWithPARCInfoCSV input port of an MDSBuilder or a PARC module.</Connection>
+        </Connections>
+      </Port>
+    </OutputPorts>
+    <SeeAlso />
+  </Module>
+  <Module>
+    <Title>GeneralSpatialViewer</Title>
+    <Description>
+    GeneralSpatialViewer is a stripped down version of a SAHMModelOutputViewerCell that displays a single raster layer as well as additional vector layer overlays.  This functions as a mini-gis in the spreadsheet for viewing ancillary data.
+
+The display projection and extent will match the raster being used.</Description>
+    <InputPorts>
+      <Port>
+        <PortName>row</PortName>
+        <Definition>Entering a value here forces the output for this cell to appear on the row specified on the output spreadsheet.
+Row counts start from 1.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>VisTrails will autoselect the next empty cell, but you do not have control over which outputs appear where.</Default>
+        <Options>Any positive integer.</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>column</PortName>
+        <Definition>Entering a value here forces the output for this cell to appear on the column specified on the output spreadsheet.
+Row counts start from 1.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>Any positive integer.</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>display_states</PortName>
+        <Definition>Flag indicating whether to overlay the displayed map with US state boundaries.  Uses the 1:2,000,000 Natural Earth state boundaries layer from: http://www.naturalearthdata.com/</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>True</Default>
+        <Options>True False</Options>
+        <Connections></Connections>
+      </Port>
+      <Port>
+        <PortName>raster_layers</PortName>
+        <Definition>The RasterLayer to use as the main display layer on the map.  Additional vector layers if any will be displayed on top of this layer.  If more than one input is provided to this port the first will be used and all additionals will be ignored.</Definition>
+        <Mandatory>True</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>Connects to the output from a RasterLayer module</Connections>
+      </Port>
+      <Port>
+        <PortName>vector_layers</PortName>
+        <Definition>Additonal PointLayer or PolyLayers display layers to overlay on top of the specified RasterLayer</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>Connects to one or more outputs from PointLayer or PolyLayer modules</Connections>
+      </Port>
+    </InputPorts>
+    <OutputPorts />
+  </Module>
+  <Module>
+    <Title>PointLayer</Title>
+    <Description>This module specifies a vector GIS data file (shapefile) with a point geometry type as well as additional parameters describing how to display it in a GeneralSpatialViewer or SAHMOutputviewer spreadsheet cell.  Note that these overlays are intended only for general map orientation and the code has not been optimized for display of large complex files.  Perfomance will be unacceptable unless you limit the number of points being displayed to something on the order of hundreds to thousands.</Description>
+    <InputPorts>
+      <Port>
+        <PortName>alpha</PortName>
+        <Definition>The level of transparency to use on this layer</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>1.0 (No transparency)</Default>
+        <Options>A number between 0.0 (completly transparent) and 1.0 (No transparency)</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>draw order</PortName>
+        <Definition>The order this layer will be drawn on the output cells.  A 1 would be drawn first, a 2 would be drawn on top of a 1, etc.  The displayed raster will always be drawn first (on the bottom of the display) vector layers will be overlaid on top. Note: not all values must be filled.  For example specifying a large value such as 999 ensures that a layer will be drawn on top regardless of how many other layers are added. </Definition>
+        <Mandatory>False</Mandatory>
+        <Default>1 (multiple layers with no draw_order will be displayed in no particular order.</Default>
+        <Options>Any number between 1 and 999</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>fill_color</PortName>
+        <Definition>The color to use inside the point marker.  Not all markers use a fill color, for example Xs.</Definition>
+        <Mandatory>No</Mandatory>
+        <Default>Blue</Default>
+        <Options>Any color</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>input_file</PortName>
+        <Definition>The point or multi-point shapefile to display.  This file must have a defined spatial reference but it does not need to match that of other layers or the main raster.</Definition>
+        <Mandatory>Yes</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>Line_color</PortName>
+        <Definition>The color to use for shape outlines.</Definition>
+        <Mandatory>No</Mandatory>
+        <Default>Black</Default>
+        <Options>Any color</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>marker</PortName>
+        <Definition>The marker or shape to use for each point.  The list of code for the available shapes can be found at:  http://matplotlib.org/api/markers_api.html</Definition>
+        <Mandatory>No</Mandatory>
+        <Default>"o" (Circle)</Default>
+        <Options>see: http://matplotlib.org/api/markers_api.html</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>markersize</PortName>
+        <Definition>The size in points to use for each marker.</Definition>
+        <Mandatory>No</Mandatory>
+        <Default>50</Default>
+        <Options>any integer</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>query</PortName>
+        <Definition>The query field allows you to specify a subset of the total features to draw.  The syntax of this query matches a standard shapefile query syntax and follows these general rules:
+1: Field names must be in double quotes and match the case used in the data exactly. 
+2: String values must be enclosed in single quotes and match the case used in the data exactly.
+3: Numeric field values must not be in quotes.
+4: Valid comparison opperators are =, &gt;, &lt;, &lt;&gt;, &gt;=, &lt;= 
+5: Multiple clauses can be joined with and, or, not
+
+For example:
+    "NAME" = 'Colorado'
+    "SQUARE_MIL" &gt; 5.0
+    "STATE" = 'CO' or "STATE" = 'WY'</Definition>
+        <Mandatory>No</Mandatory>
+        <Default>50</Default>
+        <Options>any integer</Options>
+        <Connections>NA</Connections>
+      </Port>
+    </InputPorts>
+    <OutputPorts>
+      <Port>
+        <PortName>outputsPredictListFile</PortName>
+        <Definition>A RastersWithPARCInfoCSV file that lists the outputs from this module.</Definition>
+        <Mandatory>True</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>
+          <Connection>This port can connect to either the RastersWithPARCInfoCSV input port of an MDSBuilder or a PARC module.</Connection>
+        </Connections>
+      </Port>
+    </OutputPorts>
+    <SeeAlso />
+  </Module>
+  <Module>
+    <Title>PolyLayer</Title>
+    <Description>This module specifies a vector GIS data file (shapefile) with a polygon geometry type as well as additional parameters describing how to display it in a GeneralSpatialViewer or SAHMOutputviewer spreadsheet cell.  Note that these overlays are intended only for general map orientation and the code has not been optimized for display of large complex files.  Perfomance will be unacceptable unless you limit the number of features being displayed to something on the order of tens to hundreds of shapes.</Description>
+    <InputPorts>
+      <Port>
+        <PortName>alpha</PortName>
+        <Definition>The level of transparency to use on this layer</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>1.0 (No transparency)</Default>
+        <Options>A number between 0.0 (completly transparent) and 1.0 (No transparency)</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>draw order</PortName>
+        <Definition>The order this layer will be drawn on the output cells.  A 1 would be drawn first, a 2 would be drawn on top of a 1, etc.  The displayed raster will always be drawn first (on the bottom of the display) vector layers will be overlaid on top. Note: not all values must be filled.  For example specifying a large value such as 999 ensures that a layer will be drawn on top regardless of how many other layers are added. </Definition>
+        <Mandatory>False</Mandatory>
+        <Default>1 (multiple layers with no draw_order will be displayed in no particular order.</Default>
+        <Options>Any number between 1 and 999</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>fill_color</PortName>
+        <Definition>The color to use inside the point marker.  Not all markers use a fill color, for example Xs.</Definition>
+        <Mandatory>No</Mandatory>
+        <Default>Blue</Default>
+        <Options>Any color</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>input_file</PortName>
+        <Definition>The point or multi-point shapefile to display.  This file must have a defined spatial reference but it does not need to match that of other layers or the main raster.</Definition>
+        <Mandatory>Yes</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>Line_color</PortName>
+        <Definition>The color to use for shape outlines.</Definition>
+        <Mandatory>No</Mandatory>
+        <Default>Black</Default>
+        <Options>Any color</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>query</PortName>
+        <Definition>The query field allows you to specify a subset of the total features to draw.  The syntax of this query matches a standard shapefile query syntax and follows these general rules:
+1: Field names must be in double quotes and match the case used in the data exactly. 
+2: String values must be enclosed in single quotes and match the case used in the data exactly.
+3: Numeric field values must not be in quotes.
+4: Valid comparison opperators are =, &gt;, &lt;, &lt;&gt;, &gt;=, &lt;= 
+5: Multiple clauses can be joined with and, or, not
+
+For example:
+    "NAME" = 'Colorado'
+    "SQUARE_MIL" &gt; 5.0
+    "STATE" = 'CO' or "STATE" = 'WY'</Definition>
+        <Mandatory>No</Mandatory>
+        <Default>50</Default>
+        <Options>any integer</Options>
+        <Connections>NA</Connections>
+      </Port>
+    </InputPorts>
+    <OutputPorts>
+      <Port>
+        <PortName>outputsPredictListFile</PortName>
+        <Definition>A RastersWithPARCInfoCSV file that lists the outputs from this module.</Definition>
+        <Mandatory>True</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>
+          <Connection>This port can connect to either the RastersWithPARCInfoCSV input port of an MDSBuilder or a PARC module.</Connection>
+        </Connections>
+      </Port>
+    </OutputPorts>
+    <SeeAlso />
+  </Module>
+  <Module>
+    <Title>RasterLayer</Title>
+    <Description>This module specifies a raster GIS data file as well as additional parameters describing how to display it in a GeneralSpatialViewer or SAHMOutputviewer spreadsheet cell.  Numerous common input files are supported including ESRI rasters, geotifs, img format, etc.  The layer must have a defined spatial definition </Description>
+    <InputPorts>
+      <Port>
+        <PortName>NoDataValue</PortName>
+        <Definition>Used to manually specify the value that corresponds to NoData in the input layer.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>Usually this value can be correctly pulled from the input layer and nothing will need to be specified here.</Default>
+        <Options>NA</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>categorical</PortName>
+        <Definition>A flag indicating that this layer is categorical.  Categorical layers are displayed with discrete color ramps.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>False</Default>
+        <Options>True False</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>cmap</PortName>
+        <Definition>The color ramp (colormap) used to display the data.  Used to specify which colors are displayed for the high values, which color for the low values, etc.  For a list of the available color ramps see:  http://wiki.scipy.org/Cookbook/Matplotlib/Show_colormaps</Definition>
+        <Mandatory>No</Mandatory>
+        <Default>jet</Default>
+        <Options>NA</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>display_max</PortName>
+        <Definition>Used to manually specify the value to use as the upper limit on the color ramp.  Values greater than this will be displayed with the top color.</Definition>
+        <Mandatory>No</Mandatory>
+        <Default>pulled from input raster.</Default>
+        <Options>NA</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>display_min</PortName>
+        <Definition>Used to manually specify the value to use as the upper limit on the color ramp.  Values less than this will be displayed with the bottom color.</Definition>
+        <Mandatory>No</Mandatory>
+        <Default>pulled from input raster.</Default>
+        <Options>NA</Options>
+        <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>query</PortName>
+        <Definition>The query field allows you to specify a subset of the total features to draw.  The syntax of this query matches a standard shapefile query syntax and follows these general rules:
+1: Field names must be in double quotes and match the case used in the data exactly. 
+2: String values must be enclosed in single quotes and match the case used in the data exactly.
+3: Numeric field values must not be in quotes.
+4: Valid comparison opperators are =, &gt;, &lt;, &lt;&gt;, &gt;=, &lt;= 
+5: Multiple clauses can be joined with and, or, not
+
+For example:
+    "NAME" = 'Colorado'
+    "SQUARE_MIL" &gt; 5.0
+    "STATE" = 'CO' or "STATE" = 'WY'</Definition>
+        <Mandatory>No</Mandatory>
+        <Default>50</Default>
+        <Options>any integer</Options>
+        <Connections>NA</Connections>
       </Port>
     </InputPorts>
     <OutputPorts>
