@@ -447,7 +447,7 @@ class PARC(object):
             try:
                 xOffset = int((point[0] - source_raster.west) / source_raster.xScale)
                 yOffset = int((point[1] - source_raster.north) / source_raster.yScale)
-                data = source_raster.getBlock(xOffset, yOffset, 1, 1)
+                data = source_raster.getBlock(yOffset, xOffset, 1, 1)
                 value = data[0, 0]
             except:
                 bad_point = True
