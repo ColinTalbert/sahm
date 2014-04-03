@@ -67,13 +67,14 @@ except ImportError:
 from PyQt4 import QtCore, QtGui
 try:
     from vistrails.core.modules.vistrails_module import Module
-    from vistrails.packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
+    from vistrails.packages.spreadsheet.basic_widgets import SpreadsheetCell
     from vistrails.packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
     from vistrails.packages.spreadsheet.spreadsheet_controller import spreadsheetController
     from vistrails.core.packagemanager import get_package_manager
 except ImportError:
     from core.modules.vistrails_module import Module
     from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
+    from packages.spreadsheet.spreadsheet_base import StandardSheetReference
     from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
     from packages.spreadsheet.spreadsheet_controller import spreadsheetController
     from core.packagemanager import get_package_manager
@@ -141,7 +142,7 @@ class SAHMSpatialOutputViewerCell(BaseGeoViewerCell):
         self.inputs = map_ports(self, self.port_map)
         self.inputs.update(self.parse_inputs())
 
-        self.inputs["model_dir"] = os.path.normcase(self.inputs["model_workspace"])
+        self.inputs["model_dir"] = self.inputs["model_workspace"]
 
         for model_output in ['prob', 'bin', 'resid', 'mess', 'MoD']:
             try:
@@ -157,23 +158,7 @@ class SAHMSpatialOutputViewerCell(BaseGeoViewerCell):
 
         self.inputs["model_tag"] = os.path.split(self.inputs["model_dir"])[1]
 
-        if self.hasInputFromPort("row"):
-            if not self.location:
-                self.location = CellLocation()
-            self.location.row = self.getInputFromPort('row') - 1
-
-        if self.hasInputFromPort("column"):
-            if not self.location:
-                self.location = CellLocation()
-            self.location.col = self.getInputFromPort('column') - 1
-
-        if self.inputPorts.has_key('Location'):
-            self.location = self.inputPorts['Location'][0].obj
-
-#        if self.hasInputFromPort("max_cells_dimension"):
-#            inputs["max_cells_dimension"] = self.getInputFromPort('max_cells_dimension')
-#        else:
-#            inputs["max_cells_dimension"] = [item for item in self._input_ports if item[0] == 'max_cells_dimension'][0][2]['defaults']
+        self.location = utils.get_sheet_location(self)
 
         if utils.check_if_model_finished(self.inputs["model_dir"]):
             self.local_displayAndWait()

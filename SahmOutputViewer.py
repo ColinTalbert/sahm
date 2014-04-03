@@ -51,6 +51,7 @@ try:
     from vistrails.core.system import systemType
     from vistrails.core.modules.vistrails_module import Module
     from vistrails.packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
+    from vistrails.packages.spreadsheet.spreadsheet_base import StandardSheetReference
     from vistrails.packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
     from vistrails.packages.spreadsheet.spreadsheet_controller import spreadsheetController
     from vistrails.core.packagemanager import get_package_manager
@@ -58,6 +59,7 @@ except ImportError:
     from core.system import systemType
     from core.modules.vistrails_module import Module
     from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
+    from packages.spreadsheet.spreadsheet_base import StandardSheetReference
     from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
     from packages.spreadsheet.spreadsheet_controller import spreadsheetController
     from core.packagemanager import get_package_manager
@@ -159,16 +161,7 @@ class SAHMModelOutputViewerCell(SpreadsheetCell):
 
             model_label = model_dir.capitalize().replace('output', 'Output')
 
-
-            if self.hasInputFromPort("row"):
-                if not self.location:
-                    self.location = CellLocation()
-                self.location.row = self.getInputFromPort('row') - 1
-
-            if self.hasInputFromPort("column"):
-                if not self.location:
-                    self.location = CellLocation()
-                self.location.col = self.getInputFromPort('column') - 1
+            self.location = utils.get_sheet_location(self)
 
             if self.hasInputFromPort('InitialModelOutputDisplay'):
                 initial_display = self.getInputFromPort('InitialModelOutputDisplay')

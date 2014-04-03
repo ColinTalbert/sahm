@@ -126,18 +126,8 @@ class BaseGeoViewerCell(SpreadsheetCell):
 
     def parse_inputs(self):
         inputs = {}
-        if self.hasInputFromPort("row"):
-            if not self.location:
-                self.location = CellLocation()
-            self.location.row = self.getInputFromPort('row') - 1
 
-        if self.hasInputFromPort("column"):
-            if not self.location:
-                self.location = CellLocation()
-            self.location.col = self.getInputFromPort('column') - 1
-
-        if self.inputPorts.has_key('Location'):
-            self.location = self.inputPorts['Location'][0].obj
+        self.location = utils.get_sheet_location(self)
 
         inputs['vector_layers'] = []
         for vector_layers in self.forceGetInputListFromPort('vector_layers'):
@@ -210,7 +200,7 @@ class SpatialViewerCellWidgetBase(QCellWidget):
 
         self.display_states = inputs["display_states"]
 
-        self.on_draw_base(view_extent=self.get_max_extent())
+        self.on_draw(view_extent=self.get_max_extent())
 
 #          self.maxXlim, self.maxYlim = self.getMaxDisplayExtent()
 #          self.maxXlim = [self.getMaxExtent()[0], self.getMaxExtent()[1]]

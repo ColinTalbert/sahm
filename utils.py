@@ -1223,3 +1223,65 @@ def hash_file(fname):
     h = sha_hash()
     h.update(open(fname, "rb").read())
     return h.hexdigest()
+
+def get_sheet_location(_module):
+    '''given a sahm spreadsheet module, finds all the other sahm spreadsheet cells
+    in the currently executing pipeline and returns a CellLocation
+    with the name of the currently executing pipeline and dimensions set to
+    hold the number of cells needed.
+    '''
+    auto_location = None
+    if _module.inputPorts.has_key('Location'):
+        auto_location = _module.inputPorts['Location'][0].obj
+    else:
+        cur_vt = _module.moduleInfo['controller'].vistrail
+        cur_pipeline = _module.moduleInfo['pipeline']
+        cur_version = _module.moduleInfo['controller'].current_version
+        cur_name = cur_vt.get_pipeline_name(cur_version)
+        if "+" in cur_name:
+            cur_name = " ".join(cur_name.split()[:-2])
+
+        cur_cells = 0
+        rows = []
+        cols = []
+        for m in cur_pipeline.modules.itervalues():
+            if m.name in ['SAHMSpatialOutputViewerCell',
+                            'SAHMModelOutputViewerCell',
+                                'GeoSpatialViewerCell']:
+                cur_cells += 1
+                for function in m.functions:
+                    if function.name == 'row':
+                        rows.append(int(function.params[0].strValue))
+                    elif function.name == 'column':
+                        cols.append(int(function.params[0].strValue))
+        if rows:
+            max_row = max(rows)
+        else:
+            max_row = 2
+
+        if cols:
+            max_col = max(cols)
+        else:
+            max_col = math.ceil(cur_cells / 2)
+
+        if max_row * max_col < cur_cells:
+            max_col = math.ceil(cur_cells / 2)
+
+        sheet_ref = StandardSheetReference()
+        sheet_ref.sheetName = cur_name
+        sheet_ref.minimumColumnCount = max_col
+        sheet_ref.minimumRowCount = max_row
+        auto_location = CellLocation()
+        auto_location.sheetReference = sheet_ref
+
+    if _module.hasInputFromPort("row"):
+        if not auto_location:
+            auto_location = CellLocation()
+        auto_location.row = _module.getInputFromPort('row') - 1
+
+    if _module.hasInputFromPort("column"):
+        if not auto_location:
+            auto_location = CellLocation()
+        auto_location.col = _module.getInputFromPort('column') - 1
+
+    return auto_location
