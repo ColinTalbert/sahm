@@ -2026,6 +2026,10 @@ def initialize():
         msg += ("!"*79 + "\n") * 3
         writetolog(msg, True, True)
 
+    java_path = utils.find_java_exe(configuration.java_path)
+
+    utils.set_seed(configuration.default_seed)
+
     gdal_data = os.path.join(os.path.dirname(__file__), "GDAL_Resources", "gdal-data")
     os.environ['GDAL_DATA'] = gdal_data
     projlib = os.path.join(os.path.dirname(__file__), "GDAL_Resources", "projlib")

@@ -765,6 +765,61 @@ def pull_R_install_from_reg():
     msgbox.exec_()
     return "R not found!"
 
+def find_java_exe(java_bin):
+    '''Used on windows to check if we can execute java based on the
+    java_bin file they have selected.
+    The default is 'java' which works if java is installed correctly and on the path
+    if they have specified something else that we can get to, we're good as well.
+    If not look for an environmental variable 'java_home'
+    otherwise look in c:\program files\java or C:\Program Files (x86)\Java
+    '''
+    tryed_locs = [java_bin]
+    try:
+        p = subprocess.Popen(java_bin, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = p.communicate()
+        if err.startswith('Usage: java'):
+            #  Fantastic, what they have or the default is legit
+            return java_bin
+    except WindowsError:
+        pass
+
+    #  Too bad what they have didn't work as we expected
+    try:
+        java_home = os.environ['JAVA_HOME']
+        java_exe = os.path.join(java_home, 'bin', 'java.exe')
+        tryed_locs.append(java_exe)
+        if os.path.exists(java_exe):
+            return os.path.abspath(java_exe)
+    except KeyError, IndexError:
+        pass
+
+    for java_dir in [r"C:\Program Files (x86)\java", r"C:\Program Files\java"]:
+        jre_folders = [os.path.join(java_dir, j) for j in os.listdir(java_dir)
+                if j.lower().startswith('jre') or j.lower().startswith('jdk')]
+        tryed_locs.append(java_dir)
+        try:
+            java_exe = os.path.join(jre_folders[-1], "bin", 'java.exe')
+
+            if os.path.exists(java_exe):
+                return os.path.abspath(java_exe)
+        except IndexError:
+            pass
+
+    #  we have gone above and beyond trying to find java on this system
+    #  it is time to give up and alert the user.
+    msg = "The current java_path does not appear to be a valid instalation of java.\n"
+    msg += "SAHM is also unable to autodetect an installation of java on this machine.\n"
+    msg += "\nLocations searched for java:"
+    for loc in tryed_locs:
+        msg += "\n\t" + loc
+    msg += "\nThis only affects the Maxent model."
+    msg += "\nSee the SAHM installation section of the user manual for details."
+
+    print msg
+    return java_bin
+
+
+
 def writeRErrorsToLog(args, outMsg, errMsg):
     #  first check that this is a model run, or has a o= in the args.
     #  If so write the output log file in the directory
