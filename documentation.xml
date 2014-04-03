@@ -355,11 +355,11 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <Connections>Does not connect to any other module.</Connections>
       </Port>
       <Port>
-        <PortName>outputFolderName</PortName>
-        <Definition>Adds an indentifier to the output folder name for the purpose of data organization.  The folder name is still preficed with 'ApplyModel_' and suffixed with and auto-incremented counter.</Definition>
+        <PortName>SelectBestPredSubset</PortName>
+        <Definition>Boolean if true then model selection will occur and the predictors that don't contribute significantly will be dropped from the final model.  If untrue then all predictors selected at the covariate correlation filter will be used to create the final model. </Definition>
         <Mandatory>False</Mandatory>
-        <Default>NA</Default>
-        <Options>NA</Options>
+        <Default>False</Default>
+        <Options>True (Checked)</Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
     </InputPorts>
@@ -1030,6 +1030,22 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <Mandatory>False</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
+        <Connections>Does not connect to any other module.</Connections>
+      </Port>
+      <Port>
+        <PortName>SelectBestPredSubset</PortName>
+        <Definition>Boolean if true then model selection will occur and the predictors that don't contribute significantly will be dropped from the final model.  If untrue then all predictors selected at the covariate correlation filter will be used to create the final model. </Definition>
+        <Mandatory>False</Mandatory>
+        <Default>False</Default>
+        <Options>True (Checked)</Options>
+        <Connections>Does not connect to any other module.</Connections>
+      </Port>
+      <Port>
+        <PortName>SquaredTerms</PortName>
+        <Definition>Boolean if true then model selection consider all interactions and squared terms. </Definition>
+        <Mandatory>False</Mandatory>
+        <Default>True (Checked)</Default>
+        <Options>False (Unchecked)</Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
     </InputPorts>
