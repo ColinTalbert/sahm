@@ -563,7 +563,7 @@ class MDSBuilder(object):
 
         #  convert the mds csv to a shapefile
         output_shp = self.outputMDS.replace(".csv", "_shapefiles")
-        SpatialUtilities.mds_to_shape(self.outputMDS, output_shp)
+        SpatialUtilities.mds_to_shape(self.outputMDS, output_shp, self.templateSurface.srs)
 
         if self.deleteTemp:
             #  if this flag is true the field data we're working with is

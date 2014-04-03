@@ -282,7 +282,7 @@ class SAHMRaster():
     def close(self):
         self.ds = None
 
-def mds_to_shape(MDSFile, outputfolder):
+def mds_to_shape(MDSFile, outputfolder, srs=None):
 
     #  bit of a hack but currently saving the shape file as
     #  three shape files presence, absence, and background
@@ -372,6 +372,12 @@ def mds_to_shape(MDSFile, outputfolder):
             backslayer.CreateFeature(feature)
 
     #  close the data sources
+    srs.MorphToESRI()
+    for output_file in outputfiles.itervalues():
+        prj_fname = output_file.replace(".shp", ".prj")
+        f = open(prj_fname, 'w')
+        f.write(srs.ExportToWkt())
+        f.close()
     del MDSreader
     ds.Destroy()
 
