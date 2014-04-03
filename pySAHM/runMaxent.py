@@ -10,12 +10,13 @@ import multiprocessing
 
 
 class MAXENTRunner(object):
-    '''This is a class to run the maxent jar.  The output from will need 
+    '''This is a class to run the maxent jar.  The output from will need
     to be sent through WrapMaxent.r to generate outputs.
     '''
     def __init__(self):
         self.verbose = False
         self.maxent_path = ''
+        self.java_path = 'java'
         self.mdsfile = ''
         self.projectionlayers = ''
         self.environmentallayers = ''
@@ -27,7 +28,7 @@ class MAXENTRunner(object):
         self.logger = None
         self.test_key = 'test'
         self.sub_run = False
-        
+
         self.processing_mode = "single models sequentially (n - 1 cores each)"
         self.args_dict = {}
         self.maxent_args = {}
@@ -37,11 +38,11 @@ class MAXENTRunner(object):
             self.maxent_args['plots'] = 'false'
             self.maxent_args['responsecurves'] = 'false'
             self.maxent_args['outputgrids'] = 'false'
-            
+
         self.validateInputs()
-        
+
         self.start_pool()
-        
+
         if self.args_dict['c'] != '':
             self.prepInputs()
         else:
@@ -66,11 +67,11 @@ class MAXENTRunner(object):
         self.maxent_args['autorun'] = 'true'
         if ' ' in self.args_dict['species_name']:
             self.args_dict['species_name'] = self.args_dict['species_name'].replace(' ', '_')
-        if(not self.test_key): #if there is no testsplit (ie cross validation, remove the empty csv
+        if(not self.test_key):  #  if there is no testsplit (ie cross validation, remove the empty csv
             del self.maxent_args['testsamplesfile']
-        
+
         if self.categoricals:
-            catstr = ",".join([cat.replace('_categorical', '') 
+            catstr = ",".join([cat.replace('_categorical', '')
                                for cat in self.categoricals])
             self.maxent_args['togglelayertype'] = catstr
 
@@ -82,42 +83,42 @@ class MAXENTRunner(object):
         stderr_fname_max = os.path.join(self.outputdir, "stdErr_max.txt")
         stdout_fname_R = os.path.join(self.outputdir, "stdOut_R.txt")
         stderr_fname_R = os.path.join(self.outputdir, "stdErr_R.txt")
-        self.writetolog('    running command:  \n' + 
-                        utilities.convert_list_to_cmd_str(cmd) +"\n", True, False)
-        utilities.add_process_to_pool(utilities.launch_cmd, 
+        self.writetolog('    running command:  \n' +
+                        utilities.convert_list_to_cmd_str(cmd) + "\n", True, False)
+        utilities.add_process_to_pool(utilities.launch_cmd,
                                 [cmd, stdout_fname_max, stderr_fname_max])
         utilities.wait_for_pool_to_finish()
-        
+
         r_cmd = [sys.executable]
         r_cmd.extend(sys.argv)
         r_cmd[1] = r_cmd[1].replace('runMaxent.py', 'runRModel.py')
-        r_cmd.append('lam='+self.outputdir)
-        self.writetolog('    running command:  \n' + 
-                    utilities.convert_list_to_cmd_str(r_cmd) +"\n", True, False)
-        utilities.add_process_to_pool(utilities.launch_cmd, 
+        r_cmd.append('lam=' + self.outputdir)
+        self.writetolog('    running command:  \n' +
+                    utilities.convert_list_to_cmd_str(r_cmd) + "\n", True, False)
+        utilities.add_process_to_pool(utilities.launch_cmd,
                                 [r_cmd, stdout_fname_R, stderr_fname_R])
         utilities.wait_for_pool_to_finish()
-        
+
 
     def start_pool(self):
-        #note that except for Condor this is the inverse of how the main
-        #application allocates cores.
+        #  note that except for Condor this is the inverse of how the main
+        #  application allocates cores.
         if self.cur_processing_mode == "FORT Condor":
-            process_count = 2**32
+            process_count = 2 ** 32
         elif self.cur_processing_mode == "multiple models simultaneously (1 core each)":
-            #there might be multiple models running so we only get one core
+            #  there might be multiple models running so we only get one core
             process_count = 1
         else:
-            #no other models should be running, we get to use all the cores
+            #  no other models should be running, we get to use all the cores
             process_count = multiprocessing.cpu_count() - 1
-        
+
         if process_count < 1:
             process_count = 1
-            
+
         utilities.start_new_pool(process_count)
 
     def gen_maxent_cmd(self):
-        cmd = ['java', '-mx512m', '-jar', self.maxent_path]
+        cmd = [self.java_path, '-mx512m', '-jar', self.maxent_path]
         for k, v in self.maxent_args.iteritems():
             if v in [True, False]:
                 cmd.append(k + "=" + str(v).lower())
@@ -126,16 +127,17 @@ class MAXENTRunner(object):
         return cmd
 
     def validateInputs(self):
-        #first manually set some instance variables from the args
+        #  first manually set some instance variables from the args
         self.mdsfile = self.args_dict['c']
         self.outputdir = self.args_dict['o']
         self.maxent_args['outputdirectory'] = self.outputdir
         self.cur_processing_mode = self.args_dict['cur_processing_mode']
-        self.test_key = self.args_dict.get('test_key','test')
+        self.test_key = self.args_dict.get('test_key', 'test')
         self.sub_run = self.args_dict.get('sub_run', False)
         self.maxent_path = self.args_dict.get('maxent_path', "")
-        
-        #next run our valid inputs checks.
+        self.java_path = self.args_dict.get('java_path', self.java_path)
+
+        #  next run our valid inputs checks.
         if not os.path.exists(self.mdsfile):
             raise RuntimeError(self, 'Input MDS, ' + self.mdsfile + ', could not be found on file system')
         if not self.maxent_args.has_key('projectionlayers'):
@@ -162,13 +164,13 @@ class MAXENTRunner(object):
     def prepInputs(self):
         if not self.sub_run:
             self.handleCrossValidations()
-        
+
         """parses out input MDS file into the 1 to 3 SWD files that Maxent requires.
         """
         self.testCSV = os.path.join(self.outputdir, 'testSamples.csv')
         self.trainingCSV = os.path.join(self.outputdir, 'trainingSamples.csv')
         self.backgroundCSV = os.path.join(self.outputdir, 'backgroundPoints.csv')
-        
+
         testWriter = csv.writer(open(self.testCSV, 'wb'))
         trainingWriter = csv.writer(open(self.trainingCSV, 'wb'))
         backgroundWriter = csv.writer(open(self.backgroundCSV, 'wb'))
@@ -199,22 +201,22 @@ class MAXENTRunner(object):
         for row in MDSreader:
             self.convertNA(row)
             vals = self.usedValues(row, covariateIndexes)
-            if evalsplit and row[evalsplit] == 'test': #handle evaluation split
+            if evalsplit and row[evalsplit] == 'test':  #  handle evaluation split
                 pass
-            elif splitcol is None: #no split column
-                if row[2]=='1':
+            elif splitcol is None:  #  no split column
+                if row[2] == '1':
                     trainingWriter.writerow([self.args_dict['species_name']] + row[:2] + vals)
-                elif row[2] in ['-9999','-9998','0']:
+                elif row[2] in ['-9999', '-9998', '0']:
                     hasBackground = True
                     backgroundWriter.writerow([''] + row[:2] + vals)
-            elif not row[splitcol] == self.test_key: #train split
-                if row[2] in ['-9999','-9998','0']: 
+            elif not row[splitcol] == self.test_key:  #  train split
+                if row[2] in ['-9999', '-9998', '0']:
                     hasBackground = True
                     backgroundWriter.writerow([''] + row[:2] + vals)
-                elif row[2]=='1': 
-                    trainingWriter.writerow([self.args_dict['species_name']] + row[:2] + vals)   
-            elif row[splitcol] == self.test_key or self.testCSV == '': #test split only used by Maxent and only using pres data
-                if row[2]=='1':
+                elif row[2] == '1':
+                    trainingWriter.writerow([self.args_dict['species_name']] + row[:2] + vals)
+            elif row[splitcol] == self.test_key or self.testCSV == '':  #  test split only used by Maxent and only using pres data
+                if row[2] == '1':
                     testWriter.writerow([self.args_dict['species_name']] + row[:2] + vals)
             else :
                 pass
@@ -250,58 +252,58 @@ class MAXENTRunner(object):
                 pass
             else:
                 self.maxent_args['outputgrids'] = 'false'
-            return 
+            return
 
     def handleCrossValidations(self):
-        #Start marian adding junk to the code   
+        #  Start marian adding junk to the code
         MDSreader = csv.reader(open(self.args_dict['c'], 'r'))
         header1 = MDSreader.next()
         header2 = MDSreader.next()
         header3 = MDSreader.next()
-               
+
         if 'Split' in header1:
-             
+
             newLine = MDSreader.next()
-            ttList=["test","train"]
-            cvList=["NA"]
-            #find the first line of the mds that isn't na to determine if test/train or cv split 
-            while newLine[header1.index("Split")]=="NA":
+            ttList = ["test", "train"]
+            cvList = ["NA"]
+            #  find the first line of the mds that isn't na to determine if test/train or cv split
+            while newLine[header1.index("Split")] == "NA":
                 newLine = MDSreader.next()
-               
-            #loop through the mds and fit a maxent model withholding each new cv fold
+
+            #  loop through the mds and fit a maxent model withholding each new cv fold
             if (not newLine[header1.index("Split")] in ttList):
                 subrun_args = copy.deepcopy(self.args_dict)
-                subrun_args["sub_run"] = 'True' 
+                subrun_args["sub_run"] = 'True'
 #                cvMaxent = copy.deepcopy(self)
 #                cvMaxent.sub_run=True
                 for row in MDSreader:
                     if (not row[header1.index("Split")] in cvList):
                         subrun_args["test_key"] = row[header1.index("Split")]
-                        outdir = os.path.join(self.outputdir, 
+                        outdir = os.path.join(self.outputdir,
                                         "cvSplit" + row[header1.index("Split")])
                         subrun_args["o"] = outdir
                         stdout_fname = os.path.join(outdir, "stdOut.txt")
                         stderr_fname = os.path.join(outdir, "stdErr.txt")
                         os.mkdir(subrun_args["o"])
-                        
+
                         cvList.append(row[header1.index("Split")])
                         try:
-                            cmd = [sys.executable] 
-                            cmd += sys.argv[:sys.argv.index("--args")+1]
-                            
+                            cmd = [sys.executable]
+                            cmd += sys.argv[:sys.argv.index("--args") + 1]
+
                             for k, v in subrun_args.iteritems():
                                 if v in [True, False]:
                                     cmd.append(k + "=" + str(v).upper())
                                 else:
                                     cmd.append(k + "=" + str(v))
-                            cmd.append("maxent_args="+str(self.maxent_args))
-                            
-                            utilities.add_process_to_pool(utilities.launch_cmd, 
+                            cmd.append("maxent_args=" + str(self.maxent_args))
+
+                            utilities.add_process_to_pool(utilities.launch_cmd,
                                 [cmd, stdout_fname, stderr_fname])
                         except utilities.TrappedError as e:
-                            raise RuntimeError(self, e.message)  
-         
-                    #here we need to run Maxent without the test split csv which breaks it 
+                            raise RuntimeError(self, e.message)
+
+                    #  here we need to run Maxent without the test split csv which breaks it
                     self.test_key = None
             utilities.wait_for_pool_to_finish()
 
@@ -335,7 +337,7 @@ class MAXENTRunner(object):
                     self.categoricals.append(item)
 
     def isSWD(self, f):
-        """Checks the format of a file to see if it is in the 
+        """Checks the format of a file to see if it is in the
         Maxent samples with data (SWD) format.
         """
         if os.path.exists(f):
@@ -349,21 +351,21 @@ class MAXENTRunner(object):
 def main(argv):
     """Process our command line args and initiate a Maxent run
     """
-    
+
     ourMaxent = MAXENTRunner()
-    
-    args = sys.argv[sys.argv.index("--args")+1:]
+
+    args = sys.argv[sys.argv.index("--args") + 1:]
     for arg in args:
-        k,v = arg.split("=")
+        k, v = arg.split("=")
         if k == "maxent_args":
             ourMaxent.maxent_args = eval(v)
         elif v.lower() in ['true', 'false']:
             ourMaxent.args_dict[k] = eval(v.title())
         else:
             ourMaxent.args_dict[k] = v
-            
+
     ourMaxent.run()
-    
+
 if __name__ == "__main__":
 
 #    try:

@@ -51,7 +51,7 @@ import re
 import random
 import filecmp
 import pickle
-
+import math
 
 
 import numpy as np
@@ -61,13 +61,16 @@ from PyQt4 import QtCore, QtGui
 try:
     from vistrails.core.cache.hasher import sha_hash
     from vistrails.core.modules.basic_modules import File, Path, Directory, new_constant, Constant, Color
+    from vistrails.packages.spreadsheet.basic_widgets import CellLocation
+    from vistrails.packages.spreadsheet.spreadsheet_base import StandardSheetReference
     from vistrails.core.modules.vistrails_module import ModuleError, ModuleSuspended
-    from vistrails.core.modules.vistrails_module import ModuleError
     from vistrails.core import system
     from vistrails.gui import application
 except:
     from core.cache.hasher import sha_hash
-    from core.modules.basic_modules import File, Path, Directory, new_constant, Constant
+    from core.modules.basic_modules import File, Path, Directory, new_constant, Constant, Color
+    from packages.spreadsheet.basic_widgets import CellLocation
+    from packages.spreadsheet.spreadsheet_base import StandardSheetReference
     from core.modules.vistrails_module import ModuleError, ModuleSuspended
     from core import system
     from gui import application
@@ -99,11 +102,21 @@ def importOSGEO():
     global gdal_merge
     from GDAL_Resources.Utilities import gdal_merge as gdal_merge
 
-def mknextfile(prefix, suffix="", directory=""):
+def mknextfile(prefix, suffix="", directory="", subfolder="", runname=""):
     global _roottempdir
     if directory == "":
         directory = _roottempdir
+
+    if subfolder:
+        directory = os.path.join(directory, subfolder)
+
     files = os.listdir(directory)
+
+    if runname:
+        prefix = prefix + "_" + runname + "_"
+    else:
+        prefix = prefix + "_"
+
     seq = 0
     for f in files:
         if f.startswith(prefix):
@@ -119,7 +132,7 @@ def mknextfile(prefix, suffix="", directory=""):
     file.close()
     return filename
 
-def get_last_dir(prefix, directory=""):
+def get_last_dir(prefix, directory="", subfolder="", name=""):
     global _roottempdir
     if directory == "":
         directory = _roottempdir
@@ -143,10 +156,18 @@ def get_last_dir(prefix, directory=""):
         return os.path.join(directory, prefix + str(seq))
     return None
 
-def mknextdir(prefix, directory="", skipSequence=False):
+def mknextdir(prefix, directory="", skipSequence=False, subfolder="", runname=""):
     global _roottempdir
     if directory == "":
         directory = _roottempdir
+
+    if subfolder:
+        directory = os.path.join(directory, subfolder)
+
+    if runname:
+        prefix = prefix + "_" + runname + "_"
+    else:
+        prefix = prefix + "_"
 
     if skipSequence:
         dirname = os.path.join(directory, prefix)
@@ -174,21 +195,8 @@ def get_picklehash_filename(directory=""):
     global _roottempdir
     if directory == "":
         directory = _roottempdir
-    fname = os.path.join(directory, "vt_hashmap_pickle.dat")
-    return fname
-
-def get_hash_filename(directory=""):
-    global _roottempdir
-    if directory == "":
-        directory = _roottempdir
     fname = os.path.join(directory, "vt_hashmap.dat")
     return fname
-
-def write_hash_entry(hashname, dirname, directory=""):
-    fname = get_hash_filename(directory)
-    with open(fname, 'a') as f:
-        print >> f, hashname, os.path.basename(dirname)
-
 
 def write_hash_entry_pickle(hashname, fname, directory=""):
 
@@ -199,6 +207,22 @@ def write_hash_entry_pickle(hashname, fname, directory=""):
             hash_dict[hashname] = fname
     else:
         hash_dict = {hashname:fname}
+
+    with open(hash_fname, "wb") as f:
+        pickle.dump(hash_dict, f)
+
+def delete_hash_entry_pickle(signature, directory=""):
+
+    hash_fname = get_picklehash_filename(directory)
+    if os.path.exists(hash_fname):
+        with open(hash_fname, "rb") as f:
+            hash_dict = pickle.load(f)
+            try:
+                del hash_dict[signature]
+            except KeyError:
+                pass
+    else:
+        hash_dict = {}
 
     with open(hash_fname, "wb") as f:
         pickle.dump(hash_dict, f)
@@ -215,31 +239,6 @@ def get_fname_from_hash_pickle(hashname, directory=""):
                 return hash_dict[hashname]
             except KeyError:
                 return None
-    return None
-
-#  def get_dir_from_hash_pickle(hashname, directory=""):
-#      global _roottempdir
-#      if directory == "":
-#          directory = _roottempdir
-#      fname = get_picklehash_filename(directory)
-#      if os.path.exists(fname):
-#          with open(fname, 'rb') as f:
-#              hash_dict = pickle.load(f)
-#              dirname = hash_dict[hashname]['directory']
-#              return os.path.join(directory, dirname)
-#      return None
-
-def get_dir_from_hash(hashname, directory=""):
-    global _roottempdir
-    if directory == "":
-        directory = _roottempdir
-    fname = get_hash_filename(directory)
-    if os.path.exists(fname):
-        with open(fname, 'r') as f:
-            for line in f:
-                arr = line.strip().split()
-                if arr[0] == hashname:
-                    return os.path.join(directory, arr[1])
     return None
 
 def setrootdir(session_dir):
@@ -584,23 +583,22 @@ class ModelJobMonitor(object):
             #  are not run asyncronously we can assume it's done now.
             return False
 
-        try:
-            lastLine = open(self.out_fname, 'r').readlines()[-2]
-        except (IndexError, IOError):
-            return False
+        for out_fname in [self.out_fname,
+                          os.path.join(os.path.dirname(self.out_fname), "ApplyModel_output.txt")]:
+            try:
+                lastLine = open(out_fname, 'r').readlines()[-2]
+            except (IndexError, IOError):
+                return False
 
-        if lastLine.startswith("Total time"):
-            return True
-        elif lastLine.startswith("Model Failed"):
-            self.has_error = True
-            return True
-        else:
-            return False
+            if lastLine.startswith("Total time"):
+                return True
+            elif self.has_error:
+                return True
+            elif lastLine.startswith("Model Failed"):
+                self.has_error = True
+                return True
 
-def check_if_modle_finished(model_out_fname):
-    '''checks to see if a model output text file indicates the model finished
-    '''
-
+        return False
 
 def get_job_monitor(module, model_args):
     stdout_fname = os.path.join(model_args['o'], "stdOut.txt")
@@ -1187,7 +1185,8 @@ def compare_mds(mds1, mds2):
     return np.count_nonzero(np.logical_not(orig_mds == new_mds)) == 0
 
 def make_next_file_complex(curModule, prefix, suffix="", directory="",
-                          key_inputs=[], file_or_dir='file'):
+                          key_inputs=[], file_or_dir='file',
+                                                    subfolder="", runname=""):
     '''How we're handling file can lead to some unanticipated results.
     To handle this we want to re-use file names if
     1) all ports are identical
@@ -1200,28 +1199,51 @@ def make_next_file_complex(curModule, prefix, suffix="", directory="",
             h.update(bytes(curModule.getInputFromPort(key)))
 
     for input in key_inputs:
-        h.update(input + hash_file(input))
+        h.update(str(input) + hash_file(input))
 
     signature = h.hexdigest()
 
     fname = get_fname_from_hash_pickle(signature)
 
-    if fname is None or not os.path.exists(fname):
-        if file_or_dir == 'file':
-            fname = mknextfile(prefix=prefix, suffix=suffix, directory=directory)
-        else:
-            fname = mknextdir(prefix=prefix)
-        write_hash_entry_pickle(signature, fname)
+    if fname is None and file_or_dir == 'file':
+        fname = mknextfile(prefix=prefix, suffix=suffix,
+                           directory=directory, subfolder=subfolder, runname=runname)
         already_run = False
+    elif fname is None:
+        fname = mknextdir(prefix=prefix, subfolder=subfolder, runname=runname)
+        already_run = False
+    elif not os.path.exists(fname):
+        already_run = False
+        dir_path = os.path.dirname(fname)
+        if os.path.abspath(dir_path) == os.path.abspath(getrootdir()) or \
+            os.path.abspath(dir_path) == os.path.abspath(os.path.join(getrootdir(), subfolder)):
+            #  We're in the same directory but maybe they deleted the original file
+            if file_or_dir == 'file':
+                file = open(os.path.abspath(fname), 'w')
+                file.close()
+            else:
+                os.makedirs(fname)
+        else:
+            #  The old fname was in some other directory.
+            delete_hash_entry_pickle(signature=signature, directory=directory)
+            if file_or_dir == 'file':
+                fname = mknextfile(prefix=prefix, suffix=suffix,
+                           directory=directory, subfolder=subfolder, runname=runname)
+            else:
+                fname = mknextdir(prefix=prefix,
+                           directory=directory, subfolder=subfolder, runname=runname)
     else:
         already_run = True
 
-    return fname, already_run
+    return fname, signature, already_run
 
 
 def hash_file(fname):
     h = sha_hash()
-    h.update(open(fname, "rb").read())
+    if os.path.exists(str(fname)):
+        h.update(open(fname, "rb").read())
+    else:
+        h.update(str(fname))
     return h.hexdigest()
 
 def get_sheet_location(_module):
@@ -1285,3 +1307,41 @@ def get_sheet_location(_module):
         auto_location.col = _module.getInputFromPort('column') - 1
 
     return auto_location
+
+def get_previous_run_info(full_fname):
+    '''given a fname in in the format:
+                ..\sessiondir\<subfolder>\prefix_runname_count.suffix"
+    returns the subfolder and runname if applicable
+    '''
+    folder, fname = os.path.split(full_fname)
+    parentfolder, subfolder = os.path.split(folder)
+
+    if folder == getrootdir():
+        #  there was no subfolder this file is at the root of our session dir
+        subfolder = ""
+    elif os.path.abspath(parentfolder) == os.path.abspath(getrootdir()):
+        pass  #  The subfolder we have is legit.
+    else:
+        subfolder = ""
+
+    fname_parts = fname.split("_")
+    if len(fname_parts) == 2:
+        #  there was no runname
+        runname = ""
+    else:
+        runname = fname_parts[1]
+
+    return subfolder, runname
+
+def get_raster_files(raster_fname):
+    if os.path.exists(os.path.join(raster_fname, "hdr.adf")):
+        grid_folder = raster_fname
+    elif raster_fname.endswith("hdr.adf"):
+        grid_folder = os.path.split(raster_fname)[0]
+    else:
+        return raster_fname
+
+    return [os.path.join(grid_folder, f) for f in os.listdir(grid_folder)
+                                    if f.endswith(".adf")]
+
+
