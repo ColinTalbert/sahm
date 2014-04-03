@@ -82,6 +82,7 @@ import getpass
 _roottempdir = ""
 _logger = None
 r_path = None
+default_seed = 1234
 
 gdalconst = None
 gdal = None
@@ -328,6 +329,18 @@ def R_boolean(value):
         return 'TRUE'
     else:
         return 'FALSE'
+
+def set_seed(value):
+    global default_seed
+    default_seed = int(value)
+
+def get_seed(value=None):
+    global default_seed
+    if value:
+        return value
+    else:
+        return default_seed
+#          return random.randint(-1 * ((2 ** 32) / 2 - 1), (2 ** 32) / 2 - 1)
 
 def dir_path_value(value, module=None):
     val = getFileRelativeToCurrentVT(value.name, module)

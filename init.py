@@ -553,7 +553,7 @@ class Model(Module):
         if self.abbrev == 'brt' or \
             self.abbrev == 'rf':
             if not "seed" in self.args_dict.keys():
-                self.args_dict['seed'] = random.randint(-1 * ((2 ** 32) / 2 - 1), (2 ** 32) / 2 - 1)
+                self.args_dict['seed'] = rseed = utils.get_seed()
             writetolog("    seed used for " + self.abbrev + " = " + str(self.args_dict['seed']))
 
         self.args_dict['o'] = self.output_dname
@@ -901,7 +901,7 @@ class MDSBuilder(Module):
 #                    'backgroundPointType': ('pointType', None, False),
                     'backgroundPointCount': ('pointCount', None, False),
                     'backgroundProbSurf': ('probSurfacefName', None, False),
-                    'Seed': ('seed', None, False)}
+                    'Seed': ('seed', utils.get_seed, True),
 
         MDSParams = utils.map_ports(self, port_map)
 
@@ -1581,10 +1581,7 @@ class ModelEvaluationSplit(Module):
 
         args['es'] = "TRUE"
 
-        if self.hasInputFromPort("Seed"):
-            seed = str(self.getInputFromPort("Seed"))
-        else:
-            seed = random.randint(-1 * ((2 ** 32) / 2 - 1), (2 ** 32) / 2 - 1)
+        seed = utils.get_seed(self.forceGetInputFromPort("Seed", None))
         writetolog("    seed used for Split = " + str(seed))
         args['seed'] = str(seed)
 
@@ -1650,10 +1647,7 @@ class ModelSelectionSplit(Module):
         #  args += " es=FALSE"
         args['es'] = "FALSE"
 
-        if self.hasInputFromPort("Seed"):
-            seed = str(self.getInputFromPort("Seed"))
-        else:
-            seed = random.randint(-1 * ((2 ** 32) / 2 - 1), (2 ** 32) / 2 - 1)
+        seed = utils.get_seed(self.forceGetInputFromPort("Seed", None))
         writetolog("    seed used for Split = " + str(seed))
         #  args += " seed=" + str(seed)
         args['seed'] = str(seed)
@@ -1704,10 +1698,7 @@ class ModelSelectionCrossValidation(Module):
         if argsDict["nf"] <= 0:
             raise ModuleError(self, "Number of Folds must be greater than 0")
 
-        if self.hasInputFromPort("Seed"):
-            seed = str(self.getInputFromPort("Seed"))
-        else:
-            seed = random.randint(-1 * ((2 ** 32) / 2 - 1), (2 ** 32) / 2 - 1)
+        seed = utils.get_seed(self.forceGetInputFromPort("Seed", None))
         if not argsDict.has_key('spt'):
                 argsDict['spt'] = 'FALSE'
 
@@ -1754,15 +1745,11 @@ class CovariateCorrelationAndSelection(Module):
                     'ShowGUI': ('ShowGUI', None, True),
                     'numPlots': ('numPlots', None, False),
                     'minCor': ('minCor', None, False),
-                    'corsWithHighest': ('corsWithHighest', utils.R_boolean, False), }
+                    'corsWithHighest': ('corsWithHighest', utils.R_boolean, False),
+                    'Seed': ('seed', utils.get_seed, True)}
 
         params = utils.map_ports(self, port_map)
-        if self.hasInputFromPort("Seed"):
-            seed = str(self.getInputFromPort("Seed"))
         else:
-            seed = random.randint(-1 * ((2 ** 32) / 2 - 1), (2 ** 32) / 2 - 1)
-        writetolog("    seed used for subsampling = " + str(seed))
-        params["seed"] = str(seed)
         global session_dir
         params['outputMDS'] = os.path.join(session_dir, "CovariateCorrelationOutputMDS_" + params['selectionName'] + ".csv")
         params['displayJPEG'] = os.path.join(session_dir, "CovariateCorrelationDisplay.jpg")

@@ -92,21 +92,26 @@ def package_requirements():
     if not python_module_exists('scipy'):
         raise MissingRequirement('scipy')
 
+
 if system.systemType in ['Microsoft', 'Windows']:
     #  on Windows the default location of these is relative to the python.exe
     pyloc = sys.executable
     configuration = \
         ConfigurationObject(output_dir=r'C:\temp\SAHM_workspace',
-                            r_path=r'..\\Central_R\R-3.0.1\bin',
+                            r_path=r'Central_R\R-3.0.1\bin',
                             maxent_path=r'Not Set',
+                            java_path=r'java',
                             cur_session_folder=r"C:\temp\SAHM_workspace",
                             cur_processing_mode="single models sequentially (n - 1 cores each)",
+                            default_seed='1234',
                             verbose='True')
 else:
     configuration = \
         ConfigurationObject(output_dir=r'C:\temp\SAHM_workspace',
                             r_path=r'Not Set',
                             maxent_path=r'Not Set',
+                            java_path=r'java',
                             cur_session_folder=r"C:\temp\SAHM_workspace",
                             cur_processing_mode="single models sequentially (n - 1 cores each)",
+                            default_seed='1234',
                             verbose='True')
