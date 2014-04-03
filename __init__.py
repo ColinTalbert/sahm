@@ -58,7 +58,39 @@ identifier = "gov.usgs.sahm"
 version = '1.2.0'
 
 def package_dependencies():
-    return ['edu.utah.sci.vistrails.matplotlib']
+    try:
+        import vistrails.core.packagemanager
+        manager = vistrails.core.packagemanager.get_package_manager()
+    except ImportError:
+        import core.packagemanager
+        manager = core.packagemanager.get_package_manager()
+
+
+    if manager.has_package('org.vistrails.vistrails.spreadsheet'):
+        return ['org.vistrails.vistrails.spreadsheet']
+    else:
+        return []
+
+def package_requirements():
+    try:
+        from vistrails.core.requirements import python_module_exists, MissingRequirement
+    except ImportError:
+        from core.requirements import python_module_exists, MissingRequirement
+
+    if not python_module_exists('matplotlib'):
+        raise MissingRequirement('matplotlib')
+    if not python_module_exists('fiona'):
+        raise MissingRequirement('fiona')
+    if not python_module_exists('numpy'):
+        raise MissingRequirement('numpy')
+    if not python_module_exists('osgeo'):
+        raise MissingRequirement('osgeo')
+    if not python_module_exists('shapely'):
+        raise MissingRequirement('shapely')
+    if not python_module_exists('pyproj'):
+        raise MissingRequirement('pyproj')
+    if not python_module_exists('scipy'):
+        raise MissingRequirement('scipy')
 
 if system.systemType in ['Microsoft', 'Windows']:
     #  on Windows the default location of these is relative to the python.exe
