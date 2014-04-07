@@ -1236,7 +1236,7 @@ class PARC(Module):
                                 ('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                 ('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                                 ('ignoreNonOverlap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
-                                ('outputFolderName', '(edu.utah.sci.vistrails.basic:String)', {'optional':True}), ]
+                                ('run_name_info', '(gov.usgs.sahm:OutputNameInfo:Other)')]
 
     _output_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)')]
 
@@ -1253,14 +1253,20 @@ class PARC(Module):
         ourPARC = parc.PARC()
         template = utils.getFileRelativeToCurrentVT(self.forceGetInputFromPort('templateLayer').name, self)
         template_path, template_fname = os.path.split(template)
-        template_fname = os.path.splitext(template_fname)[0]
-        if template_fname == 'hdr':
-            template_fname = os.path.split(template_path)[1]
+        template_fname = SpatialUtilities.getRasterShortName(template)
 
-        if self.hasInputFromPort("outputFolderName"):
-            output_dname = os.path.join(utils.getrootdir(), 'PARC_' + self.getInputFromPort("outputFolderName"))
+        run_name_info = self.forceGetInputFromPort('run_name_info', None)
+        if run_name_info:
+            subfolder = run_name_info.contents.get('subfolder_name', "")
+            runname = run_name_info.contents.get('runname', "")
+            if runname:
+                output_dname = os.path.join(utils.getrootdir(), subfolder, 'PARC_' + runname + "_" + template_fname)
+            else:
+                output_dname = os.path.join(utils.getrootdir(), subfolder, 'PARC_' + template_fname)
         else:
+            subfolder, runname = "", ""
             output_dname = os.path.join(utils.getrootdir(), 'PARC_' + template_fname)
+
         if not os.path.exists(output_dname):
             os.mkdir(output_dname)
 
@@ -1275,52 +1281,63 @@ class PARC(Module):
         if self.hasInputFromPort("ignoreNonOverlap"):
             ourPARC.ignoreNonOverlap = self.getInputFromPort("ignoreNonOverlap")
 
-        workingCSV = os.path.join(output_dname, "tmpFilesToPARC.csv")
+        key_inputs = [utils.get_raster_files(template)]
+        for rasters_csv in self.forceGetInputListFromPort("RastersWithPARCInfoCSV"):
+            key_inputs.append(rasters_csv.name)
+        for predictor_list in self.forceGetInputListFromPort("PredictorList"):
+            key_inputs.append(str(predictor_list))
+        for predictor in self.forceGetInputListFromPort("predictor"):
+            key_inputs.append(str(predictor))
 
-        f = open(workingCSV, "wb")
-        csvWriter = csv.writer(f)
-        csvWriter.writerow(["FilePath", "Categorical", "Resampling", "Aggregation"])
+        workingCSV, signature, already_run = utils.make_next_file_complex(self,
+                                        prefix='PARCFiles', suffix='.csv',
+                                        key_inputs=key_inputs,
+                                        subfolder=os.path.join(subfolder, output_dname), runname=runname)
 
 
-        if self.hasInputFromPort("RastersWithPARCInfoCSV"):
-            for input_rasters_csv in self.forceGetInputListFromPort('RastersWithPARCInfoCSV'):
-                csvReader = csv.reader(open(input_rasters_csv.name), delimiter=",")
-                header = csvReader.next()
-                for row in csvReader:
-                    csvWriter.writerow([utils.getFileRelativeToCurrentVT(row[0]), row[1], row[2], row[3]])
+#          workingCSV = os.path.join(output_dname, "tmpFilesToPARC.csv")
+        if already_run:
+            writetolog("No change in inputs or paramaters using previous run of PARC", True)
+        else:
+            f = open(workingCSV, "wb")
+            csvWriter = csv.writer(f)
+            csvWriter.writerow(["FilePath", "Categorical", "Resampling", "Aggregation"])
+
+            if self.hasInputFromPort("RastersWithPARCInfoCSV"):
+                for input_rasters_csv in self.forceGetInputListFromPort('RastersWithPARCInfoCSV'):
+                    csvReader = csv.reader(open(input_rasters_csv.name), delimiter=",")
+                    header = csvReader.next()
+                    for row in csvReader:
+                        csvWriter.writerow([utils.getFileRelativeToCurrentVT(row[0]), row[1], row[2], row[3]])
 
 
-        if self.hasInputFromPort("PredictorList"):
-            predictor_lists = self.forceGetInputListFromPort('PredictorList')
-            for predictor_list in predictor_lists:
+            if self.hasInputFromPort("PredictorList"):
+                predictor_lists = self.forceGetInputListFromPort('PredictorList')
+                for predictor_list in predictor_lists:
+                    for predictor in predictor_list:
+                        csvWriter.writerow([utils.getFileRelativeToCurrentVT(predictor[0], self), predictor[1], predictor[2], predictor[3]])
+
+            if self.hasInputFromPort("predictor"):
+                predictor_list = self.forceGetInputListFromPort('predictor')
                 for predictor in predictor_list:
                     csvWriter.writerow([utils.getFileRelativeToCurrentVT(predictor[0], self), predictor[1], predictor[2], predictor[3]])
+            f.close()
+            del csvWriter
+            ourPARC.inputs_CSV = workingCSV
+            ourPARC.template = template
+            writetolog('    template layer = ' + template)
+            writetolog("    output_dname=" + output_dname, False, False)
+            writetolog("    workingCSV=" + workingCSV, False, False)
+            try:
+                ourPARC.parcFiles()
+            except TrappedError as e:
+                writetolog(e.message)
+                raise ModuleError(self, e.message)
+            except:
+                utils.informative_untrapped_error(self, "PARC")
 
-        if self.hasInputFromPort("predictor"):
-            predictor_list = self.forceGetInputListFromPort('predictor')
-            for predictor in predictor_list:
-                csvWriter.writerow([utils.getFileRelativeToCurrentVT(predictor[0], self), predictor[1], predictor[2], predictor[3]])
-        f.close()
-        del csvWriter
-        ourPARC.inputs_CSV = workingCSV
-        ourPARC.template = template
-        writetolog('    template layer = ' + template)
-        writetolog("    output_dname=" + output_dname, False, False)
-        writetolog("    workingCSV=" + workingCSV, False, False)
-        try:
-            ourPARC.parcFiles()
-        except TrappedError as e:
-            writetolog(e.message)
-            raise ModuleError(self, e.message)
-        except:
-            utils.informative_untrapped_error(self, "PARC")
-
-        #  delete our temp working file
-        os.remove(workingCSV)
-
-        predictorsDir = utils.create_dir_module(output_dname)
-        outputCSV = os.path.join(output_dname, "PARC_Files.csv")
-        output_file = utils.create_file_module(outputCSV, module=self)
+        utils.write_hash_entry_pickle(signature, workingCSV)
+        output_file = utils.create_file_module(workingCSV, module=self)
 
         self.setResult('RastersWithPARCInfoCSV', output_file)
 
