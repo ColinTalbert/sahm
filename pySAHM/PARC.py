@@ -542,30 +542,34 @@ class PARC(object):
                             "/n    x pixel scale = " + str(abs(self.templateRaster.xScale)) +
                             "/n    y pixel scale = " + str(abs(self.templateRaster.yScale)))
 
-
         #  Validate input rasters
         if not os.path.exists(self.inputs_CSV):
             raise utilities.TrappedError("Inputs CSV, " + self.inputs_CSV + ", does not exist on file system.")
 
-        inputs_csv = csv.reader(open(self.inputs_CSV, 'r'))
-        header = inputs_csv.next()
+        current_inputs = np.genfromtxt(self.inputs_CSV, dtype='S1000', delimiter=",", skip_header=True)
+#          inputs_csv = csv.reader(open(self.inputs_CSV, 'r'))
+#          header = inputs_csv.next()
         input_file_errors = ""
 
-        output_csv = os.path.join(self.out_dir, "PARC_Files.csv")
-        if os.path.exists(output_csv):
-            existing_files = np.genfromtxt(output_csv, dtype='S1000', delimiter=",", skip_header=True)[:, 4]
-            existing_files = [os.path.abspath(f) for f in existing_files]
-            output = csv.writer(open(output_csv, "ab"))
-        else:
-            existing_files = []
-            output = csv.writer(open(output_csv, "wb"))
-            output.writerow(["PARCOutputFile", "Categorical", "Resampling",
-                             "Aggregation", "OriginalFile",
-                             os.path.abspath(self.template),
-                             os.path.abspath(self.out_dir)])
+        header_row = ["PARCOutputFile", "Categorical", "Resampling",
+                      "Aggregation", "OriginalFile",
+                      os.path.abspath(self.template), os.path.abspath(self.out_dir)]
+        all_previous_output = os.path.join(self.out_dir, "PARC_Files.csv")
+        try:
+            previous_inputs = np.genfromtxt(all_previous_output, dtype='S1000', delimiter=",", skip_header=True)[:, 4]
+            previous_inputs = [SpatialUtilities.getRasterShortName(os.path.abspath(f))
+                                                         for f in previous_inputs]
+            prev_output = csv.writer(open(all_previous_output, "ab"))
+        except (IndexError, IOError, StopIteration):  #  IndexError=only header, IOError=File doesn't exist, StopIteration=Empty file
+            previous_inputs = []
+            prev_output = csv.writer(open(all_previous_output, "wb"))
+            prev_output.writerow(header_row)
+
+        cur_output = csv.writer(open(self.inputs_CSV, "wb"))
+        cur_output.writerow(header_row)
 
         inputs = []
-        for row in inputs_csv:
+        for row in [list(r) for r in current_inputs]:
             input_file = row[0]
             input_just_file = SpatialUtilities.getRasterShortName(input_file)
 
@@ -640,9 +644,13 @@ class PARC(object):
                                                     short_name + ".tif"))
             outputrow = [file_name] + row[1:4] + [os.path.abspath(row[0]),
                                                  os.path.abspath(self.out_dir)]
-            if input_file not in existing_files:
-                output.writerow(outputrow)
-        del output
+            cur_output.writerow(outputrow)
+            if short_name not in previous_inputs:
+                prev_output.writerow(outputrow)
+
+
+        del prev_output
+        del cur_output
 
         if input_file_errors != "":
             self.writetolog(input_file_errors, False, False)
