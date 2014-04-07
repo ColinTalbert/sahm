@@ -334,8 +334,10 @@ def launch_cmd(cmd, stdout_fname="", stderr_fname="", async=False):
         if not stderr_fname:
             stderr_fname = fname + "stderr.txt"
 
-    stdErrFile = open(stderr_fname, 'wb')
-    stdOutFile = open(stdout_fname, 'wb')
+    stdErrFile = open(stderr_fname, 'a')
+    stdErrFile.seek(0, os.SEEK_END)
+    stdOutFile = open(stdout_fname, 'a')
+    stdOutFile.seek(0, os.SEEK_END)
 
     p = subprocess.Popen(cmd, stderr=stdErrFile, stdout=stdOutFile)
     if not async:
