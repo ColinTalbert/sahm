@@ -60,7 +60,8 @@ from PyQt4 import QtCore, QtGui
 
 try:
     from vistrails.core.cache.hasher import sha_hash
-    from vistrails.core.modules.basic_modules import File, Path, Directory, new_constant, Constant, Color
+    import vistrails.api as api
+    from vistrails.core.modules.basic_modules import File, Path, Directory, new_constant, Constant, Color, String
     from vistrails.packages.spreadsheet.basic_widgets import CellLocation
     from vistrails.packages.spreadsheet.spreadsheet_base import StandardSheetReference
     from vistrails.core.modules.vistrails_module import ModuleError, ModuleSuspended
@@ -68,7 +69,7 @@ try:
     from vistrails.gui import application
 except:
     from core.cache.hasher import sha_hash
-    from core.modules.basic_modules import File, Path, Directory, new_constant, Constant, Color
+    from core.modules.basic_modules import File, Path, Directory, new_constant, Constant, Color, String
     from packages.spreadsheet.basic_widgets import CellLocation
     from packages.spreadsheet.spreadsheet_base import StandardSheetReference
     from core.modules.vistrails_module import ModuleError, ModuleSuspended
@@ -1115,6 +1116,38 @@ def waitForProcessesToFinish(processQueue, maxCount=1):
 def getParentDir(f, x=None):
     parentdirf = os.path.dirname(f.name)
     return create_dir_module(parentdirf)
+
+def convert_tom(old_f, new_module):
+    controller = api.get_current_controller()
+    param = old_f.parameters[0]
+    param_value = param.strValue
+    alias = param.alias
+
+    new_val_lookup = ["Threshold=0.5", "Sensitivity=Specificity",
+                       "Maximizes (sensitivity+specificity)/2",
+                       "Maximizes Cohen's Kappa",
+                       "Maximizes PCC (percent correctly classified)",
+                       "Predicted prevalence=observed prevalence",
+                       "Threshold=observed prevalence",
+                       "Mean predicted probability",
+                       "Minimizes distance between ROC plot and (0,1)",
+                       ]
+
+    if param.type == 'Integer':
+        param_value = new_val_lookup[int(param.strValue) - 1]
+    else:
+        param_value = param.strValue
+
+    new_function = controller.create_function(new_module,
+                                              'ThresholdOptimizationMethod',
+                                              [param_value],
+                                              [alias])
+    # !!! I should do this, but there is an ordering bug so I do the
+    # following lines instead !!!
+    #  return [('add', new_function, new_module.vtType, new_module.id)]
+
+    new_module.add_function(new_function)
+    return []
 
 def get_filename_relative(f):
     return getFileRelativeToCurrentVT(f.name)

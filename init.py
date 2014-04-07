@@ -2487,7 +2487,12 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                     }
     for m in ['GLM', 'MARS', 'RandomForest', 'BoostedRegressionTree']:
         module_remap['Models|' + m] = [(None, '1.0.2', 'Models|' + m,
-                          {'dst_port_remap': {'modelWorkspace': utils.getParentDir} })]
+                          {'dst_port_remap': {'modelWorkspace': utils.getParentDir} }),
+                                       (None, '1.2.0', 'Models|' + m,
+                          {'function_remap': {'ThresholdOptimizationMethod': utils.convert_tom} })]
+
+    module_remap['Models|MARS'].append((None, '1.2.0', 'Models|MARS',
+                          {'dst_port_remap': {'MarsPenalty': 'MarsPenalty'} }))
 
     for m in ['ApplyModel']:
         module_remap['Tools|' + m] = [(None, '1.0.1', 'Tools|' + m,
