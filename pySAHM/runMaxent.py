@@ -79,14 +79,12 @@ class MAXENTRunner(object):
             self.maxent_path = os.path.join(self.maxent_path, 'maxent.jar')
 
         cmd = self.gen_maxent_cmd()
-        stdout_fname_max = os.path.join(self.outputdir, "stdOut_max.txt")
-        stderr_fname_max = os.path.join(self.outputdir, "stdErr_max.txt")
-        stdout_fname_R = os.path.join(self.outputdir, "stdOut_R.txt")
-        stderr_fname_R = os.path.join(self.outputdir, "stdErr_R.txt")
+        stdout_fname = os.path.join(self.outputdir, "stdOut.txt")
+        stderr_fname = os.path.join(self.outputdir, "stdErr.txt")
         self.writetolog('    running command:  \n' +
                         utilities.convert_list_to_cmd_str(cmd) + "\n", True, False)
         utilities.add_process_to_pool(utilities.launch_cmd,
-                                [cmd, stdout_fname_max, stderr_fname_max])
+                                [cmd, stdout_fname, stderr_fname])
         utilities.wait_for_pool_to_finish()
 
         r_cmd = [sys.executable]
@@ -96,7 +94,7 @@ class MAXENTRunner(object):
         self.writetolog('    running command:  \n' +
                     utilities.convert_list_to_cmd_str(r_cmd) + "\n", True, False)
         utilities.add_process_to_pool(utilities.launch_cmd,
-                                [r_cmd, stdout_fname_R, stderr_fname_R])
+                                [r_cmd, stdout_fname, stderr_fname])
         utilities.wait_for_pool_to_finish()
 
 
