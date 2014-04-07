@@ -867,13 +867,15 @@ class BackgroundSurfaceGenerator(Module):
             msg = "Problem encountered generating KDE.  Expected output file not found."
             writetolog(msg, False)
             raise ModuleError(self, msg)
+
+        utils.write_hash_entry_pickle(signature, output_fname)
         self.setResult("KDE", output_file)
 
 class OutputNameInfo(Constant):
     contents = {}
 
 class OutputName(Module):
-    __doc__ = GenModDoc.construct_module_doc('MDSBuilder')
+    __doc__ = GenModDoc.construct_module_doc('OutputName')
 
     _input_ports = [('run_name', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'[""]', 'optional':True}),
                                  ('subfolder_name', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'[""]', 'optional':True}),

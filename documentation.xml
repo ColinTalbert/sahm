@@ -255,7 +255,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       </Port>
       <Port>
         <PortName>Seed</PortName>
-        <Definition>The random number seed used by BRT.  If one desires to reproduce results from a previous BRT fit, one must enter the random number seed that is reported in the textual output from that model fit.  The seed used is always reported in the textual output.</Definition>
+        <Definition>The random number seed used by BRT. There is a default seed specified in the SAHM configuration.  If you want to use a different value it can be entered here.</Definition>
         <Mandatory>FALSE</Mandatory>
         <Default>Randomly Generated</Default>
         <Options>
@@ -362,6 +362,14 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <Options>True (Checked)</Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
+      <Port>
+        <PortName>run_name_info</PortName>
+        <Definition>Used to specify a meaningful tag and subfolder for output file naming/organization.  See documentation for OutputName module for more information.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>None</Options>
+        <Connections>Connects to an OutputName module</Connections>
+      </Port>
     </InputPorts>
     <OutputPorts>
       <Port>
@@ -435,7 +443,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       </Port>
       <Port>
         <PortName>Text_Output</PortName>
-        <Definition>This file contains a summary of  the model fit.  The information contained here includes the number of presence observations (counts equal to or greater than 1 for count models), the number of absence points, the number of covariates that were considered by the model selection algorithm.  Note all of these can differ from the numbers in the original .mds due to incomplete records being deleted, and predictors with only one unique value being removed.  The random number seed is recorded if applicable which allows completely reproducible results as well as a summary of the model fit.  Evaluation Statistics are reported for the data used to fit the model as well as for the test or cross-validation split if applicable.  References for how to interpret most of these are ubiquitous in the literature but it is worth mentioning that interpretation of the calibration statistics is described by Pearce and Ferrier 2000 as well as Miller and Hui 1991.  Most metrics reported here can also be found in related graphical displays.</Definition>
+        <Definition>This file contains a summary of  the model fit.  The information contained here includes the number of presence observations (counts equal to or greater than 1 for count models), the number of absence points, the number of covariates that were considered by the model selection algorithm.  Note all of these can differ from the numbers in the original .mds due to incomplete records being deleted, and predictors with only one unique value being removed.  Evaluation Statistics are reported for the data used to fit the model as well as for the test or cross-validation split if applicable.  References for how to interpret most of these are ubiquitous in the literature but it is worth mentioning that interpretation of the calibration statistics is described by Pearce and Ferrier 2000 as well as Miller and Hui 1991.  Most metrics reported here can also be found in related graphical displays.</Definition>
         <Mandatory>NA</Mandatory>
         <Default>NA</Default>
         <Connections>Does not connect to any other module.</Connections>
@@ -511,7 +519,7 @@ Several options are available for fitting BRTs when run using VisTrails special 
       </Port>
       <Port>
         <PortName>Seed</PortName>
-        <Definition>The random number seed used by BRT.  If one desires to reproduce results from a previous randomForest fit, one must enter the random number seed that is reported in the textual output from that model fit.  The seed used is always reported in the textual output.</Definition>
+        <Definition>The random number seed used by BRT.  . There is a default seed specified in the SAHM configuration.  If you want to use a different value it can be entered here.</Definition>
         <Mandatory>FALSE</Mandatory>
         <Default>Randomly Generated</Default>
         <Options>
@@ -643,6 +651,14 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
+      </Port>
+      <Port>
+        <PortName>run_name_info</PortName>
+        <Definition>Used to specify a meaningful tag and subfolder for output file naming/organization.  See documentation for OutputName module for more information.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>None</Options>
+        <Connections>Connects to an OutputName module</Connections>
       </Port>
     </InputPorts>
     <OutputPorts>
@@ -846,6 +862,14 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
+      <Port>
+        <PortName>run_name_info</PortName>
+        <Definition>Used to specify a meaningful tag and subfolder for output file naming/organization.  See documentation for OutputName module for more information.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>None</Options>
+        <Connections>Connects to an OutputName module</Connections>
+      </Port>
     </InputPorts>
     <OutputPorts>
       <Port>
@@ -1048,6 +1072,14 @@ Several options are available for fitting BRTs when run using VisTrails special 
         <Options>False (Unchecked)</Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
+      <Port>
+        <PortName>run_name_info</PortName>
+        <Definition>Used to specify a meaningful tag and subfolder for output file naming/organization.  See documentation for OutputName module for more information.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>None</Options>
+        <Connections>Connects to an OutputName module</Connections>
+      </Port>
     </InputPorts>
     <OutputPorts>
       <Port>
@@ -1242,101 +1274,6 @@ Row counts start from 1.</Definition>
   </Module>
   <Tools></Tools>
   <Module>
-    <Title>BackgroundSurfaceGenerator</Title>
-    <Description>This function takes a field data file and based on the options specified creates a continuous or binary mask for generation of background points either using a Kernel Density (KDE) of the presence points with various options for optimizing bandwidth or a minimum convex polygon (MCP). 
-    </Description>
-    <InputPorts>
-      <Port>
-        <PortName>fieldData</PortName>
-        <Definition>an input field dataset with X and Y locations along with a response column.  This will commonly be generated either by the FieldDataQuery or the FieldDataAggregateAndWeight. </Definition>
-        <Mandatory>True</Mandatory>
-        <Default>NA</Default>
-        <Options>NA</Options>
-        <Connections>
-          <Connection>The mdsFile can be produced by any of MDSBuilder, ModelEvaluationSplit, ModelSelectionCrossValidation, ModelSelectionSplit, or CovariateCorrelationAndSelection.   </Connection>
-        </Connections>
-      </Port>
-      <Port>
-        <PortName>bandwidthOptimizationMethod</PortName>
-        <Definition>if KDE is the selected method this determines how the bandwith will be optimized the adhoc option is usually quite quick other methods can be a bit more time consuming</Definition>
-        <Mandatory>False</Mandatory>
-        <Default>adhoc</Default>
-        <Options>
-          <Option>adhoc: uses ad hoc bandwidth selection from the spatstat package this does not optimize any statistical criterion</Option>
-          <Option>Hpi: The Plug-in bandwidth selector from the R ks library</Option>
-          <Option>Hscv: The smoothed cross-validation bandwidth selector from the R ks library</Option>
-          <Option>Hbcv: The biased cross-validation bandwidth selector from the R ks library</Option>
-          <Option>Hlscv: The least squares cross-validation bandwidth selector from the R ks library</Option>
-        </Options>
-        <Connections>Does not connect to any other module.</Connections>
-      </Port>
-      <Port>
-        <PortName>continuous</PortName>
-        <Definition>Indicate whether a continuous (bias) surface or a binary mask should be created.  If continuous is set to TRUE then the isopleth argument will be ignored and a continuous surface will be generated.  If continuous is set to false then the isopleth argument will determine where the binary cuttoff is drawn.</Definition>
-        <Mandatory>False</Mandatory>
-        <Default>False (Unchecked)</Default>
-        <Options>
-          <Option>True (Checked)</Option>
-          <Option>False (Unchecked)</Option>
-        </Options>
-        <Connections>Does not connect to any other module.</Connections>
-      </Port>
-      <Port>
-        <PortName>isopleth</PortName>
-        <Definition>If continuous is selected the isopleth is used to determine where the cuttoff for the binary mask is drawn.  This should be in percent so an isopleth of 95 will include the region that contains 95% of the presence locations.  </Definition>
-        <Mandatory>False</Mandatory>
-        <Default>95 but this is only used if continuous is set False or if method is MCP</Default>
-        <Options>
-          <Option>True (Checked)</Option>
-          <Option>False (Unchecked)</Option>
-        </Options>
-        <Connections>Does not connect to any other module.</Connections>
-      </Port>
-      <Port>
-        <PortName>method</PortName>
-        <Definition>The method used to generate the surface for background point generation.  This should be either KDE (Kernel Density Estimate) or MCP (Minimum Convex Polygon).  If MCP is used the arguments continuous ans Isopleth will be ignored.</Definition>
-        <Mandatory>False</Mandatory>
-        <Default>KDE</Default>
-        <Options>
-          <Option>KDE uses a kernel density estimate of the presence locations</Option>
-          <Option>MCP uses a minimum convex polygon to create a mask of the presence locations</Option>
-        </Options>
-        <Connections>Does not connect to any other module.</Connections>
-      </Port>
-      <Port>
-        <PortName>templateLayer</PortName>
-        <Definition>the TemplateLayer used for writing the background point generation surface to a tiff.  This will generally come directly from the TemplateLayer module</Definition>
-        <Mandatory>TRUE</Mandatory>
-        <Default>NA</Default>
-        <Options>
-          <Option>NA</Option>
-        </Options>
-        <Connections>Does not connect to any other module.</Connections>
-      </Port>
-    </InputPorts>
-    <OutputPorts>
-      <Port>
-        <PortName>backgroundProbSurf</PortName>
-        <Definition>A continuous or binary tiff that can be used to generate background points following the spatial pattern of where samples were taken </Definition>
-        <Mandatory>NA</Mandatory>
-        <Default>NA</Default>
-        <Options>NA</Options>
-        <Connections>
-          <Connection>'backgroundProbSurf' port of of the MDSBuilder</Connection>
-        </Connections>
-      </Port>
-    </OutputPorts>
-    <References>
-      <Reference>A. Baddeley and R. Turner (2005). Spatstat: an R package for analyzing spatial point
-  patterns. Journal of Statistical Software 12 (6), 1-42. ISSN: 1548-7660. URL:
-  www.jstatsoft.org</Reference>
-      <Reference> Tarn Duong (2012). ks: Kernel smoothing. R package version 1.8.6.
-  http://CRAN.R-project.org/package=ks
-</Reference>
-    </References>
-    <SeeAlso />
-  </Module>
-  <Module>
     <Title>ApplyModel</Title>
     <Description>This module takes a previously run model and applies it to new data.  ApplyModel requires the output workspace from a previous model run.  It can be used in one of two ways:
 
@@ -1412,6 +1349,22 @@ Row counts start from 1.</Definition>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Does not connect to any other module.</Connections>
+      </Port>
+      <Port>
+        <PortName>run_name_info</PortName>
+        <Definition>Used to specify a file name tag or ouput subfolder name in which to put/name the output files produced by this module.  In not used the outputs will be put in the root of the SAHM session folder and given the default name (e.g. FDQ_1.csv).  All subsequent outputs produced by modules downstream of the one with a run_name_info specified will use the same subfolder or run_name tag unless a new OutputName is used</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>Does not connect to any other module.</Connections>
+      </Port>
+      <Port>
+        <PortName>run_name_info</PortName>
+        <Definition>Used to specify a meaningful tag and subfolder for output file naming/organization.  See documentation for OutputName module for more information.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>None</Options>
+        <Connections>Connects to an OutputName module</Connections>
       </Port>
     </InputPorts>
     <OutputPorts>
@@ -1502,6 +1455,112 @@ Row counts start from 1.</Definition>
       </Port>
     </OutputPorts>
     <References></References>
+    <SeeAlso />
+  </Module>
+  <Module>
+    <Title>BackgroundSurfaceGenerator</Title>
+    <Description>This function takes a field data file and based on the options specified creates a continuous or binary mask for generation of background points either using a Kernel Density (KDE) of the presence points with various options for optimizing bandwidth or a minimum convex polygon (MCP). 
+    </Description>
+    <InputPorts>
+      <Port>
+        <PortName>fieldData</PortName>
+        <Definition>an input field dataset with X and Y locations along with a response column.  This will commonly be generated either by the FieldDataQuery or the FieldDataAggregateAndWeight. </Definition>
+        <Mandatory>True</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>
+          <Connection>The mdsFile can be produced by any of MDSBuilder, ModelEvaluationSplit, ModelSelectionCrossValidation, ModelSelectionSplit, or CovariateCorrelationAndSelection.   </Connection>
+        </Connections>
+      </Port>
+      <Port>
+        <PortName>bandwidthOptimizationMethod</PortName>
+        <Definition>if KDE is the selected method this determines how the bandwith will be optimized the adhoc option is usually quite quick other methods can be a bit more time consuming</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>adhoc</Default>
+        <Options>
+          <Option>adhoc: uses ad hoc bandwidth selection from the spatstat package this does not optimize any statistical criterion</Option>
+          <Option>Hpi: The Plug-in bandwidth selector from the R ks library</Option>
+          <Option>Hscv: The smoothed cross-validation bandwidth selector from the R ks library</Option>
+          <Option>Hbcv: The biased cross-validation bandwidth selector from the R ks library</Option>
+          <Option>Hlscv: The least squares cross-validation bandwidth selector from the R ks library</Option>
+        </Options>
+        <Connections>Does not connect to any other module.</Connections>
+      </Port>
+      <Port>
+        <PortName>continuous</PortName>
+        <Definition>Indicate whether a continuous (bias) surface or a binary mask should be created.  If continuous is set to TRUE then the isopleth argument will be ignored and a continuous surface will be generated.  If continuous is set to false then the isopleth argument will determine where the binary cuttoff is drawn.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>False (Unchecked)</Default>
+        <Options>
+          <Option>True (Checked)</Option>
+          <Option>False (Unchecked)</Option>
+        </Options>
+        <Connections>Does not connect to any other module.</Connections>
+      </Port>
+      <Port>
+        <PortName>isopleth</PortName>
+        <Definition>If continuous is selected the isopleth is used to determine where the cuttoff for the binary mask is drawn.  This should be in percent so an isopleth of 95 will include the region that contains 95% of the presence locations.  </Definition>
+        <Mandatory>False</Mandatory>
+        <Default>95 but this is only used if continuous is set False or if method is MCP</Default>
+        <Options>
+          <Option>True (Checked)</Option>
+          <Option>False (Unchecked)</Option>
+        </Options>
+        <Connections>Does not connect to any other module.</Connections>
+      </Port>
+      <Port>
+        <PortName>method</PortName>
+        <Definition>The method used to generate the surface for background point generation.  This should be either KDE (Kernel Density Estimate) or MCP (Minimum Convex Polygon).  If MCP is used the arguments continuous ans Isopleth will be ignored.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>KDE</Default>
+        <Options>
+          <Option>KDE uses a kernel density estimate of the presence locations</Option>
+          <Option>MCP uses a minimum convex polygon to create a mask of the presence locations</Option>
+        </Options>
+        <Connections>Does not connect to any other module.</Connections>
+      </Port>
+      <Port>
+        <PortName>templateLayer</PortName>
+        <Definition>the TemplateLayer used for writing the background point generation surface to a tiff.  This will generally come directly from the TemplateLayer module</Definition>
+        <Mandatory>TRUE</Mandatory>
+        <Default>NA</Default>
+        <Options>
+          <Option>NA</Option>
+        </Options>
+        <Options>
+          <Option>NA</Option>
+        </Options>
+        <Connections>Does not connect to any other module.</Connections>
+      </Port>
+      <Port>
+        <PortName>run_name_info</PortName>
+        <Definition>Used to specify a meaningful tag and subfolder for output file naming/organization.  See documentation for OutputName module for more information.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>None</Options>
+        <Connections>Connects to an OutputName module</Connections>
+      </Port>
+    </InputPorts>
+    <OutputPorts>
+      <Port>
+        <PortName>backgroundProbSurf</PortName>
+        <Definition>A continuous or binary tiff that can be used to generate background points following the spatial pattern of where samples were taken </Definition>
+        <Mandatory>NA</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>
+          <Connection>'backgroundProbSurf' port of of the MDSBuilder</Connection>
+        </Connections>
+      </Port>
+    </OutputPorts>
+    <References>
+      <Reference>A. Baddeley and R. Turner (2005). Spatstat: an R package for analyzing spatial point
+  patterns. Journal of Statistical Software 12 (6), 1-42. ISSN: 1548-7660. URL:
+  www.jstatsoft.org</Reference>
+      <Reference> Tarn Duong (2012). ks: Kernel smoothing. R package version 1.8.6.
+  http://CRAN.R-project.org/package=ks
+</Reference>
+    </References>
     <SeeAlso />
   </Module>
   <Module>
@@ -1612,6 +1671,14 @@ If using the complex Python syntax query a valid Python equality statement with 
             The syntax is python in case you want to create an involved query.<Option>Simple - Select a Query_Column and enter a value in the Query port.  If the value for a row in the selected column equals the value entered in the Query that row will be kept.  For example you might have a 'year' column selected in the Query_column port and enter 2009 here to to select all 2009 entries.  NOTE:  DO NOT ENCLOSE THE QUERY TEXT IN QUOTES IF YOU ARE TRYING TO MATCH A STRING!</Option><Option>Complex - Optionally you can construct complex queries using Python syntax.  To do this enclose the column name in square brackets as part of a line of Python code.  Since the columns used are specified in the query string there is no need to use the Query_column port and it will be ignored.  For example to select years greater than 2005 you would use:  [year] &gt; 2005  To include string equality make sure you enclose the entire bracketed field name in quotes as well.  For example "[Observer]" == "Colin"  Complex queries involving multiple columns are possible as well, for example "[Observer]" != "Colin" and [year] &gt; 2005.</Option></Options>
         <Connections>Does not generally Connect to any other Module.</Connections>
       </Port>
+      <Port>
+        <PortName>run_name_info</PortName>
+        <Definition>Used to specify a meaningful tag and subfolder for output file naming/organization.  See documentation for OutputName module for more information.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>None</Options>
+        <Connections>Connects to an OutputName module</Connections>
+      </Port>
     </InputPorts>
     <OutputPorts>
       <Port>
@@ -1684,6 +1751,14 @@ EPSG codes are numbers representing all commonly used geographic and projected c
           <Option>If you have ESRI ArcGIS and a layer in the coordinate system you can find the EPSG code in the items metadata.  Select the item in ArcCatalog, open the description tag, scroll down to the Spatial Reference section, the EPSG will be the number in the 'WELL-KNOWN-IDENDIFIER' tag.</Option>
         </Options>
         <Connections>Does not generally Connect to any other Module.</Connections>
+      </Port>
+      <Port>
+        <PortName>run_name_info</PortName>
+        <Definition>Used to specify a meaningful tag and subfolder for output file naming/organization.  See documentation for OutputName module for more information.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>None</Options>
+        <Connections>Connects to an OutputName module</Connections>
       </Port>
     </InputPorts>
     <OutputPorts>
@@ -1778,6 +1853,16 @@ In formatting the list of predictor files, the titles assigned to each of the co
           <Option>False (Unchecked) = All processing will occur on the same thread as the main program.</Option>
         </Options>
         <Connections></Connections>
+      </Port>
+      <Port>
+        <PortName>run_name_info</PortName>
+        <Definition>Used to specify a meaningful tag and subfolder for output file naming/organization.  See documentation for OutputName module for more information.
+
+Note: Modules downstream of PARC will not use the run_name or folder_name specified here.  To get these subsequent modules to, you can also connect the OutputName to the MDSBuilder module immediately downstream of PARC.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>None</Options>
+        <Connections>Connects to an OutputName module</Connections>
       </Port>
     </InputPorts>
     <OutputPorts>
@@ -1919,11 +2004,19 @@ The following columns are in a RastersWithPARCInfoCSV:
         <PortName>Seed</PortName>
         <Definition>The seed is used to be able recreate a specific output.  The seed used in each run will be noted on the console output and saved in the output log in the session folder.</Definition>
         <Mandatory>False</Mandatory>
-        <Default>If no seed is specified a random seed between -1*((2^32)/2) and ((2^32)/2) will be generated and used.</Default>
+        <Default>None (The seed value specified in the SAHM configuration will be used)</Default>
         <Options>
           <Option>Any integer between -1*((2^32)/2) and ((2^32)/2)</Option>
         </Options>
         <Connections>NA</Connections>
+      </Port>
+      <Port>
+        <PortName>run_name_info</PortName>
+        <Definition>Used to specify a meaningful tag and subfolder for output file naming/organization.  See documentation for OutputName module for more information.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>None</Options>
+        <Connections>Connects to an OutputName module</Connections>
       </Port>
     </InputPorts>
     <OutputPorts>
@@ -1948,6 +2041,63 @@ The following columns are in a RastersWithPARCInfoCSV:
       </Port>
     </OutputPorts>
     <References></References>
+    <SeeAlso />
+  </Module>
+  <Module>
+    <Title>OutputName</Title>
+    <Description>A OutputName module is used to specify a file name tag or ouput subfolder name in which to put/name the output files produced by all SAHM modules downstream of it.  The default file naming/creation method used by SAHM puts new files in the root of the SAHM session folder and gives them a default name that ends with a number that increments for each unique set of inputs and parameters(e.g. FDQ_1.csv, FDQ_2.csv).   
+
+    While this convention ensures that previous outputs are not overwritten by subsequent runs it can make it difficult to determine which outputs were produced by specific workflows.  The optional OutputName module gives a user the ability to extend the default naming convention to include a meaningful tag and/or a subfolder name to put outputs files into.
+
+    The OutputName module can be connected to most SAHM modules (except those in DataInput, GeospatialTools, and Outputs) and all subsequent outputs produced by modules downstream of the one with a OutputName specified will use the same subfolder or run_name tag unless a new OutputName is used downstream.  Two noteable exceptions to this are the PARC and BackgroundSurfaceGenerator modules which will not pass the tag or subfolder they use.  
+
+    While both the run_name and subfolder_name are optional, one of the two must be used.
+       </Description>
+    <InputPorts>
+      <Port>
+        <PortName>delete_previous</PortName>
+        <Definition>If checked any previous output produced in the specified folder or containing the specified tag will be deleted from the current SAHM session folder.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>Does not connect to any other module.</Connections>
+      </Port>
+      <Port>
+        <PortName>run_name</PortName>
+        <Definition>The string specified here gets inserted into the output name generated by SAHM.  For example FDQ_1.csv would become FDQ_SomeName_1.csv if a run_name of SomeName was specified.</Definition>
+        <Mandatory>FALSE</Mandatory>
+        <Default>NA</Default>
+        <Options>
+          <Option>Any string without spaces, underscores, or special characters.</Option>
+        </Options>
+        <Connections>Does not connect to any other module.</Connections>
+      </Port>
+      <Port>
+        <PortName>subfolder_name</PortName>
+        <Definition>A folder with the string specified here gets created at the root of the SAHM session directory, if it doesn't already exist.  All subsequent output gets saved into this folder.  </Definition>
+        <Mandatory>FALSE</Mandatory>
+        <Default>None</Default>
+        <Options>
+          <Option>Any string without spaces, underscores, or special characters.</Option>
+        </Options>
+        <Connections>Does not connect to any other module.</Connections>
+      </Port>
+    </InputPorts>
+    <OutputPorts>
+      <Port>
+        <PortName>run_name_info</PortName>
+        <Definition>A dictionary with the values specified as parameters to this module.</Definition>
+        <Mandatory>NA</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>
+          <Connection>This port can connect to most of the other SAHM modules.</Connection>
+        </Connections>
+      </Port>
+    </OutputPorts>
+    <References>
+      <Reference>Hastie T, Tibshirani R, Friedman JH. 2009. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. New York: Springer-Verlag. 744 pp. 2nd ed. </Reference>
+    </References>
     <SeeAlso />
   </Module>
   <Module>
@@ -1979,13 +2129,21 @@ It is not valid to select models based on their performance on the reserved port
       </Port>
       <Port>
         <PortName>Seed</PortName>
-        <Definition>The random number seed used by split the data.  If one desires to reproduce results from a previous split fit, one must enter the random number seed that is reported in the console output from that split step.  </Definition>
+        <Definition>The random number seed used by split the data.  . There is a default seed specified in the SAHM configuration.  If you want to use a different value it can be entered here.</Definition>
         <Mandatory>FALSE</Mandatory>
-        <Default>Randomly selected</Default>
+        <Default>The seed specified in the SAHM configuration</Default>
         <Options>
           <Option>Any integer between -2147483647 and 2147483647</Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
+      </Port>
+      <Port>
+        <PortName>run_name_info</PortName>
+        <Definition>Used to specify a meaningful tag and subfolder for output file naming/organization.  See documentation for OutputName module for more information.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>None</Options>
+        <Connections>Connects to an OutputName module</Connections>
       </Port>
     </InputPorts>
     <OutputPorts>
@@ -2034,13 +2192,21 @@ It is not valid to select models based on their performance on the reserved port
       </Port>
       <Port>
         <PortName>Seed</PortName>
-        <Definition>The random number seed used to split the data.  If one desires to reproduce results from a previous split fit, one must enter the random number seed that is reported in the console output from that split step. </Definition>
+        <Definition>The random number seed used to split the data.  . There is a default seed specified in the SAHM configuration.  If you want to use a different value it can be entered here.</Definition>
         <Mandatory>FALSE</Mandatory>
-        <Default>Randomly selected</Default>
+        <Default>The seed specified in the SAHM configuration</Default>
         <Options>
           <Option>Any integer between -2147483647 and 2147483647</Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
+      </Port>
+      <Port>
+        <PortName>run_name_info</PortName>
+        <Definition>Used to specify a meaningful tag and subfolder for output file naming/organization.  See documentation for OutputName module for more information.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>None</Options>
+        <Connections>Connects to an OutputName module</Connections>
       </Port>
     </InputPorts>
     <OutputPorts>
@@ -2102,13 +2268,21 @@ Under most circumstances the cross-validation evaluation metrics reported by thi
       </Port>
       <Port>
         <PortName>Seed</PortName>
-        <Definition>The random number seed used to split the data.  If one desires to reproduce results from a previous split fit, one must enter the random number seed that is reported in the console output from that split step. </Definition>
+        <Definition>The random number seed used to split the data.  There is a default seed specified in the SAHM configuration.  If you want to use a different value it can be entered here.</Definition>
         <Mandatory>FALSE</Mandatory>
-        <Default>Randomly selected</Default>
+        <Default>The seeed specified in the SAHM configuration</Default>
         <Options>
           <Option>Any integer between -2147483647 and 2147483647</Option>
         </Options>
         <Connections>Does not connect to any other module.</Connections>
+      </Port>
+      <Port>
+        <PortName>run_name_info</PortName>
+        <Definition>Used to specify a meaningful tag and subfolder for output file naming/organization.  See documentation for OutputName module for more information.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>None</Options>
+        <Connections>Connects to an OutputName module</Connections>
       </Port>
     </InputPorts>
     <OutputPorts>
@@ -2204,6 +2378,14 @@ Multiple iterations can be run at this screen, allowing the user to investigate 
         </Options>
         <Connections>Does not connect to any other module.</Connections>
       </Port>
+      <Port>
+        <PortName>run_name_info</PortName>
+        <Definition>Used to specify a meaningful tag and subfolder for output file naming/organization.  See documentation for OutputName module for more information.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>None</Options>
+        <Connections>Connects to an OutputName module</Connections>
+      </Port>
     </InputPorts>
     <OutputPorts>
       <Port>
@@ -2260,11 +2442,11 @@ Be cautious when using the output layers from this tool as input to models as th
     <SeeAlso />
   </Module>
   <Module>
-    <Title>GeneralSpatialViewer</Title>
+    <Title>GeoSpatialViewerCell</Title>
     <Description>
-    GeneralSpatialViewer is a stripped down version of a SAHMModelOutputViewerCell that displays a single raster layer as well as additional vector layer overlays.  This functions as a mini-gis in the spreadsheet for viewing ancillary data.
+    The GeoSpatialViewerCell is a stripped down version of a SAHMModelOutputViewerCell that displays a single raster layer as well as additional vector layer overlays.  This functions as a mini-gis in the spreadsheet for viewing ancillary data.
 
-The display projection and extent will match the raster being used.</Description>
+The display projection and extent will match the raster being used.  Currently exactly one raster with a defined projection definition is required.</Description>
     <InputPorts>
       <Port>
         <PortName>row</PortName>

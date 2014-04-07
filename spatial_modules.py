@@ -152,7 +152,7 @@ class GeoSpatialViewerCell(BaseGeoViewerCell):
     cmap values can be found at:
 
     """
-    __doc__ = GenModDoc.construct_module_doc('GeneralSpatialViewer')
+    __doc__ = GenModDoc.construct_module_doc('GeoSpatialViewerCell')
     _input_ports = copy.deepcopy(BaseGeoViewerCell._input_ports)
     _input_ports.extend([ ("raster_layers",
                            "(edu.utah.sci.vistrails.basic:Dictionary)")])
@@ -1011,8 +1011,8 @@ class MPLButton(QtGui.QAction):
                 eval("cell.mpl_toolbar." + self.actionfunc + "()")
 
 class RasterLayer(Module):
-    '''A file that represents a raster geospatial layer for display
-    '''
+    __doc__ = GenModDoc.construct_module_doc('RasterLayer')
+
     _input_ports = [("raster_file", '(edu.utah.sci.vistrails.basic:Path)'),
                     ("cmap", '(gov.usgs.sahm:mpl_colormap:Other)', {'defaults':'["jet"]'}),
                     ('categorical', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
@@ -1078,8 +1078,8 @@ class VectorLayer(Module):
         self.setResult('display_dict', self.args_dict)
 
 class PointLayer(VectorLayer):
-    '''A vector file with point geometry
-    '''
+    __doc__ = GenModDoc.construct_module_doc('PointLayer')
+
     _input_ports = list(VectorLayer._input_ports)
     _input_ports.extend([('marker', '(edu.utah.sci.vistrails.basic:String)',
                           {'defaults':'["o"]', 'optional':False}),
@@ -1099,8 +1099,8 @@ class PointLayer(VectorLayer):
         VectorLayer.compute(self)
 
 class PolyLayer(VectorLayer):
-    '''A vector file with polygon or multi-polygon geometry
-    '''
+    __doc__ = GenModDoc.construct_module_doc('PolyLayer')
+
     def compute(self):
         self.args_dict['shapetype'] = "polygon"
         VectorLayer.compute(self)
