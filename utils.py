@@ -759,10 +759,7 @@ def pull_R_install_from_reg():
 
                     return R_path
 
-    msgbox = QtGui.QMessageBox()
-    msgbox.setText("SAHM is unable to autodetect an installation of R on this machine\nYou must manually set the 'r_path' configuration value\n\nSee the SAHM installation section of the user manual for details.")
-    msgbox.exec_()
-    return "R not found!"
+    return "SAHM is unable to autodetect an installation of R on this machine\nYou must manually set the 'r_path' configuration value\n\nSee the SAHM installation section of the user manual for details."
 
 def find_java_exe(java_bin):
     '''Used on windows to check if we can execute java based on the
@@ -1289,45 +1286,50 @@ def get_sheet_location(_module):
     if _module.inputPorts.has_key('Location'):
         auto_location = _module.inputPorts['Location'][0].obj
     else:
-        cur_vt = _module.moduleInfo['controller'].vistrail
-        cur_pipeline = _module.moduleInfo['pipeline']
-        cur_version = _module.moduleInfo['controller'].current_version
-        cur_name = cur_vt.get_pipeline_name(cur_version)
-        if "+" in cur_name:
-            cur_name = " ".join(cur_name.split()[:-2])
+        try:
+            cur_vt = _module.moduleInfo['controller'].vistrail
 
-        cur_cells = 0
-        rows = []
-        cols = []
-        for m in cur_pipeline.modules.itervalues():
-            if m.name in ['SAHMSpatialOutputViewerCell',
-                            'SAHMModelOutputViewerCell',
-                                'GeoSpatialViewerCell']:
-                cur_cells += 1
-                for function in m.functions:
-                    if function.name == 'row':
-                        rows.append(int(function.params[0].strValue))
-                    elif function.name == 'column':
-                        cols.append(int(function.params[0].strValue))
-        if rows:
-            max_row = max(rows)
-        else:
-            max_row = 2
+            cur_pipeline = _module.moduleInfo['pipeline']
+            cur_version = _module.moduleInfo['controller'].current_version
+            cur_name = cur_vt.get_pipeline_name(cur_version)
+            if "+" in cur_name:
+                cur_name = " ".join(cur_name.split()[:-2])
 
-        if cols:
-            max_col = max(cols)
-        else:
-            max_col = math.ceil(cur_cells / 2)
+            cur_cells = 0
+            rows = []
+            cols = []
+            for m in cur_pipeline.modules.itervalues():
+                if m.name in ['SAHMSpatialOutputViewerCell',
+                                'SAHMModelOutputViewerCell',
+                                    'GeoSpatialViewerCell']:
+                    cur_cells += 1
+                    for function in m.functions:
+                        if function.name == 'row':
+                            rows.append(int(function.params[0].strValue))
+                        elif function.name == 'column':
+                            cols.append(int(function.params[0].strValue))
+            if rows:
+                max_row = max(rows)
+            else:
+                max_row = 2
 
-        if max_row * max_col < cur_cells:
-            max_col = math.ceil(cur_cells / 2)
+            if cols:
+                max_col = max(cols)
+            else:
+                max_col = math.ceil(cur_cells / 2)
 
-        sheet_ref = StandardSheetReference()
-        sheet_ref.sheetName = cur_name
-        sheet_ref.minimumColumnCount = max_col
-        sheet_ref.minimumRowCount = max_row
-        auto_location = CellLocation()
-        auto_location.sheetReference = sheet_ref
+            if max_row * max_col < cur_cells:
+                max_col = math.ceil(cur_cells / 2)
+
+            sheet_ref = StandardSheetReference()
+            sheet_ref.sheetName = cur_name
+            sheet_ref.minimumColumnCount = max_col
+            sheet_ref.minimumRowCount = max_row
+            auto_location = CellLocation()
+            auto_location.sheetReference = sheet_ref
+
+        except AttributeError:
+            auto_location = None
 
     if _module.hasInputFromPort("row"):
         if not auto_location:
