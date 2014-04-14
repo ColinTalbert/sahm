@@ -109,6 +109,8 @@ class BaseGeoViewerCell(SpreadsheetCell):
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("vector_layers", "(edu.utah.sci.vistrails.basic:Dictionary)"),
                     ('display_states', '(edu.utah.sci.vistrails.basic:Boolean)',
+                                    {'defaults':'["True"]', 'optional':False}),
+                    ('display_colorbar', '(edu.utah.sci.vistrails.basic:Boolean)',
                                     {'defaults':'["True"]', 'optional':False}), ]
 
 
@@ -119,30 +121,43 @@ class BaseGeoViewerCell(SpreadsheetCell):
     def provide_output_port_documentation(cls, port_name):
         return GenModDoc.construct_port_doc(cls, port_name, 'out')
 
+    def __init__(self, parent=None):
+        SpreadsheetCell.__init__(self)
+
+        self.port_map = {}
+
     def compute(self):
         self.inputs = self.parse_inputs()
+        self.inputs.update(map_ports(self, self.port_map))
 
-        self.local_displayAndWait()
+        self.local_displayAndWait(self.inputs)
 
     def parse_inputs(self):
         inputs = {}
 
-        self.location = utils.get_sheet_location(self)
+        if self.__class__.__name__ != 'client_GeoSpatialViewerCell':
+            self.location = utils.get_sheet_location(self)
+        else:
+            self.location = None
 
-        inputs['vector_layers'] = []
-        for vector_layers in self.forceGetInputListFromPort('vector_layers'):
-            inputs['vector_layers'].append(vector_layers)
+        inputs['vector_layers'] = self.forceGetInputListFromPort('vector_layers')
+        #  ugly hack to get the viswall to work.  Serial/unserialize nests
+        #  the list of vector_layers in an additional list
+        if inputs['vector_layers'] != [] and type(inputs['vector_layers'][0]) == list:
+            inputs['vector_layers'] = inputs['vector_layers'][0]
 
-        inputs['raster_layers'] = []
-        for raster_layers in self.forceGetInputListFromPort('raster_layers'):
-            inputs['raster_layers'].append(raster_layers)
+        inputs['raster_layers'] = self.forceGetInputListFromPort('raster_layers')
+        #  ugly hack to get the viswall to work.  Serial/unserialize nests
+        #  the list of vector_layers in an additional list
+        if inputs['raster_layers'] != [] and type(inputs['raster_layers'][0]) == list:
+            inputs['raster_layers'] = inputs['raster_layers'][0]
 
         inputs["display_states"] = self.forceGetInputFromPort("display_states", True)
-
+        inputs["display_colorbar"] = self.forceGetInputFromPort("display_colorbar", True)
         return inputs
 
-    def local_displayAndWait(self):
-        self.displayAndWait(SpatialViewerCellWidget, self.inputs)
+    def local_displayAndWait(self, inputs):
+        self.displayAndWait(SpatialViewerCellWidget, inputs)
 
 class GeoSpatialViewerCell(BaseGeoViewerCell):
     """
@@ -168,18 +183,18 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         """
         QCellWidget.__init__(self, parent)
 
-        self.displaylegend = False
+        self.SyncChangesButton = "all"
+        self.setAnimationEnabled(False)
+        self.display_states = True
+        self.display_colorbar = True
+        self.cursor_mode = 'pan'
 
         centralLayout = QtGui.QVBoxLayout()
         self.setLayout(centralLayout)
         centralLayout.setMargin(0)
         centralLayout.setSpacing(0)
         self.create_main_frame()
-        self.fig.canvas.draw()
-        self.SyncChangesButton = "all"
-        self.setAnimationEnabled(False)
-        self.display_states = True
-        self.display_colorbar = True
+#          self.fig.canvas.draw()
 
     def updateContents(self, inputs):
         """ updateContents(inputs: dictionary) -> None
@@ -199,6 +214,7 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.load_layers()
 
         self.display_states = inputs["display_states"]
+        self.display_colorbar = inputs["display_colorbar"]
 
         self.on_draw(view_extent=self.get_max_extent())
 
@@ -211,24 +227,29 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.fig.canvas.draw()
         self.update()
 
+#          self.axes.callbacks.connect('xlim_changed', self.lim_changed)
+#          self.axes.callbacks.connect('ylim_changed', self.lim_changed)
+        self.axes.end_pan = self.end_pan
+
+    def end_pan(self, *args, **kwargs):
+        self.sync_extents()
+
     def on_draw_base(self, view_extent=None):
         """ Completely clears then redraws the figure
         There's probably a more efficient way to do this.
         """
-        if not view_extent:
-            xlim, ylim = self.get_extent()
-        else:
+        if view_extent:
             xlim, ylim = view_extent
+        else:
+            xlim, ylim = self.get_extent()
 
         self.fig.clear()
         self.add_axis()
 
         self.display_raster(xlim, ylim)
 
-        self.set_extent(xlim, ylim)
+        self.set_axis_extent(xlim, ylim)
         if self.display_states:
-            #  only attempt to draw the state boundaries if
-            #  fiona was successfully imported
             self.add_states()
 
         for vector_layer in self.vector_layers:
@@ -257,12 +278,11 @@ class SpatialViewerCellWidgetBase(QCellWidget):
                 for t in cb.ax.get_xticklabels():
                     t.set_fontsize(7)
 
-        self.set_extent(xlim, ylim)
+        self.set_axis_extent(xlim, ylim)
 
 #          self.map_canvas.draw()
         self.axes.figure.canvas.draw_idle()
         self.update()
-        self.data_changed = False
 #          self.axes.set_ylim(display_extent[2:], emit=False)
 #          self.axes.set_xlim(display_extent[:2], emit=False)
 
@@ -319,8 +339,6 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.add_axis()
 
         self.mpl_toolbar = NavigationToolbar(self.map_canvas, None)
-
-
 
         self.mpl_toolbar.pan()
 
@@ -380,17 +398,15 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.sync_extents()
 
     def button_up(self, event):
-        if event.button == 1 and self.data_changed:
-#            self.pull_pixels()
+        if self.cursor_mode == 'zoom':
             self.sync_extents()
-            self.data_changed = False
 
     def _resize(self, event):
         self.pull_pixels()
 
-    def lim_changed(self, event):
-        self.data_changed = True
-
+#      def lim_changed(self, event):
+#          if not self.button_pressed:
+#              self.sync_extents()
 
     def pull_pixels(self):
         try:
@@ -423,8 +439,6 @@ class SpatialViewerCellWidgetBase(QCellWidget):
 
     def add_axis(self):
         self.axes = self.fig.add_subplot(111, aspect='equal', adjustable='datalim')
-        self.axes.callbacks.connect('xlim_changed', self.lim_changed)
-        self.axes.callbacks.connect('ylim_changed', self.lim_changed)
         self.axes.spines['right'].set_color('none')
         self.axes.spines['top'].set_color('none')
         self.axes.spines['bottom'].set_color('none')
@@ -642,12 +656,19 @@ class SpatialViewerCellWidgetBase(QCellWidget):
     #  Functions dealing with managing extents
 
     def set_extent(self, xlim, ylim):
-        self.axes.set_ylim(ylim, emit=False)
-        self.axes.set_xlim(xlim, emit=False)
+
+        self.set_axis_extent(xlim, ylim)
 
         self.pull_pixels()
         self.fig.canvas.draw()
+
+        self.set_axis_extent(xlim, ylim)
+
         self.update()
+
+    def set_axis_extent(self, xlim, ylim):
+        self.axes.set_ylim(ylim, emit=False)
+        self.axes.set_xlim(xlim, emit=False)
 
     def get_extent(self):
         return self.axes.get_xlim(), self.axes.get_ylim()
@@ -1000,9 +1021,13 @@ class MPLButton(QtGui.QAction):
                 if cursor == "Zoom" and \
                     (not zoomaction.isChecked() or cellWidget is cell):
                     cell.mpl_toolbar.zoom()
+                    cell.cursor_mode = 'zoom'
                 elif cursor == "Pan" and \
                     (not panaction.isChecked() or cellWidget is cell):
                     cell.mpl_toolbar.pan()
+                    cell.cursor_mode = 'pan'
+                else:
+                    cell.cursor_mode = 'none'
 
                 zoomaction.setChecked(cursor == "Zoom")
                 panaction.setChecked(cursor == "Pan")
@@ -1016,7 +1041,7 @@ class RasterLayer(Module):
     _input_ports = [("raster_file", '(edu.utah.sci.vistrails.basic:Path)'),
                     ("cmap", '(gov.usgs.sahm:mpl_colormap:Other)', {'defaults':'["jet"]'}),
                     ('categorical', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
-#                      ('threeBand', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+                    ('three_band', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                     ('display_min', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('display_max', '(edu.utah.sci.vistrails.basic:Float)'),
                     ('NoDataValue', '(edu.utah.sci.vistrails.basic:Float)'), ]
@@ -1026,7 +1051,7 @@ class RasterLayer(Module):
     port_map = {'raster_file':('raster_file', utils.get_filename_relative, True),
                     'cmap': ("cmap", None, True),
                     'categorical': ("categorical", None, True),
-#                      'threeBand': ("threeBand", None, True),
+                    'three_band': ("three_band", None, True),
                     'display_min': ("display_min", None, False),
                     'display_max': ("display_max", None, False),
                     'NoDataValue': ("NoDataValue", None, False),
@@ -1161,6 +1186,8 @@ class RasterDisplay(object):
         if not raster_kwargs.get("display_min", 'pullfromraster') == 'pullfromraster':
             self.display_min = raster_kwargs['display_min']
 
+        self.three_band = raster_kwargs.get('three_band', False)
+
         self.cmap = raster_kwargs.get("cmap", matplotlib.cm.jet)
 
     def __call__(self, xlim, ylim):
@@ -1181,33 +1208,17 @@ class RasterDisplay(object):
         else:
             y_pixels = None
 
-        ary = self.raster.get_block_bbox([xstart, ystart, xend, yend], x_pixels, y_pixels)
+        if self.three_band:
+            display_band = [1, 2, 3]
+        else:
+            display_band = 1
+
+        ary = self.raster.get_block_bbox([xstart, ystart, xend, yend], x_pixels, y_pixels, display_band)
         if ary is None or ary.size == 1:
                 print "raster_array is None!!!/n/n"
                 return np.empty([1960, 1080])
         else:
                 return ary
-
-        #          if self.threeBand:
-#              raise Exception("no longer working")
-#              from PIL import Image
-#              r = ds.GetRasterBand(1)
-#              g = ds.GetRasterBand(2)
-#              b = ds.GetRasterBand(3)
-#              r1 = r.ReadAsArray(xoff=xOffset, yoff=yOffset,
-#                                                    win_xsize=ncols, win_ysize=nrows,
-#                                                    buf_ysize=self.height, buf_xsize=self.width)
-#              b1 = b.ReadAsArray(xoff=xOffset, yoff=yOffset,
-#                                                    win_xsize=ncols, win_ysize=nrows,
-#                                                    buf_ysize=self.height, buf_xsize=self.width)
-#              g1 = g.ReadAsArray(xoff=xOffset, yoff=yOffset,
-#                                                    win_xsize=ncols, win_ysize=nrows,
-#                                                    buf_ysize=self.height, buf_xsize=self.width)
-#              imR = Image.fromarray(r1)
-#              imG = Image.fromarray(g1)
-#              imB = Image.fromarray(b1)
-#              return Image.merge('RGB', (imR, imG, imB))
-#          else:
 
 #    @print_timing
     def setDims(self, ax):

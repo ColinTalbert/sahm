@@ -43,6 +43,8 @@ class SAHMRaster():
         self.west = None
         self.south = None
         self.gt = None
+        self.bands = []
+        self.bandcount = 1
 
         if isRaster(rasterFile):
             self.loadRaster()
@@ -57,6 +59,10 @@ class SAHMRaster():
 
         self.ds = gdal.Open(self.source, gdalconst.GA_ReadOnly)
         self.band = self.ds.GetRasterBand(1)
+        self.bands = []
+        for band in range(self.ds.RasterCount):
+            self.bands.append(self.ds.GetRasterBand(band + 1))
+        self.bandcount = self.ds.RasterCount
 
     def createNewRaster(self):
         self.Error = []
@@ -68,22 +74,26 @@ class SAHMRaster():
         if self.signedByte:
             self.ds = driver.Create(self.source,
                                             self.width, self.height,
-                                            1, self.pixelType, ["PIXELTYPE=SIGNEDBYTE"])
+                                            self.bandcount, self.pixelType, ["PIXELTYPE=SIGNEDBYTE"])
         else:
             self.ds = driver.Create(self.source,
                                             self.width, self.height,
-                                            1, self.pixelType)
+                                            self.bandcount, self.pixelType)
 
         self.gt = (self.west, self.xScale, 0, self.north, 0, self.yScale)
         self.ds.SetGeoTransform(self.gt)
-        self.band = self.ds.GetRasterBand(1)
 
         if self.prj is not None:
             self.ds.SetProjection(self.prj)
-        self.band.SetNoDataValue(self.NoData)
-        if self.signedByte:
-            self.band.pixelType = "SIGNEDBYTE"
-            self.band.SetMetadata({'PIXELTYPE': 'SIGNEDBYTE'}, 'IMAGE_STRUCTURE')
+
+        for band_num in range(1, self.bandcount + 1):
+            band = self.ds.GetRasterBand(band_num)
+            band.SetNoDataValue(self.NoData)
+            if self.signedByte:
+                band.pixelType = "SIGNEDBYTE"
+                band.SetMetadata({'PIXELTYPE': 'SIGNEDBYTE'}, 'IMAGE_STRUCTURE')
+            self.bands.append(band)
+        self.band = self.ds.GetRasterBand(1)
 
     def pullParamsFromRaster(self, otherRasterFile):
         if not os.path.exists(otherRasterFile):
@@ -185,14 +195,14 @@ class SAHMRaster():
         row = int(floor(round(((y - self.north) / self.yScale), 5)))
         return col, row
 
-    def getPixelValueFromIndex(self, col, row):
-        return self.band.ReadAsArray(int(col), int(row), 1, 1)[0, 0]
+    def getPixelValueFromIndex(self, col, row, band=1):
+        return self.bands[band - 1].ReadAsArray(int(col), int(row), 1, 1)[0, 0]
 
     def getPixelValueFromCoords(self, x, y):
         col, row = self.convertCoordsToColRow(x, y)
         return self.getPixelValueFromIndex(col, row)
 
-    def get_block_bbox(self, bbox, win_xsize=None, win_ysize=None):
+    def get_block_bbox(self, bbox, win_xsize=None, win_ysize=None, band=1):
         '''returns a chunk of data specified with a bbox
         bbox format is [minX, minY, maxX, maxY]
         the optional win size variables allow for downsampling of data returned
@@ -203,7 +213,7 @@ class SAHMRaster():
 
         return self.getBlock(toprow, leftcol,
                              rightcol - leftcol, bottomrow - toprow,
-                             win_xsize, win_ysize)
+                             win_xsize, win_ysize, band)
 
     def get_bbox_data_bounds(self, bbox):
         '''returns a bbox of the pixels returned from a get_block_bbox call
@@ -221,23 +231,44 @@ class SAHMRaster():
 
 
     def getBlock(self, row, col, numCols, numRows,
-                                                win_xsize=None, win_ysize=None):
+                                                win_xsize=None, win_ysize=None,
+                                                band=1):
         '''Gets a specified chunk of data from our raster
         the optional win size variables allow for downsampling of data returned
         nodata values are masked off
         '''
-        data = self.band.ReadAsArray(col, row, numCols, numRows,
+        if type(band) == list:
+            from PIL import Image
+            r_block = self.getBlock(row, col, numCols, numRows, win_xsize, win_ysize, band=band[0])
+            g_block = self.getBlock(row, col, numCols, numRows, win_xsize, win_ysize, band=band[1])
+            b_block = self.getBlock(row, col, numCols, numRows, win_xsize, win_ysize, band=band[2])
+
+            #  scale
+            r_block = np.round(255.0 * (r_block - r_block.min()) / (r_block.min() - r_block.max() - 1.0)).astype(np.uint8)
+            g_block = np.round(255.0 * (g_block - g_block.min()) / (g_block.min() - g_block.max() - 1.0)).astype(np.uint8)
+            b_block = np.round(255.0 * (b_block - b_block.min()) / (b_block.min() - b_block.max() - 1.0)).astype(np.uint8)
+
+            imR = Image.fromarray(r_block)
+            imG = Image.fromarray(g_block)
+            imB = Image.fromarray(b_block)
+            return Image.merge('RGB', (imR, imG, imB))
+        else:
+            data = self.bands[band - 1].ReadAsArray(col, row, numCols, numRows,
                                                         win_xsize, win_ysize)
+
         ndMask = np.ma.masked_array(data, mask=(data == self.NoData))
         return ndMask
 
-    def putBlock(self, data, col, row):
+    def putBlock(self, data, col, row, band=1):
         '''this only works on rasters we've opened for writing
         '''
-        data = np.where(data.mask, self.NoData, data)
-        self.band.WriteArray(data, col, row)
+        try:
+            data = np.where(data.mask, self.NoData, data)
+        except:
+            pass
+        self.bands[band - 1].WriteArray(data, col, row)
 
-    def iterBlocks(self):
+    def iterBlocks(self, band=1):
         rows = int(self.height)
         cols = int(self.width)
         for i in range(0, rows, self.blockSize):
@@ -253,7 +284,7 @@ class SAHMRaster():
                     numCols = self.blockSize
                 else:
                     numCols = cols - j
-                yield self.getBlock(j, i, numCols, numRows)
+                yield self.getBlock(j, i, numCols, numRows, band=band)
 
     def resetBlocks(self):
         self.curRow = 0
@@ -273,10 +304,11 @@ class SAHMRaster():
 #        histogram = self.band.GetDefaultHistogram()
 #        self.band.SetDefaultHistogram(histogram[0], histogram[1], histogram[3])
         self.ds.BuildOverviews(overviewlist=[2, 4, 8, 16, 32, 64, 128])
-        self.band.FlushCache()
-        self.band.GetStatistics(0, 1)
-        histogram = self.band.GetDefaultHistogram()
-        self.band.SetDefaultHistogram(histogram[0], histogram[1], histogram[3])
+        for band in self.bands:
+            band.FlushCache()
+            band.GetStatistics(0, 1)
+            histogram = band.GetDefaultHistogram()
+            band.SetDefaultHistogram(histogram[0], histogram[1], histogram[3])
 
 
     def close(self):
