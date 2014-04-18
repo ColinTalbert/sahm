@@ -203,9 +203,12 @@ def write_hash_entry_pickle(hashname, fname, directory=""):
 
     hash_fname = get_picklehash_filename(directory)
     if os.path.exists(hash_fname):
-        with open(hash_fname, "rb") as f:
-            hash_dict = pickle.load(f)
-            hash_dict[hashname] = fname
+        try:
+            with open(hash_fname, "rb") as f:
+                hash_dict = pickle.load(f)
+                hash_dict[hashname] = fname
+        except:
+            hash_dict = {hashname:fname}
     else:
         hash_dict = {hashname:fname}
 
@@ -219,6 +222,7 @@ def delete_hash_entry_pickle(signature, directory=""):
         with open(hash_fname, "rb") as f:
             hash_dict = pickle.load(f)
             try:
+                hash_dict = pickle.load(f)
                 del hash_dict[signature]
             except KeyError:
                 pass
@@ -235,8 +239,8 @@ def get_fname_from_hash_pickle(hashname, directory=""):
     fname = get_picklehash_filename(directory)
     if os.path.exists(fname):
         with open(fname, 'rb') as f:
-            hash_dict = pickle.load(f)
             try:
+                hash_dict = pickle.load(f)
                 return hash_dict[hashname]
             except KeyError:
                 return None
