@@ -547,7 +547,7 @@ class Model(Module):
         except ModuleSuspended:
             raise
         except:
-            utils.delete_hash_entry_pickle(signature, self.output_dname)
+            utils.delete_hash_entry_pickle(signature)
             raise
 
         self.set_model_results()

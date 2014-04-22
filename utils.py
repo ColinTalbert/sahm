@@ -220,7 +220,6 @@ def delete_hash_entry_pickle(signature, directory=""):
     hash_fname = get_picklehash_filename(directory)
     if os.path.exists(hash_fname):
         with open(hash_fname, "rb") as f:
-            hash_dict = pickle.load(f)
             try:
                 hash_dict = pickle.load(f)
                 del hash_dict[signature]
@@ -1246,7 +1245,7 @@ def make_next_file_complex(curModule, prefix, suffix="", directory="",
     elif fname is None:
         fname = mknextdir(prefix=prefix, subfolder=subfolder, runname=runname)
         already_run = False
-    elif not os.path.exists(fname):
+    elif not os.path.exists(fname) or os.path.getsize(fname) == 0:
         already_run = False
         dir_path = os.path.dirname(fname)
         if os.path.abspath(dir_path) == os.path.abspath(getrootdir()) or \
