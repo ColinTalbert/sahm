@@ -1841,7 +1841,7 @@ class CovariateCorrelationAndSelection(Module):
         writetolog("    seed used for subsampling = " + str(params['seed']))
         global session_dir
         params['outputMDS'] = os.path.join(session_dir, subfolder, "CovariateCorrelationOutputMDS_" + runname + ".csv")
-        params['displayJPEG'] = os.path.join(session_dir, "CovariateCorrelationDisplay.jpg")
+        params['displayJPEG'] = os.path.join(session_dir, subfolder, "CovariateCorrelationDisplay.jpg")
         params['r_path'] = configuration.r_path
         params['module'] = self
         writetolog("    inputMDS = " + params['inputMDS'], False, False)
