@@ -313,7 +313,7 @@ class MDSBuilder(object):
 
         #  step one check how many points we'll have to sample before we can
         #  expect to get as many as requested
-        proportionToCheck = self.probSurfaceSanityCheck()
+        proportionToCheck, number_to_check = self.probSurfaceSanityCheck()
 
         #  First we'll create a temp copy of the Field Data to work with.
         if os.path.exists(self.fieldData):
@@ -333,7 +333,7 @@ class MDSBuilder(object):
         oFile = open(self.fieldData, 'ab')
         fOut = csv.writer(oFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-        if proportionToCheck < 0.33:
+        if proportionToCheck < 0.33 and number_to_check < 2000000:
             #  we need relatively few points it will be most efficient
             #  to simply loop through random points and throw out the
             #  duplicates
@@ -440,7 +440,7 @@ class MDSBuilder(object):
 #        driver = probRaster.DS.GetDriver()
 #        outDataset = driver.Create(tmpOutput, cols, rows, 1, gdalconst.GDT_Byte)
 
-        bSize = 1024  #  pixels per block
+        bSize = 5024  #  pixels per block
         fullPixelCount = bSize * bSize  #  number of pixels in one block
 
         goodIndices = []
@@ -656,7 +656,7 @@ class MDSBuilder(object):
             msg += "\n\n processing time and memory use could be excessive and problematic.\n"
             self.writetolog(msg, True, True)
 
-        return self.pointCount / float(max_points)
+        return self.pointCount / float(max_points), self.pointCount / aveProb * 100
 
     def getMeanProb(self, sRaster):
         """Calculate the mean probability (value) for a raster.
@@ -669,7 +669,7 @@ class MDSBuilder(object):
         rows = int(sRaster.height)
         cols = int(sRaster.width)
 
-        bSize = 1024  #  pixels per block
+        bSize = 5024  #  pixels per block
         fullPixelCount = bSize * bSize  #  number of pixels in one block
 
         avs = []
