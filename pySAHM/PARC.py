@@ -547,8 +547,9 @@ class PARC(object):
             raise utilities.TrappedError("Inputs CSV, " + self.inputs_CSV + ", does not exist on file system.")
 
         current_inputs = np.genfromtxt(self.inputs_CSV, dtype='S1000', delimiter=",", skip_header=True)
-#          inputs_csv = csv.reader(open(self.inputs_CSV, 'r'))
-#          header = inputs_csv.next()
+        if len(current_inputs.shape) == 1:
+            #  pound there was only a single item in the input file, reshape the array
+            current_inputs = np.array([current_inputs])
         input_file_errors = ""
 
         header_row = ["PARCOutputFile", "Categorical", "Resampling",
@@ -556,7 +557,11 @@ class PARC(object):
                       os.path.abspath(self.template), os.path.abspath(self.out_dir)]
         all_previous_output = os.path.join(self.out_dir, "PARC_Files.csv")
         try:
-            previous_inputs = np.genfromtxt(all_previous_output, dtype='S1000', delimiter=",", skip_header=True)[:, 4]
+            previous_inputs = np.genfromtxt(all_previous_output, dtype='S1000', delimiter=",", skip_header=True)
+            if len(previous_inputs.shape) == 1:
+            #  pound there was only a single item in the input file, reshape the array
+                previous_inputs = previous_inputs = np.array([previous_inputs])
+
             previous_inputs = [SpatialUtilities.getRasterShortName(os.path.abspath(f))
                                                          for f in previous_inputs]
             prev_output = csv.writer(open(all_previous_output, "ab"))
