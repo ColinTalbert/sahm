@@ -211,7 +211,7 @@ class SAHMRaster():
         leftcol, bottomrow = self.convertCoordsToColRow(bbox[0], bbox[1])
         rightcol, toprow = self.convertCoordsToColRow(bbox[2], bbox[3])
 
-        return self.getBlock(toprow, leftcol,
+        return self.getBlock(leftcol, toprow,
                              rightcol - leftcol, bottomrow - toprow,
                              win_xsize, win_ysize, band)
 
@@ -230,7 +230,7 @@ class SAHMRaster():
         return west, east, south, north
 
 
-    def getBlock(self, row, col, numCols, numRows,
+    def getBlock(self, col, row, numCols, numRows,
                                                 win_xsize=None, win_ysize=None,
                                                 band=1):
         '''Gets a specified chunk of data from our raster
@@ -239,9 +239,9 @@ class SAHMRaster():
         '''
         if type(band) == list:
             from PIL import Image
-            r_block = self.getBlock(row, col, numCols, numRows, win_xsize, win_ysize, band=band[0])
-            g_block = self.getBlock(row, col, numCols, numRows, win_xsize, win_ysize, band=band[1])
-            b_block = self.getBlock(row, col, numCols, numRows, win_xsize, win_ysize, band=band[2])
+            r_block = self.getBlock(col, row, numCols, numRows, win_xsize, win_ysize, band=band[0])
+            g_block = self.getBlock(col, row, numCols, numRows, win_xsize, win_ysize, band=band[1])
+            b_block = self.getBlock(col, row, numCols, numRows, win_xsize, win_ysize, band=band[2])
 
             #  scale
             r_block = np.round(255.0 * (r_block - r_block.min()) / (r_block.min() - r_block.max() - 1.0)).astype(np.uint8)
@@ -284,7 +284,7 @@ class SAHMRaster():
                     numCols = self.blockSize
                 else:
                     numCols = cols - j
-                yield self.getBlock(j, i, numCols, numRows, band=band)
+                yield self.getBlock(i, j, numCols, numRows, band=band)
 
     def resetBlocks(self):
         self.curRow = 0

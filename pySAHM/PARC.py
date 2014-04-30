@@ -313,9 +313,9 @@ class PARC(object):
             tmp_output_raster = SpatialUtilities.SAHMRaster(tmpOutput)
             self.Aggregate(tmp_output_raster, dest, source[3],
                            num_source_per_target)
-
             self.writetolog("   Finished Aggregating: " + short_name)
             try:
+                tmp_output_raster.close()
                 os.remove(tmpOutput)
             except WindowsError:
                 pass
@@ -352,6 +352,9 @@ class PARC(object):
         tmpOutput = os.path.splitext(outFName)[0] + ".tif"
         tmpOutDataset = SpatialUtilities.SAHMRaster(tmpOutput)
         tmpOutDataset.pullParamsFromRaster(self.templateRaster.source)
+        tmpOutDataset.pixelType = sourceRaster.pixelType
+        tmpOutDataset.NoData = sourceRaster.NoData
+        tmpOutDataset.signedByte = sourceRaster.signedByte
         tmpOutDataset.createNewRaster()
 
         rows = int(sourceRaster.height)
@@ -367,22 +370,23 @@ class PARC(object):
 
         for i in range(0, rows, bSize):
             if i + bSize < rows:
-                numRows = bSize
+                num_rows = bSize
             else:
-                numRows = rows - i
+                num_rows = rows - i
 
             for j in range(0, cols, bSize):
                 if j + bSize < cols:
-                    numCols = bSize
+                    num_cols = bSize
                 else:
-                    numCols = cols - j
+                    num_cols = cols - j
 
-                data = sourceRaster.getBlock(j, i, numCols, numRows)
+                data = sourceRaster.getBlock(col=j, row=i,
+                                             numCols=num_cols, numRows=num_rows)
 
                 if method == None:
                     method = "Mean"
                 if method in ["Mean", "Max", "Min", "STD"]:
-                    ans = self.rebin(data, (numRows / numSourcePerTarget, numCols / numSourcePerTarget), method)
+                    ans = self.rebin(data, (num_rows / numSourcePerTarget, num_cols / numSourcePerTarget), method)
                 else:
                     X, Y = data.shape
                     x = X // numSourcePerTarget
@@ -447,7 +451,8 @@ class PARC(object):
             try:
                 xOffset = int((point[0] - source_raster.west) / source_raster.xScale)
                 yOffset = int((point[1] - source_raster.north) / source_raster.yScale)
-                data = source_raster.getBlock(yOffset, xOffset, 1, 1)
+                data = source_raster.getBlock(col=xOffset, row=yOffset,
+                                                        numCols=1, numRows=1)
                 value = data[0, 0]
             except:
                 bad_point = True
@@ -550,6 +555,7 @@ class PARC(object):
         if len(current_inputs.shape) == 1:
             #  pound there was only a single item in the input file, reshape the array
             current_inputs = np.array([current_inputs])
+
         input_file_errors = ""
 
         header_row = ["PARCOutputFile", "Categorical", "Resampling",
@@ -563,7 +569,7 @@ class PARC(object):
                 previous_inputs = previous_inputs = np.array([previous_inputs])
 
             previous_inputs = [SpatialUtilities.getRasterShortName(os.path.abspath(f))
-                                                         for f in previous_inputs]
+                                                         for f in previous_inputs[:, 4]]
             prev_output = csv.writer(open(all_previous_output, "ab"))
         except (IndexError, IOError, StopIteration):  #  IndexError=only header, IOError=File doesn't exist, StopIteration=Empty file
             previous_inputs = []
