@@ -474,12 +474,20 @@ class SpatialViewerCellWidgetBase(QCellWidget):
             raster_proj = Proj(raster_crs.ExportToProj4())
 
             ((minx, maxx), (miny, maxy)) = self.get_extent()
+            shift360 = False
+            if minx > 180 and minx < 360:
+                minx -= 360
+                shift360 = True
+            if maxx > 180 and maxx < 360:
+                maxx -= 360
+                shift360 = True
+
             (minx, maxx), (miny, maxy) = transform(raster_proj, shape_proj, (minx, maxx), (miny, maxy))
             patches = []
             for rec in fiona_shp.filter(bbox=(minx, miny, maxx, maxy)):
                 if query_function(rec):
                     patches += self.get_patches(rec['geometry'],
-                                   shape_proj, raster_proj)
+                                   shape_proj, raster_proj, shift360)
 
             pc = PatchCollection(patches, **kwargs)
             self.axes.add_collection(pc)
@@ -527,18 +535,26 @@ class SpatialViewerCellWidgetBase(QCellWidget):
             msg += "\n\n acceptable opperands are =, > , <, >=, <=, And, Or, Not"
             raise ModuleError(self, msg)
 
-    def get_patches(self, geom, shape_proj, raster_proj):
+    def get_patches(self, geom, shape_proj, raster_proj, shift360=False):
         '''returns a list of all the patches in the passed geometry
         '''
         patches = []
         if geom['type'] == 'Polygon':
             trans_ring = np.asarray(zip(*transform(shape_proj, raster_proj, *zip(*geom['coordinates'][0]))))
-            patches.append(Polygon(trans_ring))
+            if shift360:
+                trans_ring[:, 0] = trans_ring[:, 0] + 360
+                patches.append(Polygon(trans_ring))
+            else:
+                patches.append(Polygon(trans_ring))
 #              self.plot_poly(trans_ring, **kwargs)
         elif geom['type'] == 'MultiPolygon':
             for ring in geom['coordinates']:
                 trans_ring = np.asarray(zip(*transform(shape_proj, raster_proj, *zip(*ring[0]))))
-                patches.append(Polygon(trans_ring))
+                if shift360:
+                    trans_ring[:, 0] = trans_ring[:, 0] + 360
+                    patches.append(Polygon(trans_ring))
+                else:
+                    patches.append(Polygon(trans_ring))
 #                  self.plot_poly(trans_ring, **kwargs)
         return patches
 
