@@ -1365,7 +1365,7 @@ def get_previous_run_info(full_fname):
         subfolder = ""
 
     fname_parts = fname.split("_")
-    if len(fname_parts) == 2:
+    if len(fname_parts) == 2 or len(fname_parts) == 1:
         #  there was no runname
         runname = ""
     else:
