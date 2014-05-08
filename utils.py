@@ -192,7 +192,7 @@ def mknextdir(prefix, directory="", skipSequence=False, subfolder="", runname=""
     os.mkdir(dirname)
     return dirname
 
-def get_picklehash_filename(directory=""):
+def get_picklehash_fname(directory=""):
     global _roottempdir
     if directory == "":
         directory = _roottempdir
@@ -201,7 +201,7 @@ def get_picklehash_filename(directory=""):
 
 def write_hash_entry_pickle(hashname, fname, directory=""):
 
-    hash_fname = get_picklehash_filename(directory)
+    hash_fname = get_picklehash_fname(directory)
     if os.path.exists(hash_fname):
         try:
             with open(hash_fname, "rb") as f:
@@ -217,7 +217,7 @@ def write_hash_entry_pickle(hashname, fname, directory=""):
 
 def delete_hash_entry_pickle(signature, directory=""):
 
-    hash_fname = get_picklehash_filename(directory)
+    hash_fname = get_picklehash_fname(directory)
     if os.path.exists(hash_fname):
         with open(hash_fname, "rb") as f:
             try:
@@ -235,7 +235,7 @@ def get_fname_from_hash_pickle(hashname, directory=""):
     global _roottempdir
     if directory == "":
         directory = _roottempdir
-    fname = get_picklehash_filename(directory)
+    fname = get_picklehash_fname(directory)
     if os.path.exists(fname):
         with open(fname, 'rb') as f:
             try:
@@ -1245,7 +1245,9 @@ def make_next_file_complex(curModule, prefix, suffix="", directory="",
     elif fname is None:
         fname = mknextdir(prefix=prefix, subfolder=subfolder, runname=runname)
         already_run = False
-    elif not os.path.exists(fname) or os.path.getsize(fname) == 0:
+    elif not os.path.exists(fname) or \
+        (file_or_dir == 'file' and os.path.getsize(fname) == 0) or \
+        (file_or_dir != 'file' and os.listdir(fname) == []):
         already_run = False
         dir_path = os.path.dirname(fname)
         if os.path.abspath(dir_path) == os.path.abspath(getrootdir()) or \
