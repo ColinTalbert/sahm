@@ -523,8 +523,8 @@ class Model(Module):
         self.output_dname, signature, already_run = utils.make_next_file_complex(self, prefix, key_inputs=[mdsFile],
                                                                                 file_or_dir='dir', subfolder=subfolder)
         copy_mds_fname = os.path.join(self.output_dname, os.path.split(mdsFile)[1])
-
-        shutil.copyfile(mdsFile, copy_mds_fname)
+        if not os.path.exists(copy_mds_fname):
+            shutil.copyfile(mdsFile, copy_mds_fname)
         self.args_dict["c"] = copy_mds_fname
 
 #            self.output_dname = utils.find_model_dir(prefix, self.args_dict)

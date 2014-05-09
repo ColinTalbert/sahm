@@ -1254,7 +1254,7 @@ def make_next_file_complex(curModule, prefix, suffix="", directory="",
             os.path.abspath(dir_path) == os.path.abspath(os.path.join(getrootdir(), subfolder)):
             #  We're in the same directory but maybe they deleted the original file
             if file_or_dir == 'file':
-                file = open(os.path.abspath(fname), 'w')
+                file = open(os.path.abspath(fname), 'w+')
                 file.close()
             else:
                 os.makedirs(fname)
