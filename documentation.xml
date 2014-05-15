@@ -2742,7 +2742,17 @@ For example:
   </Module>
   <Module>
     <Title>Reclassifier</Title>
-    <Description>This module will reclassify an input raster according to a specific remapping.  Note that this tool currently only produces integer data type output.   </Description>
+    <Description>This module will reclassify an input raster according to a specific remapping.  
+ 
+The reclassification is provided by specifiying a text file that contains the reclass map (format described below).  It is also possible (and preferred) to specify the same info dynamically by clicking 'configure' on this module.  A box will pop up in which you can enter the reclass information in the same format it would appear in the text file.
+
+The format of the reclass map conforms to the ESRI reclass by asci format, information available at: http://resources.arcgis.com/en/help/main/10.1/index.html#//00q90000003w000000   Values not specified in the reclass file will remain unchanged. No Data values are specified in both the input and output line with a NoData string
+    
+For example:
+0 100 : 42      -&gt; would reclass values 0 through 99 as 42
+255 : 0         -&gt; would reclass the value of 255 to 0
+NoData : 0      -&gt; would reclass current no data to 0
+-9999 : NoData  -&gt; would reclass current -9999 to no data</Description>
     <InputPorts>
       <Port>
         <PortName>inputRaster</PortName>
@@ -2753,12 +2763,20 @@ For example:
         <Connections>NA</Connections>
       </Port>
       <Port>
-        <PortName>templateFile</PortName>
-        <Definition>The layer that will be used to determine the ouput cell size, as well as the projection information.  This will likely be the same as your overall workflow template layer but does not need to be.</Definition>
+        <PortName>reclassFile</PortName>
+        <Definition>A text file that contains the reclass map in  ESRI reclass by asci format, information available at: http://resources.arcgis.com/en/help/main/10.1/index.html#//00q90000003w000000</Definition>
         <Mandatory>True</Mandatory>
         <Default>NA</Default>
         <Options>NA</Options>
         <Connections>Will likely connect with the TemplateLayer specified elsewhere in your workflow.</Connections>
+      </Port>
+      <Port>
+        <PortName>run_name_info</PortName>
+        <Definition>Connects to a OutputName module to allow you to specify an output subfolder or file name string</Definition>
+        <Mandatory>True</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>Must connect with OutputName module</Connections>
       </Port>
     </InputPorts>
     <OutputPorts>

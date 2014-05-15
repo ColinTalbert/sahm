@@ -284,7 +284,7 @@ class SAHMRaster():
                     numCols = self.blockSize
                 else:
                     numCols = cols - j
-                yield self.getBlock(i, j, numCols, numRows, band=band)
+                yield self.getBlock(j, i, numCols, numRows, band=band)
 
     def resetBlocks(self):
         self.curRow = 0

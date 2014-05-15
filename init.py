@@ -230,7 +230,7 @@ class FieldData(Path):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-         return GenModDoc.construct_port_doc(cls, port_name, 'out')
+        return GenModDoc.construct_port_doc(cls, port_name, 'out')
 
     def compute(self):
         out_fname = utils.getFileRelativeToCurrentVT(self.getInputFromPort("value").name, self)
@@ -1346,21 +1346,21 @@ class PARC(Module):
 class Reclassifier(Module):
     '''
     '''
-#    __doc__ = GenModDoc.construct_module_doc('RasterFormatConverter')
+    __doc__ = GenModDoc.construct_module_doc('RasterFormatConverter')
 
     _input_ports = [("inputRaster", "(edu.utah.sci.vistrails.basic:Path)"),
                     ('reclassFile', '(edu.utah.sci.vistrails.basic:File)'),
                     ('reclassFileContents', '(edu.utah.sci.vistrails.basic:String)'),
-                    ]
+                    ('run_name_info', '(gov.usgs.sahm:OutputNameInfo:Other)')]
 
     _output_ports = [('outputRaster', '(edu.utah.sci.vistrails.basic:File)')]
 
-#    @classmethod
-#    def provide_input_port_documentation(cls, port_name):
-#        return GenModDoc.construct_port_doc(cls, port_name, 'in')
-#    @classmethod
-#    def provide_output_port_documentation(cls, port_name):
-#         return GenModDoc.construct_port_doc(cls, port_name, 'out')
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return GenModDoc.construct_port_doc(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+        return GenModDoc.construct_port_doc(cls, port_name, 'out')
 
     def compute(self):
         writetolog("\nRunning Reclassifier", True)
@@ -1369,6 +1369,18 @@ class Reclassifier(Module):
                     'reclassFileContents':('reclassFileContents', None, False), }
 
         argsDict = utils.map_ports(self, port_map)
+
+        run_name_info = self.forceGetInputFromPort('run_name_info', None)
+        if run_name_info:
+            subfolder = run_name_info.contents.get('subfolder_name', "")
+            runname = run_name_info.contents.get('runname', "")
+            if runname:
+                output_dname = os.path.join(utils.getrootdir(), subfolder)
+            else:
+                output_dname = os.path.join(utils.getrootdir(), subfolder)
+        else:
+            subfolder, runname = "", ""
+            output_dname = os.path.join(utils.getrootdir())
 
         from pySAHM.TiffProcessor import rasterReclassifier
         ourReclassifier = rasterReclassifier()
@@ -1388,11 +1400,20 @@ class Reclassifier(Module):
             raise ModuleError(self, msg)
 
         ourReclassifier.outDir = utils.getrootdir()
-        ourReclassifier.outName = utils.mknextfile(SpatialUtilities.getRasterShortName(argsDict['inputRaster']), "_rc.tif")
-#        outFName = os.path.join(ourReclassifier.outDir, ourReclassifier.outName)
-        ourReclassifier.run()
 
-        output_file = utils.create_file_module(ourReclassifier.outName, module=self)
+        in_shortname = utils.getShortName(ourReclassifier.inputFname)
+
+        out_fname, signature, already_run = utils.make_next_file_complex(self,
+                                        prefix=in_shortname, suffix='.tif',
+                                        key_inputs=[argsDict['inputRaster']],
+                                        subfolder=subfolder, runname=runname)
+
+        if not already_run:
+            ourReclassifier.outName = out_fname
+            ourReclassifier.run()
+            utils.write_hash_entry_pickle(signature, out_fname)
+
+        output_file = utils.create_file_module(out_fname, module=self)
 
 
 #        writetolog("Finished running PARC", True)
@@ -1642,10 +1663,10 @@ class ModelEvaluationSplit(Module):
 
         if not already_run:
             utils.run_R_script("TestTrainSplit.r", args, self, new_r_path=configuration.r_path)
+            utils.write_hash_entry_pickle(signature, outputMDS)
 
         output_file = utils.create_file_module(outputMDS, module=self)
         writetolog("Finished Model Evaluation split ", True)
-        utils.write_hash_entry_pickle(signature, outputMDS)
         self.setResult("outputMDS", output_file)
 
 class ModelSelectionSplit(Module):
