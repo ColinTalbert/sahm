@@ -1346,7 +1346,7 @@ class PARC(Module):
 class Reclassifier(Module):
     '''
     '''
-    __doc__ = GenModDoc.construct_module_doc('RasterFormatConverter')
+    __doc__ = GenModDoc.construct_module_doc('Reclassifier')
 
     _input_ports = [("inputRaster", "(edu.utah.sci.vistrails.basic:Path)"),
                     ('reclassFile', '(edu.utah.sci.vistrails.basic:File)'),
