@@ -161,12 +161,12 @@ class SAHMSpatialOutputViewerCell(BaseGeoViewerCell):
         self.location = utils.get_sheet_location(self)
 
         if utils.check_if_model_finished(self.inputs["model_dir"]):
-            self.local_displayAndWait()
+            self.local_displayAndWait(self.inputs)
 
 #    @print_timing
-    def local_displayAndWait(self):
+    def local_displayAndWait(self, inputs):
         self.displayAndWait(SAHMSpatialOutputViewerCellWidget,
-                            self.inputs)
+                            inputs)
 
     def find_mds(self, model_dir):
         """returns the path to the mds that was used to generate this

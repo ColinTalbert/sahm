@@ -135,10 +135,10 @@ class BaseGeoViewerCell(SpreadsheetCell):
     def parse_inputs(self):
         inputs = {}
 
-        if self.__class__.__name__ != 'client_GeoSpatialViewerCell':
-            self.location = utils.get_sheet_location(self)
-        else:
-            self.location = None
+        #if self.__class__.__name__ != 'client_GeoSpatialViewerCell':
+        self.location = utils.get_sheet_location(self)
+        #else:
+        #    self.location = None
 
         inputs['vector_layers'] = self.forceGetInputListFromPort('vector_layers')
         #  ugly hack to get the viswall to work.  Serial/unserialize nests
@@ -253,14 +253,15 @@ class SpatialViewerCellWidgetBase(QCellWidget):
             self.add_states()
 
         for vector_layer in self.vector_layers:
-            kwargs = dict(vector_layer)
-            del(kwargs['input_file'])
-            if kwargs['shapetype'] == 'polygon':
-                del(kwargs['shapetype'])
-                self.add_poly_layer(vector_layer['input_file'], **kwargs)
-            elif kwargs['shapetype'] == 'point':
-                del(kwargs['shapetype'])
-                self.add_point_layer(vector_layer['input_file'], **kwargs)
+            if vector_layer:
+                kwargs = dict(vector_layer)
+                del(kwargs['input_file'])
+                if kwargs['shapetype'] == 'polygon':
+                    del(kwargs['shapetype'])
+                    self.add_poly_layer(vector_layer['input_file'], **kwargs)
+                elif kwargs['shapetype'] == 'point':
+                    del(kwargs['shapetype'])
+                    self.add_point_layer(vector_layer['input_file'], **kwargs)
 
 
         if self.display_colorbar:
