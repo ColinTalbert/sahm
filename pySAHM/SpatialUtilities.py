@@ -71,14 +71,15 @@ class SAHMRaster():
 
         #  register the gdal driver
         driver = gdal.GetDriverByName(self.driverName)
+
+        create_args = ['COMPRESS=LZW', 'PREDICTOR=2', 'TILED=Yes',
+                       'BLOCKXSIZE=128', 'BLOCKYSIZE=128']
+
         if self.signedByte:
-            self.ds = driver.Create(self.source,
-                                            self.width, self.height,
-                                            self.bandcount, self.pixelType, ["PIXELTYPE=SIGNEDBYTE"])
-        else:
-            self.ds = driver.Create(self.source,
-                                            self.width, self.height,
-                                            self.bandcount, self.pixelType)
+            create_args += ["PIXELTYPE=SIGNEDBYTE"]
+
+        self.ds = driver.Create(self.source, self.width, self.height,
+                    self.bandcount, self.pixelType, create_args)
 
         self.gt = (self.west, self.xScale, 0, self.north, 0, self.yScale)
         self.ds.SetGeoTransform(self.gt)
@@ -303,7 +304,7 @@ class SAHMRaster():
 
 #        histogram = self.band.GetDefaultHistogram()
 #        self.band.SetDefaultHistogram(histogram[0], histogram[1], histogram[3])
-        self.ds.BuildOverviews(overviewlist=[2, 4, 8, 16, 32, 64, 128])
+        self.ds.BuildOverviews("NEAREST", overviewlist=[2, 4, 8, 16, 32, 64, 128, 256])
         for band in self.bands:
             band.FlushCache()
             band.GetStatistics(0, 1)
