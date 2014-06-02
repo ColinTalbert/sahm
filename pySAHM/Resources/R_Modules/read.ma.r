@@ -70,8 +70,9 @@
       rm.list<-vector()
         # remove background points or record these as absence for pseudoabsence (Only partially implemented)
         if(length(which(is.na(dat[,r.col]),arr.ind=TRUE))>0) dat<-dat[-c(which(is.na(dat[,r.col]),arr.ind=TRUE)),]
-        if(any(dat[,r.col]==-9998)) {dat[which(dat[,r.col]==-9998,arr.ind=TRUE),r.col]<-0
-        out$input$PsdoAbs=TRUE
+        if(any(dat[,r.col]==-9998)) {
+            dat[which(dat[,r.col]==-9998,arr.ind=TRUE),r.col]<-0
+            out$input$PsdoAbs=TRUE
         } else out$input$PsdoAbs=FALSE
        
         # remove evaluation points
@@ -80,7 +81,7 @@
              dat<-dat[-c(which(dat[,EvalIndx]=="test",arr.ind=TRUE)),]
              rm.list<-EvalIndx
         }
-
+        
       # find and save xy columns#
       xy.cols <- na.omit(c(match("x",tolower(names(dat))),match("y",tolower(names(dat)))))
       if(length(xy.cols)>0)  {
@@ -120,10 +121,11 @@
           if(comp.cases/all.cases<.9) warning(paste(round((1-comp.cases/all.cases)*100,digits=2),"% of cases were removed because of missing values",sep=""))
       #########################################################################
         #split out the weights,response, and xy.columns after removing incomplete cases
-         
+     
       dat.names<-names(dat)
       # tagging factors and looking at their levels
          factor.cols <- grep("categorical",names(dat))
+         factor.cols<-factor.cols[!factor.cols%in%rm.list]
       factor.cols <- factor.cols[!is.na(factor.cols)]
       out.list$bad.factor.cols=NULL
       if(length(factor.cols)==0){
