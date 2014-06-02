@@ -12,6 +12,13 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
 #================================================================= 
    
     if(Model=="glm") {
+    
+    if(PsdoAbs){
+      #for glm sum of absence weights set equal to sum of presence weights
+      absWt<-sum(dat$response==1)/sum(dat$response==0)
+      weight[dat$response==0]<-absWt
+      
+     }
     mymodel.glm.step<-list()
             penalty <- if(simp.method=="AIC") 2 else
                          log(nrow(dat))
