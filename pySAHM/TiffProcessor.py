@@ -102,9 +102,12 @@ class rasterReclassifier(rasterProcessor):
         
         
         for blockData in self.inputRaster.iterBlocks():
-#            print blockData
+#              print blockData
+#              print SpatialUtilities.GDALToNPDataType(outputRaster.pixelType)
             outBlock = np.ma.asarray(blockData.copy(), dtype=SpatialUtilities.GDALToNPDataType(outputRaster.pixelType))
             for k,v in self.reclassDict.iteritems():
+                if v == "NoData":
+                    v = self.inputRaster.NoData
                 if k[0] == "NoData":
                     outBlock = np.where(np.ma.getmask(blockData), v, outBlock)
                 elif len(k) == 1:
@@ -136,16 +139,18 @@ class rasterReclassifier(rasterProcessor):
         outDict = {}
         reclassFile = open(reclassFName, "r")
         for line in reclassFile.readlines():
-            splitLine = line.split()
+            split_line = line.split()
             #ignore comments
-            if not splitLine[0].startswith("#"):
-                if splitLine[1] == ":":
-                    if splitLine[0] == "NoData":
-                        outDict[(splitLine[0],)] = float(splitLine[2])
-                    else:
-                        outDict[(float(splitLine[0]),)] = float(splitLine[2])
-                elif splitLine[2] == ":":
-                    outDict[(float(splitLine[0]), float(splitLine[1]))] = float(splitLine[3])
+            if not split_line[0].startswith("#"):
+                if str(split_line[-1]).lower() in ["nodata", "no data"]:
+                    val = "NoData"
+                else:
+                    val = float(split_line[-1])
+
+                if split_line[1] == ":": #single value reclass
+                    outDict[(float(split_line[0]),)] = val
+                elif split_line[2] == ":": #range of values reclass
+                    outDict[(float(split_line[0]), float(split_line[1]))] = val
                     
         return outDict 
 

@@ -241,7 +241,8 @@ def get_fname_from_hash_pickle(hashname, directory=""):
             try:
                 hash_dict = pickle.load(f)
                 return hash_dict[hashname]
-            except KeyError:
+            except:
+                #  if anything goes wrong we'll just rerun it!
                 return None
     return None
 
