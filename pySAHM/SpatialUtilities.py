@@ -67,13 +67,18 @@ class SAHMRaster():
     def createNewRaster(self):
         self.Error = []
         #  delete the output if it exists
-        gdal.Unlink(self.source)
+#          gdal.Unlink(self.source)
+        try:
+            os.unlink(self.source)
+        except:
+            pass
 
         #  register the gdal driver
         driver = gdal.GetDriverByName(self.driverName)
 
-        create_args = ['COMPRESS=LZW', 'PREDICTOR=2', 'TILED=Yes',
-                       'BLOCKXSIZE=128', 'BLOCKYSIZE=128']
+#          create_args = ['COMPRESS=LZW', 'PREDICTOR=2', 'TILED=Yes',
+#                         'BLOCKXSIZE=128', 'BLOCKYSIZE=128']
+        create_args = []
 
         if self.signedByte:
             create_args += ["PIXELTYPE=SIGNEDBYTE"]
@@ -663,10 +668,15 @@ def average_geotifs(raster_fnames, outfname):
     #  load our rasters
     #  we end up with a list of data iterators on each
     rasters = []
+    raster_iters = []
     for fname in raster_fnames:
-        rasters.append(SAHMRaster(fname).iterBlocks())
+        rasters.append(SAHMRaster(fname))
 
     #  create our output raster
+    try:
+        gdal.Unlink(outfname)
+    except:
+        pass
     out_raster = SAHMRaster(outfname)
     out_raster.pullParamsFromRaster(raster_fnames[0])
     out_raster.createNewRaster()
@@ -675,9 +685,10 @@ def average_geotifs(raster_fnames, outfname):
     #  calculate the cooresponding block from the inputs
     #  and put this value in the output blockd
 #     average = itertools.imap(average_nparrays, zip(rasters))
-    rasters.insert(0, out_raster.iterBlocks())
-    for block in zip(*rasters):
-        d = average_nparrays(block[1:])
-        out_raster.putBlock(d, out_raster.curCol, out_raster.curRow)
+#      rasters.insert(0, out_raster.iterBlocks())
+#      out_raster.curCol, out_raster.curRow = 0, 0
+    for block in itertools.izip(*[sr.iterBlocks() for sr in rasters]):
+        d = average_nparrays(block[:])
+        out_raster.putBlock(d, sr.curCol, sr.curRow)
 
     out_raster.close()
