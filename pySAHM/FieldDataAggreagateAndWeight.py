@@ -190,6 +190,7 @@ class FieldDataQuery(object):
         # if pixel
         lineCount = linesInFile(self.csv)
         extraPoints = []
+        nodata_points = []
         pointCount = 0
         pcntDone = 0
         line = 1
@@ -211,14 +212,18 @@ class FieldDataQuery(object):
 
             if self.template.pointInExtent(x, y):
                 pixelColumn, pixelRow = self.template.convertCoordsToColRow(x, y)
-                pixel = (pixelColumn, pixelRow)
-                # if verbose == True:
-                if not pixel in usedPixels:
-                    usedPixels[pixel] = [row]
+                
+                if self.template.getPixelValueFromIndex(pixelColumn, pixelRow) == self.template.NoData:
+                    nodata_points.append([x, y, row[2]])
                 else:
-                    curVal = usedPixels[pixel]
-                    curVal.append(row)
-                    usedPixels[pixel] = curVal
+                    pixel = (pixelColumn, pixelRow)
+                    # if verbose == True:
+                    if not pixel in usedPixels:
+                        usedPixels[pixel] = [row]
+                    else:
+                        curVal = usedPixels[pixel]
+                        curVal.append(row)
+                        usedPixels[pixel] = curVal
             else:
                 extraPoints.append([x, y, row[2]])
             pointCount += 1
@@ -302,18 +307,23 @@ class FieldDataQuery(object):
         oFile.close
         if self.verbose:
             self.writetolog("Done\nFinished creating field data query output.\n")
-            if len(extraPoints) == pointCount:
+            if len(extraPoints) + len(nodata_points) == pointCount:
                 msg = "All " + str(pointCount) + " points were outside of the template extent\n"
                 msg += "This might indicate a mismatch between the template and field data projection.\n"
                 msg += "\nProcessing cannot continue"
                 raise Exception, "All points were outside of the template extent"
-            elif len(extraPoints) > 0:
+
+            if len(extraPoints) > 0:
                 self.writetolog ("  WARNING: " + str(len(extraPoints)) + " points" +
                     " out of " + str(pointCount) + " total points in the " +
                     "original CSV were outside the template extent and WERE NOT " +
-                    "INCLUDED IN THE FDQ OUTPUT.")
-            else:
-                pass
+                    "INCLUDED IN THE FDAW OUTPUT.")
+
+            if len(nodata_points) > 0:
+                self.writetolog ("  WARNING: " + str(len(nodata_points)) + " points" +
+                    " out of " + str(pointCount) + " total points in the " +
+                    "original CSV were in NoData areas of the template and WERE NOT " +
+                    "INCLUDED IN THE FDAW OUTPUT.")
 
 
 def linesInFile(filename):
