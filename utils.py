@@ -645,10 +645,10 @@ def run_model_script(script, args_dict, module=None, runner_script="runRModel.py
             raise ModuleSuspended(module, 'Model running on Condor',
                                   queue=job_monitor)
         else:
-            #  utilities.add_process_to_pool(utilities.launch_cmd,
-            #                         [cmd, stdout_fname, stderr_fname])
-            out_msg, err_msg = utilities.launch_cmd(cmd, stdout_fname,
-                                                    stderr_fname, True)
+            utilities.add_process_to_pool(utilities.launch_cmd,
+                                   [cmd, stdout_fname, stderr_fname])
+#              out_msg, err_msg = utilities.launch_cmd(cmd, stdout_fname,
+#                                                      stderr_fname, True)
             writetolog("\n R Processing launched asynchronously " + script,
                        True)
             raise ModuleSuspended(module, 'Model running asynchronously',

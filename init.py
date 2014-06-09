@@ -532,7 +532,7 @@ class Model(Module):
         if self.abbrev == 'brt' or \
             self.abbrev == 'rf':
             if not "seed" in self.args_dict.keys():
-                self.args_dict['seed'] = rseed = utils.get_seed()
+                self.args_dict['seed'] = utils.get_seed()
             writetolog("    seed used for " + self.abbrev + " = " + str(self.args_dict['seed']))
 
         self.args_dict['o'] = self.output_dname
