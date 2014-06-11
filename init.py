@@ -1174,7 +1174,8 @@ class FieldDataAggregateAndWeight(Module):
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
                                  ('PointAggregationOrWeightMethod', '(gov.usgs.sahm:PointAggregationMethod:Other)', {'defaults':'["Collapse In Pixel"]'}),
                                  ('FD_EPSG_projection', '(edu.utah.sci.vistrails.basic:Integer)'),
-                                  ('run_name_info', '(gov.usgs.sahm:OutputNameInfo:Other)')]
+                                  ('run_name_info', '(gov.usgs.sahm:OutputNameInfo:Other)'),
+                                  ('drop_nodata_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}), ]
     _output_ports = [('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')]
 
     __doc__ = GenModDoc.construct_module_doc('FieldDataAggregateAndWeight')
@@ -1193,7 +1194,8 @@ class FieldDataAggregateAndWeight(Module):
             'PointAggregationOrWeightMethod': ('aggMethod', None, True),
             'SDofGaussianKernel': ('sd', None, False),
             'FD_EPSG_projection': ('epsg', None, False),
-            'run_name_info': ('run_name_info', None, False), }
+            'run_name_info': ('run_name_info', None, False),
+            'drop_nodata_points':('drop_nodata_points', None, True), }
 
         FDAWParams = utils.map_ports(self, port_map)
 #          output_fname = utils.mknextfile(prefix='FDAW_', suffix='.csv')

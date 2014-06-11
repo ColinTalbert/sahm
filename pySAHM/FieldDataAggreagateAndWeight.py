@@ -96,6 +96,7 @@ class FieldDataQuery(object):
         self.epsg = None
         self.pointsSpatialRef = None
         self.logger = None
+        self.drop_nodata_points = True
 
     def validateArgs(self):
         """
@@ -213,7 +214,8 @@ class FieldDataQuery(object):
             if self.template.pointInExtent(x, y):
                 pixelColumn, pixelRow = self.template.convertCoordsToColRow(x, y)
                 
-                if self.template.getPixelValueFromIndex(pixelColumn, pixelRow) == self.template.NoData:
+                if self.template.getPixelValueFromIndex(pixelColumn, pixelRow) == self.template.NoData and \
+                    self.drop_nodata_points:
                     nodata_points.append([x, y, row[2]])
                 else:
                     pixel = (pixelColumn, pixelRow)
