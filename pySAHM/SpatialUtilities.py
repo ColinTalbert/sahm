@@ -64,7 +64,7 @@ class SAHMRaster():
             self.bands.append(self.ds.GetRasterBand(band + 1))
         self.bandcount = self.ds.RasterCount
 
-    def createNewRaster(self):
+    def createNewRaster(self, create_args=None):
         self.Error = []
         #  delete the output if it exists
 #          gdal.Unlink(self.source)
@@ -76,9 +76,8 @@ class SAHMRaster():
         #  register the gdal driver
         driver = gdal.GetDriverByName(self.driverName)
 
-#          create_args = ['COMPRESS=LZW', 'PREDICTOR=2', 'TILED=Yes',
-#                         'BLOCKXSIZE=128', 'BLOCKYSIZE=128']
-        create_args = []
+        if not create_args:
+            create_args = []
 
         if self.signedByte:
             create_args += ["PIXELTYPE=SIGNEDBYTE"]
@@ -618,7 +617,8 @@ def getTemplateSRSCellSize(sourceRaster, templateRaster):
     return templateSRSCellSize
 
 def intermediaryReprojection(sourceRaster, templateRaster, outRasterFName,
-                             resamplingType, matchTemplateCellSize=False):
+                             resamplingType, matchTemplateCellSize=False,
+                             create_args=None):
     '''Reprojects the sourceRaster into the templateRaster projection, datum
     and extent.  The output cell size is determined to be the closest dimension
     to the sourceRaster cell size that will evenly go into the template raster
@@ -646,7 +646,7 @@ def intermediaryReprojection(sourceRaster, templateRaster, outRasterFName,
     outputFile.yScale = -1 * targetCellSize
     outputFile.height = templateRaster.height * int(templateRaster.xScale / targetCellSize)
     outputFile.width = templateRaster.width * int(templateRaster.xScale / targetCellSize)
-    outputFile.createNewRaster()
+    outputFile.createNewRaster(create_args=create_args)
 
     err = gdal.ReprojectImage(sourceRaster.ds, outputFile.ds,
                               sourceRaster.srs.ExportToWkt(),
