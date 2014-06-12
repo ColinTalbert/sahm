@@ -1,4 +1,4 @@
-import os
+import os, sys
 import csv
 import random
 import string
@@ -290,6 +290,13 @@ class SAHMRaster():
                 else:
                     numCols = cols - j
                 yield self.getBlock(j, i, numCols, numRows, band=band)
+
+    def num_blocks(self):
+        '''returns an integer with the current number of blocks
+        '''
+        rows = int(self.height)
+        cols = int(self.width)
+        return int(len(range(0, rows, self.blockSize))) * int(len(range(0, cols, self.blockSize)))
 
     def resetBlocks(self):
         self.curRow = 0
@@ -660,7 +667,8 @@ def average_nparrays(arrays):
     dstack = np.ma.dstack(arrays)
     return np.ma.mean(dstack, axis=2)
 
-def average_geotifs(raster_fnames, outfname, create_args=None):
+def average_geotifs(raster_fnames, outfname,
+                    create_args=None, verbose=False):
     '''takes a list of raster fnames and saves
     the average of their pixel values to a new raster
     with the outfname
@@ -687,8 +695,16 @@ def average_geotifs(raster_fnames, outfname, create_args=None):
 #     average = itertools.imap(average_nparrays, zip(rasters))
 #      rasters.insert(0, out_raster.iterBlocks())
 #      out_raster.curCol, out_raster.curRow = 0, 0
+
+    num_blocks = rasters[0].num_blocks()
+    cur_block = 0
     for block in itertools.izip(*[sr.iterBlocks() for sr in rasters]):
         d = average_nparrays(block[:])
         out_raster.putBlock(d, sr.curCol, sr.curRow)
+
+        if verbose:
+            print '\r>> Finished ' + str(cur_block) + ' out of ' + str(num_blocks),
+            cur_block += 1
+            sys.stdout.flush()
 
     out_raster.close()
