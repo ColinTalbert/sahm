@@ -962,7 +962,8 @@ class MDSBuilder(Module):
             subfolder = run_name_info.contents.get('subfolder_name', "")
             runname = run_name_info.contents.get('runname', "")
         else:
-            subfolder, runname = utils.get_previous_run_info(MDSParams['fieldData'])
+            subfolder, runname = utils.get_previous_run_info(
+                                                MDSParams.get('fieldData', ''))
 
         inputs_csvs = self.forceGetInputListFromPort('RastersWithPARCInfoCSV')
         if len(inputs_csvs) == 0:
