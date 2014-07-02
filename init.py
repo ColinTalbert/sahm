@@ -162,7 +162,8 @@ def menu_items():
 
         for mode in [("multiple models simultaneously (1 core each)", True),
                      ("single models sequentially (n - 1 cores each)", True),
-                     ("FORT Condor", isFortCondorAvailible())]:
+                     ("FORT Condor", isFortCondorAvailible()),
+                     ("Denver ARC1", True)]:
             radio = QtGui.QRadioButton(mode[0])
             radio.setChecked(mode[0] == configuration.cur_processing_mode)
             radio.setEnabled(mode[1])
