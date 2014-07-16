@@ -67,18 +67,24 @@ class SAHMRaster():
     def createNewRaster(self):
         self.Error = []
         #  delete the output if it exists
-        gdal.Unlink(self.source)
+#          gdal.Unlink(self.source)
+        try:
+            os.unlink(self.source)
+        except:
+            pass
 
         #  register the gdal driver
         driver = gdal.GetDriverByName(self.driverName)
+
+#          create_args = ['COMPRESS=LZW', 'PREDICTOR=2', 'TILED=Yes',
+#                         'BLOCKXSIZE=128', 'BLOCKYSIZE=128']
+        create_args = []
+
         if self.signedByte:
-            self.ds = driver.Create(self.source,
-                                            self.width, self.height,
-                                            self.bandcount, self.pixelType, ["PIXELTYPE=SIGNEDBYTE"])
-        else:
-            self.ds = driver.Create(self.source,
-                                            self.width, self.height,
-                                            self.bandcount, self.pixelType)
+            create_args += ["PIXELTYPE=SIGNEDBYTE"]
+
+        self.ds = driver.Create(self.source, self.width, self.height,
+                    self.bandcount, self.pixelType, create_args)
 
         self.gt = (self.west, self.xScale, 0, self.north, 0, self.yScale)
         self.ds.SetGeoTransform(self.gt)
@@ -303,7 +309,7 @@ class SAHMRaster():
 
 #        histogram = self.band.GetDefaultHistogram()
 #        self.band.SetDefaultHistogram(histogram[0], histogram[1], histogram[3])
-        self.ds.BuildOverviews(overviewlist=[2, 4, 8, 16, 32, 64, 128])
+        self.ds.BuildOverviews("NEAREST", overviewlist=[2, 4, 8, 16, 32, 64, 128, 256])
         for band in self.bands:
             band.FlushCache()
             band.GetStatistics(0, 1)
@@ -662,10 +668,15 @@ def average_geotifs(raster_fnames, outfname):
     #  load our rasters
     #  we end up with a list of data iterators on each
     rasters = []
+    raster_iters = []
     for fname in raster_fnames:
-        rasters.append(SAHMRaster(fname).iterBlocks())
+        rasters.append(SAHMRaster(fname))
 
     #  create our output raster
+    try:
+        gdal.Unlink(outfname)
+    except:
+        pass
     out_raster = SAHMRaster(outfname)
     out_raster.pullParamsFromRaster(raster_fnames[0])
     out_raster.createNewRaster()
@@ -674,9 +685,10 @@ def average_geotifs(raster_fnames, outfname):
     #  calculate the cooresponding block from the inputs
     #  and put this value in the output blockd
 #     average = itertools.imap(average_nparrays, zip(rasters))
-    rasters.insert(0, out_raster.iterBlocks())
-    for block in zip(*rasters):
-        d = average_nparrays(block[1:])
-        out_raster.putBlock(d, out_raster.curCol, out_raster.curRow)
+#      rasters.insert(0, out_raster.iterBlocks())
+#      out_raster.curCol, out_raster.curRow = 0, 0
+    for block in itertools.izip(*[sr.iterBlocks() for sr in rasters]):
+        d = average_nparrays(block[:])
+        out_raster.putBlock(d, sr.curCol, sr.curRow)
 
     out_raster.close()

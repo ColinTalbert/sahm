@@ -107,7 +107,7 @@ class rasterReclassifier(rasterProcessor):
             outBlock = np.ma.asarray(blockData.copy(), dtype=SpatialUtilities.GDALToNPDataType(outputRaster.pixelType))
             for k,v in self.reclassDict.iteritems():
                 if v == "NoData":
-                    v = self.inputRaster.NoData
+                    v = outputRaster.NoData
                 if k[0] == "NoData":
                     outBlock = np.where(np.ma.getmask(blockData), v, outBlock)
                 elif len(k) == 1:

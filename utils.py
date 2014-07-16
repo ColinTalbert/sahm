@@ -645,10 +645,10 @@ def run_model_script(script, args_dict, module=None, runner_script="runRModel.py
             raise ModuleSuspended(module, 'Model running on Condor',
                                   queue=job_monitor)
         else:
-            #  utilities.add_process_to_pool(utilities.launch_cmd,
-            #                         [cmd, stdout_fname, stderr_fname])
-            out_msg, err_msg = utilities.launch_cmd(cmd, stdout_fname,
-                                                    stderr_fname, True)
+            utilities.add_process_to_pool(utilities.launch_cmd,
+                                   [cmd, stdout_fname, stderr_fname])
+#              out_msg, err_msg = utilities.launch_cmd(cmd, stdout_fname,
+#                                                      stderr_fname, True)
             writetolog("\n R Processing launched asynchronously " + script,
                        True)
             raise ModuleSuspended(module, 'Model running asynchronously',
@@ -794,15 +794,14 @@ def find_java_exe(java_bin):
         pass
 
     for java_dir in [r"C:\Program Files (x86)\java", r"C:\Program Files\java"]:
-        jre_folders = [os.path.join(java_dir, j) for j in os.listdir(java_dir)
-                if j.lower().startswith('jre') or j.lower().startswith('jdk')]
         tryed_locs.append(java_dir)
         try:
+            jre_folders = [os.path.join(java_dir, j) for j in os.listdir(java_dir)
+                if j.lower().startswith('jre') or j.lower().startswith('jdk')]
             java_exe = os.path.join(jre_folders[-1], "bin", 'java.exe')
-
             if os.path.exists(java_exe):
                 return os.path.abspath(java_exe)
-        except IndexError:
+        except:
             pass
 
     #  we have gone above and beyond trying to find java on this system
