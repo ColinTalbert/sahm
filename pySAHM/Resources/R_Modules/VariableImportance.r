@@ -11,7 +11,7 @@ VariableImportance<-function(Model,out,auc){
      }
      else trainPred=out$dat$ma$train$pred
        #I have to add 1 to the drop in AUC to ensure it's greater than zero then I can normalize
-      
+       
     cor.mat[,ncol(cor.mat)]<-unlist(auc$train)-PermutePredict(out$mods$vnames,dat=out$dat$ma$train$dat[,-1],pred=trainPred,out$mods$final.mod,Model,resp=out$dat$ma$train$dat[,1])
     #cor.mat[,ncol(cor.mat)]<-cor.mat[,ncol(cor.mat)]/sum(cor.mat[,ncol(cor.mat)])
     if(out$dat$split.type%in%c("eval","test"))
@@ -20,7 +20,7 @@ VariableImportance<-function(Model,out,auc){
           # cor.mat[,1]<-cor.mat[,1]/sum(cor.mat[,1])
    
     if(out$dat$split.type=="crossValidation")
-         cor.mat[,1:(ncol(cor.mat)-1)]<- -apply(out$cv$cor.mat,1,"-",as.vector(unlist(auc)[1:(ncol(cor.mat)-1)]))
+         cor.mat[,1:(ncol(cor.mat)-1)]<- -t(apply(out$cv$cor.mat,1,"-",as.vector(unlist(auc)[1:(ncol(cor.mat)-1)])))
 
     colnames(cor.mat)<-names(out$dat$ma)
     rownames(cor.mat)<-out$mods$vnames
@@ -42,7 +42,7 @@ VariableImportance<-function(Model,out,auc){
 
 ######################## copied from append out
   par(mar=c(5,17,4,2))
-   
+         browser()
     plot(c(min(0,min(cor.mat)),(max(cor.mat)+.1)),y=c(-.5,(length(out$mods$vnames)+.5)),type="n",xlab="Importance",main="Importance using the change in AUC when each predictor is permuted",ylab="",yaxt="n",cex.lab=1.4)
     grid()
       if(out$dat$split.type!="crossValidation"){
