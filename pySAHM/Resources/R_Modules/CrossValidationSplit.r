@@ -62,13 +62,17 @@ CrossValidationSplit<-function(input.file,output.file,response.col="ResponseBina
 set.seed(seed)
 options(warn=1)
      if(n.folds<=1 | n.folds%%1!=0) stop("n.folds must be an integer greater than 1")
-
+   #===========================================
    #Read input data and remove any columns to be excluded
           dat.in<-read.csv(input.file,header=FALSE,as.is=TRUE)
           dat<-as.data.frame(dat.in[4:dim(dat.in)[1],])
-   # if there was a test training split this should be used for Evaluation of the final model since cross validation can only be
+   #===========================================
+   # if there was a test training split this should be used for Evaluation 
+   # of the final model since cross validation can only be
    # used for model selection
-          if(any(!is.na(match("Split",dat.in[1,])))) dat.in[1,match("Split",dat.in[1,])]<-"EvalSplit"
+   
+          if(any(!is.na(match("Split",dat.in[1,])))) 
+                dat.in[1,match("Split",dat.in[1,])]<-"EvalSplit"
           names(dat)<-dat.in[1,]
 
         response<-dat[,match(tolower(response.col),tolower(names(dat)))]
@@ -76,7 +80,9 @@ options(warn=1)
            response[response==-9998]<-0
            }
            
-          if(sum(as.numeric(response)==0)==0 && !is.null(stratify)) stop("Cross Validation requires absence data")
+          if(sum(as.numeric(response)==0)==0 && !is.null(stratify)) 
+               stop("Cross Validation requires absence data")
+
 
       #Ignoring background data that might be present in the mds
 
@@ -94,9 +100,12 @@ options(warn=1)
          if(length(factor.cols)!=0){
            for (i in 1:length(factor.cols)){
                factor.table<-table(dat[,factor.cols[i]])
-                 if(any(factor.table<10)) {warning(paste("Some levels for the categorical predictor ",names(dat)[factor.cols[i]]," do not have at least 10 observations.\n",
-                                                                   "you might want to consider removing or reclassifying this predictor before continuing.\n",
-                                                                   "Factors with few observations can cause failure in model fitting when the data is split and cannot be reilably used in training a model.",sep=""))
+                 if(any(factor.table<10)) 
+                     {warning(paste("Some levels for the categorical predictor ",
+                                    names(dat)[factor.cols[i]],
+                                    " do not have at least 10 observations.\n",
+                                    "you might want to consider removing or reclassifying this predictor before continuing.\n",
+                                    "Factors with few observations can cause failure in model fitting when the data is split and cannot be reilably used in training a model.",sep=""))
                     factor.table<-as.data.frame(factor.table)
                      colnames(factor.table)<-c("Factor Name","Factor Count")
                      cat(paste("\n",names(dat)[factor.cols[i]],"\n"))
@@ -107,7 +116,8 @@ options(warn=1)
             }
             #this splits the training set
               if(any(!is.na(match(tolower("evalsplit"),tolower(names(dat)))))){
-                 split.mask<-dat[,match(tolower("evalsplit"),tolower(names(dat)))]=="train"
+                 split.mask<-dat[,match(tolower("evalsplit"),
+                       tolower(names(dat)))]=="train"
                  index<-seq(1:nrow(dat))[split.mask]
              } else split.mask<-index<-seq(1:nrow(dat))
              
@@ -119,7 +129,10 @@ options(warn=1)
                 for(i in 1:length(names(table(response)))){
                   index.i<-index[response[split.mask]==names(table(response))[i]]
                   index.i<-index.i[order(runif(length(index.i)))]
-                  dat[index.i,ncol(dat)]<-c(rep(seq(1:n.folds),each=floor(length(index.i)/n.folds)),sample(seq(1:n.folds),size=length(index.i)%%n.folds,replace=FALSE))
+                  dat[index.i,ncol(dat)]<-c(rep(seq(1:n.folds),
+                        each=floor(length(index.i)/n.folds)),
+                        sample(seq(1:n.folds),size=length(index.i)%%n.folds,
+                        replace=FALSE))
                 }
              } else if(spatSplit){
                  X<-as.numeric(dat$X[split.mask])
@@ -133,7 +146,8 @@ options(warn=1)
                 dat[index,ncol(dat)]<-as.numeric(as.factor(paste(CVsplit,CVsplitY)))
              }else{
                 index<-index[order(runif(length(index)))]
-                dat[index,ncol(dat)]<-c(rep(seq(1:n.folds),each=floor(length(index)/n.folds)),sample(seq(1:n.folds),size=length(index)%%n.folds,replace=FALSE))
+                dat[index,ncol(dat)]<-c(rep(seq(1:n.folds),each=floor(length(index)/n.folds)),
+                    sample(seq(1:n.folds),size=length(index)%%n.folds,replace=FALSE))
              }
              names(dat)[ncol(dat)]<-"Split"
          #inserting data must be done in 3 steps because dat.in isn't a proper dataframe in that
@@ -143,11 +157,12 @@ options(warn=1)
           dat.in[4:(dim(dat.in)[1]),(dim(dat.in)[2]+1)]<-dat$Split
           dat.in[c(1,3),(dim(dat.in)[2])]<-c("Split","")
           dat.in[2,(dim(dat.in)[2])]<-1
-
+            if(any(table(dat$responseBinary,dat$Split)<2)) 
+               stop("Some combinations of the response and data split is nearly empty, please use a stratified nonspatial split")
               if(dim(bg.dat)[1]!=0) {
                 names(bg.dat)<-names(dat.in)
                 dat.in<-rbind(dat.in,bg.dat)}
-
+              browser()
               #write output files for R modules
              write.table(dat.in,file=output.file,row.names=FALSE,col.names=FALSE,sep=",",quote=FALSE)
 
