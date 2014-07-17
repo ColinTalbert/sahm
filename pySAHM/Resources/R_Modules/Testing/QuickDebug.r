@@ -1,5 +1,5 @@
-setwd("C:\\GoogleDrive\\Python\\DevWorkspace\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
-ScriptPath="C:\\GoogleDrive\\Python\\DevWorkspace\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
+setwd("C:\\VisTrails_SAHM\\VisTrails_SAHM\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="C:\\VisTrails_SAHM\\VisTrails_SAHM\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
 
 
 source("LoadRequiredCode.r")
@@ -42,7 +42,7 @@ FitModels(ma.name=input.file,
 #================================================================#
  
 input.file="I:\\VisTrails\\MarianTesting\\BrewersSparrowTests\\BinomialCV.csv"
-output.dir="C:\\temp\\SAHM_workspace\\MARS2"
+input.file=C:\Focal_species_project2\glm_prism_1\CovariateCorrelationOutputMDS_prism_initial.csvoutput.dir="C:\\temp\\SAHM_workspace\\MARS2"
 
 FitModels(ma.name=input.file,
             output.dir=output.dir,
@@ -53,25 +53,19 @@ total.time
 #================================================================#
 #                   Evaluate New Data
 #================================================================#
-o=new.tiffs="I:\\VisTrails\\WorkingFiles\\workspace\\CheatgrassApplyModel\\ApplyModelResults\\TestingNewVariableImportance\\MDS1\\ApplyModel_5" mpt=FALSE ws=J:\Projects\Climate_RS_Comparison\ws="Cheatgrass_VisTrails\\WUS\\FEB2013\\ParameterOptimization\\brt_4\\modelWorkspace"
-output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1"
-rc="responseBinary"
 
-new.tiffs="J:\\Projects\\SurrogateSpecies\\SAHM_Demo\\DerivedData\\ClimateProjectionsDemo\\_testProjection.csv"
-output.dir="J:\\Projects\\SurrogateSpecies\\SAHM_Demo\\DerivedData\\ClimateProjectionsDemo\\ApplyModel_1" 
-ws="J:\\Projects\\SurrogateSpecies\\SAHM_Demo\\DerivedData\\ClimateProjectionsDemo\\brt_1\\modelWorkspace" 
 
-ws<-"J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\WUS\\FEB2013\\ParameterOptimization_SpatialCV2\\maxent_7\\modelWorkspace"
-output.dir="J:\\Projects\\Climate_RS_Comparison\\MarianTesting2\\ApplyModel_MDS1_KDEbin_maxent_2"
-new.tiffs="J:\\Projects\\Climate_RS_Comparison\\Cheatgrass_VisTrails\\WUS\\FEB2013\\validation\\MergedDataset_1.csv"
+ws<-"C:\\temp\\SAHM_workspace\\modelWorkspace"
+output.dir="C:\\temp\\SAHM_workspace"
+new.tiffs="C:\\Users\\mallen\\Downloads\\ForMarian_4\\ForMarian_4\\MergedDataset_WCMPI2650casq_1.csv"
 
 load(ws)
-setwd("I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
-ScriptPath="I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
+setwd("C:\\VisTrails_SAHM\\VisTrails_SAHM\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="C:\\VisTrails_SAHM\\VisTrails_SAHM\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
 source(file.path(ScriptPath,"LoadRequiredCode.r"))
 source(paste(toupper(out$input$script.name),".helper.fcts.r",sep=""))
 #options(error=expression(if(interactive()) recover() else dump.calls()))
-EvaluateNewData(workspace=ws,out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=FALSE,out=out,produce.metrics=FALSE,new.tifs=new.tiffs)
+EvaluateNewData(workspace=ws,out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=TRUE,out=out,produce.metrics=FALSE,new.tifs=new.tiffs)
 
 #================================================================#
 I:\VisTrails\VisTrails_SAHM_x64_debug\Central_R\R-2.14.1\bin\x64\Rterm.exe --vanilla -f I:\VisTrails\VisTrails_SAHM_x64_debug\VisTrails\vistrails\packages\sahm_MarianDev\pySAHM\Resources\R_Modules\EvaluateNewData.r --args mbt=TRUE mpt=TRUE ws="C:\temp\SAHM_workspace\rf_1\modelWorkspace" mes=FALSE o=C:\temp\SAHM_workspace\rf_3\modelWorkspace\rf_1
@@ -79,14 +73,14 @@ I:\VisTrails\VisTrails_SAHM_x64_debug\Central_R\R-2.14.1\bin\x64\Rterm.exe --van
 #================================================================#
 #                            GLM
 #================================================================#
+input.file='C:\\Users\\mallen\\Downloads\\CovariateCorrelationOutputMDS_TestFire_initial.csv' 
+input.file="C:\\Users\\mallen\\Downloads\\ForMarian_4\\ForMarian_4\\CovariateCorrelationOutputMDS_prismcasq_initial.csv"
 
-##Surrogate sp with template
-input.file="J:\\Projects\\SurrogateSpecies\\DerivedData\\InitialWorkspace\\modelSelection_split_testingPlot.csv"
 FitModels(ma.name=input.file,
           tif.dir=NULL,
           output.dir=output.dir,
-          response.col=rc,make.p.tif=T,make.binary.tif=T,
-          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=F,opt.methods=2,squared.terms=FALSE,ScriptPath=ScriptPath)
+          response.col=rc,make.p.tif=F,make.binary.tif=F,
+          simp.method="AIC",debug.mode=T,responseCurveForm="pdf",script.name="glm",MESS=F,opt.methods=2,squared.terms=TRUE,ScriptPath=ScriptPath,predSelect=TRUE,seed=1234)
 
    
 #================================================================#
