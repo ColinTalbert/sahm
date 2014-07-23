@@ -874,6 +874,17 @@ class BackgroundSurfaceGenerator(Module):
 class OutputNameInfo(Constant):
     contents = {}
 
+    @staticmethod
+    def translate_to_python(x):
+        try:
+            runinfo = OutputNameInfo()
+            runinfo.contents = {'runname':str(x),
+                                'subfolder_name':'',
+                                'delete_previous':False}
+            return runinfo
+        except:
+            return None
+
 class OutputName(Module):
     __doc__ = GenModDoc.construct_module_doc('OutputName')
 
