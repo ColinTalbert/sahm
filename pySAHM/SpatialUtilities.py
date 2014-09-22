@@ -261,7 +261,8 @@ class SAHMRaster():
             data = self.bands[band - 1].ReadAsArray(col, row, numCols, numRows,
                                                         win_xsize, win_ysize)
 
-        ndMask = np.ma.masked_array(data, mask=(data == self.NoData))
+        #ndMask = np.ma.masked_array(data, mask=(data == self.NoData))
+        ndMask = np.ma.masked_array(data, mask=(np.isclose(data, self.NoData)))
         return ndMask
 
     def putBlock(self, data, col, row, band=1):
