@@ -1,4 +1,4 @@
-import os
+import os, sys
 import csv
 import random
 import string
@@ -64,7 +64,7 @@ class SAHMRaster():
             self.bands.append(self.ds.GetRasterBand(band + 1))
         self.bandcount = self.ds.RasterCount
 
-    def createNewRaster(self):
+    def createNewRaster(self, create_args=None):
         self.Error = []
         #  delete the output if it exists
 #          gdal.Unlink(self.source)
@@ -76,9 +76,8 @@ class SAHMRaster():
         #  register the gdal driver
         driver = gdal.GetDriverByName(self.driverName)
 
-#          create_args = ['COMPRESS=LZW', 'PREDICTOR=2', 'TILED=Yes',
-#                         'BLOCKXSIZE=128', 'BLOCKYSIZE=128']
-        create_args = []
+        if not create_args:
+            create_args = []
 
         if self.signedByte:
             create_args += ["PIXELTYPE=SIGNEDBYTE"]
@@ -291,6 +290,13 @@ class SAHMRaster():
                 else:
                     numCols = cols - j
                 yield self.getBlock(j, i, numCols, numRows, band=band)
+
+    def num_blocks(self):
+        '''returns an integer with the current number of blocks
+        '''
+        rows = int(self.height)
+        cols = int(self.width)
+        return int(len(range(0, rows, self.blockSize))) * int(len(range(0, cols, self.blockSize)))
 
     def resetBlocks(self):
         self.curRow = 0
@@ -618,7 +624,8 @@ def getTemplateSRSCellSize(sourceRaster, templateRaster):
     return templateSRSCellSize
 
 def intermediaryReprojection(sourceRaster, templateRaster, outRasterFName,
-                             resamplingType, matchTemplateCellSize=False):
+                             resamplingType, matchTemplateCellSize=False,
+                             create_args=None):
     '''Reprojects the sourceRaster into the templateRaster projection, datum
     and extent.  The output cell size is determined to be the closest dimension
     to the sourceRaster cell size that will evenly go into the template raster
@@ -646,7 +653,7 @@ def intermediaryReprojection(sourceRaster, templateRaster, outRasterFName,
     outputFile.yScale = -1 * targetCellSize
     outputFile.height = templateRaster.height * int(templateRaster.xScale / targetCellSize)
     outputFile.width = templateRaster.width * int(templateRaster.xScale / targetCellSize)
-    outputFile.createNewRaster()
+    outputFile.createNewRaster(create_args=create_args)
 
     err = gdal.ReprojectImage(sourceRaster.ds, outputFile.ds,
                               sourceRaster.srs.ExportToWkt(),
@@ -660,7 +667,8 @@ def average_nparrays(arrays):
     dstack = np.ma.dstack(arrays)
     return np.ma.mean(dstack, axis=2)
 
-def average_geotifs(raster_fnames, outfname):
+def average_geotifs(raster_fnames, outfname,
+                    create_args=None, verbose=False):
     '''takes a list of raster fnames and saves
     the average of their pixel values to a new raster
     with the outfname
@@ -679,7 +687,7 @@ def average_geotifs(raster_fnames, outfname):
         pass
     out_raster = SAHMRaster(outfname)
     out_raster.pullParamsFromRaster(raster_fnames[0])
-    out_raster.createNewRaster()
+    out_raster.createNewRaster(create_args)
 
     #  loop though the blocks in our output raster
     #  calculate the cooresponding block from the inputs
@@ -687,8 +695,16 @@ def average_geotifs(raster_fnames, outfname):
 #     average = itertools.imap(average_nparrays, zip(rasters))
 #      rasters.insert(0, out_raster.iterBlocks())
 #      out_raster.curCol, out_raster.curRow = 0, 0
+
+    num_blocks = rasters[0].num_blocks()
+    cur_block = 0
     for block in itertools.izip(*[sr.iterBlocks() for sr in rasters]):
         d = average_nparrays(block[:])
         out_raster.putBlock(d, sr.curCol, sr.curRow)
+
+        if verbose:
+            print '\r>> Finished ' + str(cur_block) + ' out of ' + str(num_blocks),
+            cur_block += 1
+            sys.stdout.flush()
 
     out_raster.close()

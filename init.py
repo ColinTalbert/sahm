@@ -874,6 +874,17 @@ class BackgroundSurfaceGenerator(Module):
 class OutputNameInfo(Constant):
     contents = {}
 
+    @staticmethod
+    def translate_to_python(x):
+        try:
+            runinfo = OutputNameInfo()
+            runinfo.contents = {'runname':str(x),
+                                'subfolder_name':'',
+                                'delete_previous':False}
+            return runinfo
+        except:
+            return None
+
 class OutputName(Module):
     __doc__ = GenModDoc.construct_module_doc('OutputName')
 
@@ -962,7 +973,8 @@ class MDSBuilder(Module):
             subfolder = run_name_info.contents.get('subfolder_name', "")
             runname = run_name_info.contents.get('runname', "")
         else:
-            subfolder, runname = utils.get_previous_run_info(MDSParams['fieldData'])
+            subfolder, runname = utils.get_previous_run_info(
+                                                MDSParams.get('fieldData', ''))
 
         inputs_csvs = self.forceGetInputListFromPort('RastersWithPARCInfoCSV')
         if len(inputs_csvs) == 0:
@@ -1174,7 +1186,8 @@ class FieldDataAggregateAndWeight(Module):
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
                                  ('PointAggregationOrWeightMethod', '(gov.usgs.sahm:PointAggregationMethod:Other)', {'defaults':'["Collapse In Pixel"]'}),
                                  ('FD_EPSG_projection', '(edu.utah.sci.vistrails.basic:Integer)'),
-                                  ('run_name_info', '(gov.usgs.sahm:OutputNameInfo:Other)')]
+                                  ('run_name_info', '(gov.usgs.sahm:OutputNameInfo:Other)'),
+                                  ('drop_nodata_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}), ]
     _output_ports = [('fieldData', '(gov.usgs.sahm:FieldData:DataInput)')]
 
     __doc__ = GenModDoc.construct_module_doc('FieldDataAggregateAndWeight')
@@ -1193,7 +1206,8 @@ class FieldDataAggregateAndWeight(Module):
             'PointAggregationOrWeightMethod': ('aggMethod', None, True),
             'SDofGaussianKernel': ('sd', None, False),
             'FD_EPSG_projection': ('epsg', None, False),
-            'run_name_info': ('run_name_info', None, False), }
+            'run_name_info': ('run_name_info', None, False),
+            'drop_nodata_points':('drop_nodata_points', None, True), }
 
         FDAWParams = utils.map_ports(self, port_map)
 #          output_fname = utils.mknextfile(prefix='FDAW_', suffix='.csv')
