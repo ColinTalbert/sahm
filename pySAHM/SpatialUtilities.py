@@ -85,7 +85,11 @@ class SAHMRaster():
         self.ds = driver.Create(self.source, self.width, self.height,
                     self.bandcount, self.pixelType, create_args)
 
-        self.gt = (self.west, self.xScale, 0, self.north, 0, self.yScale)
+        if 180 < self.west < 360:
+            self.gt = (self.west - 360, self.xScale, 0, self.north, 0, self.yScale)
+        else:
+            self.gt = (self.west, self.xScale, 0, self.north, 0, self.yScale)
+
         self.ds.SetGeoTransform(self.gt)
 
         if self.prj is not None:
@@ -304,6 +308,7 @@ class SAHMRaster():
         self.curCol = 0
 
     def pointInExtent(self, x, y):
+
         if (float(x) >= self.west and
             float(x) <= self.east and
             float(y) >= self.south and
@@ -637,9 +642,18 @@ def intermediaryReprojection(sourceRaster, templateRaster, outRasterFName,
     outputFile.gt = templateRaster.gt
     outputFile.width = templateRaster.width
     outputFile.height = templateRaster.height
-    outputFile.west = templateRaster.west
+
     outputFile.north = templateRaster.north
-    outputFile.east = templateRaster.east
+
+    if sourceRaster.west > 180 and sourceRaster.west < 360 and \
+        templateRaster.west < 0 and templateRaster.west > -180:
+        outputFile.west = templateRaster.west + 360
+        outputFile.east = templateRaster.east + 360
+    else:
+        outputFile.west = templateRaster.west
+        outputFile.east = templateRaster.east
+
+
     outputFile.south = templateRaster.south
 
     outputFile.NoData = sourceRaster.NoData

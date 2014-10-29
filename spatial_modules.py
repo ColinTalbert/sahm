@@ -85,8 +85,6 @@ from pySAHM.utilities import dbfreader as dbfreader
 import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-#  from matplotlib.backends.backend_qt4 import FigureCanvasQT as FigureCanvas
-#  from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
 
 from matplotlib.figure import Figure
 from matplotlib.offsetbox import AnchoredOffsetbox, TextArea
@@ -135,10 +133,7 @@ class BaseGeoViewerCell(SpreadsheetCell):
     def parse_inputs(self):
         inputs = {}
 
-        #if self.__class__.__name__ != 'client_GeoSpatialViewerCell':
         self.location = utils.get_sheet_location(self)
-        #else:
-        #    self.location = None
 
         inputs['vector_layers'] = self.forceGetInputListFromPort('vector_layers')
         #  ugly hack to get the viswall to work.  Serial/unserialize nests
@@ -218,21 +213,15 @@ class SpatialViewerCellWidgetBase(QCellWidget):
 
         self.on_draw(view_extent=self.get_max_extent())
 
-#          self.maxXlim, self.maxYlim = self.getMaxDisplayExtent()
-#          self.maxXlim = [self.getMaxExtent()[0], self.getMaxExtent()[1]]
-#          self.maxYlim = [self.getMaxExtent()[2], self.getMaxExtent()[3]]
-#
-#          self.axes.set_ylim(self.maxYlim, emit=False)
-#          self.axes.set_xlim(self.maxXlim, emit=False)
         self.fig.canvas.draw()
         self.update()
 
-#          self.axes.callbacks.connect('xlim_changed', self.lim_changed)
-#          self.axes.callbacks.connect('ylim_changed', self.lim_changed)
-        self.axes.end_pan = self.end_pan
+        self.axes.callbacks.connect('ylim_changed', self.lim_changed)
 
-    def end_pan(self, *args, **kwargs):
-        self.sync_extents()
+    def lim_changed(self, event):
+        if self.cursor_mode == "zoom":
+            print 'lim_changed in zoom'
+            self.sync_extents()
 
     def on_draw_base(self, view_extent=None):
         """ Completely clears then redraws the figure
@@ -281,11 +270,8 @@ class SpatialViewerCellWidgetBase(QCellWidget):
 
         self.set_axis_extent(xlim, ylim)
 
-#          self.map_canvas.draw()
         self.axes.figure.canvas.draw_idle()
         self.update()
-#          self.axes.set_ylim(display_extent[2:], emit=False)
-#          self.axes.set_xlim(display_extent[:2], emit=False)
 
     def set_raster_base(self, raster_kwargs):
         '''The raster being displayed sets the data_max extent and projection for our
@@ -328,12 +314,11 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.dpi = 100
         self.fig = Figure((5.0, 4.0), dpi=self.dpi)
 
-#        self.fig.subplots_adjust(left = 0.01, right=0.99, top=0.99, bottom=0.001)
         self.fig.subplots_adjust(left=0, right=1, top=1, bottom=0)
         self.map_canvas = MyMapCanvas(self.fig)
         self.map_canvas.mpl_connect('scroll_event', self.wheel_zoom)
-#        self.connect(self, QtCore.SIGNAL('keyPressEvent(QString)'),
-#             self.key_press)
+
+        self.map_canvas.mpl_connect('button_press_event', self.button_down)
         self.map_canvas.mpl_connect('button_release_event', self.button_up)
         self.map_canvas.mpl_connect('resize_event', self._resize)
 
@@ -343,7 +328,6 @@ class SpatialViewerCellWidgetBase(QCellWidget):
 
         self.mpl_toolbar.pan()
 
-#        self.popMenu = popup_menu(self, self.mpl_toolbar)
         self.popMenu = None
 
         self.map_canvas.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -398,16 +382,17 @@ class SpatialViewerCellWidgetBase(QCellWidget):
 
         self.sync_extents()
 
+
+    def button_down(self, event):
+        self.last_buttondown_loc = (event.x, event.y)
+
     def button_up(self, event):
-        if self.cursor_mode == 'zoom':
+        if self.cursor_mode == 'pan' and (event.x, event.y) != self.last_buttondown_loc:
             self.sync_extents()
+
 
     def _resize(self, event):
         self.pull_pixels()
-
-#      def lim_changed(self, event):
-#          if not self.button_pressed:
-#              self.sync_extents()
 
     def pull_pixels(self):
         try:
@@ -702,9 +687,12 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.axes.set_ylim(max_ylim)
         self.sync_extents()
 
-    def sync_extents(self):
+    def sync_extents(self, extent=''):
         for spatialViewer in self.get_active_cells():
-            spatialViewer.set_extent(self.axes.get_xlim(), self.axes.get_ylim())
+            if extent:
+                spatialViewer.set_extent(extent[0], extent[1])
+            else:
+                spatialViewer.set_extent(self.axes.get_xlim(), self.axes.get_ylim())
             spatialViewer.map_canvas.draw()
 
 
@@ -800,15 +788,8 @@ class ViewStateBoundariesButton(QtGui.QAction):
 
         active_cells = cellWidget.get_active_cells()
         for cell in active_cells:
-
-#              xlim = cell.axes.get_xlim()
-#              ylim = cell.axes.get_ylim()
             cell.display_states = self.isChecked()
             cell.on_draw()
-#              cell.fig.canvas.draw()
-#              cell.update()
-#              cell.axes.set_xlim(xlim)
-#              cell.axes.set_ylim(ylim)
 
 class GeneralSpatialViewerToolBar(QCellToolBar):
     """
@@ -878,11 +859,6 @@ class GeneralSpatialViewerToolBar(QCellToolBar):
         QCellToolBar.updateToolBar(self)
         sw = self.getSnappedWidget()
 
-#        for action in self.actions():
-#            if type(action) == ViewLayerAction:
-#                #disenable all action refering to data we don't have
-#                action.setEnabled(sw.all_layers[action.tag]['enabled'])
-
         #  Strip out the unused actions
         keep_actions = ['Zoom', 'Save', 'Back', 'Forward', 'Pan']
         keep_actions = []
@@ -914,10 +890,6 @@ class GeneralSpatialViewerToolBar(QCellToolBar):
                 popmenu.addAction(action)
             else:
                 popmenu.addSeparator()
-
-#        for action in sw.mpl_toolbar.actions():
-#            action.setIconVisibleInMenu(True)
-#            popmenu.addAction(action)
 
         return popmenu
 
@@ -975,9 +947,6 @@ class showColorbarButton(QtGui.QAction):
 
         active_cells = cellWidget.get_active_cells()
         for cell in active_cells:
-
-#              xlim = cell.axes.get_xlim()
-#              ylim = cell.axes.get_ylim()
             cell.display_colorbar = self.isChecked()
             cell.on_draw()
 
@@ -1162,7 +1131,6 @@ class MyMapCanvas(FigureCanvas):
     '''
     def __init__(self, fig):
         FigureCanvas.__init__(self, fig)
-#        self._cursorx = None
 
 #    @print_timing
     def resizeEvent(self, event):
