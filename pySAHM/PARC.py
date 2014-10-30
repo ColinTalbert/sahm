@@ -551,9 +551,10 @@ class PARC(object):
         if not os.path.exists(self.inputs_CSV):
             raise utilities.TrappedError("Inputs CSV, " + self.inputs_CSV + ", does not exist on file system.")
 
-        current_inputs = np.genfromtxt(self.inputs_CSV, dtype='S1000', delimiter=",", skip_header=True)
+        current_inputs = np.genfromtxt(self.inputs_CSV, dtype='S1000',
+                           delimiter=",", skip_header=True, invalid_raise=False)
         if len(current_inputs.shape) == 1:
-            #  pound there was only a single item in the input file, reshape the array
+            #  there was only a single item in the input file, reshape the array
             current_inputs = np.array([current_inputs])
 
         input_file_errors = ""
