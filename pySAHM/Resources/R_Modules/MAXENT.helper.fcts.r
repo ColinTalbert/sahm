@@ -15,9 +15,11 @@ read.maxent<-function(lambdas){
   #make these all default to NULL in case the feature type was turned off
   Raw.coef<-Quad.coef<-Prod.coef<-Fwd.Hinge<-Rev.Hinge<-Thresh.val<-Raw.mult<-Quad.mult<-
       Prod.mult<-FH.mult<-FH.cnst<-Rev.mult<-Rev.cnst<-Thresh.cnst<-NULL
+      
   if(any(fctType=="raw")){ 
        "Raw.coef"<-lambdas[fctType=="raw",]
        Raw.mult<-c(-sum(Raw.coef[,2]*Raw.coef[,3]/(Raw.coef[,4]-Raw.coef[,3])), Raw.coef[,2]/(Raw.coef[,4]-Raw.coef[,3]))
+       Raw.mult[is.nan(Raw.mult)]<-0
   }
   if(any(fctType=="quadratic")){
         "Quad.coef"<-lambdas[fctType=="quadratic",]

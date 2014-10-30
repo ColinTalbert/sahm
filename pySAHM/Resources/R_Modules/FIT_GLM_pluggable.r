@@ -52,7 +52,7 @@ make.binary.tif=T
 simp.method="AIC"
 opt.methods=2
 MESS=FALSE
-squared.terms=FALSE
+squared.terms=TRUE
 multCore=TRUE
 predSelect=TRUE
 

@@ -1,5 +1,5 @@
-setwd("C:\\VisTrails_SAHM\\VisTrails_SAHM\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
-ScriptPath="C:\\VisTrails_SAHM\\VisTrails_SAHM\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
+setwd("C:\\GoogleDrive\\Python\\DevWorkspace\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="C:\\GoogleDrive\\Python\\DevWorkspace\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
 
 
 source("LoadRequiredCode.r")
@@ -26,17 +26,16 @@ input.file="C:\\temp\\TestDataSets\\modelSelection_split_1.csv"
 #================================================================#
 #                       Maxent
 #================================================================#
- -f N:\Research\nccsc\Private\Projects\VisTrails\DevelopmentWorkspace\Nick\userpackages\..\userpackages\sahm\pySAHM\Resources\R_Modules\WrapMaxent.r --args
-  lam=C:\Users\ctalbert\AppData\Local\Temp\sahm_testing\maxent_8 
-  c=C:\Users\ctalbert\AppData\Local\Temp\sahm_testing\MergedDataset_5.csv cur_processing_mode=multiple models simultaneously (1 core each) 
-  o=C:\Users\ctalbert\AppData\Local\Temp\sahm_testing\maxent_8 mpt=TRUE mes=FALSE rc=responseBinary mbt=TRUE multicore=FALSE
-input.file="I:\\SpeciesData\\Kansas\\prairie_chicken\\Rangewide_model\\Maxent\\Round2\\Background\\CovariateCorrelationOutputMDS_StateSplit_CV5.csv"
-input.file="N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\junk\\sahm_testing\\MergedDataset_5.csv"
-lambdas.file="N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\junk\\sahm_testing\\maxent_8"
+'multicore=TRUE', 'om=2', 'maxent_path=K:\\USERS\\ISS\\VisTrails\\VisTrails2.1.2_SAHM_x64_1.2.0\\Central_Maxent', 'species_name=species', 'cur_processing_mode=single models sequentially (n - 1 cores each)', 'c=J:\\Projects\\CNHPforJorge\\Maxent_WildParsnip_4\\CovariateCorrelationOutputMDS_WildParsnip_initial.csv', 'o=J:\\Projects\\CNHPforJorge\\Maxent_WildParsnip_4'
+
+
+  lambdas.file="J:\\Projects\\CNHPforJorge\\Maxent_WildParsnip_4"
+ input.file="J:\\Projects\\CNHPforJorge\\Maxent_WildParsnip_4\\CovariateCorrelationOutputMDS_WildParsnip_initial.csv"
+
 FitModels(ma.name=input.file,
             output.dir=output.dir,
-            response.col=rc,make.p.tif=T,make.binary.tif=T,
-            debug.mode=T,script.name="maxent",opt.methods=2,MESS=T,lambdas=lambdas.file,,multCore=TRUE,ScriptPath=ScriptPath)
+            response.col=rc,make.p.tif=F,make.binary.tif=F,
+            debug.mode=T,script.name="maxent",opt.methods=2,MESS=F,lambdas=lambdas.file,multCore=TRUE,ScriptPath=ScriptPath)
 #================================================================#
 #                            MARS
 #================================================================#

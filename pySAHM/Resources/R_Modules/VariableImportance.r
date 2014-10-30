@@ -42,7 +42,7 @@ VariableImportance<-function(Model,out,auc){
 
 ######################## copied from append out
   par(mar=c(5,17,4,2))
-         browser()
+        
     plot(c(min(0,min(cor.mat)),(max(cor.mat)+.1)),y=c(-.5,(length(out$mods$vnames)+.5)),type="n",xlab="Importance",main="Importance using the change in AUC when each predictor is permuted",ylab="",yaxt="n",cex.lab=1.4)
     grid()
       if(out$dat$split.type!="crossValidation"){

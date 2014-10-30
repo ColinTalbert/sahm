@@ -50,7 +50,7 @@ n.folds=3
 alpha=1
 
 learning.rate = NULL
-bag.fraction = 0.5
+bag.fraction = 0.75
 prev.stratify = TRUE
 max.trees = 10000
 tolerance.method = "auto"
