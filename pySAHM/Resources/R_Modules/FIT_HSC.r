@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-## Copyright (C) 2010-2012, USGS Fort Collins Science Center. 
+## Copyright (C) 20010-2012, USGS Fort Collins Science Center. 
 ## All rights reserved.
 ## Contact: talbertc@usgs.gov
 ##
@@ -42,30 +42,48 @@
 ## and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
-chk.libs <- function(Model){
-#Checks libraries for many functions I should probably pass just the list of libs to check but this helps me update 
-#documentation on all libraries required by SAHM 
-#Written by Marian Talbert 2/2012
-     if(Model=="PairsExplore") libs=list("gam")
-     if(Model=="Pred.inspect") libs=list("raster","gam")
-     if(Model%in%c("mars","glm","rf","gam","ann","brt","maxent","hsc")) libs <- c("PresenceAbsence","rgdal","sp","survival","tools","raster","tcltk2","foreign","ade4","ROCR","ncf","splines")
-     if(Model=="hsc")                libs<-as.list(c("rjson",libs))
-     if(Model=="mars")               libs<-as.list(c("mda","earth","plotrix",libs))
-     if(Model%in%c("glm","maxent"))  libs<-as.list(libs)
-     if(Model=="rf")                 libs<-as.list(c("randomForest",libs))
-     if(Model=="gam")                libs<-as.list(c("gam",libs))
-     if(Model=="ann")                libs<-as.list(c("nnet",libs))
-     if(Model=="brt")                libs<-as.list(c("lattice","gbm",libs))
-    
-     if(Model=="GenPsdAbs")   libs<-list("adehabitatHR","ks","raster","rgdal","sp","spatstat")
-      lib.mssg <- unlist(suppressMessages(suppressWarnings(lapply(libs,require,quietly = T, warn.conflicts=F,character.only=T))))
-      if(any(!lib.mssg)){
-            install.packages(unlist(libs[!lib.mssg]), repos = "http://cran.r-project.org")
-            lib.mssg <- unlist(suppressMessages(suppressWarnings(lapply(libs,require,quietly = T, warn.conflicts=F,character.only=T))))
-            }
-        if(any(!lib.mssg)) stop(paste(paste("\n\nthe following package(s) could not be loaded: ",paste(unlist(libs[!lib.mssg]),sep="")),
-        "\n THIS IS OFTEN BECAUSE YOU DID NOT FOLLOW THE INSTALL INSTRUCTIONS ON PAGE 4 OF THE SAHM MANUAL\nINSTALL R IN A LOCATION WHERE YOU HAVE WRITE PERMISSION (Often NOT Program Files)!!!!",sep=""))
+make.p.tif=T
+make.binary.tif=T
+opt.methods=2
+MESS=FALSE
+multCore=TRUE
 
-      }
+# Interpret command line argurments #
+# Make Function Call #
+Args <- commandArgs(trailingOnly=FALSE)
+
+    for (i in 1:length(Args)){
+		if(Args[i]=="-f") ScriptPath<-Args[i+1]
+		argSplit <- strsplit(Args[i], "=")
+		if(argSplit[[1]][1]=="--file") ScriptPath <- argSplit[[1]][2]
+	}
+
+    for (arg in Args) {
+    	argSplit <- strsplit(arg, "=")
+    	argSplit[[1]][1]
+    	argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="c") csv <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="o") output <- argSplit[[1]][2]
+    	if(argSplit[[1]][1]=="rc") responseCol <- argSplit[[1]][2]
+   		if(argSplit[[1]][1]=="mpt") make.p.tif <- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="om")  opt.methods <- as.numeric(argSplit[[1]][2])
+ 		  if(argSplit[[1]][1]=="mes")  MESS <-as.logical(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="hsc")  hsc <-argSplit[[1]][2]
+ 			 if(argSplit[[1]][1]=="multicore")  multCore <- as.logical(argSplit[[1]][2])
+    }
+
+ScriptPath<-dirname(ScriptPath)
+source(file.path(ScriptPath,"LoadRequiredCode.r"))
+source(file.path(ScriptPath,"MAXENT.helper.fcts.r"))
+
+
+    FitModels(ma.name=csv,
+		output.dir=output,
+		response.col=responseCol,
+		make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
+		script.name="hsc",
+    opt.methods=opt.methods,MESS=MESS,hsc=hsc,ScriptPath=ScriptPath,multCore=multCore,debug.mode=FALSE)
+
 
 

@@ -24,6 +24,22 @@ input.file="N:\\Research\\nccsc\\Private\\Projects\\VisTrails\\DevelopmentWorksp
 input.file="C:\\temp\\TestDataSets\\modelSelection_split_1.csv"
 
 #================================================================#
+#           Habitat Suitability Criterion            
+#================================================================#
+'multicore=TRUE', 'om=2', 'maxent_path=K:\\USERS\\ISS\\VisTrails\\VisTrails2.1.2_SAHM_x64_1.2.0\\Central_Maxent', 'species_name=species', 'cur_processing_mode=single models sequentially (n - 1 cores each)', 'c=J:\\Projects\\CNHPforJorge\\Maxent_WildParsnip_4\\CovariateCorrelationOutputMDS_WildParsnip_initial.csv', 'o=J:\\Projects\\CNHPforJorge\\Maxent_WildParsnip_4'
+
+
+  hsc.file="K:\\USERS\\ISB\\GIS\\C_TALBERT\\misc\\test_hsc.json"
+ input.file="J:\\Projects\\CNHPforJorge\\SingleSplit\\CovariateCorrelationOutputMDS_segundo.csv"
+
+FitModels(ma.name=input.file,
+            output.dir=output.dir,
+            response.col=rc,make.p.tif=T,make.binary.tif=T,
+            debug.mode=T,script.name="hsc",opt.methods=2,MESS=F,hsc.file=hsc.file,multCore=TRUE,ScriptPath=ScriptPath)
+            
+            
+
+#================================================================#
 #                       Maxent
 #================================================================#
 'multicore=TRUE', 'om=2', 'maxent_path=K:\\USERS\\ISS\\VisTrails\\VisTrails2.1.2_SAHM_x64_1.2.0\\Central_Maxent', 'species_name=species', 'cur_processing_mode=single models sequentially (n - 1 cores each)', 'c=J:\\Projects\\CNHPforJorge\\Maxent_WildParsnip_4\\CovariateCorrelationOutputMDS_WildParsnip_initial.csv', 'o=J:\\Projects\\CNHPforJorge\\Maxent_WildParsnip_4'

@@ -60,8 +60,16 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
           if(full.fit) return(out)
           else return(out$mods$final.mod)
           }
-  
-     
+
+#================================================================
+#          Habitat Suitability Criterion
+#================================================================= 
+     if(Model=="hsc"){
+      out$mods$final.mod[[1]]<-read.hsc(out$input$hsc.file)
+           return(out)
+          }
+
+    
    SplitBackground(out,dat)
    out$dat$ma$train$Split<-c(Split,rep(0,times=sum(dat$response>0)))
 #================================================================
