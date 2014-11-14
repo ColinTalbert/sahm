@@ -284,14 +284,18 @@ class CreatePredictorCurvesDialog(QtGui.QDialog):
         
     def okTriggered(self):
         self.SaveMDSFromTreeview()
+        self.clear_contents()
         self.done(0)
 
-    def cancel(self):
+    def clear_contents(self):
         for cv in self.covariate_viewers:
             cv.fig_hsc.delaxes(cv.ax_hsc)
             cv.fig_hsc.delaxes(cv.ax_hist)
             cv.fig_map.delaxes(cv.ax_map)
             del cv
+
+    def cancel(self):
+        self.clear_contents()
         self.done(1)
         
     def thresholdEdit(self):
@@ -338,6 +342,7 @@ class CreatePredictorCurvesDialog(QtGui.QDialog):
 
     def create_covartiate_viewer(self, col, matchax=None, previous_verts=None):
         mds_subset = self.mds_data[list(self.mds_data.columns[:3].values) + [col]][2:]
+        mds_subset['responseBinary'] = mds_subset['responseBinary'].astype(dtype='int')
         this_item = covariate_viewer(name=col,
                      values=self.mds_data[col][2:].astype(dtype='float'),
                      df=mds_subset,
@@ -363,6 +368,7 @@ class CreatePredictorCurvesDialog(QtGui.QDialog):
             json.dump(output, f)
         
     def closeEvent(self, event):
+        self.clear_contents()
         self.cancel()
 
 

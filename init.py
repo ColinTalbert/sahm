@@ -84,8 +84,6 @@ from widgets import get_predictor_widget, get_predictor_config
 from SelectPredictorsLayers import SelectListDialog
 from SelectAndTestFinalModel import SelectAndTestFinalModel
 
-from CreatePredictorCurves import CreatePredictorCurvesDialog
-
 import utils
 import GenerateModuleDoc as GenModDoc
 #  import our python SAHM Processing files
@@ -544,20 +542,6 @@ class Model(Module):
 
         utils.write_hash_entry_pickle(signature, self.output_dname)
 
-        if self.abbrev == "hsc":
-            json_fname = os.path.join(self.output_dname, 'hsc.json')
-            kwargs_mod = {'inputMDS':self.args_dict['c'],
-                      'output_json':json_fname}
-            self.args_dict['hsc'] = json_fname
-            dialog = CreatePredictorCurvesDialog(kwargs_mod)
-            #  dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
-            retVal = dialog.exec_()
-            #  outputPredictorList = dialog.outputList
-            if retVal == 1:
-                raise ModuleError(self, "Cancel or Close selected (not OK) workflow halted.")
-                dialog = CreatePredictorCurvesDialog(self.args_dict)
-
-
         try:
             utils.run_model_script(self.name, self.args_dict, self, self.pywrapper)
         except ModuleSuspended:
@@ -823,7 +807,7 @@ class HabitatSuitabilityCurve(Model):
         global models_path
         Model.__init__(self)
         self.name = 'FIT_HSC.r'
-        self.pywrapper = "runHSC.py"
+        self.pywrapper = "runRModel.py"
         self.abbrev = 'hsc'
 
     def compute(self):
