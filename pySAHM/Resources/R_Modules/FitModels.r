@@ -99,6 +99,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
               chk.libs(Model)
    #Read in data, perform several checks and store all of the information in the out list
              out <- read.ma(out)
+            
              out$dat$bname <- bname
              out$dat$bnameExpanded=file.path(dirname(out$dat$bname),"ExpandedOutput")
              dir.create(out$dat$bnameExpanded)
@@ -112,13 +113,14 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
         
     #Fit the desired model#
                out<-generic.model.fit(out,Model,t0)
-              
+           
     #Making Predictions
                pred.vals<-function(x,model,Model){
               x$pred<-pred.fct(model,x$dat[,2:ncol(x$dat)],Model)
               return(x)}
-       
+                    
               #getting the predictions for the test/train or cross validation splits into the object at the correct list location
+                  if(Model=="hsc" & out$dat$split.type=="crossValidation") stop("Cross Validation not implemented for HSC model") 
                   if(out$dat$split.type!="crossValidation") out$dat$ma<-(lapply(X=out$dat$ma,FUN=pred.vals,model=out$mods$final.mod,Model=Model))
                      else out$dat$ma$train$pred<-pred.vals(out$dat$ma$train,out$mods$final.mod,Model=Model)$pred  
                   
@@ -150,6 +152,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
               cat("Progress:70%\n");flush.console()
 
   #Response curves #
+  
      response.curves(out,Model)
      
    #Save Workspace

@@ -177,6 +177,11 @@ on.exit(detach(out$input))
         out$mods$n.vars.final<- out$mods$n.vars.final<-ncol(out$dat$ma$train$dat)-1
         out$mods$vnames<-names(out$dat$ma$train$dat)[-1]
    }
+   
+   if(Model=="hsc"){
+    out$mods$n.vars.final<- length(out$mods$final.mod[[1]])
+        out$mods$vnames<-names(out$mods$final.mod[[1]])
+   }
   
   return(out)
 }
