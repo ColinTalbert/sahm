@@ -644,7 +644,7 @@ def run_model_script(script, args_dict, module=None, runner_script="runRModel.py
             json_fname = os.path.join(module.output_dname, 'hsc.json')
             kwargs_mod = {'inputMDS':module.args_dict['c'],
                       'output_json':json_fname}
-            module.args_dict['hsc'] = json_fname
+            args_dict['hsc'] = json_fname
             dialog = CreatePredictorCurvesDialog(kwargs_mod)
             #  dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
             retVal = dialog.exec_()
