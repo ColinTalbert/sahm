@@ -545,8 +545,10 @@ class Model(Module):
         utils.write_hash_entry_pickle(signature, self.output_dname)
 
         if self.abbrev == "hsc":
+            json_fname = os.path.join(self.output_dname, 'hsc.json')
             kwargs_mod = {'inputMDS':self.args_dict['c'],
-                      'output_json':os.path.join(self.output_dname, 'hsc.json')}
+                      'output_json':json_fname}
+            self.args_dict['hsc'] = json_fname
             dialog = CreatePredictorCurvesDialog(kwargs_mod)
             #  dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
             retVal = dialog.exec_()
@@ -820,7 +822,7 @@ class HabitatSuitabilityCurve(Model):
     def __init__(self):
         global models_path
         Model.__init__(self)
-        self.name = 'WrapMaxent.r'
+        self.name = 'FIT_HSC.r'
         self.pywrapper = "runHSC.py"
         self.abbrev = 'hsc'
 

@@ -313,23 +313,30 @@ class CreatePredictorCurvesDialog(QtGui.QDialog):
         Sets the check state to be the same as the 0/1 include flag.
         '''
 
+        if os.path.exists(self.output_mds):
+            prev_out = json.load(open(self.output_mds, 'rb'))
+        else:
+            prev_out = {}
+
         self.mds_data = pd.read_csv(self.input_mds, na_values=['NA'])
         noncovariate_columns = ['Split', 'EvalSplit', 'CV']
 
         self.covariate_viewers = []
 
-        first_viewer = self.create_covartiate_viewer(self.mds_data.columns[3])
+        first_viewer = self.create_covartiate_viewer(self.mds_data.columns[3],
+                    previous_verts=prev_out.get(self.mds_data.columns[3], None))
         self.covariates_vlayout.addWidget(first_viewer)
         self.covariate_viewers.append(first_viewer)
 
         for col in self.mds_data.columns[4:]:
             if not col in noncovariate_columns:
                 print col
-                this_viewer = self.create_covartiate_viewer(col, matchax=first_viewer.ax_map)
+                this_viewer = self.create_covartiate_viewer(col, matchax=first_viewer.ax_map,
+                    previous_verts=prev_out.get(col, None))
                 self.covariates_vlayout.addWidget(this_viewer)
                 self.covariate_viewers.append(this_viewer)
 
-    def create_covartiate_viewer(self, col, matchax=None):
+    def create_covartiate_viewer(self, col, matchax=None, previous_verts=None):
         mds_subset = self.mds_data[list(self.mds_data.columns[:3].values) + [col]][2:]
         this_item = covariate_viewer(name=col,
                      values=self.mds_data[col][2:].astype(dtype='float'),
@@ -338,7 +345,8 @@ class CreatePredictorCurvesDialog(QtGui.QDialog):
                      include=int(self.mds_data[col][0]) == 1,
                      parent=self,
                      label=col,
-                     matchax=matchax)
+                     matchax=matchax,
+                     previous_verts=previous_verts)
         this_item.on_draw()
         return this_item
         
@@ -360,14 +368,15 @@ class CreatePredictorCurvesDialog(QtGui.QDialog):
 
 import matplotlib as mpl
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT
 from matplotlib.figure import Figure
 
 class covariate_viewer(QtGui.QGroupBox):
 
 
     def __init__(self, name, values, df, include=False, layer_fname=None,
-                 parent=None, cm=mpl.cm.coolwarm, label='', matchax=None):
+                 parent=None, cm=mpl.cm.coolwarm, label='', matchax=None,
+                 previous_verts=None):
 
         super(covariate_viewer, self).__init__(name, parent=parent)
 
@@ -382,6 +391,7 @@ class covariate_viewer(QtGui.QGroupBox):
         self.label = label
         self.matchax = matchax
         self.raster_im = False
+        self.vertices = previous_verts
 
         self.main_layout = QtGui.QHBoxLayout()
         self.include_chk = QtGui.QCheckBox("include")
@@ -482,6 +492,7 @@ class covariate_viewer(QtGui.QGroupBox):
 #                           xlim=(newL, newR), ylim=(newB, newT))
 
     def init_hsc_chart(self):
+
         min = self.values.min()
         max = self.values.max()
         mean = self.values.mean()
@@ -494,7 +505,11 @@ class covariate_viewer(QtGui.QGroupBox):
         for val, c, label in [('0', 'b', 'absence'),
                        ('1', 'r', 'presence'),
                        ('-9999', 'black', 'background'),
-                       ('-9998', 'black', 'background')]:
+                       ('-9998', 'black', 'background'),
+                       (0, 'b', 'absence'),
+                       (1, 'r', 'presence'),
+                       (-9999, 'black', 'background'),
+                       (-9998, 'black', 'background')]:
             try:
 
                 x = self.values.loc[self.df['responseBinary'] == val]
@@ -510,9 +525,12 @@ class covariate_viewer(QtGui.QGroupBox):
 
 
 
-        self.interactor = PathInteractor(self.ax_hsc,
-                                         [min, mean, max], [1.0, 1.0, 1.0],
-                                         parent=self)
+        if self.vertices is None:
+            x, y = [min, mean, max], [1.0, 1.0, 1.0]
+        else:
+            x, y = zip(*self.vertices)
+
+        self.interactor = PathInteractor(self.ax_hsc, x, y, parent=self)
         self.ax_hsc.set_ylim((0, 1.05))
         self.ax_hsc.set_title(self.label + "\nCurve and Distribution")
 
@@ -524,7 +542,7 @@ class covariate_viewer(QtGui.QGroupBox):
 
         self.display_map(vertices)
         
-        self.mpl_toolbar = NavigationToolbar(self.canvas_map, None)
+        self.mpl_toolbar = NavigationToolbar2QT(self.canvas_map, None)
         self.mpl_toolbar.pan()
         
         self.ax_map.end_pan = self.end_pan
@@ -598,10 +616,10 @@ class covariate_viewer(QtGui.QGroupBox):
                                             cmap=cmap,
                                             origin='upper',
                                             extent=xlim + ylim)
-            for val, c, label in [('0', 'b', 'absence'),
-                       ('1', 'r', 'presence'),
-                       ('-9999', 'black', 'background'),
-                       ('-9998', 'black', 'background')]:
+            for val, c, label in [(0, 'b', 'absence'),
+                       (1, 'r', 'presence'),
+                       (-9999, 'black', 'background'),
+                       (-9998, 'black', 'background')]:
 #              try:
                 x = self.df.loc[self.df['responseBinary'] == val]['X']
                 x = [float(x) for x in x.values]
@@ -1080,8 +1098,8 @@ if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
 
 
-    args = {'input_mds':r"I:\VisTrails\WorkingFiles\workspace\_HabitatSuitabilityCurves\Maxent_BrewersSparrowCV_1\CovariateCorrelationOutputMDS_BrewersSparrowCV_initial.csv",
-            'output_mds':r"I:\VisTrails\WorkingFiles\workspace\_HabitatSuitabilityCurves\Maxent_BrewersSparrowCV_1\CovariateCorrelationOutputMDS_BrewersSparrowCV_output.json",
+    args = {'inputMDS':r"I:\VisTrails\WorkingFiles\workspace\_HabitatSuitabilityCurves\hsc_BrewersSparrowHSC_1\CovariateCorrelationOutputMDS_BrewersSparrowHSC_initial.csv",
+            'output_json':r"I:\VisTrails\WorkingFiles\workspace\_HabitatSuitabilityCurves\hsc_BrewersSparrowHSC_1\hsc.json",
             }
 
     createPredictorCurves = CreatePredictorCurvesDialog(args)
