@@ -75,7 +75,7 @@ Args <- commandArgs(trailingOnly=FALSE)
 
 ScriptPath<-dirname(ScriptPath)
 source(file.path(ScriptPath,"LoadRequiredCode.r"))
-source(file.path(ScriptPath,"MAXENT.helper.fcts.r"))
+source(file.path(ScriptPath,"HSC.helper.fcts.r"))
 
 
     FitModels(ma.name=csv,
