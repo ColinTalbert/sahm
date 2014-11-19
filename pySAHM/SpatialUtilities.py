@@ -687,7 +687,8 @@ def average_geotifs(raster_fnames, outfname,
         pass
     out_raster = SAHMRaster(outfname)
     out_raster.pullParamsFromRaster(raster_fnames[0])
-    out_raster.createNewRaster(create_args)
+    out_raster.pixelType = gdalconst.GDT_Float32
+    out_raster.createNewRaster()  #  create_args)
 
     #  loop though the blocks in our output raster
     #  calculate the cooresponding block from the inputs
@@ -700,7 +701,8 @@ def average_geotifs(raster_fnames, outfname,
     cur_block = 0
     for block in itertools.izip(*[sr.iterBlocks() for sr in rasters]):
         d = average_nparrays(block[:])
-        out_raster.putBlock(d, sr.curCol, sr.curRow)
+        out_raster.putBlock(d,
+                            sr.curCol, sr.curRow)
 
         if verbose:
             print '\r>> Finished ' + str(cur_block) + ' out of ' + str(num_blocks),

@@ -508,11 +508,14 @@ class covariate_viewer(QtGui.QGroupBox):
         data = []
         colors = []
         labels = []
-        for val, c, label in [('0', 'b', 'absence'),
-                       ('1', 'r', 'presence'),
-                       ('-9999', 'black', 'background'),
-                       ('-9998', 'black', 'background'),
-                       (0, 'b', 'absence'),
+        
+        
+#          pres = self.values.loc[self.df['responseBinary'] == 'presence']
+#          pres = [float(pres) for pres in pres.values]
+#
+#          total = self.values
+        
+        for val, c, label in [(0, 'b', 'absence'),
                        (1, 'r', 'presence'),
                        (-9999, 'black', 'background'),
                        (-9998, 'black', 'background')]:
@@ -525,8 +528,9 @@ class covariate_viewer(QtGui.QGroupBox):
                 labels.append(label)
             except:
                 pass
-        self.ax_hist.hist(data, bins=bins, stacked=True, color=colors,
-                        label=labels, alpha=0.4, histtype='stepfilled', lw=0.1)
+        self.ax_hist.hist(data, bins=bins, stacked=False, color=colors,
+                          normed=True, label=labels, alpha=0.4, histtype='bar',
+                          lw=0.1)
 #          plt.legend()
 
 
@@ -1104,7 +1108,7 @@ if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
 
 
-    args = {'inputMDS':r"I:\VisTrails\WorkingFiles\workspace\_HabitatSuitabilityCurves\hsc_BrewersSparrowHSC_1\CovariateCorrelationOutputMDS_BrewersSparrowHSC_initial.csv",
+    args = {'inputMDS':r"I:\VisTrails\WorkingFiles\workspace\_HabitatSuitabilityCurves\hsc_test2\CovariateCorrelationOutputMDS_BrewersSparrowHSC_initial.csv",
             'output_json':r"I:\VisTrails\WorkingFiles\workspace\_HabitatSuitabilityCurves\hsc_BrewersSparrowHSC_1\hsc.json",
             }
 
