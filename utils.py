@@ -81,6 +81,7 @@ except:
 import numpy
 
 import pySAHM.utilities as utilities
+from CreatePredictorCurves import CreatePredictorCurvesDialog
 import getpass
 
 _roottempdir = ""
@@ -638,6 +639,18 @@ def run_model_script(script, args_dict, module=None, runner_script="runRModel.py
     if not job_monitor.finished():
         writetolog("\nStarting processing of " + script , True)
         writetolog("    command used: \n" + utilities.convert_list_to_cmd_str(cmd), False, False)
+
+        if module.abbrev == "hsc":
+            json_fname = os.path.join(module.output_dname, 'hsc.json')
+            kwargs_mod = {'inputMDS':module.args_dict['c'],
+                      'output_json':json_fname}
+            args_dict['hsc'] = json_fname
+            dialog = CreatePredictorCurvesDialog(kwargs_mod)
+            #  dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
+            retVal = dialog.exec_()
+            #  outputPredictorList = dialog.outputList
+            if retVal == 1:
+                raise ModuleError(module, "Cancel or Close selected (not OK) workflow halted.")
 
         if processing_mode == "FORT Condor":
             runModelOnCondor(script, args_dict)

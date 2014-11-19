@@ -84,7 +84,6 @@ from widgets import get_predictor_widget, get_predictor_config
 from SelectPredictorsLayers import SelectListDialog
 from SelectAndTestFinalModel import SelectAndTestFinalModel
 
-
 import utils
 import GenerateModuleDoc as GenModDoc
 #  import our python SAHM Processing files
@@ -542,6 +541,7 @@ class Model(Module):
         time.sleep(2)
 
         utils.write_hash_entry_pickle(signature, self.output_dname)
+
         try:
             utils.run_model_script(self.name, self.args_dict, self, self.pywrapper)
         except ModuleSuspended:
@@ -791,6 +791,42 @@ class MAXENT(Model):
         self.setModelResult(htmlfile, "report", "")
 
         writetolog("Finished Maxent", True)
+
+class HabitatSuitabilityCurve(Model):
+    '''
+    '''
+    _input_ports = list(Model._input_ports)
+    _input_ports.extend([('UseRMetrics', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
+                         ])
+    _output_ports = list(Model._output_ports)
+    _output_ports.extend([("curves_json", "(edu.utah.sci.vistrails.basic:File)"),
+                     ("report", "(edu.utah.sci.vistrails.basic:File)"),
+                     ("roc", "(edu.utah.sci.vistrails.basic:File)")])
+
+    def __init__(self):
+        global models_path
+        Model.__init__(self)
+        self.name = 'FIT_HSC.r'
+        self.pywrapper = "runRModel.py"
+        self.abbrev = 'hsc'
+
+    def compute(self):
+
+        Model.compute(self)
+
+#       set some Maxent specific outputs
+        self.args_dict['species_name'] = self.args_dict['species_name'].replace(' ', '_')
+        lambdasfile = self.args_dict["species_name"] + ".lambdas"
+        self.setModelResult(lambdasfile, "lambdas", "")
+
+        rocfile = "plots" + os.sep + self.args_dict["species_name"] + "_roc.png"
+        self.setModelResult(rocfile, "roc", "")
+
+        htmlfile = self.args_dict["species_name"] + ".html"
+        self.setModelResult(htmlfile, "report", "")
+
+        writetolog("Finished HSC", True)
+
 
 class BackgroundSurfaceGenerator(Module):
     '''
@@ -2485,7 +2521,11 @@ _modules = generate_namespaces({'DataInput': [
                                            (BoostedRegressionTree,
                                                 {
                                                  'moduleColor':model_color,
-                                                           'moduleFringe':model_fringe})
+                                                           'moduleFringe':model_fringe}),
+                                           (HabitatSuitabilityCurve,
+                                                {
+                                                 'moduleColor':model_color,
+                                                           'moduleFringe':model_fringe}),
                                            ],
                                 'Other':  [(Model, {'abstract': True}),
                                            (VectorLayer, {'abstract': True}),
