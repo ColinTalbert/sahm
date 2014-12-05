@@ -668,7 +668,7 @@ def average_nparrays(arrays):
     return np.ma.mean(dstack, axis=2)
 
 def average_geotifs(raster_fnames, outfname,
-                    create_args=None, verbose=False):
+                    create_args=[], verbose=False):
     '''takes a list of raster fnames and saves
     the average of their pixel values to a new raster
     with the outfname
@@ -688,7 +688,7 @@ def average_geotifs(raster_fnames, outfname,
     out_raster = SAHMRaster(outfname)
     out_raster.pullParamsFromRaster(raster_fnames[0])
     out_raster.pixelType = gdalconst.GDT_Float32
-    out_raster.createNewRaster()  #  create_args)
+    out_raster.createNewRaster(create_args)
 
     #  loop though the blocks in our output raster
     #  calculate the cooresponding block from the inputs
