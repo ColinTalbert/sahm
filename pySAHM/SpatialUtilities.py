@@ -77,7 +77,8 @@ class SAHMRaster():
         driver = gdal.GetDriverByName(self.driverName)
 
         if not create_args:
-            create_args = []
+            create_args = ['COMPRESS=LZW', 'PREDICTOR=2', 'TILED=Yes',
+                   'BLOCKXSIZE=128', 'BLOCKYSIZE=128']
 
         if self.signedByte:
             create_args += ["PIXELTYPE=SIGNEDBYTE"]
