@@ -83,7 +83,7 @@ source(file.path(ScriptPath,"HSC.helper.fcts.r"))
 		response.col=responseCol,
 		make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
 		script.name="hsc",
-    opt.methods=opt.methods,MESS=MESS,hsc=hsc,ScriptPath=ScriptPath,multCore=multCore,debug.mode=FALSE)
+    opt.methods=opt.methods,MESS=MESS,hsc.file=hsc,ScriptPath=ScriptPath,multCore=multCore,debug.mode=FALSE)
 
 
 

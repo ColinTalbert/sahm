@@ -359,11 +359,36 @@ class CreatePredictorCurvesDialog(QtGui.QDialog):
         #updates the second header line on the input MDS file 
         #to reflect the checked items in the tree view 
         #and saves the results to the output MDS.
+                
+
+            
+        reader = csv.reader(open(self.input_mds, "r"))
+        header = reader.next() #store the header
+        header2 = reader.next() #the 2nd line of the mds with use/don't use
+        header3 = reader.next() #the 3rd line of the mds with the path
         
+        outHeader2 = header2
+                  
         output = {}
         for covariate_viewer in self.covariate_viewers:
-            output[covariate_viewer.name] = covariate_viewer.vertices
+            if covariate_viewer.include:
+                output[covariate_viewer.name] = covariate_viewer.vertices
+                
+                col_index = header.index(covariate_viewer.name)
+                if covariate_viewer.include:
+                    outHeader2[col_index] = "1"
+                else:
+                    outHeader2[col_index] = "0"
 
+        oFile = open(self.input_mds, 'wb')
+        writer = csv.writer(oFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(header)
+        writer.writerow(outHeader2)
+        writer.writerow(header3)
+        for row in reader:
+            writer.writerow(row)
+        oFile.close
+        
         with open(self.output_mds, 'wb') as f:
             json.dump(output, f)
         
