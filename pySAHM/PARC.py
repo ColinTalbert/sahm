@@ -175,8 +175,14 @@ class PARC(object):
         if self.processingMode == "FORT Condor":
             self.waitForCondorProcessesToFinish(process_queue)
         else:
+            error_msgs = ''
             for process in self.pool_processes:
-                process.get()
+                msg = process.get()
+                print msg[0]
+                if msg[1] != '':
+                    error_msgs += ("\n" + msg[1])
+            if error_msgs != '':
+                raise utilities.TrappedError(error_msgs)
 
         print "done"
 
