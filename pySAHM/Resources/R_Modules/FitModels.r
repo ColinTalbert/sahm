@@ -120,7 +120,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
               return(x)}
                     
               #getting the predictions for the test/train or cross validation splits into the object at the correct list location
-                  if(Model=="hsc" & out$dat$split.type=="crossValidation") stop("Cross Validation not implemented for HSC model") 
+                  
                   if(out$dat$split.type!="crossValidation") out$dat$ma<-(lapply(X=out$dat$ma,FUN=pred.vals,model=out$mods$final.mod,Model=Model))
                      else out$dat$ma$train$pred<-pred.vals(out$dat$ma$train,out$mods$final.mod,Model=Model)$pred  
                   

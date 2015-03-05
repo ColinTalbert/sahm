@@ -58,6 +58,7 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
         #this little section is borrowed from BIOMOD because rf partial plot 
         #does something odd with the y axis
         dat<-out$dat$ma$train$dat[,-1]
+        resp<-out$dat$ma$train$dat[,1]
         Xp <- as.data.frame(matrix(NA, nc = ncol(dat), nr = nrow(dat),
         dimnames = list(NULL, colnames(dat))))
         for (i in 1:ncol(dat)) {
@@ -73,7 +74,7 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
        
      dir.create(file.path(out$input$output.dir,"responseCurves"))
      rsp.dat<-NA
-      
+              
       for (k in c(1,2)){
           if(k==1){ jpeg(file.path(out$input$output.dir,"responseCurves","all_response_curves.jpg"),width=2000,height=2000,quality=100)
                     par(oma=c(2,2,4,2),mfrow=c(prow,pcol))}                   
@@ -102,6 +103,8 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
                       if(out$input$model.family=="poisson") y.lim=range(apply(Xf,1,mean))
                        plot(Xp1[, i],apply(Xf,1,mean), ylim = y.lim, xlab = "",
                       ylab = "", type = "l", main = names(dat)[i],lwd=2,cex=3,cex.main=3,cex.axis=2.5)
+                      rug(dat[resp==1,i],col="red")
+                      rug(dat[resp==0,i],col="blue")
                if(k==2) graphics.off() 
                if(k==2) {if(i==min(sort(match(out$mods$vnames,names(dat))))) rsp.dat<-cbind(Xp1[, i],apply(Xf,1,mean))
                         else rsp.dat<-cbind(rsp.dat,Xp1[, i],apply(Xf,1,mean))
