@@ -127,8 +127,11 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
                             #learning rate estimation removes columns with low contributions to fit for removal 
                             #here we put specify use all if no predictor selection was to occur
                             if(!predSelect) out$mods$lr.mod$good.cols<-seq(from=2,to=ncol(out$dat$Subset$dat))
+                             
+                           n.trees<-c(300,600,800,1000,1200,1500,1800)
+                           if(!is.null(out$input$n.trees)) n.trees=out$input$n.trees
                         m0 <- gbm.step.fast(dat=out$dat$Subset$dat,gbm.x=out$mods$lr.mod$good.cols,gbm.y=1,family=model.family,
-                              n.trees = c(300,600,800,1000,1200,1500,1800),step.size=step.size,max.trees=max.trees,
+                              n.trees = n.trees,step.size=step.size,max.trees=max.trees,
                               tolerance.method=tolerance.method,tolerance=tolerance, n.folds=n.folds,prev.stratify=prev.stratify,
                               tree.complexity=out$mods$parms$tc.sub,learning.rate=out$mods$lr.mod$lr0,bag.fraction=bag.fraction,site.weights=out$dat$Subset$weight,
                               autostop=T,debug.mode=F,silent=!debug.mode,
@@ -143,11 +146,13 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
                 }
               
             final.mod<-list()
-               
+                   
             for(i in 1:num.splits){
                  if(out$mods$lr.mod$lr==0) out$mods$lr.mod$lr<-out$mods$lr.mod$lr0
+                 n.trees<-c(300,600,800,1000,1200,1500,1800,2200,2600,3000,3500,4000,4500,5000)
+                           if(!is.null(out$input$n.trees)) n.trees=out$input$n.trees
                  final.mod[[i]] <- gbm.step.fast(dat=dat[c(Split,rep(i,times=sum(dat$response>0)))==i,],gbm.x=out$mods$simp.mod$good.cols,gbm.y = 1,family=model.family,
-                                n.trees = c(300,600,700,800,900,1000,1200,1500,1800,2200,2600,3000,3500,4000,4500,5000),n.folds=n.folds,max.trees,
+                                n.trees = n.trees,n.folds=n.folds,max.trees,
                                 tree.complexity=out$mods$parms$tc.full,learning.rate=out$mods$lr.mod$lr,bag.fraction=bag.fraction,site.weights=rep(1,times=nrow(dat[c(Split,rep(i,times=sum(dat$response>0)))==i,])),
                                 autostop=T,debug.mode=F,silent=!debug.mode,plot.main=F,superfast=F)
                   #             
