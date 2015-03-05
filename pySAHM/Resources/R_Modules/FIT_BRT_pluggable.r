@@ -103,7 +103,7 @@ ScriptPath<-dirname(ScriptPath)
 source(file.path(ScriptPath,"LoadRequiredCode.r"))
 source(file.path(ScriptPath,"BRT.helper.fcts.r"))
 
-
+    if(ntr=="NULL") ntr=NULL
 
     FitModels(ma.name=csv,
 		output.dir=output,
