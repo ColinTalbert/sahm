@@ -2708,18 +2708,8 @@ For example:
         <Connections>NA</Connections>
       </Port>
       <Port>
-        <PortName>query</PortName>
-        <Definition>The query field allows you to specify a subset of the total features to draw.  The syntax of this query matches a standard shapefile query syntax and follows these general rules:
-1: Field names must be in double quotes and match the case used in the data exactly. 
-2: String values must be enclosed in single quotes and match the case used in the data exactly.
-3: Numeric field values must not be in quotes.
-4: Valid comparison opperators are =, &gt;, &lt;, &lt;&gt;, &gt;=, &lt;= 
-5: Multiple clauses can be joined with and, or, not
-
-For example:
-    "NAME" = 'Colorado'
-    "SQUARE_MIL" &gt; 5.0
-    "STATE" = 'CO' or "STATE" = 'WY'</Definition>
+        <PortName>raster_file</PortName>
+        <Definition>The file to display.  Many common raster file formats are supported including ESRI rasters, geotifs, img format, etc.  For the complete list of supported types see the list of 'Compiled by default':  http://www.gdal.org/formats_list.html    Note that when specifing a file in an ESRI grid format you can select the 'hdr.adf' file in the file browser since selecting the grid parent folder is not supported.</Definition>
         <Mandatory>No</Mandatory>
         <Default>50</Default>
         <Options>any integer</Options>
