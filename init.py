@@ -699,8 +699,8 @@ class BoostedRegressionTree(Model):
                               ('ToleranceMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["auto"]', 'optional':True}),
                               ('Tolerance', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.001"]', 'optional':True}),
                               ('LearningRate', '(edu.utah.sci.vistrails.basic:Float)', {'optional':True}),
-                              ('MaximumTrees', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ('SelectBestPredSubset', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
+                              ('NumberOfTrees', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ])
     def __init__(self):
         global models_path
@@ -716,7 +716,7 @@ class BoostedRegressionTree(Model):
                          'ToleranceMethod':('tolm', None, False),  #  This is a BRT specific port
                          'Tolerance':('tol', None, False),  #  This is a BRT specific port
                          'LearningRate':('lr', None, False),  #  This is a BRT specific port
-                         'MaximumTrees':('mt', None, False),  #  This is a BRT specific port
+                         'NumberOfTrees':('ntr', None, False),  #  This is a BRT specific port
                          'SelectBestPredSubset':('pst', utils.R_boolean, False),  #  This is a BRT specific port
                          })
 
