@@ -104,15 +104,21 @@ rc="responseBinary"
 #                            BRT
 #================================================================#
 input.file="J:\Projects\NormalsComparison\SAHM4\AHB\MergedDataset_1.csv"
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_ntr\\brt_BrewersSparrowCV_1\\CovariateCorrelationOutputMDS_BrewersSparrowCV_initial.csv"
 #input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_FinalTest\\CovariateCorrelationOutputMDS_initial.csv"
-FitModels(ma.name=input.file,
-          tif.dir=NULL,output.dir=output.dir,
-          response.col=rc,make.p.tif=F,make.binary.tif=F,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
-      family = "bernoulli",max.trees = 10000,tolerance.method = "auto",
-  tolerance = 0.001,seed=1,opt.methods=2,
-          simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
-          bag.fraction = 0.5,prev.stratify = TRUE, max.trees = NULL,opt.methods=2,MESS=F,ScriptPath=ScriptPath,multCore=FALSE,predSelect=FALSE)
-
+input.file="I:\\VisTrails\\MarianTesting\\BrewersSparrowTests\\BinomialTestTrain.csv"
+maxTrees=c(10,50,100,1000,10000,NULL)
+for(i in 2:length(maxTrees)){
+  d<-file.path(output.dir,paste("brt",i,sep="_"))
+  dir.create(d)
+  FitModels(ma.name=input.file,
+            tif.dir=NULL,output.dir=output.dir,
+            response.col=rc,make.p.tif=F,make.binary.tif=F,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
+        family = "bernoulli",n.trees =100,tolerance.method = "auto",
+    tolerance = 0.001,seed=1234,opt.methods=2,
+            simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
+            bag.fraction = 0.5,prev.stratify = TRUE, opt.methods=2,MESS=F,ScriptPath=ScriptPath,multCore=FALSE,predSelect=FALSE)
+}
 "I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\RFDebug\\modelWorkspace"
 EvaluateNewData(workspace="I:\\VisTrails\\WorkingFiles\\workspace\\_64xTesting\\RFDebug\\modelWorkspace",out.dir=output.dir,b.tif=TRUE,p.tif=TRUE,mess=FALSE,produce.metrics=TRUE)
 
