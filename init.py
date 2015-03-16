@@ -565,8 +565,8 @@ class Model(Module):
         self.setModelResult("_mess_map.tif", 'MessMap', self.abbrev)
         self.setModelResult("_MoD_map.tif", 'MoDMap', self.abbrev)
         self.setModelResult("_output.txt", 'Text_Output', self.abbrev)
-        self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot', self.abbrev)
-        self.setModelResult("_variable.importance.jpg", 'ModelVariableImportance', self.abbrev)
+        self.setModelResult("_modelEvalPlot.png", 'modelEvalPlot', self.abbrev)
+        self.setModelResult("_variable.importance.png", 'ModelVariableImportance', self.abbrev)
         writetolog("Finished " + self.abbrev + " builder\n", True, True)
 
         modelWorkspace = utils.create_dir_module(self.output_dname)
@@ -1876,7 +1876,7 @@ class CovariateCorrelationAndSelection(Module):
         writetolog("    seed used for subsampling = " + str(params['seed']))
         global session_dir
         params['outputMDS'] = os.path.join(session_dir, subfolder, "CovariateCorrelationOutputMDS_" + runname + ".csv")
-        params['displayJPEG'] = os.path.join(session_dir, subfolder, "CovariateCorrelationDisplay.jpg")
+        params['displayJPEG'] = os.path.join(session_dir, subfolder, "CovariateCorrelationDisplay.png")
         params['r_path'] = configuration.r_path
         params['module'] = self
         writetolog("    inputMDS = " + params['inputMDS'], False, False)
