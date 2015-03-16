@@ -59,7 +59,7 @@ thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template,maDir) {
         templateRast <- try(raster(template),silent=TRUE) 
         if(class(templateRast)=="try-error") HasTemplate=FALSE
     }
-    
+  
  for (i in start.tile:min(start.tile+nToDo-1,length(tr$row))){
  
    capture.output(cat(paste("starting tile", i,Sys.time(),"\n")),file=outtext,append=TRUE)

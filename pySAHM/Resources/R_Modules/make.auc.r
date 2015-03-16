@@ -126,7 +126,8 @@ make.auc.plot.jpg<-function(out=out){
             if(out$dat$split.type!="none") {
                 #so here we have to extract a sublist and apply a function to the sublist but if it has length 2 the structure of the list changes when the sublist is extracted
                  if(out$dat$split.type%in%c("test","eval")){ TestTrainRocPlot(do.call("rbind",lapply(lst,function(lst){lst$auc.data})),add.roc=TRUE,line.type=2,color="red",add.legend=FALSE)
-                    legend(x=.55,y=.2,c(paste("Training Split (AUC=",round(Stats$train$auc.fit,digits=3), ")",sep=""),paste("Testing Split  (AUC=",round(Stats$test$auc.fit,digits=3), ")",sep="")),lty=2,col=c("black","red"),lwd=2)
+                    legend(x=.55,y=.2,c(paste("Training Split (AUC=",round(Stats$train$auc.fit,digits=3), ")",sep=""),paste("Testing Split  (AUC=",round(Stats$test$auc.fit,digits=3), ")",sep="")),
+                       lty=2,col=c("black","red"),lwd=2,cex=1.8)
                  }
                  if(out$dat$split.type=="crossValidation"){
                       ROC.list<-list(predictions=lapply(lst,function(lst){lst$auc.data$pred}),labels=lapply(lst,function(lst){lst$auc.data$pres.abs}))
@@ -139,7 +140,8 @@ make.auc.plot.jpg<-function(out=out){
                        segments(x0=0,y0=0,x1=1,y1=1,col="blue")
                       text(x=(.96-Stats$train$Specf),y=Stats$train$Sens+.03,label=round(Stats$train$thresh,digits=2))
                         legend(x=.6,y=.22,c(paste("Training Split (AUC=",round(Stats$train$auc.fit,digits=3), ")",sep=""),
-                             paste("Cross Validation Mean \n (AUC=",round(mean(unlist(lapply(lst,function(lst){lst$auc.fit}))),digits=3), ")",sep="")),lwd=c(4,1),lty=c(1,1),col=c("red","black"))
+                             paste("Cross Validation Mean \n (AUC=",round(mean(unlist(lapply(lst,function(lst){lst$auc.fit}))),digits=3), ")",sep="")),lwd=c(4,1),lty=c(1,1),
+                             col=c("red","black"),cex=1.8)
                  }
                 }
                 graphics.off()
@@ -172,12 +174,8 @@ make.auc.plot.jpg<-function(out=out){
                              hist(a$pred[a$pres.abs==0],freq=TRUE,col="blue",xlim=range(a$pred),xlab="Predicted Probability",main="Available")
                 }
             } else{ 
-            pacplot(a$pred,a$pres.abs,title=paste("Calibration Plot for ",switch(out$dat$split.type,none="Training Data",test="Test Split",eval="Test Split",crossValidation="Cross Validation Split"),sep=""))
-                legend("topleft",c(as.expression(substitute(Int~~alpha==val, list(Int="Intercept:",val=signif(cal.results[1],digits=3)))),
-                 as.expression(substitute(Slope~~beta==val, list(Slope="Slope:",val=signif(cal.results[2],digits=3)))),
-                 as.expression(substitute(P(alpha==0, beta==1)==Prob,list(Prob=signif(cal.results[3],digits=3)))),
-                 as.expression(substitute(P(alpha==0~a~beta==1)==Prob,list(Prob=signif(cal.results[4],digits=3),a="|"))),
-                 as.expression(substitute(P(beta==1~a~alpha==0)==Prob,list(Prob=signif(cal.results[5],digits=3),a="|")))),bg="white")
+            pacplot(a$pred,a$pres.abs,title=paste("Calibration Plot for ",
+                   switch(out$dat$split.type,none="Training Data",test="Test Split",eval="Test Split",crossValidation="Cross Validation Split"),sep=""))
              }
             dev.off()
       }

@@ -343,7 +343,7 @@ TestTrainRocPlot<-function (DATA, threshold = 101, find.auc = TRUE, which.model 
     op <- par(pty = "s")
     if(add.roc==FALSE){
     plot(c(0, 1), c(0, 1), type = "n", xlab = xlab, ylab = ylab,
-        main = main)}
+        main = main,cex.main=2.2,cex.lab=2,cex.axis=1.5)}
     lines(c(0, 1), c(0, 1), col = "lightgray")
     if (counter.diagonal == TRUE) {
         abline(a = 1, b = -1, col = "lightgray")

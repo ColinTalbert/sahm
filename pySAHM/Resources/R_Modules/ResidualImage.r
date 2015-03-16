@@ -84,7 +84,8 @@ resid.image<-function(dev.contrib,pred,raw.dat,x,y,wgt,model.type,file.name,out,
                  par(oma=c(3,3,3,3))
                  layout(matrix(data=c(1,2), nrow=1, ncol=2), widths=c(4,1), heights=c(1,1))
                   image(z,x=x.lim,y=y.lim,col=beachcolours(heightrange=c(min(z),max(z)),sealevel=0,s=.5,ncolours=length(table(z))),
-                  main=paste("Spatial pattern of", ifelse(label!="eval"," deviance residuals\n(magnitude and sign)"," prediction error")),xlab="X coordinate",ylab="Y coordinate")
+                  main=paste("Spatial pattern of", ifelse(label!="eval"," deviance residuals\n(magnitude and sign)"," prediction error")),
+                      xlab="X coordinate",ylab="Y coordinate",,cex.main=2.2,cex.axis=1.6,cex.lab=1.8)
 
                   points(x,y,bg=col.i[col.ind], pch=21,cex=abs(dev.contrib)/max(abs(dev.contrib))*5)
                   par(mar = c(3,2.5,2.5,2))
@@ -94,7 +95,7 @@ resid.image<-function(dev.contrib,pred,raw.dat,x,y,wgt,model.type,file.name,out,
                matrix(data=colrange, ncol=length(colrange),nrow=1),
               col=beachcolours(heightrange=c(MinCol,MaxCol),sealevel=0,ncolours=length(colrange)),
               xlab="",ylab="",
-              xaxt="n")
+              xaxt="n",cex.main=2,cex.axis=2,cex.lab=2)
               graphics.off()
               return(a)
               }
