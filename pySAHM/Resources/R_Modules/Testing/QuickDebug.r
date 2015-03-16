@@ -40,13 +40,14 @@ FitModels(ma.name=input.file,
 #                            MARS
 #================================================================#
  
-input.file="I:\\VisTrails\\MarianTesting\\BrewersSparrowTests\\BinomialCV.csv"
-input.file=C:\Focal_species_project2\glm_prism_1\CovariateCorrelationOutputMDS_prism_initial.csvoutput.dir="C:\\temp\\SAHM_workspace\\MARS2"
-
+input.file="I:\\VisTrails\\MarianTesting\\BrewersSparrowTests\\BinomialTestTrain.csv"
+input.file="I:\\VisTrails\\Tutorial\\Tutorial_121_sessiondir\\vespersSparrow\\mars_1\\CovariateCorrelationOutputMDS_initial.csv"
+#input.file=C:\Focal_species_project2\glm_prism_1\CovariateCorrelationOutputMDS_prism_initial.csvoutput.dir="C:\\temp\\SAHM_workspace\\MARS2"
+output.dir="C:\\temp\\SAHM_workspace\\Mars"
 FitModels(ma.name=input.file,
             output.dir=output.dir,
-            response.col=rc,make.p.tif=T,make.binary.tif=T,
-            mars.degree=2,mars.penalty=2,debug.mode=T,script.name="mars",opt.methods=2,MESS=F,ScriptPath=ScriptPath,multCore=FALSE,predSelect=TRUE)
+            response.col=rc,make.p.tif=F,make.binary.tif=F,
+            mars.degree=1,mars.penalty=2,debug.mode=T,script.name="mars",opt.methods=2,MESS=F,ScriptPath=ScriptPath,multCore=FALSE,predSelect=TRUE)
 total.time<-Sys.time()-start.time
 total.time
 #================================================================#

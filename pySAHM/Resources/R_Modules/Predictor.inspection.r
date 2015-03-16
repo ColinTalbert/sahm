@@ -36,7 +36,7 @@ Predictor.inspection<-function(predictor,input.file,output.dir,response.col="Res
      
      a<-try(raster(tif.info[[3]][pred.indx]),silent=TRUE) 
      if(class(a)=="try-error") spatialDat=FALSE
-     output.file<-file.path(output.dir,paste(names(dat)[pred.indx],".jpg",sep=""))
+     output.file<-file.path(output.dir,paste(names(dat)[pred.indx],".png",sep=""))
      ### Producing some plots
   
     png(output.file,pointsize=13,height=2000,width=2000)
