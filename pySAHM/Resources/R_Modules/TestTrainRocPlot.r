@@ -356,6 +356,7 @@ TestTrainRocPlot<-function (DATA, threshold = 101, find.auc = TRUE, which.model 
         if (max(mark) != 0) {
             Mark.dat <- roc.plot.calculate(DATA = DATA, threshold = mark[,
                 dat], which.model = dat)
+               
             Mark.pretty <- round(Mark.dat$threshold, 2)
             Mark.pretty.char <- as.character(Mark.pretty)
             Mark.pretty.char[Mark.pretty == 0] <- "0.00"
@@ -365,6 +366,7 @@ TestTrainRocPlot<-function (DATA, threshold = 101, find.auc = TRUE, which.model 
             if(add.roc==FALSE){
             points(x = (1 - Mark.dat$specificity), y = Mark.dat$sensitivity,
                 cex = 2, pch = pch, col = mark.colors[dat])
+          
             if (mark.numbers == TRUE) {
                 text(x = (1 - Mark.dat$specificity), y = Mark.dat$sensitivity -
                   0.03, labels = Mark.pretty.char, pos = 4, col = mark.colors[dat])
@@ -390,7 +392,7 @@ TestTrainRocPlot<-function (DATA, threshold = 101, find.auc = TRUE, which.model 
         }
         leg.loc <- legend(x = "bottomright", inset = inset, pt.cex = 1,
             legend = opt.legend.names, pch = pch, bg = "white",
-            cex = opt.legend.cex)
+            cex = 1.3)
         inset <- c(0.02, leg.loc$rect$top + 0.05)
     }
     if (add.legend == TRUE) {

@@ -98,7 +98,7 @@ make.auc.plot.jpg<-function(out=out){
  ############### Confusion Matrix Plot ###########
 
   if(out$input$model.family!="poisson"){
- 
+      browser()
    png(file=paste(out$dat$bname,"confusion.matrix.png",sep="."),width=1000,height=1000,pointsize=13)
     confusion.matrix(Stats,out$dat$split.type)
     graphics.off()
@@ -119,6 +119,7 @@ make.auc.plot.jpg<-function(out=out){
 ########## AUC and Calibration plot for binomial data #######################
  
     if(out$input$model.family%in%c("binomial","bernoulli")){
+          
             png(file=plotname,height=1000,width=1000,pointsize=20)
     ## ROC AUC plots
             TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=inlst$train$thresh,add.legend=FALSE,lwd=2)
@@ -126,22 +127,23 @@ make.auc.plot.jpg<-function(out=out){
             if(out$dat$split.type!="none") {
                 #so here we have to extract a sublist and apply a function to the sublist but if it has length 2 the structure of the list changes when the sublist is extracted
                  if(out$dat$split.type%in%c("test","eval")){ TestTrainRocPlot(do.call("rbind",lapply(lst,function(lst){lst$auc.data})),add.roc=TRUE,line.type=2,color="red",add.legend=FALSE)
-                    legend(x=.55,y=.2,c(paste("Training Split (AUC=",round(Stats$train$auc.fit,digits=3), ")",sep=""),paste("Testing Split  (AUC=",round(Stats$test$auc.fit,digits=3), ")",sep="")),
+                    legend(x=.55,y=.24,c(paste("Training Split (AUC=",round(Stats$train$auc.fit,digits=3), ")",sep=""),paste("Testing Split  (AUC=",round(Stats$test$auc.fit,digits=3), ")",sep="")),
                        lty=2,col=c("black","red"),lwd=2,cex=1.8)
                  }
                  if(out$dat$split.type=="crossValidation"){
+                
                       ROC.list<-list(predictions=lapply(lst,function(lst){lst$auc.data$pred}),labels=lapply(lst,function(lst){lst$auc.data$pres.abs}))
                       pred <- prediction(ROC.list$predictions, ROC.list$labels)
                       perf <- performance(pred,"tpr","fpr")
-                      plot(perf,col="grey82",lty=3,xlab="1-Specificity (False Positive)",ylab="Sensitivity (True Positive)",main="ROC Plot for Cross-Validation")
+                      plot(perf,col="grey82",lty=3,xlab="1-Specificity (False Positive)",ylab="Sensitivity (True Positive)",main="ROC Plot for Cross-Validation",cex.main=2,cex.axis=1.4,cex.lab=1.5)
                       plot(perf,lwd=1,avg="vertical",spread.estimate="boxplot",add=TRUE)
-                      TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=inlst$train$thresh,add.legend=FALSE,lwd=1.5,add.roc=TRUE,line.type=1,col="red")
+                      TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=inlst$train$thresh,add.legend=FALSE,lwd=1.5,add.roc=TRUE,line.type=1,col="red",legend.cex=2)
                       points(1-Stats$train$Specf,Stats$train$Sens,pch=21,cex=2.5,bg="red")
                        segments(x0=0,y0=0,x1=1,y1=1,col="blue")
                       text(x=(.96-Stats$train$Specf),y=Stats$train$Sens+.03,label=round(Stats$train$thresh,digits=2))
-                        legend(x=.6,y=.22,c(paste("Training Split (AUC=",round(Stats$train$auc.fit,digits=3), ")",sep=""),
+                        legend(x=.5,y=.24,c(paste("Training Split (AUC=",round(Stats$train$auc.fit,digits=3), ")",sep=""),
                              paste("Cross Validation Mean \n (AUC=",round(mean(unlist(lapply(lst,function(lst){lst$auc.fit}))),digits=3), ")",sep="")),lwd=c(4,1),lty=c(1,1),
-                             col=c("red","black"),cex=1.8)
+                             col=c("red","black"),cex=1.3)
                  }
                 }
                 graphics.off()

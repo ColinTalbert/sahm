@@ -6,14 +6,14 @@ calibplot <- function(pred, negrug, posrug, ideal, ylim=c(0,1),capuci=TRUE, xlab
   ylow[ylow<0] <- 0
   yhigh <- pred$y + 2 * pred$se
   if (capuci) yhigh[yhigh>1] <- 1
-  plot(pred$x, ylow, type="l", col="grey", ylim=ylim, xlim=range(pred$x),
-    xlab=xlabel, lwd=2,cex.axis=1.8,cex.lab=1.8,cex.main=2, ...)
+  plot(pred$x, ylow, type="l", col="grey", ylim=ylim, xlim=range(pred$x),main=title,
+    xlab=xlabel, lwd=2,cex.axis=1.4,cex.lab=1.8,cex.main=2, ...)
   lines(pred$x, yhigh, lwd=2, col="grey")
   lines(pred$x, sapply(pred$x, ideal), lty="dashed")
-  points(pred$x, pred$y, col="blue",pch=20,cex=.5)
+  points(pred$x, pred$y, col="blue")
   rug(negrug,col="blue",lwd=2)
   rug(posrug, col = "red",lwd=2)
-  title(title)
+  
   if (!is.null(filename)) dev.off()
 }
 
