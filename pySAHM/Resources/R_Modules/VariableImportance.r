@@ -41,27 +41,28 @@ VariableImportance<-function(Model,out,auc){
   offSet<-.5 
 
 ######################## copied from append out
-  par(mar=c(5,17,4,2))
+  par(mar=c(6,17,6,2))
         
-    plot(c(min(0,min(cor.mat)),(max(cor.mat)+.1)),y=c(-.5,(length(out$mods$vnames)+.5)),type="n",xlab="Importance",main="Importance using the change in AUC when each predictor is permuted",ylab="",yaxt="n",cex.lab=1.4)
+    plot(c(min(0,min(cor.mat)),(max(cor.mat)+.1)),y=c(-.5,(length(out$mods$vnames)+.5)),type="n",xlab="Importance",
+        main="Importance using the change in AUC\nwhen each predictor is permuted",ylab="",yaxt="n",cex.lab=3,cex.main=3,cex.axis=2)
     grid()
       if(out$dat$split.type!="crossValidation"){
          rect(xleft=0,ybottom=ymiddle,xright=xright[,ncol(xright)],ytop=ymiddle+offSet,col="blue",lwd=2)
       }                         
      if(out$dat$split.type=="test" | out$dat$split.type=="eval"){
         rect(xleft=0,ybottom=ymiddle-offSet,xright=xright[,1],ytop=ymiddle,col="lightblue",lwd=2)
-        legend("bottomright" ,legend=c("train",ifelse(out$dat$split.type=="eval","eval. split","test")),fill=c("blue","lightblue"),bg="white",cex=2)
+        legend("bottomright" ,legend=c("train",ifelse(out$dat$split.type=="eval","eval. split","test")),fill=c("blue","lightblue"),bg="white",cex=2.5)
       }                         
       if(out$dat$split.type=="crossValidation"){ 
         cor.mat<-cor.mat[order(cor.mat[,ncol(cor.mat)],decreasing=FALSE),]
         boxplot(t(cor.mat[,1:(ncol(cor.mat)-1)]),horizontal =TRUE,add=TRUE,at=ymiddle,yaxt="n",col="lightblue")
         points(y=ymiddle,x=cor.mat[,ncol(cor.mat)],cex=3,pch=8,lwd=3,col="darkslateblue")
-        legend(x="bottomright",legend=c("CV","Train"),pch=c(22,8),pt.cex=c(3,3.5),pt.lwd=c(2,3),pt.bg=c("lightblue","darkslateblue"),col=c("black","darkslateblue"),cex=1.5)
+        legend(x="bottomright",legend=c("CV","Train"),pch=c(22,8),pt.cex=c(3,3.5),pt.lwd=c(2,3),pt.bg=c("lightblue","darkslateblue"),col=c("black","darkslateblue"),cex=2.5)
       }
  ############################### copied from appendOut 
     Offset=ifelse(out$dat$split.type=="none",.25,0)
-    axis(2,at=seq(from=0,to=length(out$mods$vnames),length=length(out$mods$vnames))+Offset,labels=rownames(xright),las=2,cex=.7)
-    title(ylab="Variables",line=15,cex.lab=1.4,font.lab=2)
+    axis(2,at=seq(from=0,to=length(out$mods$vnames),length=length(out$mods$vnames))+Offset,labels=rownames(xright),las=2,cex=2.5,cex.lab=2.5,cex.axis=2.5)
+    title(ylab="Variables",line=15,cex.lab=3,font.lab=2)
 } 
 
 PermutePredict<-function(pred.names,dat,pred,modelFit,Model,resp){

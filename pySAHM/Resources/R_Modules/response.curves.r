@@ -74,10 +74,10 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
        
      dir.create(file.path(out$input$output.dir,"responseCurves"))
      rsp.dat<-NA
-              
+       
       for (k in c(1,2)){
           if(k==1){ png(file.path(out$input$output.dir,"responseCurves","all_response_curves.png"),width=2000,height=2000)
-                    par(oma=c(2,2,4,2),mfrow=c(prow,pcol))}                   
+                    par(oma=c(2,2,4,2),mar=c(8,4,4,2),mfrow=c(prow,pcol))}                   
          for (i in sort(match(out$mods$vnames,names(dat)))) {
                 if (k==2) png(filename=file.path(out$input$output.dir,"responseCurves",paste(names(dat)[i],".png",sep="")),width=2000,height=2000)
                 if (!is.factor(dat[, i])) {
@@ -102,7 +102,7 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
                       #of the predicted values but I'm not sure this would work for every situation
                       if(out$input$model.family=="poisson") y.lim=range(apply(Xf,1,mean))
                        plot(Xp1[, i],apply(Xf,1,mean), ylim = y.lim, xlab = "",
-                      ylab = "", type = "l", main = names(dat)[i],lwd=4,cex=4,cex.main=5,cex.axis=4)
+                      ylab = "", type = "l", main = names(dat)[i],lwd=5,cex.lab=2.5,cex.main=5,cex.axis=2.2)
                        
                     color.box<-col2rgb(c("blue","red"),alpha=TRUE)
                            color.box[4,]<-190
