@@ -76,10 +76,10 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
      rsp.dat<-NA
               
       for (k in c(1,2)){
-          if(k==1){ jpeg(file.path(out$input$output.dir,"responseCurves","all_response_curves.jpg"),width=2000,height=2000,quality=100)
+          if(k==1){ png(file.path(out$input$output.dir,"responseCurves","all_response_curves.png"),width=2000,height=2000)
                     par(oma=c(2,2,4,2),mfrow=c(prow,pcol))}                   
          for (i in sort(match(out$mods$vnames,names(dat)))) {
-                if (k==2) jpeg(filename=file.path(out$input$output.dir,"responseCurves",paste(names(dat)[i],".jpg",sep="")),width=2000,height=2000,quality=100)
+                if (k==2) png(filename=file.path(out$input$output.dir,"responseCurves",paste(names(dat)[i],".png",sep="")),width=2000,height=2000)
                 if (!is.factor(dat[, i])) {
                     xr <- range(dat[, i])
                     Xp1 <- Xp
@@ -102,9 +102,14 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
                       #of the predicted values but I'm not sure this would work for every situation
                       if(out$input$model.family=="poisson") y.lim=range(apply(Xf,1,mean))
                        plot(Xp1[, i],apply(Xf,1,mean), ylim = y.lim, xlab = "",
-                      ylab = "", type = "l", main = names(dat)[i],lwd=2,cex=3,cex.main=3,cex.axis=2.5)
-                      rug(dat[resp==0,i],col="blue")
-                      rug(dat[resp==1,i],col="red")
+                      ylab = "", type = "l", main = names(dat)[i],lwd=4,cex=4,cex.main=5,cex.axis=4)
+                       
+                    color.box<-col2rgb(c("blue","red"),alpha=TRUE)
+                           color.box[4,]<-190
+                           temp.fct<-function(a){return(rgb(red=a[1],green=a[2],blue=a[3],alpha=a[4]))}
+                           color.box<-apply(color.box/255,2,temp.fct)
+                      rug(dat[resp==0,i],col=color.box[1],lwd=2)
+                      rug(dat[resp==1,i],col=color.box[2],lwd=2)
                   
                if(k==2) graphics.off() 
                if(k==2) {if(i==min(sort(match(out$mods$vnames,names(dat))))) rsp.dat<-cbind(Xp1[, i],apply(Xf,1,mean))

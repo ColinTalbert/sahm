@@ -73,7 +73,7 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
   ###################### Making the jpg image ###################
   if(ncol(output)>2){
 
-                 jpeg(file=gsub("csv","jpg",compile.out),width=(1000+30*ncol(output)),height=1000,pointsize=13,quality=100)
+                 png(file=gsub("csv","png",compile.out),width=(1000+30*ncol(output)),height=1000,pointsize=13)
                   par(mfrow=c(Parm.Len,1),mar=c(.2, 5, .6, 2),cex=1.1,oma=c(5, 0, 3, 0))
                #Getting rid of the header
                       row.nms<-as.character(output[(nrow(Header)+3):((nrow(Header)+2)+Parm.Len),1])

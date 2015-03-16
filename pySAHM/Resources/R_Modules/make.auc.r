@@ -44,8 +44,8 @@
 
 make.auc.plot.jpg<-function(out=out){
  
-  plotname<-paste(out$dat$bname,"_modelEvalPlot.jpg",sep="")
-  calib.plot<-paste(out$dat$bname,"_CalibrationPlot.jpg",sep="")
+  plotname<-paste(out$dat$bname,"_modelEvalPlot.png",sep="")
+  calib.plot<-paste(out$dat$bname,"_CalibrationPlot.png",sep="")
   modelname<-toupper(out$input$model)
   inlst<-out$dat$ma
  
@@ -64,7 +64,7 @@ make.auc.plot.jpg<-function(out=out){
 ##################################################################
 ### Standard residual analysis plots for glm
     if(out$input$script.name%in%c("glm","mars") & out$dat$split.type!="eval" & !(out$input$script.name=="mars" & out$input$PsdoAbs==TRUE)){
-          jpeg(paste(out$dat$bname,"_stand.resid.plots.jpeg",sep=""),height=1000,width=1000)
+          png(paste(out$dat$bname,"_stand.resid.plots.png",sep=""),height=1000,width=1000)
           par(mfrow=c(2,2))
           if(out$input$script.name=="glm") plot(out$mods$final.mod[[1]],cex=1.5,lwd=1.5,cex.main=1.5,cex.lab=1.5)
           if(out$input$script.name=="mars") plot(out$mods$final.mod[[1]]$glm.list[[1]],cex=1.5,lwd=1.5,cex.main=1.5,cex.lab=1.5)
@@ -79,7 +79,7 @@ make.auc.plot.jpg<-function(out=out){
 #################### Variable importance plots #####################
 
     if(length(out$mods$vnames)>1 & out$input$model.family!="poisson"){
-      jpeg(paste(out$dat$bname,"_variable.importance.jpg",sep=""),height=1000,width=1000)  
+      png(paste(out$dat$bname,"_variable.importance.png",sep=""),height=1000,width=1000)  
         VariableImportance(out$input$script.name,out=out,auc=lapply(Stats,"[",9)) 
       graphics.off()
     }    
@@ -99,7 +99,7 @@ make.auc.plot.jpg<-function(out=out){
 
   if(out$input$model.family!="poisson"){
  
-   jpeg(file=paste(out$dat$bname,"confusion.matrix.jpg",sep="."),width=1000,height=1000,pointsize=13,quality=100)
+   png(file=paste(out$dat$bname,"confusion.matrix.png",sep="."),width=1000,height=1000,pointsize=13)
     confusion.matrix(Stats,out$dat$split.type)
     graphics.off()
    }
@@ -119,7 +119,7 @@ make.auc.plot.jpg<-function(out=out){
 ########## AUC and Calibration plot for binomial data #######################
  
     if(out$input$model.family%in%c("binomial","bernoulli")){
-            jpeg(file=plotname,height=1000,width=1000,pointsize=20,quality=100)
+            png(file=plotname,height=1000,width=1000,pointsize=20)
     ## ROC AUC plots
             TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=inlst$train$thresh,add.legend=FALSE,lwd=2)
                  if(out$dat$split.type=="none") legend(x=.8,y=.15,paste("AUC=",round(Stats$train$auc.fit,digits=3),sep=""))
@@ -145,7 +145,7 @@ make.auc.plot.jpg<-function(out=out){
                 graphics.off()
 
             #I'm pretty sure calibration plots should work for count data as well but I'm not quite ready to make a plot
-           jpeg(file=calib.plot,height=1000,width=1000,pointsize=20,quality=100)
+           png(file=calib.plot,height=1000,width=1000,pointsize=20)
                 cal.results<-switch(out$dat$split.type,
                             none = Stats$train$calibration.stats,
                              test = Stats$test$calibration.stats,
@@ -184,7 +184,7 @@ make.auc.plot.jpg<-function(out=out){
      options(warn=0)     
    #Some residual plots for poisson data
     if(out$input$model.family%in%c("poisson")){
-            jpeg(file=plotname)
+            png(file=plotname)
             par(mfrow=c(2,2))
              plot(log(Stats$train$auc.data$pred[Stats$train$auc.data$pred!=0]),
                   (Stats$train$auc.data$pres.abs[Stats$train$auc.data$pred!=0]-Stats$train$auc.data$pred[Stats$train$auc.data$pred!=0]),
