@@ -47,7 +47,7 @@ confusion.matrix<-function(Stats,split.type){
      par(oma=c(4,3,5,3),mar=c(20,6,5,2))
   if(split.type=="none") lo<-layout(matrix(data=c(1,2), nrow=1, ncol=2), c(4.5,1), 1)
    else {lo<-layout(matrix(data=c(1,2,3), nrow=1, ncol=3), c(4.5,4.5,1), 1)
-    
+         
        if(split.type=="crossValidation"){
                                  a<-lapply(Stats[names(Stats)!="train"],function(lst){lst$Cmx})
                                   cmx<-a[[1]]
@@ -65,31 +65,32 @@ confusion.matrix<-function(Stats,split.type){
          max(100*table(lst$auc.data$pres.abs)/length(lst$auc.dat$pres.abs))
          }
          options(warn=-1)
-zlim=c(0,max(unlist(lapply(Stats,extract.max))))
+zlim=c(0,100)
         options(warn=0)
+        
   for(i in length(Stats):1){
-      image((1:2),c(2,4),matrix(data=c(100*Stats[[i]]$Cmx[2]/sum(Stats[[i]]$Cmx),100*Stats[[i]]$Cmx[4]/sum(Stats[[i]]$Cmx),100*Stats[[i]]$Cmx[1]/sum(Stats[[i]]$Cmx),100*Stats[[i]]$Cmx[3]/sum(Stats[[i]]$Cmx)),nrow=2),
+      image((1:2),c(2,4),matrix(data=c(100*Stats[[i]]$Cmx[2]/sum(Stats[[i]]$Cmx[1:2]),100*Stats[[i]]$Cmx[4]/sum(Stats[[i]]$Cmx[3:4]),
+                                       100*Stats[[i]]$Cmx[1]/sum(Stats[[i]]$Cmx[1:2]),100*Stats[[i]]$Cmx[3]/sum(Stats[[i]]$Cmx[3:4])),nrow=2),
                zlim=zlim,xaxt="n",yaxt="n",xlab="",
-               ylab="",main=paste("Confusion matrix for \n", names(Stats)[i], "data",sep=" "),col=heat.colors(50)[50:1],cex.lab=2,cex.main=2.5)
+               ylab="",main=paste("Confusion matrix for \n", names(Stats)[i], "data",sep=" "),col=heat.colors(100)[100:1],cex.lab=2,cex.main=2.5)
           mtext("Absence",side=2,at=2,cex=2,lwd=1.3)
           mtext("Presence",side=2,at=4,cex=2,lwd=1.3)
           mtext("Presence",side=1,at=1,cex=2,line=1,lwd=1.3)
           mtext("Absence",side=1,at=2,cex=2,line=1,lwd=1.3)
           text(x=c(1,1,2,2),y=c(2,4,2,4),
-          labels=c(paste(signif(100*Stats[[i]]$Cmx[2]/sum(Stats[[i]]$Cmx),digits=3),"%\n(",Stats[[i]]$Cmx[2],")",sep=""),
-                   paste(signif(100*Stats[[i]]$Cmx[1]/sum(Stats[[i]]$Cmx),digits=3),"%\n(",Stats[[i]]$Cmx[1],")",sep=""),
-                   paste(signif(100*Stats[[i]]$Cmx[4]/sum(Stats[[i]]$Cmx),digits=3),"%\n(",Stats[[i]]$Cmx[4],")",sep=""),
-                   paste(signif(100*Stats[[i]]$Cmx[3]/sum(Stats[[i]]$Cmx),digits=3),"%\n(",Stats[[i]]$Cmx[3],")",sep="")),cex=3)
+          labels=c(Stats[[i]]$Cmx[2],Stats[[i]]$Cmx[1],
+                   Stats[[i]]$Cmx[4],
+                   Stats[[i]]$Cmx[3]),cex=5)
               abline(h=3,lwd=5)
               abline(v=1.5,lwd=5)
          mtext(paste(
-                 "Pct Correctly Classified: ",signif(Stats[[i]]$Pcc,digits=3),
-               "\nSensitivity             : ",signif(Stats[[i]]$Sens,digits=3),
-               "\nSpecificity             : ",signif(Stats[[i]]$Specf,digits=3),
-               "\nTrue Skills Stat    : ",signif(Stats[[i]]$Tss,digits=3),
-               "\nCohen's Kappa     : ",signif(Stats[[i]]$Kappa,digits=3),
+                 "Pct Correctly Classified : ",signif(Stats[[i]]$Pcc,digits=3),
+               "\nSensitivity                      : ",signif(Stats[[i]]$Sens,digits=3),
+               "\nSpecificity                      : ",signif(Stats[[i]]$Specf,digits=3),
+               "\nTrue Skills Stat              : ",signif(Stats[[i]]$Tss,digits=3),
+               "\nCohen's Kappa              : ",signif(Stats[[i]]$Kappa,digits=3),
               sep=""),
-         side=1,line=13,cex=1.4)
+         side=1,line=13,cex=1.4,adj=0)
         box()
     }
   mtext("Observed",1,outer=TRUE,lwd=2,cex=2.5)
