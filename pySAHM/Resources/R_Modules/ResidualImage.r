@@ -87,7 +87,7 @@ resid.image<-function(dev.contrib,pred,raw.dat,x,y,wgt,model.type,file.name,out,
                   main=paste("Spatial pattern of", ifelse(label!="eval"," deviance residuals\n(magnitude and sign)"," prediction error")),
                       xlab="X coordinate",ylab="Y coordinate",,cex.main=2.2,cex.axis=1.6,cex.lab=1.8)
 
-                  points(x,y,bg=col.i[col.ind], pch=21,cex=abs(dev.contrib)*2.5)
+                  points(x,y,bg=col.i[col.ind], pch=21,cex=abs(dev.contrib)*1.5)
                   par(mar = c(3,2.5,2.5,2))
 
              colrange<-seq(from=MinCol,to=MaxCol,length=100)
