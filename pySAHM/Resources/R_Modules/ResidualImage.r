@@ -60,8 +60,8 @@ resid.image<-function(dev.contrib,pred,raw.dat,x,y,wgt,model.type,file.name,out,
            wgt<-wgt[samp]
            }
           #for some reason dev.contrib is negative for binomial and bernoulli and positive for poisson
-   if(label!="eval") z<-sign(pred-raw.dat)*abs(dev.contrib)
-      else z<-pred-raw.dat
+   if(label!="eval") z<-sign(raw.dat-pred)*abs(dev.contrib)
+      else z<-raw.dat-pred
      MinCol<-min(z)
      MaxCol<-max(z)
          col.i<- beachcolours(heightrange=c(min(z),max(z)),sealevel=0,s=1,ncolours=(length(table(z))+1))
