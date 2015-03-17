@@ -77,7 +77,7 @@ resid.image<-function(dev.contrib,pred,raw.dat,x,y,wgt,model.type,file.name,out,
               x.lim<-seq(from=min(x),to=max(x),length=100)
               y.lim<-seq(from=min(y),to=max(y),length=100)
                  z<-matrix(data=z,ncol=100,nrow=100,byrow=TRUE)
-
+             
                   
                  ########### Plot residual smooth with signed and sized residuals on top
               png(file=paste(out$dat$bname,"resid.plot.png",sep="."),width=1000,height=1000,pointsize=13)
@@ -87,7 +87,7 @@ resid.image<-function(dev.contrib,pred,raw.dat,x,y,wgt,model.type,file.name,out,
                   main=paste("Spatial pattern of", ifelse(label!="eval"," deviance residuals\n(magnitude and sign)"," prediction error")),
                       xlab="X coordinate",ylab="Y coordinate",,cex.main=2.2,cex.axis=1.6,cex.lab=1.8)
 
-                  points(x,y,bg=col.i[col.ind], pch=21,cex=abs(dev.contrib)/max(abs(dev.contrib))*5)
+                  points(x,y,bg=col.i[col.ind], pch=21,cex=abs(dev.contrib)*2.5)
                   par(mar = c(3,2.5,2.5,2))
 
              colrange<-seq(from=MinCol,to=MaxCol,length=100)
