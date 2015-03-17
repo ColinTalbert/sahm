@@ -42,7 +42,7 @@ VariableImportance<-function(Model,out,auc){
 
 ######################## copied from append out
   par(mar=c(6,17,6,2))
-        
+    
     plot(c(min(0,min(cor.mat)),(max(cor.mat)+.1)),y=c(-.5,(length(out$mods$vnames)+.5)),type="n",xlab="Importance",
         main="Importance using the change in AUC\nwhen each predictor is permuted",ylab="",yaxt="n",cex.lab=3,cex.main=3,cex.axis=2)
     grid()
@@ -55,7 +55,7 @@ VariableImportance<-function(Model,out,auc){
       }                         
       if(out$dat$split.type=="crossValidation"){ 
         cor.mat<-cor.mat[order(cor.mat[,ncol(cor.mat)],decreasing=FALSE),]
-        boxplot(t(cor.mat[,1:(ncol(cor.mat)-1)]),horizontal =TRUE,add=TRUE,at=ymiddle,yaxt="n",col="lightblue")
+        boxplot(t(cor.mat[,1:(ncol(cor.mat)-1)]),horizontal =TRUE,add=TRUE,at=ymiddle,yaxt="n",col="lightblue",ylab="n")
         points(y=ymiddle,x=cor.mat[,ncol(cor.mat)],cex=3,pch=8,lwd=3,col="darkslateblue")
         legend(x="bottomright",legend=c("CV","Train"),pch=c(22,8),pt.cex=c(3,3.5),pt.lwd=c(2,3),pt.bg=c("lightblue","darkslateblue"),col=c("black","darkslateblue"),cex=2.5)
       }
