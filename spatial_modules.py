@@ -216,7 +216,7 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.fig.canvas.draw()
         self.update()
 
-        self.axes.callbacks.connect('ylim_changed', self.lim_changed)
+#          self.axes.callbacks.connect('ylim_changed', self.lim_changed)
 
     def lim_changed(self, event):
         if self.cursor_mode == "zoom":
@@ -387,7 +387,7 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.last_buttondown_loc = (event.x, event.y)
 
     def button_up(self, event):
-        if self.cursor_mode == 'pan' and (event.x, event.y) != self.last_buttondown_loc:
+        if (event.x, event.y) != self.last_buttondown_loc:
             self.sync_extents()
 
 
@@ -690,13 +690,20 @@ class SpatialViewerCellWidgetBase(QCellWidget):
     def sync_extents(self, extent=''):
         for spatialViewer in self.get_active_cells():
             if extent:
-                spatialViewer.set_extent(extent[0], extent[1])
+                x0, x1 = extent[0]
+                y0, y1 = extent[1]
             else:
-                spatialViewer.set_extent(self.axes.get_xlim(), self.axes.get_ylim())
-            spatialViewer.map_canvas.draw()
+                x0, x1 = self.axes.get_xlim()
+                y0, y1 = self.axes.get_ylim()
 
+            try:
+                x0t, y0t = SpatialUtilities.transformPoint(x0, y0, self.rasterdisplay_layer.raster.srs, spatialViewer.rasterdisplay_layer.raster.srs)
+                x1t, y1t = SpatialUtilities.transformPoint(x1, y1, self.rasterdisplay_layer.raster.srs, spatialViewer.rasterdisplay_layer.raster.srs)
+            except:
+                x0t, y0t = x0, y0
+                x1t, y1t = x1, 11
 
-
+            spatialViewer.set_extent((x0t, x1t), (y0t, y1t))
 
 class SpatialViewerCellWidget(SpatialViewerCellWidgetBase):
     '''
