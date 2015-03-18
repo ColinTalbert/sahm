@@ -216,7 +216,7 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.fig.canvas.draw()
         self.update()
 
-        self.axes.callbacks.connect('ylim_changed', self.lim_changed)
+#          self.axes.callbacks.connect('ylim_changed', self.lim_changed)
 
     def lim_changed(self, event):
         if self.cursor_mode == "zoom":
@@ -387,7 +387,7 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.last_buttondown_loc = (event.x, event.y)
 
     def button_up(self, event):
-        if self.cursor_mode == 'pan' and (event.x, event.y) != self.last_buttondown_loc:
+        if (event.x, event.y) != self.last_buttondown_loc:
             self.sync_extents()
 
 
