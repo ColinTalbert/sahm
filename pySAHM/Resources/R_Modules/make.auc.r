@@ -98,7 +98,7 @@ make.auc.plot.jpg<-function(out=out){
  ############### Confusion Matrix Plot ###########
 
   if(out$input$model.family!="poisson"){
-      browser()
+     
    png(file=paste(out$dat$bname,"confusion.matrix.png",sep="."),width=1000,height=1000,pointsize=13)
     confusion.matrix(Stats,out$dat$split.type)
     graphics.off()
@@ -127,8 +127,8 @@ make.auc.plot.jpg<-function(out=out){
             if(out$dat$split.type!="none") {
                 #so here we have to extract a sublist and apply a function to the sublist but if it has length 2 the structure of the list changes when the sublist is extracted
                  if(out$dat$split.type%in%c("test","eval")){ TestTrainRocPlot(do.call("rbind",lapply(lst,function(lst){lst$auc.data})),add.roc=TRUE,line.type=2,color="red",add.legend=FALSE)
-                    legend(x=.55,y=.24,c(paste("Training Split (AUC=",round(Stats$train$auc.fit,digits=3), ")",sep=""),paste("Testing Split  (AUC=",round(Stats$test$auc.fit,digits=3), ")",sep="")),
-                       lty=2,col=c("black","red"),lwd=2,cex=1.8)
+                    legend(x=.46,y=.24,c(paste("Training Split (AUC=",round(Stats$train$auc.fit,digits=3), ")",sep=""),paste("Testing Split  (AUC=",round(Stats$test$auc.fit,digits=3), ")",sep="")),
+                       lty=2,col=c("black","red"),lwd=2,cex=1.3)
                  }
                  if(out$dat$split.type=="crossValidation"){
                 
