@@ -74,7 +74,7 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
   if(ncol(output)>2){
 
                  png(file=gsub("csv","png",compile.out),width=(1000+30*ncol(output)),height=1000,pointsize=13)
-                  par(mfrow=c(Parm.Len,1),mar=c(.2, 5, .6, 2),cex=1.1,oma=c(7, 0, 3, 0))
+                  par(mfrow=c(Parm.Len,1),mar=c(.2, 5, .6, 2),cex=1.1,oma=c(7, 1, 3, 0))
                #Getting rid of the header
                       row.nms<-as.character(output[(nrow(Header)+3):((nrow(Header)+2)+Parm.Len),1])
                       Hdr<-unlist(strsplit(readLines(compile.out,1),split=","))
@@ -112,7 +112,7 @@ AppendOut<-function(compile.out,Header,x,out,Parm.Len,parent,split.type){
                    for(i in 1:Parm.Len){
                             plot(c(.6,(ncol(train)+2)),c(0,max(1.25,max(train[i,],na.rm=TRUE)+.2)),type="n",xaxt="n",yaxp=c(0,max(1,max(train[i,],na.rm=TRUE)),4),
                                 xlab=paste("Corresponding Column in the corresponding .csv",sep=""),
-                                ylab=x.labs[i],cex.lab=2)
+                                ylab=x.labs[i],cex.lab=1.2)
                                    #have to label the maximum for everything except prediction error for which we label the min
                                    if(x.labs[i]!="Prediction\nError") temp.fct<-function(a){max(a,na.rm=TRUE)}
                                     else temp.fct<-function(a){min(a,na.rm=TRUE)}
