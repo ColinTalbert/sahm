@@ -1187,7 +1187,9 @@ def getFileRelativeToCurrentVT(fname, curModule=None):
         if justfname.lower() == "hdr.adf":
             justfname = os.path.sep.join([os.path.split(root_dir)[1], justfname])
         for rootdir in [curVTdir, getrootdir()]:
-            if os.path.exists(os.path.join(rootdir, justfname)):
+            if os.path.exists(os.path.join(rootdir, fname)):
+                return os.path.join(rootdir, fname)
+            elif os.path.exists(os.path.join(rootdir, justfname)):
                 return os.path.join(rootdir, justfname)
             for root, dirnames, filenames in os.walk(rootdir):
                 for dirname in dirnames:
