@@ -440,9 +440,10 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         sahm_dir = os.path.dirname(os.path.abspath(__file__))
         shp_fname = os.path.join(sahm_dir, "data", "states_110m", "ne_110m_admin_1_states_provinces_lakes.shp")
 
-        self.add_poly_layer(shp_fname, edgecolor=".3", facecolor='none', alpha=0.8)
+        self.add_poly_layer(shp_fname, edgecolor=".3", facecolor='none',
+                            alpha=0.8, display_all=True)
 
-    def add_poly_layer(self, layer_fname, **kwargs):
+    def add_poly_layer(self, layer_fname, display_all=False, **kwargs):
         '''add a polygon layer file to our map
         '''
         raster_crs = osr.SpatialReference()
@@ -470,7 +471,13 @@ class SpatialViewerCellWidgetBase(QCellWidget):
 
             (minx, maxx), (miny, maxy) = transform(raster_proj, shape_proj, (minx, maxx), (miny, maxy))
             patches = []
-            for rec in fiona_shp.filter(bbox=(minx, miny, maxx, maxy)):
+
+            if display_all:
+                recs = fiona_shp
+            else:
+                recs = fiona_shp.filter(bbox=(minx, miny, maxx, maxy))
+
+            for rec in recs:
                 if query_function(rec):
                     patches += self.get_patches(rec['geometry'],
                                    shape_proj, raster_proj, shift360)

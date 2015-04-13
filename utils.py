@@ -847,16 +847,23 @@ def merge_inputs_csvs(input_csvs, outputFile):
         infile1 = open(input_csv, "rb")
         infile1csv = csv.reader(infile1)
         firstline = infile1csv.next()
-        templatefname = firstline[-2]
-        if getFileRelativeToCurrentVT(templatefname):
-            infile1.close()
-            break
+        if len(firstline) > 4:
+            templatefname = firstline[-2]
+            if getFileRelativeToCurrentVT(templatefname):
+                infile1.close()
+                break
+        else:
+            templatefname = None
         infile1.close()
 
     #  open a csv we will write all the outputs into
     oFile = open(outputFile, "wb")
     outputCSV = csv.writer(oFile)
-    outputCSV.writerow(["PARCOutputFile", "Categorical",
+    if templatefname:
+        outputCSV.writerow(["PARCOutputFile", "Categorical",
+                         "Resampling", "Aggregation", "OriginalFile", templatefname, templatefname])
+    else:
+        outputCSV.writerow(["PARCOutputFile", "Categorical",
                          "Resampling", "Aggregation", "OriginalFile"])
 
     #  write all the inputs out to this file
@@ -865,7 +872,7 @@ def merge_inputs_csvs(input_csvs, outputFile):
         inputreader = csv.reader(iFile)
         inputreader.next()
         for row in inputreader:
-            outputCSV.writerow(row)
+            outputCSV.writerow([getFileRelativeToCurrentVT(row[0]), row[1], row[2], row[3]])
         iFile.close()
     oFile.close()
 
@@ -1231,9 +1238,11 @@ def make_next_file_complex(curModule, prefix, suffix="", directory="",
     h.update(curModule.signature)
     for key in sorted(curModule.inputPorts):
         if curModule.hasInputFromPort(key):
+            print bytes(curModule.getInputFromPort(key))
             h.update(bytes(curModule.getInputFromPort(key)))
 
     for input in key_inputs:
+        print str(input) + hash_file(input)
         h.update(str(input) + hash_file(input))
 
     signature = h.hexdigest()
