@@ -217,6 +217,7 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.update()
 
 #          self.axes.callbacks.connect('ylim_changed', self.lim_changed)
+#          self.axes.end_pan = self.end_pan
 
     def lim_changed(self, event):
         if self.cursor_mode == "zoom":
@@ -387,7 +388,8 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.last_buttondown_loc = (event.x, event.y)
 
     def button_up(self, event):
-        if (event.x, event.y) != self.last_buttondown_loc:
+        if event.button == 1:
+            #  this is a left click which signifies a zoom or pan end
             self.sync_extents()
 
 
