@@ -572,6 +572,9 @@ def getNDVal(filename):
     band.ComputeStatistics(True)
     min_pixel = band.GetMinimum()
 
+    if min_pixel is None:
+        return NDValue
+
     if utilities.approx_equal(min_pixel, -3.399999999999999961272e+38):
         NDValue = min_pixel
         band.SetNoDataValue(float(min_pixel))
