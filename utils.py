@@ -1308,7 +1308,10 @@ def make_next_file_complex(curModule, prefix, suffix="", directory="",
 def hash_file(fname):
     h = sha_hash()
     if os.path.exists(str(fname)):
-        h.update(open(fname, "rb").read())
+        #  to prevent memory errors and speed up processing the hashing of files
+        #  is limited to the first 100Mb of the file.
+        #  This could lead to collisions in some cases.
+        h.update(open(fname, "rb").read(100 * 1024 * 1024))
     else:
         h.update(str(fname))
     return h.hexdigest()
