@@ -1163,9 +1163,10 @@ def getFileRelativeToCurrentVT(fname, curModule=None):
     #  This is three step approach:
     #  step 1: if fname exists assume it's the one we want and return it.
     #  step 2: Look for the file relative to the current VT.
-    #        In effect loop through all the sibling and descendant folders
-    #        of the vt file's parent directory and look for the base filename in each.
-    #        If we find an identically named file hope for the best and return it.
+    #        If there exists in the fname path one and only one folder with the same name as
+    #        the folder that contains our current vt file, take the portion
+    #        of the fname from that folder on and join it to the folder that contains
+    #        our vt file.  If that fname exists on the file system assume it is the right one.
     #  step 3: Do what we did in step 2 but relative to the current session folder.
     #
     #  If no fname is found in the above three steps raise an error.
@@ -1182,26 +1183,46 @@ def getFileRelativeToCurrentVT(fname, curModule=None):
         if os.path.exists(fname):
             return fname
 
-        #  step 2 (and then step3)
+        #  step 2
+        match_fname_parts = fname.split("/")
         try:
             app = application.get_vistrails_application()()
             curlocator = app.get_vistrail().locator.name
-            curVTdir = os.path.split(curlocator)[0]
-        except:
-            curVTdir = ""
+            vt_fname = curlocator.replace("\\", "/")
 
-        root_dir, justfname = os.path.split(fname)
-        if justfname.lower() == "hdr.adf":
-            justfname = os.path.sep.join([os.path.split(root_dir)[1], justfname])
-        for rootdir in [curVTdir, getrootdir()]:
-            if os.path.exists(os.path.join(rootdir, fname)):
-                return os.path.join(rootdir, fname)
-            elif os.path.exists(os.path.join(rootdir, justfname)):
-                return os.path.join(rootdir, justfname)
-            for root, dirnames, filenames in os.walk(rootdir):
-                for dirname in dirnames:
-                    if os.path.exists(os.path.join(root, dirname, justfname)):
-                        return os.path.join(root, dirname, justfname)
+            vt_dname = os.path.split(vt_fname)[0]
+            if os.path.exists(os.path.join(vt_dname, fname)):
+                return os.path.join(vt_dname, fname)
+            vt_just_dname = os.path.split(vt_dname)[1]
+
+            if match_fname_parts.count(vt_just_dname) == 1:
+                #  a directory with the same name as our current vt parent folder exists in this files path
+                local_fname = "/".join(match_fname_parts[match_fname_parts.index(vt_just_dname) + 1:])
+                fname_relative_to_vt = os.path.join(vt_dname, local_fname)
+                if os.path.exists(fname_relative_to_vt):
+                    #  a file path exists with the same local path in the folder our vt is in
+                    #  we will assume this isn't a coincidence...
+                    return fname_relative_to_vt
+        except:
+            pass
+
+        #  step 3
+        try:
+            session_dir = getrootdir()
+            session_dir = session_dir.replace("\\", "/")
+
+            just_session_dir = os.path.split(session_dir)[1]
+
+            if match_fname_parts.count(just_session_dir) == 1:
+                #  a directory with the same name as our current vt session folder exists in this files path
+                local_fname = "/".join(match_fname_parts[match_fname_parts.index(just_session_dir) + 1:])
+                fname_relative_to_session = os.path.join(session_dir, local_fname)
+                if os.path.exists(fname_relative_to_session):
+                    #  a file path exists with the same local path in the folder our vt is in
+                    #  we will assume this isn't a coincidence...
+                    return fname_relative_to_session
+        except:
+            pass
 
         #  we did our best but couldn't find the file
         couldntFindFile()
