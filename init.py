@@ -1301,7 +1301,7 @@ class PARC(Module):
         if self.hasInputFromPort("ignoreNonOverlap"):
             ourPARC.ignoreNonOverlap = self.getInputFromPort("ignoreNonOverlap")
 
-        key_inputs = [utils.get_raster_files(template)]
+        key_inputs = utils.get_raster_files(template)
         for rasters_csv in self.forceGetInputListFromPort("RastersWithPARCInfoCSV"):
             key_inputs.append(rasters_csv.name)
         for predictor_list in self.forceGetInputListFromPort("PredictorList"):
@@ -1879,7 +1879,14 @@ class CovariateCorrelationAndSelection(Module):
 
         writetolog("    seed used for subsampling = " + str(params['seed']))
         global session_dir
-        params['outputMDS'] = os.path.join(session_dir, subfolder, "CovariateCorrelationOutputMDS_" + runname + ".csv")
+
+        outfname = os.path.join(session_dir, subfolder, "CovariateCorrelationOutputMDS_" + runname + ".csv")
+#          outputMDS, signature, already_run = utils.make_next_file_complex(self,
+#                                  prefix="CovariateCorrelationOutputMDS_" + runname, suffix='.csv',
+#                                  key_inputs=[params['inputMDS']],
+#                                  subfolder=subfolder, runname=runname)
+
+        params['outputMDS'] = outfname
         params['displayJPEG'] = os.path.join(session_dir, subfolder, "CovariateCorrelationDisplay.png")
         params['r_path'] = configuration.r_path
         params['module'] = self

@@ -828,7 +828,10 @@ def merge_inputs_csvs(input_csvs, outputFile):
         inputreader = csv.reader(iFile)
         inputreader.next()
         for row in inputreader:
-            outputCSV.writerow([getFileRelativeToCurrentVT(row[0]), row[1], row[2], row[3]])
+            try:
+                outputCSV.writerow([getFileRelativeToCurrentVT(row[0]), row[1], row[2], row[3], row[6]])
+            except:
+                outputCSV.writerow([getFileRelativeToCurrentVT(row[0]), row[1], row[2], row[3]])
         iFile.close()
     oFile.close()
 
@@ -1215,11 +1218,11 @@ def make_next_file_complex(curModule, prefix, suffix="", directory="",
     h.update(curModule.signature)
     for key in sorted(curModule.inputPorts):
         if curModule.hasInputFromPort(key):
-            print bytes(curModule.getInputFromPort(key))
+#              print bytes(curModule.getInputFromPort(key))
             h.update(bytes(curModule.getInputFromPort(key)))
 
     for input in key_inputs:
-        print str(input) + hash_file(input)
+#          print str(input) + hash_file(input)
         h.update(str(input) + hash_file(input))
 
     signature = h.hexdigest()
@@ -1355,15 +1358,6 @@ def get_previous_run_info(full_fname):
 
     return subfolder, runname
 
-def get_raster_files(raster_fname):
-    if os.path.exists(os.path.join(raster_fname, "hdr.adf")):
-        grid_folder = raster_fname
-    elif raster_fname.endswith("hdr.adf"):
-        grid_folder = os.path.split(raster_fname)[0]
-    else:
-        return raster_fname
 
-    return [os.path.join(grid_folder, f) for f in os.listdir(grid_folder)
-                                    if f.endswith(".adf")]
 
 

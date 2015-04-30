@@ -1291,7 +1291,7 @@ class RasterDisplay(object):
         else:
             display_band = 1
 
-        print 'get block', xstart, ystart, xend, yend
+#          print 'get block', xstart, ystart, xend, yend
         ary = self.raster.get_block_bbox([xstart, ystart, xend, yend], x_pixels, y_pixels, display_band)
         if ary is None or ary.size == 1:
                 print "raster_array is None!!!/n/n"
