@@ -48,6 +48,7 @@ import time
 import csv
 import string
 import struct, datetime, decimal, itertools
+import pickle
 
 import tempfile
 
@@ -60,7 +61,11 @@ import multiprocessing
 _process_pool = None
 _pool_processes = []
 
+_roottempdir = ""
+
 from PyQt4 import QtCore, QtGui
+
+from vistrails.core.cache.hasher import sha_hash
 
 mosaicAllTifsInFolder = None
 
@@ -558,3 +563,89 @@ def checkIfModelFinished(model_dir):
         return "Error in model"
     else:
         return "Running ..."
+
+def get_picklehash_fname(directory=""):
+    global _roottempdir
+    if directory == "":
+        directory = _roottempdir
+    fname = os.path.join(directory, "vt_hashmap.dat")
+    return fname
+
+def write_hash_entry_pickle(hashname, fname, directory=""):
+
+    hash_fname = get_picklehash_fname(directory)
+    if os.path.exists(hash_fname):
+        try:
+            with open(hash_fname, "rb") as f:
+                hash_dict = pickle.load(f)
+                hash_dict[hashname] = fname
+        except:
+            hash_dict = {hashname:fname}
+    else:
+        hash_dict = {hashname:fname}
+
+    with open(hash_fname, "wb") as f:
+        pickle.dump(hash_dict, f)
+
+def delete_hash_entry_pickle(signature, directory=""):
+
+    hash_fname = get_picklehash_fname(directory)
+    if os.path.exists(hash_fname):
+        with open(hash_fname, "rb") as f:
+            try:
+                hash_dict = pickle.load(f)
+                del hash_dict[signature]
+            except KeyError:
+                pass
+    else:
+        hash_dict = {}
+
+    with open(hash_fname, "wb") as f:
+        pickle.dump(hash_dict, f)
+
+def get_fname_from_hash_pickle(hashname, directory=""):
+    global _roottempdir
+    if directory == "":
+        directory = _roottempdir
+    fname = get_picklehash_fname(directory)
+    if os.path.exists(fname):
+        with open(fname, 'rb') as f:
+            try:
+                hash_dict = pickle.load(f)
+                return hash_dict[hashname]
+            except:
+                #  if anything goes wrong we'll just rerun it!
+                return None
+    return None
+
+def hash_file(fname):
+    h = sha_hash()
+
+    if isinstance(fname, list):
+        h = sha_hash()
+        for item in fname:
+            h.update(open(item, "rb").read(100 * 1024 * 1024))
+    else:
+        if os.path.exists(str(fname)):
+            #  to prevent memory errors and speed up processing the hashing of files
+            #  is limited to the first 100Mb of the file.
+            #  This could lead to collisions in some cases.
+            h.update(open(fname, "rb").read(100 * 1024 * 1024))
+        else:
+            h.update(str(fname))
+    return h.hexdigest()
+
+def get_raster_files(raster_fname):
+    if os.path.exists(os.path.join(raster_fname, "hdr.adf")):
+        grid_folder = raster_fname
+    elif raster_fname.endswith("hdr.adf"):
+        grid_folder = os.path.split(raster_fname)[0]
+    else:
+        return [raster_fname, ]
+
+    return [os.path.join(grid_folder, f) for f in os.listdir(grid_folder)
+                                    if f.endswith(".adf")]
+
+def setrootdir(session_dir):
+    global _roottempdir
+    _roottempdir = session_dir

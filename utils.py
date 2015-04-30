@@ -81,6 +81,13 @@ except:
 import numpy
 
 import pySAHM.utilities as utilities
+
+write_hash_entry_pickle = utilities.write_hash_entry_pickle
+delete_hash_entry_pickle = utilities.delete_hash_entry_pickle
+get_fname_from_hash_pickle = utilities.get_fname_from_hash_pickle
+hash_file = utilities.hash_file
+get_raster_files = utilities.get_raster_files
+
 import getpass
 
 _roottempdir = ""
@@ -192,63 +199,12 @@ def mknextdir(prefix, directory="", skipSequence=False, subfolder="", runname=""
     os.mkdir(dirname)
     return dirname
 
-def get_picklehash_fname(directory=""):
-    global _roottempdir
-    if directory == "":
-        directory = _roottempdir
-    fname = os.path.join(directory, "vt_hashmap.dat")
-    return fname
 
-def write_hash_entry_pickle(hashname, fname, directory=""):
-
-    hash_fname = get_picklehash_fname(directory)
-    if os.path.exists(hash_fname):
-        try:
-            with open(hash_fname, "rb") as f:
-                hash_dict = pickle.load(f)
-                hash_dict[hashname] = fname
-        except:
-            hash_dict = {hashname:fname}
-    else:
-        hash_dict = {hashname:fname}
-
-    with open(hash_fname, "wb") as f:
-        pickle.dump(hash_dict, f)
-
-def delete_hash_entry_pickle(signature, directory=""):
-
-    hash_fname = get_picklehash_fname(directory)
-    if os.path.exists(hash_fname):
-        with open(hash_fname, "rb") as f:
-            try:
-                hash_dict = pickle.load(f)
-                del hash_dict[signature]
-            except KeyError:
-                pass
-    else:
-        hash_dict = {}
-
-    with open(hash_fname, "wb") as f:
-        pickle.dump(hash_dict, f)
-
-def get_fname_from_hash_pickle(hashname, directory=""):
-    global _roottempdir
-    if directory == "":
-        directory = _roottempdir
-    fname = get_picklehash_fname(directory)
-    if os.path.exists(fname):
-        with open(fname, 'rb') as f:
-            try:
-                hash_dict = pickle.load(f)
-                return hash_dict[hashname]
-            except:
-                #  if anything goes wrong we'll just rerun it!
-                return None
-    return None
 
 def setrootdir(session_dir):
     global _roottempdir
     _roottempdir = session_dir
+    utilities.setrootdir(session_dir)
 
 def getrootdir():
     global _roottempdir
@@ -1305,16 +1261,7 @@ def make_next_file_complex(curModule, prefix, suffix="", directory="",
     return fname, signature, already_run
 
 
-def hash_file(fname):
-    h = sha_hash()
-    if os.path.exists(str(fname)):
-        #  to prevent memory errors and speed up processing the hashing of files
-        #  is limited to the first 100Mb of the file.
-        #  This could lead to collisions in some cases.
-        h.update(open(fname, "rb").read(100 * 1024 * 1024))
-    else:
-        h.update(str(fname))
-    return h.hexdigest()
+
 
 def get_sheet_location(_module):
     '''given a sahm spreadsheet module, finds all the other sahm spreadsheet cells
