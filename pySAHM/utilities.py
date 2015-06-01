@@ -624,13 +624,19 @@ def hash_file(fname):
     if isinstance(fname, list):
         h = sha_hash()
         for item in fname:
-            h.update(open(item, "rb").read(100 * 1024 * 1024))
+            try:
+                h.update(open(item, "rb").read(100 * 1024 * 1024))
+            except:
+                h.update(open(item, "rb").read())
     else:
         if os.path.exists(str(fname)):
             #  to prevent memory errors and speed up processing the hashing of files
             #  is limited to the first 100Mb of the file.
             #  This could lead to collisions in some cases.
-            h.update(open(fname, "rb").read(100 * 1024 * 1024))
+            try:
+                h.update(open(fname, "rb").read(100 * 1024 * 1024))
+            except:
+                h.update(open(fname, "rb").read())
         else:
             h.update(str(fname))
     return h.hexdigest()
