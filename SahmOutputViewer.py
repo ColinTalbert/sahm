@@ -96,7 +96,7 @@ class SAHMModelOutputViewerCell(SpreadsheetCell):
         return utils.construct_port_msg(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-         return utils.construct_port_msg(cls, port_name, 'out')
+        return utils.construct_port_msg(cls, port_name, 'out')
 
     def findFile(self, modelDir, suffix):
         try:
