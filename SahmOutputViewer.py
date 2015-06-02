@@ -104,6 +104,8 @@ class SAHMModelOutputViewerCell(SpreadsheetCell):
             for f in files:
                 if f.endswith(suffix):
                     return os.path.join(modelDir, f)
+                elif f.endswith(suffix.replace(".png", ".jpg")):
+                    return os.path.join(modelDir, f[:-4] + ".jpg")
         except:
             return "Couldn't find file"
         return "Couldn't find file"
