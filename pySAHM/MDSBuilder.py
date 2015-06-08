@@ -204,11 +204,7 @@ class MDSBuilder(object):
         rasters = {}
         for row in inputs_CSV:
             temp_raster = row[0]
-            if len(row) >= 5:
-                raster_shortname = row[4]
-            else:
-                raster_shortname = os.path.split(temp_raster)[1]
-                raster_shortname = os.path.splitext(raster_shortname)[0]
+            raster_shortname = SpatialUtilities.getRasterShortName(temp_raster)
             if len(row) > 1 and row[1] == '1':
                 raster_shortname += "_categorical"
             rasters[raster_shortname] = temp_raster
