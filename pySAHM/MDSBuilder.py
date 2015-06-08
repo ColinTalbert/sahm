@@ -54,7 +54,7 @@ import scipy.stats.stats as stats
 from optparse import OptionParser
 import utilities
 import SpatialUtilities
-#  from Utilities import self.writetolog
+
 
 class MDSBuilder(object):
     '''Takes a csv with animal location x,y and attributes each with the values

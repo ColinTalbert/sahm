@@ -65,7 +65,12 @@ _roottempdir = ""
 
 from PyQt4 import QtCore, QtGui
 
-from vistrails.core.cache.hasher import sha_hash
+try:
+    import hashlib
+    sha_hash = hashlib.sha1
+except ImportError:
+    import sha
+    sha_hash = sha.new
 
 mosaicAllTifsInFolder = None
 
