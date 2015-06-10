@@ -604,7 +604,7 @@ class RandomForest(Model):
     __doc__ = GenModDoc.construct_module_doc('RandomForest')
 
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["None"]', 'optional':True}),
+    _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["{}"]'.format(utils.get_seed()), 'optional':True}),
                          ('mTry', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["1"]', 'optional':True}),
                          ('nTrees', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                          ('nodesize', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
@@ -690,7 +690,7 @@ class BoostedRegressionTree(Model):
     __doc__ = GenModDoc.construct_module_doc('BoostedRegressionTree')
 
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["None"]', 'optional':True}),
+    _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["{}"]'.format(utils.get_seed()), 'optional':True}),
                               ('TreeComplexity', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ('BagFraction', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.75"]', 'optional':True}),
                               ('NumberOfFolds', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["3"]', 'optional':True}),
@@ -945,7 +945,7 @@ class MDSBuilder(Module):
 #                                 ('backgroundPointType', '(gov.usgs.sahm:RandomPointType:Other)', {'defaults':'["Background"]'}),
                                  ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
                                  ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)'),
-                                 ('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["None"]', 'optional':True}),
+                                 ('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["{}"]'.format(utils.get_seed()), 'optional':True}),
                                  ('run_name_info', '(gov.usgs.sahm:OutputNameInfo:Other)')]
 
 
@@ -1841,7 +1841,7 @@ class CovariateCorrelationAndSelection(Module):
                     ('numPlots', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["8"]', 'optional':True}),
                     ('minCor', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.7"]', 'optional':True}),
                     ('corsWithHighest', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
-                    ('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["None"]', 'optional':True}),
+                    ('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["{}"]'.format(utils.get_seed()), 'optional':True}),
                     ('run_name_info', '(gov.usgs.sahm:OutputNameInfo:Other)', {'optional':True}), ]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
 
