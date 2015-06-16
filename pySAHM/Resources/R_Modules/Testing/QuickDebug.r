@@ -39,17 +39,18 @@ FitModels(ma.name=input.file,
 #================================================================#
 #                            MARS
 #================================================================#
- 
-input.file="I:\\VisTrails\\MarianTesting\\BrewersSparrowTests\\BinomialTestTrain.csv"
-input.file="I:\\VisTrails\\Tutorial\\Tutorial_121_sessiondir\\vespersSparrow\\mars_1\\CovariateCorrelationOutputMDS_initial.csv"
-#input.file=C:\Focal_species_project2\glm_prism_1\CovariateCorrelationOutputMDS_prism_initial.csvoutput.dir="C:\\temp\\SAHM_workspace\\MARS2"
-output.dir="C:\\temp\\SAHM_workspace\\Mars"
+input.file = "J:\\Projects\\MojaveInvasives\\DerivedData\\AnalysisWith2000to2010base\\BRORUB20002010prism\\brt_1\\CovariateCorrelationOutputMDS_initial.csv"
+
+penalty=c(3,5,10)
+for(i in 1:length(penalty)){
+output.dir=file.path("C:\\temp\\MARS",paste("MARS",i,sep="_"))
+dir.create(output.dir)
 FitModels(ma.name=input.file,
-            output.dir=output.dir,
-            response.col=rc,make.p.tif=F,make.binary.tif=F,
-            mars.degree=1,mars.penalty=2,debug.mode=T,script.name="mars",opt.methods=2,MESS=F,ScriptPath=ScriptPath,multCore=FALSE,predSelect=TRUE)
-total.time<-Sys.time()-start.time
-total.time
+        tif.dir=NULL,output.dir=output.dir,
+        response.col=rc,make.p.tif=F,make.binary.tif=F,
+            mars.degree=1,mars.penalty=penalty[i],debug.mode=F,
+            script.name="mars",opt.methods=2,MESS=F,ScriptPath=ScriptPath)
+}            
 #================================================================#
 #                   Evaluate New Data
 #================================================================#
@@ -86,17 +87,22 @@ FitModels(ma.name=input.file,
 #================================================================#
 #                            RF
 #================================================================#
-input.file = "J:\\Projects\\GypsyMoth\\SAHM_Output\\e2013c\\mars_Intro_APHIS_GenBckgrnd_2\\CovariateCorrelationOutputMDS_test.csv"
-output.dir="C:\\temp\\SAHMDebugJunk\\BRTOut1\\rf"
+input.file = "J:\\Projects\\MojaveInvasives\\DerivedData\\AnalysisWith2000to2010base\\BRORUB20002010prism\\brt_1\\CovariateCorrelationOutputMDS_initial.csv"
+
+Nodes=c(10,15,20,25)
+for(i in 1:length(Nodes)){
+output.dir=file.path("C:\\temp\\RF",paste("RF",i,sep="_"))
+dir.create(output.dir)
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,
-      response.col=rc,make.p.tif=T,make.binary.tif=T,
+      response.col=rc,make.p.tif=F,make.binary.tif=F,
           debug.mode=T,opt.methods=2,script.name="rf",
 responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
-samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=NULL,importance=FALSE,
+samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=Nodes[i],importance=FALSE,
 localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=NULL,norm.votes=TRUE,
 do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,MESS=T,ScriptPath=ScriptPath,multCore=FALSE)
+}
 total.time<-Sys.time()-start.time
 total.time
 
@@ -107,15 +113,16 @@ rc="responseBinary"
 input.file="J:\Projects\NormalsComparison\SAHM4\AHB\MergedDataset_1.csv"
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_ntr\\brt_BrewersSparrowCV_1\\CovariateCorrelationOutputMDS_BrewersSparrowCV_initial.csv"
 #input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_FinalTest\\CovariateCorrelationOutputMDS_initial.csv"
-input.file="I:\\VisTrails\\MarianTesting\\BrewersSparrowTests\\BinomialTestTrain.csv"
-maxTrees=c(10,50,100,1000,10000,NULL)
-for(i in 2:length(maxTrees)){
+input.file="J:\\Projects\\MojaveInvasives\\DerivedData\\AnalysisWith2000to2010base\\BRORUB20002010prism\\brt_1\\CovariateCorrelationOutputMDS_initial.csv"
+maxTrees=c(25,50,75,100,150,NULL)
+output.dir="C:\\temp\\BRT"
+for(i in 1:length(maxTrees)){
   d<-file.path(output.dir,paste("brt",i,sep="_"))
   dir.create(d)
   FitModels(ma.name=input.file,
-            tif.dir=NULL,output.dir=output.dir,
+            tif.dir=NULL,output.dir=d,
             response.col=rc,make.p.tif=F,make.binary.tif=F,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
-        family = "bernoulli",n.trees =100,tolerance.method = "auto",
+        family = "bernoulli",n.trees =maxTrees[i],tolerance.method = "auto",
     tolerance = 0.001,seed=1234,opt.methods=2,
             simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
             bag.fraction = 0.5,prev.stratify = TRUE, opt.methods=2,MESS=F,ScriptPath=ScriptPath,multCore=FALSE,predSelect=FALSE)
