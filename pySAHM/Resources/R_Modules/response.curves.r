@@ -74,7 +74,7 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
        
      dir.create(file.path(out$input$output.dir,"responseCurves"))
      rsp.dat<-NA
-       
+          
       for (k in c(1,2)){
           if(k==1){ png(file.path(out$input$output.dir,"responseCurves","all_response_curves.png"),width=2000,height=2000)
                     par(oma=c(2,2,4,2),mar=c(8,4,4,2),mfrow=c(prow,pcol))}                   
@@ -104,10 +104,10 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
                        plot(Xp1[, i],apply(Xf,1,mean), ylim = y.lim, xlab = "",
                       ylab = "", type = "l", main = names(dat)[i],lwd=5,cex.lab=2.5,cex.main=5,cex.axis=2.2)
                        
-                    color.box<-col2rgb(c("blue","red"),alpha=TRUE)
-                           color.box[4,]<-190
-                           temp.fct<-function(a){return(rgb(red=a[1],green=a[2],blue=a[3],alpha=a[4]))}
-                           color.box<-apply(color.box/255,2,temp.fct)
+                    color.box<-c("blue","red")
+                          # color.box[4,]<-190
+                           #temp.fct<-function(a){return(rgb(red=a[1],green=a[2],blue=a[3],alpha=a[4]))}
+                           #color.box<-apply(color.box/255,2,temp.fct)
                       rug(dat[resp==0,i],col=color.box[1],lwd=2)
                       rug(dat[resp==1,i],col=color.box[2],lwd=2)
                   
