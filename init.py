@@ -979,19 +979,18 @@ class MDSBuilder(Module):
         inputs_csvs = self.forceGetInputListFromPort('RastersWithPARCInfoCSV')
         if len(inputs_csvs) == 0:
             raise ModuleError(self, "Must supply at least one 'RastersWithPARCInfoCSV'/nThis is the output from the PARC module")
-        if len(inputs_csvs) > 1:
-            inputs_csv = utils.mknextfile(prefix='CombinedPARCFiles', suffix='.csv', subfolder=subfolder, runname=runname)
-            inputs_names = [utils.getFileRelativeToCurrentVT(f.name, self) for f in inputs_csvs]
-            utils.merge_inputs_csvs(inputs_names, inputs_csv)
-        else:
-            inputs_csv = utils.getFileRelativeToCurrentVT(inputs_csvs[0].name, self)
-        MDSParams['inputsCSV'] = inputs_csv
+
 
             #  inputsCSV = utils.path_port(self, 'RastersWithPARCInfoCSV')
         key_inputs = []
-        for input in ['fieldData', 'inputsCSV']:
+        for input in ['fieldData']:
             if MDSParams.has_key(input):
                 key_inputs.append(MDSParams[input])
+
+        inputs_names = [utils.getFileRelativeToCurrentVT(f.name, self) for f in inputs_csvs]
+        for fname in inputs_names:
+            key_inputs.append(fname)
+
         if MDSParams.has_key('probSurfacefName'):
             key_inputs.append(MDSParams['probSurfacefName'])
         key_inputs.append(MDSParams['seed'])
@@ -1004,6 +1003,11 @@ class MDSBuilder(Module):
         if already_run:
             writetolog("No change in inputs or paramaters using previous run of MDS Builder", True)
         else:
+            inputs_csv = utils.mknextfile(prefix='CombinedPARCFiles', suffix='.csv', subfolder=subfolder, runname=runname)
+            inputs_names = [utils.getFileRelativeToCurrentVT(f.name, self) for f in inputs_csvs]
+            utils.merge_inputs_csvs(inputs_names, inputs_csv)
+            MDSParams['inputsCSV'] = inputs_csv
+
             ourMDSBuilder = MDSB.MDSBuilder()
             utils.PySAHM_instance_params(ourMDSBuilder, MDSParams)
 
@@ -1297,7 +1301,7 @@ class PARC(Module):
         if self.hasInputFromPort("ignoreNonOverlap"):
             ourPARC.ignoreNonOverlap = self.getInputFromPort("ignoreNonOverlap")
 
-        key_inputs = [utils.get_raster_files(template)]
+        key_inputs = utils.get_raster_files(template)
         for rasters_csv in self.forceGetInputListFromPort("RastersWithPARCInfoCSV"):
             key_inputs.append(rasters_csv.name)
         for predictor_list in self.forceGetInputListFromPort("PredictorList"):
@@ -1875,7 +1879,14 @@ class CovariateCorrelationAndSelection(Module):
 
         writetolog("    seed used for subsampling = " + str(params['seed']))
         global session_dir
-        params['outputMDS'] = os.path.join(session_dir, subfolder, "CovariateCorrelationOutputMDS_" + runname + ".csv")
+
+        outfname = os.path.join(session_dir, subfolder, "CovariateCorrelationOutputMDS_" + runname + ".csv")
+#          outputMDS, signature, already_run = utils.make_next_file_complex(self,
+#                                  prefix="CovariateCorrelationOutputMDS_" + runname, suffix='.csv',
+#                                  key_inputs=[params['inputMDS']],
+#                                  subfolder=subfolder, runname=runname)
+
+        params['outputMDS'] = outfname
         params['displayJPEG'] = os.path.join(session_dir, subfolder, "CovariateCorrelationDisplay.png")
         params['r_path'] = configuration.r_path
         params['module'] = self

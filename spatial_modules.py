@@ -50,6 +50,7 @@ import gc
 import itertools
 import re
 import copy
+import math
 
 import utils
 
@@ -189,7 +190,7 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         centralLayout.setMargin(0)
         centralLayout.setSpacing(0)
         self.create_main_frame()
-#          self.fig.canvas.draw()
+        self.changing_lim = False
 
     def updateContents(self, inputs):
         """ updateContents(inputs: dictionary) -> None
@@ -216,12 +217,78 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.fig.canvas.draw()
         self.update()
 
-#          self.axes.callbacks.connect('ylim_changed', self.lim_changed)
+        self.cid = self.axes.callbacks.connect('ylim_changed', self.lim_changed)
+#          self.cid = self.axes.callbacks.connect('xlim_changed', self.lim_changed)
+#          self.axes.end_pan = self.end_pan
+
+    def adj_aspect(self, extent):
+
+        #  total limits of all the data
+        (d_x0, d_x1), (d_y0, d_y1) = self.get_max_extent()
+        d_width = d_x1 - d_x0
+        d_height = d_y1 - d_y0
+        xr = 1.05 * d_width
+        yr = 1.05 * d_height
+
+        d_aspect = float(d_height) / d_width
+
+
+        #  limits of the data in the zoom box
+        (z_x0, z_x1), (z_y0, z_y1) = extent
+        z_width = max(math.fabs(z_x1 - z_x0), 1e-30)
+        z_height = max(math.fabs(z_y1 - z_y0), 1e-30)
+
+        z_aspect = float(z_height) / z_width
+
+        ax_bounds = self.axes.axesPatch.get_window_extent().bounds
+        ax_width = int(ax_bounds[2] + 0.5)
+        ax_height = int(ax_bounds[3] + 0.5)
+
+        ax_aspect = float(ax_height) / ax_width
+
+        xmarg = d_width - xr
+        ymarg = d_height - yr
+        Ysize = ax_aspect * z_width
+        Xsize = z_height / ax_aspect
+        Xmarg = Xsize - xr
+        Ymarg = Ysize - yr
+        xm = 0  #  Setting these targets to, e.g., 0.05*xr does not seem to
+                #  help.
+        ym = 0
+
+        y_expander = (d_aspect * z_width / z_height - 1.0)
+
+        if abs(y_expander) < 0.005:
+    #         print 'good enough already'
+            return
+
+        if xmarg > xm and ymarg > ym:
+            adjy = ((Ymarg > 0 and y_expander < 0)
+                    or (Xmarg < 0 and y_expander > 0))
+        else:
+            adjy = y_expander > 0
+
+        if adjy:
+            yc = 0.5 * (z_y0 + z_y1)
+            y0 = yc - Ysize / 2.0
+            y1 = yc + Ysize / 2.0
+
+            adj_extent = ((z_x0, z_x1), (y0, y1))
+            #  print 'New y0, y1:', y0, y1
+            #  print 'New ysize, ysize/xsize', y1-y0, (y1-y0)/xsize
+        else:
+            xc = 0.5 * (z_x0 + z_x1)
+            x0 = xc - Xsize / 2.0
+            x1 = xc + Xsize / 2.0
+            adj_extent = ((x0, x1), (z_y0, z_y1))
+
+        return adj_extent
 
     def lim_changed(self, event):
         if self.cursor_mode == "zoom":
             print 'lim_changed in zoom'
-            self.sync_extents()
+            extent = self.adj_aspect(self.get_extent())
+            self.sync_extents(extent=extent)
 
     def on_draw_base(self, view_extent=None):
         """ Completely clears then redraws the figure
@@ -269,6 +336,8 @@ class SpatialViewerCellWidgetBase(QCellWidget):
                     t.set_fontsize(7)
 
         self.set_axis_extent(xlim, ylim)
+
+        self.cid = self.axes.callbacks.connect('ylim_changed', self.lim_changed)
 
         self.axes.figure.canvas.draw_idle()
         self.update()
@@ -380,16 +449,17 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.axes.set_xlim((newL, newR))
         self.axes.set_ylim((newB, newT))
 
+        self.changing_lim = True
         self.sync_extents()
 
 
     def button_down(self, event):
-        self.last_buttondown_loc = (event.x, event.y)
-
+        self.changing_lim = True
+#
     def button_up(self, event):
-        if (event.x, event.y) != self.last_buttondown_loc:
+        if event.button == 1 and self.cursor_mode == 'pan':
+            #  this is a left click which signifies a zoom or pan end
             self.sync_extents()
-
 
     def _resize(self, event):
         self.pull_pixels()
@@ -440,9 +510,10 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         sahm_dir = os.path.dirname(os.path.abspath(__file__))
         shp_fname = os.path.join(sahm_dir, "data", "states_110m", "ne_110m_admin_1_states_provinces_lakes.shp")
 
-        self.add_poly_layer(shp_fname, edgecolor=".3", facecolor='none', alpha=0.8)
+        self.add_poly_layer(shp_fname, edgecolor=".3", facecolor='none',
+                            alpha=0.8, display_all=True)
 
-    def add_poly_layer(self, layer_fname, **kwargs):
+    def add_poly_layer(self, layer_fname, display_all=False, **kwargs):
         '''add a polygon layer file to our map
         '''
         raster_crs = osr.SpatialReference()
@@ -470,7 +541,13 @@ class SpatialViewerCellWidgetBase(QCellWidget):
 
             (minx, maxx), (miny, maxy) = transform(raster_proj, shape_proj, (minx, maxx), (miny, maxy))
             patches = []
-            for rec in fiona_shp.filter(bbox=(minx, miny, maxx, maxy)):
+
+            if display_all:
+                recs = fiona_shp
+            else:
+                recs = fiona_shp.filter(bbox=(minx, miny, maxx, maxy))
+
+            for rec in recs:
                 if query_function(rec):
                     patches += self.get_patches(rec['geometry'],
                                    shape_proj, raster_proj, shift360)
@@ -658,7 +735,6 @@ class SpatialViewerCellWidgetBase(QCellWidget):
     #  Functions dealing with managing extents
 
     def set_extent(self, xlim, ylim):
-
         self.set_axis_extent(xlim, ylim)
 
         self.pull_pixels()
@@ -683,9 +759,14 @@ class SpatialViewerCellWidgetBase(QCellWidget):
 
     def zoomFull(self):
         max_xlim, max_ylim = self.get_max_extent()
+        orig_cursor_mode = self.cursor_mode
+        self.cursor_mode = 'pan'
+
         self.axes.set_xlim(max_xlim)
         self.axes.set_ylim(max_ylim)
+        self.changing_lim = True
         self.sync_extents()
+        self.cursor_mode = orig_cursor_mode
 
     def sync_extents(self, extent=''):
         for spatialViewer in self.get_active_cells():
@@ -701,9 +782,14 @@ class SpatialViewerCellWidgetBase(QCellWidget):
                 x1t, y1t = SpatialUtilities.transformPoint(x1, y1, self.rasterdisplay_layer.raster.srs, spatialViewer.rasterdisplay_layer.raster.srs)
             except:
                 x0t, y0t = x0, y0
-                x1t, y1t = x1, 11
+                x1t, y1t = x1, x1
 
-            spatialViewer.set_extent((x0t, x1t), (y0t, y1t))
+            if not spatialViewer is self:
+                spatialViewer.changing_lim = True
+
+            if spatialViewer.changing_lim:
+                spatialViewer.set_extent((x0t, x1t), (y0t, y1t))
+                spatialViewer.changing_lim = False
 
 class SpatialViewerCellWidget(SpatialViewerCellWidgetBase):
     '''
@@ -1205,6 +1291,7 @@ class RasterDisplay(object):
         else:
             display_band = 1
 
+#          print 'get block', xstart, ystart, xend, yend
         ary = self.raster.get_block_bbox([xstart, ystart, xend, yend], x_pixels, y_pixels, display_band)
         if ary is None or ary.size == 1:
                 print "raster_array is None!!!/n/n"

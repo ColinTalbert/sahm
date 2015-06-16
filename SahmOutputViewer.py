@@ -96,7 +96,7 @@ class SAHMModelOutputViewerCell(SpreadsheetCell):
         return utils.construct_port_msg(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-         return utils.construct_port_msg(cls, port_name, 'out')
+        return utils.construct_port_msg(cls, port_name, 'out')
 
     def findFile(self, modelDir, suffix):
         try:
@@ -104,6 +104,8 @@ class SAHMModelOutputViewerCell(SpreadsheetCell):
             for f in files:
                 if f.endswith(suffix):
                     return os.path.join(modelDir, f)
+                elif f.endswith(suffix.replace(".png", ".jpg")):
+                    return os.path.join(modelDir, f[:-4] + ".jpg")
         except:
             return "Couldn't find file"
         return "Couldn't find file"

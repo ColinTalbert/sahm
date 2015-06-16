@@ -148,7 +148,10 @@ class rasterReclassifier(rasterProcessor):
                     val = float(split_line[-1])
 
                 if split_line[1] == ":": #single value reclass
-                    outDict[(float(split_line[0]),)] = val
+                    try:
+                        outDict[(float(split_line[0]),)] = val
+                    except:
+                        outDict[(split_line[0],)] = val
                 elif split_line[2] == ":": #range of values reclass
                     outDict[(float(split_line[0]), float(split_line[1]))] = val
                     
