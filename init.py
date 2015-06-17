@@ -565,8 +565,8 @@ class Model(Module):
         self.setModelResult("_mess_map.tif", 'MessMap', self.abbrev)
         self.setModelResult("_MoD_map.tif", 'MoDMap', self.abbrev)
         self.setModelResult("_output.txt", 'Text_Output', self.abbrev)
-        self.setModelResult("_modelEvalPlot.jpg", 'modelEvalPlot', self.abbrev)
-        self.setModelResult("_variable.importance.jpg", 'ModelVariableImportance', self.abbrev)
+        self.setModelResult("_modelEvalPlot.png", 'modelEvalPlot', self.abbrev)
+        self.setModelResult("_variable.importance.png", 'ModelVariableImportance', self.abbrev)
         writetolog("Finished " + self.abbrev + " builder\n", True, True)
 
         modelWorkspace = utils.create_dir_module(self.output_dname)
@@ -604,7 +604,7 @@ class RandomForest(Model):
     __doc__ = GenModDoc.construct_module_doc('RandomForest')
 
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["None"]', 'optional':True}),
+    _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["{}"]'.format(utils.get_seed()), 'optional':True}),
                          ('mTry', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["1"]', 'optional':True}),
                          ('nTrees', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                          ('nodesize', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
@@ -690,7 +690,7 @@ class BoostedRegressionTree(Model):
     __doc__ = GenModDoc.construct_module_doc('BoostedRegressionTree')
 
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["None"]', 'optional':True}),
+    _input_ports.extend([('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["{}"]'.format(utils.get_seed()), 'optional':True}),
                               ('TreeComplexity', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ('BagFraction', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.75"]', 'optional':True}),
                               ('NumberOfFolds', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["3"]', 'optional':True}),
@@ -699,8 +699,8 @@ class BoostedRegressionTree(Model):
                               ('ToleranceMethod', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["auto"]', 'optional':True}),
                               ('Tolerance', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.001"]', 'optional':True}),
                               ('LearningRate', '(edu.utah.sci.vistrails.basic:Float)', {'optional':True}),
-                              ('MaximumTrees', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ('SelectBestPredSubset', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
+                              ('NumberOfTrees', '(edu.utah.sci.vistrails.basic:Integer)', {'optional':True}),
                               ])
     def __init__(self):
         global models_path
@@ -716,7 +716,7 @@ class BoostedRegressionTree(Model):
                          'ToleranceMethod':('tolm', None, False),  #  This is a BRT specific port
                          'Tolerance':('tol', None, False),  #  This is a BRT specific port
                          'LearningRate':('lr', None, False),  #  This is a BRT specific port
-                         'MaximumTrees':('mt', None, False),  #  This is a BRT specific port
+                         'NumberOfTrees':('ntr', None, False),  #  This is a BRT specific port
                          'SelectBestPredSubset':('pst', utils.R_boolean, False),  #  This is a BRT specific port
                          })
 
@@ -981,7 +981,7 @@ class MDSBuilder(Module):
 #                                 ('backgroundPointType', '(gov.usgs.sahm:RandomPointType:Other)', {'defaults':'["Background"]'}),
                                  ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
                                  ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)'),
-                                 ('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["None"]', 'optional':True}),
+                                 ('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["{}"]'.format(utils.get_seed()), 'optional':True}),
                                  ('run_name_info', '(gov.usgs.sahm:OutputNameInfo:Other)')]
 
 
@@ -1015,19 +1015,18 @@ class MDSBuilder(Module):
         inputs_csvs = self.forceGetInputListFromPort('RastersWithPARCInfoCSV')
         if len(inputs_csvs) == 0:
             raise ModuleError(self, "Must supply at least one 'RastersWithPARCInfoCSV'/nThis is the output from the PARC module")
-        if len(inputs_csvs) > 1:
-            inputs_csv = utils.mknextfile(prefix='CombinedPARCFiles', suffix='.csv', subfolder=subfolder, runname=runname)
-            inputs_names = [utils.getFileRelativeToCurrentVT(f.name, self) for f in inputs_csvs]
-            utils.merge_inputs_csvs(inputs_names, inputs_csv)
-        else:
-            inputs_csv = utils.getFileRelativeToCurrentVT(inputs_csvs[0].name, self)
-        MDSParams['inputsCSV'] = inputs_csv
+
 
             #  inputsCSV = utils.path_port(self, 'RastersWithPARCInfoCSV')
         key_inputs = []
-        for input in ['fieldData', 'inputsCSV']:
+        for input in ['fieldData']:
             if MDSParams.has_key(input):
                 key_inputs.append(MDSParams[input])
+
+        inputs_names = [utils.getFileRelativeToCurrentVT(f.name, self) for f in inputs_csvs]
+        for fname in inputs_names:
+            key_inputs.append(fname)
+
         if MDSParams.has_key('probSurfacefName'):
             key_inputs.append(MDSParams['probSurfacefName'])
         key_inputs.append(MDSParams['seed'])
@@ -1040,6 +1039,11 @@ class MDSBuilder(Module):
         if already_run:
             writetolog("No change in inputs or paramaters using previous run of MDS Builder", True)
         else:
+            inputs_csv = utils.mknextfile(prefix='CombinedPARCFiles', suffix='.csv', subfolder=subfolder, runname=runname)
+            inputs_names = [utils.getFileRelativeToCurrentVT(f.name, self) for f in inputs_csvs]
+            utils.merge_inputs_csvs(inputs_names, inputs_csv)
+            MDSParams['inputsCSV'] = inputs_csv
+
             ourMDSBuilder = MDSB.MDSBuilder()
             utils.PySAHM_instance_params(ourMDSBuilder, MDSParams)
 
@@ -1333,7 +1337,7 @@ class PARC(Module):
         if self.hasInputFromPort("ignoreNonOverlap"):
             ourPARC.ignoreNonOverlap = self.getInputFromPort("ignoreNonOverlap")
 
-        key_inputs = [utils.get_raster_files(template)]
+        key_inputs = utils.get_raster_files(template)
         for rasters_csv in self.forceGetInputListFromPort("RastersWithPARCInfoCSV"):
             key_inputs.append(rasters_csv.name)
         for predictor_list in self.forceGetInputListFromPort("PredictorList"):
@@ -1873,7 +1877,7 @@ class CovariateCorrelationAndSelection(Module):
                     ('numPlots', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["8"]', 'optional':True}),
                     ('minCor', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.7"]', 'optional':True}),
                     ('corsWithHighest', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
-                    ('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["None"]', 'optional':True}),
+                    ('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["{}"]'.format(utils.get_seed()), 'optional':True}),
                     ('run_name_info', '(gov.usgs.sahm:OutputNameInfo:Other)', {'optional':True}), ]
     _output_ports = [("outputMDS", "(gov.usgs.sahm:MergedDataSet:Other)")]
 
@@ -1911,8 +1915,15 @@ class CovariateCorrelationAndSelection(Module):
 
         writetolog("    seed used for subsampling = " + str(params['seed']))
         global session_dir
-        params['outputMDS'] = os.path.join(session_dir, subfolder, "CovariateCorrelationOutputMDS_" + runname + ".csv")
-        params['displayJPEG'] = os.path.join(session_dir, subfolder, "CovariateCorrelationDisplay.jpg")
+
+        outfname = os.path.join(session_dir, subfolder, "CovariateCorrelationOutputMDS_" + runname + ".csv")
+#          outputMDS, signature, already_run = utils.make_next_file_complex(self,
+#                                  prefix="CovariateCorrelationOutputMDS_" + runname, suffix='.csv',
+#                                  key_inputs=[params['inputMDS']],
+#                                  subfolder=subfolder, runname=runname)
+
+        params['outputMDS'] = outfname
+        params['displayJPEG'] = os.path.join(session_dir, subfolder, "CovariateCorrelationDisplay.png")
         params['r_path'] = configuration.r_path
         params['module'] = self
         writetolog("    inputMDS = " + params['inputMDS'], False, False)

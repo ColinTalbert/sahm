@@ -48,7 +48,7 @@ make.binary.tif=T
 tc=NULL
 n.folds=3
 alpha=1
-
+n.trees=NULL
 learning.rate = NULL
 bag.fraction = 0.75
 prev.stratify = TRUE
@@ -84,6 +84,7 @@ Args <- commandArgs(trailingOnly=FALSE)
       if(argSplit[[1]][1]=="tc")  tc <- as.numeric(argSplit[[1]][2])
  			if(argSplit[[1]][1]=="nf")  n.folds <- as.numeric(argSplit[[1]][2])
  			if(argSplit[[1]][1]=="alp")  alpha <- as.numeric(argSplit[[1]][2])
+ 			if(argSplit[[1]][1]=="ntr")  n.trees <- as.numeric(argSplit[[1]][2])
       if(argSplit[[1]][1]=="lr")  learning.rate <- as.numeric(argSplit[[1]][2])
  			if(argSplit[[1]][1]=="bf")  bag.fraction <- as.numeric(argSplit[[1]][2])
  			if(argSplit[[1]][1]=="ps")  prev.stratify <- as.logical(argSplit[[1]][2])
@@ -102,13 +103,13 @@ ScriptPath<-dirname(ScriptPath)
 source(file.path(ScriptPath,"LoadRequiredCode.r"))
 source(file.path(ScriptPath,"BRT.helper.fcts.r"))
 
-
+ 
 
     FitModels(ma.name=csv,
 		output.dir=output,
 		response.col=responseCol,
 		make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
-		simp.method="cross-validation",debug.mode=F,tc=tc,n.folds=n.folds,alpha=alpha,script.name="brt",
+		simp.method="cross-validation",debug.mode=F,tc=tc,n.trees=n.trees, n.folds=n.folds,alpha=alpha,script.name="brt",
 		learning.rate =learning.rate, bag.fraction = bag.fraction,prev.stratify = prev.stratify,max.trees = max.trees,seed=seed,
     opt.methods=opt.methods,MESS=MESS,tolerance.method = tolerance.method,tolerance=tolerance,ScriptPath=ScriptPath,multCore=multCore,predSelect=predSelect)
 

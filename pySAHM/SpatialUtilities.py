@@ -77,7 +77,11 @@ class SAHMRaster():
         driver = gdal.GetDriverByName(self.driverName)
 
         if not create_args:
-            create_args = ['COMPRESS=LZW', 'PREDICTOR=2', 'TILED=Yes',
+            if self.pixelType == gdalconst.GDT_Float64:
+                create_args = ['COMPRESS=LZW', 'PREDICTOR=3', 'TILED=Yes',
+                   'BLOCKXSIZE=128', 'BLOCKYSIZE=128']
+            else:
+                create_args = ['COMPRESS=LZW', 'PREDICTOR=2', 'TILED=Yes',
                    'BLOCKXSIZE=128', 'BLOCKYSIZE=128']
 
         if self.signedByte:
@@ -86,7 +90,11 @@ class SAHMRaster():
         self.ds = driver.Create(self.source, self.width, self.height,
                     self.bandcount, self.pixelType, create_args)
 
-        self.gt = (self.west, self.xScale, 0, self.north, 0, self.yScale)
+        if 180 < self.west < 360:
+            self.gt = (self.west - 360, self.xScale, 0, self.north, 0, self.yScale)
+        else:
+            self.gt = (self.west, self.xScale, 0, self.north, 0, self.yScale)
+
         self.ds.SetGeoTransform(self.gt)
 
         if self.prj is not None:
@@ -262,7 +270,8 @@ class SAHMRaster():
             data = self.bands[band - 1].ReadAsArray(col, row, numCols, numRows,
                                                         win_xsize, win_ysize)
 
-        ndMask = np.ma.masked_array(data, mask=(data == self.NoData))
+        #ndMask = np.ma.masked_array(data, mask=(data == self.NoData))
+        ndMask = np.ma.masked_array(data, mask=(np.isclose(data, self.NoData)))
         return ndMask
 
     def putBlock(self, data, col, row, band=1):
@@ -304,6 +313,7 @@ class SAHMRaster():
         self.curCol = 0
 
     def pointInExtent(self, x, y):
+
         if (float(x) >= self.west and
             float(x) <= self.east and
             float(y) >= self.south and
@@ -640,9 +650,18 @@ def intermediaryReprojection(sourceRaster, templateRaster, outRasterFName,
     outputFile.gt = templateRaster.gt
     outputFile.width = templateRaster.width
     outputFile.height = templateRaster.height
-    outputFile.west = templateRaster.west
+
     outputFile.north = templateRaster.north
-    outputFile.east = templateRaster.east
+
+    if sourceRaster.west > 180 and sourceRaster.west < 360 and \
+        templateRaster.west < 0 and templateRaster.west > -180:
+        outputFile.west = templateRaster.west + 360
+        outputFile.east = templateRaster.east + 360
+    else:
+        outputFile.west = templateRaster.west
+        outputFile.east = templateRaster.east
+
+
     outputFile.south = templateRaster.south
 
     outputFile.NoData = sourceRaster.NoData
@@ -691,7 +710,8 @@ def average_geotifs(raster_fnames, outfname,
         pass
     out_raster = SAHMRaster(outfname)
     out_raster.pullParamsFromRaster(raster_fnames[0])
-    out_raster.pixelType = gdalconst.GDT_Float32
+    out_raster.createNewRaster(create_args)
+    out_raster.createNewRaster()  #  create_args)
     out_raster.createNewRaster(create_args)
 
     #  loop though the blocks in our output raster
@@ -705,6 +725,7 @@ def average_geotifs(raster_fnames, outfname,
     cur_block = 0
     for block in itertools.izip(*[sr.iterBlocks() for sr in rasters]):
         d = average_nparrays(block[:])
+        out_raster.putBlock(d, sr.curCol, sr.curRow)
         out_raster.putBlock(d,
                             sr.curCol, sr.curRow)
 

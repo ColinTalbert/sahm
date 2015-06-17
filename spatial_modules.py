@@ -50,6 +50,7 @@ import gc
 import itertools
 import re
 import copy
+import math
 
 import utils
 
@@ -85,8 +86,6 @@ from pySAHM.utilities import dbfreader as dbfreader
 import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-#  from matplotlib.backends.backend_qt4 import FigureCanvasQT as FigureCanvas
-#  from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
 
 from matplotlib.figure import Figure
 from matplotlib.offsetbox import AnchoredOffsetbox, TextArea
@@ -135,10 +134,7 @@ class BaseGeoViewerCell(SpreadsheetCell):
     def parse_inputs(self):
         inputs = {}
 
-        #if self.__class__.__name__ != 'client_GeoSpatialViewerCell':
         self.location = utils.get_sheet_location(self)
-        #else:
-        #    self.location = None
 
         inputs['vector_layers'] = self.forceGetInputListFromPort('vector_layers')
         #  ugly hack to get the viswall to work.  Serial/unserialize nests
@@ -194,7 +190,7 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         centralLayout.setMargin(0)
         centralLayout.setSpacing(0)
         self.create_main_frame()
-#          self.fig.canvas.draw()
+        self.changing_lim = False
 
     def updateContents(self, inputs):
         """ updateContents(inputs: dictionary) -> None
@@ -218,21 +214,81 @@ class SpatialViewerCellWidgetBase(QCellWidget):
 
         self.on_draw(view_extent=self.get_max_extent())
 
-#          self.maxXlim, self.maxYlim = self.getMaxDisplayExtent()
-#          self.maxXlim = [self.getMaxExtent()[0], self.getMaxExtent()[1]]
-#          self.maxYlim = [self.getMaxExtent()[2], self.getMaxExtent()[3]]
-#
-#          self.axes.set_ylim(self.maxYlim, emit=False)
-#          self.axes.set_xlim(self.maxXlim, emit=False)
         self.fig.canvas.draw()
         self.update()
 
-#          self.axes.callbacks.connect('xlim_changed', self.lim_changed)
-#          self.axes.callbacks.connect('ylim_changed', self.lim_changed)
+        self.cid = self.axes.callbacks.connect('ylim_changed', self.lim_changed)
+#          self.cid = self.axes.callbacks.connect('xlim_changed', self.lim_changed)
 #          self.axes.end_pan = self.end_pan
 
-    def end_pan(self, *args, **kwargs):
-        self.sync_extents()
+    def adj_aspect(self, extent):
+
+        #  total limits of all the data
+        (d_x0, d_x1), (d_y0, d_y1) = self.get_max_extent()
+        d_width = d_x1 - d_x0
+        d_height = d_y1 - d_y0
+        xr = 1.05 * d_width
+        yr = 1.05 * d_height
+
+        d_aspect = float(d_height) / d_width
+
+
+        #  limits of the data in the zoom box
+        (z_x0, z_x1), (z_y0, z_y1) = extent
+        z_width = max(math.fabs(z_x1 - z_x0), 1e-30)
+        z_height = max(math.fabs(z_y1 - z_y0), 1e-30)
+
+        z_aspect = float(z_height) / z_width
+
+        ax_bounds = self.axes.axesPatch.get_window_extent().bounds
+        ax_width = int(ax_bounds[2] + 0.5)
+        ax_height = int(ax_bounds[3] + 0.5)
+
+        ax_aspect = float(ax_height) / ax_width
+
+        xmarg = d_width - xr
+        ymarg = d_height - yr
+        Ysize = ax_aspect * z_width
+        Xsize = z_height / ax_aspect
+        Xmarg = Xsize - xr
+        Ymarg = Ysize - yr
+        xm = 0  #  Setting these targets to, e.g., 0.05*xr does not seem to
+                #  help.
+        ym = 0
+
+        y_expander = (d_aspect * z_width / z_height - 1.0)
+
+        if abs(y_expander) < 0.005:
+    #         print 'good enough already'
+            return
+
+        if xmarg > xm and ymarg > ym:
+            adjy = ((Ymarg > 0 and y_expander < 0)
+                    or (Xmarg < 0 and y_expander > 0))
+        else:
+            adjy = y_expander > 0
+
+        if adjy:
+            yc = 0.5 * (z_y0 + z_y1)
+            y0 = yc - Ysize / 2.0
+            y1 = yc + Ysize / 2.0
+
+            adj_extent = ((z_x0, z_x1), (y0, y1))
+            #  print 'New y0, y1:', y0, y1
+            #  print 'New ysize, ysize/xsize', y1-y0, (y1-y0)/xsize
+        else:
+            xc = 0.5 * (z_x0 + z_x1)
+            x0 = xc - Xsize / 2.0
+            x1 = xc + Xsize / 2.0
+            adj_extent = ((x0, x1), (z_y0, z_y1))
+
+        return adj_extent
+
+    def lim_changed(self, event):
+        if self.cursor_mode == "zoom":
+            print 'lim_changed in zoom'
+            extent = self.adj_aspect(self.get_extent())
+            self.sync_extents(extent=extent)
 
     def on_draw_base(self, view_extent=None):
         """ Completely clears then redraws the figure
@@ -281,11 +337,10 @@ class SpatialViewerCellWidgetBase(QCellWidget):
 
         self.set_axis_extent(xlim, ylim)
 
-#          self.map_canvas.draw()
+        self.cid = self.axes.callbacks.connect('ylim_changed', self.lim_changed)
+
         self.axes.figure.canvas.draw_idle()
         self.update()
-#          self.axes.set_ylim(display_extent[2:], emit=False)
-#          self.axes.set_xlim(display_extent[:2], emit=False)
 
     def set_raster_base(self, raster_kwargs):
         '''The raster being displayed sets the data_max extent and projection for our
@@ -328,12 +383,11 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.dpi = 100
         self.fig = Figure((5.0, 4.0), dpi=self.dpi)
 
-#        self.fig.subplots_adjust(left = 0.01, right=0.99, top=0.99, bottom=0.001)
         self.fig.subplots_adjust(left=0, right=1, top=1, bottom=0)
         self.map_canvas = MyMapCanvas(self.fig)
         self.map_canvas.mpl_connect('scroll_event', self.wheel_zoom)
-#        self.connect(self, QtCore.SIGNAL('keyPressEvent(QString)'),
-#             self.key_press)
+
+        self.map_canvas.mpl_connect('button_press_event', self.button_down)
         self.map_canvas.mpl_connect('button_release_event', self.button_up)
         self.map_canvas.mpl_connect('resize_event', self._resize)
 
@@ -343,7 +397,6 @@ class SpatialViewerCellWidgetBase(QCellWidget):
 
         self.mpl_toolbar.pan()
 
-#        self.popMenu = popup_menu(self, self.mpl_toolbar)
         self.popMenu = None
 
         self.map_canvas.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -396,19 +449,20 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.axes.set_xlim((newL, newR))
         self.axes.set_ylim((newB, newT))
 
+        self.changing_lim = True
         self.sync_extents()
 
+
+    def button_down(self, event):
+        self.changing_lim = True
+#
     def button_up(self, event):
-        if event.button == 1:
+        if event.button == 1 and self.cursor_mode == 'pan':
             #  this is a left click which signifies a zoom or pan end
             self.sync_extents()
 
     def _resize(self, event):
         self.pull_pixels()
-
-#      def lim_changed(self, event):
-#          if not self.button_pressed:
-#              self.sync_extents()
 
     def pull_pixels(self):
         try:
@@ -456,9 +510,10 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         sahm_dir = os.path.dirname(os.path.abspath(__file__))
         shp_fname = os.path.join(sahm_dir, "data", "states_110m", "ne_110m_admin_1_states_provinces_lakes.shp")
 
-        self.add_poly_layer(shp_fname, edgecolor=".3", facecolor='none', alpha=0.8)
+        self.add_poly_layer(shp_fname, edgecolor=".3", facecolor='none',
+                            alpha=0.8, display_all=True)
 
-    def add_poly_layer(self, layer_fname, **kwargs):
+    def add_poly_layer(self, layer_fname, display_all=False, **kwargs):
         '''add a polygon layer file to our map
         '''
         raster_crs = osr.SpatialReference()
@@ -486,7 +541,13 @@ class SpatialViewerCellWidgetBase(QCellWidget):
 
             (minx, maxx), (miny, maxy) = transform(raster_proj, shape_proj, (minx, maxx), (miny, maxy))
             patches = []
-            for rec in fiona_shp.filter(bbox=(minx, miny, maxx, maxy)):
+
+            if display_all:
+                recs = fiona_shp
+            else:
+                recs = fiona_shp.filter(bbox=(minx, miny, maxx, maxy))
+
+            for rec in recs:
                 if query_function(rec):
                     patches += self.get_patches(rec['geometry'],
                                    shape_proj, raster_proj, shift360)
@@ -674,7 +735,6 @@ class SpatialViewerCellWidgetBase(QCellWidget):
     #  Functions dealing with managing extents
 
     def set_extent(self, xlim, ylim):
-
         self.set_axis_extent(xlim, ylim)
 
         self.pull_pixels()
@@ -699,17 +759,37 @@ class SpatialViewerCellWidgetBase(QCellWidget):
 
     def zoomFull(self):
         max_xlim, max_ylim = self.get_max_extent()
+        orig_cursor_mode = self.cursor_mode
+        self.cursor_mode = 'pan'
+
         self.axes.set_xlim(max_xlim)
         self.axes.set_ylim(max_ylim)
+        self.changing_lim = True
         self.sync_extents()
+        self.cursor_mode = orig_cursor_mode
 
-    def sync_extents(self):
+    def sync_extents(self, extent=''):
         for spatialViewer in self.get_active_cells():
-            spatialViewer.set_extent(self.axes.get_xlim(), self.axes.get_ylim())
-            spatialViewer.map_canvas.draw()
+            if extent:
+                x0, x1 = extent[0]
+                y0, y1 = extent[1]
+            else:
+                x0, x1 = self.axes.get_xlim()
+                y0, y1 = self.axes.get_ylim()
 
+            try:
+                x0t, y0t = SpatialUtilities.transformPoint(x0, y0, self.rasterdisplay_layer.raster.srs, spatialViewer.rasterdisplay_layer.raster.srs)
+                x1t, y1t = SpatialUtilities.transformPoint(x1, y1, self.rasterdisplay_layer.raster.srs, spatialViewer.rasterdisplay_layer.raster.srs)
+            except:
+                x0t, y0t = x0, y0
+                x1t, y1t = x1, x1
 
+            if not spatialViewer is self:
+                spatialViewer.changing_lim = True
 
+            if spatialViewer.changing_lim:
+                spatialViewer.set_extent((x0t, x1t), (y0t, y1t))
+                spatialViewer.changing_lim = False
 
 class SpatialViewerCellWidget(SpatialViewerCellWidgetBase):
     '''
@@ -801,15 +881,8 @@ class ViewStateBoundariesButton(QtGui.QAction):
 
         active_cells = cellWidget.get_active_cells()
         for cell in active_cells:
-
-#              xlim = cell.axes.get_xlim()
-#              ylim = cell.axes.get_ylim()
             cell.display_states = self.isChecked()
             cell.on_draw()
-#              cell.fig.canvas.draw()
-#              cell.update()
-#              cell.axes.set_xlim(xlim)
-#              cell.axes.set_ylim(ylim)
 
 class GeneralSpatialViewerToolBar(QCellToolBar):
     """
@@ -879,11 +952,6 @@ class GeneralSpatialViewerToolBar(QCellToolBar):
         QCellToolBar.updateToolBar(self)
         sw = self.getSnappedWidget()
 
-#        for action in self.actions():
-#            if type(action) == ViewLayerAction:
-#                #disenable all action refering to data we don't have
-#                action.setEnabled(sw.all_layers[action.tag]['enabled'])
-
         #  Strip out the unused actions
         keep_actions = ['Zoom', 'Save', 'Back', 'Forward', 'Pan']
         keep_actions = []
@@ -915,10 +983,6 @@ class GeneralSpatialViewerToolBar(QCellToolBar):
                 popmenu.addAction(action)
             else:
                 popmenu.addSeparator()
-
-#        for action in sw.mpl_toolbar.actions():
-#            action.setIconVisibleInMenu(True)
-#            popmenu.addAction(action)
 
         return popmenu
 
@@ -976,9 +1040,6 @@ class showColorbarButton(QtGui.QAction):
 
         active_cells = cellWidget.get_active_cells()
         for cell in active_cells:
-
-#              xlim = cell.axes.get_xlim()
-#              ylim = cell.axes.get_ylim()
             cell.display_colorbar = self.isChecked()
             cell.on_draw()
 
@@ -1163,7 +1224,6 @@ class MyMapCanvas(FigureCanvas):
     '''
     def __init__(self, fig):
         FigureCanvas.__init__(self, fig)
-#        self._cursorx = None
 
 #    @print_timing
     def resizeEvent(self, event):
@@ -1231,6 +1291,7 @@ class RasterDisplay(object):
         else:
             display_band = 1
 
+#          print 'get block', xstart, ystart, xend, yend
         ary = self.raster.get_block_bbox([xstart, ystart, xend, yend], x_pixels, y_pixels, display_band)
         if ary is None or ary.size == 1:
                 print "raster_array is None!!!/n/n"

@@ -44,8 +44,8 @@
 
 make.auc.plot.jpg<-function(out=out){
  
-  plotname<-paste(out$dat$bname,"_modelEvalPlot.jpg",sep="")
-  calib.plot<-paste(out$dat$bname,"_CalibrationPlot.jpg",sep="")
+  plotname<-paste(out$dat$bname,"_modelEvalPlot.png",sep="")
+  calib.plot<-paste(out$dat$bname,"_CalibrationPlot.png",sep="")
   modelname<-toupper(out$input$model)
   inlst<-out$dat$ma
  
@@ -64,7 +64,7 @@ make.auc.plot.jpg<-function(out=out){
 ##################################################################
 ### Standard residual analysis plots for glm
     if(out$input$script.name%in%c("glm","mars") & out$dat$split.type!="eval" & !(out$input$script.name=="mars" & out$input$PsdoAbs==TRUE)){
-          jpeg(paste(out$dat$bname,"_stand.resid.plots.jpeg",sep=""),height=1000,width=1000)
+          png(paste(out$dat$bname,"_stand.resid.plots.png",sep=""),height=1000,width=1000)
           par(mfrow=c(2,2))
           if(out$input$script.name=="glm") plot(out$mods$final.mod[[1]],cex=1.5,lwd=1.5,cex.main=1.5,cex.lab=1.5)
           if(out$input$script.name=="mars") plot(out$mods$final.mod[[1]]$glm.list[[1]],cex=1.5,lwd=1.5,cex.main=1.5,cex.lab=1.5)
@@ -79,7 +79,7 @@ make.auc.plot.jpg<-function(out=out){
 #################### Variable importance plots #####################
 
     if(length(out$mods$vnames)>1 & out$input$model.family!="poisson"){
-      jpeg(paste(out$dat$bname,"_variable.importance.jpg",sep=""),height=1000,width=1000)  
+      png(paste(out$dat$bname,"_variable.importance.png",sep=""),height=1000,width=1000)  
         VariableImportance(out$input$script.name,out=out,auc=lapply(Stats,"[",9)) 
       graphics.off()
     }    
@@ -98,8 +98,8 @@ make.auc.plot.jpg<-function(out=out){
  ############### Confusion Matrix Plot ###########
 
   if(out$input$model.family!="poisson"){
- 
-   jpeg(file=paste(out$dat$bname,"confusion.matrix.jpg",sep="."),width=1000,height=1000,pointsize=13,quality=100)
+     
+   png(file=paste(out$dat$bname,"confusion.matrix.png",sep="."),width=1000,height=1000,pointsize=13)
     confusion.matrix(Stats,out$dat$split.type)
     graphics.off()
    }
@@ -119,33 +119,37 @@ make.auc.plot.jpg<-function(out=out){
 ########## AUC and Calibration plot for binomial data #######################
  
     if(out$input$model.family%in%c("binomial","bernoulli")){
-            jpeg(file=plotname,height=1000,width=1000,pointsize=20,quality=100)
+          
+            png(file=plotname,height=1000,width=1000,pointsize=20)
     ## ROC AUC plots
             TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=inlst$train$thresh,add.legend=FALSE,lwd=2)
                  if(out$dat$split.type=="none") legend(x=.8,y=.15,paste("AUC=",round(Stats$train$auc.fit,digits=3),sep=""))
             if(out$dat$split.type!="none") {
                 #so here we have to extract a sublist and apply a function to the sublist but if it has length 2 the structure of the list changes when the sublist is extracted
                  if(out$dat$split.type%in%c("test","eval")){ TestTrainRocPlot(do.call("rbind",lapply(lst,function(lst){lst$auc.data})),add.roc=TRUE,line.type=2,color="red",add.legend=FALSE)
-                    legend(x=.55,y=.2,c(paste("Training Split (AUC=",round(Stats$train$auc.fit,digits=3), ")",sep=""),paste("Testing Split  (AUC=",round(Stats$test$auc.fit,digits=3), ")",sep="")),lty=2,col=c("black","red"),lwd=2)
+                    legend(x=.46,y=.24,c(paste("Training Split (AUC=",round(Stats$train$auc.fit,digits=3), ")",sep=""),paste("Testing Split  (AUC=",round(Stats$test$auc.fit,digits=3), ")",sep="")),
+                       lty=2,col=c("black","red"),lwd=2,cex=1.3)
                  }
                  if(out$dat$split.type=="crossValidation"){
+                
                       ROC.list<-list(predictions=lapply(lst,function(lst){lst$auc.data$pred}),labels=lapply(lst,function(lst){lst$auc.data$pres.abs}))
                       pred <- prediction(ROC.list$predictions, ROC.list$labels)
                       perf <- performance(pred,"tpr","fpr")
-                      plot(perf,col="grey82",lty=3,xlab="1-Specificity (False Positive)",ylab="Sensitivity (True Positive)",main="ROC Plot for Cross-Validation")
+                      plot(perf,col="grey82",lty=3,xlab="1-Specificity (False Positive)",ylab="Sensitivity (True Positive)",main="ROC Plot for Cross-Validation",cex.main=2,cex.axis=1.4,cex.lab=1.5)
                       plot(perf,lwd=1,avg="vertical",spread.estimate="boxplot",add=TRUE)
-                      TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=inlst$train$thresh,add.legend=FALSE,lwd=1.5,add.roc=TRUE,line.type=1,col="red")
+                      TestTrainRocPlot(DATA=Stats$train$auc.data,opt.thresholds=inlst$train$thresh,add.legend=FALSE,lwd=1.5,add.roc=TRUE,line.type=1,col="red",legend.cex=2)
                       points(1-Stats$train$Specf,Stats$train$Sens,pch=21,cex=2.5,bg="red")
                        segments(x0=0,y0=0,x1=1,y1=1,col="blue")
                       text(x=(.96-Stats$train$Specf),y=Stats$train$Sens+.03,label=round(Stats$train$thresh,digits=2))
-                        legend(x=.6,y=.22,c(paste("Training Split (AUC=",round(Stats$train$auc.fit,digits=3), ")",sep=""),
-                             paste("Cross Validation Mean \n (AUC=",round(mean(unlist(lapply(lst,function(lst){lst$auc.fit}))),digits=3), ")",sep="")),lwd=c(4,1),lty=c(1,1),col=c("red","black"))
+                        legend(x=.5,y=.24,c(paste("Training Split (AUC=",round(Stats$train$auc.fit,digits=3), ")",sep=""),
+                             paste("Cross Validation Mean \n (AUC=",round(mean(unlist(lapply(lst,function(lst){lst$auc.fit}))),digits=3), ")",sep="")),lwd=c(4,1),lty=c(1,1),
+                             col=c("red","black"),cex=1.3)
                  }
                 }
                 graphics.off()
 
             #I'm pretty sure calibration plots should work for count data as well but I'm not quite ready to make a plot
-           jpeg(file=calib.plot,height=1000,width=1000,pointsize=20,quality=100)
+           png(file=calib.plot,height=1000,width=1000,pointsize=20)
                 cal.results<-switch(out$dat$split.type,
                             none = Stats$train$calibration.stats,
                              test = Stats$test$calibration.stats,
@@ -172,19 +176,15 @@ make.auc.plot.jpg<-function(out=out){
                              hist(a$pred[a$pres.abs==0],freq=TRUE,col="blue",xlim=range(a$pred),xlab="Predicted Probability",main="Available")
                 }
             } else{ 
-            pacplot(a$pred,a$pres.abs,title=paste("Calibration Plot for ",switch(out$dat$split.type,none="Training Data",test="Test Split",eval="Test Split",crossValidation="Cross Validation Split"),sep=""))
-                legend("topleft",c(as.expression(substitute(Int~~alpha==val, list(Int="Intercept:",val=signif(cal.results[1],digits=3)))),
-                 as.expression(substitute(Slope~~beta==val, list(Slope="Slope:",val=signif(cal.results[2],digits=3)))),
-                 as.expression(substitute(P(alpha==0, beta==1)==Prob,list(Prob=signif(cal.results[3],digits=3)))),
-                 as.expression(substitute(P(alpha==0~a~beta==1)==Prob,list(Prob=signif(cal.results[4],digits=3),a="|"))),
-                 as.expression(substitute(P(beta==1~a~alpha==0)==Prob,list(Prob=signif(cal.results[5],digits=3),a="|")))),bg="white")
+            pacplot(a$pred,a$pres.abs,title=paste("Calibration Plot for ",
+                   switch(out$dat$split.type,none="Training Data",test="Test Split",eval="Test Split",crossValidation="Cross Validation Split"),sep=""))
              }
             dev.off()
       }
      options(warn=0)     
    #Some residual plots for poisson data
     if(out$input$model.family%in%c("poisson")){
-            jpeg(file=plotname)
+            png(file=plotname)
             par(mfrow=c(2,2))
              plot(log(Stats$train$auc.data$pred[Stats$train$auc.data$pred!=0]),
                   (Stats$train$auc.data$pres.abs[Stats$train$auc.data$pred!=0]-Stats$train$auc.data$pred[Stats$train$auc.data$pred!=0]),

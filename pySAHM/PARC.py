@@ -152,18 +152,39 @@ class PARC(object):
             self.process_pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
         self.pool_processes = []
 
+        header_row = ["PARCOutputFile", "Categorical", "Resampling",
+                      "Aggregation", "OriginalFile",
+                      os.path.abspath(self.template), os.path.abspath(self.out_dir)]
+        cur_output = csv.writer(open(self.inputs_CSV, "wb"))
+        cur_output.writerow(header_row)
+
+
         #  Clip and reproject each source image.
         for image in self.inputs:
             in_fname = SpatialUtilities.getRasterShortName(image[0])
             out_file = os.path.join(self.out_dir, in_fname + ".tif")
 
+            raster_files = utilities.get_raster_files(image[0])
+            raster_hash = utilities.hash_file(raster_files)
+
             process_queue = []
             if os.path.exists(out_file):
                 try:
                     gdal.Open(out_file)
-                    msg = "The output " + in_fname + \
-                        " already exists. \tSkipping this file."
-                    self.logger.writetolog(msg, True, True)
+
+                    old_source = utilities.get_fname_from_hash_pickle(raster_hash, self.out_dir)
+                    if old_source is None or old_source['source'].replace("\\", "/") != image[0].replace("\\", "/"):  #  we've previously run a file with this output name from a different source
+                        out_file = out_file.replace('.tif', "_" + raster_hash + '.tif')
+                        msg = "The output " + in_fname + \
+                            " already exists, but was derived from a different source."
+
+                        msg += " renaming output to {}".format(out_file)
+                        self.logger.writetolog(msg, True, True)
+                        process_queue.append(self.gen_singlePARC_thread(image, out_file))
+                    else:
+                        msg = "The output " + in_fname + \
+                            " already exists. \tSkipping this file."
+                        self.logger.writetolog(msg, True, True)
                 except:
                     #  we bombed trying to open the outFile with gdal. Lets rerun it.
                     process_queue.append(self.gen_singlePARC_thread(image, out_file))
@@ -171,12 +192,29 @@ class PARC(object):
             else:
                 process_queue.append(self.gen_singlePARC_thread(image, out_file))
 
+
+            #  also write the output row, reconfigured to our output file
+            outputrow = [out_file] + image[1:4] + [os.path.abspath(image[0]),
+                                                 os.path.abspath(self.out_dir), in_fname]
+            cur_output.writerow(outputrow)
+
+            out_finfo = {'source':image[0], 'result':out_file}
+            utilities.write_hash_entry_pickle(raster_hash,
+                                        out_finfo, self.out_dir)
+        del cur_output
+
         #  wait for the last set of processes to finish up
         if self.processingMode == "FORT Condor":
             self.waitForCondorProcessesToFinish(process_queue)
         else:
+            error_msgs = ''
             for process in self.pool_processes:
-                process.get()
+                msg = process.get()
+                print msg[0]
+                if msg[1] != '':
+                    error_msgs += ("\n" + msg[1])
+            if error_msgs != '':
+                raise utilities.TrappedError(error_msgs)
 
         print "done"
 
@@ -551,33 +589,31 @@ class PARC(object):
         if not os.path.exists(self.inputs_CSV):
             raise utilities.TrappedError("Inputs CSV, " + self.inputs_CSV + ", does not exist on file system.")
 
-        current_inputs = np.genfromtxt(self.inputs_CSV, dtype='S1000', delimiter=",", skip_header=True)
+        current_inputs = np.genfromtxt(self.inputs_CSV, dtype='S1000',
+                           delimiter=",", skip_header=True, invalid_raise=False)
         if len(current_inputs.shape) == 1:
-            #  pound there was only a single item in the input file, reshape the array
+            #  there was only a single item in the input file, reshape the array
             current_inputs = np.array([current_inputs])
 
         input_file_errors = ""
 
-        header_row = ["PARCOutputFile", "Categorical", "Resampling",
-                      "Aggregation", "OriginalFile",
-                      os.path.abspath(self.template), os.path.abspath(self.out_dir)]
-        all_previous_output = os.path.join(self.out_dir, "PARC_Files.csv")
-        try:
-            previous_inputs = np.genfromtxt(all_previous_output, dtype='S1000', delimiter=",", skip_header=True)
-            if len(previous_inputs.shape) == 1:
-            #  pound there was only a single item in the input file, reshape the array
-                previous_inputs = previous_inputs = np.array([previous_inputs])
 
-            previous_inputs = [SpatialUtilities.getRasterShortName(os.path.abspath(f))
-                                                         for f in previous_inputs[:, 4]]
-            prev_output = csv.writer(open(all_previous_output, "ab"))
-        except (IndexError, IOError, StopIteration):  #  IndexError=only header, IOError=File doesn't exist, StopIteration=Empty file
-            previous_inputs = []
-            prev_output = csv.writer(open(all_previous_output, "wb"))
-            prev_output.writerow(header_row)
+#          all_previous_output = os.path.join(self.out_dir, "PARC_Files.csv")
+#          try:
+#              previous_inputs = np.genfromtxt(all_previous_output, dtype='S1000', delimiter=",", skip_header=True)
+#              if len(previous_inputs.shape) == 1:
+#              #  pound there was only a single item in the input file, reshape the array
+#                  previous_inputs = previous_inputs = np.array([previous_inputs])
+#
+#              previous_inputs = [SpatialUtilities.getRasterShortName(os.path.abspath(f))
+#                                                           for f in previous_inputs[:, 4]]
+#              prev_output = csv.writer(open(all_previous_output, "ab"))
+#          except (IndexError, IOError, StopIteration):  #  IndexError=only header, IOError=File doesn't exist, StopIteration=Empty file
+#              previous_inputs = []
+#              prev_output = csv.writer(open(all_previous_output, "wb"))
+#              prev_output.writerow(header_row)
 
-        cur_output = csv.writer(open(self.inputs_CSV, "wb"))
-        cur_output.writerow(header_row)
+
 
         inputs = []
         for row in [list(r) for r in current_inputs]:
@@ -593,7 +629,6 @@ class PARC(object):
                 input_file_errors += "\n\t" + input_just_file + " used multiple times"
             else:
                 inputs.append(input_just_file)
-
 
             sourceRaster = SpatialUtilities.SAHMRaster(input_file)
             if len(sourceRaster.Error) > 0:
@@ -649,19 +684,7 @@ class PARC(object):
                     row[3] = default
 
             self.inputs.append(row)
-            #  also write the output row, reconfigured to our output file
-            short_name = SpatialUtilities.getRasterShortName(row[0])
-            file_name = os.path.abspath(os.path.join(self.out_dir,
-                                                    short_name + ".tif"))
-            outputrow = [file_name] + row[1:4] + [os.path.abspath(row[0]),
-                                                 os.path.abspath(self.out_dir)]
-            cur_output.writerow(outputrow)
-            if short_name not in previous_inputs:
-                prev_output.writerow(outputrow)
 
-
-        del prev_output
-        del cur_output
 
         if input_file_errors != "":
             self.writetolog(input_file_errors, False, False)

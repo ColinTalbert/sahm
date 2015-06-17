@@ -171,7 +171,7 @@ Pairs.Explore<-function(num.plots=5,min.cor=.7,input.file,output.file,response.c
                         else cex.mult=3
             }
            
- if(Debug==FALSE) jpeg(output.file,width=wdth,height=wdth,pointsize=13)
+ if(Debug==FALSE) png(output.file,width=wdth,height=wdth,pointsize=13)
     MyPairs(cbind(TrueResponse,HighToPlot),cor.range=cor.range,missing.summary=missing.summary,my.labels=(as.vector(High.cor)[1:num.plots]),
     lower.panel=panel.smooth,diag.panel=panel.hist, upper.panel=panel.cor,pch=21,
     bg = c("blue","red","yellow")[factor(response,levels=c(0,1,-9999))],col.smooth = "red",cex.mult=cex.mult,oma=c(0,2,6,0),famly=famly)

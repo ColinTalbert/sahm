@@ -1,5 +1,5 @@
-setwd("I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
-ScriptPath="I:\\VisTrails\\DevWorkspace\\Marian\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
+setwd("C:\\GoogleDrive\\Python\\DevWorkspace\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="C:\\GoogleDrive\\Python\\DevWorkspace\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
 
 source("PairsExplore.r")
 source("read.dat.r")
@@ -8,9 +8,9 @@ source("read.dat.r")
 source("my.panel.smooth.binary.r")
 source("Predictor.inspection.r")
 
-infil="C:\\temp\\TestDataSets\\CanadaThistleNewFormat.csv"
-predictor="bio_13"
-
+i="I:\\VisTrails\\Tutorial\\tmp_working_copy\\ClimateProjection\\breeding bird\\CovariateCorrelationOutputMDS_second.csv"
+p="rip_540m"
+o="I:\\VisTrails\\Tutorial\\tmp_working_copy\\ClimateProjection\\breeding bird\\PredictorInspector"
 ## Nonspatial data should work through SAHM
 i="C:\\temp\\SAHM_workspace\\NonSpatialData.csv"
 predictor="PrecipitatoinRast"
@@ -29,7 +29,7 @@ predictor="TemperatureRastPois"
 o="I:\\VisTrails\\WorkingFiles\\workspace\\NewOutput\\SyntheticCountData"
 rc="responseCount"
 
-bgd=TRUE 
+bgd=FALSE 
 i="I:\\VisTrails\\WorkingFiles\\workspace\\MarianTesting\\TestSuite\\modelSelection_split_1.csv"
 o="I:\\VisTrails\\WorkingFiles\\workspace\\MarianTesting\\TestSuite\\PredictorInspections"
 p="PRISM_bio_03_1971_2000_800m" 
