@@ -51,10 +51,12 @@ pred.fct<-function(model,x,Model){
   y <- rep(NA,nrow(x))
 
   if(Model%in%c("glm","mars")){
-   if("list"%in%class(model)) y[complete.cases(x)] <- try(as.vector(predict(model[[1]],x[complete.cases(x),],type="response")),silent=TRUE)
-        else  y[complete.cases(x)] <- try(as.vector(predict(model,x[complete.cases(x),],type="response")),silent=TRUE)
+ 
+   if("list"%in%class(model)) y <- try(as.vector(predict(model[[1]],x,type="response")),silent=TRUE)
+        else  y<- try(as.vector(predict(model,x,type="response")),silent=TRUE)
+      
      }
-     
+ 
  
   if(Model=="brt"){
          # retrieve key items from the global environment #

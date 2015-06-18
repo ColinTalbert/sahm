@@ -440,8 +440,8 @@ class SelectListDialog(QtGui.QDialog):
             if kwarg_key in self.kwargs:
                 args[arg] = str(self.kwargs[kwarg_key])
                 
-        if os.path.exists(os.path.join(self.outputDir, "Predictor_Correlation.jpg")):
-            os.remove(os.path.join(self.outputDir, "Predictor_Correlation.jpg"))
+        if os.path.exists(os.path.join(self.outputDir, "Predictor_Correlation.png")):
+            os.remove(os.path.join(self.outputDir, "Predictor_Correlation.png"))
             
         utils.run_R_script('PairsExplore.r', args, self.module, new_r_path=self.kwargs['r_path'])
         
@@ -483,7 +483,7 @@ class SelectListDialog(QtGui.QDialog):
 
 
     def makeNewCovariatePlot(self, output_dir, covariate):
-        output_fname = os.path.join(output_dir, covariate + ".jpg")
+        output_fname = os.path.join(output_dir, covariate + ".png")
         
         args = {"i":self.inputMDS, 
             "o":output_dir, 

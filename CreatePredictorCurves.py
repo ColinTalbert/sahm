@@ -359,11 +359,36 @@ class CreatePredictorCurvesDialog(QtGui.QDialog):
         #updates the second header line on the input MDS file 
         #to reflect the checked items in the tree view 
         #and saves the results to the output MDS.
+                
+
+            
+        reader = csv.reader(open(self.input_mds, "r"))
+        header = reader.next() #store the header
+        header2 = reader.next() #the 2nd line of the mds with use/don't use
+        header3 = reader.next() #the 3rd line of the mds with the path
         
+        outHeader2 = header2
+                  
         output = {}
         for covariate_viewer in self.covariate_viewers:
-            output[covariate_viewer.name] = covariate_viewer.vertices
+            if covariate_viewer.include:
+                output[covariate_viewer.name] = covariate_viewer.vertices
+                
+                col_index = header.index(covariate_viewer.name)
+                if covariate_viewer.include:
+                    outHeader2[col_index] = "1"
+                else:
+                    outHeader2[col_index] = "0"
 
+        oFile = open(self.input_mds, 'wb')
+        writer = csv.writer(oFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(header)
+        writer.writerow(outHeader2)
+        writer.writerow(header3)
+        for row in reader:
+            writer.writerow(row)
+        oFile.close
+        
         with open(self.output_mds, 'wb') as f:
             json.dump(output, f)
         
@@ -508,11 +533,14 @@ class covariate_viewer(QtGui.QGroupBox):
         data = []
         colors = []
         labels = []
-        for val, c, label in [('0', 'b', 'absence'),
-                       ('1', 'r', 'presence'),
-                       ('-9999', 'black', 'background'),
-                       ('-9998', 'black', 'background'),
-                       (0, 'b', 'absence'),
+        
+        
+#          pres = self.values.loc[self.df['responseBinary'] == 'presence']
+#          pres = [float(pres) for pres in pres.values]
+#
+#          total = self.values
+        
+        for val, c, label in [(0, 'b', 'absence'),
                        (1, 'r', 'presence'),
                        (-9999, 'black', 'background'),
                        (-9998, 'black', 'background')]:
@@ -525,8 +553,9 @@ class covariate_viewer(QtGui.QGroupBox):
                 labels.append(label)
             except:
                 pass
-        self.ax_hist.hist(data, bins=bins, stacked=True, color=colors,
-                        label=labels, alpha=0.4, histtype='stepfilled', lw=0.1)
+        self.ax_hist.hist(data, bins=bins, stacked=False, color=colors,
+                          normed=True, label=labels, alpha=0.4, histtype='bar',
+                          lw=0.1)
 #          plt.legend()
 
 
@@ -1104,7 +1133,7 @@ if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
 
 
-    args = {'inputMDS':r"I:\VisTrails\WorkingFiles\workspace\_HabitatSuitabilityCurves\hsc_BrewersSparrowHSC_1\CovariateCorrelationOutputMDS_BrewersSparrowHSC_initial.csv",
+    args = {'inputMDS':r"I:\VisTrails\WorkingFiles\workspace\_HabitatSuitabilityCurves\hsc_test2\CovariateCorrelationOutputMDS_BrewersSparrowHSC_initial.csv",
             'output_json':r"I:\VisTrails\WorkingFiles\workspace\_HabitatSuitabilityCurves\hsc_BrewersSparrowHSC_1\hsc.json",
             }
 

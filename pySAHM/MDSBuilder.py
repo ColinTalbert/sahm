@@ -54,7 +54,7 @@ import scipy.stats.stats as stats
 from optparse import OptionParser
 import utilities
 import SpatialUtilities
-#  from Utilities import self.writetolog
+
 
 class MDSBuilder(object):
     '''Takes a csv with animal location x,y and attributes each with the values
@@ -204,8 +204,7 @@ class MDSBuilder(object):
         rasters = {}
         for row in inputs_CSV:
             temp_raster = row[0]
-            raster_shortname = os.path.split(temp_raster)[1]
-            raster_shortname = os.path.splitext(raster_shortname)[0]
+            raster_shortname = SpatialUtilities.getRasterShortName(temp_raster)
             if len(row) > 1 and row[1] == '1':
                 raster_shortname += "_categorical"
             rasters[raster_shortname] = temp_raster

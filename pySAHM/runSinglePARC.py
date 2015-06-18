@@ -67,14 +67,7 @@ import SpatialUtilities
 
 from PARC import PARC
 
-def main(args_in):
-    """
-    Process commandline Arguments, 
-    Create an instance of PARC with the Variables,
-    Kick off the parkFiles function of our PARC instance
-    """
-    setupGDAL()
-    
+def parse_options(args_in):
     # Process command-line args.  
     usageStmt = "usage:  %prog [options] <template image> <input dir or list of input files>"
     desc = "This application projects, aggregates, resamples, and clips imagery."
@@ -92,6 +85,16 @@ def main(args_in):
     
     (options, args) = parser.parse_args(args_in)
     
+    return options
+
+def main(options):
+    """
+    Process commandline Arguments,
+    Create an instance of PARC with the Variables,
+    Kick off the parkFiles function of our PARC instance
+    """
+    setupGDAL()
+
     # Process command-line args.  tin
     ourPARC = PARC()
     ourPARC.verbose = options.verbose
@@ -101,7 +104,7 @@ def main(args_in):
     ourPARC.outDir = outDir
     ourPARC.logger = utilities.logger(os.path.dirname(outDir), ourPARC.verbose, False)
     ourPARC.writetolog = ourPARC.logger.writetolog
-    
+
 #     if options.ignoreNonOverlap:
 #         ourPARC.shrink_template_extent(SpatialUtilities.SAHMRaster(options.source))
 #     if ourPARC.templateRaster.width < 1 or \
@@ -110,28 +113,42 @@ def main(args_in):
 #         #reset the template raster and try the naive method
 #         ourPARC.templateRaster = SpatialUtilities.SAHMRaster(options.template)
 #         ourPARC.shrink_template_extent_naive(SpatialUtilities.SAHMRaster(options.source))
-    
     ourPARC.parcFile([options.source, options.categorical, options.resampling, options.aggregation], options.dest)
 
-    print "Finished successfully!"
+
 
 def setupGDAL():
+
+
+
     parentDir = os.path.split(os.path.dirname(__file__))[0]
     gdal_data = os.path.join(parentDir, "GDAL_Resources", "gdal-data")
     os.environ['GDAL_DATA'] = gdal_data
     projlib = os.path.join(parentDir, "GDAL_Resources", "projlib")
     os.environ['PROJ_LIB'] = projlib
     
+    from osgeo import gdal
+    gdal.UseExceptions()
 
 if __name__ == "__main__":
 
     try:
-        main(sys.argv[1:])
+        options = parse_options(sys.argv[1:])
+        try:
+            source_name = SpatialUtilities.getRasterShortName(
+                            SpatialUtilities.getRasterShortName(options.source))
+        except:
+            source_name = '<<problem getting raster name>>'
+
+        main(options)
+        print "Finished PARC processing of {}".format(source_name)
     except Exception as e:
-        print e
-        import traceback
-        print traceback.format_exc()
-        sys.stderr.write(traceback.format_exc())
-        print "Job failed!", sys.exc_info()[0]
-    
+#          import traceback
+#  #          exc_type, exc_value, exc_traceback = sys.exc_info()
+#  #  #          print traceback.format_exc()
+#  #          sys.stderr.write(traceback.format_exc())
+#          print sys.exc_info()
+        sys.stderr.write("PARC processing of {} failed:\n{}".format(source_name,
+                                            e))
+
 

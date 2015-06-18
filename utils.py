@@ -82,6 +82,13 @@ import numpy
 
 import pySAHM.utilities as utilities
 from CreatePredictorCurves import CreatePredictorCurvesDialog
+
+write_hash_entry_pickle = utilities.write_hash_entry_pickle
+delete_hash_entry_pickle = utilities.delete_hash_entry_pickle
+get_fname_from_hash_pickle = utilities.get_fname_from_hash_pickle
+hash_file = utilities.hash_file
+get_raster_files = utilities.get_raster_files
+
 import getpass
 
 _roottempdir = ""
@@ -193,63 +200,12 @@ def mknextdir(prefix, directory="", skipSequence=False, subfolder="", runname=""
     os.mkdir(dirname)
     return dirname
 
-def get_picklehash_fname(directory=""):
-    global _roottempdir
-    if directory == "":
-        directory = _roottempdir
-    fname = os.path.join(directory, "vt_hashmap.dat")
-    return fname
 
-def write_hash_entry_pickle(hashname, fname, directory=""):
-
-    hash_fname = get_picklehash_fname(directory)
-    if os.path.exists(hash_fname):
-        try:
-            with open(hash_fname, "rb") as f:
-                hash_dict = pickle.load(f)
-                hash_dict[hashname] = fname
-        except:
-            hash_dict = {hashname:fname}
-    else:
-        hash_dict = {hashname:fname}
-
-    with open(hash_fname, "wb") as f:
-        pickle.dump(hash_dict, f)
-
-def delete_hash_entry_pickle(signature, directory=""):
-
-    hash_fname = get_picklehash_fname(directory)
-    if os.path.exists(hash_fname):
-        with open(hash_fname, "rb") as f:
-            try:
-                hash_dict = pickle.load(f)
-                del hash_dict[signature]
-            except KeyError:
-                pass
-    else:
-        hash_dict = {}
-
-    with open(hash_fname, "wb") as f:
-        pickle.dump(hash_dict, f)
-
-def get_fname_from_hash_pickle(hashname, directory=""):
-    global _roottempdir
-    if directory == "":
-        directory = _roottempdir
-    fname = get_picklehash_fname(directory)
-    if os.path.exists(fname):
-        with open(fname, 'rb') as f:
-            try:
-                hash_dict = pickle.load(f)
-                return hash_dict[hashname]
-            except:
-                #  if anything goes wrong we'll just rerun it!
-                return None
-    return None
 
 def setrootdir(session_dir):
     global _roottempdir
     _roottempdir = session_dir
+    utilities.setrootdir(session_dir)
 
 def getrootdir():
     global _roottempdir
@@ -641,10 +597,14 @@ def run_model_script(script, args_dict, module=None, runner_script="runRModel.py
         writetolog("    command used: \n" + utilities.convert_list_to_cmd_str(cmd), False, False)
 
         if module.abbrev == "hsc":
+            orig_mds = args_dict['c'].replace(".csv", "_orig.csv")
+            shutil.copyfile(args_dict['c'], orig_mds)
+
             json_fname = os.path.join(module.output_dname, 'hsc.json')
-            kwargs_mod = {'inputMDS':module.args_dict['c'],
+            kwargs_mod = {'inputMDS':args_dict['c'],
                       'output_json':json_fname}
             args_dict['hsc'] = json_fname
+            cmd.append("hsc=" + json_fname)
             dialog = CreatePredictorCurvesDialog(kwargs_mod)
             #  dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
             retVal = dialog.exec_()
@@ -860,16 +820,23 @@ def merge_inputs_csvs(input_csvs, outputFile):
         infile1 = open(input_csv, "rb")
         infile1csv = csv.reader(infile1)
         firstline = infile1csv.next()
-        templatefname = firstline[-2]
-        if getFileRelativeToCurrentVT(templatefname):
-            infile1.close()
-            break
+        if len(firstline) > 4:
+            templatefname = firstline[-2]
+            if getFileRelativeToCurrentVT(templatefname):
+                infile1.close()
+                break
+        else:
+            templatefname = None
         infile1.close()
 
     #  open a csv we will write all the outputs into
     oFile = open(outputFile, "wb")
     outputCSV = csv.writer(oFile)
-    outputCSV.writerow(["PARCOutputFile", "Categorical",
+    if templatefname:
+        outputCSV.writerow(["PARCOutputFile", "Categorical",
+                         "Resampling", "Aggregation", "OriginalFile", templatefname, templatefname])
+    else:
+        outputCSV.writerow(["PARCOutputFile", "Categorical",
                          "Resampling", "Aggregation", "OriginalFile"])
 
     #  write all the inputs out to this file
@@ -878,7 +845,10 @@ def merge_inputs_csvs(input_csvs, outputFile):
         inputreader = csv.reader(iFile)
         inputreader.next()
         for row in inputreader:
-            outputCSV.writerow(row)
+            try:
+                outputCSV.writerow([getFileRelativeToCurrentVT(row[0]), row[1], row[2], row[3], row[6]])
+            except:
+                outputCSV.writerow([getFileRelativeToCurrentVT(row[0]), row[1], row[2], row[3]])
         iFile.close()
     oFile.close()
 
@@ -1169,9 +1139,10 @@ def getFileRelativeToCurrentVT(fname, curModule=None):
     #  This is three step approach:
     #  step 1: if fname exists assume it's the one we want and return it.
     #  step 2: Look for the file relative to the current VT.
-    #        In effect loop through all the sibling and descendant folders
-    #        of the vt file's parent directory and look for the base filename in each.
-    #        If we find an identically named file hope for the best and return it.
+    #        If there exists in the fname path one and only one folder with the same name as
+    #        the folder that contains our current vt file, take the portion
+    #        of the fname from that folder on and join it to the folder that contains
+    #        our vt file.  If that fname exists on the file system assume it is the right one.
     #  step 3: Do what we did in step 2 but relative to the current session folder.
     #
     #  If no fname is found in the above three steps raise an error.
@@ -1188,24 +1159,46 @@ def getFileRelativeToCurrentVT(fname, curModule=None):
         if os.path.exists(fname):
             return fname
 
-        #  step 2 (and then step3)
+        #  step 2
+        match_fname_parts = fname.split("/")
         try:
             app = application.get_vistrails_application()()
             curlocator = app.get_vistrail().locator.name
-            curVTdir = os.path.split(curlocator)[0]
-        except:
-            curVTdir = ""
+            vt_fname = curlocator.replace("\\", "/")
 
-        root_dir, justfname = os.path.split(fname)
-        if justfname.lower() == "hdr.adf":
-            justfname = os.path.sep.join([os.path.split(root_dir)[1], justfname])
-        for rootdir in [curVTdir, getrootdir()]:
-            if os.path.exists(os.path.join(rootdir, justfname)):
-                return os.path.join(rootdir, justfname)
-            for root, dirnames, filenames in os.walk(rootdir):
-                for dirname in dirnames:
-                    if os.path.exists(os.path.join(root, dirname, justfname)):
-                        return os.path.join(root, dirname, justfname)
+            vt_dname = os.path.split(vt_fname)[0]
+            if os.path.exists(os.path.join(vt_dname, fname)):
+                return os.path.join(vt_dname, fname)
+            vt_just_dname = os.path.split(vt_dname)[1]
+
+            if match_fname_parts.count(vt_just_dname) == 1:
+                #  a directory with the same name as our current vt parent folder exists in this files path
+                local_fname = "/".join(match_fname_parts[match_fname_parts.index(vt_just_dname) + 1:])
+                fname_relative_to_vt = os.path.join(vt_dname, local_fname)
+                if os.path.exists(fname_relative_to_vt):
+                    #  a file path exists with the same local path in the folder our vt is in
+                    #  we will assume this isn't a coincidence...
+                    return fname_relative_to_vt
+        except:
+            pass
+
+        #  step 3
+        try:
+            session_dir = getrootdir()
+            session_dir = session_dir.replace("\\", "/")
+
+            just_session_dir = os.path.split(session_dir)[1]
+
+            if match_fname_parts.count(just_session_dir) == 1:
+                #  a directory with the same name as our current vt session folder exists in this files path
+                local_fname = "/".join(match_fname_parts[match_fname_parts.index(just_session_dir) + 1:])
+                fname_relative_to_session = os.path.join(session_dir, local_fname)
+                if os.path.exists(fname_relative_to_session):
+                    #  a file path exists with the same local path in the folder our vt is in
+                    #  we will assume this isn't a coincidence...
+                    return fname_relative_to_session
+        except:
+            pass
 
         #  we did our best but couldn't find the file
         couldntFindFile()
@@ -1242,9 +1235,11 @@ def make_next_file_complex(curModule, prefix, suffix="", directory="",
     h.update(curModule.signature)
     for key in sorted(curModule.inputPorts):
         if curModule.hasInputFromPort(key):
+#              print bytes(curModule.getInputFromPort(key))
             h.update(bytes(curModule.getInputFromPort(key)))
 
     for input in key_inputs:
+#          print str(input) + hash_file(input)
         h.update(str(input) + hash_file(input))
 
     signature = h.hexdigest()
@@ -1286,13 +1281,7 @@ def make_next_file_complex(curModule, prefix, suffix="", directory="",
     return fname, signature, already_run
 
 
-def hash_file(fname):
-    h = sha_hash()
-    if os.path.exists(str(fname)):
-        h.update(open(fname, "rb").read())
-    else:
-        h.update(str(fname))
-    return h.hexdigest()
+
 
 def get_sheet_location(_module):
     '''given a sahm spreadsheet module, finds all the other sahm spreadsheet cells
@@ -1386,15 +1375,6 @@ def get_previous_run_info(full_fname):
 
     return subfolder, runname
 
-def get_raster_files(raster_fname):
-    if os.path.exists(os.path.join(raster_fname, "hdr.adf")):
-        grid_folder = raster_fname
-    elif raster_fname.endswith("hdr.adf"):
-        grid_folder = os.path.split(raster_fname)[0]
-    else:
-        return raster_fname
 
-    return [os.path.join(grid_folder, f) for f in os.listdir(grid_folder)
-                                    if f.endswith(".adf")]
 
 

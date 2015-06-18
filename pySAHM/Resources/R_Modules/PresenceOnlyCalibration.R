@@ -6,14 +6,14 @@ calibplot <- function(pred, negrug, posrug, ideal, ylim=c(0,1),capuci=TRUE, xlab
   ylow[ylow<0] <- 0
   yhigh <- pred$y + 2 * pred$se
   if (capuci) yhigh[yhigh>1] <- 1
-  plot(pred$x, ylow, type="l", col="orange", ylim=ylim, xlim=range(pred$x),
-    xlab=xlabel, lwd=2, ...)
-  lines(pred$x, yhigh, lwd=2, col="orange")
+  plot(pred$x, ylow, type="l", col="grey", ylim=ylim, xlim=range(pred$x),main=title,
+    xlab=xlabel, lwd=2,cex.axis=1.4,cex.lab=1.8,cex.main=2, ...)
+  lines(pred$x, yhigh, lwd=2, col="grey")
   lines(pred$x, sapply(pred$x, ideal), lty="dashed")
-  points(pred$x, pred$y, col="deepskyblue")
-  rug(negrug)
-  rug(posrug, col = "orange")
-  title(title)
+  points(pred$x, pred$y, col="blue")
+  rug(negrug,col="blue",lwd=2)
+  rug(posrug, col = "red",lwd=2)
+  
   if (!is.null(filename)) dev.off()
 }
 
@@ -68,8 +68,8 @@ ecalp <- function(preds, acts, bins=10, do.plot=TRUE, do.clear=TRUE, filename=NU
     } else {
       points(mx, p, xlim=c(0,1), ylim=c(0,1), ...)
     }
-    rug(preds[acts==0])
-    rug(preds[acts==1], col = "orange")
+    rug(preds[acts==0],col="blue")
+    rug(preds[acts==1], col = "red")
     abline(0,1,lty="dashed")
     title(title)
     if (!is.null(filename)) dev.off()

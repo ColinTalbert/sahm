@@ -36,10 +36,10 @@ Predictor.inspection<-function(predictor,input.file,output.dir,response.col="Res
      
      a<-try(raster(tif.info[[3]][pred.indx]),silent=TRUE) 
      if(class(a)=="try-error") spatialDat=FALSE
-     output.file<-file.path(output.dir,paste(names(dat)[pred.indx],".jpg",sep=""))
+     output.file<-file.path(output.dir,paste(names(dat)[pred.indx],".png",sep=""))
      ### Producing some plots
   
-    jpeg(output.file,pointsize=13,height=2000,width=2000,quality=100)
+    png(output.file,pointsize=13,height=2000,width=2000)
          if(spatialDat) par(mfrow=c(2,2),mar=c(5,7,9,6),oma=c(6,2,2,2))
          else par(mfrow=c(2,1),mar=c(15,25,9,25))
              hst<-hist(pred,plot=FALSE)

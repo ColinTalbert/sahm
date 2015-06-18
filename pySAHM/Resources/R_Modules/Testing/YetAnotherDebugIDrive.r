@@ -7,11 +7,11 @@
 # the code will sort out responses and only fit appropriate models 
 #==============================================================
 #set this path to a directory where output is to be writtend
-Outdir<-"I:\\VisTrails\\MarianTesting\\Output\\Debug12_30_13"
+Outdir<-"I:\\VisTrails\\MarianTesting\\Output\\Test3_16_15"
 TestList<-list.files("I:\\VisTrails\\MarianTesting\\BrewersSparrowTests",full.name=TRUE,recursive=FALSE,pattern=".csv")
 CodePath<-"C:\\GoogleDrive\\Python\\DevWorkspace\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
 #master code path until Colin changes it again...
-CodePath<-"K:\\USERS\\ISS\\VisTrails_SAHM_x64_1.1.0\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
+#CodePath<-"K:\\USERS\\ISS\\VisTrails_SAHM_x64_1.1.0\\VisTrails\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
 #==============================================================
 #sourcecode path
 setwd(CodePath)

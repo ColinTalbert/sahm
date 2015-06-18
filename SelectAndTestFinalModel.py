@@ -316,7 +316,7 @@ class SelectAndTestFinalModel(QtGui.QDialog):
             msgbox = QtGui.QMessageBox(self)
             msgbox.setText(msg)
             msgbox.exec_()
-            output_disp = os.path.join(finalFolder, "FinalEvaluationBinom.jpg")
+            output_disp = os.path.join(finalFolder, "FinalEvaluationBinom.png")
             self.load_picture(output_disp)
             return None
         else:
@@ -356,7 +356,7 @@ class SelectAndTestFinalModel(QtGui.QDialog):
             msgbox.setText(msg)
             msgbox.exec_()        
         else:
-            output_disp = os.path.join(finalFolder, "FinalEvaluationBinom.jpg")
+            output_disp = os.path.join(finalFolder, "FinalEvaluationBinom.png")
             self.display_jpeg = output_disp
             self.load_picture(output_disp)
 
@@ -488,7 +488,7 @@ class FindModelType():
         else:
             self.csv_file = csvOutputs[0]
         
-        self.jpeg_file = self.csv_file.replace(".csv", ".jpg")
+        self.jpeg_file = self.csv_file.replace(".csv", ".png")
         
     def button_push(self):
         sender =self.which_type.sender()
