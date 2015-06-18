@@ -27,11 +27,14 @@ input.file="C:\\temp\\TestDataSets\\modelSelection_split_1.csv"
 #           Habitat Suitability Criterion            
 #================================================================#
 'multicore=TRUE', 'om=2', 'maxent_path=K:\\USERS\\ISS\\VisTrails\\VisTrails2.1.2_SAHM_x64_1.2.0\\Central_Maxent', 'species_name=species', 'cur_processing_mode=single models sequentially (n - 1 cores each)', 'c=J:\\Projects\\CNHPforJorge\\Maxent_WildParsnip_4\\CovariateCorrelationOutputMDS_WildParsnip_initial.csv', 'o=J:\\Projects\\CNHPforJorge\\Maxent_WildParsnip_4'
-
+  hsc.file="I:\\VisTrails\\WorkingFiles\\workspace\\_HabitatSuitabilityCurves\\hsc_BrewersSparrowHSC_test_4\\hsc.json"
+  input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_HabitatSuitabilityCurves\\hsc_BrewersSparrowHSC_test_4\\CovariateCorrelationOutputMDS_BrewersSparrowHSC_initial.csv"
+  
   hsc.file="I:\\VisTrails\\WorkingFiles\\workspace\\_HabitatSuitabilityCurves2\\hsc_BrewersSparrowCV_1\\hsc.json"
   input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_HabitatSuitabilityCurves2\\hsc_BrewersSparrowCV_2\\CovariateCorrelationOutputMDS_BrewersSparrowCV_initial_orig.csv"
-  hsc.file="K:\\USERS\\ISB\\GIS\\C_TALBERT\\misc\\test_hsc.json"
- input.file="J:\\Projects\\CNHPforJorge\\SingleSplit\\CovariateCorrelationOutputMDS_segundo.csv"
+  hsc.file="I:\\VisTrails\\WorkingFiles\\workspace\\_HabitatSuitabilityCurves\\hsc_BrewersSparrowHSC_test_4\\hsc.json"
+ input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_HabitatSuitabilityCurves\\hsc_BrewersSparrowHSC_test_4\\CovariateCorrelationOutputMDS_BrewersSparrowHSC_initial.csv"
+ 
 
 FitModels(ma.name=input.file,
             output.dir=output.dir,

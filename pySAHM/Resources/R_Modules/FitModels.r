@@ -126,7 +126,12 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
                   
                   #Just for the training set for Random Forest we have to take out of bag predictions rather than the regular predictions
                   if(Model=="rf") out$dat$ma$train$pred<-tweak.p(out$mods$predictions) 
-                                                  
+                  #for HSC predicted probabilities of zero or 1 break devaince so we tweak these too
+                  if(Model=="hsc"){ 
+                     out$dat$ma$train$pred[out$dat$ma$train$pred==0]<-.0000001
+                     out$dat$ma$train$pred[out$dat$ma$train$pred==1]<-.9999999
+                  }
+                                               
     #Run Cross Validation if specified might need separate cv functions for each model
             if(out$dat$split.type=="crossValidation") out<-cv.fct(out$mods$final.mod, out=out, sp.no = 1, prev.stratify = F,Model=Model)
             
