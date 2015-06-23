@@ -1921,6 +1921,8 @@ class CovariateCorrelationAndSelection(Module):
 #                                  prefix="CovariateCorrelationOutputMDS_" + runname, suffix='.csv',
 #                                  key_inputs=[params['inputMDS']],
 #                                  subfolder=subfolder, runname=runname)
+        if outfname == params['inputMDS']:
+            outfname = outfname[:-4] + "_2.csv"
 
         params['outputMDS'] = outfname
         params['displayJPEG'] = os.path.join(session_dir, subfolder, "CovariateCorrelationDisplay.png")
