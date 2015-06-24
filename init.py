@@ -799,9 +799,7 @@ class HabitatSuitabilityCurve(Model):
     _input_ports.extend([('UseRMetrics', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
                          ])
     _output_ports = list(Model._output_ports)
-    _output_ports.extend([("curves_json", "(edu.utah.sci.vistrails.basic:File)"),
-                     ("report", "(edu.utah.sci.vistrails.basic:File)"),
-                     ("roc", "(edu.utah.sci.vistrails.basic:File)")])
+    _output_ports.extend([("curves_json", "(edu.utah.sci.vistrails.basic:File)")])
 
     def __init__(self):
         global models_path
@@ -814,16 +812,7 @@ class HabitatSuitabilityCurve(Model):
 
         Model.compute(self)
 
-#       set some Maxent specific outputs
-        self.args_dict['species_name'] = self.args_dict['species_name'].replace(' ', '_')
-        lambdasfile = self.args_dict["species_name"] + ".lambdas"
-        self.setModelResult(lambdasfile, "lambdas", "")
-
-        rocfile = "plots" + os.sep + self.args_dict["species_name"] + "_roc.png"
-        self.setModelResult(rocfile, "roc", "")
-
-        htmlfile = self.args_dict["species_name"] + ".html"
-        self.setModelResult(htmlfile, "report", "")
+        self.setModelResult("hsc.json", "curves_json", "")
 
         writetolog("Finished HSC", True)
 
