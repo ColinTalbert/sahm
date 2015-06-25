@@ -802,8 +802,6 @@ class HabitatSuitabilityCurve(Model):
     '''
     '''
     _input_ports = list(Model._input_ports)
-    _input_ports.extend([('UseRMetrics', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':True}),
-                         ])
     _output_ports = list(Model._output_ports)
     _output_ports.extend([("curves_json", "(edu.utah.sci.vistrails.basic:File)")])
 

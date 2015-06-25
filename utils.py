@@ -1332,7 +1332,7 @@ def get_sheet_location(_module):
             sheet_ref.sheetName = cur_name
             sheet_ref.minimumColumnCount = max_col
             sheet_ref.minimumRowCount = max_row
-            auto_location = CellLocation()
+            auto_location = CellLocation.Location()
             auto_location.sheetReference = sheet_ref
 
         except AttributeError:
@@ -1340,12 +1340,12 @@ def get_sheet_location(_module):
 
     if _module.hasInputFromPort("row"):
         if not auto_location:
-            auto_location = CellLocation()
+            auto_location = CellLocation.Location()
         auto_location.row = _module.getInputFromPort('row') - 1
 
     if _module.hasInputFromPort("column"):
         if not auto_location:
-            auto_location = CellLocation()
+            auto_location = CellLocation.Location()
         auto_location.col = _module.getInputFromPort('column') - 1
 
     return auto_location
