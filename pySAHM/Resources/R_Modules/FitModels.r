@@ -130,8 +130,9 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
                   if(Model=="hsc"){ 
                      out$dat$ma$train$pred[out$dat$ma$train$pred==0]<-.0000001
                      out$dat$ma$train$pred[out$dat$ma$train$pred==1]<-.9999999
+                     out$dat$split.type="none"
                   }
-                                               
+                                            
     #Run Cross Validation if specified might need separate cv functions for each model
             if(out$dat$split.type=="crossValidation") out<-cv.fct(out$mods$final.mod, out=out, sp.no = 1, prev.stratify = F,Model=Model)
             

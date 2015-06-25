@@ -7,6 +7,7 @@ source("MARS.helper.fcts.r")
 source("GLM.helper.fcts.r")
 source("BRT.helper.fcts.r")
 source("RF.helper.fcts.r")
+source("HSC.helper.fcts.r")
 source("MAXENT.helper.fcts.r")
 output.dir="C:\\temp\\SAHM_workspace"
 rc="responseBinary"
@@ -32,8 +33,8 @@ input.file="C:\\temp\\TestDataSets\\modelSelection_split_1.csv"
   
   hsc.file="I:\\VisTrails\\WorkingFiles\\workspace\\_HabitatSuitabilityCurves2\\hsc_BrewersSparrowCV_1\\hsc.json"
   input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_HabitatSuitabilityCurves2\\hsc_BrewersSparrowCV_2\\CovariateCorrelationOutputMDS_BrewersSparrowCV_initial_orig.csv"
-  hsc.file="I:\\VisTrails\\WorkingFiles\\workspace\\_HabitatSuitabilityCurves\\hsc_BrewersSparrowHSC_test_4\\hsc.json"
- input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_HabitatSuitabilityCurves\\hsc_BrewersSparrowHSC_test_4\\CovariateCorrelationOutputMDS_BrewersSparrowHSC_initial.csv"
+  hsc.file="I:\\VisTrails\\WorkingFiles\\workspace\\_HabitatSuitabilityCurves\\vespersSparrow_withCat\\UserDefinedCurve_2\\hsc.json"
+ input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_HabitatSuitabilityCurves\\vespersSparrow_withCat\\UserDefinedCurve_2\\CovariateCorrelationOutputMDS_initial.csv"
  
 
 FitModels(ma.name=input.file,
