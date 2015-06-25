@@ -1,10 +1,10 @@
-read.hsc<-function(hsc){
-      JSON<-readLines(hsc)
+read.udc<-function(udc){
+      JSON<-readLines(udc)
       mechModel<-fromJSON(JSON)
       mechModel
 }
 
-hsc.predict<-function(model,dat){
+udc.predict<-function(model,dat){
       
       if(is.null(names(model))) model<-model[[1]]
             

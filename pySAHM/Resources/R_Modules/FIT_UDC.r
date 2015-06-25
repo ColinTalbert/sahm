@@ -69,21 +69,21 @@ Args <- commandArgs(trailingOnly=FALSE)
  			if(argSplit[[1]][1]=="mbt")  make.binary.tif <- as.logical(argSplit[[1]][2])
  			if(argSplit[[1]][1]=="om")  opt.methods <- as.numeric(argSplit[[1]][2])
  		  if(argSplit[[1]][1]=="mes")  MESS <-as.logical(argSplit[[1]][2])
- 			if(argSplit[[1]][1]=="hsc")  hsc <-argSplit[[1]][2]
+ 			if(argSplit[[1]][1]=="udc")  udc <-argSplit[[1]][2]
  			 if(argSplit[[1]][1]=="multicore")  multCore <- as.logical(argSplit[[1]][2])
     }
 
 ScriptPath<-dirname(ScriptPath)
 source(file.path(ScriptPath,"LoadRequiredCode.r"))
-source(file.path(ScriptPath,"HSC.helper.fcts.r"))
+source(file.path(ScriptPath,"udc.helper.fcts.r"))
 
 
     FitModels(ma.name=csv,
 		output.dir=output,
 		response.col=responseCol,
 		make.p.tif=make.p.tif,make.binary.tif=make.binary.tif,
-		script.name="hsc",
-    opt.methods=opt.methods,MESS=MESS,hsc.file=hsc,ScriptPath=ScriptPath,multCore=multCore,debug.mode=FALSE)
+		script.name="udc",
+    opt.methods=opt.methods,MESS=MESS,udc.file=udc,ScriptPath=ScriptPath,multCore=multCore,debug.mode=FALSE)
 
 
 

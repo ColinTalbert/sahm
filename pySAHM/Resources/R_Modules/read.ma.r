@@ -75,8 +75,8 @@
             out$input$PsdoAbs=TRUE
         } else out$input$PsdoAbs=FALSE
        
-       #for hsc remove any splitting columns no splitting allowed
-          if(out$input$script.name=="hsc"){
+       #for udc remove any splitting columns no splitting allowed
+          if(out$input$script.name=="udc"){
             if(any(!is.na(m<-match("EvalSplit",names(dat))))) dat<-dat[,-c(m)]
             if(any(!is.na(m<-match("Split",names(dat))))) dat<-dat[,-c(m)]
           }

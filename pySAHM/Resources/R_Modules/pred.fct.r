@@ -93,9 +93,9 @@ pred.fct<-function(model,x,Model){
    if(Model=="maxent"){
    y[complete.cases(x)]<-try(maxent.predict(model,x[complete.cases(x),]),silent=TRUE)
    }
-   if(Model=="hsc"){
-   
-      y[complete.cases(x)]<-try(hsc.predict(model,x[complete.cases(x),]),silent=TRUE)
+   if(Model=="udc"){
+  
+      y[complete.cases(x)]<-try(udc.predict(model,x[complete.cases(x),]),silent=TRUE)
     }
     if(class(y)=="try-error") stop("Predicting the response for the new values failed.  One probable cause is that you are trying to predict to factor levels that were not present during model fitting.")
 return(y)
