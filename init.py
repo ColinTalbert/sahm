@@ -101,9 +101,6 @@ from SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
 
 from spatial_modules import BaseGeoViewerCell, GeoSpatialViewerCell, RasterLayer, \
                             VectorLayer, PolyLayer, PointLayer, LineLayer
-from sahm_picklists import ResponseType, AggregationMethod, \
-        ResampleMethod, PointAggregationMethod, ModelOutputType, RandomPointType, \
-        OutputRaster, mpl_colormap, T_O_M
 
 from utils import writetolog
 from pySAHM.utilities import TrappedError
@@ -242,8 +239,14 @@ class Predictor(Constant):
     __doc__ = GenModDoc.construct_module_doc('Predictor')
 
     _input_ports = [('categorical', '(edu.utah.sci.vistrails.basic:Boolean)'),
-                    ('ResampleMethod', '(gov.usgs.sahm:ResampleMethod:Other)', {'defaults':'["Bilinear"]'}),
-                    ('AggregationMethod', '(gov.usgs.sahm:AggregationMethod:Other)', {'defaults':'["Mean"]'}),
+                    ('ResampleMethod', '(edu.utah.sci.vistrails.basic:String)',
+                     {'entry_types': "['enum']",
+                      'values': "[['NearestNeighbor', 'Bilinear', 'Cubic', 'CubicSpline', 'Lanczos']]", 'optional': True,
+                      'defaults':'["Bilinear"]'}),
+                    ('AggregationMethod', '(edu.utah.sci.vistrails.basic:String)',
+                     {'entry_types': "['enum']",
+                      'values': "[['Mean', 'Max', 'Min', 'STD', 'Majority', 'None']]", 'optional': True,
+                      'defaults':'["Mean"]'}),
                     ('file', '(edu.utah.sci.vistrails.basic:Path)')]
     _output_ports = [('value', '(gov.usgs.sahm:Predictor:DataInput)'),
                      ('value_as_string', '(edu.utah.sci.vistrails.basic:String)', True)]
@@ -423,7 +426,10 @@ class Model(Module):
     SAHM package. It is not intended for direct use or incorporation into
     the VisTrails workflow by the user.
     '''
-    _input_ports = [('ThresholdOptimizationMethod', '(gov.usgs.sahm:T_O_M:Other)', {'defaults':'["Sensitivity=Specificity"]', 'optional':False}),
+    _input_ports = [('ThresholdOptimizationMethod', '(edu.utah.sci.vistrails.basic:String)',
+                     {'entry_types': "['enum']",
+                      'values': '[["Threshold=0.5", "Sensitivity=Specificity", "Maximizes (sensitivity+specificity)/2", "Maximizes Cohen\'s Kappa","Maximizes PCC (percent correctly classified)","Predicted prevalence=observed prevalence","Threshold=observed prevalence","Mean predicted probability","Minimizes distance between ROC plot and (0,1)",]]', 'optional': True,
+                      'defaults':'["Sensitivity=Specificity"]', 'optional':False}),
                     ('mdsFile', '(gov.usgs.sahm:MergedDataSet:Other)'),
                     ('makeBinMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
                     ('makeProbabilityMap', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}),
@@ -967,7 +973,6 @@ class MDSBuilder(Module):
 
     _input_ports = [('RastersWithPARCInfoCSV', '(gov.usgs.sahm:RastersWithPARCInfoCSV:Other)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
-#                                 ('backgroundPointType', '(gov.usgs.sahm:RandomPointType:Other)', {'defaults':'["Background"]'}),
                                  ('backgroundPointCount', '(edu.utah.sci.vistrails.basic:Integer)'),
                                  ('backgroundProbSurf', '(edu.utah.sci.vistrails.basic:File)'),
                                  ('Seed', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["{}"]'.format(utils.get_seed()), 'optional':True}),
@@ -1063,7 +1068,10 @@ class FieldDataQuery(Module):
                                  ('Response_column', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["3"]'}),
                                  ('Response_Presence_value', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["1"]'}),
                                  ('Response_Absence_value', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'["0"]'}),
-                                 ('ResponseType', '(gov.usgs.sahm:ResponseType:Other)', {'defaults':'["Presence(Absence)"]'}),
+                                 ('ResponseType', '(edu.utah.sci.vistrails.basic:String)',
+                                    {'entry_types': "['enum']",
+                                        'values': "[['Presence(Absence)', 'Count']]", 'optional': True,
+                                        'defaults':'["Presence(Absence)"]'}),
                                   ('Query_column', '(edu.utah.sci.vistrails.basic:String)'),
                                   ('Query', '(edu.utah.sci.vistrails.basic:String)'),
                                   ('run_name_info', '(gov.usgs.sahm:OutputNameInfo:Other)')]
@@ -1213,7 +1221,10 @@ class FieldDataAggregateAndWeight(Module):
     '''
     _input_ports = [('templateLayer', '(gov.usgs.sahm:TemplateLayer:DataInput)'),
                                  ('fieldData', '(gov.usgs.sahm:FieldData:DataInput)'),
-                                 ('PointAggregationOrWeightMethod', '(gov.usgs.sahm:PointAggregationMethod:Other)', {'defaults':'["Collapse In Pixel"]'}),
+                                 ('PointAggregationOrWeightMethod', '(edu.utah.sci.vistrails.basic:String)',
+                                    {'entry_types': "['enum']",
+                                     'values': "[['Collapse In Pixel', 'Weight Per Pixel']]", 'optional': True,
+                                     'defaults':'["Collapse In Pixel"]'}),
                                  ('FD_EPSG_projection', '(edu.utah.sci.vistrails.basic:Integer)'),
                                   ('run_name_info', '(gov.usgs.sahm:OutputNameInfo:Other)'),
                                   ('drop_nodata_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["True"]', 'optional':False}), ]
@@ -2531,18 +2542,9 @@ _modules = generate_namespaces({'DataInput': [
                                            ],
                                 'Other':  [(Model, {'abstract': True}),
                                            (VectorLayer, {'abstract': True}),
-                                           (ResampleMethod, {'abstract': True}),
-                                           (AggregationMethod, {'abstract': True}),
                                            (PredictorList, {'abstract': True}),
                                            (MergedDataSet, {'abstract': True}),
-                                           (ResponseType, {'abstract': True}),
                                            (RastersWithPARCInfoCSV, {'abstract': True}),
-                                           (PointAggregationMethod, {'abstract': True}),
-                                           (ModelOutputType, {'abstract': True}),
-                                           (RandomPointType, {'abstract': True}),
-                                           (OutputRaster, {'abstract': True}),
-                                           (mpl_colormap, {'abstract': True}),
-                                           (T_O_M, {'abstract': True}),
                                            (BaseGeoViewerCell, {'abstract': True}),
                                            (OutputNameInfo, {'abstract': True}),
 #                                           (TextFile, {'configureWidgetType': TextFileConfiguration}),
@@ -2598,7 +2600,16 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                           {'dst_port_remap': {'model_workspace': utils.getParentDir} })]
     module_remap['Output|SAHMModelOutputViewerCell'] = [(None, '1.0.2', 'Output|SAHMModelOutputViewerCell',
                           {'dst_port_remap': {'ModelWorkspace': utils.getParentDir} })]
-#
+
+    module_remap['Output|SAHMModelOutputViewerCell'] = [(None, '1.0.2', 'Output|SAHMModelOutputViewerCell',
+                          {'dst_port_remap': {'ModelWorkspace': utils.getParentDir} })]
+
+    module_remap['Tools|FieldDataQuery'] = [(None, '2.0.0', 'Tools|FieldDataQuery',
+                          {'dst_port_remap': {'ResponseType': 'ResponseType'} })]
+    module_remap['DataInput|FieldData'] = [(None, '2.0.0', 'DataInput|FieldData',
+                          {'dst_port_remap': {'value': 'value'} })]
+    module_remap['DataInput|TemplateLayer'] = [(None, '2.0.0', 'DataInput|TemplateLayer',
+                          {'dst_port_remap': {'value': 'value'} })]
 #    for m in ['SAHMSpatialOutputViewerCell', 'SAHMModelOutputViewerCell']:
 #        module_remap['Output|' + m] = [(None, '1.0.2', 'Output|' + m,
 #                          {'src_port_remap': {'model_workspace': 'ModelWorkspace',

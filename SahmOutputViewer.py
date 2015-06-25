@@ -67,10 +67,7 @@ except ImportError:
 if systemType in ['Microsoft', 'Windows']:
     from PyQt4 import QAxContainer
 
-from sahm_picklists import ModelOutputType
 import utils
-
-
 
 
 import os
@@ -89,7 +86,10 @@ class SAHMModelOutputViewerCell(SpreadsheetCell):
     _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
                     ('ModelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'),
-                    ('InitialModelOutputDisplay', '(gov.usgs.sahm:ModelOutputType:Other)', {'defaults':"['AUC']"})
+                    ('InitialModelOutputDisplay', '(edu.utah.sci.vistrails.basic:String)',
+                     {'entry_types': "['enum']",
+                      'values': "[['Text', 'Response Curves', 'AUC', 'Calibration', 'Confusion', 'Residuals']]", 'optional': True,
+                      'defaults':'["AUC"]'}),
                     ]
     @classmethod
     def provide_input_port_documentation(cls, port_name):

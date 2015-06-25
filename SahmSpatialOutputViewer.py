@@ -117,7 +117,10 @@ class SAHMSpatialOutputViewerCell(BaseGeoViewerCell):
     _input_ports.extend([('display_presense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                     ('display_absense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                     ('display_background_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
-                    ('initial_raster_display', '(gov.usgs.sahm:OutputRaster:Other)', {'defaults':'["Probability"]'}),
+                    ('initial_raster_display', '(edu.utah.sci.vistrails.basic:String)',
+                     {'entry_types': "['enum']",
+                      'values': "[['Probability', 'Binary Probability', 'Residuals', 'Mess', 'MoD']]", 'optional': True,
+                      'defaults':'["Probability"]'}),
                     ('model_workspace', '(edu.utah.sci.vistrails.basic:Directory)')])
 
     #  all inputs are determined relative to the model_workspace

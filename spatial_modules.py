@@ -1117,8 +1117,14 @@ class MPLButton(QtGui.QAction):
 class RasterLayer(Module):
     __doc__ = GenModDoc.construct_module_doc('RasterLayer')
 
+    maps=[m for m in pylab.cm.datad if not m.endswith("_r")]
+    maps.sort()
+
     _input_ports = [("raster_file", '(edu.utah.sci.vistrails.basic:Path)'),
-                    ("cmap", '(gov.usgs.sahm:mpl_colormap:Other)', {'defaults':'["jet"]'}),
+                    ("cmap", '(edu.utah.sci.vistrails.basic:String)',
+                     {'entry_types': "['enum']",
+                      'values': "[{}]".format(str(maps)), 'optional': True,
+                      'defaults':'["jet"]'}),
                     ('categorical', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                     ('three_band', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
                     ('display_min', '(edu.utah.sci.vistrails.basic:Float)'),
