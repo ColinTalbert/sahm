@@ -560,6 +560,10 @@ def get_job_monitor(module, model_args):
         model_prefix = os.path.split(os.path.split(model_args['ws'])[0])[1].split("_")[0]
     else:
         model_prefix = os.path.split(model_args['o'])[1].split("_")[0]
+     
+    if model_prefix == "udc":
+        model_prefix = "hsc"
+        
     output_txt = os.path.join(model_args['o'], model_prefix + "_output.txt")
 
     return ModelJobMonitor(module, stdout_fname, stderr_fname, output_txt)
@@ -590,7 +594,7 @@ def run_model_script(script, args_dict, module=None, runner_script="runRModel.py
             orig_mds = args_dict['c'].replace(".csv", "_orig.csv")
             shutil.copyfile(args_dict['c'], orig_mds)
 
-            json_fname = os.path.join(module.output_dname, '.json')
+            json_fname = os.path.join(module.output_dname, 'udc.json')
             kwargs_mod = {'inputMDS':args_dict['c'],
                       'output_json':json_fname}
             args_dict['udc'] = json_fname
@@ -615,7 +619,7 @@ def run_model_script(script, args_dict, module=None, runner_script="runRModel.py
             writetolog("\n R Processing launched asynchronously " + script,
                        True)
             raise ModuleSuspended(module, 'Model running asynchronously',
-                                  queue=job_monitor)
+                                  handle=job_monitor)
     else:
         check_R_output(job_monitor.stdout, job_monitor.stderr,
                        module, args_dict)
