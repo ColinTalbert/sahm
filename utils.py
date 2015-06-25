@@ -58,25 +58,14 @@ import numpy as np
 
 from PyQt4 import QtCore, QtGui
 
-try:
-    from vistrails.core.cache.hasher import sha_hash
-    import vistrails.api as api
-    from vistrails.core.modules.basic_modules import File, Path, Directory, new_constant, Constant, Color, String
-    from vistrails.packages.spreadsheet.basic_widgets import CellLocation
-    from vistrails.packages.spreadsheet.spreadsheet_base import StandardSheetReference
-    from vistrails.core.modules.vistrails_module import ModuleError, ModuleSuspended
-    from vistrails.core import system
-    from vistrails.gui import application
-except:
-    from core.cache.hasher import sha_hash
-    from core.modules.basic_modules import File, Path, Directory, new_constant, Constant, Color, String
-    from packages.spreadsheet.basic_widgets import CellLocation
-    from packages.spreadsheet.spreadsheet_base import StandardSheetReference
-    from core.modules.vistrails_module import ModuleError, ModuleSuspended
-    from core import system
-    from gui import application
-
-
+from vistrails.core.cache.hasher import sha_hash
+import vistrails.api as api
+from vistrails.core.modules.basic_modules import File, Path, Directory, PathObject
+from vistrails.packages.spreadsheet.basic_widgets import CellLocation
+from vistrails.packages.spreadsheet.spreadsheet_base import StandardSheetReference
+from vistrails.core.modules.vistrails_module import ModuleError, ModuleSuspended
+from vistrails.core import system
+from vistrails.gui import application
 
 import numpy
 

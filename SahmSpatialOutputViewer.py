@@ -65,21 +65,13 @@ except ImportError:
 
 
 from PyQt4 import QtCore, QtGui
-try:
-    from vistrails.core.modules.vistrails_module import Module
-    from vistrails.packages.spreadsheet.basic_widgets import SpreadsheetCell
-    from vistrails.packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
-    from vistrails.packages.spreadsheet.spreadsheet_controller import spreadsheetController
-    from vistrails.core.packagemanager import get_package_manager
-except ImportError:
-    from core.modules.vistrails_module import Module
-    from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
-    from packages.spreadsheet.spreadsheet_base import StandardSheetReference
-    from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
-    from packages.spreadsheet.spreadsheet_controller import spreadsheetController
-    from core.packagemanager import get_package_manager
+from vistrails.core.modules.vistrails_module import Module
+from vistrails.packages.spreadsheet.basic_widgets import SpreadsheetCell
+from vistrails.packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
+from vistrails.packages.spreadsheet.spreadsheet_controller import spreadsheetController
+from vistrails.core.packagemanager import get_package_manager
 
-from sahm_picklists import OutputRaster
+
 from utils import map_ports
 
 from pySAHM.utilities import dbfreader as dbfreader
