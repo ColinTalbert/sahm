@@ -75,6 +75,11 @@
             out$input$PsdoAbs=TRUE
         } else out$input$PsdoAbs=FALSE
        
+       #for hsc remove any splitting columns no splitting allowed
+          if(out$input$script.name=="hsc"){
+            if(any(!is.na(m<-match("EvalSplit",names(dat))))) dat<-dat[,-c(m)]
+            if(any(!is.na(m<-match("Split",names(dat))))) dat<-dat[,-c(m)]
+          }
         # remove evaluation points
         if(any(!is.na(match("EvalSplit",names(dat))))){
              EvalIndx<-match("EvalSplit",names(dat))
@@ -124,7 +129,7 @@
      
       dat.names<-names(dat)
             
-      if(out$input$script.name=="hsc") Split.type="none"
+    
       # tagging factors and looking at their levels
          factor.cols <- grep("categorical",names(dat))
          factor.cols<-factor.cols[!factor.cols%in%rm.list]
