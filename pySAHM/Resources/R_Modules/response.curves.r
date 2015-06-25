@@ -48,7 +48,7 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
       bname<-out$dat$bname
         
       if(Model%in%c("brt","mars","rf"))  nvar <- nrow(out$mods$summary)
-      if(Model%in%c("maxent","hsc")) nvar <- out$mods$n.vars.final
+      if(Model%in%c("maxent","udc")) nvar <- out$mods$n.vars.final
       if(Model=="glm")              nvar <- out$mods$n.vars.final-length(grep(":", attr(terms(formula(out$mods$final.mod[[1]])),"term.labels")))
                
             pcol <- ceiling(sqrt(nvar))

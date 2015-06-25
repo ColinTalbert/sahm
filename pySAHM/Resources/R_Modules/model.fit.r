@@ -64,8 +64,9 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
 #================================================================
 #          Habitat Suitability Criterion
 #================================================================= 
-     if(Model=="hsc"){
-      out$mods$final.mod[[1]]<-read.hsc(out$input$hsc.file)
+     if(Model=="udc"){
+     
+      out$mods$final.mod[[1]]<-read.udc(out$input$udc.file)
            return(out)
           }
 

@@ -48,8 +48,8 @@ chk.libs <- function(Model){
 #Written by Marian Talbert 2/2012
      if(Model=="PairsExplore") libs=list("gam")
      if(Model=="Pred.inspect") libs=list("raster","gam")
-     if(Model%in%c("mars","glm","rf","gam","ann","brt","maxent","hsc")) libs <- c("PresenceAbsence","rgdal","sp","survival","tools","raster","tcltk2","foreign","ade4","ROCR","ncf","splines")
-     if(Model=="hsc")                libs<-as.list(c("rjson",libs))
+     if(Model%in%c("mars","glm","rf","gam","ann","brt","maxent","udc")) libs <- c("PresenceAbsence","rgdal","sp","survival","tools","raster","tcltk2","foreign","ade4","ROCR","ncf","splines")
+     if(Model=="udc")                libs<-as.list(c("rjson",libs))
      if(Model=="mars")               libs<-as.list(c("mda","earth","plotrix",libs))
      if(Model%in%c("glm","maxent"))  libs<-as.list(libs)
      if(Model=="rf")                 libs<-as.list(c("randomForest",libs))

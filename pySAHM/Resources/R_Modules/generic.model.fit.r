@@ -178,7 +178,7 @@ on.exit(detach(out$input))
         out$mods$vnames<-names(out$dat$ma$train$dat)[-1]
    }
    
-   if(Model=="hsc"){
+   if(Model=="udc"){
     out$mods$n.vars.final<- length(out$mods$final.mod[[1]])
         out$mods$vnames<-names(out$mods$final.mod[[1]])
    }
