@@ -73,7 +73,6 @@ from SelectAndTestFinalModel import SelectAndTestFinalModel
 
 import utils
 import GenerateModuleDoc as GenModDoc
-#  import our python SAHM Processing files
 import pySAHM.FieldDataAggreagateAndWeight as FDAW
 import pySAHM.MDSBuilder as MDSB
 import pySAHM.MDSBuilder_vector as MDSB_V
@@ -84,7 +83,6 @@ import pySAHM.utilities as utilities
 import pySAHM.SpatialUtilities as SpatialUtilities
 from SahmOutputViewer import SAHMModelOutputViewerCell
 from SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
-#  from GeneralSpatialViewer import GeneralSpatialViewer
 
 from spatial_modules import BaseGeoViewerCell, GeoSpatialViewerCell, RasterLayer, \
                             VectorLayer, PolyLayer, PointLayer, LineLayer
@@ -785,7 +783,7 @@ class MAXENT(Model):
 
         writetolog("Finished Maxent", True)
 
-class HabitatSuitabilityCurve(Model):
+class UserDefinedCurve(Model):
     '''
     '''
     _input_ports = list(Model._input_ports)
@@ -797,15 +795,15 @@ class HabitatSuitabilityCurve(Model):
         Model.__init__(self)
         self.name = 'FIT_HSC.r'
         self.pywrapper = "runRModel.py"
-        self.abbrev = 'hsc'
+        self.abbrev = 'udc'
 
     def compute(self):
 
         Model.compute(self)
 
-        self.setModelResult("hsc.json", "curves_json", "")
+        self.setModelResult("udc.json", "curves_json", "")
 
-        writetolog("Finished HSC", True)
+        writetolog("Finished UserDefinedCurves", True)
 
 
 class BackgroundSurfaceGenerator(Module):
@@ -2520,7 +2518,7 @@ _modules = generate_namespaces({'DataInput': [
                                                 {
                                                  'moduleColor':model_color,
                                                            'moduleFringe':model_fringe}),
-                                           (HabitatSuitabilityCurve,
+                                           (UserDefinedCurve,
                                                 {
                                                  'moduleColor':model_color,
                                                            'moduleFringe':model_fringe}),
@@ -2595,6 +2593,7 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                           {'dst_port_remap': {'value': 'value'} })]
     module_remap['DataInput|TemplateLayer'] = [(None, '2.0.0', 'DataInput|TemplateLayer',
                           {'dst_port_remap': {'value': 'value'} })]
+
 #    for m in ['SAHMSpatialOutputViewerCell', 'SAHMModelOutputViewerCell']:
 #        module_remap['Output|' + m] = [(None, '1.0.2', 'Output|' + m,
 #                          {'src_port_remap': {'model_workspace': 'ModelWorkspace',

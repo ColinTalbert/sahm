@@ -586,15 +586,15 @@ def run_model_script(script, args_dict, module=None, runner_script="runRModel.py
         writetolog("\nStarting processing of " + script , True)
         writetolog("    command used: \n" + utilities.convert_list_to_cmd_str(cmd), False, False)
 
-        if module.abbrev == "hsc":
+        if module.abbrev == "udc":
             orig_mds = args_dict['c'].replace(".csv", "_orig.csv")
             shutil.copyfile(args_dict['c'], orig_mds)
 
-            json_fname = os.path.join(module.output_dname, 'hsc.json')
+            json_fname = os.path.join(module.output_dname, '.json')
             kwargs_mod = {'inputMDS':args_dict['c'],
                       'output_json':json_fname}
-            args_dict['hsc'] = json_fname
-            cmd.append("hsc=" + json_fname)
+            args_dict['udc'] = json_fname
+            cmd.append("udc=" + json_fname)
             dialog = CreatePredictorCurvesDialog(kwargs_mod)
             #  dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
             retVal = dialog.exec_()
