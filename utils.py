@@ -240,7 +240,8 @@ def map_ports(module, port_map):
                 value = access(value)
             if isinstance(value, File) or \
                         isinstance(value, Directory) or \
-                        isinstance(value, Path):
+                        isinstance(value, Path) or\
+                        isinstance(value, PathObject):
                 value = path_port(module, port)
             args[flag] = value
     return args
