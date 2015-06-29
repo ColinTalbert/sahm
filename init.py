@@ -793,7 +793,7 @@ class UserDefinedCurve(Model):
     def __init__(self):
         global models_path
         Model.__init__(self)
-        self.name = 'FIT_HSC.r'
+        self.name = 'FIT_UDC.r'
         self.pywrapper = "runRModel.py"
         self.abbrev = 'udc'
 

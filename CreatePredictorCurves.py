@@ -536,7 +536,6 @@ class PathInteractor(PlotInteractor):
         self.shadow.set_data(*zip(*self.vertices))
 
         self.canvas_udc.restore_region(self.background)
-        #     self.ax_udc.draw_artist(self.pathpatch)
         self.ax_udc.draw_artist(self.line)
         self.canvas_udc.blit(self.ax_udc.bbox)
 
@@ -547,9 +546,9 @@ class PathInteractor(PlotInteractor):
         for coll in (self.ax_udc.collections):
             self.ax_udc.collections.remove(coll)
 
+
         xlim = self.ax_udc.get_xlim()
         x, y = [list(t) for t in zip(*self.vertices)]
-
         if xlim[0] < x[0]:
             x.insert(0, xlim[0])
             y.insert(0, y[0])
@@ -561,10 +560,12 @@ class PathInteractor(PlotInteractor):
             y.append(y[-1])
         elif x[-1] < xlim[-1]:
             x[-1] = xlim[-1]
-
         self.fill = self.ax_udc.fill_between(x, 0, y, facecolor='green', alpha=0.5)
+        self.ax_udc.set_xlim(xlim)
+
 
     def add_shadow(self):
+
         self.shadow, = self.ax_udc.plot(*zip(*self.vertices))
         self.shadow.update_from(self.line)
 
@@ -656,6 +657,7 @@ class PathInteractor(PlotInteractor):
             
             self.replot()
             
+
         elif  event.button == 1:
         #  button pressed but not on a vertex == Pan!!
             if self.last_x is None:

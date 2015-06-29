@@ -560,9 +560,6 @@ def get_job_monitor(module, model_args):
         model_prefix = os.path.split(os.path.split(model_args['ws'])[0])[1].split("_")[0]
     else:
         model_prefix = os.path.split(model_args['o'])[1].split("_")[0]
-     
-    if model_prefix == "udc":
-        model_prefix = "hsc"
         
     output_txt = os.path.join(model_args['o'], model_prefix + "_output.txt")
 
