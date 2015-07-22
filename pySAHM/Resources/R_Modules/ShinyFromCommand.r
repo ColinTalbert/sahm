@@ -83,7 +83,7 @@ source(file.path(ScrptPath,"MAXENT.helper.fcts.r"))
 ShinyCode<-file.path(ScrptPath,"ResponseCurves")
 
 sourceList<-list(file.path(ShinyCode,"external\\ChkLibs.r"),file.path(ShinyCode,"external\\Colors.r"),
-file.path(ShinyCode,"external\\response.curves.r"))
+file.path(ShinyCode,"external\\interactionPlot.r"),file.path(ShinyCode,"external\\response.curvesOneModel.r"))
 unlist(lapply(sourceList,source))
 ChkLibs(list("gbm","randomForest","maptools","rgdal","shiny","leaflet","maptools","rgdal","raster","ncdf4","fields","maps",
             "ggplot2","zoo","XML","RColorBrewer","chron","wesanderson"))
