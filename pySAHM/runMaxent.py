@@ -83,19 +83,27 @@ class MAXENTRunner(object):
         stderr_fname = os.path.join(self.outputdir, "stdErr.txt")
         self.writetolog('    running command:  \n' +
                         utilities.convert_list_to_cmd_str(cmd) + "\n", True, False)
-        utilities.add_process_to_pool(utilities.launch_cmd,
-                                [cmd, stdout_fname, stderr_fname])
-        utilities.wait_for_pool_to_finish()
 
-        r_cmd = [sys.executable]
-        r_cmd.extend(sys.argv)
-        r_cmd[1] = r_cmd[1].replace('runMaxent.py', 'runRModel.py')
-        r_cmd.append('lam=' + self.outputdir)
-        self.writetolog('    running command:  \n' +
-                    utilities.convert_list_to_cmd_str(r_cmd) + "\n", True, False)
-        utilities.add_process_to_pool(utilities.launch_cmd,
-                                [r_cmd, stdout_fname, stderr_fname])
-        utilities.wait_for_pool_to_finish()
+        if os.path.exists(self.maxent_path):
+            utilities.add_process_to_pool(utilities.launch_cmd,
+                                    [cmd, stdout_fname, stderr_fname])
+            utilities.wait_for_pool_to_finish()
+
+            r_cmd = [sys.executable]
+            r_cmd.extend(sys.argv)
+            r_cmd[1] = r_cmd[1].replace('runMaxent.py', 'runRModel.py')
+            r_cmd.append('lam=' + self.outputdir)
+            self.writetolog('    running command:  \n' +
+                        utilities.convert_list_to_cmd_str(r_cmd) + "\n", True, False)
+            utilities.add_process_to_pool(utilities.launch_cmd,
+                                    [r_cmd, stdout_fname, stderr_fname])
+            utilities.wait_for_pool_to_finish()
+        else:
+            msg = 'The specified Maxent.Jar file ({})\n\t\t'.format(self.maxent_path)
+            msg += "\nNoes not appear to exist on the file system!"
+            self.writetolog(msg, True, True)
+            raise RuntimeError(msg)
+
 
 
     def start_pool(self):

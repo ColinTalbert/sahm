@@ -181,7 +181,7 @@ class FieldDataQuery(object):
         else:
             header.append("Weights")
 
-        header.append(os.path.abspath(SpatialUtilities.getRasterName(self.templatefName)))
+        header.append(os.path.abspath(SpatialUtilities.get_raster_name(self.templatefName)))
         header.append(os.path.abspath(origCSV))
 
         # loop through each row (observation) and

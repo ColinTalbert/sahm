@@ -98,13 +98,15 @@ doc_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "documentatio
 GenModDoc.load_documentation(doc_file)
 
 class BaseGeoViewerCell(SpreadsheetCell):
-    _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
-                    ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
-                    ("vector_layers", "(edu.utah.sci.vistrails.basic:Dictionary)"),
+    _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)", {'optional': True}),
+                    ("column", "(edu.utah.sci.vistrails.basic:Integer)", {'optional': True}),
+                    ("vector_layers", "(edu.utah.sci.vistrails.basic:Dictionary)", {'optional': False}),
                     ('display_states', '(edu.utah.sci.vistrails.basic:Boolean)',
-                                    {'defaults':'["True"]', 'optional':False}),
+                                    {'defaults':'["True"]', 'optional':True}),
                     ('display_colorbar', '(edu.utah.sci.vistrails.basic:Boolean)',
-                                    {'defaults':'["True"]', 'optional':False}), ]
+                                    {'defaults':'["True"]', 'optional':True}),
+                    ('Location', '(org.vistrails.vistrails.spreadsheet:CellLocation)',
+                                    {'optional':True})]
 
 
     @classmethod
@@ -130,20 +132,20 @@ class BaseGeoViewerCell(SpreadsheetCell):
 
         self.location = utils.get_sheet_location(self)
 
-        inputs['vector_layers'] = self.forceGetInputListFromPort('vector_layers')
+        inputs['vector_layers'] = self.force_get_input_list('vector_layers')
         #  ugly hack to get the viswall to work.  Serial/unserialize nests
         #  the list of vector_layers in an additional list
         if inputs['vector_layers'] != [] and type(inputs['vector_layers'][0]) == list:
             inputs['vector_layers'] = inputs['vector_layers'][0]
 
-        inputs['raster_layers'] = self.forceGetInputListFromPort('raster_layers')
+        inputs['raster_layers'] = self.force_get_input_list('raster_layers')
         #  ugly hack to get the viswall to work.  Serial/unserialize nests
         #  the list of vector_layers in an additional list
         if inputs['raster_layers'] != [] and type(inputs['raster_layers'][0]) == list:
             inputs['raster_layers'] = inputs['raster_layers'][0]
 
-        inputs["display_states"] = self.forceGetInputFromPort("display_states", True)
-        inputs["display_colorbar"] = self.forceGetInputFromPort("display_colorbar", True)
+        inputs["display_states"] = self.force_get_input("display_states", True)
+        inputs["display_colorbar"] = self.force_get_input("display_colorbar", True)
         return inputs
 
     def local_displayAndWait(self, inputs):
@@ -1114,20 +1116,20 @@ class RasterLayer(Module):
     maps=[m for m in pylab.cm.datad if not m.endswith("_r")]
     maps.sort()
 
-    _input_ports = [("raster_file", '(edu.utah.sci.vistrails.basic:Path)'),
+    _input_ports = [("raster_file", '(edu.utah.sci.vistrails.basic:Path)', {'optional': True}),
                     ("cmap", '(edu.utah.sci.vistrails.basic:String)',
                      {'entry_types': "['enum']",
                       'values': "[{}]".format(str(maps)), 'optional': True,
-                      'defaults':'["jet"]'}),
-                    ('categorical', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
-                    ('three_band', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
-                    ('display_min', '(edu.utah.sci.vistrails.basic:Float)'),
-                    ('display_max', '(edu.utah.sci.vistrails.basic:Float)'),
-                    ('NoDataValue', '(edu.utah.sci.vistrails.basic:Float)'), ]
+                      'defaults':'["jet"]', 'optional': True}),
+                    ('categorical', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
+                    ('three_band', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
+                    ('display_min', '(edu.utah.sci.vistrails.basic:Float)', {'optional': True}),
+                    ('display_max', '(edu.utah.sci.vistrails.basic:Float)', {'optional': True}),
+                    ('NoDataValue', '(edu.utah.sci.vistrails.basic:Float)', {'optional': True}) ]
 
     _output_ports = [('display_dict', '(edu.utah.sci.vistrails.basic:Dictionary)')]
 
-    port_map = {'raster_file':('raster_file', utils.get_filename_relative, True),
+    port_map = {'raster_file':('raster_file', utils.get_relative_path, True),
                     'cmap': ("cmap", None, True),
                     'categorical': ("categorical", None, True),
                     'three_band': ("three_band", None, True),
@@ -1148,18 +1150,18 @@ class VectorLayer(Module):
     '''Base class for VisTrails modules that represent a geospatial layer
     that can be added to a GeneralSpatialViewerCell as an overlay to a RasterFile
     '''
-    _input_ports = [('input_file', '(edu.utah.sci.vistrails.basic:File)', {'optional':False}),
+    _input_ports = [('input_file', '(edu.utah.sci.vistrails.basic:File)', {'optional':True}),
                     ('line_color', '(edu.utah.sci.vistrails.basic:Color)', {'optional':True}),
                     ('fill_color', '(edu.utah.sci.vistrails.basic:Color)', {'optional':True}),
-                    ('line_width', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["1"]', 'optional':False}),
-                    ('alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["1.0"]', 'optional':False}),
+                    ('line_width', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["1"]', 'optional':True}),
+                    ('alpha', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["1.0"]', 'optional':True}),
                     ('query', '(edu.utah.sci.vistrails.basic:String)', {'defaults':'[""]', 'optional':True}),
                     ('draw_order', '(edu.utah.sci.vistrails.basic:Integer)', {'defaults':'["1"]', 'optional':True}), ]
     _output_ports = [('display_dict', '(edu.utah.sci.vistrails.basic:Dictionary)')]
 
     def __init__(self):
         Module.__init__(self)
-        self.port_map = {'input_file':('input_file', utils.get_filename_relative, True),  #  These ports are for all Models
+        self.port_map = {'input_file':('input_file', utils.get_relative_path, True),  #  These ports are for all Models
                      'line_color':('edgecolor', utils.vt_color_to_tuple, False),
                      'fill_color':('facecolor', utils.vt_color_to_tuple, False),
                      'line_width':('linewidth', None, True),
@@ -1186,9 +1188,9 @@ class PointLayer(VectorLayer):
 
     _input_ports = list(VectorLayer._input_ports)
     _input_ports.extend([('marker', '(edu.utah.sci.vistrails.basic:String)',
-                          {'defaults':'["o"]', 'optional':False}),
+                          {'defaults':'["o"]', 'optional':True}),
                          ('markersize', '(edu.utah.sci.vistrails.basic:Float)',
-                          {'defaults':'["50.0"]', 'optional':False}), ])
+                          {'defaults':'["50.0"]', 'optional':True}), ])
 
     def __init__(self):
         VectorLayer.__init__(self)
