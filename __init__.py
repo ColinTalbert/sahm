@@ -43,28 +43,17 @@
 ###############################################################################
 import sys
 
-try:
-    from vistrails.core import system
-except ImportError:
-    from core import system
+from vistrails.core import system
+from vistrails.core.configuration import ConfigurationObject
 
-try:
-    from vistrails.core.configuration import ConfigurationObject
-except ImportError:
-    from core.configuration import ConfigurationObject
 
 name = "SAHM"
 identifier = "gov.usgs.sahm"
-version = '1.2.0'
+version = '2.0.0'
 
 def package_dependencies():
-    try:
-        import vistrails.core.packagemanager
-        manager = vistrails.core.packagemanager.get_package_manager()
-    except ImportError:
-        import core.packagemanager
-        manager = core.packagemanager.get_package_manager()
-
+    import vistrails.core.packagemanager
+    manager = vistrails.core.packagemanager.get_package_manager()
 
     if manager.has_package('org.vistrails.vistrails.spreadsheet'):
         return ['org.vistrails.vistrails.spreadsheet']

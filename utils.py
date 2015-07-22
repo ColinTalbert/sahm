@@ -58,25 +58,14 @@ import numpy as np
 
 from PyQt4 import QtCore, QtGui
 
-try:
-    from vistrails.core.cache.hasher import sha_hash
-    import vistrails.api as api
-    from vistrails.core.modules.basic_modules import File, Path, Directory, new_constant, Constant, Color, String
-    from vistrails.packages.spreadsheet.basic_widgets import CellLocation
-    from vistrails.packages.spreadsheet.spreadsheet_base import StandardSheetReference
-    from vistrails.core.modules.vistrails_module import ModuleError, ModuleSuspended
-    from vistrails.core import system
-    from vistrails.gui import application
-except:
-    from core.cache.hasher import sha_hash
-    from core.modules.basic_modules import File, Path, Directory, new_constant, Constant, Color, String
-    from packages.spreadsheet.basic_widgets import CellLocation
-    from packages.spreadsheet.spreadsheet_base import StandardSheetReference
-    from core.modules.vistrails_module import ModuleError, ModuleSuspended
-    from core import system
-    from gui import application
-
-
+from vistrails.core.cache.hasher import sha_hash
+import vistrails.api as api
+from vistrails.core.modules.basic_modules import File, Path, Directory, PathObject
+from vistrails.packages.spreadsheet.basic_widgets import CellLocation
+from vistrails.packages.spreadsheet.spreadsheet_base import StandardSheetReference
+from vistrails.core.modules.vistrails_module import ModuleError, ModuleSuspended
+from vistrails.core import system
+from vistrails.gui import application
 
 import numpy
 
@@ -200,8 +189,6 @@ def mknextdir(prefix, directory="", skipSequence=False, subfolder="", runname=""
     os.mkdir(dirname)
     return dirname
 
-
-
 def setrootdir(session_dir):
     global _roottempdir
     _roottempdir = session_dir
@@ -227,8 +214,8 @@ def createrootdir(rootWorkspace):
 def map_ports(module, port_map):
     args = {}
     for port, (flag, access, required) in port_map.iteritems():
-        if required or module.hasInputFromPort(port):
-            value = module.forceGetInputListFromPort(port)
+        if required or module.has_input(port):
+            value = module.force_get_input_list(port)
             if len(value) > 1:
                 raise ModuleError(module, 'Multiple items found from Port ' +
                     port + '.  Only single entry handled.  Please remove extraneous items.')
@@ -245,19 +232,23 @@ def map_ports(module, port_map):
                     raise ModuleError(module, 'No items found from Port ' +
                         port + '.  Input is required.')
             else:
-                value = module.forceGetInputFromPort(port)
+                value = module.force_get_input(port)
 
             if access is not None:
                 value = access(value)
-            if isinstance(value, File) or \
-                        isinstance(value, Directory) or \
-                        isinstance(value, Path):
+            if is_filelike(value):
                 value = path_port(module, port)
             args[flag] = value
     return args
 
+def is_filelike(thing):
+    return isinstance(thing, File) or \
+                        isinstance(thing, Directory) or \
+                        isinstance(thing, Path) or\
+                        isinstance(thing, PathObject)
+
 def path_port(module, portName):
-    value = module.forceGetInputListFromPort(portName)
+    value = module.force_get_input_list(portName)
     if len(value) > 1:
         raise ModuleError(module, 'Multiple items found from Port ' +
                           portName + '.  Only single entry handled.  Please remove extraneous items.')
@@ -266,8 +257,8 @@ def path_port(module, portName):
     path = path.replace("/", os.path.sep)
     if os.path.exists(path):
         return path
-    elif os.path.exists(getFileRelativeToCurrentVT(path, module)):
-        return getFileRelativeToCurrentVT(path, module)
+    elif os.path.exists(get_relative_path(path, module)):
+        return get_relative_path(path, module)
     else:
         raise RuntimeError, 'The indicated file or directory, ' + \
             path + ', does not exist on the file system.  Cannot continue!'
@@ -304,24 +295,20 @@ def get_seed(value=None):
 #          return random.randint(-1 * ((2 ** 32) / 2 - 1), (2 ** 32) / 2 - 1)
 
 def dir_path_value(value, module=None):
-    val = getFileRelativeToCurrentVT(value.name, module)
+    val = get_relative_path(value, module)
     sep = os.path.sep
     return val.replace("/", sep)
 
-def create_file_module(fname, f=None, module=None):
+#  class FileObject(object):
+#      def __init__(self, fname, upToDate=True, module=None):
+#          self.name = get_relative_path(fname, module)
+#          self.upToDate = True
+#
+#  class DirectoryObject(object):
+#      def __init__(self, dname, upToDate=True, module=None):
+#          self.name = get_relative_path(dname, module)
+#          self.upToDate = True
 
-    if f is None:
-        f = File()
-    f.name = getFileRelativeToCurrentVT(fname)
-    f.upToDate = True
-    return f
-
-def create_dir_module(dname, d=None):
-    if d is None:
-        d = Directory()
-    d.name = dname
-    d.upToDate = True
-    return d
 
 def MDSresponseCol(MDSFile):
     csvfile = open(MDSFile, "r")
@@ -412,12 +399,12 @@ def getShortName(fullPathName):
         shortname = os.path.splitext(shortname)[0]
     return shortname
 
-def getRasterName(fullPathName):
+def get_raster_name(fullPathName):
     if fullPathName.endswith('hdr.adf'):
         rastername = os.path.split(fullPathName)[0]
     else:
         rastername = fullPathName
-    return getFileRelativeToCurrentVT(rastername)
+    return get_relative_path(rastername)
 
 def gen_R_cmd(script, args_dict):
     '''Formats the cmd used to launch a SAHM R script
@@ -570,6 +557,7 @@ def get_job_monitor(module, model_args):
         model_prefix = os.path.split(os.path.split(model_args['ws'])[0])[1].split("_")[0]
     else:
         model_prefix = os.path.split(model_args['o'])[1].split("_")[0]
+        
     output_txt = os.path.join(model_args['o'], model_prefix + "_output.txt")
 
     return ModelJobMonitor(module, stdout_fname, stderr_fname, output_txt)
@@ -596,15 +584,15 @@ def run_model_script(script, args_dict, module=None, runner_script="runRModel.py
         writetolog("\nStarting processing of " + script , True)
         writetolog("    command used: \n" + utilities.convert_list_to_cmd_str(cmd), False, False)
 
-        if module.abbrev == "hsc":
+        if module.abbrev == "udc":
             orig_mds = args_dict['c'].replace(".csv", "_orig.csv")
             shutil.copyfile(args_dict['c'], orig_mds)
 
-            json_fname = os.path.join(module.output_dname, 'hsc.json')
+            json_fname = os.path.join(module.output_dname, 'udc.json')
             kwargs_mod = {'inputMDS':args_dict['c'],
                       'output_json':json_fname}
-            args_dict['hsc'] = json_fname
-            cmd.append("hsc=" + json_fname)
+            args_dict['udc'] = json_fname
+            cmd.append("udc=" + json_fname)
             dialog = CreatePredictorCurvesDialog(kwargs_mod)
             #  dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
             retVal = dialog.exec_()
@@ -612,76 +600,15 @@ def run_model_script(script, args_dict, module=None, runner_script="runRModel.py
             if retVal == 1:
                 raise ModuleError(module, "Cancel or Close selected (not OK) workflow halted.")
 
-        if processing_mode == "FORT Condor":
-            runModelOnCondor(script, args_dict)
-            writetolog("\n R Processing launched using Condor " + script, True)
-            raise ModuleSuspended(module, 'Model running on Condor',
-                                  queue=job_monitor)
-        else:
-            utilities.add_process_to_pool(utilities.launch_cmd,
-                                   [cmd, stdout_fname, stderr_fname])
-#              out_msg, err_msg = utilities.launch_cmd(cmd, stdout_fname,
-#                                                      stderr_fname, True)
-            writetolog("\n R Processing launched asynchronously " + script,
-                       True)
-            raise ModuleSuspended(module, 'Model running asynchronously',
-                                  queue=job_monitor)
+        utilities.add_process_to_pool(utilities.launch_cmd,
+                               [cmd, stdout_fname, stderr_fname])
+        writetolog("\n R Processing launched asynchronously " + script,
+                   True)
+        raise ModuleSuspended(module, 'Model running asynchronously',
+                              handle=job_monitor)
     else:
         check_R_output(job_monitor.stdout, job_monitor.stderr,
                        module, args_dict)
-
-
-def runModelOnCondor(script, args_dict, command_arr):
-    #  copy MDS file and convert all refs to K:, I:, N:, J: to UNC paths
-    mdsDir, mdsFile = os.path.split(args_dict["c"])
-    newMDSfname = os.path.join(args_dict['o'], mdsFile)
-    newMDSFile = open(newMDSfname, 'w')
-    oldLines = open(args_dict["c"], 'r').readlines()
-    for headerLine in oldLines[:3]:
-        newMDSFile.write(utilities.replaceMappedDrives(headerLine))
-
-    newMDSFile.writelines(oldLines[3:])
-
-    os.chdir(args_dict['o'])
-
-    mdsArgIndex = command_arr.index('c=' + args_dict["c"])
-    command_arr[mdsArgIndex] = 'c=' + newMDSfname
-    for index in range(len(command_arr)):
-        command_arr[index] = utilities.replaceMappedDrives(command_arr[index])
-
-    #  create condorSubmit file
-    submitFname = os.path.join(args_dict['o'], "modelSubmit.txt")
-    submitFile = open(submitFname, 'w')
-    submitFile.write("Universe                = vanilla\n")
-    submitFile.write("Executable              = c:\Windows\System32\cmd.exe\n")
-    submitFile.write("run_as_owner            = true\n")
-    submitFile.write("Getenv                  = true\n")
-    submitFile.write("Should_transfer_files   = no\n")
-    submitFile.write("transfer_executable     = false\n")
-
-    machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151', 'igskbacbws425']
-    reqsStr = 'Requirements            = (Machine =="'
-    reqsStr += '.gs.doi.net"||Machine =="'.join(machines) + '.gs.doi.net")\n'
-    submitFile.write(reqsStr)
-    stdErrFname = os.path.join(args_dict['o'], "stdErr.txt")
-    stdOutFname = os.path.join(args_dict['o'], "stdOut.txt")
-    logFname = os.path.join(args_dict['o'], "log.txt")
-    submitFile.write("Output                  = " + utilities.replaceMappedDrives(stdOutFname) + "\n")
-    submitFile.write("error                   = " + utilities.replaceMappedDrives(stdErrFname) + "\n")
-    submitFile.write("log                     = " + utilities.replaceMappedDrives(logFname) + "\n")
-    argsStr = 'Arguments               = "/c pushd ' + "'"
-    argsStr += "' '".join(command_arr) + "'" + '"\n'
-    argsStr = utilities.replaceMappedDrives(argsStr)
-    argsStr = argsStr.replace(r"\python.exe'", "' && python.exe")
-    submitFile.write(argsStr)
-    submitFile.write("+RequiresWholeMachine = True\n")
-    submitFile.write("Notification            = Never\n")
-    submitFile.write("Queue\n")
-    submitFile.close()
-
-    #  launch condor job
-    DEVNULL = open(os.devnull, 'wb')
-    p = subprocess.Popen(["condor_submit", "-n", 'IGSKBACBWSCDRS3', submitFname], stderr=DEVNULL, stdout=DEVNULL)
 
 def get_r_path():
     global r_path
@@ -822,7 +749,7 @@ def merge_inputs_csvs(input_csvs, outputFile):
         firstline = infile1csv.next()
         if len(firstline) > 4:
             templatefname = firstline[-2]
-            if getFileRelativeToCurrentVT(templatefname):
+            if get_relative_path(templatefname):
                 infile1.close()
                 break
         else:
@@ -846,9 +773,9 @@ def merge_inputs_csvs(input_csvs, outputFile):
         inputreader.next()
         for row in inputreader:
             try:
-                outputCSV.writerow([getFileRelativeToCurrentVT(row[0]), row[1], row[2], row[3], row[6]])
+                outputCSV.writerow([get_relative_path(row[0]), row[1], row[2], row[3], row[6]])
             except:
-                outputCSV.writerow([getFileRelativeToCurrentVT(row[0]), row[1], row[2], row[3]])
+                outputCSV.writerow([get_relative_path(row[0]), row[1], row[2], row[3]])
         iFile.close()
     oFile.close()
 
@@ -1097,8 +1024,7 @@ def waitForProcessesToFinish(processQueue, maxCount=1):
                     processQueue.remove(process)
 
 def getParentDir(f, x=None):
-    parentdirf = os.path.dirname(f.name)
-    return create_dir_module(parentdirf)
+    return os.path.dirname(f.name)
 
 def convert_tom(old_f, new_module):
     controller = api.get_current_controller()
@@ -1132,10 +1058,7 @@ def convert_tom(old_f, new_module):
     new_module.add_function(new_function)
     return []
 
-def get_filename_relative(f):
-    return getFileRelativeToCurrentVT(f.name)
-
-def getFileRelativeToCurrentVT(fname, curModule=None):
+def get_relative_path(f, module=None):
     #  This is three step approach:
     #  step 1: if fname exists assume it's the one we want and return it.
     #  step 2: Look for the file relative to the current VT.
@@ -1146,14 +1069,19 @@ def getFileRelativeToCurrentVT(fname, curModule=None):
     #  step 3: Do what we did in step 2 but relative to the current session folder.
     #
     #  If no fname is found in the above three steps raise an error.
-    def couldntFindFile():
+    def couldnt_find_file(fname):
         msg = "Could not find file: " + fname + "\nPlease point to valid location for this file."
-        if curModule is None:
+        if module is None:
             raise Exception(msg)
         else:
-            raise ModuleError(curModule, msg)
+            raise ModuleError(module, msg)
 
     try:
+        if is_filelike(f):
+            fname = f.name
+        else:
+            fname = f
+
         fname = fname.replace ("\\", "/")
         #  step 1
         if os.path.exists(fname):
@@ -1201,11 +1129,11 @@ def getFileRelativeToCurrentVT(fname, curModule=None):
             pass
 
         #  we did our best but couldn't find the file
-        couldntFindFile()
+        couldnt_find_file(fname)
 
     except Exception, e:
         #  if something goes wrong we couldn't find the file throw an error
-        couldntFindFile()
+        couldnt_find_file(fname)
 
 def compare_files(f1, f2):
     return filecmp.cmp(f1, f2, shallow=False)
@@ -1223,7 +1151,7 @@ def compare_mds(mds1, mds2):
     #  np.array_equiv(orig_mds, new_mds) doesn't work on string types in this np version
     return np.count_nonzero(np.logical_not(orig_mds == new_mds)) == 0
 
-def make_next_file_complex(curModule, prefix, suffix="", directory="",
+def make_next_file_complex(module, prefix, suffix="", directory="",
                           key_inputs=[], file_or_dir='file',
                                                     subfolder="", runname=""):
     '''How we're handling file can lead to some unanticipated results.
@@ -1232,11 +1160,11 @@ def make_next_file_complex(curModule, prefix, suffix="", directory="",
     2) key input files we want to monitor for changes
     '''
     h = sha_hash()
-    h.update(curModule.signature)
-    for key in sorted(curModule.inputPorts):
-        if curModule.hasInputFromPort(key):
-#              print bytes(curModule.getInputFromPort(key))
-            h.update(bytes(curModule.getInputFromPort(key)))
+    h.update(module.signature)
+    for key in sorted(module.inputPorts):
+        if module.has_input(key):
+#              print bytes(module.get_input(key))
+            h.update(bytes(module.get_input(key)))
 
     for input in key_inputs:
 #          print str(input) + hash_file(input)
@@ -1306,8 +1234,8 @@ def get_sheet_location(_module):
             rows = []
             cols = []
             for m in cur_pipeline.modules.itervalues():
-                if m.name in ['SAHMSpatialOutputViewerCell',
-                                'SAHMModelOutputViewerCell',
+                if m.name in ['ModelMapViewer',
+                                'ModelOutputViewer',
                                     'GeoSpatialViewerCell']:
                     cur_cells += 1
                     for function in m.functions:
@@ -1332,21 +1260,21 @@ def get_sheet_location(_module):
             sheet_ref.sheetName = cur_name
             sheet_ref.minimumColumnCount = max_col
             sheet_ref.minimumRowCount = max_row
-            auto_location = CellLocation()
+            auto_location = CellLocation.Location()
             auto_location.sheetReference = sheet_ref
 
         except AttributeError:
             auto_location = None
 
-    if _module.hasInputFromPort("row"):
+    if _module.has_input("row"):
         if not auto_location:
-            auto_location = CellLocation()
-        auto_location.row = _module.getInputFromPort('row') - 1
+            auto_location = CellLocation.Location()
+        auto_location.row = _module.get_input('row') - 1
 
-    if _module.hasInputFromPort("column"):
+    if _module.has_input("column"):
         if not auto_location:
-            auto_location = CellLocation()
-        auto_location.col = _module.getInputFromPort('column') - 1
+            auto_location = CellLocation.Location()
+        auto_location.col = _module.get_input('column') - 1
 
     return auto_location
 

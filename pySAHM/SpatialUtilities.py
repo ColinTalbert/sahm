@@ -452,7 +452,7 @@ def Normalized_field_name(field_name, previous_fields):
             short_name = shorter_name + "_" + str(i)
     return short_name
 
-def getRasterName(fullPathName):
+def get_raster_name(fullPathName):
     if fullPathName.endswith('hdr.adf'):
         rastername = os.path.split(fullPathName)[0]
     else:
@@ -460,7 +460,7 @@ def getRasterName(fullPathName):
     return rastername
 
 def getRasterShortName(fullPathName):
-    rasterName = getRasterName(fullPathName)
+    rasterName = get_raster_name(fullPathName)
     rasterJustName = os.path.split(rasterName)[1]
     return os.path.splitext(rasterJustName)[0]
 

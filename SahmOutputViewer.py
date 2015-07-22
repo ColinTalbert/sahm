@@ -1,23 +1,8 @@
 ###############################################################################
 #  #
-#  # Copyright (C) 2010-2012, USGS Fort Collins Science Center.
-#  # All rights reserved.
-#  # Contact: talbertc@usgs.gov
-#  #
 #  # This file is part of the Software for Assisted Habitat Modeling package
 #  # for VisTrails.
 #  #
-#  # "Redistribution and use in source and binary forms, with or without
-#  # modification, are permitted provided that the following conditions are met:
-#  #
-#  #  - Redistributions of source code must retain the above copyright notice,
-#  #    this list of conditions and the following disclaimer.
-#  #  - Redistributions in binary form must reproduce the above copyright
-#  #    notice, this list of conditions and the following disclaimer in the
-#  #    documentation and/or other materials provided with the distribution.
-#  #  - Neither the name of the University of Utah nor the names of its
-#  #    contributors may be used to endorse or promote products derived from
-#  #    this software without specific prior written permission.
 #  #
 #  # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 #  # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
@@ -47,30 +32,18 @@
 ################################################################################
 from PyQt4 import QtCore, QtGui, QtWebKit
 
-try:
-    from vistrails.core.system import systemType
-    from vistrails.core.modules.vistrails_module import Module
-    from vistrails.packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
-    from vistrails.packages.spreadsheet.spreadsheet_base import StandardSheetReference
-    from vistrails.packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
-    from vistrails.packages.spreadsheet.spreadsheet_controller import spreadsheetController
-    from vistrails.core.packagemanager import get_package_manager
-except ImportError:
-    from core.system import systemType
-    from core.modules.vistrails_module import Module
-    from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
-    from packages.spreadsheet.spreadsheet_base import StandardSheetReference
-    from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
-    from packages.spreadsheet.spreadsheet_controller import spreadsheetController
-    from core.packagemanager import get_package_manager
+from vistrails.core.system import systemType
+from vistrails.core.modules.vistrails_module import Module
+from vistrails.packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
+from vistrails.packages.spreadsheet.spreadsheet_base import StandardSheetReference
+from vistrails.packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
+from vistrails.packages.spreadsheet.spreadsheet_controller import spreadsheetController
+from vistrails.core.packagemanager import get_package_manager
 
 if systemType in ['Microsoft', 'Windows']:
     from PyQt4 import QAxContainer
 
-from sahm_picklists import ModelOutputType
 import utils
-
-
 
 
 import os
@@ -82,15 +55,19 @@ GenModDoc.load_documentation(doc_file)
 
 ################################################################################
 
-class SAHMModelOutputViewerCell(SpreadsheetCell):
+class ModelOutputViewer(SpreadsheetCell):
     """
     """
     __doc__ = GenModDoc.construct_module_doc('SAHMModelOutputViewerCell')
-    _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
-                    ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
+    _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)", {'optional': True}),
+                    ("column", "(edu.utah.sci.vistrails.basic:Integer)", {'optional': True}),
                     ('ModelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'),
-                    ('InitialModelOutputDisplay', '(gov.usgs.sahm:ModelOutputType:Other)', {'defaults':"['AUC']"})
-                    ]
+                    ('InitialModelOutputDisplay', '(edu.utah.sci.vistrails.basic:String)',
+                     {'entry_types': "['enum']",
+                      'values': "[['Text', 'Response Curves', 'AUC', 'Calibration', 'Confusion', 'Residuals']]", 'optional': True,
+                      'defaults':'["AUC"]'}),
+                    ('Location', '(org.vistrails.vistrails.spreadsheet:CellLocation)',
+                                    {'optional':True})]
     @classmethod
     def provide_input_port_documentation(cls, port_name):
         return utils.construct_port_msg(cls, port_name, 'in')
@@ -115,14 +92,15 @@ class SAHMModelOutputViewerCell(SpreadsheetCell):
         Dispatch the display event to the spreadsheet with images and labels
 
         """
-        if self.hasInputFromPort("ModelWorkspace") and \
-            utils.check_if_model_finished(self.getInputFromPort("ModelWorkspace").name):
+        model_workspace = utils.get_relative_path(self.get_input("ModelWorkspace"), self)
+
+        if self.has_input("ModelWorkspace") and \
+            utils.check_if_model_finished(model_workspace):
 
             auc_graph = text_output = response_curves = calibration_graph = None
             confusion_graph = residuals_graph = variable_graph = model_label = initial_display = None
 
             window = spreadsheetController.findSpreadsheetWindow()
-            model_workspace = self.getInputFromPort("ModelWorkspace").name
 
             model_dir_full = os.path.normcase(model_workspace)
             model_dir = os.path.split(model_dir_full)[1]
@@ -165,8 +143,8 @@ class SAHMModelOutputViewerCell(SpreadsheetCell):
 
             self.location = utils.get_sheet_location(self)
 
-            if self.hasInputFromPort('InitialModelOutputDisplay'):
-                initial_display = self.getInputFromPort('InitialModelOutputDisplay')
+            if self.has_input('InitialModelOutputDisplay'):
+                initial_display = self.get_input('InitialModelOutputDisplay')
             else:
                 initial_display = 'AUC'
 

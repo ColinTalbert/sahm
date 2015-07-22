@@ -65,21 +65,13 @@ except ImportError:
 
 
 from PyQt4 import QtCore, QtGui
-try:
-    from vistrails.core.modules.vistrails_module import Module
-    from vistrails.packages.spreadsheet.basic_widgets import SpreadsheetCell
-    from vistrails.packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
-    from vistrails.packages.spreadsheet.spreadsheet_controller import spreadsheetController
-    from vistrails.core.packagemanager import get_package_manager
-except ImportError:
-    from core.modules.vistrails_module import Module
-    from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
-    from packages.spreadsheet.spreadsheet_base import StandardSheetReference
-    from packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
-    from packages.spreadsheet.spreadsheet_controller import spreadsheetController
-    from core.packagemanager import get_package_manager
+from vistrails.core.modules.vistrails_module import Module
+from vistrails.packages.spreadsheet.basic_widgets import SpreadsheetCell
+from vistrails.packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
+from vistrails.packages.spreadsheet.spreadsheet_controller import spreadsheetController
+from vistrails.core.packagemanager import get_package_manager
 
-from sahm_picklists import OutputRaster
+
 from utils import map_ports
 
 from pySAHM.utilities import dbfreader as dbfreader
@@ -107,17 +99,20 @@ import spatial_modules
 from spatial_modules import BaseGeoViewerCell, GeoSpatialViewerCell, SpatialViewerCellWidgetBase, \
     GeneralSpatialViewerToolBar, ViewStateBoundariesButton
 
-class SAHMSpatialOutputViewerCell(BaseGeoViewerCell):
+class ModelMapViewer(BaseGeoViewerCell):
     """
     SAHMModelOutputViewerCell is a VisTrails Module that
     displays the various output from a SAHM Model run in a single cell
     """
     __doc__ = GenModDoc.construct_module_doc('SAHMSpatialOutputViewerCell')
     _input_ports = copy.deepcopy(BaseGeoViewerCell._input_ports)
-    _input_ports.extend([('display_presense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
-                    ('display_absense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
-                    ('display_background_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
-                    ('initial_raster_display', '(gov.usgs.sahm:OutputRaster:Other)', {'defaults':'["Probability"]'}),
+    _input_ports.extend([('display_presense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
+                    ('display_absense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
+                    ('display_background_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
+                    ('initial_raster_display', '(edu.utah.sci.vistrails.basic:String)',
+                     {'entry_types': "['enum']",
+                      'values': "[['Probability', 'Binary Probability', 'Residuals', 'Mess', 'MoD']]", 'optional': True,
+                      'defaults':'["Probability"]'}),
                     ('model_workspace', '(edu.utah.sci.vistrails.basic:Directory)')])
 
     #  all inputs are determined relative to the model_workspace
@@ -135,7 +130,7 @@ class SAHMSpatialOutputViewerCell(BaseGeoViewerCell):
             'display_absense_points': ("display_abs_points", None, True),
             'display_background_points': ("display_backs_points", None, True),
             'initial_raster_display': ("initial_raster", None, True),
-            "model_workspace": ("model_workspace", utils.get_filename_relative, True)}
+            "model_workspace": ("model_workspace", utils.get_relative_path, True)}
 
 #    @print_timing
     def compute(self):
