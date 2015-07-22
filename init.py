@@ -81,8 +81,8 @@ import pySAHM.RasterFormatConverter as RFC
 import pySAHM.runMaxent as MaxentRunner
 import pySAHM.utilities as utilities
 import pySAHM.SpatialUtilities as SpatialUtilities
-from SahmOutputViewer import SAHMModelOutputViewerCell
-from SahmSpatialOutputViewer import SAHMSpatialOutputViewerCell
+from SahmOutputViewer import ModelOutputViewer
+from SahmSpatialOutputViewer import ModelMapViewer
 
 from spatial_modules import BaseGeoViewerCell, GeoSpatialViewerCell, RasterLayer, \
                             VectorLayer, PolyLayer, PointLayer, LineLayer
@@ -2533,9 +2533,9 @@ _modules = generate_namespaces({'DataInput': [
 #                                           (TextFile, {'configureWidgetType': TextFileConfiguration}),
 #                                           (CSVTextFile, {'configureWidgetType': CSVTextFileConfiguration})
                                            ],
-                                'Output': [(SAHMModelOutputViewerCell, {'moduleColor':output_color,
+                                'Output': [(ModelOutputViewer, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe}),
-                                          (SAHMSpatialOutputViewerCell, {'moduleColor':output_color,
+                                          (ModelMapViewer, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe}),
 #                                             (GeneralSpatialViewer, {'moduleColor':output_color,
 #                                                             'moduleFringe':output_fringe}),
@@ -2579,13 +2579,11 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
         module_remap['Tools|' + m] = [(None, '1.0.1', 'Tools|' + m,
                           {'dst_port_remap': {'modelWorkspace': utils.getParentDir} })]
 
-    module_remap['Output|SAHMSpatialOutputViewerCell'] = [(None, '1.0.2', 'Output|SAHMSpatialOutputViewerCell',
-                          {'dst_port_remap': {'model_workspace': utils.getParentDir} })]
-    module_remap['Output|SAHMModelOutputViewerCell'] = [(None, '1.0.2', 'Output|SAHMModelOutputViewerCell',
-                          {'dst_port_remap': {'ModelWorkspace': utils.getParentDir} })]
+    module_remap['Output|SAHMSpatialOutputViewerCell'] = [(None, '1.0.2', 'Output|SAHMSpatialOutputViewerCell', {'dst_port_remap': {'model_workspace': utils.getParentDir} }),
+                                                          (None, '2.0.1', 'Output|ModelMapViewer', {'dst_port_remap': {}}), ]
+    module_remap['Output|SAHMModelOutputViewerCell'] = [(None, '1.0.2', 'Output|SAHMModelOutputViewerCell', {'dst_port_remap': {'ModelWorkspace': utils.getParentDir} }),
+                                                        (None, '2.0.1', 'Output|ModelOutputViewer', {'dst_port_remap': {} })]
 
-    module_remap['Output|SAHMModelOutputViewerCell'] = [(None, '1.0.2', 'Output|SAHMModelOutputViewerCell',
-                          {'dst_port_remap': {'ModelWorkspace': utils.getParentDir} })]
 
     module_remap['Tools|FieldDataQuery'] = [(None, '2.0.0', 'Tools|FieldDataQuery',
                           {'dst_port_remap': {'ResponseType': 'ResponseType'} })]

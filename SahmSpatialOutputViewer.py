@@ -99,16 +99,16 @@ import spatial_modules
 from spatial_modules import BaseGeoViewerCell, GeoSpatialViewerCell, SpatialViewerCellWidgetBase, \
     GeneralSpatialViewerToolBar, ViewStateBoundariesButton
 
-class SAHMSpatialOutputViewerCell(BaseGeoViewerCell):
+class ModelMapViewer(BaseGeoViewerCell):
     """
     SAHMModelOutputViewerCell is a VisTrails Module that
     displays the various output from a SAHM Model run in a single cell
     """
     __doc__ = GenModDoc.construct_module_doc('SAHMSpatialOutputViewerCell')
     _input_ports = copy.deepcopy(BaseGeoViewerCell._input_ports)
-    _input_ports.extend([('display_presense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
-                    ('display_absense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
-                    ('display_background_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':False}),
+    _input_ports.extend([('display_presense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
+                    ('display_absense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
+                    ('display_background_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
                     ('initial_raster_display', '(edu.utah.sci.vistrails.basic:String)',
                      {'entry_types': "['enum']",
                       'values': "[['Probability', 'Binary Probability', 'Residuals', 'Mess', 'MoD']]", 'optional': True,
@@ -130,7 +130,7 @@ class SAHMSpatialOutputViewerCell(BaseGeoViewerCell):
             'display_absense_points': ("display_abs_points", None, True),
             'display_background_points': ("display_backs_points", None, True),
             'initial_raster_display': ("initial_raster", None, True),
-            "model_workspace": ("model_workspace", utils.get_filename_relative, True)}
+            "model_workspace": ("model_workspace", utils.get_relative_path, True)}
 
 #    @print_timing
     def compute(self):

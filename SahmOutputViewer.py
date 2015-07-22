@@ -70,18 +70,19 @@ GenModDoc.load_documentation(doc_file)
 
 ################################################################################
 
-class SAHMModelOutputViewerCell(SpreadsheetCell):
+class ModelOutputViewer(SpreadsheetCell):
     """
     """
     __doc__ = GenModDoc.construct_module_doc('SAHMModelOutputViewerCell')
-    _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)"),
-                    ("column", "(edu.utah.sci.vistrails.basic:Integer)"),
+    _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)", {'optional': True}),
+                    ("column", "(edu.utah.sci.vistrails.basic:Integer)", {'optional': True}),
                     ('ModelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'),
                     ('InitialModelOutputDisplay', '(edu.utah.sci.vistrails.basic:String)',
                      {'entry_types': "['enum']",
                       'values': "[['Text', 'Response Curves', 'AUC', 'Calibration', 'Confusion', 'Residuals']]", 'optional': True,
                       'defaults':'["AUC"]'}),
-                    ]
+                    ('Location', '(org.vistrails.vistrails.spreadsheet:CellLocation)',
+                                    {'optional':True})]
     @classmethod
     def provide_input_port_documentation(cls, port_name):
         return utils.construct_port_msg(cls, port_name, 'in')
@@ -106,14 +107,15 @@ class SAHMModelOutputViewerCell(SpreadsheetCell):
         Dispatch the display event to the spreadsheet with images and labels
 
         """
-        if self.hasInputFromPort("ModelWorkspace") and \
-            utils.check_if_model_finished(self.getInputFromPort("ModelWorkspace").name):
+        model_workspace = utils.get_relative_path(self.get_input("ModelWorkspace"), self)
+
+        if self.has_input("ModelWorkspace") and \
+            utils.check_if_model_finished(model_workspace):
 
             auc_graph = text_output = response_curves = calibration_graph = None
             confusion_graph = residuals_graph = variable_graph = model_label = initial_display = None
 
             window = spreadsheetController.findSpreadsheetWindow()
-            model_workspace = self.getInputFromPort("ModelWorkspace").name
 
             model_dir_full = os.path.normcase(model_workspace)
             model_dir = os.path.split(model_dir_full)[1]
@@ -156,8 +158,8 @@ class SAHMModelOutputViewerCell(SpreadsheetCell):
 
             self.location = utils.get_sheet_location(self)
 
-            if self.hasInputFromPort('InitialModelOutputDisplay'):
-                initial_display = self.getInputFromPort('InitialModelOutputDisplay')
+            if self.has_input('InitialModelOutputDisplay'):
+                initial_display = self.get_input('InitialModelOutputDisplay')
             else:
                 initial_display = 'AUC'
 
