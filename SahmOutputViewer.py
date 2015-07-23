@@ -63,7 +63,7 @@ GenModDoc.load_documentation(doc_file)
 class ModelOutputViewer(SpreadsheetCell):
     """
     """
-    __doc__ = GenModDoc.construct_module_doc('SAHMModelOutputViewerCell')
+    __doc__ = GenModDoc.construct_module_doc('ModelOutputViewer')
     _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)", {'optional': True}),
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)", {'optional': True}),
                     ('ModelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'),
@@ -75,10 +75,10 @@ class ModelOutputViewer(SpreadsheetCell):
                                     {'optional':True})]
     @classmethod
     def provide_input_port_documentation(cls, port_name):
-        return utils.construct_port_msg(cls, port_name, 'in')
+        return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-        return utils.construct_port_msg(cls, port_name, 'out')
+        return GenModDoc.construct_port_doc(cls, port_name, 'out')
 
     def findFile(self, modelDir, suffix):
         try:
@@ -736,16 +736,16 @@ class Ui_Frame(object):
 class ResponseCurveExplorer(SpreadsheetCell):
     """
     """
-    __doc__ = GenModDoc.construct_module_doc('SAHMModelOutputViewerCell')
+    __doc__ = GenModDoc.construct_module_doc('ResponseCurveExplorer')
     _input_ports = [('ModelWorkspaces', '(edu.utah.sci.vistrails.basic:Directory)'),
                     ('Location', '(org.vistrails.vistrails.spreadsheet:CellLocation)',
                                     {'optional':True})]
     @classmethod
     def provide_input_port_documentation(cls, port_name):
-        return utils.construct_port_msg(cls, port_name, 'in')
+        return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-        return utils.construct_port_msg(cls, port_name, 'out')
+        return GenModDoc.construct_port_doc(cls, port_name, 'out')
 
     def compute(self):
         """ compute() -> None

@@ -679,8 +679,8 @@ class MAXENT(Model):
         writetolog("Finished Maxent", True)
 
 class UserDefinedCurve(Model):
-    '''
-    '''
+    __doc__ = GenModDoc.construct_module_doc('UserDefinedCurve')
+
     _input_ports = list(Model._input_ports)
     _output_ports = list(Model._output_ports)
     _output_ports.extend([("curves_json", "(edu.utah.sci.vistrails.basic:File)", {'optional':True}),])

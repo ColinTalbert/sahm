@@ -73,6 +73,8 @@ def load_documentation(xml_file):
 def construct_module_doc(module_name):
     global doc_tree
 
+    doc_string = "Documentation missing"
+
     for elem in doc_tree.findall("Module"):
 
         title = elem.find("Title")

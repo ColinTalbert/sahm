@@ -104,7 +104,7 @@ class ModelMapViewer(BaseGeoViewerCell):
     SAHMModelOutputViewerCell is a VisTrails Module that
     displays the various output from a SAHM Model run in a single cell
     """
-    __doc__ = GenModDoc.construct_module_doc('SAHMSpatialOutputViewerCell')
+    __doc__ = GenModDoc.construct_module_doc('ModelMapViewer')
     _input_ports = copy.deepcopy(BaseGeoViewerCell._input_ports)
     _input_ports.extend([('display_presense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
                     ('display_absense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
