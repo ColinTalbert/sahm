@@ -764,6 +764,7 @@ class ResponseCurveExplorer(SpreadsheetCell):
             rel_workspace = os.path.join(rel_workspace, 'modelWorkspace')
             workspaces.append(os.path.normpath(rel_workspace))
 
+        self.location = utils.get_curve_sheet_location(self)
 
         #  find the next available port
         port = 5678

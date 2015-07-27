@@ -1212,7 +1212,34 @@ def make_next_file_complex(module, prefix, suffix="", directory="",
     return fname, signature, already_run
 
 
+def get_curve_sheet_location(_module):
+    '''returns a location with a new sheet with the node name of the current run
+    and dimensions set to 1x1
+    '''
+    try:
+        cur_vt = _module.moduleInfo['controller'].vistrail
 
+        cur_pipeline = _module.moduleInfo['pipeline']
+        cur_version = _module.moduleInfo['controller'].current_version
+        cur_name = cur_vt.get_pipeline_name(cur_version)
+        if "+" in cur_name:
+            cur_name = " ".join(cur_name.split()[:-2])
+
+        cur_name += " rce"
+
+        sheet_ref = StandardSheetReference()
+        sheet_ref.sheetName = cur_name
+        sheet_ref.minimumColumnCount = 1
+        sheet_ref.minimumRowCount = 1
+        auto_location = CellLocation.Location()
+        auto_location.sheetReference = sheet_ref
+
+        auto_location.row = 0
+        auto_location.col = 0
+    except AttributeError:
+        auto_location = None
+
+    return auto_location
 
 def get_sheet_location(_module):
     '''given a sahm spreadsheet module, finds all the other sahm spreadsheet cells
