@@ -700,7 +700,98 @@ class UserDefinedCurve(Model):
 
         writetolog("Finished UserDefinedCurves", True)
 
+class EnsembleBuilder(SAHMDocumentedModule, Module):
+    '''
+    '''
+    __doc__ = GenModDoc.construct_module_doc('BackgroundSurfaceGenerator')
 
+    _input_ports = [('ModelWorkspaces', '(edu.utah.sci.vistrails.basic:Directory)'),
+                    ('ThresholdMetric', '(edu.utah.sci.vistrails.basic:String)',
+                     {'entry_types': "['enum']",
+                      'values': '[["None", "AUC", "Percent Correctly Classified", "Sensitivity", "Specificity", "Kappa", "True Skill Statistic"]]',
+                      'defaults':'["None"]', 'optional':True}),
+                    ('ThresholdValue', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.75"]', 'optional':True}),
+                    ('run_name_info', '(gov.usgs.sahm:OutputNameInfo:Other)', {'optional':True}), ]
+    _output_ports = [("AverageProbability", "(edu.utah.sci.vistrails.basic:File)"),
+                     ("BinaryCount", "(edu.utah.sci.vistrails.basic:File)"),]
+
+    def compute(self):
+        port_map = {'ThresholdMetric': ('ThresholdMetric', None, True),
+                    'ThresholdValue': ('ThresholdValue', None, False),
+            'run_name_info': ('run_name_info', None, False), }
+
+        params = utils.map_ports(self, port_map)
+
+        model_workspaces = self.get_input_list("ModelWorkspaces")
+        if len(model_workspaces) < 2:
+            raise RuntimeError('2 or more ModelWorkspaces must be supplied!')
+
+        #  TODO add in check to make sure all models finished successfully
+        #  if still running raise module suspended
+        workspaces = []
+        for model_workspace in model_workspaces:
+
+
+            rel_workspace = utils.get_relative_path(model_workspace, self)
+            if params['ThresholdMetric'] != 'None':
+                model_results = utils.get_model_results(rel_workspace)
+                param_key = params['ThresholdMetric'].replace(' ', '').lower()
+                if float(model_results[param_key]) >= float(params['ThresholdValue']):
+                    workspaces.append(os.path.normpath(rel_workspace))
+                else:
+                    msg = "Model below threshold, Removed from ensemble! :\n"
+                    msg += os.path.normpath(rel_workspace)
+                    msg += "\n model {} value of {} below threshold of {}".format(params['ThresholdMetric'], model_results[param_key], params['ThresholdValue'])
+
+                    writetolog(msg, True)
+            else:
+                workspaces.append(os.path.normpath(rel_workspace))
+
+        run_name_info = params.get('run_name_info')
+        if run_name_info:
+            subfolder = run_name_info.get('subfolder_name', "")
+            runname = run_name_info.get('runname', "")
+        else:
+            #  If all subfolders are the same we'll but the model output in the same subfolder
+            subfolders = []
+            for model_workspace in model_workspaces:
+                subfolder, runname = utils.get_previous_run_info(utils.get_relative_path(model_workspace))
+                subfolders.append(subfolder)
+            if all(x == subfolders[0] for x in subfolders):
+                subfolder = subfolders[0]
+            else:
+                subfolder = ''
+            runname = ''
+
+        prefix = "ensemble_prob"
+        suffix = ".tif"
+
+        prob_tifs = [os.path.join(ws, utils.find_file(ws, '_prob_map.tif')) for ws in workspaces]
+        bin_tifs = [os.path.join(ws, utils.find_file(ws, '_bin_map.tif')) for ws in workspaces]
+
+        output_fname, signature, already_run = utils.make_next_file_complex(self,
+                                        prefix=prefix, suffix=suffix,
+                                        key_inputs=prob_tifs,
+                                        subfolder=subfolder, runname=runname)
+        output_fname_bin = output_fname.replace("ensemble_prob", "ensemble_count")
+
+        if already_run:
+            writetolog("No change in inputs or parameters using previous run of EnsembleBuilder", True)
+        else:
+
+            SpatialUtilities.average_geotifs(prob_tifs, output_fname, None, False, SpatialUtilities.average_nparrays)
+            SpatialUtilities.average_geotifs(bin_tifs, output_fname_bin, None, False, SpatialUtilities.sum_nparrays)
+
+        if os.path.exists(utils.get_relative_path(output_fname, self)):
+            writetolog("Finished Ensemble generation ", True)
+        else:
+            msg = "Problem encountered building ensemble maps.  Expected output file not found."
+            writetolog(msg, False)
+            raise ModuleError(self, msg)
+
+        utils.write_hash_entry_pickle(signature, output_fname)
+        self.set_output("AverageProbability", utils.get_relative_path(output_fname, self))
+        self.set_output("BinaryCount", utils.get_relative_path(output_fname_bin, self))
 
 class BackgroundSurfaceGenerator(SAHMDocumentedModule, Module):
     '''
@@ -751,7 +842,7 @@ class BackgroundSurfaceGenerator(SAHMDocumentedModule, Module):
                                         subfolder=subfolder, runname=runname)
 
         if already_run:
-            writetolog("No change in inputs or paramaters using previous run of BackgroundSurfaceGenerator", True)
+            writetolog("No change in inputs or parameters using previous run of BackgroundSurfaceGenerator", True)
         else:
             args = {"tmplt":kde_params["templatefName"],
                     "i":kde_params["fieldData"],
@@ -886,7 +977,7 @@ class MDSBuilder(SAHMDocumentedModule, Module):
                                         subfolder=subfolder, runname=runname)
 
         if already_run:
-            writetolog("No change in inputs or paramaters using previous run of MDS Builder", True)
+            writetolog("No change in inputs or parameters using previous run of MDS Builder", True)
         else:
             inputs_csv = utils.mknextfile(prefix='CombinedPARCFiles', suffix='.csv', subfolder=subfolder, runname=runname)
             inputs_names = [utils.get_relative_path(f, self) for f in inputs_csvs]
@@ -964,7 +1055,7 @@ class FieldDataQuery(SAHMDocumentedModule, Module):
                                         subfolder=subfolder, runname=runname)
 
         if already_run:
-            writetolog("No change in inputs or paramaters using previous run of FieldDataQuery", True)
+            writetolog("No change in inputs or parameters using previous run of FieldDataQuery", True)
         else:
             outfile = open(FDQOutput, "wb")
             csvwriter = csv.writer(outfile)
@@ -1108,7 +1199,7 @@ class FieldDataAggregateAndWeight(SAHMDocumentedModule, Module):
                                         subfolder=subfolder, runname=runname)
 
         if already_run:
-            writetolog("No change in inputs or paramaters using previous run of FieldDataAggregateAndWeight", True)
+            writetolog("No change in inputs or parameters using previous run of FieldDataAggregateAndWeight", True)
         else:
             writetolog("    output_fname=" + output_fname, True, False)
             FDAWParams['output'] = output_fname
@@ -1185,7 +1276,7 @@ class PARC(SAHMDocumentedModule, Module):
 
 #          workingCSV = os.path.join(output_dname, "tmpFilesToPARC.csv")
         if already_run:
-            writetolog("No change in inputs or paramaters using previous run of PARC", True)
+            writetolog("No change in inputs or parameters using previous run of PARC", True)
         else:
             f = open(workingCSV, "wb")
             csvWriter = csv.writer(f)
@@ -2125,8 +2216,8 @@ _modules = generate_namespaces({'DataInput': [
                                           CovariateCorrelationAndSelection,
                                           ApplyModel,
                                           BackgroundSurfaceGenerator,
-                                          OutputName
-                                          ],
+                                          OutputName,
+                                          EnsembleBuilder],
                                 'GeospatialTools': [(Reclassifier, {'configureWidgetType': ReclassifierConfiguration}),
                                                     CategoricalToContinuous,
                                                     (GeoSpatialViewerCell, {'moduleColor':output_color,

@@ -1335,4 +1335,37 @@ def get_previous_run_info(full_fname):
 
 
 
+def get_model_output_fname(dname):
+    '''given a model output workspace (dname) returns the full path to the
+    text output file from the model
+    '''
+    output_fnames = [f for f in os.listdir(dname) if f.endswith('_output.txt')]
+    if not output_fnames:
+        return None
+    return os.path.join(dname, output_fnames[0])
 
+def get_model_results(dname):
+    '''Given a model output workspace (dname) returns a dictionary with the
+    parsed contents of the model results
+    '''
+    output_txt = get_model_output_fname(dname)
+    f = open(output_txt, "r")
+    lines = f.readlines()
+    clean_lines = [l.strip().replace(" ", "") for l in lines if l != "\n"]
+
+    results = {}
+    for line in clean_lines:
+        try:
+            parts = line.split("=")
+            if parts[0] and parts[1]:
+                results[parts[0].lower()] = parts[1].split("(")[0]
+        except:
+            pass
+
+        try:
+            parts = line.split(":")
+            if parts[0] and parts[1]:
+                results[parts[0].lower()] = parts[1].split("(")[0]
+        except:
+            pass
+    return results
