@@ -703,7 +703,7 @@ class UserDefinedCurve(Model):
 class EnsembleBuilder(SAHMDocumentedModule, Module):
     '''
     '''
-    __doc__ = GenModDoc.construct_module_doc('BackgroundSurfaceGenerator')
+    __doc__ = GenModDoc.construct_module_doc('EnsembleBuilder')
 
     _input_ports = [('ModelWorkspaces', '(edu.utah.sci.vistrails.basic:Directory)'),
                     ('ThresholdMetric', '(edu.utah.sci.vistrails.basic:String)',

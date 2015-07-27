@@ -1552,6 +1552,81 @@ Row counts start from 1.</Definition>
   </Module>
   <Tools></Tools>
   <Module>
+    <Title>EnsembleBuilder</Title>
+    <Description>The EnsembleBuilder provides methods for creating an ensemble product from multiple model results.  It produces two output maps, one with the average continuous probability of all the included outputs and a second with the count of the number of models with a positive binary probability.
+
+Additionally the tool allows one to set a threshold on various model metrics to identify which models are to be included in the ensemble.  Model outputs with a value below the threshold will be removed from the ensemble.</Description>
+    <InputPorts>
+      <Port>
+        <PortName>ModelWorkspaces</PortName>
+        <Definition>This is one to four model workspaces output by any of the R models. </Definition>
+        <Mandatory>True</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>
+          <Connection>Connects to the output port 'modelWorkspace' on any of the R models (MARS, BRT, RandomForest, GLM, Maxent, or UserDefinedCurves)</Connection>
+        </Connections>
+      </Port>
+      <Port>
+        <PortName>ThresholdMetric</PortName>
+        <Definition>The model metric to use to set a threshold for model inclusion in the ensemble model.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>None</Default>
+        <Options>
+          <Option>None</Option>
+          <Option>AUC</Option>
+          <Option>Percent Correctly Classified</Option>
+          <Option>Sensitivity</Option>
+          <Option>Specificity</Option>
+          <Option>Kappa</Option>
+        </Options>
+        <Connections>
+          <Connection>Does not connect to any other module.</Connection>
+        </Connections>
+      </Port>
+      <Port>
+        <PortName>ThresholdValue</PortName>
+        <Definition>The value to use as a threshold for model inclusion in the ensemble model.  All models with a value equal than or equal to this value for the specified threshold metric will be included.</Definition>
+        <Mandatory>True</Mandatory>
+        <Default>0.75</Default>
+        <Options>NA</Options>
+        <Connections>
+          <Connection>Does not connect to any other module.</Connection>
+        </Connections>
+      </Port>
+      <Port>
+        <PortName>run_name_info</PortName>
+        <Definition>Used to specify a meaningful tag and subfolder for output file naming/organization.  See documentation for OutputName module for more information.</Definition>
+        <Mandatory>False</Mandatory>
+        <Default>NA</Default>
+        <Options>None</Options>
+        <Connections>Connects to an OutputName module</Connections>
+      </Port>
+    </InputPorts>
+    <OutputPorts>
+      <Port>
+        <PortName>AverageProbability</PortName>
+        <Definition>The average probability saved in a geotif format.</Definition>
+        <Mandatory>NA</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>
+          <Connection>Can be connected to the raster_file port of a RasterLayer for display in a GeospatialViewerCell</Connection>
+        </Connections>
+      </Port>
+      <Port>
+        <PortName>BinaryCount</PortName>
+        <Definition>The count of binary probability maps with 1 for that cell saved in a geotif format. </Definition>
+        <Mandatory>NA</Mandatory>
+        <Default>NA</Default>
+        <Options>NA</Options>
+        <Connections>
+          <Connection>Can be connected to the raster_file port of a RasterLayer for display in a GeospatialViewerCell</Connection>
+        </Connections>
+      </Port>
+    </OutputPorts>
+  </Module>
+  <Module>
     <Title>ApplyModel</Title>
     <Description>This module takes a previously run model and applies it to new data.  ApplyModel requires the output workspace from a previous model run.  It can be used in one of two ways:
 
