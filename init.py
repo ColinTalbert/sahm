@@ -87,8 +87,9 @@ def menu_items():
         utils.setrootdir(path)
         utils.createLogger(session_dir, True)
 
-        config = package.configuration
-        config.set_deep_value('cur_session_folder', path)
+        package_manager = get_package_manager()
+        package = package_manager.get_package(identifier)
+        configuration.set_deep_value('cur_session_folder', path)
         package.persist_configuration()
 
         writetolog("*" * 79 + "\n" + "*" * 79)
@@ -133,13 +134,9 @@ def menu_items():
                 if (widget != 0) and (type(widget) is QtGui.QRadioButton):
                     if widget.isChecked():
 
-                        configuration.cur_processing_mode = str(widget.text())
+                        configuration.set_deep_value('cur_processing_mode', str(widget.text()))
+                        configuration.persist_configuration()
 
-                        package_manager = get_package_manager()
-                        package = package_manager.get_package(identifier)
-                        dom, element = package.find_own_dom_element()
-
-                        configuration.write_to_dom(dom, element)
                         utilities.start_new_pool(utilities.get_process_count(widget.text()))
 
 
@@ -1874,10 +1871,11 @@ def initialize():
         #  they don't have a decent R path, let's see if we can pull one from the
         utils.set_r_path(utils.pull_R_install_from_reg())
         configuration.r_path = utils.get_r_path()
+        configuration.set_deep_value('r_path', configuration.r_path)
+
         package_manager = get_package_manager()
         package = package_manager.get_package(identifier)
-        dom, element = package.find_own_dom_element()
-        configuration.write_to_dom(dom, element)
+        package.persist_configuration()
 
     try:
         testfname = os.path.join(utils.get_r_path(), "CanSAHMWriteToR.txt")
