@@ -46,7 +46,7 @@ response.curvesOneModel<-function(fitLst,model,vals=NULL){
                              lines(test[1:(lR-1),pIdx],Response[1:(lR-1)], ylim = y.lim, xlab = "",
                                 ylab = "", type = "l", lwd=2,cex=3,cex.main=3,cex.axis=1.2,yaxt=ifelse(pIdx==1,"s","n"),
                                 xaxt="n",main="",col=Cols[v-1])
-                                segments(x0=vals[v,pIdx],y0=0,y1=Response[lR],x1=vals[v,pIdx],col=Cols[v-1],lty=2)
+                                segments(x0=vals[v,pIdx],y0=0,y1=Response[lR],x1=vals[v,pIdx],col=Cols[v-1],lty=2,cex=2)
                              }   
                                 mtext(names(dat)[pIdx],line=1,cex=1.2)
                                # if(pIdx==1) mtext(model,side=2,outer=TRUE,at=seq(from=1/(2*nRow),to=(1-1/(2*nRow)),length=nRow)[j+1],line=3,cex=1.2)

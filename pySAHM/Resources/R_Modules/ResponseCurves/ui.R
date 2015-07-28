@@ -40,7 +40,16 @@ conditionalPanel(length(modelLst)>1,
   plotOutput("map4", click = "plot_click"),style="padding: 5px;"),style="padding: 5px;"),
   column(6,
   wellPanel(plotOutput("curves4"),style="padding: 5px;"),style="padding: 5px;" )
+  
+  ),
+ fluidRow(
+  column(4,
+  wellPanel(),style="padding: 5px;"),
+  column(6,
+  wellPanel(plotOutput("Density"),style="padding: 5px;"),style="padding: 5px;")
+  
   )
+   
  )   
 ),
 #===============================================
@@ -54,7 +63,8 @@ titlePanel("Slide Explorer")
 tabPanel("Interaction Tool",
 titlePanel("Interaction Tool"),
 helpText("Explore the interaction between two predictors in the model while holding",
-   "all other predictors constant"),
+   "all other predictors constant at the value",
+   "specified by the sliders"),
 sidebarPanel(  
             uiOutput("sliders"),                           
             width=2

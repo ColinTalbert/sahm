@@ -12,7 +12,7 @@ source("MAXENT.helper.fcts.r")
 sourceList<-list("ResponseCurves\\external\\ChkLibs.r","ResponseCurves\\external\\Colors.r","ResponseCurves\\external\\response.curvesOneModel.r","ResponseCurves\\external\\interactionPlot.r")
 unlist(lapply(sourceList,source))
 ChkLibs(list("gbm","randomForest","maptools","rgdal","shiny","leaflet","maptools","rgdal","raster","ncdf4","fields","maps",
-            "ggplot2","zoo","XML","RColorBrewer","chron","wesanderson"))
+            "ggplot2","zoo","XML","RColorBrewer","chron","wesanderson","sm"))
 
 
 wsLst<-list()
@@ -68,3 +68,4 @@ c(.2,.1,50,-10,.2,.06,.5,0))
 response.curvesInteraction(fitLst[[3]],modelLst[[3]],vals)
 response.curves(fitLst,modelLst,vals)
 response.curvesOneModel(fitLst[[3]],modelLst[[3]],vals) 
+densityPlot(fitLst[[3]])

@@ -85,7 +85,12 @@ output$curves4 <- renderPlot({
   #Plot the Curves
     response.curvesOneModel(fitLst[[4]],modelLst[[4]],XYs$vals)
   })
-  
+
+output$Density <- renderPlot({
+  #Plot the Curves
+    densityPlot(fitLst[[3]])
+  })
+    
 output$interact<-renderPlot({
  
  #get the value from the sliders using their position
