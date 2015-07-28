@@ -12,8 +12,8 @@ shinyServer(function(input, output) {
       XYs$Xlocs <- input$plot_click$x
       XYs$Ylocs<-  input$plot_click$y
     } else {
-    XYs$Xlocs<-append(input$plot_click$x,XYs$Xlocs)[1:min(8,(length(XYs$Xlocs)+1))]
-    XYs$Ylocs<-append(input$plot_click$y,XYs$Ylocs)[1:min(8,(length(XYs$Ylocs)+1))] 
+    XYs$Xlocs<-append(XYs$Xlocs,input$plot_click$x)
+    XYs$Ylocs<-append(XYs$Ylocs,input$plot_click$y)
     }
     
       XYdat<-as.data.frame(cbind(X=XYs$Xlocs,Y=XYs$Ylocs))
@@ -98,6 +98,7 @@ SlideVals<-unlist(lapply(names(dat),FUN=function(l) input[[l]]))
 
 if(input$Model=="All"){
 par(mfrow=c(2,2),mar=c(0,0,2,0),oma=c(0,0,0,0))
+
   interactionPlot(fitLst[[1]],modelLst[[1]],vals=SlideVals,phi=input$phi,theta=input$theta,x=input$FirstPredictor,y=input$SecondPredictor)
   interactionPlot(fitLst[[2]],modelLst[[2]],vals=SlideVals,phi=input$phi,theta=input$theta,x=input$FirstPredictor,y=input$SecondPredictor)
   interactionPlot(fitLst[[3]],modelLst[[3]],vals=SlideVals,phi=input$phi,theta=input$theta,x=input$FirstPredictor,y=input$SecondPredictor)

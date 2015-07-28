@@ -38,7 +38,7 @@ mapStk<<-stack(mapLst)
 stk<-stack(rastLst)
 
 
-Cols<<-c(wes_palette("Darjeeling"),wes_palette("Moonrise3"))
+Cols<<-c(wes_palette("Darjeeling"),wes_palette("GrandBudapest2"),wes_palette("Cavalcanti"),wes_palette("Moonrise3"))
 max_plots<-5
 nModels<<-4
 Variables<<-unique(unlist(lapply(fitLst,FUN=function(fit){fit$mods$vnames})))
