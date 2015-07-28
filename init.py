@@ -57,7 +57,7 @@ import pySAHM.MDSBuilder as MDSB
 import pySAHM.PARC as parc
 import pySAHM.RasterFormatConverter as RFC
 import pySAHM.SpatialUtilities as SpatialUtilities
-from SahmOutputViewer import ModelOutputViewer
+from SahmOutputViewer import ModelOutputViewer, ResponseCurveExplorer
 from SahmSpatialOutputViewer import ModelMapViewer
 
 from spatial_modules import BaseGeoViewerCell, GeoSpatialViewerCell, RasterLayer, \
@@ -679,8 +679,8 @@ class MAXENT(Model):
         writetolog("Finished Maxent", True)
 
 class UserDefinedCurve(Model):
-    '''
-    '''
+    __doc__ = GenModDoc.construct_module_doc('UserDefinedCurve')
+
     _input_ports = list(Model._input_ports)
     _output_ports = list(Model._output_ports)
     _output_ports.extend([("curves_json", "(edu.utah.sci.vistrails.basic:File)", {'optional':True}),])
@@ -1725,7 +1725,6 @@ class CovariateCorrelationAndSelection(SAHMDocumentedModule, Module):
         if retVal == 1:
             raise ModuleError(self, "Cancel or Close selected (not OK) workflow halted.")
 
-
 def load_max_ent_params():
     maxent_fname = os.path.join(os.path.dirname(__file__), 'maxent.csv')
     csv_reader = csv.reader(open(maxent_fname, 'rU'))
@@ -2171,6 +2170,8 @@ _modules = generate_namespaces({'DataInput': [
                                 'Output': [(ModelOutputViewer, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe}),
                                           (ModelMapViewer, {'moduleColor':output_color,
+                                                           'moduleFringe':output_fringe}),
+                                          (ResponseCurveExplorer, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe}),
                                           ]
                                 })

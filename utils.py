@@ -172,6 +172,9 @@ def mknextdir(prefix, directory="", skipSequence=False, subfolder="", runname=""
         if os.path.exists(dirname):
             shutil.rmtree(dirname)
     else:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
         files = os.listdir(directory)
         seq = 0
         for f in files:

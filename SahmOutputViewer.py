@@ -30,11 +30,16 @@
 ################################################################################
 #  ImageViewer widgets/toolbar implementation
 ################################################################################
+import time
+import subprocess
+import socket
+
 from PyQt4 import QtCore, QtGui, QtWebKit
 
 from vistrails.core.system import systemType
 from vistrails.core.modules.vistrails_module import Module
 from vistrails.packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
+from vistrails.packages.spreadsheet.widgets.webview.webview import WebViewCellWidget
 from vistrails.packages.spreadsheet.spreadsheet_base import StandardSheetReference
 from vistrails.packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellToolBar
 from vistrails.packages.spreadsheet.spreadsheet_controller import spreadsheetController
@@ -44,7 +49,7 @@ if systemType in ['Microsoft', 'Windows']:
     from PyQt4 import QAxContainer
 
 import utils
-
+import pySAHM.utilities as utilities
 
 import os
 import itertools
@@ -58,7 +63,7 @@ GenModDoc.load_documentation(doc_file)
 class ModelOutputViewer(SpreadsheetCell):
     """
     """
-    __doc__ = GenModDoc.construct_module_doc('SAHMModelOutputViewerCell')
+    __doc__ = GenModDoc.construct_module_doc('ModelOutputViewer')
     _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)", {'optional': True}),
                     ("column", "(edu.utah.sci.vistrails.basic:Integer)", {'optional': True}),
                     ('ModelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'),
@@ -70,10 +75,10 @@ class ModelOutputViewer(SpreadsheetCell):
                                     {'optional':True})]
     @classmethod
     def provide_input_port_documentation(cls, port_name):
-        return utils.construct_port_msg(cls, port_name, 'in')
+        return GenModDoc.construct_port_doc(cls, port_name, 'in')
     @classmethod
     def provide_output_port_documentation(cls, port_name):
-        return utils.construct_port_msg(cls, port_name, 'out')
+        return GenModDoc.construct_port_doc(cls, port_name, 'out')
 
     def findFile(self, modelDir, suffix):
         try:
@@ -159,8 +164,6 @@ class ModelOutputViewer(SpreadsheetCell):
                                                                           initial_display))
         else:
             fileValue = None
-
-
 
 class SAHMOutputViewerCellWidget(QCellWidget):
     """
@@ -727,3 +730,121 @@ class Ui_Frame(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.confusion), QtGui.QApplication.translate("Frame", "Confusion", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.residuals), QtGui.QApplication.translate("Frame", "Residuals", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.variable), QtGui.QApplication.translate("Frame", "Variable Importance", None, QtGui.QApplication.UnicodeUTF8))
+
+
+
+class ResponseCurveExplorer(SpreadsheetCell):
+    """
+    """
+    __doc__ = GenModDoc.construct_module_doc('ResponseCurveExplorer')
+    _input_ports = [('ModelWorkspaces', '(edu.utah.sci.vistrails.basic:Directory)'),
+                    ('Location', '(org.vistrails.vistrails.spreadsheet:CellLocation)',
+                                    {'optional':True})]
+    @classmethod
+    def provide_input_port_documentation(cls, port_name):
+        return GenModDoc.construct_port_doc(cls, port_name, 'in')
+    @classmethod
+    def provide_output_port_documentation(cls, port_name):
+        return GenModDoc.construct_port_doc(cls, port_name, 'out')
+
+    def compute(self):
+        """ compute() -> None
+        Dispatch the display event to the spreadsheet with images and labels
+
+        """
+        model_workspaces = self.get_input_list("ModelWorkspaces")
+        if len(model_workspaces) < 1 or len(model_workspaces) > 4:
+            raise RuntimeError('Between 1 and 4 ModelWorkspaces must be supplied!')
+         
+        #TODO add in check to make sure all models finished successfully
+        #if still running raise module suspended   
+        workspaces = []
+        for model_workspace in model_workspaces:
+            rel_workspace = utils.get_relative_path(model_workspace, self)
+            rel_workspace = os.path.join(rel_workspace, 'modelWorkspace')
+            workspaces.append(os.path.normpath(rel_workspace))
+
+
+        #  find the next available port
+        port = 5678
+        while port_occupied('127.0.0.1', port):
+            print "port ({}) occupied trying next".format(port)
+            port += 1
+            if port > 6000:
+                raise RuntimeError('Unable to find unoccupied port!')
+
+        #  launch the Shiny app
+        args = {}
+        args['port'] = str(port)
+        args['wsList'] = ",".join(workspaces)
+        script = "ShinyFromCommand.r"
+        cmd = utils.gen_R_cmd(script, args)
+
+
+        outdname = utils.mknextdir(subfolder="ResponseCurveExplorerOutput", prefix="run", skipSequence=False)
+        outfname = utils.mknextfile("ResponseCurveExplorer_stdout", suffix=".txt", directory=outdname)
+        errfname = utils.mknextfile("ResponseCurveExplorer_stderr", suffix=".txt", directory=outdname)
+
+
+        utils.writetolog("\nStarting processing of " + script , True)
+        utils.writetolog("    command used: \n" + utilities.convert_list_to_cmd_str(cmd), False, False)
+
+        stdErrFile = open(errfname, 'a')
+        stdErrFile.seek(0, os.SEEK_END)
+        stdOutFile = open(outfname, 'a')
+        stdOutFile.seek(0, os.SEEK_END)
+
+        p = subprocess.Popen(cmd, stderr=stdErrFile, stdout=stdOutFile)
+
+        start_time = time.clock()
+        CUTOFF_SECONDS = 300  #  5min
+
+        while True:
+            with open(outfname) as stdout_f:
+                stdout = stdout_f.read()
+                try:
+                    listening = stdout.split("Listening on ")
+                    url = listening[-1].strip()
+                except:
+                    pass
+
+            with open(errfname) as stderr_f:
+                stderr = stderr_f.read()
+                if "Error" in stderr:
+                    raise RuntimeError("Running Shiny App resulted in an Error:\n{}".format(stderr))
+
+                else:
+                    listening = stderr.split("Listening on ")
+                    url = listening[-1].strip()
+
+                    if url.startswith("http:"):
+                        break
+
+            time.sleep(5)
+            if time.clock() - start_time > CUTOFF_SECONDS:
+                msg = "Shiny App taking longer than expected to load!.\n"
+                msg += "The R kernel generating the Shiny app will continue to run in the background.\n"
+                msg += "Manually monitor the contents of {\n}\tfor the url which you can then open in a browser.".format(errfname)
+                raise RuntimeError(msg)
+
+        self.cellWidget = self.displayAndWait(responseCurveExplorerWidger, (p, url, None))
+
+
+class responseCurveExplorerWidger(WebViewCellWidget):
+
+    def updateContents(self, inputPorts):
+        self.p, url, file = inputPorts
+        WebViewCellWidget.updateContents(self, (url, file))
+
+    def deleteLater(self):
+        """ deleteLater() -> None
+        Make sure to clear history and delete the widget
+
+        """
+        self.p.kill()
+        WebViewCellWidget.deleteLater(self)
+
+def port_occupied(url, port):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    result = sock.connect_ex((url, int(port)))
+    return result == 0
