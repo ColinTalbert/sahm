@@ -57,7 +57,10 @@ tabPanel("Slide Explorer",
 
 plotOutput("Dens"),
 fluidRow(
-uiOutput("sliderE") )
+#column(2,uiOutput("slide",1)),
+#column(2,uiOutput("slide",2)),
+lapply(1:length(dataLst),function(i){
+column(1,uiOutput(paste0("slide",i)))}))
 ),
 
 #===============================================
