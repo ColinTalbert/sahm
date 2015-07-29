@@ -49,13 +49,15 @@ conditionalPanel(length(modelLst)>1,
   wellPanel(plotOutput("Density"),style="padding: 5px;"),style="padding: 5px;")
   
   )
-   
  )   
 ),
 #===============================================
 # ==========  Slide Explorer ==========#
 tabPanel("Slide Explorer",
-titlePanel("Slide Explorer")
+
+plotOutput("Dens"),
+fluidRow(
+uiOutput("sliderE") )
 ),
 
 #===============================================

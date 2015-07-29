@@ -90,7 +90,11 @@ output$Density <- renderPlot({
   #Plot the Curves
     densityPlot(fitLst[[3]])
   })
-    
+
+output$Dens <- renderPlot({
+  #Plot the Curves
+    densityPlot(fitLst[[3]])
+  })    
 output$interact<-renderPlot({
  
  #get the value from the sliders using their position
@@ -109,6 +113,22 @@ par(mfrow=c(2,2),mar=c(0,0,2,0),oma=c(0,0,0,0))
   }
   
 })
+output$sliderE <- renderUI({
+    
+    f<-function(l){
+    sliderInput(inputId=as.character(paste(l$Name,"aa",sep="")),label=as.character(l$Name),min=signif(l$min,digits=3),max=signif(l$max,digits=3),value=signif(l$mean,digits=3),round=TRUE)
+    }
+    getNames<-function(x){as.character(x[[1]])}
+    #we're not holding the predictors used in the surface constant so remove them from the
+    #input slider list
+    datNames<-unlist(lapply(dataLst,getNames))
+    match(c(input$FirstPredictor,input$SecondPredictor),datNames)
+   # datForSliders<-dataLst[-c(match(c(input$FirstPredictor,input$SecondPredictor),datNames))]
+   # lapply(datForSliders, f)
+   lapply(dataLst,f)
+      
+    })
+
       
 output$sliders <- renderUI({
     
