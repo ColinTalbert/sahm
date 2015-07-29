@@ -1,9 +1,7 @@
 densityPlot<-function(fitLst){
 
         #How to check that models and data match
-        dat<-fitLst$dat$ma$train$dat[,-1]
-
-         cols<-c("blue","red")
+        cols<-c("blue","red")
           color.box<-col2rgb(cols,alpha=TRUE)
                            color.box[4,]<-60
           temp.fct<-function(a){return(rgb(red=a[1],green=a[2],blue=a[3],alpha=a[4]))}
