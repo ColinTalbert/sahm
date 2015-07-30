@@ -39,7 +39,8 @@ from vistrails.core.modules.vistrails_module import Module, ModuleError, ModuleS
 from vistrails.core.modules.basic_modules import File, Path, Constant
 from vistrails.gui.modules.module_configure import StandardModuleConfigurationWidget
 from vistrails.core.packagemanager import get_package_manager
-from vistrails.core.upgradeworkflow import UpgradeWorkflowHandler
+import vistrails.core.upgradeworkflow as upgradeworkflow
+UpgradeModuleRemap = upgradeworkflow.UpgradeModuleRemap
 from vistrails.core import system
 
 from PyQt4 import QtCore, QtGui
@@ -2265,56 +2266,49 @@ _modules = generate_namespaces({'DataInput': [
                                           ]
                                 })
 
-def handle_module_upgrade_request(controller, module_id, pipeline):
-    module_remap = {'Tools|BackgroundSurfaceGenerator':
-                     [(None, '1.0.2', 'Tools|BackgroundSurfaceGenerator',
-                          {'dst_port_remap': {'bias': 'continuous'} })],
-                    'Tools|MDSBuilder':
-                     [(None, '1.0.2', 'Tools|MDSBuilder',
-                          {'dst_port_remap': {'backgroundpointCount': 'backgroundPointCount', } }),
-                      (None, '1.2.0', 'Tools|MDSBuilder',
-                          {'dst_port_remap': {'backgroundPointType':None, } })],
-                    'Tools|PARC':
-                     [(None, '1.0.2', 'Tools|PARC',
-                          {'dst_port_remap': {'bias': '',
-                                              'multipleCores': '', } })],
-                    'Tools|RasterFormatConverter':
-                    [(None, '1.0.2', 'Tools|RasterFormatConverter',
-                          {'dst_port_remap': {'multipleCores': '', } })],
-                    'Models|MAXENT':
-                    [(None, '1.0.2', 'Models|MAXENT',
-                          {'dst_port_remap': {'inputMDS': 'mdsFile', } })],
-                    }
-    for m in ['GLM', 'MARS', 'RandomForest', 'BoostedRegressionTree']:
-        module_remap['Models|' + m] = [(None, '1.0.2', 'Models|' + m,
-                          {'dst_port_remap': {'modelWorkspace': utils.getParentDir} }),
-                                       (None, '1.2.0', 'Models|' + m,
-                          {'function_remap': {'ThresholdOptimizationMethod': utils.convert_tom} })]
+_upgrades = {}
+_upgrades['DataInput|FieldData'] = [UpgradeModuleRemap(None, '2.0.0', '2.0.0', None,
+                                  dst_port_remap={'value': 'file'},
+                                 src_port_remap={'value': 'value'})]
+_upgrades['DataInput|TemplateLayer'] = [UpgradeModuleRemap(None, '2.0.0', '2.0.0', None,
+                                  dst_port_remap={'value': 'file'})]
+_upgrades['DataInput|Predictor'] = [UpgradeModuleRemap(None, '2.0.0', '2.0.0', None,
+                                  dst_port_remap={'value': 'file'},
+                                 function_remap={'AggregationMethod': utils.convert_old_enum,
+                                              'ResampleMethod': utils.convert_old_enum, })]
 
-    module_remap['Models|MARS'].append((None, '1.2.0', 'Models|MARS',
-                          {'dst_port_remap': {'MarsPenalty': 'MarsPenalty'} }))
+_upgrades['Models|MAXENT'] = [UpgradeModuleRemap(None, '1.0.2', '1.0.2', None,
+                                  dst_port_remap={'inputMDS': 'mdsFile'})]
 
-    for m in ['ApplyModel']:
-        module_remap['Tools|' + m] = [(None, '1.0.1', 'Tools|' + m,
-                          {'dst_port_remap': {'modelWorkspace': utils.getParentDir} })]
+for m in ['GLM', 'MARS', 'RandomForest', 'BoostedRegressionTree']:
+        _upgrades['Models|' + m] = [UpgradeModuleRemap(None, '1.0.2', '1.0.2', 'Models|' + m,
+                                        dst_port_remap={'modelWorkspace': utils.getParentDir}),
+                                    UpgradeModuleRemap(None, '1.2.0', '1.2.0', 'Models|' + m,
+                                        dst_port_remap={'UsePseudoAbs':None}),
+                                    UpgradeModuleRemap(None, '2.0.0', '2.0.0', 'Models|' + m,
+                                        dst_port_remap={'ThresholdOptimizationMethod': utils.convert_tom})]
 
-    module_remap['Output|SAHMSpatialOutputViewerCell'] = [(None, '1.0.2', 'Output|SAHMSpatialOutputViewerCell', {'dst_port_remap': {'model_workspace': utils.getParentDir} }),
-                                                          (None, '2.0.1', 'Output|ModelMapViewer', {'dst_port_remap': {}}), ]
-    module_remap['Output|SAHMModelOutputViewerCell'] = [(None, '1.0.2', 'Output|SAHMModelOutputViewerCell', {'dst_port_remap': {'ModelWorkspace': utils.getParentDir} }),
-                                                        (None, '2.0.1', 'Output|ModelOutputViewer', {'dst_port_remap': {} })]
+_upgrades['Output|SAHMSpatialOutputViewerCell'] = [UpgradeModuleRemap(None, '2.0.0', '2.0.0', 'Output|ModelMapViewer', {}), ]
+_upgrades['Output|SAHMModelOutputViewerCell'] = [UpgradeModuleRemap(None, '2.0.0', '2.0.0', 'Output|ModelOutputViewer', {})]
 
+_upgrades['Tools|BackgroundSurfaceGenerator'] = [UpgradeModuleRemap(None, '1.0.2', '1.0.2', None,
+                                  dst_port_remap={'bias': 'continuous'})]
+_upgrades['Tools|MDSBuilder'] = [UpgradeModuleRemap(None, '2.0.0', '2.0.0', None,
+                                  dst_port_remap={'backgroundpointCount': 'backgroundPointCount',
+                                                  'backgroundPointType':None})]
+_upgrades['Tools|PARC'] = [UpgradeModuleRemap(None, '1.0.2', '1.0.2', None,
+                                  dst_port_remap={'bias': '',
+                                          'multipleCores': ''})]
+_upgrades['Tools|RasterFormatConverter'] = [UpgradeModuleRemap(None, '1.0.2', '1.0.2', None,
+                                  dst_port_remap={'multipleCores': ''})]
+_upgrades['Tools|ApplyModel'] = [UpgradeModuleRemap(None, '1.0.1', '1.0.1', None,
+                                 function_remap={'modelWorkspace': utils.getParentDir})]
+_upgrades['Tools|FieldDataQuery'] = [UpgradeModuleRemap(None, '2.0.0', '2.0.0', None,
+                                  dst_port_remap={'ResponseType': 'ResponseType'},
+                                 function_remap={'ResponseType': utils.convert_old_enum})]
+_upgrades['Tools|FieldDataAggregateAndWeight'] = [UpgradeModuleRemap(None, '2.0.0', '2.0.0', 'Tools|FieldDataAggregateAndWeight',
+                      {'function_remap': {'ResponseType': utils.convert_old_enum} })]
 
-    module_remap['Tools|FieldDataQuery'] = [(None, '2.0.0', 'Tools|FieldDataQuery',
-                          {'dst_port_remap': {'ResponseType': 'ResponseType'} })]
-    module_remap['DataInput|FieldData'] = [(None, '2.0.0', 'DataInput|FieldData',
-                          {'dst_port_remap': {'value': 'file'} })]
-    module_remap['DataInput|TemplateLayer'] = [(None, '2.0.1', None,
-                          {'dst_port_remap': {'value': 'file'} })]
-
-#    for m in ['SAHMSpatialOutputViewerCell', 'SAHMModelOutputViewerCell']:
-#        module_remap['Output|' + m] = [(None, '1.0.2', 'Output|' + m,
-#                          {'src_port_remap': {'model_workspace': 'ModelWorkspace',
-#                                              'modelWorkspace': utils.getParentDir} })]
-
-    return UpgradeWorkflowHandler.remap_module(controller, module_id, pipeline,
-                                             module_remap)
+_upgrades['GeospatialTools|RasterLayer'] = [UpgradeModuleRemap(None, '2.0.0', '2.0.0', None,
+                                  dst_port_remap={'value': 'file'},
+                                 function_remap={'cmap': utils.convert_old_enum})]

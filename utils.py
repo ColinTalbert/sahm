@@ -1029,6 +1029,22 @@ def waitForProcessesToFinish(processQueue, maxCount=1):
 def getParentDir(f, x=None):
     return os.path.dirname(f.name)
 
+def convert_old_enum(old_f, new_module):
+    controller = api.get_current_controller()
+    param = old_f.parameters[0]
+    param_value = param.strValue
+    alias = param.alias
+
+    param_value = param.strValue
+
+    new_function = controller.create_function(new_module,
+                                              old_f.name,
+                                              [param_value],
+                                              [alias])
+    new_module.add_function(new_function)
+    return []
+
+
 def convert_tom(old_f, new_module):
     controller = api.get_current_controller()
     param = old_f.parameters[0]
