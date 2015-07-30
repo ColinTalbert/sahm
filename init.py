@@ -554,19 +554,43 @@ class ApplyModel(Model):
         #  if the suplied mds has rows, observations then
         #  pass r code the flag to produce metrics
         mdsfname = utils.get_relative_path(self.force_get_input('mdsFile'), self)
-        mdsfile = open(mdsfname, "r")
-        lines = 0
-        readline = mdsfile.readline
-        while readline():
-            lines += 1
-            if lines > 4:
-                break
+        workspace = utils.get_relative_path(self.force_get_input('modelWorkspace'), self)
 
-        if lines > 3:
+        mdsfile = open(mdsfname, "r")
+        lines = mdsfile.readlines()
+
+        if len(lines) > 3:
             #  we have rows R will need to recreate metrics.
             self.args = 'pmt=TRUE '
         else:
             self.args = 'pmt=FALSE '
+
+        if len(lines) == 3:
+            #  we're applying this model to a new area
+            #  make sure all the covariates in the original model are in the new csv
+            #  if not tack on the original values.
+            orig_mds = utils.get_mdsfname(workspace)
+            orig_mdsfile = open(orig_mds, "r")
+            orig_lines = orig_mdsfile.readlines()
+
+            orig_covariates = [item for item in orig_lines[0][3:] if item not in ['Split', 'EvalSplit', 'Weights']]
+            missing_covariates = []
+            new_covariates = [item for item in lines[0][3:] if item not in ['Split', 'EvalSplit', 'Weights']]
+            
+            for orig_covariate in orig_covariates:
+                if orig_lines[1][orig_lines[0].index(orig_covariate)] == 1 and \
+                    new_covariates.count(orig_covariate) == 0:
+                    missing_covariates.append(orig_covariate)
+            if len(missing_covariates) > 0:
+                msg = 'One or more of the covariates used in the original model are not specified in the apply model mds file\n'
+                msg += 'Specfically the following covariates were not found:'
+                msg += '\n\t'.join(missing_covariates)
+
+                raise RuntimeError()
+            
+
+
+            
 
         Model.compute(self)
 
@@ -934,7 +958,6 @@ class MDSBuilder(SAHMDocumentedModule, Module):
 
     def compute(self):
         port_map = {'fieldData': ('fieldData', None, False),
-#                    'backgroundPointType': ('pointType', None, False),
                     'backgroundPointCount': ('pointCount', None, False),
                     'backgroundProbSurf': ('probSurfacefName', None, False),
                     'Seed': ('seed', utils.get_seed, True),
@@ -1832,8 +1855,7 @@ def load_max_ent_params():
         if default:
             default = eval(default)
             kwargs['defaults'] = str([str(default)])
-        if p_type == 'Boolean':
-            kwargs['optional'] = True
+        kwargs['optional'] = True
         input_ports.append((name, '(' + basic_pkg + ':' + p_type + ')', kwargs))
         docs[name] = doc
 
