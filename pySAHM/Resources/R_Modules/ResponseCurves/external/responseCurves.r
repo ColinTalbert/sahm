@@ -22,7 +22,7 @@ responseCurves<-function(fitLst,model,vals=NULL,pIdx){
          byVar<-ifelse(missing(pIdx),FALSE,TRUE)
         # Cols<-c("red","blue","green","blueviolet","darkgoldenrod1","aquamarine","violetred","slateblue")
            
-            if(byVar) par(mfrow=c((length(fitLst)+1),1),mar=c(0,0,0,0),oma=c(0,1,0,0),xpd=TRUE)
+            if(byVar) par(mfrow=c((length(fitLst)+1),1),mar=c(0,1,0,0),oma=c(0,1,0,0),xpd=TRUE)
             else par(mfrow=c(1,ncol(dat)),mar=c(0,0,0,0),oma=c(3,5,3,0),xpd=TRUE)
            
             y.lim<-c(0,1)
@@ -45,16 +45,18 @@ responseCurves<-function(fitLst,model,vals=NULL,pIdx){
                                lR<-length(Response)
                                 if(v==1){
                                    plot(test[1:(lR-1),pIdx],Response[1:(lR-1)], ylim = y.lim, xlab = "",
-                                    ylab = "", type = ifelse(plotR,"l","n"), lwd=2,cex=3,cex.main=3,cex.axis=1.2,yaxt=ifelse(pIdx==1,"s","n"),
+                                    ylab = "", type = ifelse(plotR,"l","n"), lwd=2,cex=3,cex.main=3,cex.axis=1.2,yaxt=ifelse(pIdx==1 & !byVar,"s","n"),
                                     xaxt="n",main="")
+                                    if(!plotR) box(col="grey82")
                                  }
                                  if(v!=1 & plotR){
                                     lines(test[1:(lR-1),pIdx],Response[1:(lR-1)], ylim = y.lim, xlab = "",
-                                      ylab = "", type = "l", lwd=2,cex=3,cex.main=3,cex.axis=1.2,yaxt=ifelse(pIdx==1,"s","n"),
+                                      ylab = "", type = "l", lwd=2,cex=3,cex.main=3,cex.axis=1.2,yaxt=ifelse(!byVar,"s","n"),
                                       xaxt="n",main="",col=Cols[v-1])
                                       segments(x0=vals[v,pIdx],y0=0,y1=Response[lR],x1=vals[v,pIdx],col=Cols[v-1],lty=2,cex=2)
-                                 }   
-                               if(!byVar) mtext(names(dat)[pIdx],line=1,cex=1.2)
+                                 }
+                               if(byVar & pIdx==1) mtext(model[[j]],line=0,side=2,cex=1.2)  
+                               if(!byVar) mtext(names(dat)[pIdx],line=1,side=3,cex=1.2,col=ifelse(plotR,"black","grey74"))
                                # if(pIdx==1) mtext(model,side=2,outer=TRUE,at=seq(from=1/(2*nRow),to=(1-1/(2*nRow)),length=nRow)[j+1],line=3,cex=1.2)
                         }
                     } 
@@ -67,11 +69,14 @@ responseCurves<-function(fitLst,model,vals=NULL,pIdx){
                   cols<-apply(color.box/255,2,temp.fct)
                     presDens<-density(dat[resp==1,pIdx])
                     absDens<-density(dat[resp==0,pIdx])
-                    plot(x=range(c(absDens$x,presDens$x)),y=c(0,max(absDens$y,presDens$y)),type="n",
-                    ylab="",xlab=names(dat)[pIdx],yaxt="n")
+                    plot(x=c(mins[pIdx],maxs[pIdx]),y=c(0,max(absDens$y,presDens$y)),type="n",
+                    ylab="",xlab=names(dat)[pIdx],yaxt="n",bty="n")
                     polygon(absDens,col=cols[1],border="blue")
                     polygon(presDens,col=cols[2],border="red")
-                    if(pIdx==1) mtext("Density",side=2,outer=TRUE,at=seq(from=1/(2*nRow),to=(1-1/(2*nRow)),length=nRow)[j+1],line=3,cex=1.2)
+                    for(v in 1:nrow(vals)){
+                      segments(x0=vals[v,pIdx],y0=0,y1=25,x1=vals[v,pIdx],col=Cols[v-1],lty=2,cex=2)
+                    }
+                    if(pIdx==1) mtext("Density",side=2,cex=1.2)
                 }    
   }         
                 
