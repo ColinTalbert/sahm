@@ -5,105 +5,113 @@ shinyServer(function(input, output) {
     vals= NULL
   )
 
-  # Handle clicks on the plot
-  observeEvent(input$plot_click, {
+IntractVals<-reactiveValues(
+#start with the means
+Vals = vector()
+)
+#==============================================
+# Maps 
+#==========================
+# Handle clicks on the plot
+observeEvent(input$plot_click, {
     if (is.null(XYs$Xlocs)) {
       # We don't have a first click, so this is the first click
       XYs$Xlocs <- input$plot_click$x
-      XYs$Ylocs<-  input$plot_click$y
+      XYs$Ylocs <-  input$plot_click$y
     } else {
-    XYs$Xlocs<-append(input$plot_click$x,XYs$Xlocs)[1:min(8,(length(XYs$Xlocs)+1))]
-    XYs$Ylocs<-append(input$plot_click$y,XYs$Ylocs)[1:min(8,(length(XYs$Ylocs)+1))] 
+    XYs$Xlocs<-append(XYs$Xlocs,input$plot_click$x)
+    XYs$Ylocs<-append(XYs$Ylocs,input$plot_click$y)
     }
     
       XYdat<-as.data.frame(cbind(X=XYs$Xlocs,Y=XYs$Ylocs))
       XYs$vals<-extract(stk,XYdat)
-  })
-
-   
- output$map1 <- renderPlot({
+})
+#============================  
+#Map Generation
+lapply(1:length(modelLst),function(i){
+output[[paste("map",i,sep="")]] <- renderPlot({       
   #Plot the Map
-      par(oma=c(0,0,0,0),mar=c(0,0,2,0),xpd=FALSE)
-      
-      plot(mapStk,1,maxpixels=60000,col=Colors,xaxt="n",yaxt="n",bty="n")
+      par(oma=c(0,0,0,0),mar=c(0,0,2,0),xpd=FALSE) 
+      plot(mapStk,i,maxpixels=60000,col=Colors,xaxt="n",yaxt="n",bty="n")
 
       XYdat<-as.data.frame(cbind(X=XYs$Xlocs,Y=XYs$Ylocs))
       if((any(!is.na(XYdat)))){
-      points(x=XYdat$X,y=XYdat$Y,pch=21,col="black",bg=Cols[1:nrow(XYdat)],cex=2.5)
-      }   
-  })  
-  
- output$map2 <- renderPlot({
-  #Plot the Map
-      par(oma=c(0,0,0,0),mar=c(0,0,2,0),xpd=FALSE)
-      plot(mapStk,2,maxpixels=30000,col=Colors,xaxt="n",yaxt="n")
-
-      XYdat<-as.data.frame(cbind(X=XYs$Xlocs,Y=XYs$Ylocs))
-      if((any(!is.na(XYdat)))){
-      points(x=XYdat$X,y=XYdat$Y,pch=21,col="black",bg=Cols[1:nrow(XYdat)],cex=2.5)
-      }
+      points(x=XYdat$X,y=XYdat$Y,pch=21,col="black",bg=Cols[1:nrow(XYdat)],cex=2.5)  
+  }
   })
-  
-output$map3 <- renderPlot({
-  #Plot the Map
-      par(oma=c(0,0,0,0),mar=c(0,0,2,0),xpd=FALSE)
-      plot(mapStk,3,maxpixels=30000,col=Colors,xaxt="n",yaxt="n")
-
-      XYdat<-as.data.frame(cbind(X=XYs$Xlocs,Y=XYs$Ylocs))
-      if((any(!is.na(XYdat)))){
-      points(x=XYdat$X,y=XYdat$Y,pch=21,col="black",bg=Cols[1:nrow(XYdat)],cex=2.5)
-      }
-  })
- 
- output$map4 <- renderPlot({
-  #Plot the Map
-      par(oma=c(0,0,0,0),mar=c(0,0,2,0),xpd=FALSE)
-      plot(mapStk,4,maxpixels=30000,col=Colors,xaxt="n",yaxt="n")
-
-      XYdat<-as.data.frame(cbind(X=XYs$Xlocs,Y=XYs$Ylocs))
-      if((any(!is.na(XYdat)))){
-      points(x=XYdat$X,y=XYdat$Y,pch=21,col="black",bg=Cols[1:nrow(XYdat)],cex=2.5)
-      }
-  })
-        
-output$curves1 <- renderPlot({
+})    
+#============================    
+#Response Curve Generation for Map 
+lapply(1:length(modelLst),function(i){
+output[[paste("curves",i,sep="")]] <- renderPlot({        
   #Plot the Curves
-    response.curvesOneModel(fitLst[[1]],modelLst[[1]],XYs$vals)
+    responseCurves(list(f=fitLst[[i]]),list(m=modelLst[[i]]),XYs$vals)
+  })
   })
 
-output$curves2 <- renderPlot({
-  #Plot the Curves
-    response.curvesOneModel(fitLst[[2]],modelLst[[2]],XYs$vals)
+#==============================================
+# Sliders   
+#============================
+#Response curves for sliders
+
+observeEvent(input$addVals,{
+  IntractV<-unlist(lapply(paste(names(dat),"aa",sep=""),FUN=function(l) input[[l]]))
+  IntractVals$Vals<-rbind(IntractVals$Vals,IntractV)
+ })
+
+lapply(1:length(dataLst),IntractVals=IntractVals,function(i,IntractVals){
+output[[paste("slideRsp",i,sep="")]]<-renderPlot({
+  responseCurves(fitLst,modelLst,vals=IntractVals$Vals,i)
   })
-    
-output$curves3 <- renderPlot({
-  #Plot the Curves
-    response.curvesOneModel(fitLst[[3]],modelLst[[3]],XYs$vals)
-  })
+})
   
-output$curves4 <- renderPlot({
-  #Plot the Curves
-    response.curvesOneModel(fitLst[[4]],modelLst[[4]],XYs$vals)
-  })
-  
+#==============================================
+# Interactions   
+#============================  
+# predictor interaction
 output$interact<-renderPlot({
  
  #get the value from the sliders using their position
 SlideVals<-unlist(lapply(names(dat),FUN=function(l) input[[l]]))
 
 if(input$Model=="All"){
-par(mfrow=c(2,2),mar=c(0,0,2,0),oma=c(0,0,0,0))
-  interactionPlot(fitLst[[1]],modelLst[[1]],vals=SlideVals,phi=input$phi,theta=input$theta,x=input$FirstPredictor,y=input$SecondPredictor)
-  interactionPlot(fitLst[[2]],modelLst[[2]],vals=SlideVals,phi=input$phi,theta=input$theta,x=input$FirstPredictor,y=input$SecondPredictor)
-  interactionPlot(fitLst[[3]],modelLst[[3]],vals=SlideVals,phi=input$phi,theta=input$theta,x=input$FirstPredictor,y=input$SecondPredictor)
-  interactionPlot(fitLst[[4]],modelLst[[4]],vals=SlideVals,phi=input$phi,theta=input$theta,x=input$FirstPredictor,y=input$SecondPredictor)
-  } else{
+  par(mfrow=c(2,2),mar=c(0,0,2,0),oma=c(0,0,0,0))
+  for(i in 1:length(fitLst)){
+    interactionPlot(fitLst[[i]],modelLst[[i]],vals=SlideVals,phi=input$phi,theta=input$theta,x=input$FirstPredictor,y=input$SecondPredictor)
+    }
+} else{
    i<-match(input$Model,unlist(modelLst))
     interactionPlot(fitLst[[i]],modelLst[[i]],vals=SlideVals,phi=input$phi,theta=input$theta,x=input$FirstPredictor,y=input$SecondPredictor)
   }
   
 })
-      
+#=====================
+# named sliders
+#creating a named list of sliders so I can put them where I feel like 
+lapply(1:length(dataLst),function(i){
+output[[paste("slide",i,sep="")]] <- renderUI({ 
+    sliderInput(inputId=paste(as.character(dataLst[[i]]$Name),"aa",sep=""),label=as.character(dataLst[[i]]$Name),min=signif(dataLst[[i]]$min,digits=3),max=signif(dataLst[[i]]$max,digits=3),
+    value=signif(dataLst[[i]]$mean,digits=3),round=TRUE)
+    })
+})
+#=========================
+#a named list of predictor densities
+lapply(1:length(dataLst),function(i){
+output[[paste("dens",i,sep="")]] <- renderPlot({
+           cols<-c("blue","red")
+          color.box<-col2rgb(cols,alpha=TRUE)
+                           color.box[4,]<-60
+          temp.fct<-function(a){return(rgb(red=a[1],green=a[2],blue=a[3],alpha=a[4]))}
+          cols<-apply(color.box/255,2,temp.fct)
+            presDens<-density(dat[resp==1,i])
+            absDens<-density(dat[resp==0,i])
+            par(mar=c(2,.3,0,.3),oma=c(0,0,0,0))
+            plot(x=range(c(absDens$x,presDens$x)),y=c(0,max(absDens$y,presDens$y)),type="n",
+            ylab="",xlab=names(dat)[i],yaxt="n")
+            polygon(absDens,col=cols[1],border="blue")
+            polygon(presDens,col=cols[2],border="red")
+    })
+})      
 output$sliders <- renderUI({
     
     f<-function(l){

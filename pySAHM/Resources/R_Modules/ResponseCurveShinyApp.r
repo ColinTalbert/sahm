@@ -81,12 +81,12 @@ source(file.path(ScrptPath,"RF.helper.fcts.r"))
 source(file.path(ScrptPath,"MAXENT.helper.fcts.r"))
 
 ShinyCode<-file.path(ScrptPath,"ResponseCurves")
-
+            
 sourceList<-list(file.path(ShinyCode,"external\\ChkLibs.r"),file.path(ShinyCode,"external\\Colors.r"),
-file.path(ShinyCode,"external\\interactionPlot.r"),file.path(ShinyCode,"external\\response.curvesOneModel.r"))
+file.path(ShinyCode,"external\\interactionPlot.r"),file.path(ShinyCode,"external\\responseCurves.r"),file.path(ShinyCode,"external\\densityPlot.r"))
 unlist(lapply(sourceList,source))
 ChkLibs(list("gbm","randomForest","maptools","rgdal","shiny","leaflet","maptools","rgdal","raster","ncdf4","fields","maps",
-            "ggplot2","zoo","XML","RColorBrewer","chron","wesanderson"))
+            "ggplot2","zoo","XML","RColorBrewer","chron","wesanderson","sm"))
 
 
 fitLst<-list()
@@ -106,17 +106,17 @@ mapStk<<-stack(mapLst)
 stk<-stack(rastLst)
 
 
-Cols<<-c(wes_palette("Darjeeling"),wes_palette("Moonrise3"))
+Cols<<-c(wes_palette("Darjeeling"),wes_palette("GrandBudapest2"),wes_palette("Cavalcanti"),wes_palette("Moonrise3"))
 max_plots<-5
-nModels<<-4
 Variables<<-unique(unlist(lapply(fitLst,FUN=function(fit){fit$mods$vnames})))
 
 dat<-fitLst[[1]]$dat$ma$train$dat[,-1]
 resp<-fitLst[[1]]$dat$ma$train$dat[,1]
+
  d=data.frame(Name=names(dat),min=apply(dat,2,min,na.rm=TRUE),
    max=apply(dat,2,max,na.rm=TRUE),mean=apply(dat,2,mean,na.rm=TRUE))
-dataLst<-split(d,f=seq(1:nrow(d)))
-   
+dataLst<<-split(d,f=seq(1:nrow(d)))
+rspHgt<-c("150px","300px","550px","750px")[length(fitLst)]   
 #=========================================
 #    This is where the ma
 

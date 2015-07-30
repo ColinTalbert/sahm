@@ -9,17 +9,18 @@ source("BRT.helper.fcts.r")
 source("RF.helper.fcts.r")
 source("MAXENT.helper.fcts.r")
 #setwd("C:\\GoogleDrive\\Interactive\\Rcode\\Shiny\\MyCode")
-sourceList<-list("ResponseCurves\\external\\ChkLibs.r","ResponseCurves\\external\\Colors.r","ResponseCurves\\external\\response.curvesOneModel.r","ResponseCurves\\external\\interactionPlot.r")
+sourceList<-list("ResponseCurves\\external\\ChkLibs.r","ResponseCurves\\external\\Colors.r",
+    "ResponseCurves\\external\\interactionPlot.r","ResponseCurves\\external\\densityPlot.r","ResponseCurves\\external\\responseCurves.r")
 unlist(lapply(sourceList,source))
 ChkLibs(list("gbm","randomForest","maptools","rgdal","shiny","leaflet","maptools","rgdal","raster","ncdf4","fields","maps",
-            "ggplot2","zoo","XML","RColorBrewer","chron","wesanderson"))
+            "ggplot2","zoo","XML","RColorBrewer","chron","wesanderson","sm"))
 
 
 wsLst<-list()
 wsLst[[1]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\brt_1\\modelWorkspace"
 wsLst[[2]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\glm_1\\modelWorkspace"
-wsLst[[3]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\mars_1\\modelWorkspace"
-wsLst[[4]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\rf_1\\modelWorkspace"
+#wsLst[[3]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\mars_1\\modelWorkspace"
+#wsLst[[4]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\rf_1\\modelWorkspace"
 
 fitLst<-list()
 modelLst<-list()
@@ -38,17 +39,18 @@ mapStk<<-stack(mapLst)
 stk<-stack(rastLst)
 
 
-Cols<<-c(wes_palette("Darjeeling"),wes_palette("Moonrise3"))
+Cols<<-c(wes_palette("Darjeeling"),wes_palette("GrandBudapest2"),wes_palette("Cavalcanti"),wes_palette("Moonrise3"))
 max_plots<-5
 nModels<<-4
 Variables<<-unique(unlist(lapply(fitLst,FUN=function(fit){fit$mods$vnames})))
 
-dat<-fitLst[[1]]$dat$ma$train$dat[,-1]
-resp<-fitLst[[1]]$dat$ma$train$dat[,1]
+dat<<-fitLst[[1]]$dat$ma$train$dat[,-1]
+resp<<-fitLst[[1]]$dat$ma$train$dat[,1]
  d=data.frame(Name=names(dat),min=apply(dat,2,min,na.rm=TRUE),
    max=apply(dat,2,max,na.rm=TRUE),mean=apply(dat,2,mean,na.rm=TRUE))
-dataLst<-split(d,f=seq(1:nrow(d)))
-       
+dataLst<<-split(d,f=seq(1:nrow(d)))
+IntractVals<-vector()
+rspHgt<-c("150px","300px","550px","750px")[length(fitLst)]
 #=========================================
 #    This is where the ma
 runApp("C:\\GoogleDrive\\Python\\DevWorkspace\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules\\ResponseCurves")
@@ -66,5 +68,7 @@ c(.9,-.6,50,-10,.2,.06,.5,2),
 c(.2,.1,50,-10,.2,0,.17,2),
 c(.2,.1,50,-10,.2,.06,.5,0))
 response.curvesInteraction(fitLst[[3]],modelLst[[3]],vals)
-response.curves(fitLst,modelLst,vals)
-response.curvesOneModel(fitLst[[3]],modelLst[[3]],vals) 
+response.curves(fitLst,modelLst,vals,1)
+response.curvesOneModel(list(f=fitLst[[3]]),list(m=modelLst[[3]]),vals) 
+response.curvesOneModel(fitLst,modelLst,vals,pIdx=1)
+densityPlot(fitLst[[3]])
