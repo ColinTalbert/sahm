@@ -9,7 +9,8 @@ IntractVals<-reactiveValues(
 #start with the means
 Vals = vector()
 )
-
+#==============================================
+# Maps 
 #==========================
 # Handle clicks on the plot
 observeEvent(input$plot_click, {
@@ -47,14 +48,12 @@ output[[paste("curves",i,sep="")]] <- renderPlot({
     responseCurves(list(f=fitLst[[i]]),list(m=modelLst[[i]]),XYs$vals)
   })
   })
-  
+
+#==============================================
+# Sliders   
 #============================
 #Response curves for sliders
-#observeEvent(unlist(lapply(paste(names(dat),"aa",sep=""),FUN=function(l) input[[l]])),{
-#  IntractV<-unlist(lapply(paste(names(dat),"aa",sep=""),FUN=function(l) input[[l]]))
-#  IntractVals<-rbind(InteractVals,IntractV)
-#
-#})
+
 observeEvent(input$addVals,{
   IntractV<-unlist(lapply(paste(names(dat),"aa",sep=""),FUN=function(l) input[[l]]))
   IntractVals$Vals<-rbind(IntractVals$Vals,IntractV)
@@ -66,13 +65,8 @@ output[[paste("slideRsp",i,sep="")]]<-renderPlot({
   })
 })
   
-#============================  
-# all densities for a model
-output$Density <- renderPlot({
-  #Plot the Curves
-    densityPlot(fitLst[[3]])
-  })
-
+#==============================================
+# Interactions   
 #============================  
 # predictor interaction
 output$interact<-renderPlot({
@@ -81,13 +75,11 @@ output$interact<-renderPlot({
 SlideVals<-unlist(lapply(names(dat),FUN=function(l) input[[l]]))
 
 if(input$Model=="All"){
-par(mfrow=c(2,2),mar=c(0,0,2,0),oma=c(0,0,0,0))
-
-  interactionPlot(fitLst[[1]],modelLst[[1]],vals=SlideVals,phi=input$phi,theta=input$theta,x=input$FirstPredictor,y=input$SecondPredictor)
-  interactionPlot(fitLst[[2]],modelLst[[2]],vals=SlideVals,phi=input$phi,theta=input$theta,x=input$FirstPredictor,y=input$SecondPredictor)
-  interactionPlot(fitLst[[3]],modelLst[[3]],vals=SlideVals,phi=input$phi,theta=input$theta,x=input$FirstPredictor,y=input$SecondPredictor)
-  interactionPlot(fitLst[[4]],modelLst[[4]],vals=SlideVals,phi=input$phi,theta=input$theta,x=input$FirstPredictor,y=input$SecondPredictor)
-  } else{
+  par(mfrow=c(2,2),mar=c(0,0,2,0),oma=c(0,0,0,0))
+  for(i in 1:length(fitLst)){
+    interactionPlot(fitLst[[i]],modelLst[[i]],vals=SlideVals,phi=input$phi,theta=input$theta,x=input$FirstPredictor,y=input$SecondPredictor)
+    }
+} else{
    i<-match(input$Model,unlist(modelLst))
     interactionPlot(fitLst[[i]],modelLst[[i]],vals=SlideVals,phi=input$phi,theta=input$theta,x=input$FirstPredictor,y=input$SecondPredictor)
   }

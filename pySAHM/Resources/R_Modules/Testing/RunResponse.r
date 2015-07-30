@@ -19,8 +19,8 @@ ChkLibs(list("gbm","randomForest","maptools","rgdal","shiny","leaflet","maptools
 wsLst<-list()
 wsLst[[1]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\brt_1\\modelWorkspace"
 wsLst[[2]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\glm_1\\modelWorkspace"
-wsLst[[3]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\mars_1\\modelWorkspace"
-wsLst[[4]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\rf_1\\modelWorkspace"
+#wsLst[[3]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\mars_1\\modelWorkspace"
+#wsLst[[4]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\rf_1\\modelWorkspace"
 
 fitLst<-list()
 modelLst<-list()
@@ -50,7 +50,7 @@ resp<<-fitLst[[1]]$dat$ma$train$dat[,1]
    max=apply(dat,2,max,na.rm=TRUE),mean=apply(dat,2,mean,na.rm=TRUE))
 dataLst<<-split(d,f=seq(1:nrow(d)))
 IntractVals<-vector()
-
+rspHgt<-c("150px","300px","550px","750px")[length(fitLst)]
 #=========================================
 #    This is where the ma
 runApp("C:\\GoogleDrive\\Python\\DevWorkspace\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules\\ResponseCurves")

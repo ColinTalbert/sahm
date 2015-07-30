@@ -42,13 +42,6 @@ conditionalPanel(length(modelLst)>1,
   wellPanel(plotOutput("curves4",height="350px"),style="padding: 5px;"),style="padding: 5px;" )
   
   )
-  ),
- fluidRow(
-  column(4,
-  wellPanel(),style="padding: 5px;"),
-  column(6,
-  wellPanel(plotOutput("Density",height="350px"),style="padding: 5px;"),style="padding: 5px;")
-  
   )
 ),
 #===============================================
@@ -57,15 +50,16 @@ tabPanel("Slide Explorer",
 helpText("Use the sliders to change the value that each predictor is held at in generating the response", 
          "curves once you are satisfied with your selections clicking \"add curves for current values\" will",
          "add these values in a new color to the plot."), 
+actionButton("addVals", label = "add curves for current values"),
 fluidRow(
 lapply(1:length(dataLst),function(i){
 column(1,uiOutput(paste0("slide",i)))
 })),
 fluidRow(
 lapply(1:length(dataLst),function(i){
-column(1,plotOutput(paste0("slideRsp",i),height="750px"))
-})),
-actionButton("addVals", label = "add curves for current values")
+column(1,plotOutput(paste0("slideRsp",i),height=rspHgt))
+}))
+
 ),
 
 #===============================================
