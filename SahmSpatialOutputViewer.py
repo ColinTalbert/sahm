@@ -106,6 +106,7 @@ class ModelMapViewer(BaseGeoViewerCell):
     """
     __doc__ = GenModDoc.construct_module_doc('ModelMapViewer')
     _input_ports = copy.deepcopy(BaseGeoViewerCell._input_ports)
+    _input_ports.pop(_input_ports.index(('vector_layers', '(edu.utah.sci.vistrails.basic:Dictionary)', {'optional': False})))
     _input_ports.extend([('display_presense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
                     ('display_absense_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
                     ('display_background_points', '(edu.utah.sci.vistrails.basic:Boolean)', {'defaults':'["False"]', 'optional':True}),
@@ -113,7 +114,8 @@ class ModelMapViewer(BaseGeoViewerCell):
                      {'entry_types': "['enum']",
                       'values': "[['Probability', 'Binary Probability', 'Residuals', 'Mess', 'MoD']]", 'optional': True,
                       'defaults':'["Probability"]'}),
-                    ('model_workspace', '(edu.utah.sci.vistrails.basic:Directory)')])
+                    ('model_workspace', '(edu.utah.sci.vistrails.basic:Directory)'),
+                    ('vector_layers', '(edu.utah.sci.vistrails.basic:Dictionary)', {'optional': True})])
 
     #  all inputs are determined relative to the model_workspace
     @classmethod
