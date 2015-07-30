@@ -295,23 +295,11 @@ def get_seed(value=None):
         return value
     else:
         return default_seed
-#          return random.randint(-1 * ((2 ** 32) / 2 - 1), (2 ** 32) / 2 - 1)
 
 def dir_path_value(value, module=None):
     val = get_relative_path(value, module)
     sep = os.path.sep
     return val.replace("/", sep)
-
-#  class FileObject(object):
-#      def __init__(self, fname, upToDate=True, module=None):
-#          self.name = get_relative_path(fname, module)
-#          self.upToDate = True
-#
-#  class DirectoryObject(object):
-#      def __init__(self, dname, upToDate=True, module=None):
-#          self.name = get_relative_path(dname, module)
-#          self.upToDate = True
-
 
 def MDSresponseCol(MDSFile):
     csvfile = open(MDSFile, "r")
@@ -824,6 +812,20 @@ def applyMDS_selection(oldMDS, newMDS):
     oFile.close()
     shutil.copyfile(tmpnewMDS, newMDS)
     os.remove(tmpnewMDS)
+
+def get_mdsfname(workspace):
+    '''given a model output workspace directory namereturns the full path to the
+    mds file (only csv in the workspace)
+    '''
+    csv_fnames = [f for f in os.listdir(workspace) if f.endswith('.csv')]
+    if not csv_fnames:
+        return None
+
+    for csv_fname in csv_fnames:
+        full_fname = os.path.join(workspace, csv_fname)
+        if isMDSFile(full_fname):
+            return full_fname
+    return None
 #
 #
 #
@@ -1070,9 +1072,6 @@ def convert_tom(old_f, new_module):
                                               'ThresholdOptimizationMethod',
                                               [param_value],
                                               [alias])
-    # !!! I should do this, but there is an ordering bug so I do the
-    # following lines instead !!!
-    #  return [('add', new_function, new_module.vtType, new_module.id)]
 
     new_module.add_function(new_function)
     return []

@@ -140,9 +140,9 @@ def isMDSFile(MDSFile):
     header1 = MDSreader.next()
     header2 = MDSreader.next()
     header3 = MDSreader.next()
+    del MDSreader
 
     return True
-    del MDSreader
 
 def find_key(dic, val):
     """return the key of dictionary dic given the value
