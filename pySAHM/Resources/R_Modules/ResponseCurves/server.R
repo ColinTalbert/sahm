@@ -4,6 +4,12 @@ shinyServer(function(input, output) {
     Ylocs = NULL,
     vals= NULL
   )
+
+IntractVals<-reactiveValues(
+#start with the means
+Vals = vector()
+)
+
 #==========================
 # Handle clicks on the plot
 observeEvent(input$plot_click, {
@@ -50,17 +56,15 @@ output[[paste("curves",i,sep="")]] <- renderPlot({
 #
 #})
 observeEvent(input$addVals,{
-browser()
   IntractV<-unlist(lapply(paste(names(dat),"aa",sep=""),FUN=function(l) input[[l]]))
-  IntractVals<-rbind(IntractVals,IntractV)
- 
-output$slideRsp<-renderPlot({
-  response.curves(fitLst,modelLst,vals=IntractVals)
+  IntractVals$Vals<-rbind(IntractVals$Vals,IntractV)
+ })
+
+lapply(1:length(dataLst),IntractVals=IntractVals,function(i,IntractVals){
+output[[paste("slideRsp",i,sep="")]]<-renderPlot({
+  response.curves(fitLst,modelLst,vals=IntractVals$Vals,i)
+  })
 })
-
-})
-
-
   
 #============================  
 # all densities for a model

@@ -54,12 +54,18 @@ conditionalPanel(length(modelLst)>1,
 #===============================================
 # ==========  Slide Explorer ==========#
 tabPanel("Slide Explorer",
-
+helpText("Use the sliders to change the value that each predictor is held at in generating the response", 
+         "curves once you are satisfied with your selections clicking \"add curves for current values\" will",
+         "add these values in a new color to the plot."), 
 fluidRow(
 lapply(1:length(dataLst),function(i){
-column(1,uiOutput(paste0("slide",i)))})),
-actionButton("addVals", label = "add curves for current values"),
-plotOutput("slideRsp")
+column(1,uiOutput(paste0("slide",i)))
+})),
+fluidRow(
+lapply(1:length(dataLst),function(i){
+column(1,plotOutput(paste0("slideRsp",i),height="750px"))
+})),
+actionButton("addVals", label = "add curves for current values")
 ),
 
 #===============================================

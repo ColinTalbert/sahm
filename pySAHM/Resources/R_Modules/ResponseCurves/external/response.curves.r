@@ -1,4 +1,4 @@
-response.curves<-function(fitLst,modelLst,vals=NULL){
+response.curves<-function(fitLst,modelLst,vals=NULL,pIdx){
     
         #How to check that models and data match
         dat<-fitLst[[1]]$dat$ma$train$dat[,-1]
@@ -22,11 +22,10 @@ response.curves<-function(fitLst,modelLst,vals=NULL){
         
         # Cols<-c("red","blue","green","blueviolet","darkgoldenrod1","aquamarine","violetred","slateblue")
        
-            par(mfrow=c((length(fitLst)+1),ncol(dat)),mar=c(0,0,0,0),oma=c(3,5,3,0),xpd=TRUE)
+            par(mfrow=c((length(fitLst)+1),1),mar=c(0,0,0,0),oma=c(0,1,0,0),xpd=TRUE)
             y.lim<-c(0,1)
               nRow<-length(fitLst)+1             
            for(j in 1:length(fitLst)){
-                 for (pIdx in 1:ncol(dat)) {
                    for(v in 1:nrow(vals)){
                     test <- do.call("rbind", replicate(n, vals[v,], simplify=FALSE))
                     test[,pIdx] <- seq(mins[pIdx], maxs[pIdx], length.out=n)
@@ -45,14 +44,13 @@ response.curves<-function(fitLst,modelLst,vals=NULL){
                        lines(test[1:(lR-1),pIdx],Response[1:(lR-1)], ylim = y.lim, xlab = "",
                           ylab = "", type = "l", lwd=2,cex=3,cex.main=3,cex.axis=1.2,yaxt=ifelse(pIdx==1,"s","n"),
                           xaxt="n",main="",col=Cols[v-1])
-                          segments(x0=vals[v,pIdx],y0=0,y1=Response[lR],x1=vals[v,pIdx],col=Cols[v-1])
-                       }   
-                          if(j==1) mtext(names(dat)[pIdx],line=1,cex=1.2)
-                          if(pIdx==1) mtext(modelLst[[j]],side=2,outer=TRUE,at=seq(from=1/(2*nRow),to=(1-1/(2*nRow)),length=nRow)[j+1],line=3,cex=1.2)
+                          segments(x0=vals[v,pIdx],y0=0,y1=Response[lR],x1=vals[v,pIdx],col=Cols[v-1],lty=2,cex=2)
+                       }                           
                      }
-                    }
+                      if(pIdx==1) mtext(modelLst[[j]],side=2,outer=TRUE,at=seq(from=1/(2*nRow),to=(1-1/(2*nRow)),length=nRow)[j+1],line=3,cex=1.2)
+                      if(j==1) mtext(names(dat)[pIdx],line=1,cex=1.2)                   
                   }  
-            for (pIdx in 1:ncol(dat)) {      
+            
                  cols<-c("blue","red")
                 color.box<-col2rgb(cols,alpha=TRUE)
                                  color.box[4,]<-60
@@ -63,8 +61,8 @@ response.curves<-function(fitLst,modelLst,vals=NULL){
                   plot(x=range(c(absDens$x,presDens$x)),y=c(0,max(absDens$y,presDens$y)),type="n",
                   ylab="",xlab=names(dat)[pIdx],yaxt="n")
                   polygon(absDens,col=cols[1],border="blue")
-                  polygon(presDens,col=cols[2],border="red")  
-            }
+                  polygon(presDens,col=cols[2],border="red")
+                  if(pIdx==1) mtext("Density",side=2,outer=TRUE,at=seq(from=1/(2*nRow),to=(1-1/(2*nRow)),length=nRow)[j+1],line=3,cex=1.2)  
  } 
                 
                 
