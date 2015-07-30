@@ -44,7 +44,7 @@ output[[paste("map",i,sep="")]] <- renderPlot({
 lapply(1:length(modelLst),function(i){
 output[[paste("curves",i,sep="")]] <- renderPlot({        
   #Plot the Curves
-    response.curvesOneModel(fitLst[[i]],modelLst[[i]],XYs$vals)
+    responseCurves(list(f=fitLst[[i]]),list(m=modelLst[[i]]),XYs$vals)
   })
   })
   
@@ -62,7 +62,7 @@ observeEvent(input$addVals,{
 
 lapply(1:length(dataLst),IntractVals=IntractVals,function(i,IntractVals){
 output[[paste("slideRsp",i,sep="")]]<-renderPlot({
-  response.curves(fitLst,modelLst,vals=IntractVals$Vals,i)
+  responseCurves(fitLst,modelLst,vals=IntractVals$Vals,i)
   })
 })
   
