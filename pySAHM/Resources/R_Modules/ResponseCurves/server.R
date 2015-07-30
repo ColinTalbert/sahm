@@ -10,7 +10,7 @@ observeEvent(input$plot_click, {
     if (is.null(XYs$Xlocs)) {
       # We don't have a first click, so this is the first click
       XYs$Xlocs <- input$plot_click$x
-      XYs$Ylocs<-  input$plot_click$y
+      XYs$Ylocs <-  input$plot_click$y
     } else {
     XYs$Xlocs<-append(XYs$Xlocs,input$plot_click$x)
     XYs$Ylocs<-append(XYs$Ylocs,input$plot_click$y)
@@ -25,7 +25,7 @@ lapply(1:length(modelLst),function(i){
 output[[paste("map",i,sep="")]] <- renderPlot({       
   #Plot the Map
       par(oma=c(0,0,0,0),mar=c(0,0,2,0),xpd=FALSE) 
-      plot(mapStk,1,maxpixels=60000,col=Colors,xaxt="n",yaxt="n",bty="n")
+      plot(mapStk,i,maxpixels=60000,col=Colors,xaxt="n",yaxt="n",bty="n")
 
       XYdat<-as.data.frame(cbind(X=XYs$Xlocs,Y=XYs$Ylocs))
       if((any(!is.na(XYdat)))){
@@ -34,13 +34,34 @@ output[[paste("map",i,sep="")]] <- renderPlot({
   })
 })    
 #============================    
-#Response Curve Generation  
+#Response Curve Generation for Map 
 lapply(1:length(modelLst),function(i){
 output[[paste("curves",i,sep="")]] <- renderPlot({        
   #Plot the Curves
     response.curvesOneModel(fitLst[[i]],modelLst[[i]],XYs$vals)
   })
   })
+  
+#============================
+#Response curves for sliders
+#observeEvent(unlist(lapply(paste(names(dat),"aa",sep=""),FUN=function(l) input[[l]])),{
+#  IntractV<-unlist(lapply(paste(names(dat),"aa",sep=""),FUN=function(l) input[[l]]))
+#  IntractVals<-rbind(InteractVals,IntractV)
+#
+#})
+observeEvent(input$addVals,{
+browser()
+  IntractV<-unlist(lapply(paste(names(dat),"aa",sep=""),FUN=function(l) input[[l]]))
+  IntractVals<-rbind(IntractVals,IntractV)
+ 
+output$slideRsp<-renderPlot({
+  response.curves(fitLst,modelLst,vals=IntractVals)
+})
+
+})
+
+
+  
 #============================  
 # all densities for a model
 output$Density <- renderPlot({

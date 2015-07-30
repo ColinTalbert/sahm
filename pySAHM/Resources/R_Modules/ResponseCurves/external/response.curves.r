@@ -22,7 +22,7 @@ response.curves<-function(fitLst,modelLst,vals=NULL){
         
         # Cols<-c("red","blue","green","blueviolet","darkgoldenrod1","aquamarine","violetred","slateblue")
        
-            par(mfrow=c(length(fitLst)+1,ncol(dat)),mar=c(0,0,0,0),oma=c(3,5,3,0),xpd=TRUE)
+            par(mfrow=c((length(fitLst)+1),ncol(dat)),mar=c(0,0,0,0),oma=c(3,5,3,0),xpd=TRUE)
             y.lim<-c(0,1)
               nRow<-length(fitLst)+1             
            for(j in 1:length(fitLst)){
@@ -50,15 +50,22 @@ response.curves<-function(fitLst,modelLst,vals=NULL){
                           if(j==1) mtext(names(dat)[pIdx],line=1,cex=1.2)
                           if(pIdx==1) mtext(modelLst[[j]],side=2,outer=TRUE,at=seq(from=1/(2*nRow),to=(1-1/(2*nRow)),length=nRow)[j+1],line=3,cex=1.2)
                      }
-                 } 
-          }
-        
-              for(pIdx in 1:ncol(dat)){
-                  hst<-hist(dat[,pIdx],plot=FALSE,breaks=30)
-                  hist(dat[,pIdx],col="red",xlab="",main="",cex.lab=cex.mult,cex=cex.mult,cex.main=cex.mult,cex.axis=.7*cex.mult,breaks=30)
-               hist(dat[resp==0,pIdx],breaks=hst$breaks,add=TRUE,col="blue",yaxt="n")
-               }           
-  }         
+                    }
+                  }  
+            for (pIdx in 1:ncol(dat)) {      
+                 cols<-c("blue","red")
+                color.box<-col2rgb(cols,alpha=TRUE)
+                                 color.box[4,]<-60
+                temp.fct<-function(a){return(rgb(red=a[1],green=a[2],blue=a[3],alpha=a[4]))}
+                cols<-apply(color.box/255,2,temp.fct)
+                  presDens<-density(dat[resp==1,pIdx])
+                  absDens<-density(dat[resp==0,pIdx])
+                  plot(x=range(c(absDens$x,presDens$x)),y=c(0,max(absDens$y,presDens$y)),type="n",
+                  ylab="",xlab=names(dat)[pIdx],yaxt="n")
+                  polygon(absDens,col=cols[1],border="blue")
+                  polygon(presDens,col=cols[2],border="red")  
+            }
+ } 
                 
                 
                 

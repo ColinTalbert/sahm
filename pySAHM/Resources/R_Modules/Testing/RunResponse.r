@@ -10,7 +10,7 @@ source("RF.helper.fcts.r")
 source("MAXENT.helper.fcts.r")
 #setwd("C:\\GoogleDrive\\Interactive\\Rcode\\Shiny\\MyCode")
 sourceList<-list("ResponseCurves\\external\\ChkLibs.r","ResponseCurves\\external\\Colors.r","ResponseCurves\\external\\response.curvesOneModel.r",
-    "ResponseCurves\\external\\interactionPlot.r","ResponseCurves\\external\\densityPlot.r")
+    "ResponseCurves\\external\\interactionPlot.r","ResponseCurves\\external\\densityPlot.r","ResponseCurves\\external\\response.curves.r")
 unlist(lapply(sourceList,source))
 ChkLibs(list("gbm","randomForest","maptools","rgdal","shiny","leaflet","maptools","rgdal","raster","ncdf4","fields","maps",
             "ggplot2","zoo","XML","RColorBrewer","chron","wesanderson","sm"))
@@ -49,7 +49,7 @@ resp<<-fitLst[[1]]$dat$ma$train$dat[,1]
  d=data.frame(Name=names(dat),min=apply(dat,2,min,na.rm=TRUE),
    max=apply(dat,2,max,na.rm=TRUE),mean=apply(dat,2,mean,na.rm=TRUE))
 dataLst<<-split(d,f=seq(1:nrow(d)))
-
+IntractVals<-vector()
 
 #=========================================
 #    This is where the ma
