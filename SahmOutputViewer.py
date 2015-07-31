@@ -778,7 +778,7 @@ class ResponseCurveExplorer(SpreadsheetCell):
         args = {}
         args['port'] = str(port)
         args['wsList'] = ",".join(workspaces)
-        script = "ShinyFromCommand.r"
+        script = "ResponseCurveShinyApp.r"
         cmd = utils.gen_R_cmd(script, args)
 
 
