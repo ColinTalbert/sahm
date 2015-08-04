@@ -19,8 +19,8 @@ ChkLibs(list("gbm","randomForest","maptools","rgdal","shiny","leaflet","maptools
 wsLst<-list()
 wsLst[[1]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\brt_1\\modelWorkspace"
 wsLst[[2]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\glm_1\\modelWorkspace"
-#wsLst[[3]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\mars_1\\modelWorkspace"
-#wsLst[[4]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\rf_1\\modelWorkspace"
+wsLst[[3]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\mars_1\\modelWorkspace"
+wsLst[[4]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\rf_1\\modelWorkspace"
 
 fitLst<-list()
 modelLst<-list()
@@ -51,6 +51,7 @@ resp<<-fitLst[[1]]$dat$ma$train$dat[,1]
 dataLst<<-split(d,f=seq(1:nrow(d)))
 IntractVals<-vector()
 rspHgt<-c("150px","300px","550px","750px")[length(fitLst)]
+
 #=========================================
 #    This is where the ma
 runApp("C:\\GoogleDrive\\Python\\DevWorkspace\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules\\ResponseCurves")
@@ -58,6 +59,18 @@ runApp("C:\\GoogleDrive\\Python\\DevWorkspace\\userpackages\\sahm\\pySAHM\\Resou
 
 #=========================================
 # scratch pad 
+#switching to contour
+r2<-sampleRegular(r,size=20000,xy=TRUE)
+a<- matrix(r2[,3],nrow=length(unique(r2[,1])))
+a<-a[,ncol(a):1]
+rastTm<-Sys.time()
+plot(r,maxpixels=100000,col=Colors)
+Sys.time()-rastTm
+
+rastTm<-Sys.time()
+my.filled.contour(a, plot.axes = {},col=Colors,nlevels = 26)
+Sys.time()-rastTm
+
 par(mfrow=c(2,2),mar=c(0,0,2,0),oma=c(0,0,0,0))
  response.curvesInteraction(fitLst[[1]],modelLst[[1]],vals,phi=phi,theta=theta)
   response.curvesInteraction(fitLst[[2]],modelLst[[2]],vals,phi=phi,theta=theta)

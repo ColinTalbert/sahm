@@ -83,9 +83,9 @@ mainPanel(
   wellPanel(
       plotOutput("interact"),
        sliderInput("phi", label = h4("phi"),
-                                        min = 0, max = 180,value=35),
+                                        min = 0, max = 90,value=35),
        sliderInput("theta", label = h4("theta"),
-                                        min = 0, max = 180,value=60),
+                                        min = 0, max = 360,value=300),
       width="100%",height="120%")                               
 )
 )

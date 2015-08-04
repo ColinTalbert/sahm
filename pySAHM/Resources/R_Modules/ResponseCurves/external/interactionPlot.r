@@ -22,7 +22,7 @@ interactionPlot<-function(fitLst,model,vals=NULL,theta=30,phi=25,x,y){
                           yCol= match(y,names(dat))
                           xCol=match(x,names(dat))
                           test[, yCol] <- rep(seq(mins[yCol], maxs[yCol], length.out=n),each=n)
-                          test[, xCol] <- rep(seq(mins[yCol], maxs[yCol], length.out=n),times=n)
+                          test[, xCol] <- rep(seq(mins[xCol], maxs[xCol], length.out=n),times=n)
                           test<-as.data.frame(test)
                           colnames(test)<-names(means)
                            Response<-pred.fct(fitLst$mods$final.mod, test,model)
