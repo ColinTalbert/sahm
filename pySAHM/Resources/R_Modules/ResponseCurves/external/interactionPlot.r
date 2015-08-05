@@ -35,7 +35,7 @@ interactionPlot<-function(fitLst,model,vals=NULL,theta=30,phi=25,x,y){
                             facetcol <- cut(zfacet, nbcol)
                           
                            persp(x=seq(mins[xCol], maxs[xCol], length.out=n),y=seq(mins[yCol], maxs[yCol], length.out=n),
-                               z=z,theta=theta,phi=phi,col=Colors[facetcol],shade=.4,xlab=x,ylab=y,main=model,zlim=c(0,1),border=NA)
+                               z=z,theta=theta,phi=phi,col=Colors[facetcol],shade=.4,xlab=x,ylab=y,main=model,zlim=c(0,1),border=NA,cex.lab=1.3)
                            }
 
                 

@@ -72,8 +72,16 @@ output[[paste("slideRsp",i,sep="")]]<-renderPlot({
 output$interact<-renderPlot({
  
  #get the value from the sliders using their position
-SlideVals<-unlist(lapply(names(dat),FUN=function(l) input[[l]]))
 
+SlideVals<-unlist(lapply(names(dat),FUN=function(l) input[[l]]))
+    if(!is.null(SlideVals)){
+        #slider values are missing the values for the indicies of the first and second predictor so put the spaces back in
+        Svals<-vector(length=ncol(dat))
+        toAdd<-sort(match(c(input$FirstPredictor,input$SecondPredictor),names(dat)))
+        datPos<-seq(1:ncol(dat))[-c(toAdd)]
+        Svals[datPos]<-SlideVals
+        SlideVals<-Svals
+    }
 if(input$Model=="All"){
   par(mfrow=c(2,2),mar=c(0,0,2,0),oma=c(0,0,0,0))
   for(i in 1:length(fitLst)){
@@ -81,7 +89,7 @@ if(input$Model=="All"){
     }
 } else{
    i<-match(input$Model,unlist(modelLst))
-    interactionPlot(fitLst[[i]],modelLst[[i]],vals=SlideVals,phi=input$phi,theta=input$theta,x=input$FirstPredictor,y=input$SecondPredictor)
+    interactionPlot(fitLst[[i]],modelLst[[i]],vals=Svals,phi=input$phi,theta=input$theta,x=input$FirstPredictor,y=input$SecondPredictor)
   }
   
 })
@@ -122,10 +130,8 @@ output$sliders <- renderUI({
     #input slider list
     datNames<-unlist(lapply(dataLst,getNames))
     match(c(input$FirstPredictor,input$SecondPredictor),datNames)
-   # datForSliders<-dataLst[-c(match(c(input$FirstPredictor,input$SecondPredictor),datNames))]
-   # lapply(datForSliders, f)
-   lapply(dataLst,f)
-      
+   datForSliders<-dataLst[-c(match(c(input$FirstPredictor,input$SecondPredictor),datNames))]
+   lapply(datForSliders, f)    
     })
   #output$info <- renderPrint({
     # With base graphics, need to tell it what the x and y variables are.
