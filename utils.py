@@ -823,7 +823,7 @@ def get_mdsfname(workspace):
 
     for csv_fname in csv_fnames:
         full_fname = os.path.join(workspace, csv_fname)
-        if isMDSFile(full_fname):
+        if utilities.isMDSFile(full_fname):
             return full_fname
     return None
 #
@@ -1343,6 +1343,9 @@ def get_previous_run_info(full_fname):
     if len(fname_parts) == 2 or len(fname_parts) == 1:
         #  there was no runname
         runname = ""
+    elif fname_parts[0] == 'PARC':
+        runname = ''
+
     else:
         runname = fname_parts[1]
 

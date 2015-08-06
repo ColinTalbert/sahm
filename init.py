@@ -965,6 +965,10 @@ class MDSBuilder(SAHMDocumentedModule, Module):
 
         MDSParams = utils.map_ports(self, port_map)
 
+        inputs_csvs = self.force_get_input_list('RastersWithPARCInfoCSV')
+        if len(inputs_csvs) == 0:
+            raise ModuleError(self, "Must supply at least one 'RastersWithPARCInfoCSV'/nThis is the output from the PARC module")
+
         run_name_info = MDSParams.get('run_name_info')
         if run_name_info:
             subfolder = run_name_info.get('subfolder_name', "")
@@ -972,13 +976,13 @@ class MDSBuilder(SAHMDocumentedModule, Module):
         else:
             subfolder, runname = utils.get_previous_run_info(
                                                 MDSParams.get('fieldData', ''))
+            if subfolder == '' and runname == '':
+                subfolder, runname = utils.get_previous_run_info(
+                                        os.path.split(inputs_csvs[0])[0])
+                #  except this gives us the wrong runname so...
+                runname = ''
 
-        inputs_csvs = self.force_get_input_list('RastersWithPARCInfoCSV')
-        if len(inputs_csvs) == 0:
-            raise ModuleError(self, "Must supply at least one 'RastersWithPARCInfoCSV'/nThis is the output from the PARC module")
 
-
-            #  inputsCSV = utils.path_port(self, 'RastersWithPARCInfoCSV')
         key_inputs = []
         for input in ['fieldData']:
             if MDSParams.has_key(input):
