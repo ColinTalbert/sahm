@@ -1,4 +1,4 @@
-responseCurves<-function(fitLst,model,vals=NULL,pIdx){
+responseCurves<-function(fitLst,model,vals=NULL,varImp,addImp,pIdx){
     
         #How to check that models and data match
         dat<-fitLst[[1]]$dat$ma$train$dat[,-1]
@@ -16,11 +16,13 @@ responseCurves<-function(fitLst,model,vals=NULL,pIdx){
          means <- sapply(dat, mean, na.rm=TRUE)
          n <- 50
          
+          bgRamp<-colorRampPalette(c("white","grey75"))(10)
+          Colors<-c("black",Cols)
         if(is.null(vals)) vals<-matrix(means,nrow=1)
          else vals<-rbind(means,vals)
          
          byVar<-ifelse(missing(pIdx),FALSE,TRUE)
-        # Cols<-c("red","blue","green","blueviolet","darkgoldenrod1","aquamarine","violetred","slateblue")
+        
            
             if(byVar) par(mfrow=c((length(fitLst)+1),1),mar=c(0,1,0,0),oma=c(0,1,0,0),xpd=TRUE)
             else par(mfrow=c(1,ncol(dat)),mar=c(0,0,0,0),oma=c(3,5,3,0),xpd=TRUE)
@@ -31,10 +33,15 @@ responseCurves<-function(fitLst,model,vals=NULL,pIdx){
               modelCycle<-1:length(fitLst)
               predCycle<-1:ncol(dat)
               if(byVar) predCycle <- pIdx
-              
-               for(j in modelCycle){  
+               
+               for(j in modelCycle){
+                    allVarImp<-rep(0,times=ncol(dat))
+                    allVarImp[match(names(varImp[[j]]),names(dat))]<-varImp[[j]] 
+                    allVarImp[allVarImp<0]<-0 #set the minimum to zero so it shows up white
+                    bgCol<-bgRamp[cut(x=allVarImp,breaks=seq(from=0,to=max(varImp[[j]]),length=11),include.lowest=TRUE)] 
                  for (pIdx in predCycle) {
                      plotR<- (names(dat)[pIdx]%in%fitLst[[j]]$mods$vnames)
+                     
                      for(v in 1:nrow(vals)){
                               test <- do.call("rbind", replicate(n, vals[v,], simplify=FALSE))
                               test[,pIdx] <- seq(mins[pIdx], maxs[pIdx], length.out=n)
@@ -47,13 +54,20 @@ responseCurves<-function(fitLst,model,vals=NULL,pIdx){
                                    plot(test[1:(lR-1),pIdx],Response[1:(lR-1)], ylim = y.lim, xlab = "",
                                     ylab = "", type = ifelse(plotR,"l","n"), lwd=2,cex=3,cex.main=3,cex.axis=1.2,yaxt=ifelse(pIdx==1 & !byVar,"s","n"),
                                     xaxt="n",main="")
+                                    if(addImp){
+                                      Xext<-extendrange(test[1:(lR-1),pIdx])
+                                      Yext<-extendrange(c(0,1))
+                                      rect(Xext[1],Yext[1],Xext[2],Yext[2],col=bgCol[pIdx])
+                                    }
+                                    
                                     if(!plotR) box(col="grey82")
                                  }
-                                 if(v!=1 & plotR){
+                                 if(plotR){
                                     lines(test[1:(lR-1),pIdx],Response[1:(lR-1)], ylim = y.lim, xlab = "",
                                       ylab = "", type = "l", lwd=2,cex=3,cex.main=3,cex.axis=1.2,yaxt=ifelse(!byVar,"s","n"),
-                                      xaxt="n",main="",col=Cols[v-1])
-                                      segments(x0=vals[v,pIdx],y0=0,y1=Response[lR],x1=vals[v,pIdx],col=Cols[v-1],lty=2,cex=2)
+                                      xaxt="n",main="",col=Colors[v])
+                                      segments(x0=vals[v,pIdx],y0=0,y1=Response[lR],x1=vals[v,pIdx],col=Colors[v],lty=2,cex=2)
+                                      points(x=vals[v,pIdx],y=Response[lR],col=Colors[v],pch=16,cex=2)
                                  }
                                if(byVar & pIdx==1) mtext(model[[j]],line=0,side=2,cex=1.2)  
                                if(!byVar) mtext(names(dat)[pIdx],line=1,side=3,cex=1.2,col=ifelse(plotR,"black","grey74"))

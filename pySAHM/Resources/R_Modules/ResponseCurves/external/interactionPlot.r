@@ -4,6 +4,11 @@ interactionPlot<-function(fitLst,model,vals=NULL,theta=30,phi=25,x,y){
         dat<-fitLst$dat$ma$train$dat[,-1]
         resp<-fitLst$dat$ma$train$dat[,1]
         VarNames<-names(dat)
+        
+        #Don't plot the interaction if neither predictor is in the model
+        Col=Colors
+        if(sum(c(x,y)%in%fitLst$mods$vnames)==0) Col=rep("grey92",times=length(Colors))
+        
         myPredict <- function (x, y, ...) { 
           out <- predict(x, y, type='response', args=c("outputformat=logistic"), ...);
           return (out)
@@ -33,9 +38,9 @@ interactionPlot<-function(fitLst,model,vals=NULL,theta=30,phi=25,x,y){
                             nbcol<-length(Colors)
                             # Recode facet z-values into color indices
                             facetcol <- cut(zfacet, nbcol)
-                          
+                            
                            persp(x=seq(mins[xCol], maxs[xCol], length.out=n),y=seq(mins[yCol], maxs[yCol], length.out=n),
-                               z=z,theta=theta,phi=phi,col=Colors[facetcol],shade=.4,xlab=x,ylab=y,main=model,zlim=c(0,1),border=NA,cex.lab=1.3)
+                               z=z,theta=theta,phi=phi,col=Col[facetcol],shade=.4,xlab=x,ylab=y,main=model,zlim=c(0,1),border=NA,cex.lab=1.3)
                            }
 
                 
