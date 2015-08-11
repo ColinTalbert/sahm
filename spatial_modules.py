@@ -1113,7 +1113,7 @@ class MPLButton(QtGui.QAction):
 class RasterLayer(Module):
     __doc__ = GenModDoc.construct_module_doc('RasterLayer')
 
-    maps=[m for m in pylab.cm.datad if not m.endswith("_r")]
+    maps = [m for m in pylab.cm.datad]
     maps.sort()
 
     _input_ports = [("raster_file", '(edu.utah.sci.vistrails.basic:Path)', {'optional': True}),
@@ -1355,7 +1355,7 @@ def make_categorical_cmap(kwargs):
     else:
         raster = SpatialUtilities.SAHMRaster(kwargs['raster_file'])
         vals = raster.getBlock(0, 0, raster.width, raster.height, 2000, 2000)
-        uniques = np.unique(vals)
+        uniques = np.unique(vals[vals.mask == False])
         labels = [str(l) for l in uniques]
 
     cmap = matplotlib.cm.get_cmap(kwargs['cmap'].name, len(uniques))

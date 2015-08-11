@@ -232,7 +232,7 @@ class MDSBuilder(object):
         else:
             #  The input is a raw field data file
             original_field_data = self.fieldData
-            field_data_template = "NA"
+            field_data_template = ""
 
         if len(inputs_header) > 5:
             self.parc_template = inputs_header[5]

@@ -738,6 +738,7 @@ class ResponseCurveExplorer(SpreadsheetCell):
     """
     __doc__ = GenModDoc.construct_module_doc('ResponseCurveExplorer')
     _input_ports = [('ModelWorkspaces', '(edu.utah.sci.vistrails.basic:Directory)'),
+                    ('run_name_info', '(gov.usgs.sahm:OutputNameInfo:Other)', {'optional':True}),
                     ('Location', '(org.vistrails.vistrails.spreadsheet:CellLocation)',
                                     {'optional':True})]
     @classmethod
@@ -764,6 +765,7 @@ class ResponseCurveExplorer(SpreadsheetCell):
             rel_workspace = os.path.join(rel_workspace, 'modelWorkspace')
             workspaces.append(os.path.normpath(rel_workspace))
 
+        self.location = utils.get_curve_sheet_location(self)
 
         #  find the next available port
         port = 5678
@@ -777,13 +779,41 @@ class ResponseCurveExplorer(SpreadsheetCell):
         args = {}
         args['port'] = str(port)
         args['wsList'] = ",".join(workspaces)
-        script = "ShinyFromCommand.r"
+        script = "ResponseCurveShinyApp.r"
         cmd = utils.gen_R_cmd(script, args)
 
 
-        outdname = utils.mknextdir(subfolder="ResponseCurveExplorerOutput", prefix="run", skipSequence=False)
-        outfname = utils.mknextfile("ResponseCurveExplorer_stdout", suffix=".txt", directory=outdname)
-        errfname = utils.mknextfile("ResponseCurveExplorer_stderr", suffix=".txt", directory=outdname)
+        if self.has_input('run_name_info'):
+            runinfo = self.force_get_input('run_name_info')
+            subfolder = runinfo.contents.get('subfolder', "")
+            runname = runinfo.contents.get('runname', "")
+        else:
+            subfolders = []
+            runnames = []
+            for outdname in workspaces:
+                _subfolder, _runname = utils.get_previous_run_info(os.path.split(outdname)[0])
+                subfolders.append(_subfolder)
+                runnames.append(_runname)
+
+            if all(x == subfolders[0] for x in subfolders):
+                subfolder = subfolders[0]
+            else:
+                subfolder = ''
+            if all(x == runnames[0] for x in runnames):
+                runname = runnames[0]
+            else:
+                runname = ''
+
+
+        outdname = os.path.join(utils.getrootdir(), subfolder, "ResponseCurveExplorerOutput")
+        if not os.path.exists(outdname):
+            os.makedirs(outdname)
+
+        outdname = utils.mknextdir(prefix="ResponseCurveExplorerOutput", skipSequence=False, directory=os.path.join(utils.getrootdir(), subfolder))
+        outfname = utils.mknextfile("ResponseCurveExplorer_stdout", suffix=".txt", directory=outdname,
+                                   runname=runname)
+        errfname = utils.mknextfile("ResponseCurveExplorer_stderr", suffix=".txt", directory=outdname,
+                                   runname=runname)
 
 
         utils.writetolog("\nStarting processing of " + script , True)

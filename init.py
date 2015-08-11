@@ -39,7 +39,8 @@ from vistrails.core.modules.vistrails_module import Module, ModuleError, ModuleS
 from vistrails.core.modules.basic_modules import File, Path, Constant
 from vistrails.gui.modules.module_configure import StandardModuleConfigurationWidget
 from vistrails.core.packagemanager import get_package_manager
-from vistrails.core.upgradeworkflow import UpgradeWorkflowHandler
+import vistrails.core.upgradeworkflow as upgradeworkflow
+UpgradeModuleRemap = upgradeworkflow.UpgradeModuleRemap
 from vistrails.core import system
 
 from PyQt4 import QtCore, QtGui
@@ -87,8 +88,9 @@ def menu_items():
         utils.setrootdir(path)
         utils.createLogger(session_dir, True)
 
-        config = package.configuration
-        config.set_deep_value('cur_session_folder', path)
+        package_manager = get_package_manager()
+        package = package_manager.get_package(identifier)
+        configuration.set_deep_value('cur_session_folder', path)
         package.persist_configuration()
 
         writetolog("*" * 79 + "\n" + "*" * 79)
@@ -133,13 +135,9 @@ def menu_items():
                 if (widget != 0) and (type(widget) is QtGui.QRadioButton):
                     if widget.isChecked():
 
-                        configuration.cur_processing_mode = str(widget.text())
+                        configuration.set_deep_value('cur_processing_mode', str(widget.text()))
+                        configuration.persist_configuration()
 
-                        package_manager = get_package_manager()
-                        package = package_manager.get_package(identifier)
-                        dom, element = package.find_own_dom_element()
-
-                        configuration.write_to_dom(dom, element)
                         utilities.start_new_pool(utilities.get_process_count(widget.text()))
 
 
@@ -556,19 +554,43 @@ class ApplyModel(Model):
         #  if the suplied mds has rows, observations then
         #  pass r code the flag to produce metrics
         mdsfname = utils.get_relative_path(self.force_get_input('mdsFile'), self)
-        mdsfile = open(mdsfname, "r")
-        lines = 0
-        readline = mdsfile.readline
-        while readline():
-            lines += 1
-            if lines > 4:
-                break
+        workspace = utils.get_relative_path(self.force_get_input('modelWorkspace'), self)
 
-        if lines > 3:
+        mdsfile = open(mdsfname, "r")
+        lines = mdsfile.readlines()
+
+        if len(lines) > 3:
             #  we have rows R will need to recreate metrics.
             self.args = 'pmt=TRUE '
         else:
             self.args = 'pmt=FALSE '
+
+        if len(lines) == 3:
+            #  we're applying this model to a new area
+            #  make sure all the covariates in the original model are in the new csv
+            #  if not tack on the original values.
+            orig_mds = utils.get_mdsfname(workspace)
+            orig_mdsfile = open(orig_mds, "r")
+            orig_lines = orig_mdsfile.readlines()
+
+            orig_covariates = [item for item in orig_lines[0][3:] if item not in ['Split', 'EvalSplit', 'Weights']]
+            missing_covariates = []
+            new_covariates = [item for item in lines[0][3:] if item not in ['Split', 'EvalSplit', 'Weights']]
+            
+            for orig_covariate in orig_covariates:
+                if orig_lines[1][orig_lines[0].index(orig_covariate)] == 1 and \
+                    new_covariates.count(orig_covariate) == 0:
+                    missing_covariates.append(orig_covariate)
+            if len(missing_covariates) > 0:
+                msg = 'One or more of the covariates used in the original model are not specified in the apply model mds file\n'
+                msg += 'Specfically the following covariates were not found:'
+                msg += '\n\t'.join(missing_covariates)
+
+                raise RuntimeError()
+            
+
+
+            
 
         Model.compute(self)
 
@@ -700,7 +722,98 @@ class UserDefinedCurve(Model):
 
         writetolog("Finished UserDefinedCurves", True)
 
+class EnsembleBuilder(SAHMDocumentedModule, Module):
+    '''
+    '''
+    __doc__ = GenModDoc.construct_module_doc('EnsembleBuilder')
 
+    _input_ports = [('ModelWorkspaces', '(edu.utah.sci.vistrails.basic:Directory)'),
+                    ('ThresholdMetric', '(edu.utah.sci.vistrails.basic:String)',
+                     {'entry_types': "['enum']",
+                      'values': '[["None", "AUC", "Percent Correctly Classified", "Sensitivity", "Specificity", "Kappa", "True Skill Statistic"]]',
+                      'defaults':'["None"]', 'optional':True}),
+                    ('ThresholdValue', '(edu.utah.sci.vistrails.basic:Float)', {'defaults':'["0.75"]', 'optional':True}),
+                    ('run_name_info', '(gov.usgs.sahm:OutputNameInfo:Other)', {'optional':True}), ]
+    _output_ports = [("AverageProbability", "(edu.utah.sci.vistrails.basic:File)"),
+                     ("BinaryCount", "(edu.utah.sci.vistrails.basic:File)"),]
+
+    def compute(self):
+        port_map = {'ThresholdMetric': ('ThresholdMetric', None, True),
+                    'ThresholdValue': ('ThresholdValue', None, False),
+            'run_name_info': ('run_name_info', None, False), }
+
+        params = utils.map_ports(self, port_map)
+
+        model_workspaces = self.get_input_list("ModelWorkspaces")
+        if len(model_workspaces) < 2:
+            raise RuntimeError('2 or more ModelWorkspaces must be supplied!')
+
+        #  TODO add in check to make sure all models finished successfully
+        #  if still running raise module suspended
+        workspaces = []
+        for model_workspace in model_workspaces:
+
+
+            rel_workspace = utils.get_relative_path(model_workspace, self)
+            if params['ThresholdMetric'] != 'None':
+                model_results = utils.get_model_results(rel_workspace)
+                param_key = params['ThresholdMetric'].replace(' ', '').lower()
+                if float(model_results[param_key]) >= float(params['ThresholdValue']):
+                    workspaces.append(os.path.normpath(rel_workspace))
+                else:
+                    msg = "Model below threshold, Removed from ensemble! :\n"
+                    msg += os.path.normpath(rel_workspace)
+                    msg += "\n model {} value of {} below threshold of {}".format(params['ThresholdMetric'], model_results[param_key], params['ThresholdValue'])
+
+                    writetolog(msg, True)
+            else:
+                workspaces.append(os.path.normpath(rel_workspace))
+
+        run_name_info = params.get('run_name_info')
+        if run_name_info:
+            subfolder = run_name_info.get('subfolder_name', "")
+            runname = run_name_info.get('runname', "")
+        else:
+            #  If all subfolders are the same we'll but the model output in the same subfolder
+            subfolders = []
+            for model_workspace in model_workspaces:
+                subfolder, runname = utils.get_previous_run_info(utils.get_relative_path(model_workspace))
+                subfolders.append(subfolder)
+            if all(x == subfolders[0] for x in subfolders):
+                subfolder = subfolders[0]
+            else:
+                subfolder = ''
+            runname = ''
+
+        prefix = "ensemble_prob"
+        suffix = ".tif"
+
+        prob_tifs = [os.path.join(ws, utils.find_file(ws, '_prob_map.tif')) for ws in workspaces]
+        bin_tifs = [os.path.join(ws, utils.find_file(ws, '_bin_map.tif')) for ws in workspaces]
+
+        output_fname, signature, already_run = utils.make_next_file_complex(self,
+                                        prefix=prefix, suffix=suffix,
+                                        key_inputs=prob_tifs,
+                                        subfolder=subfolder, runname=runname)
+        output_fname_bin = output_fname.replace("ensemble_prob", "ensemble_count")
+
+        if already_run:
+            writetolog("No change in inputs or parameters using previous run of EnsembleBuilder", True)
+        else:
+
+            SpatialUtilities.average_geotifs(prob_tifs, output_fname, None, False, SpatialUtilities.average_nparrays)
+            SpatialUtilities.average_geotifs(bin_tifs, output_fname_bin, None, False, SpatialUtilities.sum_nparrays)
+
+        if os.path.exists(utils.get_relative_path(output_fname, self)):
+            writetolog("Finished Ensemble generation ", True)
+        else:
+            msg = "Problem encountered building ensemble maps.  Expected output file not found."
+            writetolog(msg, False)
+            raise ModuleError(self, msg)
+
+        utils.write_hash_entry_pickle(signature, output_fname)
+        self.set_output("AverageProbability", utils.get_relative_path(output_fname, self))
+        self.set_output("BinaryCount", utils.get_relative_path(output_fname_bin, self))
 
 class BackgroundSurfaceGenerator(SAHMDocumentedModule, Module):
     '''
@@ -751,7 +864,7 @@ class BackgroundSurfaceGenerator(SAHMDocumentedModule, Module):
                                         subfolder=subfolder, runname=runname)
 
         if already_run:
-            writetolog("No change in inputs or paramaters using previous run of BackgroundSurfaceGenerator", True)
+            writetolog("No change in inputs or parameters using previous run of BackgroundSurfaceGenerator", True)
         else:
             args = {"tmplt":kde_params["templatefName"],
                     "i":kde_params["fieldData"],
@@ -845,13 +958,16 @@ class MDSBuilder(SAHMDocumentedModule, Module):
 
     def compute(self):
         port_map = {'fieldData': ('fieldData', None, False),
-#                    'backgroundPointType': ('pointType', None, False),
                     'backgroundPointCount': ('pointCount', None, False),
                     'backgroundProbSurf': ('probSurfacefName', None, False),
                     'Seed': ('seed', utils.get_seed, True),
                     'run_name_info': ('run_name_info', None, False), }
 
         MDSParams = utils.map_ports(self, port_map)
+
+        inputs_csvs = self.force_get_input_list('RastersWithPARCInfoCSV')
+        if len(inputs_csvs) == 0:
+            raise ModuleError(self, "Must supply at least one 'RastersWithPARCInfoCSV'/nThis is the output from the PARC module")
 
         run_name_info = MDSParams.get('run_name_info')
         if run_name_info:
@@ -860,13 +976,13 @@ class MDSBuilder(SAHMDocumentedModule, Module):
         else:
             subfolder, runname = utils.get_previous_run_info(
                                                 MDSParams.get('fieldData', ''))
+            if subfolder == '' and runname == '':
+                subfolder, runname = utils.get_previous_run_info(
+                                        os.path.split(inputs_csvs[0])[0])
+                #  except this gives us the wrong runname so...
+                runname = ''
 
-        inputs_csvs = self.force_get_input_list('RastersWithPARCInfoCSV')
-        if len(inputs_csvs) == 0:
-            raise ModuleError(self, "Must supply at least one 'RastersWithPARCInfoCSV'/nThis is the output from the PARC module")
 
-
-            #  inputsCSV = utils.path_port(self, 'RastersWithPARCInfoCSV')
         key_inputs = []
         for input in ['fieldData']:
             if MDSParams.has_key(input):
@@ -886,7 +1002,7 @@ class MDSBuilder(SAHMDocumentedModule, Module):
                                         subfolder=subfolder, runname=runname)
 
         if already_run:
-            writetolog("No change in inputs or paramaters using previous run of MDS Builder", True)
+            writetolog("No change in inputs or parameters using previous run of MDS Builder", True)
         else:
             inputs_csv = utils.mknextfile(prefix='CombinedPARCFiles', suffix='.csv', subfolder=subfolder, runname=runname)
             inputs_names = [utils.get_relative_path(f, self) for f in inputs_csvs]
@@ -964,7 +1080,7 @@ class FieldDataQuery(SAHMDocumentedModule, Module):
                                         subfolder=subfolder, runname=runname)
 
         if already_run:
-            writetolog("No change in inputs or paramaters using previous run of FieldDataQuery", True)
+            writetolog("No change in inputs or parameters using previous run of FieldDataQuery", True)
         else:
             outfile = open(FDQOutput, "wb")
             csvwriter = csv.writer(outfile)
@@ -1108,7 +1224,7 @@ class FieldDataAggregateAndWeight(SAHMDocumentedModule, Module):
                                         subfolder=subfolder, runname=runname)
 
         if already_run:
-            writetolog("No change in inputs or paramaters using previous run of FieldDataAggregateAndWeight", True)
+            writetolog("No change in inputs or parameters using previous run of FieldDataAggregateAndWeight", True)
         else:
             writetolog("    output_fname=" + output_fname, True, False)
             FDAWParams['output'] = output_fname
@@ -1185,7 +1301,7 @@ class PARC(SAHMDocumentedModule, Module):
 
 #          workingCSV = os.path.join(output_dname, "tmpFilesToPARC.csv")
         if already_run:
-            writetolog("No change in inputs or paramaters using previous run of PARC", True)
+            writetolog("No change in inputs or parameters using previous run of PARC", True)
         else:
             f = open(workingCSV, "wb")
             csvWriter = csv.writer(f)
@@ -1743,8 +1859,7 @@ def load_max_ent_params():
         if default:
             default = eval(default)
             kwargs['defaults'] = str([str(default)])
-        if p_type == 'Boolean':
-            kwargs['optional'] = True
+        kwargs['optional'] = True
         input_ports.append((name, '(' + basic_pkg + ':' + p_type + ')', kwargs))
         docs[name] = doc
 
@@ -1783,10 +1898,11 @@ def initialize():
         #  they don't have a decent R path, let's see if we can pull one from the
         utils.set_r_path(utils.pull_R_install_from_reg())
         configuration.r_path = utils.get_r_path()
+        configuration.set_deep_value('r_path', configuration.r_path)
+
         package_manager = get_package_manager()
         package = package_manager.get_package(identifier)
-        dom, element = package.find_own_dom_element()
-        configuration.write_to_dom(dom, element)
+        package.persist_configuration()
 
     try:
         testfname = os.path.join(utils.get_r_path(), "CanSAHMWriteToR.txt")
@@ -2119,15 +2235,14 @@ _modules = generate_namespaces({'DataInput': [
                                           FieldDataAggregateAndWeight,
                                           MDSBuilder,
                                           PARC,
-                                          RasterFormatConverter,
                                           ModelEvaluationSplit,
                                           ModelSelectionSplit,
                                           ModelSelectionCrossValidation,
                                           CovariateCorrelationAndSelection,
                                           ApplyModel,
                                           BackgroundSurfaceGenerator,
-                                          OutputName
-                                          ],
+                                          OutputName,
+                                          EnsembleBuilder],
                                 'GeospatialTools': [(Reclassifier, {'configureWidgetType': ReclassifierConfiguration}),
                                                     CategoricalToContinuous,
                                                     (GeoSpatialViewerCell, {'moduleColor':output_color,
@@ -2138,6 +2253,7 @@ _modules = generate_namespaces({'DataInput': [
                                                            'moduleFringe':INPUT_FRINGE}),
                                                     (PointLayer, {'moduleColor':INPUT_COLOR,
                                                            'moduleFringe':INPUT_FRINGE}),
+                                                    RasterFormatConverter,
 #                                                      (LineLayer, {'moduleColor':INPUT_COLOR,
 #                                                             'moduleFringe':INPUT_FRINGE}),
                                                     ],
@@ -2176,56 +2292,49 @@ _modules = generate_namespaces({'DataInput': [
                                           ]
                                 })
 
-def handle_module_upgrade_request(controller, module_id, pipeline):
-    module_remap = {'Tools|BackgroundSurfaceGenerator':
-                     [(None, '1.0.2', 'Tools|BackgroundSurfaceGenerator',
-                          {'dst_port_remap': {'bias': 'continuous'} })],
-                    'Tools|MDSBuilder':
-                     [(None, '1.0.2', 'Tools|MDSBuilder',
-                          {'dst_port_remap': {'backgroundpointCount': 'backgroundPointCount', } }),
-                      (None, '1.2.0', 'Tools|MDSBuilder',
-                          {'dst_port_remap': {'backgroundPointType':None, } })],
-                    'Tools|PARC':
-                     [(None, '1.0.2', 'Tools|PARC',
-                          {'dst_port_remap': {'bias': '',
-                                              'multipleCores': '', } })],
-                    'Tools|RasterFormatConverter':
-                    [(None, '1.0.2', 'Tools|RasterFormatConverter',
-                          {'dst_port_remap': {'multipleCores': '', } })],
-                    'Models|MAXENT':
-                    [(None, '1.0.2', 'Models|MAXENT',
-                          {'dst_port_remap': {'inputMDS': 'mdsFile', } })],
-                    }
-    for m in ['GLM', 'MARS', 'RandomForest', 'BoostedRegressionTree']:
-        module_remap['Models|' + m] = [(None, '1.0.2', 'Models|' + m,
-                          {'dst_port_remap': {'modelWorkspace': utils.getParentDir} }),
-                                       (None, '1.2.0', 'Models|' + m,
-                          {'function_remap': {'ThresholdOptimizationMethod': utils.convert_tom} })]
+_upgrades = {}
+_upgrades['DataInput|FieldData'] = [UpgradeModuleRemap(None, '2.0.0', '2.0.0', None,
+                                  dst_port_remap={'value': 'file'},
+                                 src_port_remap={'value': 'value'})]
+_upgrades['DataInput|TemplateLayer'] = [UpgradeModuleRemap(None, '2.0.0', '2.0.0', None,
+                                  dst_port_remap={'value': 'file'})]
+_upgrades['DataInput|Predictor'] = [UpgradeModuleRemap(None, '2.0.0', '2.0.0', None,
+                                  dst_port_remap={'value': 'file'},
+                                 function_remap={'AggregationMethod': utils.convert_old_enum,
+                                              'ResampleMethod': utils.convert_old_enum, })]
 
-    module_remap['Models|MARS'].append((None, '1.2.0', 'Models|MARS',
-                          {'dst_port_remap': {'MarsPenalty': 'MarsPenalty'} }))
+_upgrades['Models|MAXENT'] = [UpgradeModuleRemap(None, '1.0.2', '1.0.2', None,
+                                  dst_port_remap={'inputMDS': 'mdsFile'})]
 
-    for m in ['ApplyModel']:
-        module_remap['Tools|' + m] = [(None, '1.0.1', 'Tools|' + m,
-                          {'dst_port_remap': {'modelWorkspace': utils.getParentDir} })]
+for m in ['GLM', 'MARS', 'RandomForest', 'BoostedRegressionTree']:
+        _upgrades['Models|' + m] = [UpgradeModuleRemap(None, '1.0.2', '1.0.2', 'Models|' + m,
+                                        dst_port_remap={'modelWorkspace': utils.getParentDir}),
+                                    UpgradeModuleRemap(None, '1.2.0', '1.2.0', 'Models|' + m,
+                                        dst_port_remap={'UsePseudoAbs':None}),
+                                    UpgradeModuleRemap(None, '2.0.0', '2.0.0', 'Models|' + m,
+                                        dst_port_remap={'ThresholdOptimizationMethod': utils.convert_tom})]
 
-    module_remap['Output|SAHMSpatialOutputViewerCell'] = [(None, '1.0.2', 'Output|SAHMSpatialOutputViewerCell', {'dst_port_remap': {'model_workspace': utils.getParentDir} }),
-                                                          (None, '2.0.1', 'Output|ModelMapViewer', {'dst_port_remap': {}}), ]
-    module_remap['Output|SAHMModelOutputViewerCell'] = [(None, '1.0.2', 'Output|SAHMModelOutputViewerCell', {'dst_port_remap': {'ModelWorkspace': utils.getParentDir} }),
-                                                        (None, '2.0.1', 'Output|ModelOutputViewer', {'dst_port_remap': {} })]
+_upgrades['Output|SAHMSpatialOutputViewerCell'] = [UpgradeModuleRemap(None, '2.0.0', '2.0.0', 'Output|ModelMapViewer', {}), ]
+_upgrades['Output|SAHMModelOutputViewerCell'] = [UpgradeModuleRemap(None, '2.0.0', '2.0.0', 'Output|ModelOutputViewer', {})]
 
+_upgrades['Tools|BackgroundSurfaceGenerator'] = [UpgradeModuleRemap(None, '1.0.2', '1.0.2', None,
+                                  dst_port_remap={'bias': 'continuous'})]
+_upgrades['Tools|MDSBuilder'] = [UpgradeModuleRemap(None, '2.0.0', '2.0.0', None,
+                                  dst_port_remap={'backgroundpointCount': 'backgroundPointCount',
+                                                  'backgroundPointType':None})]
+_upgrades['Tools|PARC'] = [UpgradeModuleRemap(None, '1.0.2', '1.0.2', None,
+                                  dst_port_remap={'bias': '',
+                                          'multipleCores': ''})]
+_upgrades['Tools|RasterFormatConverter'] = [UpgradeModuleRemap(None, '1.0.2', '1.0.2', None,
+                                  dst_port_remap={'multipleCores': ''})]
+_upgrades['Tools|ApplyModel'] = [UpgradeModuleRemap(None, '1.0.1', '1.0.1', None,
+                                 function_remap={'modelWorkspace': utils.getParentDir})]
+_upgrades['Tools|FieldDataQuery'] = [UpgradeModuleRemap(None, '2.0.0', '2.0.0', None,
+                                  dst_port_remap={'ResponseType': 'ResponseType'},
+                                 function_remap={'ResponseType': utils.convert_old_enum})]
+_upgrades['Tools|FieldDataAggregateAndWeight'] = [UpgradeModuleRemap(None, '2.0.0', '2.0.0', 'Tools|FieldDataAggregateAndWeight',
+                      {'function_remap': {'ResponseType': utils.convert_old_enum} })]
 
-    module_remap['Tools|FieldDataQuery'] = [(None, '2.0.0', 'Tools|FieldDataQuery',
-                          {'dst_port_remap': {'ResponseType': 'ResponseType'} })]
-    module_remap['DataInput|FieldData'] = [(None, '2.0.0', 'DataInput|FieldData',
-                          {'dst_port_remap': {'value': 'file'} })]
-    module_remap['DataInput|TemplateLayer'] = [(None, '2.0.1', None,
-                          {'dst_port_remap': {'value': 'file'} })]
-
-#    for m in ['SAHMSpatialOutputViewerCell', 'SAHMModelOutputViewerCell']:
-#        module_remap['Output|' + m] = [(None, '1.0.2', 'Output|' + m,
-#                          {'src_port_remap': {'model_workspace': 'ModelWorkspace',
-#                                              'modelWorkspace': utils.getParentDir} })]
-
-    return UpgradeWorkflowHandler.remap_module(controller, module_id, pipeline,
-                                             module_remap)
+_upgrades['GeospatialTools|RasterLayer'] = [UpgradeModuleRemap(None, '2.0.0', '2.0.0', None,
+                                  dst_port_remap={'value': 'file'},
+                                 function_remap={'cmap': utils.convert_old_enum})]

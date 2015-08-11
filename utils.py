@@ -295,23 +295,11 @@ def get_seed(value=None):
         return value
     else:
         return default_seed
-#          return random.randint(-1 * ((2 ** 32) / 2 - 1), (2 ** 32) / 2 - 1)
 
 def dir_path_value(value, module=None):
     val = get_relative_path(value, module)
     sep = os.path.sep
     return val.replace("/", sep)
-
-#  class FileObject(object):
-#      def __init__(self, fname, upToDate=True, module=None):
-#          self.name = get_relative_path(fname, module)
-#          self.upToDate = True
-#
-#  class DirectoryObject(object):
-#      def __init__(self, dname, upToDate=True, module=None):
-#          self.name = get_relative_path(dname, module)
-#          self.upToDate = True
-
 
 def MDSresponseCol(MDSFile):
     csvfile = open(MDSFile, "r")
@@ -824,6 +812,20 @@ def applyMDS_selection(oldMDS, newMDS):
     oFile.close()
     shutil.copyfile(tmpnewMDS, newMDS)
     os.remove(tmpnewMDS)
+
+def get_mdsfname(workspace):
+    '''given a model output workspace directory namereturns the full path to the
+    mds file (only csv in the workspace)
+    '''
+    csv_fnames = [f for f in os.listdir(workspace) if f.endswith('.csv')]
+    if not csv_fnames:
+        return None
+
+    for csv_fname in csv_fnames:
+        full_fname = os.path.join(workspace, csv_fname)
+        if utilities.isMDSFile(full_fname):
+            return full_fname
+    return None
 #
 #
 #
@@ -1029,6 +1031,22 @@ def waitForProcessesToFinish(processQueue, maxCount=1):
 def getParentDir(f, x=None):
     return os.path.dirname(f.name)
 
+def convert_old_enum(old_f, new_module):
+    controller = api.get_current_controller()
+    param = old_f.parameters[0]
+    param_value = param.strValue
+    alias = param.alias
+
+    param_value = param.strValue
+
+    new_function = controller.create_function(new_module,
+                                              old_f.name,
+                                              [param_value],
+                                              [alias])
+    new_module.add_function(new_function)
+    return []
+
+
 def convert_tom(old_f, new_module):
     controller = api.get_current_controller()
     param = old_f.parameters[0]
@@ -1054,9 +1072,6 @@ def convert_tom(old_f, new_module):
                                               'ThresholdOptimizationMethod',
                                               [param_value],
                                               [alias])
-    # !!! I should do this, but there is an ordering bug so I do the
-    # following lines instead !!!
-    #  return [('add', new_function, new_module.vtType, new_module.id)]
 
     new_module.add_function(new_function)
     return []
@@ -1212,7 +1227,34 @@ def make_next_file_complex(module, prefix, suffix="", directory="",
     return fname, signature, already_run
 
 
+def get_curve_sheet_location(_module):
+    '''returns a location with a new sheet with the node name of the current run
+    and dimensions set to 1x1
+    '''
+    try:
+        cur_vt = _module.moduleInfo['controller'].vistrail
 
+        cur_pipeline = _module.moduleInfo['pipeline']
+        cur_version = _module.moduleInfo['controller'].current_version
+        cur_name = cur_vt.get_pipeline_name(cur_version)
+        if "+" in cur_name:
+            cur_name = " ".join(cur_name.split()[:-2])
+
+        cur_name += " rce"
+
+        sheet_ref = StandardSheetReference()
+        sheet_ref.sheetName = cur_name
+        sheet_ref.minimumColumnCount = 1
+        sheet_ref.minimumRowCount = 1
+        auto_location = CellLocation.Location()
+        auto_location.sheetReference = sheet_ref
+
+        auto_location.row = 0
+        auto_location.col = 0
+    except AttributeError:
+        auto_location = None
+
+    return auto_location
 
 def get_sheet_location(_module):
     '''given a sahm spreadsheet module, finds all the other sahm spreadsheet cells
@@ -1301,6 +1343,9 @@ def get_previous_run_info(full_fname):
     if len(fname_parts) == 2 or len(fname_parts) == 1:
         #  there was no runname
         runname = ""
+    elif fname_parts[0] == 'PARC':
+        runname = ''
+
     else:
         runname = fname_parts[1]
 
@@ -1308,4 +1353,37 @@ def get_previous_run_info(full_fname):
 
 
 
+def get_model_output_fname(dname):
+    '''given a model output workspace (dname) returns the full path to the
+    text output file from the model
+    '''
+    output_fnames = [f for f in os.listdir(dname) if f.endswith('_output.txt')]
+    if not output_fnames:
+        return None
+    return os.path.join(dname, output_fnames[0])
 
+def get_model_results(dname):
+    '''Given a model output workspace (dname) returns a dictionary with the
+    parsed contents of the model results
+    '''
+    output_txt = get_model_output_fname(dname)
+    f = open(output_txt, "r")
+    lines = f.readlines()
+    clean_lines = [l.strip().replace(" ", "") for l in lines if l != "\n"]
+
+    results = {}
+    for line in clean_lines:
+        try:
+            parts = line.split("=")
+            if parts[0] and parts[1]:
+                results[parts[0].lower()] = parts[1].split("(")[0]
+        except:
+            pass
+
+        try:
+            parts = line.split(":")
+            if parts[0] and parts[1]:
+                results[parts[0].lower()] = parts[1].split("(")[0]
+        except:
+            pass
+    return results
