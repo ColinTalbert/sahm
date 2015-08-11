@@ -22,8 +22,20 @@ wsLst[[2]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\glm
 wsLst[[3]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\mars_1\\modelWorkspace"
 wsLst[[4]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\rf_1\\modelWorkspace"
 
+wsLst[[1]]<-"J:\\Projects\\cnhp_swap\\derived_data\\workspace_03072014\\brt_SpruceFir_1\\modelWorkspace"
+wsLst[[2]]<-"J:\\Projects\\cnhp_swap\\derived_data\\workspace_03072014\\glm_SpruceFir_1\\modelWorkspace"
+wsLst[[3]]<-"J:\\Projects\\cnhp_swap\\derived_data\\workspace_03072014\\mars_SpruceFir_1\\modelWorkspace"
+wsLst[[4]]<-"J:\\Projects\\cnhp_swap\\derived_data\\workspace_03072014\\rf_SpruceFir_1\\modelWorkspace"
+
+wsLst[[1]]<-"J:\\Projects\\cnhp_swap\\derived_data\\workspace_03072014\\brt_sagebrush_1\\modelWorkspace"
+wsLst[[2]]<-"J:\\Projects\\cnhp_swap\\derived_data\\workspace_03072014\\glm_sagebrush_1\\modelWorkspace"
+wsLst[[3]]<-"J:\\Projects\\cnhp_swap\\derived_data\\workspace_03072014\\mars_sagebrush_1\\modelWorkspace"
+wsLst[[4]]<-"J:\\Projects\\cnhp_swap\\derived_data\\workspace_03072014\\rf_sagebrush_1\\modelWorkspace"
+
+
 fitLst<-list()
 modelLst<-list()
+varImpLst<-list()
 mapLst<-vector()
 rastLst<-vector()
 for(w in 1:length(wsLst)){
@@ -34,9 +46,11 @@ for(w in 1:length(wsLst)){
   fitLst[[w]]<-out
   rm(out)
   mapLst[[w]]<-file.path(dirname(wsLst[[w]]),paste(modelLst[[w]],"prob_map.tif",sep="_"))
+  varImpLst[[w]]<-getVarImp(dirname(wsLst[[w]]))
 }
 mapStk<<-stack(mapLst)
 stk<-stack(rastLst)
+maxImp<-max(unlist(lapply(varImpLst,max)))
 
 
 Cols<<-c(wes_palette("Darjeeling"),wes_palette("GrandBudapest2"),wes_palette("Cavalcanti"),wes_palette("Moonrise3"))
@@ -53,7 +67,7 @@ IntractVals<-vector()
 rspHgt<-c("150px","300px","550px","750px")[length(fitLst)]
 
 #=========================================
-#    This is where the ma
+#    This is where the magic happens
 runApp("C:\\GoogleDrive\\Python\\DevWorkspace\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules\\ResponseCurves")
 
 
@@ -71,17 +85,11 @@ rastTm<-Sys.time()
 my.filled.contour(a, plot.axes = {},col=Colors,nlevels = 26)
 Sys.time()-rastTm
 
-par(mfrow=c(2,2),mar=c(0,0,2,0),oma=c(0,0,0,0))
- response.curvesInteraction(fitLst[[1]],modelLst[[1]],vals,phi=phi,theta=theta)
-  response.curvesInteraction(fitLst[[2]],modelLst[[2]],vals,phi=phi,theta=theta)
-  response.curvesInteraction(fitLst[[3]],modelLst[[3]],vals,phi=phi,theta=theta)
-  response.curvesInteraction(fitLst[[4]],modelLst[[4]],vals,phi=phi,theta=theta)
 vals<-rbind(c(.2,.1,50,-10,.2,.06,.5,2),
 c(.9,-.6,50,-10,.2,.06,.5,2),
 c(.2,.1,50,-10,.2,0,.17,2),
 c(.2,.1,50,-10,.2,.06,.5,0))
-response.curvesInteraction(fitLst[[3]],modelLst[[3]],vals)
-response.curves(fitLst,modelLst,vals,1)
-response.curvesOneModel(list(f=fitLst[[3]]),list(m=modelLst[[3]]),vals) 
-response.curvesOneModel(fitLst,modelLst,vals,pIdx=1)
+
+responseCurves(f=list(fitLst[[1]]),m=list(modelLst[[1]]),varImp=list(varImpLst[[1]]),addImp=TRUE,vals)
+interactionPlot(fitLst[[1]],modelLst[[1]],vals=NULL,theta=30,phi=25,x="cfrst_18km",y="cfrst_18km")
 densityPlot(fitLst[[3]])
