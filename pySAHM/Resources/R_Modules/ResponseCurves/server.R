@@ -9,6 +9,10 @@ IntractVals<-reactiveValues(
 #start with the means
 Vals = vector()
 )
+
+observeEvent(input$resetVals,{
+     IntractVals$Vals=vector()
+})
 #==============================================
 # Maps 
 #==========================
@@ -25,6 +29,11 @@ observeEvent(input$plot_click, {
     
       XYdat<-as.data.frame(cbind(X=XYs$Xlocs,Y=XYs$Ylocs))
       XYs$vals<-extract(stk,XYdat)
+})
+observeEvent(input$resetNVals,{
+     XYs$Xlocs=NULL
+     XYs$Ylocs=NULL
+     XYs$vals=NULL
 })
 #============================  
 #Map Generation
@@ -45,7 +54,7 @@ output[[paste("map",i,sep="")]] <- renderPlot({
 lapply(1:length(modelLst),function(i){
 output[[paste("curves",i,sep="")]] <- renderPlot({        
   #Plot the Curves
-    responseCurves(list(f=fitLst[[i]]),list(m=modelLst[[i]]),XYs$vals)
+    responseCurves(list(f=fitLst[[i]]),list(m=modelLst[[i]]),vals=XYs$vals,varImp=list(varImpLst[[i]]),addImp=input$addMImp)
   })
   })
 
@@ -61,7 +70,7 @@ observeEvent(input$addVals,{
 
 lapply(1:length(dataLst),IntractVals=IntractVals,function(i,IntractVals){
 output[[paste("slideRsp",i,sep="")]]<-renderPlot({
-  responseCurves(fitLst,modelLst,vals=IntractVals$Vals,i)
+  responseCurves(fitLst,modelLst,vals=IntractVals$Vals,i,varImp=varImpLst,addImp=input$addImp)
   })
 })
   
@@ -69,11 +78,25 @@ output[[paste("slideRsp",i,sep="")]]<-renderPlot({
 # Interactions   
 #============================  
 # predictor interaction
+output$sliders <- renderUI({
+    
+    f<-function(l){
+    sliderInput(inputId=as.character(l$Name),label=as.character(l$Name),min=signif(l$min,digits=3),max=signif(l$max,digits=3),value=signif(l$mean,digits=3),round=TRUE)
+    }
+    getNames<-function(x){as.character(x[[1]])}
+    #we're not holding the predictors used in the surface constant so remove them from the
+    #input slider list
+    datNames<-unlist(lapply(dataLst,getNames))
+    match(c(input$FirstPredictor,input$SecondPredictor),datNames)
+   datForSliders<-dataLst[-c(match(c(input$FirstPredictor,input$SecondPredictor),datNames))]
+   lapply(datForSliders, f)    
+    })
+
 output$interact<-renderPlot({
  
  #get the value from the sliders using their position
-
-SlideVals<-unlist(lapply(names(dat),FUN=function(l) input[[l]]))
+SlideNames<-names(dat)[-c(which(names(dat)%in%c(input$FirstPredictor,input$SecondPredictor)))]
+SlideVals<-unlist(lapply(SlideNames,FUN=function(l) input[[l]]))
     if(!is.null(SlideVals)){
         #slider values are missing the values for the indicies of the first and second predictor so put the spaces back in
         Svals<-vector(length=ncol(dat))
@@ -82,7 +105,9 @@ SlideVals<-unlist(lapply(names(dat),FUN=function(l) input[[l]]))
         Svals[datPos]<-SlideVals
         SlideVals<-Svals
     }
-if(input$Model=="All"){
+if(input$FirstPredictor==input$SecondPredictor){
+ plot(0:1,0:1,type="n",xaxt="n",yaxt="n",xlab="",ylab="")   
+}else{if(input$Model=="All"){
   par(mfrow=c(2,2),mar=c(0,0,2,0),oma=c(0,0,0,0))
   for(i in 1:length(fitLst)){
     interactionPlot(fitLst[[i]],modelLst[[i]],vals=SlideVals,phi=input$phi,theta=input$theta,x=input$FirstPredictor,y=input$SecondPredictor)
@@ -91,7 +116,7 @@ if(input$Model=="All"){
    i<-match(input$Model,unlist(modelLst))
     interactionPlot(fitLst[[i]],modelLst[[i]],vals=Svals,phi=input$phi,theta=input$theta,x=input$FirstPredictor,y=input$SecondPredictor)
   }
-  
+}  
 })
 #=====================
 # named sliders
@@ -120,19 +145,7 @@ output[[paste("dens",i,sep="")]] <- renderPlot({
             polygon(presDens,col=cols[2],border="red")
     })
 })      
-output$sliders <- renderUI({
-    
-    f<-function(l){
-    sliderInput(inputId=as.character(l$Name),label=as.character(l$Name),min=signif(l$min,digits=3),max=signif(l$max,digits=3),value=signif(l$mean,digits=3),round=TRUE)
-    }
-    getNames<-function(x){as.character(x[[1]])}
-    #we're not holding the predictors used in the surface constant so remove them from the
-    #input slider list
-    datNames<-unlist(lapply(dataLst,getNames))
-    match(c(input$FirstPredictor,input$SecondPredictor),datNames)
-   datForSliders<-dataLst[-c(match(c(input$FirstPredictor,input$SecondPredictor),datNames))]
-   lapply(datForSliders, f)    
-    })
+
   #output$info <- renderPrint({
     # With base graphics, need to tell it what the x and y variables are.
    # nearPoints(ras, input$plot_click,threshold=500,addDist=TRUE,maxpoints=1)

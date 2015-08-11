@@ -102,7 +102,7 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
                       #of the predicted values but I'm not sure this would work for every situation
                       if(out$input$model.family=="poisson") y.lim=range(apply(Xf,1,mean))
                        plot(Xp1[, i],apply(Xf,1,mean), ylim = y.lim, xlab = "",
-                      ylab = "", type = "l", main = names(dat)[i],lwd=2,cex=3,cex.main=3,cex.axis=2.5)
+                      ylab = "", type = "l", main = names(dat)[i],lwd=2,cex=3,cex.main=3,cex.axis=2,cex.axis=2.5)
                       rug(dat[resp==1,i],col="red")
                       rug(dat[resp==0,i],col="blue")
                if(k==2) graphics.off() 
