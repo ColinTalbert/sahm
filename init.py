@@ -367,14 +367,17 @@ class Model(SAHMDocumentedModule, Module):
         else:
             subfolder, runname = utils.get_previous_run_info(mdsFile)
 
-        if runname and out_folder:
-            prefix = "_".join([self.abbrev, runname, out_folder])
-        elif runname:
-            prefix = "_".join([self.abbrev, runname])
-        elif out_folder:
-            prefix = "_".join([self.abbrev, out_folder])
-        else:
-            prefix = self.abbrev
+        prefix = self.abbrev
+        if prefix == "ApplyModel":
+            prefix = "Apply"
+            if not os.path.isdir(self.args_dict['ws']):
+                orig_ws = os.path.split(self.args_dict['ws'])[0]
+            else:
+                orig_ws = self.args_dict['ws']
+            prefix += os.path.split(orig_ws)[1].replace('_', '').upper()
+
+        name_items = filter(None, [prefix, runname, out_folder])
+        prefix = "_".join(name_items)
 
         #  convert threshold optimization string to the expected integer
         thresholds = {"Threshold=0.5":1,
@@ -979,8 +982,6 @@ class MDSBuilder(SAHMDocumentedModule, Module):
             if subfolder == '' and runname == '':
                 subfolder, runname = utils.get_previous_run_info(
                                         os.path.split(inputs_csvs[0])[0])
-                #  except this gives us the wrong runname so...
-                runname = ''
 
 
         key_inputs = []

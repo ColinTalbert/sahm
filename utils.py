@@ -1343,9 +1343,8 @@ def get_previous_run_info(full_fname):
     if len(fname_parts) == 2 or len(fname_parts) == 1:
         #  there was no runname
         runname = ""
-    elif fname_parts[0] == 'PARC':
+    elif fname_parts[0] == 'PARC' and len(fname_parts) != 3:
         runname = ''
-
     else:
         runname = fname_parts[1]
 
