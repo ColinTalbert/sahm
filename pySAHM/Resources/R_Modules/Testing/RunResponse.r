@@ -55,7 +55,7 @@ maxImp<-max(unlist(lapply(varImpLst,max)))
 
 Cols<<-c(wes_palette("Darjeeling"),wes_palette("GrandBudapest2"),wes_palette("Cavalcanti"),wes_palette("Moonrise3"))
 max_plots<-5
-nModels<<-4
+
 Variables<<-unique(unlist(lapply(fitLst,FUN=function(fit){fit$mods$vnames})))
 
 dat<<-fitLst[[1]]$dat$ma$train$dat[,-1]
@@ -93,3 +93,5 @@ c(.2,.1,50,-10,.2,.06,.5,0))
 responseCurves(f=list(fitLst[[1]]),m=list(modelLst[[1]]),varImp=list(varImpLst[[1]]),addImp=TRUE,vals)
 interactionPlot(fitLst[[1]],modelLst[[1]],vals=NULL,theta=30,phi=25,x="cfrst_18km",y="cfrst_18km")
 densityPlot(fitLst[[3]])
+
+C:\R-3.2.0\bin\x64\Rterm.exe --vanilla -f C:\GoogleDrive\Python\DevWorkspace\userpackages\sahm\pySAHM\Resources\R_Modules\ResponseCurveShinyApp.r --args port=5678 wsList=C:/temp/SAHM_workspace/ForResponseCurveTool/brewersSparrow/brt_1/modelWorkspace,C:/temp/SAHM_workspace/ForResponseCurveTool/brewersSparrow/glm_1/modelWorkspace,C:/temp/SAHM_workspace/ForResponseCurveTool/brewersSparrow/mars_1/modelWorkspace,C:/temp/SAHM_workspace/ForResponseCurveTool/brewersSparrow/rf_1/modelWorkspace

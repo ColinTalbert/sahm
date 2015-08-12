@@ -63,13 +63,10 @@ Args <- commandArgs(trailingOnly=FALSE)
     	if(argSplit[[1]][1]=="port") Port <- as.numeric(argSplit[[1]][2])
     	if(argSplit[[1]][1]=="wsList") wsList <- as.character(argSplit[[1]][2])
     }
-    print(wsList)
+    
 wsLst<-as.list(strsplit(wsList,",")[[1]])
  #scriptPath gets renamed when we load workspaces so we use ScrptPath
  ScrptPath<-ScriptPath<-dirname(ScriptPath)
- print(ScriptPath)
- print(ScrptPath)
- print(file.path(ScrptPath,"LoadRequiredCode.r"))
 
 #load the SAHM code
 
@@ -80,28 +77,30 @@ source(file.path(ScrptPath,"BRT.helper.fcts.r"))
 source(file.path(ScrptPath,"RF.helper.fcts.r"))
 source(file.path(ScrptPath,"MAXENT.helper.fcts.r"))
 
-ShinyCode<-file.path(ScrptPath,"ResponseCurves")
-            
-sourceList<-list(file.path(ShinyCode,"external\\ChkLibs.r"),file.path(ShinyCode,"external\\Colors.r"),
-file.path(ShinyCode,"external\\interactionPlot.r"),file.path(ShinyCode,"external\\responseCurves.r"),file.path(ShinyCode,"external\\densityPlot.r"))
-unlist(lapply(sourceList,source))
+ShinyCode<-file.path(ScrptPath,"ResponseCurves\\External")
+sourceList<-list.files(ShinyCode,full.names=TRUE)
+unlist(lapply(as.list(sourceList),source))
+
 ChkLibs(list("gbm","randomForest","maptools","rgdal","shiny","leaflet","maptools","rgdal","raster","ncdf4","fields","maps",
             "ggplot2","zoo","XML","RColorBrewer","chron","wesanderson","sm"))
 
 
 fitLst<-list()
 modelLst<-list()
+varImpLst<-list()
 mapLst<-vector()
 rastLst<-vector()
 for(w in 1:length(wsLst)){
- load(file.path(wsLst[[w]]))
+ load(wsLst[[w]])
   modelLst[[w]]<-out$input$script.name
   rastLst<-out$dat$tif.ind
   if(w>1 & any(rastLst!=out$dat$tif.ind)) stop("Rasters Don't match for all workspaces")
   fitLst[[w]]<-out
   rm(out)
   mapLst[[w]]<-file.path(dirname(wsLst[[w]]),paste(modelLst[[w]],"prob_map.tif",sep="_"))
+  varImpLst[[w]]<-getVarImp(dirname(wsLst[[w]]))
 }
+
 mapStk<<-stack(mapLst)
 stk<-stack(rastLst)
 
@@ -120,7 +119,7 @@ rspHgt<-c("150px","300px","550px","750px")[length(fitLst)]
 #=========================================
 #    This is where the ma
 
-print(getwd())
+
 runApp(file.path(ScrptPath,"ResponseCurves"),port=Port)
  
 

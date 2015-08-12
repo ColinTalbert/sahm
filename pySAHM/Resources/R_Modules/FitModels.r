@@ -104,7 +104,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
              out$dat$bnameExpanded=file.path(dirname(out$dat$bname),"ExpandedOutput")
              dir.create(out$dat$bnameExpanded)
              if(out$input$script.name=="rf" & out$input$model.family=="poisson") stop("Random Forest not implemented for count data")
-         
+             options(warn=-1)
    #writing out the header info to the CSV so in case of a break we know what broke
              out<-place.save(out)
               out$dat$split.label<-out$dat$split.type
@@ -153,7 +153,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
                   cat("40%\n")
                   
     #producing auc and residual plots model summary information and accross model evaluation metric
-          out$mods$auc.output<-make.auc.plot.jpg(out=out)
+          out$mods$auc.output<-suppressWarnings(make.auc.plot.jpg(out=out))
 
               cat("Progress:70%\n");flush.console()
 
@@ -187,9 +187,6 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
             cat("\nfinished with prediction maps, t=",round(t5-t4,2),"sec\n");flush.console()
           }
 
-    if(!debug.mode) {
-        sink();on.exit();unlink(paste(bname,"_log.txt",sep=""))
-        }
     cat("Progress:100%\n");flush.console()
     on.exit(capture.output(cat(paste("\nTotal time = ",round((unclass(Sys.time())-t0)/60,2)," min\n\n",sep="")),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)) 
     if(debug.mode) assign("fit",out$mods$final.mod,envir=.GlobalEnv)
