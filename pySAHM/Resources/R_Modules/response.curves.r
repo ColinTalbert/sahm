@@ -77,9 +77,11 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
               
       for (k in c(1,2)){
           if(k==1){ jpeg(file.path(out$input$output.dir,"responseCurves","all_response_curves.jpg"),width=2000,height=2000,quality=100)
-                    par(oma=c(2,2,4,2),mfrow=c(prow,pcol))}                   
+                    par(oma=c(2,8,4,2),mfrow=c(prow,pcol))}                   
          for (i in sort(match(out$mods$vnames,names(dat)))) {
-                if (k==2) jpeg(filename=file.path(out$input$output.dir,"responseCurves",paste(names(dat)[i],".jpg",sep="")),width=2000,height=2000,quality=100)
+                if (k==2){ jpeg(filename=file.path(out$input$output.dir,"responseCurves",paste(names(dat)[i],".jpg",sep="")),width=2000,height=2000,quality=100)
+                 par(mar=c(7,10,8,1))
+                }
                 if (!is.factor(dat[, i])) {
                     xr <- range(dat[, i])
                     Xp1 <- Xp
@@ -102,16 +104,24 @@ response.curves<-function(out,Model,pred.dat=NULL,cv=FALSE){
                       #of the predicted values but I'm not sure this would work for every situation
                       if(out$input$model.family=="poisson") y.lim=range(apply(Xf,1,mean))
                        plot(Xp1[, i],apply(Xf,1,mean), ylim = y.lim, xlab = "",
-                      ylab = "", type = "l", main = names(dat)[i],lwd=2,cex=3,cex.main=3,cex.axis=2,cex.axis=2.5)
-                      rug(dat[resp==1,i],col="red")
-                      rug(dat[resp==0,i],col="blue")
+                      ylab = "", type = "l", main = names(dat)[i],lwd=ifelse(k==1,4,6),cex=3,cex.main=6,xaxt="n",yaxt="n")
+                        if(k==2) mtext("Predicted Value", side=2,line=6,cex=6)
+                        axis(1,labels=FALSE)
+                        axis(2,labels=FALSE)
+                        axis(1,line=2,lwd=0,cex.axis=4)
+                        axis(2,line=1,lwd=0,cex.axis=4)
+
+                      rug(dat[resp==1,i],col="red",lwd=2)
+                      rug(dat[resp==0,i],col="blue",lwd=2)
                if(k==2) graphics.off() 
                if(k==2) {if(i==min(sort(match(out$mods$vnames,names(dat))))) rsp.dat<-cbind(Xp1[, i],apply(Xf,1,mean))
                         else rsp.dat<-cbind(rsp.dat,Xp1[, i],apply(Xf,1,mean))
                             colnames(rsp.dat)[(ncol(rsp.dat)-1):(ncol(rsp.dat))]<-c(names(dat)[i],basename(out$input$output.dir))  
                         }             
                } 
-         if(k==1) graphics.off()     
+         if(k==1){
+         mtext("Predicted Value",side=2,cex=5,line=2,outer=TRUE)
+         graphics.off()}     
        }
        write.csv(rsp.dat,file=file.path(out$dat$bnameExpanded,"ResponseCurves.csv"))
                 

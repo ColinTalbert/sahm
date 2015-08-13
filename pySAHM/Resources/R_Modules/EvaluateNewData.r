@@ -17,7 +17,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
 
 #Written by Marian Talbert 5/2012
      t0 <- unclass(Sys.time()) 
-   
+    options(warn=-1)
     chk.libs(out$input$script.name)
        out1<-out
        try(rm(out,envir=.GlobalEnv),silent=TRUE)
