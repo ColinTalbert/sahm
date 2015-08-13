@@ -3,7 +3,7 @@ responseCurves<-function(fitLst,model,vals=NULL,varImp,addImp,pIdx){
         #How to check that models and data match
         dat<-fitLst[[1]]$dat$ma$train$dat[,-1]
         resp<-fitLst[[1]]$dat$ma$train$dat[,1]
-        VarNames<-names(dat)
+       
         myPredict <- function (x, y, ...) { 
           out <- predict(x, y, type='response', args=c("outputformat=logistic"), ...);
           return (out)

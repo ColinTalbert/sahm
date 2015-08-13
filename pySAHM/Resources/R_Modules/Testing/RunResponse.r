@@ -96,6 +96,6 @@ c(.2,.1,50,-10,.2,0,.17,2),
 c(.2,.1,50,-10,.2,.06,.5,0))
 
 responseCurves(f=list(fitLst[[1]]),m=list(modelLst[[1]]),varImp=list(varImpLst[[1]]),addImp=TRUE,vals)
-interactionPlot(fitLst[[1]],modelLst[[1]],vals=NULL,theta=30,phi=25,x="cfrst_18km",y="cfrst_18km")
+interactionPlot(fitLst[[1]],modelLst[[1]],vals=NULL,theta=30,phi=25,x="Average_FirstFrost_sd",y="ppt_season_sd_3")
 densityPlot(fitLst[[3]])
 

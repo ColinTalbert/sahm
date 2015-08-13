@@ -21,7 +21,7 @@ interactionPlot<-function(fitLst,model,vals=NULL,theta=30,phi=25,x,y){
          means <- sapply(dat, mean, na.rm=TRUE)
          vals<-as.vector(vals)
          if(is.null(vals)) vals<-means
-         n <- 50
+         n <- 100
 
                           test <- do.call("rbind", replicate(n^2, vals, simplify=FALSE))
                           yCol= match(y,names(dat))
@@ -38,9 +38,12 @@ interactionPlot<-function(fitLst,model,vals=NULL,theta=30,phi=25,x,y){
                             nbcol<-length(Colors)
                             # Recode facet z-values into color indices
                             facetcol <- cut(zfacet, nbcol)
-                            
+                            Xlab<-paste(substr(x,start=1,stop=12),c("\n","")[1+(nchar(x)<=12)],
+                                   substr(x,start=13,stop=nchar(x)),sep="")
+                            Ylab<-paste(substr(y,start=1,stop=12),c("\n","")[1+(nchar(y)<=12)],
+                                   substr(y,start=13,stop=nchar(y)),sep="")       
                            persp(x=seq(mins[xCol], maxs[xCol], length.out=n),y=seq(mins[yCol], maxs[yCol], length.out=n),
-                               z=z,theta=theta,phi=phi,col=Col[facetcol],shade=.4,xlab=x,ylab=y,zlab="Prediction",
+                               z=z,theta=theta,phi=phi,col=Col[facetcol],shade=.4,xlab=Xlab,ylab=Ylab,zlab="Prediction",
                                main=model,zlim=c(0,1),border=NA,cex.lab=1.3)
                            }
 
