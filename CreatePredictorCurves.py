@@ -68,10 +68,8 @@ import matplotlib.colors as colors
 
 import pySAHM.SpatialUtilities as SpatialUtilities
 import seaborn as sns
-sns.set(style="darkgrid")
 
 import json
-
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -277,22 +275,22 @@ class covariate_viewer(QtGui.QGroupBox):
         spacer_item = QtGui.QSpacerItem(0, 0, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.main_layout.addItem(spacer_item)
     
-    
-        self.fig_udc = Figure((5.0, 4.0), dpi=self.dpi)
-        self.canvas_udc = FigureCanvas(self.fig_udc)
-        self.canvas_udc.setParent(self.chart_panel)
-        self.ax_udc = self.fig_udc.add_subplot(111)
-    
-        self.chart_layout.addWidget(self.canvas_udc)
-        self.chart_panel.setLayout(self.chart_layout)
-    
-        self.main_layout.addWidget(self.chart_panel)
-    
-    
-        self.setLayout(self.main_layout)
-    
-        self.init_udc_chart()
-        self.repaint()
+        with sns.set(style="darkgrid"):
+            self.fig_udc = Figure((5.0, 4.0), dpi=self.dpi)
+            self.canvas_udc = FigureCanvas(self.fig_udc)
+            self.canvas_udc.setParent(self.chart_panel)
+            self.ax_udc = self.fig_udc.add_subplot(111)
+
+            self.chart_layout.addWidget(self.canvas_udc)
+            self.chart_panel.setLayout(self.chart_layout)
+
+            self.main_layout.addWidget(self.chart_panel)
+
+
+            self.setLayout(self.main_layout)
+
+            self.init_udc_chart()
+            self.repaint()
 
 
     def init_udc_chart(self):

@@ -293,12 +293,12 @@ class SAHMSpatialOutputViewerCellWidget(SpatialViewerCellWidgetBase):
             self.all_layers[pointType]["enabled"] = len(self.all_layers[pointType]['x']) > 0
 
     def add_title(self, title):
-        at = AnchoredText(title,
+        self.title_box = AnchoredText(title,
                           loc=2, frameon=True, pad=.05, borderpad=0.2)
-        at.patch.set_boxstyle("round,rounding_size=0.2")
-        at.set_alpha(0.1)
-        at.set_zorder(9999)  #  put the legend on top
-        self.axes.add_artist(at)
+        self.title_box.patch.set_boxstyle("round,rounding_size=0.2")
+        self.title_box.set_alpha(0.1)
+        self.title_box.set_zorder(9999)  #  put the legend on top
+        self.axes.add_artist(self.title_box)
 
     def make_resid_cmap(self, kwargs):
 
@@ -385,15 +385,8 @@ class SAHMSpatialOutputViewerCellWidget(SpatialViewerCellWidgetBase):
             if self.all_layers[point_type]['enabled']:
                 self.add_points(point_type)
 
-        if self.display_title:
-            self.add_title(title)
-
-#          if fiona and self.display_states:
-#              #  only attempt to draw the state boundaries if
-#              #  fiona was successfully imported
-#              self.first_layer = SpatialUtilities.SAHMRaster(self.get_first_raster())
-#              self.add_states()
-#          self.set_extent(display_extent[2:], display_extent[:2])
+        self.add_title(title)
+        self.title_box.set_visible(self.display_title)
 
     def add_points(self, layername):
         kwargs = self.all_layers[layername]
@@ -402,94 +395,6 @@ class SAHMSpatialOutputViewerCellWidget(SpatialViewerCellWidgetBase):
 
         if self.all_layers[layername]['enabled']:
             self.axes.scatter(kwargs['x'], kwargs['y'], s=10, c=kwargs['color'], linewidth=0.5, antialiased=True)
-
-#      def get_first_raster(self):
-#          '''returns the first existant raster file in our model workspace
-#          '''
-#          for k, v in self.all_layers.iteritems():
-#              if os.path.exists(v['file']):
-#                  return v['file']
-#          return None
-
-#      def add_raster(self, display_extent):
-#          SpatialViewerCellWidget.add_raster(self, display_extent)
-#          if self.display_title:
-#              self.add_title("")
-#          rasterfile = kwargs['file']
-#
-#  #          self.rasterlayer = RasterDisplay()
-#          self.rasterlayer.setDims(self.axes)
-#          self.rasterlayer.switch_raster(rasterfile)
-#
-#          raster_array = self.rasterlayer(*display_extent)
-#
-#          if kwargs.get('categorical', False):
-#              raster_plot = self.axes.imshow(raster_array, interpolation="nearest", cmap=kwargs['cmap'], origin='upper', extent=self.getDataExtent())
-#          elif kwargs.get('threeband', False):
-#              raster_plot = self.axes.imshow(raster_array, origin='upper', extent=self.getDataExtent())
-#          else:
-#              rmin = kwargs['min']
-#              rmax = kwargs['max']
-#              if kwargs["max"] == "pullfromraster" or \
-#                  kwargs["min"] == "pullfromraster":
-#                  min, max = SpatialUtilities.get_raster_minmax(kwargs['file'])
-#                  if kwargs["max"] == "pullfromraster":
-#                      rmax = max
-#                  if kwargs["min"] == "pullfromraster":
-#                      rmin = min
-#
-#              norm = colors.Normalize(rmin, rmax)
-#              if raster_array.size == 1:
-#                  print "raster_array is None!!!/n/n"
-#                  raster_array = np.empty([1960, 1080])
-#              raster_plot = self.axes.imshow(raster_array, interpolation="nearest", cmap=kwargs['cmap'], norm=norm, origin='upper', extent=self.getDataExtent())
-#
-#
-#          if self.displayTL:
-#
-#              if kwargs['categorical']:
-#                  cb = self.fig.colorbar(raster_plot, ticks=kwargs['cbar_ticks'], orientation='vertical', pad=0.01, shrink=.9, fraction=.3, aspect=15)
-#                  cb.ax.set_yticklabels(kwargs['cbar_labels'])
-#              else:
-#                  cb = self.fig.colorbar(raster_plot, orientation='horizontal', pad=0.01, fraction=.1, shrink=.9, aspect=30)
-#
-#              for t in cb.ax.get_xticklabels():
-#                  if kwargs['categorical']:
-#                      t.set_fontsize(5)
-#                      t.set_rotation(90)
-#                  else:
-#                      t.set_fontsize(7)
-
-
-
-#
-#    def get_array_from_raster(self, raster_file):
-#        '''return a numpy array with the values from the raster_file
-#        if there are more than 10,000 rows or cols the data will be
-#        subsampled and self.map_ratio will be set.
-#        All nodata values will be removed
-#        '''
-#        ds = gdal.Open(raster_file, gdal.GA_ReadOnly)
-#        rasterparams = getRasterParams(raster_file)
-#        nrows = rasterparams["height"]
-#        ncols = rasterparams["width"]
-#        max_dimension = max([nrows, ncols])
-#        if max_dimension > self.inputs["max_cells_dimension"]:
-#            ratio = float(self.inputs["max_cells_dimension"]) / max_dimension
-#            nrows = int(ratio * nrows)
-#            ncols = int(ratio * ncols)
-#
-#        try:
-#            ary = ds.GetRasterBand(1).ReadAsArray(buf_ysize=nrows, buf_xsize=ncols)
-#            ndval = ds.GetRasterBand(1).GetNoDataValue()
-#        except MemoryError:
-#            msgbox = QtGui.QMessageBox(self)
-#            msgbox.setText("This viewer cannot handle datasets this large.\nTry setting the max_cells_dimension to a smaller value.")
-#            msgbox.exec_()
-#            raise MemoryError
-#
-#        return np.ma.masked_array(ary, mask=(ary==ndval))
-
 
 
 class ViewTitleButton(QtGui.QAction):
@@ -508,15 +413,10 @@ class ViewTitleButton(QtGui.QAction):
 
         active_cells = cellWidget.get_active_cells()
         for cell in active_cells:
-
-            xlim = cell.axes.get_xlim()
-            ylim = cell.axes.get_ylim()
             cell.display_title = self.isChecked()
-            cell.on_draw_base()
+            cell.title_box.set_visible(cell.display_title)
             cell.fig.canvas.draw()
             cell.update()
-            cell.axes.set_xlim(xlim)
-            cell.axes.set_ylim(ylim)
 
 class sync_changes(QtGui.QAction):
 

@@ -557,7 +557,7 @@ def get_raster_minmax(filename):
     '''
     dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
     band = dataset.GetRasterBand(1)
-    nodata = getNDVal(filename)
+    nodata = get_nd_val(filename)
 
     _min = band.GetMinimum()
     _max = band.GetMaximum()
@@ -574,7 +574,7 @@ def get_raster_minmax(filename):
     return (_min, _max)
     dataset = None
 
-def getNDVal(filename):
+def get_nd_val(filename):
     dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
     band = dataset.GetRasterBand(1)
 

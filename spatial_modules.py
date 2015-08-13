@@ -179,14 +179,13 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.setAnimationEnabled(False)
         self.display_states = True
         self.display_colorbar = True
-        self.cursor_mode = 'pan'
+        self.cursor_mode = 'zoom'
 
         centralLayout = QtGui.QVBoxLayout()
         self.setLayout(centralLayout)
         centralLayout.setMargin(0)
         centralLayout.setSpacing(0)
         self.create_main_frame()
-        self.changing_lim = False
 
     def updateContents(self, inputs):
         """ updateContents(inputs: dictionary) -> None
@@ -213,7 +212,7 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.fig.canvas.draw()
         self.update()
 
-        self.cid = self.axes.callbacks.connect('ylim_changed', self.lim_changed)
+#          self.cid = self.axes.callbacks.connect('ylim_changed', self.lim_changed)
 #          self.cid = self.axes.callbacks.connect('xlim_changed', self.lim_changed)
 #          self.axes.end_pan = self.end_pan
 
@@ -280,11 +279,12 @@ class SpatialViewerCellWidgetBase(QCellWidget):
 
         return adj_extent
 
-    def lim_changed(self, event):
-        if self.cursor_mode == "zoom":
-            print 'lim_changed in zoom'
-            extent = self.adj_aspect(self.get_extent())
-            self.sync_extents(extent=extent)
+#      def lim_changed(self, event):
+#          print '!!!!!!!!!!!!lim_changed', os.path.split(self.inputs['model_workspace'])[1]
+#  #          if self.cursor_mode == "zoom":
+#  #              print '\tin zoom'
+#  #              extent = self.adj_aspect(self.get_extent())
+#  #              self.sync_extents(extent=extent)
 
     def on_draw_base(self, view_extent=None):
         """ Completely clears then redraws the figure
@@ -333,7 +333,7 @@ class SpatialViewerCellWidgetBase(QCellWidget):
 
         self.set_axis_extent(xlim, ylim)
 
-        self.cid = self.axes.callbacks.connect('ylim_changed', self.lim_changed)
+#          self.cid = self.axes.callbacks.connect('ylim_changed', self.lim_changed)
 
         self.axes.figure.canvas.draw_idle()
         self.update()
@@ -383,7 +383,7 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.map_canvas = MyMapCanvas(self.fig)
         self.map_canvas.mpl_connect('scroll_event', self.wheel_zoom)
 
-        self.map_canvas.mpl_connect('button_press_event', self.button_down)
+#          self.map_canvas.mpl_connect('button_press_event', self.button_down)
         self.map_canvas.mpl_connect('button_release_event', self.button_up)
         self.map_canvas.mpl_connect('resize_event', self._resize)
 
@@ -391,7 +391,7 @@ class SpatialViewerCellWidgetBase(QCellWidget):
 
         self.mpl_toolbar = NavigationToolbar(self.map_canvas, None)
 
-        self.mpl_toolbar.pan()
+        self.mpl_toolbar.zoom()
 
         self.popMenu = None
 
@@ -445,19 +445,32 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.axes.set_xlim((newL, newR))
         self.axes.set_ylim((newB, newT))
 
-        self.changing_lim = True
-        self.sync_extents()
+        extent = self.adj_aspect(self.get_extent())
+        self.set_extent(*extent)
+        self.sync_extents(extent)
 
 
-    def button_down(self, event):
-        self.changing_lim = True
+#      def button_down(self, event):
+#          print 'button_down', os.path.split(self.inputs['model_workspace'])[1]
 #
     def button_up(self, event):
+        print 'button_up', os.path.split(self.inputs['model_workspace'])[1]
         if event.button == 1 and self.cursor_mode == 'pan':
             #  this is a left click which signifies a zoom or pan end
+            print "\tbutton1 and pan"
+            self.pull_pixels()
             self.sync_extents()
+        elif self.cursor_mode == 'zoom':
+            print "\tbutton1 and zoom"
+            extent = self.adj_aspect(self.get_extent())
+            self.set_extent(*extent)
+            self.sync_extents(extent)
 
     def _resize(self, event):
+        try:
+            print '_resize', os.path.split(self.inputs['model_workspace'])[1]
+        except:
+            print "no inputs..."
         self.pull_pixels()
 
     def pull_pixels(self):
@@ -497,7 +510,6 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.axes.spines['left'].set_color('none')
         self.axes.get_xaxis().set_visible(False)
         self.axes.get_yaxis().set_visible(False)
-
 
     def add_states(self):
         '''Add simplified state boundaries to the output map
@@ -729,63 +741,59 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         return None
 
     #  Functions dealing with managing extents
-
     def set_extent(self, xlim, ylim):
+        print '\t\t\tset_extent', os.path.split(self.inputs['model_workspace'])[1]
         self.set_axis_extent(xlim, ylim)
-
         self.pull_pixels()
         self.fig.canvas.draw()
-
         self.set_axis_extent(xlim, ylim)
-
         self.update()
 
     def set_axis_extent(self, xlim, ylim):
+        print 'set_axis_extent', os.path.split(self.inputs['model_workspace'])[1]
         self.axes.set_ylim(ylim, emit=False)
         self.axes.set_xlim(xlim, emit=False)
 
     def get_extent(self):
+        print 'get_extent', os.path.split(self.inputs['model_workspace'])[1]
         return self.axes.get_xlim(), self.axes.get_ylim()
 
     def get_max_extent(self):
+        print 'get_max_extent', os.path.split(self.inputs['model_workspace'])[1]
         return (self.rasterdisplay_layer.raster.west,
                 self.rasterdisplay_layer.raster.east) , \
                 (self.rasterdisplay_layer.raster.south,
                 self.rasterdisplay_layer.raster.north)
 
     def zoomFull(self):
+        print 'zoomFull', os.path.split(self.inputs['model_workspace'])[1]
         max_xlim, max_ylim = self.get_max_extent()
-        orig_cursor_mode = self.cursor_mode
-        self.cursor_mode = 'pan'
-
-        self.axes.set_xlim(max_xlim)
-        self.axes.set_ylim(max_ylim)
-        self.changing_lim = True
-        self.sync_extents()
-        self.cursor_mode = orig_cursor_mode
+        self.set_extent(max_xlim, max_ylim)
+        self.sync_extents((max_xlim, max_ylim))
 
     def sync_extents(self, extent=''):
+        print "sync_extents", os.path.split(self.inputs['model_workspace'])[1]
         for spatialViewer in self.get_active_cells():
-            if extent:
-                x0, x1 = extent[0]
-                y0, y1 = extent[1]
-            else:
-                x0, x1 = self.axes.get_xlim()
-                y0, y1 = self.axes.get_ylim()
-
-            try:
-                x0t, y0t = SpatialUtilities.transformPoint(x0, y0, self.rasterdisplay_layer.raster.srs, spatialViewer.rasterdisplay_layer.raster.srs)
-                x1t, y1t = SpatialUtilities.transformPoint(x1, y1, self.rasterdisplay_layer.raster.srs, spatialViewer.rasterdisplay_layer.raster.srs)
-            except:
-                x0t, y0t = x0, y0
-                x1t, y1t = x1, x1
-
             if not spatialViewer is self:
-                spatialViewer.changing_lim = True
+                self.set_single_extent(spatialViewer, extent)
+            
+    def set_single_extent(self, cell, extent=''):
+        print "\t\tset_single_extent", os.path.split(self.inputs['model_workspace'])[1]
+        if extent:
+            x0, x1 = extent[0]
+            y0, y1 = extent[1]
+        else:
+            x0, x1 = self.axes.get_xlim()
+            y0, y1 = self.axes.get_ylim()
 
-            if spatialViewer.changing_lim:
-                spatialViewer.set_extent((x0t, x1t), (y0t, y1t))
-                spatialViewer.changing_lim = False
+        try:
+            x0t, y0t = SpatialUtilities.transformPoint(x0, y0, self.rasterdisplay_layer.raster.srs, cell.rasterdisplay_layer.raster.srs)
+            x1t, y1t = SpatialUtilities.transformPoint(x1, y1, self.rasterdisplay_layer.raster.srs, cell.rasterdisplay_layer.raster.srs)
+        except:
+            x0t, y0t = x0, y0
+            x1t, y1t = x1, x1
+
+        cell.set_extent((x0t, x1t), (y0t, y1t))
 
 class SpatialViewerCellWidget(SpatialViewerCellWidgetBase):
     '''
@@ -914,10 +922,10 @@ class GeneralSpatialViewerToolBar(QCellToolBar):
         self.appendWidget(nav_label)
         self.appendAction(FullExtentButton(self))
 
-        mplActions = [{"icon":"move.png", "checked":True, "label":"Pan",
+        mplActions = [{"icon":"move.png", "checked":False, "label":"Pan",
                  "tooltip":"Pan axes with left mouse, zoom with right",
                  "checkable":True, "actionfunc":"pan"},
-                 {"icon":"zoom.png", "checked":False,
+                 {"icon":"zoom.png", "checked":True,
                  "label":"Zoom", "tooltip":"Zoom to rectangle",
                  "checkable":True, "actionfunc":"zoom"},
                   {"icon":"back.png", "checked":False, "label":"Last Extent",
@@ -1310,6 +1318,7 @@ class RasterDisplay(object):
 
 #    @print_timing
     def ax_update(self, ax):
+        print "\t\t\t\tpp", os.path.split(self.raster.source)[1]
         ax.set_autoscale_on(False)  #  Otherwise, infinite loop
         self.setDims(ax)
 
