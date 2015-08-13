@@ -474,7 +474,6 @@ def check_R_output(stdout, stderr, module=None, args_dict=None):
     if 'Error' in stderr:
         #  also write the errors to a model specific log file in the model output dir
         #  then raise an error
-        writeRErrorsToLog(args_dict, stdout, stderr)
         if module:
             raise ModuleError(module, msg)
         else:
