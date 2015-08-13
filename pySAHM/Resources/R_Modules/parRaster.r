@@ -11,8 +11,7 @@ thresh,nToDo,ScriptPath,vnames.final.mod,train.dat,residSmooth,template,maDir) {
     source(paste(toupper(Model),".helper.fcts.r",sep=""))
    
     chk.libs(Model)
-    options(warn=-1)
-     on.exit(options(warn=0))
+  
     #for the last set we have to adjust tr$n based on the number of remaining tiles
     if((start.tile+nToDo)>tr$n) nToDo=tr$n-start.tile+1
     #have to hack in to change the extent for writting sections to seperate files because crop crashes for large files

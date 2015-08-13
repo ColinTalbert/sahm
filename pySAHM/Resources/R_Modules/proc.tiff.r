@@ -99,9 +99,9 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
   if(nvars.final==1) MOD=FALSE #because you can make a mess with one predictor but not a mod
    ######################################
    # get spatial reference info from existing image file
-   options(warn=-1)
+   
       gi <- GDALinfo(fullnames[1])
-  options(warn=1)
+  
       dims <- as.vector(gi)[1:2]
       ps <- as.vector(gi)[6:7]
       ll <- as.vector(gi)[4:5]
@@ -167,5 +167,6 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
       input$ScriptPath,vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct,
          template=out$dat$input$ParcTemplate,maDir=out$input$ma.name)
       }
+      if(length(l<-list.files(dirname(outfile.p),pattern="_prob_map.txt",full.names=TRUE))!=0) unlink(l)
      return(0)
    }
