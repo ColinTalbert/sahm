@@ -1,6 +1,6 @@
+
 setwd("C:\\GoogleDrive\\Python\\DevWorkspace\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
 ScriptPath="C:\\GoogleDrive\\Python\\DevWorkspace\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
-
 
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
@@ -9,9 +9,9 @@ source("BRT.helper.fcts.r")
 source("RF.helper.fcts.r")
 source("MAXENT.helper.fcts.r")
 #setwd("C:\\GoogleDrive\\Interactive\\Rcode\\Shiny\\MyCode")
-sourceList<-list("ResponseCurves\\external\\ChkLibs.r","ResponseCurves\\external\\Colors.r",
-    "ResponseCurves\\external\\interactionPlot.r","ResponseCurves\\external\\densityPlot.r","ResponseCurves\\external\\responseCurves.r")
-unlist(lapply(sourceList,source))
+ShinyCode<-file.path(ScriptPath,"ResponseCurves\\External")
+sourceList<-list.files(ShinyCode,full.names=TRUE)
+unlist(lapply(as.list(sourceList),source))
 ChkLibs(list("gbm","randomForest","maptools","rgdal","shiny","leaflet","maptools","rgdal","raster","ncdf4","fields","maps",
             "ggplot2","zoo","XML","RColorBrewer","chron","wesanderson","sm"))
 
@@ -71,6 +71,11 @@ rspHgt<-c("150px","300px","550px","750px")[length(fitLst)]
 runApp("C:\\GoogleDrive\\Python\\DevWorkspace\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules\\ResponseCurves")
 
 
+#=============================================
+#From the command line
+C:\R-3.2.0\bin\x64\Rterm.exe --vanilla -f C:\GoogleDrive\Python\DevWorkspace\userpackages\sahm\pySAHM\Resources\R_Modules\ResponseCurveShinyApp.r --args port=5678 wsList=C:/temp/SAHM_workspace/ForResponseCurveTool/brewersSparrow/brt_1/modelWorkspace,C:/temp/SAHM_workspace/ForResponseCurveTool/brewersSparrow/glm_1/modelWorkspace,C:/temp/SAHM_workspace/ForResponseCurveTool/brewersSparrow/mars_1/modelWorkspace,C:/temp/SAHM_workspace/ForResponseCurveTool/brewersSparrow/rf_1/modelWorkspace
+
+
 #=========================================
 # scratch pad 
 #switching to contour
@@ -94,4 +99,3 @@ responseCurves(f=list(fitLst[[1]]),m=list(modelLst[[1]]),varImp=list(varImpLst[[
 interactionPlot(fitLst[[1]],modelLst[[1]],vals=NULL,theta=30,phi=25,x="cfrst_18km",y="cfrst_18km")
 densityPlot(fitLst[[3]])
 
-C:\R-3.2.0\bin\x64\Rterm.exe --vanilla -f C:\GoogleDrive\Python\DevWorkspace\userpackages\sahm\pySAHM\Resources\R_Modules\ResponseCurveShinyApp.r --args port=5678 wsList=C:/temp/SAHM_workspace/ForResponseCurveTool/brewersSparrow/brt_1/modelWorkspace,C:/temp/SAHM_workspace/ForResponseCurveTool/brewersSparrow/glm_1/modelWorkspace,C:/temp/SAHM_workspace/ForResponseCurveTool/brewersSparrow/mars_1/modelWorkspace,C:/temp/SAHM_workspace/ForResponseCurveTool/brewersSparrow/rf_1/modelWorkspace
