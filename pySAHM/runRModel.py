@@ -84,17 +84,17 @@ def mosaicTiledOutputs(outputDirectory):
 
 
     for m in ['Bin', 'Prob', 'Resid', 'MESS', 'Mod']:
-            tilesFolder = os.path.join(outputDirectory, m + "Tiff")
-            print "tilesFolder", tilesFolder
-            if os.path.exists(tilesFolder):
+            tiles_dname = os.path.join(outputDirectory, m + "Tiff")
+            print "tiles_dname", tiles_dname
+            if os.path.exists(tiles_dname):
                 modelAbbrev = os.path.split(outputDirectory)[1].split("_")[0]
                 outFname = os.path.join(outputDirectory, "_".join([modelAbbrev, m.lower(), "map.tif"]))
                 print "outFname", outFname
 
-                onlyfiles = [os.path.join(tilesFolder, f) for f in os.listdir(tilesFolder)
-                             if os.path.isfile(os.path.join(tilesFolder, f)) and f.endswith(".tif") ]
+                onlyfiles = [os.path.join(tiles_dname, f) for f in os.listdir(tiles_dname)
+                             if os.path.isfile(os.path.join(tiles_dname, f)) and f.endswith(".tif") ]
 
-                NDValue = getNDVal(onlyfiles[0])
+                NDValue = get_nd_val(onlyfiles[0])
 
                 args = ["placeholder", "-o", outFname] + onlyfiles
                 gdal.DontUseExceptions()
@@ -106,8 +106,8 @@ def mosaicTiledOutputs(outputDirectory):
 
                 if m == 'Mod':
                     #  we must merge the dbf files as well.  ugg.
-                    only_dbf_files = [os.path.join(tilesFolder, f) for f in os.listdir(tilesFolder)
-                             if os.path.isfile(os.path.join(tilesFolder, f)) and f.endswith(".vat.dbf") ]
+                    only_dbf_files = [os.path.join(tiles_dname, f) for f in os.listdir(tiles_dname)
+                             if os.path.isfile(os.path.join(tiles_dname, f)) and f.endswith(".vat.dbf") ]
                     dbf_0_f = open(only_dbf_files[0], "rb")
                     dbf_0 = list(utilities.dbfreader(dbf_0_f))
                     dbf_0_f.close()
@@ -130,27 +130,35 @@ def mosaicTiledOutputs(outputDirectory):
                     dbf_out_f.close()
 
                 try:
-                    shutil.rmtree(tilesFolder)
+                    shutil.rmtree(tiles_dname)
+                    tile_log_fname = [f for f in os.listdir(tiles_dname)
+                                            if f.endswith('_prob_map.txt')][0]
+                    os.remove(os.path.join(tiles_dname, tile_log_fname))
                 except:
                     #  can run into latency problems with the thumbs.db in windows.
                     #  if we can't clean up this folder it's not the end of the world.
                     pass
 
 
-def getNDVal(filename):
+def get_nd_val(filename):
+    '''Attemps to determine the nodata value used in this raster
+    First it reads the value from the header metadata
+    If that value is approximately the same as raster min
+    the return the exact pixel value
+    '''
     dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
     band = dataset.GetRasterBand(1)
 
-    NDValue = band.GetNoDataValue()
+    nd_value = band.GetNoDataValue()
 
     min = band.GetMinimum()
-    if utilities.approx_equal(NDValue, min):
-        upperLeftPixVal = band.ReadAsArray(0, 0, 1, 1, 1, 1)[0][0]
-        if utilities.approx_equal(NDValue, upperLeftPixVal):
-            NDValue = band.ReadAsArray(0, 0, 1, 1, 1, 1)[0][0]
+    if utilities.approx_equal(nd_value, min):
+        upper_left_pix = band.ReadAsArray(0, 0, 1, 1, 1, 1)[0][0]
+        if utilities.approx_equal(nd_value, upper_left_pix):
+            nd_value = band.ReadAsArray(0, 0, 1, 1, 1, 1)[0][0]
 
     dataset = None
-    return NDValue
+    return nd_value
 
 
 if __name__ == "__main__":
