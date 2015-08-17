@@ -454,23 +454,23 @@ class SpatialViewerCellWidgetBase(QCellWidget):
 #          print 'button_down', os.path.split(self.inputs['model_workspace'])[1]
 #
     def button_up(self, event):
-        print 'button_up', os.path.split(self.inputs['model_workspace'])[1]
+#          print 'button_up', os.path.split(self.inputs['model_workspace'])[1]
         if event.button == 1 and self.cursor_mode == 'pan':
             #  this is a left click which signifies a zoom or pan end
-            print "\tbutton1 and pan"
+#              print "\tbutton1 and pan"
             self.pull_pixels()
             self.sync_extents()
         elif self.cursor_mode == 'zoom':
-            print "\tbutton1 and zoom"
+#              print "\tbutton1 and zoom"
             extent = self.adj_aspect(self.get_extent())
             self.set_extent(*extent)
             self.sync_extents(extent)
 
     def _resize(self, event):
-        try:
-            print '_resize', os.path.split(self.inputs['model_workspace'])[1]
-        except:
-            print "no inputs..."
+#          try:
+#              print '_resize', os.path.split(self.inputs['model_workspace'])[1]
+#          except:
+#              print "no inputs..."
         self.pull_pixels()
 
     def pull_pixels(self):
@@ -742,7 +742,7 @@ class SpatialViewerCellWidgetBase(QCellWidget):
 
     #  Functions dealing with managing extents
     def set_extent(self, xlim, ylim):
-        print '\t\t\tset_extent', os.path.split(self.inputs['model_workspace'])[1]
+#          print '\t\t\tset_extent', os.path.split(self.inputs['model_workspace'])[1]
         self.set_axis_extent(xlim, ylim)
         self.pull_pixels()
         self.fig.canvas.draw()
@@ -750,35 +750,35 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.update()
 
     def set_axis_extent(self, xlim, ylim):
-        print 'set_axis_extent', os.path.split(self.inputs['model_workspace'])[1]
+#          print 'set_axis_extent', os.path.split(self.inputs['model_workspace'])[1]
         self.axes.set_ylim(ylim, emit=False)
         self.axes.set_xlim(xlim, emit=False)
 
     def get_extent(self):
-        print 'get_extent', os.path.split(self.inputs['model_workspace'])[1]
+#          print 'get_extent', os.path.split(self.inputs['model_workspace'])[1]
         return self.axes.get_xlim(), self.axes.get_ylim()
 
     def get_max_extent(self):
-        print 'get_max_extent', os.path.split(self.inputs['model_workspace'])[1]
+#          print 'get_max_extent', os.path.split(self.inputs['model_workspace'])[1]
         return (self.rasterdisplay_layer.raster.west,
                 self.rasterdisplay_layer.raster.east) , \
                 (self.rasterdisplay_layer.raster.south,
                 self.rasterdisplay_layer.raster.north)
 
     def zoomFull(self):
-        print 'zoomFull', os.path.split(self.inputs['model_workspace'])[1]
+#          print 'zoomFull', os.path.split(self.inputs['model_workspace'])[1]
         max_xlim, max_ylim = self.get_max_extent()
         self.set_extent(max_xlim, max_ylim)
         self.sync_extents((max_xlim, max_ylim))
 
     def sync_extents(self, extent=''):
-        print "sync_extents", os.path.split(self.inputs['model_workspace'])[1]
+#          print "sync_extents", os.path.split(self.inputs['model_workspace'])[1]
         for spatialViewer in self.get_active_cells():
             if not spatialViewer is self:
                 self.set_single_extent(spatialViewer, extent)
             
     def set_single_extent(self, cell, extent=''):
-        print "\t\tset_single_extent", os.path.split(self.inputs['model_workspace'])[1]
+#          print "\t\tset_single_extent", os.path.split(self.inputs['model_workspace'])[1]
         if extent:
             x0, x1 = extent[0]
             y0, y1 = extent[1]
@@ -1304,7 +1304,7 @@ class RasterDisplay(object):
 #          print 'get block', xstart, ystart, xend, yend
         ary = self.raster.get_block_bbox([xstart, ystart, xend, yend], x_pixels, y_pixels, display_band)
         if ary is None or ary.size == 1:
-                print "raster_array is None!!!/n/n"
+#                  print "raster_array is None!!!/n/n"
                 return np.empty([1960, 1080])
         else:
                 return ary
@@ -1318,7 +1318,7 @@ class RasterDisplay(object):
 
 #    @print_timing
     def ax_update(self, ax):
-        print "\t\t\t\tpp", os.path.split(self.raster.source)[1]
+#          print "\t\t\t\tpp", os.path.split(self.raster.source)[1]
         ax.set_autoscale_on(False)  #  Otherwise, infinite loop
         self.setDims(ax)
 
