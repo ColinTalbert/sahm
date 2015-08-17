@@ -82,8 +82,7 @@ output.dir="C:\\temp\\SAHM_workspace"
 new.tiffs="C:\\Users\\mallen\\Downloads\\ForMarian_4\\ForMarian_4\\MergedDataset_WCMPI2650casq_1.csv"
 
 load(ws)
-setwd("C:\\VisTrails_SAHM\\VisTrails_SAHM\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules")
-ScriptPath="C:\\VisTrails_SAHM\\VisTrails_SAHM\\vistrails\\packages\\sahm\\pySAHM\\Resources\\R_Modules"
+
 source(file.path(ScriptPath,"LoadRequiredCode.r"))
 source(paste(toupper(out$input$script.name),".helper.fcts.r",sep=""))
 #options(error=expression(if(interactive()) recover() else dump.calls()))
@@ -108,24 +107,15 @@ FitModels(ma.name=input.file,
 #================================================================#
 #                            RF
 #================================================================#
-input.file = "J:\\Projects\\MojaveInvasives\\DerivedData\\AnalysisWith2000to2010base\\BRORUB20002010prism\\brt_1\\CovariateCorrelationOutputMDS_initial.csv"
+input.file = "C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\rf_1\\CovariateCorrelationOutputMDS_initial.csv"
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_tutorial_2.0_testing\\brewersSparrow_justMaurerObs\\rf_asage_1\\CovariateCorrelationOutputMDS_asage_initial.csv 
 
-Nodes=c(10,15,20,25)
-for(i in 1:length(Nodes)){
-output.dir=file.path("C:\\temp\\RF",paste("RF",i,sep="_"))
-dir.create(output.dir)
 FitModels(ma.name=input.file,
       tif.dir=NULL,
-      output.dir=output.dir,
+      output.dir=output.dir,nodesize=NULL,maxnodes=NULL,
       response.col=rc,make.p.tif=F,make.binary.tif=F,
-          debug.mode=T,opt.methods=2,script.name="rf",
-responseCurveForm="pdf",xtest=NULL,ytest=NULL,n.trees=1000,mtry=NULL,
-samp.replace=FALSE,sampsize=NULL,nodesize=NULL,maxnodes=Nodes[i],importance=FALSE,
-localImp=FALSE,nPerm=1,proximity=NULL,oob.prox=NULL,norm.votes=TRUE,
-do.trace=FALSE,keep.forest=NULL,keep.inbag=FALSE,MESS=T,ScriptPath=ScriptPath,multCore=FALSE)
-}
-total.time<-Sys.time()-start.time
-total.time
+          debug.mode=T,opt.methods=2,script.name="rf",ScriptPath=ScriptPath,multCore=FALSE)
+
 
 rc="responseBinary"
 #================================================================#

@@ -167,5 +167,6 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
       input$ScriptPath,vnames.final.mod=vnames.final.mod,train.dat=out$dat$ma$train$dat,residSmooth=out$mods$auc.output$residual.smooth.fct,
          template=out$dat$input$ParcTemplate,maDir=out$input$ma.name)
       }
+      if(length(l<-list.files(dirname(outfile.p),pattern="_prob_map.txt",full.names=TRUE))!=0) unlink(l)
      return(0)
    }

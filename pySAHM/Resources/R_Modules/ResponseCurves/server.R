@@ -108,7 +108,7 @@ SlideVals<-unlist(lapply(SlideNames,FUN=function(l) input[[l]]))
 if(input$FirstPredictor==input$SecondPredictor){
  plot(0:1,0:1,type="n",xaxt="n",yaxt="n",xlab="",ylab="")   
 }else{if(input$Model=="All"){
-  par(mfrow=c(2,2),mar=c(0,0,2,0),oma=c(0,0,0,0))
+  par(mfrow=c(2,2),mar=c(1,1,1,1),oma=c(0,0,0,0))
   for(i in 1:length(fitLst)){
     interactionPlot(fitLst[[i]],modelLst[[i]],vals=SlideVals,phi=input$phi,theta=input$theta,x=input$FirstPredictor,y=input$SecondPredictor)
     }

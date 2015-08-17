@@ -30,9 +30,6 @@ VariableImportance<-function(Model,out,auc){
     write.table(cbind(predictor=out$mods$vnames,cor.mat),file = variable.importance.csv,row.names=FALSE,col.names=TRUE,quote=FALSE,sep=",")
     
     
-     for(k in 1:length(out$mods$vnames)){
-                         if((lng<-nchar(rownames(cor.mat))[k])>=20) rownames(cor.mat)[k]<-paste(substr(rownames(cor.mat)[k],1,17),"\n",substr(rownames(cor.mat)[k],18,lng),sep="")
-                     }
    #if cross validation we need to avg across folds otherwise plot for each
    #order by the best in the train split
    
@@ -41,8 +38,8 @@ VariableImportance<-function(Model,out,auc){
   offSet<-.5 
 
 ######################## copied from append out
-  par(mar=c(6,17,6,2))
-    
+  par(mar=c(6,17,6,0))
+   
     plot(c(min(0,min(cor.mat)),(max(cor.mat)+.1)),y=c(-.5,(length(out$mods$vnames)+.5)),type="n",xlab="Importance",
         main="Importance using the change in AUC\nwhen each predictor is permuted",ylab="",yaxt="n",cex.lab=3,cex.main=3,cex.axis=2)
     grid()
@@ -62,8 +59,10 @@ VariableImportance<-function(Model,out,auc){
       
  ############################### copied from appendOut 
     Offset=ifelse(out$dat$split.type=="none",.25,0)
-    axis(2,at=seq(from=0,to=length(out$mods$vnames),length=length(out$mods$vnames))+Offset,labels=rownames(xright),las=2,cex=2.5,cex.lab=2.5,cex.axis=2.5)
-    title(ylab="Variables",line=15,cex.lab=3,font.lab=2)
+    ylabs<-rownames(xright)
+    ylabs<-paste(substr(ylabs,start=1,stop=10),c("\n","")[1+(nchar(ylabs)<=10)],substr(ylabs,start=11,stop=nchar(ylabs)),sep="")
+    axis(2,at=seq(from=0,to=length(out$mods$vnames),length=length(out$mods$vnames))+Offset,labels=ylabs,las=2,cex=2.5,cex.lab=2.5,cex.axis=2.5)
+    title(ylab="Variables",line=14,cex.lab=3,font.lab=2)
 } 
 
 PermutePredict<-function(pred.names,dat,pred,modelFit,Model,resp){

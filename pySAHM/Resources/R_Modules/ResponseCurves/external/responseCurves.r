@@ -3,7 +3,7 @@ responseCurves<-function(fitLst,model,vals=NULL,varImp,addImp,pIdx){
         #How to check that models and data match
         dat<-fitLst[[1]]$dat$ma$train$dat[,-1]
         resp<-fitLst[[1]]$dat$ma$train$dat[,1]
-        VarNames<-names(dat)
+       
         myPredict <- function (x, y, ...) { 
           out <- predict(x, y, type='response', args=c("outputformat=logistic"), ...);
           return (out)
@@ -25,7 +25,7 @@ responseCurves<-function(fitLst,model,vals=NULL,varImp,addImp,pIdx){
         
            
             if(byVar) par(mfrow=c((length(fitLst)+1),1),mar=c(0,1,0,0),oma=c(0,1,0,0),xpd=TRUE)
-            else par(mfrow=c(1,ncol(dat)),mar=c(0,0,0,0),oma=c(3,5,3,0),xpd=TRUE)
+            else par(mfrow=c(1,ncol(dat)),mar=c(0,0,6,0),oma=c(0,5,0,0),xpd=TRUE)
            
             y.lim<-c(0,1)
               nRow<-1
@@ -52,7 +52,8 @@ responseCurves<-function(fitLst,model,vals=NULL,varImp,addImp,pIdx){
                                lR<-length(Response)
                                 if(v==1){
                                    plot(test[1:(lR-1),pIdx],Response[1:(lR-1)], ylim = y.lim, xlab = "",
-                                    ylab = "", type = ifelse(plotR,"l","n"), lwd=2,cex=3,cex.main=3,cex.axis=1.2,yaxt=ifelse(pIdx==1 & !byVar,"s","n"),
+                                    type = ifelse(plotR,"l","n"), lwd=2,cex=3,cex.main=3,cex.axis=1.2,yaxt=ifelse(pIdx==1 & !byVar,"s","n"),
+                                    ylab=ifelse(pIdx==1 & !byVar,"Predicted Value",""),
                                     xaxt="n",main="")
                                     if(addImp){
                                       Xext<-extendrange(test[1:(lR-1),pIdx])
@@ -69,8 +70,10 @@ responseCurves<-function(fitLst,model,vals=NULL,varImp,addImp,pIdx){
                                       segments(x0=vals[v,pIdx],y0=0,y1=Response[lR],x1=vals[v,pIdx],col=Colors[v],lty=2,cex=2)
                                       points(x=vals[v,pIdx],y=Response[lR],col=Colors[v],pch=16,cex=2)
                                  }
-                               if(byVar & pIdx==1) mtext(model[[j]],line=0,side=2,cex=1.2)  
-                               if(!byVar) mtext(names(dat)[pIdx],line=1,side=3,cex=1.2,col=ifelse(plotR,"black","grey74"))
+                                 Names<-names(dat)
+                                 Names<-paste(substr(Names,start=1,stop=12),c("\n","")[1+(nchar(Names)<=12)],substr(Names,start=13,stop=nchar(Names)),sep="")
+                               if(byVar & pIdx==1) mtext(model[[j]],line=1,side=2,cex=2)  
+                               if(!byVar) mtext(Names[pIdx],line=1,side=3,cex=1.2,col=ifelse(plotR,"black","grey74"))
                                # if(pIdx==1) mtext(model,side=2,outer=TRUE,at=seq(from=1/(2*nRow),to=(1-1/(2*nRow)),length=nRow)[j+1],line=3,cex=1.2)
                         }
                     } 
