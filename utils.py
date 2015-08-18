@@ -586,6 +586,7 @@ def run_model_script(script, args_dict, module=None, runner_script="runRModel.py
             dialog = CreatePredictorCurvesDialog(kwargs_mod)
             #  dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
             retVal = dialog.exec_()
+            del dialog
             #  outputPredictorList = dialog.outputList
             if retVal == 1:
                 raise ModuleError(module, "Cancel or Close selected (not OK) workflow halted.")
