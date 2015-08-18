@@ -17,10 +17,10 @@ def main(args_in):
 
             while not os.path.isdir(outDir):
                 outDir = os.path.split(outDir)[0]
-            outDir = os.path.split(outDir)[0]
+#              outDir = os.path.split(outDir)[0]
 
             print "outDir=", outDir
-            logger = utilities.logger(outDir, True)
+            logger = utilities.logger(os.path.split(outDir)[0], True)
 
 #   if this is an ApplyModel we need to wait for the preceeding model to finish
 #   up before launching R
@@ -32,7 +32,7 @@ def main(args_in):
                 sys.stderr.write("Error in original model that this ApplyModel needs")
                 sys.exit("Error in original model could not apply model")
             elif check.startswith("Completed successfully"):
-                time.sleep(5)
+                time.sleep(3)
                 break
 
     p = subprocess.Popen(args_in, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -89,45 +89,47 @@ def mosaicTiledOutputs(outputDirectory):
             if os.path.exists(tiles_dname):
                 modelAbbrev = os.path.split(outputDirectory)[1].split("_")[0]
                 outFname = os.path.join(outputDirectory, "_".join([modelAbbrev, m.lower(), "map.tif"]))
-                print "outFname", outFname
 
                 onlyfiles = [os.path.join(tiles_dname, f) for f in os.listdir(tiles_dname)
                              if os.path.isfile(os.path.join(tiles_dname, f)) and f.endswith(".tif") ]
 
-                NDValue = get_nd_val(onlyfiles[0])
+                if onlyfiles:
 
-                args = ["placeholder", "-o", outFname] + onlyfiles
-                gdal.DontUseExceptions()
-                gdal_merge.main(args)
+                    print "outFname", outFname
+                    NDValue = get_nd_val(onlyfiles[0])
 
-                dataset = gdal.Open(outFname, gdal.GA_Update)
-                dataset.GetRasterBand(1).SetNoDataValue(float(NDValue))
-                dataset.GetRasterBand(1).ComputeStatistics(1)
+                    args = ["placeholder", "-o", outFname] + onlyfiles
+                    gdal.DontUseExceptions()
+                    gdal_merge.main(args)
 
-                if m == 'Mod':
-                    #  we must merge the dbf files as well.  ugg.
-                    only_dbf_files = [os.path.join(tiles_dname, f) for f in os.listdir(tiles_dname)
-                             if os.path.isfile(os.path.join(tiles_dname, f)) and f.endswith(".vat.dbf") ]
-                    dbf_0_f = open(only_dbf_files[0], "rb")
-                    dbf_0 = list(utilities.dbfreader(dbf_0_f))
-                    dbf_0_f.close()
+                    dataset = gdal.Open(outFname, gdal.GA_Update)
+                    dataset.GetRasterBand(1).SetNoDataValue(float(NDValue))
+                    dataset.GetRasterBand(1).ComputeStatistics(1)
 
-                    fieldnames, fieldspecs = (dbf_0)[:2]
-                    all_values = set([val[1].strip() for val in dbf_0[2:]])
+                    if m == 'Mod':
+                        #  we must merge the dbf files as well.  ugg.
+                        only_dbf_files = [os.path.join(tiles_dname, f) for f in os.listdir(tiles_dname)
+                                 if os.path.isfile(os.path.join(tiles_dname, f)) and f.endswith(".vat.dbf") ]
+                        dbf_0_f = open(only_dbf_files[0], "rb")
+                        dbf_0 = list(utilities.dbfreader(dbf_0_f))
+                        dbf_0_f.close()
 
-                    for dbf_file in only_dbf_files[1:]:
-                        dbf_f = open(dbf_file, 'rb')
-                        dbf_list = list(utilities.dbfreader(dbf_f))
-                        dbf_f.close()
+                        fieldnames, fieldspecs = (dbf_0)[:2]
+                        all_values = set([val[1].strip() for val in dbf_0[2:]])
 
-                        dbf_n_values = set([val[1].strip() for val in dbf_list[2:]])
-                        all_values = all_values | dbf_n_values
+                        for dbf_file in only_dbf_files[1:]:
+                            dbf_f = open(dbf_file, 'rb')
+                            dbf_list = list(utilities.dbfreader(dbf_f))
+                            dbf_f.close()
 
-                    dbf_out_fname = outFname.replace(".tif", ".tif.vat.dbf")
-                    dbf_out_f = open(dbf_out_fname, 'wb')
-                    all_values = zip(range(1, len(all_values) + 1), list(all_values))
-                    utilities.dbfwriter(dbf_out_f, fieldnames, fieldspecs, all_values)
-                    dbf_out_f.close()
+                            dbf_n_values = set([val[1].strip() for val in dbf_list[2:]])
+                            all_values = all_values | dbf_n_values
+
+                        dbf_out_fname = outFname.replace(".tif", ".tif.vat.dbf")
+                        dbf_out_f = open(dbf_out_fname, 'wb')
+                        all_values = zip(range(1, len(all_values) + 1), list(all_values))
+                        utilities.dbfwriter(dbf_out_f, fieldnames, fieldspecs, all_values)
+                        dbf_out_f.close()
 
                 try:
                     shutil.rmtree(tiles_dname)
