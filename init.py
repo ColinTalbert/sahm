@@ -134,9 +134,10 @@ def menu_items():
                 widget = qvbl.itemAt(i).widget()
                 if (widget != 0) and (type(widget) is QtGui.QRadioButton):
                     if widget.isChecked():
-
+                        package_manager = get_package_manager()
+                        package = package_manager.get_package(identifier)
                         configuration.set_deep_value('cur_processing_mode', str(widget.text()))
-                        configuration.persist_configuration()
+                        package.persist_configuration()
 
                         utilities.start_new_pool(utilities.get_process_count(widget.text()))
 
