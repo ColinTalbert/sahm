@@ -24,8 +24,10 @@ responseCurves<-function(fitLst,model,vals=NULL,varImp,addImp,pIdx){
          byVar<-ifelse(missing(pIdx),FALSE,TRUE)
         
            
-            if(byVar) par(mfrow=c((length(fitLst)+1),1),mar=c(0,1,0,0),oma=c(0,1,0,0),xpd=TRUE)
-            else par(mfrow=c(1,ncol(dat)),mar=c(0,0,6,0),oma=c(0,5,0,0),xpd=TRUE)
+            if(byVar) par(mfrow=c((length(fitLst)+1),1),mar=c(0,2,0,0),oma=c(0,1,0,0),xpd=TRUE) 
+            else { par(mfrow=c(1,ncol(dat)),mar=c(0,0,6,0),oma=c(0,5,0,0),xpd=TRUE)
+                  if(ncol(dat)>9) par(mfrow=c(2,ceiling(ncol(dat)/2)))
+            }
            
             y.lim<-c(0,1)
               nRow<-1
@@ -33,8 +35,8 @@ responseCurves<-function(fitLst,model,vals=NULL,varImp,addImp,pIdx){
               modelCycle<-1:length(fitLst)
               predCycle<-1:ncol(dat)
               if(byVar) predCycle <- pIdx
-               
                for(j in modelCycle){
+               if(j>length(varImp)) browser()
                     allVarImp<-rep(0,times=ncol(dat))
                     allVarImp[match(names(varImp[[j]]),names(dat))]<-varImp[[j]] 
                     allVarImp[allVarImp<0]<-0 #set the minimum to zero so it shows up white

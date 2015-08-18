@@ -101,8 +101,10 @@ for(w in 1:length(wsLst)){
   varImpLst[[w]]<-getVarImp(dirname(wsLst[[w]]))
 }
 
-mapStk<<-stack(mapLst)
-stk<-stack(rastLst)
+if(file.exists(mapLst[[1]])){
+  mapStk<<-stack(mapLst)
+  stk<-stack(rastLst)
+}
 
 
 Cols<<-c(wes_palette("Darjeeling"),wes_palette("GrandBudapest2"),wes_palette("Cavalcanti"),wes_palette("Moonrise3"))

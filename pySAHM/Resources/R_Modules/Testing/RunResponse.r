@@ -22,16 +22,32 @@ wsLst[[2]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\glm
 wsLst[[3]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\mars_1\\modelWorkspace"
 wsLst[[4]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\brewersSparrow\\rf_1\\modelWorkspace"
 
+wsLst<-list()
+wsLst[[1]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\vespersSparrow\\brt_1\\modelWorkspace"
+wsLst[[2]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\vespersSparrow\\glm_1\\modelWorkspace"
+wsLst[[3]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\vespersSparrow\\mars_1\\modelWorkspace"
+wsLst[[4]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\vespersSparrow\\rf_1\\modelWorkspace"
+
+wsLst<-list()
+wsLst[[1]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\sageThrasher\\SageThrasher\\brt_1\\modelWorkspace"
+wsLst[[2]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\sageThrasher\\SageThrasher\\glm_1\\modelWorkspace"
+wsLst[[3]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\sageThrasher\\SageThrasher\\rf_1\\modelWorkspace"
+wsLst[[4]]<-"C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\sageThrasher\\SageThrasher\\mars_1\\modelWorkspace"
+
+wsLst<-list()
 wsLst[[1]]<-"J:\\Projects\\cnhp_swap\\derived_data\\workspace_03072014\\brt_SpruceFir_1\\modelWorkspace"
 wsLst[[2]]<-"J:\\Projects\\cnhp_swap\\derived_data\\workspace_03072014\\glm_SpruceFir_1\\modelWorkspace"
 wsLst[[3]]<-"J:\\Projects\\cnhp_swap\\derived_data\\workspace_03072014\\mars_SpruceFir_1\\modelWorkspace"
 wsLst[[4]]<-"J:\\Projects\\cnhp_swap\\derived_data\\workspace_03072014\\rf_SpruceFir_1\\modelWorkspace"
 
+wsLst<-list()
 wsLst[[1]]<-"J:\\Projects\\cnhp_swap\\derived_data\\workspace_03072014\\brt_sagebrush_1\\modelWorkspace"
 wsLst[[2]]<-"J:\\Projects\\cnhp_swap\\derived_data\\workspace_03072014\\glm_sagebrush_1\\modelWorkspace"
 wsLst[[3]]<-"J:\\Projects\\cnhp_swap\\derived_data\\workspace_03072014\\mars_sagebrush_1\\modelWorkspace"
 wsLst[[4]]<-"J:\\Projects\\cnhp_swap\\derived_data\\workspace_03072014\\rf_sagebrush_1\\modelWorkspace"
 
+wsLst<-list()
+wsLst[[1]]<-"J:\\Projects\\Climate_RS_Comparison\\Tamarisk\\HUC210\\rf_initial_1\\modelWorkspace"
 
 fitLst<-list()
 modelLst<-list()
@@ -48,8 +64,10 @@ for(w in 1:length(wsLst)){
   mapLst[[w]]<-file.path(dirname(wsLst[[w]]),paste(modelLst[[w]],"prob_map.tif",sep="_"))
   varImpLst[[w]]<-getVarImp(dirname(wsLst[[w]]))
 }
-mapStk<<-stack(mapLst)
-stk<-stack(rastLst)
+if(file.exists(mapLst[[1]])){
+  mapStk<<-stack(mapLst)
+  stk<-stack(rastLst)
+}
 maxImp<-max(unlist(lapply(varImpLst,max)))
 
 
