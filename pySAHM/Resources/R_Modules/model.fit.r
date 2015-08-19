@@ -5,7 +5,7 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
 #in the generic model fit so that I can use the same simple function call for cross-validation and generic
 #model fit.  Written by Marian Talbert June 30th 2012
 
-    attach(out$input)
+    suppressMessages(attach(out$input))
     on.exit(detach(out$input))
 #================================================================
 #                        GLM

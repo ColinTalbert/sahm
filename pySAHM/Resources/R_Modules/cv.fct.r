@@ -79,8 +79,7 @@ function (fit.object, out, sp.no = 1, prev.stratify = F,Model)
 #
 # updated 16th June 2005 to calculate residual deviance
 #
-attach(out$input)
-on.exit(detach(out$input))
+
 
 
 data<-out$dat$ma$train

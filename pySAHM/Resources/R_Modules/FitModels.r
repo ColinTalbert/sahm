@@ -99,7 +99,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
               chk.libs(Model)
    #Read in data, perform several checks and store all of the information in the out list
              out <- read.ma(out)
-            
+             
              out$dat$bname <- bname
              out$dat$bnameExpanded=file.path(dirname(out$dat$bname),"ExpandedOutput")
              dir.create(out$dat$bnameExpanded)
@@ -189,6 +189,4 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
 
     cat("Progress:100%\n");flush.console()
     on.exit(capture.output(cat(paste("\nTotal time = ",round((unclass(Sys.time())-t0)/60,2)," min\n\n",sep="")),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)) 
-    if(debug.mode) assign("fit",out$mods$final.mod,envir=.GlobalEnv)
-    invisible(out)
 }
