@@ -79,8 +79,11 @@ class MAXENTRunner(object):
             self.maxent_path = os.path.join(self.maxent_path, 'maxent.jar')
 
         cmd = self.gen_maxent_cmd()
-        stdout_fname = os.path.join(self.outputdir, "stdOut.txt")
-        stderr_fname = os.path.join(self.outputdir, "stdErr.txt")
+        stdout_fname = os.path.join(self.outputdir, "ExpandedOutput", "stdOut.txt")
+        stderr_fname = os.path.join(self.outputdir, "ExpandedOutput", "stdErr.txt")
+        if not os.path.exists(os.path.join(self.outputdir, "ExpandedOutput")):
+            os.makedirs(os.path.join(self.outputdir, "ExpandedOutput"))
+
         self.writetolog('    running command:  \n' +
                         utilities.convert_list_to_cmd_str(cmd) + "\n", True, False)
 
@@ -288,8 +291,11 @@ class MAXENTRunner(object):
                         outdir = os.path.join(self.outputdir,
                                         "cvSplit" + row[header1.index("Split")])
                         subrun_args["o"] = outdir
-                        stdout_fname = os.path.join(outdir, "stdOut.txt")
-                        stderr_fname = os.path.join(outdir, "stdErr.txt")
+                        stdout_fname = os.path.join(outdir, "ExpandedOutput", "stdOut.txt")
+                        stderr_fname = os.path.join(outdir, "ExpandedOutput", "stdErr.txt")
+                        if not os.path.exists(os.path.join(outdir, "ExpandedOutput")):
+                            os.makedirs(os.path.join(outdir, "ExpandedOutput"))
+
                         os.mkdir(subrun_args["o"])
 
                         cvList.append(row[header1.index("Split")])

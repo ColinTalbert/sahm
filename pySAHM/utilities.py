@@ -189,9 +189,9 @@ def runCondorPythonJob(args, workspace, prefix, wholeMachine=False):
         reqsStr += "\n"
     submitFile.write(reqsStr)
 
-    stdErrFname = os.path.join(workspace, prefix + "_stdErr.txt")
-    stdOutFname = os.path.join(workspace, prefix + "_stdOut.txt")
-    logFname = os.path.join(workspace, prefix + "_log.txt")
+    stdErrFname = os.path.join(workspace, "ExpandedOutput", prefix + "_stdErr.txt")
+    stdOutFname = os.path.join(workspace, "ExpandedOutput", prefix + "_stdOut.txt")
+    logFname = os.path.join(workspace, "ExpandedOutput", prefix + "_log.txt")
     submitFile.write("Output                  = " + replaceMappedDrives(stdOutFname) + "\n")
     submitFile.write("error                   = " + replaceMappedDrives(stdErrFname) + "\n")
     submitFile.write("log                     = " + replaceMappedDrives(logFname) + "\n")
@@ -543,7 +543,7 @@ def covariate_name_is_ok(covname):
 
 def checkIfModelFinished(model_dir):
     try:
-        out_err = os.path.join(model_dir, "stdErr.txt")
+        out_err = os.path.join(model_dir, "ExpandedOutput", "stdErr.txt")
         stdErrLines = "\n".join(open(out_err, "r").readlines())
         if "Error" in stdErrLines:
             return "Error in model"

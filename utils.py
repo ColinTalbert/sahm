@@ -454,8 +454,6 @@ def run_R_script(script, args_dict, module=None, async=False,
         writetolog("\nFinished processing of " + script , True)
         return stdout, stderr
 
-#    runRModelPy = os.path.join(os.path.dirname(__file__), "pySAHM", runner_script)
-#    command_arr = [sys.executable, runRModelPy] + command_arr
 
 def check_R_output(stdout, stderr, module=None, args_dict=None):
     #  handle the errors and warnings
@@ -467,7 +465,7 @@ def check_R_output(stdout, stderr, module=None, args_dict=None):
         writetolog(msg)
 
     if 'Warning' in stderr:
-        msg = "The R scipt returned the following warning(s).  The R warning message is below - \n"
+        msg = "The R script returned the following warning(s).  The R warning message is below - \n"
         msg += stderr
         writetolog(msg)
 
@@ -478,8 +476,6 @@ def check_R_output(stdout, stderr, module=None, args_dict=None):
             raise ModuleError(module, msg)
         else:
             raise RuntimeError , msg
-    elif 'Warning' in stderr:
-        writeRErrorsToLog(args_dict, stdout, stderr)
 
 class ModelJobMonitor(object):
     '''The job monitor object that checks for model run completion and
@@ -540,8 +536,8 @@ class ModelJobMonitor(object):
         return False
 
 def get_job_monitor(module, model_args):
-    stdout_fname = os.path.join(model_args['o'], "stdOut.txt")
-    stderr_fname = os.path.join(model_args['o'], "stdErr.txt")
+    stdout_fname = os.path.join(model_args['o'], "ExpandedOutput", "stdOut.txt")
+    stderr_fname = os.path.join(model_args['o'], "ExpandedOutput", "stdErr.txt")
     if model_args.has_key('ws'):
         #  this is an ApplyModel not a standard model run!
         model_prefix = os.path.split(os.path.split(model_args['ws'])[0])[1].split("_")[0]
@@ -562,8 +558,8 @@ def run_model_script(script, args_dict, module=None, runner_script="runRModel.py
     args_dict["multicore"] = R_boolean(not processing_mode ==
                                 "multiple models simultaneously (1 core each)")
 
-    stderr_fname = os.path.join(args_dict['o'], "stdErr.txt")
-    stdout_fname = os.path.join(args_dict['o'], "stdOut.txt")
+    stderr_fname = os.path.join(args_dict['o'], "ExpandedOutput", "stdErr.txt")
+    stdout_fname = os.path.join(args_dict['o'], "ExpandedOutput", "stdOut.txt")
 
     cmd = gen_R_cmd(script, args_dict)
     runRModelPy = os.path.join(os.path.dirname(__file__), "pySAHM", runner_script)
@@ -1211,7 +1207,8 @@ def make_next_file_complex(module, prefix, suffix="", directory="",
                 file = open(os.path.abspath(fname), 'w+')
                 file.close()
             else:
-                os.makedirs(fname)
+                if not os.path.exists(fname):
+                    os.makedirs(fname)
         else:
             #  The old fname was in some other directory.
             delete_hash_entry_pickle(signature=signature, directory=directory)

@@ -356,7 +356,6 @@ class Model(SAHMDocumentedModule, Module):
     def compute(self):
         out_folder = self.force_get_input("outputFolderName", "")
 
-
         self.args_dict = utils.map_ports(self, self.port_map)
 
         mdsFile = utils.get_relative_path(self.args_dict['c'], self)
@@ -417,6 +416,10 @@ class Model(SAHMDocumentedModule, Module):
         copy_mds_fname = os.path.join(self.output_dname, os.path.split(mdsFile)[1])
         if not os.path.exists(copy_mds_fname):
             shutil.copyfile(mdsFile, copy_mds_fname)
+        expanded_output_dname = os.path.join(self.output_dname, "ExpandedOutput")
+        if not os.path.exists(expanded_output_dname):
+            os.makedirs(expanded_output_dname)
+
         self.args_dict["c"] = copy_mds_fname
 
 #            self.output_dname = utils.find_model_dir(prefix, self.args_dict)
