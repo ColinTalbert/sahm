@@ -2279,8 +2279,8 @@ _modules = generate_namespaces({'DataInput': [
                                                            'moduleFringe':output_fringe}),
                                           (ModelMapViewer, {'moduleColor':output_color,
                                                            'moduleFringe':output_fringe}),
-                                          (ResponseCurveExplorer, {'moduleColor':output_color,
-                                                           'moduleFringe':output_fringe}),
+#                                            (ResponseCurveExplorer, {'moduleColor':output_color,
+#                                                             'moduleFringe':output_fringe}),
                                           ]
                                 })
 
