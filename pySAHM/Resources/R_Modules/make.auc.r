@@ -72,9 +72,9 @@ make.auc.plot.jpg<-function(out=out){
           graphics.off()
     }
 ################# Calculate all statistics on test\train or train\cv splits
-  
-   out$input$has.split<-(out$input$PsdoAbs & !out$input$script.name%in%c("glm","maxent"))
-  Stats<-lapply(inlst,calcStat,family=out$input$model.family,has.split=out$input$has.split)
+   
+   out$input$has.split<-has.split<-(out$input$PsdoAbs & !out$input$script.name%in%c("glm","maxent"))
+  Stats<-lapply(inlst,calcStat,family=out$input$model.family,has.split=has.split)
 
 #################### Variable importance plots #####################
 
