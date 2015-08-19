@@ -145,8 +145,11 @@ class CreatePredictorCurvesDialog(QtGui.QDialog):
 
     def clear_contents(self):
         for cv in self.covariate_viewers:
-            cv.fig_udc.delaxes(cv.ax_udc)
-            del cv
+            try:
+                cv.fig_udc.delaxes(cv.ax_udc)
+                del cv
+            except:
+                pass
 
     def cancel(self):
         self.clear_contents()
@@ -275,7 +278,7 @@ class covariate_viewer(QtGui.QGroupBox):
         spacer_item = QtGui.QSpacerItem(0, 0, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.main_layout.addItem(spacer_item)
     
-        with sns.set(style="darkgrid"):
+        with sns.axes_style("darkgrid"):
             self.fig_udc = Figure((5.0, 4.0), dpi=self.dpi)
             self.canvas_udc = FigureCanvas(self.fig_udc)
             self.canvas_udc.setParent(self.chart_panel)

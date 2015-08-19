@@ -356,15 +356,14 @@ class Model(SAHMDocumentedModule, Module):
     def compute(self):
         out_folder = self.force_get_input("outputFolderName", "")
 
-
         self.args_dict = utils.map_ports(self, self.port_map)
 
         mdsFile = utils.get_relative_path(self.args_dict['c'], self)
 
         if self.has_input('run_name_info'):
             runinfo = self.force_get_input('run_name_info')
-            subfolder = runinfo.contents.get('subfolder', "")
-            runname = runinfo.contents.get('runname', "")
+            subfolder = runinfo.get('subfolder_name', "")
+            runname = runinfo.get('runname', "")
         else:
             subfolder, runname = utils.get_previous_run_info(mdsFile)
 
@@ -417,6 +416,10 @@ class Model(SAHMDocumentedModule, Module):
         copy_mds_fname = os.path.join(self.output_dname, os.path.split(mdsFile)[1])
         if not os.path.exists(copy_mds_fname):
             shutil.copyfile(mdsFile, copy_mds_fname)
+        expanded_output_dname = os.path.join(self.output_dname, "ExpandedOutput")
+        if not os.path.exists(expanded_output_dname):
+            os.makedirs(expanded_output_dname)
+
         self.args_dict["c"] = copy_mds_fname
 
 #            self.output_dname = utils.find_model_dir(prefix, self.args_dict)
@@ -1997,33 +2000,20 @@ def build_available_trees():
     #  if the first file in the layers file does not exist assume that none
     #  of them do and use the exampledata version
     global atFORT
-    if not os.path.exists(first_file):
-        print (("!" * 30) + " WARNING " + ("!" * 30) + "\n") * 3
-        print "The first grid in your layers CSV could not be found."
-        print "Defaulting to the example data csv."
-        print "fix/set paths in file " + layers_csv_fname + " to enable this functionality."
-        print "See documentation for more information on setting up the layers.csv\n"
-        print (("!" * 30) + " WARNING " + ("!" * 30) + "\n") * 3
-        layers_csv_fname = os.path.join(os.path.dirname(__file__), 'layers.exampledata.csv')
-        atFORT = False
 
-    else:
-        atFORT = True
+    atFORT = os.path.exists(first_file)
 
-#    #####Only for testing tutorial data
-#    print "For tutorial tesing uing the layers.exampledata.csv"
-#    layers_csv_fname = os.path.join(os.path.dirname(__file__), 'layers.exampledata.csv')
-
-    csv_reader = csv.reader(open(layers_csv_fname, 'rU'))
-    #  pass on header
-    csv_reader.next()
-    for row in csv_reader:
-        if row[2] not in trees:
-            trees[row[2]] = {}
-        available_dict = trees[row[2]]
-        if row[3] not in available_dict:
-            available_dict[row[3]] = []
-        available_dict[row[3]].append((row[0], row[1], row[4]))
+    if atFORT:
+        csv_reader = csv.reader(open(layers_csv_fname, 'rU'))
+        #  pass on header
+        csv_reader.next()
+        for row in csv_reader:
+            if row[2] not in trees:
+                trees[row[2]] = {}
+            available_dict = trees[row[2]]
+            if row[3] not in available_dict:
+                available_dict[row[3]] = []
+            available_dict[row[3]].append((row[0], row[1], row[4]))
 
     return trees
 

@@ -79,8 +79,8 @@ import pySAHM.utilities as utilities
 import pySAHM.SpatialUtilities as SpatialUtilities
 
 import matplotlib
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+#  from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+#  from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 #  from matplotlib.backends.backend_qt4 import FigureCanvasQT as FigureCanvas
 #  from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
