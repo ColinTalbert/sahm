@@ -49,6 +49,11 @@ wsLst[[4]]<-"J:\\Projects\\cnhp_swap\\derived_data\\workspace_03072014\\rf_sageb
 wsLst<-list()
 wsLst[[1]]<-"J:\\Projects\\Climate_RS_Comparison\\Tamarisk\\HUC210\\rf_initial_1\\modelWorkspace"
 
+wsLst<-list()
+wsLst[[1]]<-"I:\\VisTrails\\WorkingFiles\\workspace\\_Tutorial_2.0_multiple\\brewersSparrow_presenceONLY\\udc_1\\modelWorkspace"
+wsLst[[2]]<-"I:\\VisTrails\\WorkingFiles\\workspace\\_Tutorial_2.0_multiple\\brewersSparrow_presenceONLY\\Maxent_1\\modelWorkspace"
+wsLst[[3]]<-"I:\\VisTrails\\WorkingFiles\\workspace\\_Tutorial_2.0_multiple\\brewersSparrow_presenceONLY\\brt_1\\modelWorkspace"
+
 fitLst<-list()
 modelLst<-list()
 varImpLst<-list()
@@ -113,7 +118,7 @@ c(.9,-.6,50,-10,.2,.06,.5,2),
 c(.2,.1,50,-10,.2,0,.17,2),
 c(.2,.1,50,-10,.2,.06,.5,0))
 
-responseCurves(f=list(fitLst[[1]]),m=list(modelLst[[1]]),varImp=list(varImpLst[[1]]),addImp=TRUE,vals)
+responseCurves(f=list(fitLst[[2]]),m=list(modelLst[[2]]),varImp=list(varImpLst[[2]]),addImp=TRUE,vals)
 interactionPlot(fitLst[[1]],modelLst[[1]],vals=NULL,theta=30,phi=25,x="Average_FirstFrost_sd",y="ppt_season_sd_3")
 densityPlot(fitLst[[3]])
 
