@@ -1904,7 +1904,7 @@ def initialize():
         default_r_dname = r"Central_R\R-3.2.0\bin"
         r_path = os.path.join(base_dir, default_r_dname)
         if os.path.exists(r_path):
-            configuration.r_path = utils.get_r_path()
+            configuration.r_path = r_path
             configuration.set_deep_value('r_path', configuration.r_path)
 
             package_manager = get_package_manager()
