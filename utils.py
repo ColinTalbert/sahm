@@ -454,28 +454,49 @@ def run_R_script(script, args_dict, module=None, async=False,
         writetolog("\nFinished processing of " + script , True)
         return stdout, stderr
 
-
 def check_R_output(stdout, stderr, module=None, args_dict=None):
     #  handle the errors and warnings
-    if 'Error' in stderr:
+
+    stderr_clean = cleanup_stderr(stderr)
+
+    if 'Error' in stderr_clean:
         msg = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
         msg += "\n  An error was encountered in the R script for this module."
         msg += "\n     The R error message is below: \n"
-        msg += stderr
+        msg += stderr_clean
         writetolog(msg)
 
-    if 'Warning' in stderr:
+    if 'Warning' in stderr_clean:
         msg = "The R script returned the following warning(s).  The R warning message is below - \n"
-        msg += stderr
+        msg += stderr_clean
         writetolog(msg)
 
-    if 'Error' in stderr:
+    if 'Error' in stderr_clean:
         #  also write the errors to a model specific log file in the model output dir
         #  then raise an error
         if module:
             raise ModuleError(module, msg)
         else:
             raise RuntimeError , msg
+
+def cleanup_stderr(stderr_string):
+    chunks = stderr_string.split("The following objects are masked ")
+
+    actual_msgs = []
+    for chunk in chunks:
+        if not chunk.startswith('_by_') and not chunk.startswith('from '):
+            actual_msgs.append(chunk)
+
+        try:
+            chunk_split = chunk.splitlines()
+            second_empty_line_index = [y for y in enumerate(chunk_split) if y[1] == ""][1][0]
+            actual_msg = "\n".join(chunk_split[second_empty_line_index + 1:])
+            if actual_msg:
+                actual_msgs.append(actual_msg)
+        except:
+            pass
+
+    return "\n".join(actual_msgs)
 
 class ModelJobMonitor(object):
     '''The job monitor object that checks for model run completion and
