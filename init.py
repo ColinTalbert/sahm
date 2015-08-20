@@ -29,7 +29,7 @@
 ###############################################################################
 
 import csv
-import os
+import os, sys
 import shutil
 import subprocess
 import copy
@@ -1897,17 +1897,21 @@ def initialize():
     utils.importOSGEO()
     utils.createLogger(session_dir, configuration.verbose)
 
-    utils.set_r_path(configuration.r_path)
-    if not os.path.exists(utils.get_r_path()) and \
-        system.systemType in ['Microsoft', 'Windows']:
-        #  they don't have a decent R path, let's see if we can pull one from the
-        utils.set_r_path(utils.pull_R_install_from_reg())
-        configuration.r_path = utils.get_r_path()
-        configuration.set_deep_value('r_path', configuration.r_path)
+    if system.systemType in ['Microsoft', 'Windows']:
+        #  we're on a windows box, they probably installed VisTrails, R, and SAHM
+        #  using the prebuilt msi,  let's make sure they're using the supplied R
+        base_dir = os.path.split(os.path.split(sys.executable)[0])[0]
+        default_r_dname = r"Central_R\R-3.2.0\bin"
+        r_path = os.path.join(base_dir, default_r_dname)
+        if os.path.exists(r_path):
+            configuration.r_path = utils.get_r_path()
+            configuration.set_deep_value('r_path', configuration.r_path)
 
-        package_manager = get_package_manager()
-        package = package_manager.get_package(identifier)
-        package.persist_configuration()
+            package_manager = get_package_manager()
+            package = package_manager.get_package(identifier)
+            package.persist_configuration()
+
+    utils.set_r_path(configuration.r_path)
 
     try:
         testfname = os.path.join(utils.get_r_path(), "CanSAHMWriteToR.txt")

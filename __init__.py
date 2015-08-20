@@ -81,7 +81,6 @@ def package_requirements():
     if not python_module_exists('scipy'):
         raise MissingRequirement('scipy')
 
-
 if system.systemType in ['Microsoft', 'Windows']:
     #  on Windows the default location of these is relative to the python.exe
     pyloc = sys.executable
