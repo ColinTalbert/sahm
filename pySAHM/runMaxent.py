@@ -377,7 +377,13 @@ def main(argv):
         else:
             ourMaxent.args_dict[k] = v
 
-    ourMaxent.run()
+    try:
+        ourMaxent.run()
+    except:
+        text_file = open(os.path.join(ourMaxent.args_dict['o'], 'maxent_output.txt'), "w")
+        text_file.write("Model Failed")
+        text_file.close()
+        raise
 
 if __name__ == "__main__":
 
