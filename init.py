@@ -1589,8 +1589,8 @@ class ModelEvaluationSplit(SAHMDocumentedModule, Module):
 
         if self.has_input('run_name_info'):
             runinfo = self.force_get_input('run_name_info')
-            subfolder = runinfo.contents.get('subfolder', "")
-            runname = runinfo.contents.get('runname', "")
+            subfolder = runinfo.get('subfolder', "")
+            runname = runinfo.get('runname', "")
         else:
             subfolder, runname = utils.get_previous_run_info(inputMDS)
 
@@ -1659,8 +1659,8 @@ class ModelSelectionSplit(SAHMDocumentedModule, Module):
 
         if self.has_input('run_name_info'):
             runinfo = self.force_get_input('run_name_info')
-            subfolder = runinfo.contents.get('subfolder', "")
-            runname = runinfo.contents.get('runname', "")
+            subfolder = runinfo.get('subfolder', "")
+            runname = runinfo.get('runname', "")
         else:
             subfolder, runname = utils.get_previous_run_info(inputMDS)
 
@@ -1736,8 +1736,8 @@ class ModelSelectionCrossValidation(SAHMDocumentedModule, Module):
 
         if self.has_input('run_name_info'):
             runinfo = self.force_get_input('run_name_info')
-            subfolder = runinfo.contents.get('subfolder', "")
-            runname = runinfo.contents.get('runname', "")
+            subfolder = runinfo.get('subfolder', "")
+            runname = runinfo.get('runname', "")
         else:
             subfolder, runname = utils.get_previous_run_info(argsDict['i'])
 
@@ -1795,8 +1795,8 @@ class CovariateCorrelationAndSelection(SAHMDocumentedModule, Module):
 
         if self.has_input('run_name_info'):
             runinfo = self.force_get_input('run_name_info')
-            subfolder = runinfo.contents.get('subfolder', "")
-            runname = runinfo.contents.get('runname', "")
+            subfolder = runinfo.get('subfolder_name', "")
+            runname = runinfo.get('runname', "")
         else:
             subfolder, runname = utils.get_previous_run_info(params['inputMDS'])
 
