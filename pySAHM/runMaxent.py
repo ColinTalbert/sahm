@@ -381,7 +381,7 @@ def main(argv):
         ourMaxent.run()
     except:
         text_file = open(os.path.join(ourMaxent.args_dict['o'], 'maxent_output.txt'), "w")
-        text_file.write("Model Failed")
+        text_file.write("Model Failed\n\n")
         text_file.close()
         raise
 
