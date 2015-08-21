@@ -293,10 +293,11 @@ class MAXENTRunner(object):
                         subrun_args["o"] = outdir
                         stdout_fname = os.path.join(outdir, "ExpandedOutput", "stdOut.txt")
                         stderr_fname = os.path.join(outdir, "ExpandedOutput", "stdErr.txt")
+
+                        if not os.path.exists(outdir):
+                            os.makedirs(outdir)
                         if not os.path.exists(os.path.join(outdir, "ExpandedOutput")):
                             os.makedirs(os.path.join(outdir, "ExpandedOutput"))
-
-                        os.mkdir(subrun_args["o"])
 
                         cvList.append(row[header1.index("Split")])
                         try:
