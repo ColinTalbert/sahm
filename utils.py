@@ -517,6 +517,9 @@ class ModelJobMonitor(object):
         self.stdout = ""
         self.has_error = False
 
+        self.store_stdout()
+        self.check_for_error()
+
     def finished(self):
         self.store_stdout()
         self.check_for_error()
@@ -586,37 +589,35 @@ def run_model_script(script, args_dict, module=None, runner_script="runRModel.py
     runRModelPy = os.path.join(os.path.dirname(__file__), "pySAHM", runner_script)
     cmd = [sys.executable, runRModelPy] + cmd
 
-    job_monitor = get_job_monitor(module, args_dict)
-    if not job_monitor.finished():
-        writetolog("\nStarting processing of " + script , True)
-        writetolog("    command used: \n" + utilities.convert_list_to_cmd_str(cmd), False, False)
+    writetolog("\nStarting processing of " + script , True)
+    writetolog("    command used: \n" + utilities.convert_list_to_cmd_str(cmd), False, False)
 
-        if module.abbrev == "udc":
-            orig_mds = args_dict['c'].replace(".csv", "_orig.csv")
-            shutil.copyfile(args_dict['c'], orig_mds)
+    if module.abbrev == "udc":
+        orig_mds = args_dict['c'].replace(".csv", "_orig.csv")
+        shutil.copyfile(args_dict['c'], orig_mds)
 
-            json_fname = os.path.join(module.output_dname, 'udc.json')
-            kwargs_mod = {'inputMDS':args_dict['c'],
-                      'output_json':json_fname}
-            args_dict['udc'] = json_fname
-            cmd.append("udc=" + json_fname)
-            dialog = CreatePredictorCurvesDialog(kwargs_mod)
-            #  dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
-            retVal = dialog.exec_()
-            del dialog
-            #  outputPredictorList = dialog.outputList
-            if retVal == 1:
-                raise ModuleError(module, "Cancel or Close selected (not OK) workflow halted.")
+        json_fname = os.path.join(module.output_dname, 'udc.json')
+        kwargs_mod = {'inputMDS':args_dict['c'],
+                  'output_json':json_fname}
+        args_dict['udc'] = json_fname
+        cmd.append("udc=" + json_fname)
+        dialog = CreatePredictorCurvesDialog(kwargs_mod)
+        #  dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
+        retVal = dialog.exec_()
+        del dialog
+        #  outputPredictorList = dialog.outputList
+        if retVal == 1:
+            raise ModuleError(module, "Cancel or Close selected (not OK) workflow halted.")
 
-        utilities.add_process_to_pool(utilities.launch_cmd,
-                               [cmd, stdout_fname, stderr_fname])
-        writetolog("\n R Processing launched asynchronously " + script,
-                   True)
-        raise ModuleSuspended(module, 'Model running asynchronously',
-                              handle=job_monitor)
-    else:
-        check_R_output(job_monitor.stdout, job_monitor.stderr,
-                       module, args_dict)
+    utilities.add_process_to_pool(utilities.launch_cmd,
+                           [cmd, stdout_fname, stderr_fname])
+    writetolog("\n R Processing launched asynchronously " + script,
+               True)
+#          raise ModuleSuspended(module, 'Model running asynchronously',
+#                                handle=job_monitor)
+#      else:
+#          check_R_output(job_monitor.stdout, job_monitor.stderr,
+#                         module, args_dict)
 
 def get_r_path():
     global r_path
@@ -1318,6 +1319,8 @@ def get_sheet_location(_module):
 
             if max_row * max_col < cur_cells:
                 max_col = math.ceil(cur_cells / 2)
+            if max_col < 1:
+                max_col = 1
 
             sheet_ref = StandardSheetReference()
             sheet_ref.sheetName = cur_name
