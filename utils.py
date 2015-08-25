@@ -454,28 +454,49 @@ def run_R_script(script, args_dict, module=None, async=False,
         writetolog("\nFinished processing of " + script , True)
         return stdout, stderr
 
-
 def check_R_output(stdout, stderr, module=None, args_dict=None):
     #  handle the errors and warnings
-    if 'Error' in stderr:
+
+    stderr_clean = cleanup_stderr(stderr)
+
+    if 'Error' in stderr_clean:
         msg = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
         msg += "\n  An error was encountered in the R script for this module."
         msg += "\n     The R error message is below: \n"
-        msg += stderr
+        msg += stderr_clean
         writetolog(msg)
 
-    if 'Warning' in stderr:
+    if 'Warning' in stderr_clean:
         msg = "The R script returned the following warning(s).  The R warning message is below - \n"
-        msg += stderr
+        msg += stderr_clean
         writetolog(msg)
 
-    if 'Error' in stderr:
+    if 'Error' in stderr_clean:
         #  also write the errors to a model specific log file in the model output dir
         #  then raise an error
         if module:
             raise ModuleError(module, msg)
         else:
             raise RuntimeError , msg
+
+def cleanup_stderr(stderr_string):
+    chunks = stderr_string.split("The following objects are masked ")
+
+    actual_msgs = []
+    for chunk in chunks:
+        if not chunk.startswith('_by_') and not chunk.startswith('from '):
+            actual_msgs.append(chunk)
+
+        try:
+            chunk_split = chunk.splitlines()
+            second_empty_line_index = [y for y in enumerate(chunk_split) if y[1] == ""][1][0]
+            actual_msg = "\n".join(chunk_split[second_empty_line_index + 1:])
+            if actual_msg:
+                actual_msgs.append(actual_msg)
+        except:
+            pass
+
+    return "\n".join(actual_msgs)
 
 class ModelJobMonitor(object):
     '''The job monitor object that checks for model run completion and
@@ -495,6 +516,9 @@ class ModelJobMonitor(object):
         self.stderr = ""
         self.stdout = ""
         self.has_error = False
+
+        self.store_stdout()
+        self.check_for_error()
 
     def finished(self):
         self.store_stdout()
@@ -565,37 +589,35 @@ def run_model_script(script, args_dict, module=None, runner_script="runRModel.py
     runRModelPy = os.path.join(os.path.dirname(__file__), "pySAHM", runner_script)
     cmd = [sys.executable, runRModelPy] + cmd
 
-    job_monitor = get_job_monitor(module, args_dict)
-    if not job_monitor.finished():
-        writetolog("\nStarting processing of " + script , True)
-        writetolog("    command used: \n" + utilities.convert_list_to_cmd_str(cmd), False, False)
+    writetolog("\nStarting processing of " + script , True)
+    writetolog("    command used: \n" + utilities.convert_list_to_cmd_str(cmd), False, False)
 
-        if module.abbrev == "udc":
-            orig_mds = args_dict['c'].replace(".csv", "_orig.csv")
-            shutil.copyfile(args_dict['c'], orig_mds)
+    if module.abbrev == "udc":
+        orig_mds = args_dict['c'].replace(".csv", "_orig.csv")
+        shutil.copyfile(args_dict['c'], orig_mds)
 
-            json_fname = os.path.join(module.output_dname, 'udc.json')
-            kwargs_mod = {'inputMDS':args_dict['c'],
-                      'output_json':json_fname}
-            args_dict['udc'] = json_fname
-            cmd.append("udc=" + json_fname)
-            dialog = CreatePredictorCurvesDialog(kwargs_mod)
-            #  dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
-            retVal = dialog.exec_()
-            del dialog
-            #  outputPredictorList = dialog.outputList
-            if retVal == 1:
-                raise ModuleError(module, "Cancel or Close selected (not OK) workflow halted.")
+        json_fname = os.path.join(module.output_dname, 'udc.json')
+        kwargs_mod = {'inputMDS':args_dict['c'],
+                  'output_json':json_fname}
+        args_dict['udc'] = json_fname
+        cmd.append("udc=" + json_fname)
+        dialog = CreatePredictorCurvesDialog(kwargs_mod)
+        #  dialog.setWindowFlags(QtCore.Qt.WindowMaximizeButtonHint)
+        retVal = dialog.exec_()
+        del dialog
+        #  outputPredictorList = dialog.outputList
+        if retVal == 1:
+            raise ModuleError(module, "Cancel or Close selected (not OK) workflow halted.")
 
-        utilities.add_process_to_pool(utilities.launch_cmd,
-                               [cmd, stdout_fname, stderr_fname])
-        writetolog("\n R Processing launched asynchronously " + script,
-                   True)
-        raise ModuleSuspended(module, 'Model running asynchronously',
-                              handle=job_monitor)
-    else:
-        check_R_output(job_monitor.stdout, job_monitor.stderr,
-                       module, args_dict)
+    utilities.add_process_to_pool(utilities.launch_cmd,
+                           [cmd, stdout_fname, stderr_fname])
+    writetolog("\n R Processing launched asynchronously " + script,
+               True)
+#          raise ModuleSuspended(module, 'Model running asynchronously',
+#                                handle=job_monitor)
+#      else:
+#          check_R_output(job_monitor.stdout, job_monitor.stderr,
+#                         module, args_dict)
 
 def get_r_path():
     global r_path
@@ -1297,6 +1319,8 @@ def get_sheet_location(_module):
 
             if max_row * max_col < cur_cells:
                 max_col = math.ceil(cur_cells / 2)
+            if max_col < 1:
+                max_col = 1
 
             sheet_ref = StandardSheetReference()
             sheet_ref.sheetName = cur_name

@@ -446,8 +446,9 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.axes.set_ylim((newB, newT))
 
         extent = self.adj_aspect(self.get_extent())
-        self.set_extent(*extent)
-        self.sync_extents(extent)
+        if extent:
+            self.set_extent(*extent)
+            self.sync_extents(extent)
 
 
 #      def button_down(self, event):
