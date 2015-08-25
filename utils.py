@@ -1282,7 +1282,7 @@ def get_sheet_location(_module):
     '''
     auto_location = None
     if _module.inputPorts.has_key('Location'):
-        auto_location = _module.inputPorts['Location'][0].obj
+        auto_location = _module.inputPorts['Location'][0].obj.Location()
     else:
         try:
             cur_vt = _module.moduleInfo['controller'].vistrail
