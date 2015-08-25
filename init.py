@@ -42,6 +42,7 @@ from vistrails.core.packagemanager import get_package_manager
 import vistrails.core.upgradeworkflow as upgradeworkflow
 UpgradeModuleRemap = upgradeworkflow.UpgradeModuleRemap
 from vistrails.core import system
+from vistrails.core.vistrail.job import JobMixin
 
 from PyQt4 import QtCore, QtGui
 
@@ -312,7 +313,7 @@ class RastersWithPARCInfoCSV(File):
 #  ##End of Internal class definitions, used for port connection enforcement
 
 
-class Model(SAHMDocumentedModule, Module):
+class Model(JobMixin, SAHMDocumentedModule, Module):
     '''
     This module is a required class for other modules and scripts within the
     SAHM package. It is not intended for direct use or incorporation into
@@ -353,31 +354,35 @@ class Model(SAHMDocumentedModule, Module):
         self.output_dname = None
         Module.__init__(self)
 
-    def compute(self):
+    def job_read_inputs(self):
+        """ Implemented by modules to read job parameters from input ports.
+
+        Returns the `params` dictionary used by subsequent methods.
+        """
         out_folder = self.force_get_input("outputFolderName", "")
 
         self.args_dict = utils.map_ports(self, self.port_map)
 
-        mdsFile = utils.get_relative_path(self.args_dict['c'], self)
+        self.args_dict['c'] = utils.get_relative_path(self.args_dict['c'], self)
 
         if self.has_input('run_name_info'):
             runinfo = self.force_get_input('run_name_info')
-            subfolder = runinfo.get('subfolder_name', "")
-            runname = runinfo.get('runname', "")
+            self.subfolder = runinfo.get('subfolder_name', "")
+            self.runname = runinfo.get('runname', "")
         else:
-            subfolder, runname = utils.get_previous_run_info(mdsFile)
+            self.subfolder, self.runname = utils.get_previous_run_info(self.args_dict['c'])
 
-        prefix = self.abbrev
-        if prefix == "ApplyModel":
-            prefix = "Apply"
+        self.prefix = self.abbrev
+        if self.prefix == "ApplyModel":
+            self.prefix = "Apply"
             if not os.path.isdir(self.args_dict['ws']):
                 orig_ws = os.path.split(self.args_dict['ws'])[0]
             else:
                 orig_ws = self.args_dict['ws']
-            prefix += os.path.split(orig_ws)[1].replace('_', '').upper()
+            self.prefix += os.path.split(orig_ws)[1].replace('_', '').upper()
 
-        name_items = filter(None, [prefix, runname, out_folder])
-        prefix = "_".join(name_items)
+        name_items = filter(None, [self.prefix, self.runname, out_folder])
+        self.prefix = "_".join(name_items)
 
         #  convert threshold optimization string to the expected integer
         thresholds = {"Threshold=0.5":1,
@@ -391,12 +396,12 @@ class Model(SAHMDocumentedModule, Module):
                       "Minimizes distance between ROC plot and (0,1)":9}
         self.args_dict["om"] = thresholds.get(self.args_dict.get("om", "Sensitivity=Specificity"))
 
-        if not utils.checkModelCovariatenames(mdsFile):
+        if not utils.checkModelCovariatenames(self.args_dict['c']):
             msg = "These R models do not work with covariate names begining with non-letter characters or \n"
             msg += "covariate names that contain non-alphanumeric characters other than '.' or '_'.\n"
             msg += "Please check your covariate names and rename any that do not meet these constraints.\n"
             msg += "Covaraiate names are found in the first line of the mds file: \n"
-            msg += "\t\t" + mdsFile
+            msg += "\t\t" + self.args_dict['c']
             writetolog(msg, False, True)
             raise ModuleError(self, msg)
 
@@ -407,15 +412,22 @@ class Model(SAHMDocumentedModule, Module):
             self.args_dict['java_path'] = java_path
             self.args_dict['maxent_args'] = self.maxent_args
 
-        self.args_dict['rc'] = utils.MDSresponseCol(mdsFile)
+        self.args_dict['rc'] = utils.MDSresponseCol(self.args_dict['c'])
         self.args_dict['cur_processing_mode'] = configuration.cur_processing_mode
 
+        return self.args_dict
 
-        self.output_dname, signature, already_run = utils.make_next_file_complex(self, prefix, key_inputs=[mdsFile],
-                                                                                file_or_dir='dir', subfolder=subfolder)
-        copy_mds_fname = os.path.join(self.output_dname, os.path.split(mdsFile)[1])
+    def job_start(self, params):
+        """ Implemented by modules to submit the job.
+
+        Gets the `params` dictionary and returns a new dictionary, for example
+        with additional info necessary to check the status later.
+        """
+        self.output_dname, signature, already_run = utils.make_next_file_complex(self, self.prefix, key_inputs=[self.args_dict['c']],
+                                                                                file_or_dir='dir', subfolder=self.subfolder)
+        copy_mds_fname = os.path.join(self.output_dname, os.path.split(self.args_dict['c'])[1])
         if not os.path.exists(copy_mds_fname):
-            shutil.copyfile(mdsFile, copy_mds_fname)
+            shutil.copyfile(self.args_dict['c'], copy_mds_fname)
         expanded_output_dname = os.path.join(self.output_dname, "ExpandedOutput")
         if not os.path.exists(expanded_output_dname):
             os.makedirs(expanded_output_dname)
@@ -436,42 +448,69 @@ class Model(SAHMDocumentedModule, Module):
         #  logs so we don't get a lock
         time.sleep(2)
 
-        utils.write_hash_entry_pickle(signature, self.output_dname)
+        if not already_run:
+            utils.write_hash_entry_pickle(signature, self.output_dname)
+            try:
+                utils.run_model_script(self.name, self.args_dict, self, self.pywrapper)
+            except:
+                utils.delete_hash_entry_pickle(signature)
+                raise
 
-        try:
-            utils.run_model_script(self.name, self.args_dict, self, self.pywrapper)
-        except ModuleSuspended:
-            raise
-        except:
-            utils.delete_hash_entry_pickle(signature)
-            raise
 
-        self.set_model_results()
+        return params
 
-    def set_model_results(self,):
+    def job_finish(self, params):
+        """ Implemented by modules to get info from the finished job.
+
+        This is called once the job is finished to get the results. These can
+        be added to the `params` dictionary that this method returns.
+
+        This is the right place to clean up the job from the server if they are
+        not supposed to persist.
+        """
+        jm = utils.get_job_monitor(self, params)
+        if jm.has_error:
+            utils.check_R_output(jm.stdout, jm.stderr, module=self)
+
+        return params
+
+    def job_set_results(self, params):
         #  set our output ports
         #  if an output is expected and we're running in syncronously then throw
         #  an error
-        if not self.args_dict.has_key('mes'):
-            self.args_dict['mes'] = 'FALSE'
-        self.outputRequired = configuration.cur_processing_mode == "single models sequentially (n - 1 cores each)"
-        self.setModelResult("_prob_map.tif", 'ProbabilityMap', self.abbrev)
-        self.setModelResult("_bin_map.tif", 'BinaryMap', self.abbrev)
-        self.setModelResult("_resid_map.tif", 'ResidualsMap', self.abbrev)
-        self.setModelResult("_mess_map.tif", 'MessMap', self.abbrev)
-        self.setModelResult("_MoD_map.tif", 'MoDMap', self.abbrev)
-        self.setModelResult("_output.txt", 'Text_Output', self.abbrev)
-        self.setModelResult("_modelEvalPlot.png", 'modelEvalPlot', self.abbrev)
-        self.setModelResult("_variable.importance.png", 'ModelVariableImportance', self.abbrev)
+        if not params.has_key('mes'):
+            params['mes'] = 'FALSE'
+        self.setModelResult(params, "_prob_map.tif", 'ProbabilityMap', self.abbrev)
+        self.setModelResult(params, "_bin_map.tif", 'BinaryMap', self.abbrev)
+        self.setModelResult(params, "_resid_map.tif", 'ResidualsMap', self.abbrev)
+        self.setModelResult(params, "_mess_map.tif", 'MessMap', self.abbrev)
+        self.setModelResult(params, "_MoD_map.tif", 'MoDMap', self.abbrev)
+        self.setModelResult(params, "_output.txt", 'Text_Output', self.abbrev)
+        self.setModelResult(params, "_modelEvalPlot.png", 'modelEvalPlot', self.abbrev)
+        self.setModelResult(params, "_variable.importance.png", 'ModelVariableImportance', self.abbrev)
         writetolog("Finished " + self.abbrev + " builder\n", True, True)
 
-        self.set_output("modelWorkspace", self.output_dname)
+        self.set_output("modelWorkspace", params['o'])
 
-    def setModelResult(self, filename, portname, abbrev):
+    def setModelResult(self, params, filename, portname, abbrev):
         '''sets a single output port value
         '''
-        out_fname = os.path.join(self.output_dname, abbrev + filename)
+        out_fname = os.path.join(params['o'], abbrev + filename)
         self.set_output(portname, out_fname)
+
+    def job_get_handle(self, params):
+        """ Implemented by modules to return the JobHandle object.
+
+        This returns an object following the JobHandle interface. The
+        JobMonitor will use it to check the status of the job and call back
+        this module once the job is done.
+
+        JobHandle needs the following method:
+          * finished(): returns True if the job is finished
+        """
+        self.jm = utils.get_job_monitor(self, params)
+        return self.jm
+
 
 class GLM(Model):
     __doc__ = GenModDoc.construct_module_doc('GLM')
@@ -557,7 +596,7 @@ class ApplyModel(Model):
         self.port_map.update({'modelWorkspace':('ws',
                 lambda x: os.path.join(utils.dir_path_value(x), "modelWorkspace"), True), })
 
-    def compute(self):
+    def job_read_inputs(self):
         #  if the suplied mds has rows, observations then
         #  pass r code the flag to produce metrics
         mdsfname = utils.get_relative_path(self.force_get_input('mdsFile'), self)
@@ -566,11 +605,8 @@ class ApplyModel(Model):
         mdsfile = open(mdsfname, "r")
         lines = mdsfile.readlines()
 
-        if len(lines) > 3:
-            #  we have rows R will need to recreate metrics.
-            self.args = 'pmt=TRUE '
-        else:
-            self.args = 'pmt=FALSE '
+        #  we have rows R will need to recreate metrics.
+        self.args_dict["pmt"] = len(lines) > 3
 
         if len(lines) == 3:
             #  we're applying this model to a new area
@@ -593,13 +629,9 @@ class ApplyModel(Model):
                 msg += 'Specfically the following covariates were not found:'
                 msg += '\n\t'.join(missing_covariates)
 
-                raise RuntimeError()
-            
+                raise ModuleError(msg)
 
-
-            
-
-        Model.compute(self)
+        return Model.job_read_inputs(self)
 
 class BoostedRegressionTree(Model):
     __doc__ = GenModDoc.construct_module_doc('BoostedRegressionTree')
@@ -656,7 +688,7 @@ class MAXENT(Model):
         self.port_map.update({'species_name':('species_name', None, True),  #  This is a Maxent specific port
                               })
 
-    def compute(self):
+    def job_read_inputs(self):
 
         self.maxent_args = {}
         for port in self._input_ports:
@@ -692,19 +724,21 @@ class MAXENT(Model):
             projlayers = ','.join([path.name for path in value])
             self.maxent_args['projectionlayers'] = projlayers
 
-        Model.compute(self)
+        return Model.job_read_inputs(self)
 
-#       set some Maxent specific outputs
-        self.args_dict['species_name'] = self.args_dict['species_name'].replace(' ', '_')
-        lambdasfile = self.args_dict["species_name"] + ".lambdas"
-        self.setModelResult(lambdasfile, "lambdas", "")
+    def job_set_results(self, params):
+        #       set some Maxent specific outputs
+        params['species_name'] = params['species_name'].replace(' ', '_')
+        lambdasfile = params["species_name"] + ".lambdas"
+        self.setModelResult(params, lambdasfile, "lambdas", "")
 
-        rocfile = "plots" + os.sep + self.args_dict["species_name"] + "_roc.png"
-        self.setModelResult(rocfile, "roc", "")
+        rocfile = "plots" + os.sep + params["species_name"] + "_roc.png"
+        self.setModelResult(params, rocfile, "roc", "")
 
-        htmlfile = self.args_dict["species_name"] + ".html"
-        self.setModelResult(htmlfile, "report", "")
+        htmlfile = params["species_name"] + ".html"
+        self.setModelResult(params, htmlfile, "report", "")
 
+        Model.job_set_results(self, params)
         writetolog("Finished Maxent", True)
 
 class UserDefinedCurve(Model):

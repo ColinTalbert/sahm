@@ -136,7 +136,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
     #Run Cross Validation if specified might need separate cv functions for each model
             if(out$dat$split.type=="crossValidation") out<-cv.fct(out$mods$final.mod, out=out, sp.no = 1, prev.stratify = F,Model=Model)
             
-                
+                  assign("out",out,envir=.GlobalEnv)
                   t3 <- unclass(Sys.time())
 
                   if(!is.null(out$dat$bad.factor.cols)){
@@ -188,5 +188,6 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,scri
           }
 
     cat("Progress:100%\n");flush.console()
-    on.exit(capture.output(cat(paste("\nTotal time = ",round((unclass(Sys.time())-t0)/60,2)," min\n\n",sep="")),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE)) 
+    on.exit(capture.output(cat(paste("\nTotal time = ",round((unclass(Sys.time())-t0)/60,2)," min\n\n",sep="")),file=paste(out$dat$bname,"_output.txt",sep=""),append=TRUE))
+    invisible(out) 
 }
