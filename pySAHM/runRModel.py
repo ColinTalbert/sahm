@@ -49,7 +49,6 @@ def main(args_in):
         msg += ret[1]
         if logger:
             logger.writetolog(msg)
-        sys.stderr.write(msg)
         print msg
         return
 
@@ -58,7 +57,6 @@ def main(args_in):
         msg += ret[1]
         if logger:
             logger.writetolog(msg)
-    sys.stderr.write(msg)
 
     setupGDAL()
     mosaicTiledOutputs(outDir)

@@ -479,24 +479,49 @@ def check_R_output(stdout, stderr, module=None, args_dict=None):
         else:
             raise RuntimeError , msg
 
+def findnth(haystack, needle, n):
+    parts = haystack.split(needle, n + 1)
+    if len(parts) <= n + 1:
+        return -1
+    return len(haystack) - len(parts[-1]) - len(needle)
+
 def cleanup_stderr(stderr_string):
+
+    stderr_string = stderr_string.replace('\r\n', '\n').replace('\r', '\n')
     chunks = stderr_string.split("The following objects are masked ")
 
     actual_msgs = []
     for chunk in chunks:
-        if not chunk.startswith('_by_') and not chunk.startswith('from '):
-            actual_msgs.append(chunk)
+        if not 'Warning' in chunk and not 'Error' in chunk:
+            continue  #  this is just a masked junk error message
 
-        try:
-            chunk_split = chunk.splitlines()
-            second_empty_line_index = [y for y in enumerate(chunk_split) if y[1] == ""][1][0]
-            actual_msg = "\n".join(chunk_split[second_empty_line_index + 1:])
-            if actual_msg:
-                actual_msgs.append(actual_msg)
-        except:
-            pass
+        if chunk.startswith('_by_') or \
+            chunk.startswith('from '):
+            #  this is a masked junk message
+            #  glomed onto an actual warning or error
+            start_i = chunk.index(':') + 1
+            end_i = start_i + findnth(chunk[start_i:], "\n\n", 1)
+            chunk = chunk[end_i:].strip()
+        err_chunks = [("Error" + c).replace("ErrorWarning", "Warning") for c in chunk.split('Error') if c]
+        for err_chunk in err_chunks:
+                if 'Warning' in err_chunk:
+                    warn_chunks = [("Warning" + c).replace("WarningError", "Error") for c in chunk.split('Warning') if c]
+                    for warn_chunk in warn_chunks:
+                        if "statistics not supported by this driver" in warn_chunk:
+                            pass
+                        elif "fitted probabilities numerically 0 or 1 occurred" in warn_chunk:
+                            pass
+                        elif "no sink to remove" in warn_chunk:
+                            pass
+                        elif warn_chunk.startswith("Warning in dir.create("):
+                            pass
+                        else:
+                            actual_msgs.append(warn_chunk)
 
-    return "\n".join(actual_msgs)
+                else:
+                    actual_msgs.append(err_chunk)
+
+        return "\n".join(actual_msgs)
 
 class ModelJobMonitor(object):
     '''The job monitor object that checks for model run completion and
