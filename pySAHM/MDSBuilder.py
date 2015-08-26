@@ -169,7 +169,7 @@ class MDSBuilder(object):
 
         if self.verbose:
             self.writetolog('Finished running MDSBuilder', True, True)
-            self.writetolog('    The process took ' + str(endTime - startTime) + ' seconds')
+            self.writetolog('    The process took {:.1f} seconds'.format(endTime - startTime))
 
     def constructEmptyMDS(self):
         '''Creates the triple header line format of our output file.
