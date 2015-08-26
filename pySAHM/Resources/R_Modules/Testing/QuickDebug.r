@@ -1,6 +1,8 @@
 setwd("C:\\GoogleDrive\\Python\\DevWorkspace\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
 ScriptPath="C:\\GoogleDrive\\Python\\DevWorkspace\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
 
+setwd("K:\\USERS\\ISS\\VisTrails\\userpackages_2_0\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules")
+ScriptPath="K:\\USERS\\ISS\\VisTrails\\userpackages_2_0\\userpackages\\sahm\\pySAHM\\Resources\\R_Modules"
 
 source("LoadRequiredCode.r")
 source("MARS.helper.fcts.r")
@@ -61,17 +63,15 @@ FitModels(ma.name=input.file,
 #                            MARS
 #================================================================#
 input.file = "J:\\Projects\\MojaveInvasives\\DerivedData\\AnalysisWith2000to2010base\\BRORUB20002010prism\\brt_1\\CovariateCorrelationOutputMDS_initial.csv"
+input.file = "I:\\VisTrails\\WorkingFiles\\workspace\\_yetAnotherTest\\brewersSparrow_presenceONLY\\mars_1\\CovariateCorrelationOutputMDS_initial.csv"
+input.file = "I:\\VisTrails\\WorkingFiles\\workspace\\_yetAnotherTest\\brewersSparrow_presenceONLY\\mars_1\\CovariateCorrelationOutputMDS_initial.csv"
 
-penalty=c(3,5,10)
-for(i in 1:length(penalty)){
-output.dir=file.path("C:\\temp\\MARS",paste("MARS",i,sep="_"))
-dir.create(output.dir)
 FitModels(ma.name=input.file,
         tif.dir=NULL,output.dir=output.dir,
         response.col=rc,make.p.tif=F,make.binary.tif=F,
-            mars.degree=1,mars.penalty=penalty[i],debug.mode=F,
+            mars.degree=1,mars.penalty=2,debug.mode=F,seed=123,
             script.name="mars",opt.methods=2,MESS=F,ScriptPath=ScriptPath)
-}            
+          
 #================================================================#
 #                   Evaluate New Data
 #================================================================#
@@ -110,6 +110,7 @@ FitModels(ma.name=input.file,
 input.file = "C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\rf_1\\CovariateCorrelationOutputMDS_initial.csv"
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_tutorial_2.0_testing\\brewersSparrow_justMaurerObs\\rf_asage_1\\CovariateCorrelationOutputMDS_asage_initial.csv 
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_clutteredWarnings\\brewersSparrow\\rf_1\\CovariateCorrelationOutputMDS_initial.csv"
+input.file="J:\\Projects\\NAS\\SAHM_output\\Pomacea\\rf_optimizedGastroBacks_1\\CovariateCorrelationOutputMDS_optimizedGastroBacks_initial.csv"
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,nodesize=NULL,maxnodes=NULL,sampsize=NULL,mtry=NULL,samp.replace=FALSE,keep.forest=NULL,xtest=NULL,ytest=NULL,
@@ -117,7 +118,8 @@ FitModels(ma.name=input.file,
       keep.inbag=FALSE,
           debug.mode=T,opt.methods=2,script.name="rf",ScriptPath=ScriptPath,multCore=FALSE)
 
-
+C:\R-3.2.0\bin\i386\Rterm.exe --vanilla -f C:\GoogleDrive\Python\DevWorkspace\userpackages\sahm\pySAHM\Resources\R_Modules\FIT_RF_pluggable.r --args  mbt=TRUE mpt=TRUE c="I:\VisTrails\\WorkingFiles\workspace\_clutteredWarnings\brewersSparrow\rf_1\CovariateCorrelationOutputMDS_initial.csv" o="C:\temp\SAHM_workspace\WarnTesting" rc=responseBinary mes=TRUE
+ 
 rc="responseBinary"
 #================================================================#
 #                            BRT
@@ -176,11 +178,11 @@ EvaluateNewData(workspace=paste(workspace,"modelWorkspace",sep="\\"),out.dir=out
 C:\R-2.12.1\bin\i386\Rterm.exe --vanilla -f I:\VisTrails\Central_VisTrailsInstall_debug\vistrails\packages\sahm_MarianDev\pySAHM\Resources\R_Modules\FIT_BRT_pluggable.r --args c=C:\VisTrails\mtalbert_20110504T132851\readMaTests\Split.csv o=C:\temp\SAHMDebugJunk\BRTOut1 rc=responseBinary
 C:\R-2.12.1\bin\i386\Rterm.exe --vanilla -f I:\VisTrails\Central_VisTrailsInstall\vistrails\packages\sahm\pySAHM\Resources\R_Modules\FIT_GLM_pluggable.r --args c==I:\VisTrails\Yellowstone_example\workspace_for_paper\CovariateCorrelationOutputMDS_Both.csv o=C:\temp\SAHMDebugJunk\BRTOut1 rc=responseBinary
 
-I:\VisTrails\Central_VisTrailsInstall\Central_R\R-2.12.1\bin\i386\Rterm.exe --vanilla -f I:\VisTrails\Central_VisTrailsInstall_debug\vistrails\packages\sahm_MarianDev\pySAHM\Resources\R_Modules\FIT_BRT_pluggable.r --args  mbt=TRUE mpt=TRUE c="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv" o="C:\temp\SAHMDebugJunk\BRTOut1" rc=responseBinary mes=TRUE
+I:\VisTrails\Central_VisTrailsInstall\Central_R\R-2.12.1\bin\i386\Rterm.exe --vanilla -f C:\GoogleDrive\Python\DevWorkspace\userpackages\sahm\pySAHM\Resources\R_ModulesFIT_RF_pluggable.r --args  mbt=TRUE mpt=TRUE c="C:/VisTrails/mtalbert_20110504T132851/readMaTests/SplitCrossVal.csv" o="C:\temp\SAHMDebugJunk\BRTOut1" rc=responseBinary mes=TRUE
 
 #evaluate new data
 I:\VisTrails\Central_VisTrails_x32\Central_R\R-2.14.1\bin\i386\Rterm.exe --vanilla -f I:\VisTrails\Central_VisTrails_x32_debug\VisTrails\vistrails\packages\sahm_MarianDev\pySAHM\Resources\R_Modules\EvaluateNewData.r --args ws=I:\VisTrails\WorkingFiles\workspace\_TutorialTesting\brt_1\modelWorkspace o=I:\VisTrails\WorkingFiles\workspace\_TutorialTesting\FinalModelEvaluation_TestTrainBinom\brt_1 mpt=TRUE mbt=TRUE mes=TRUE
 
 I:\VisTrails\VisTrails_SAHM_x64_debug\Central_R\R-2.14.1\bin\x64\Rterm.exe --vanilla -f "I:\VisTrails\VisTrails_SAHM_x64_debug\vistrails\vistrails\packages\sahm_MarianDev\pySAHM\Resources\R_Modules\FIT_BRT_pluggable.r" --args  c="I:\VisTrails\WorkingFiles\workspace\_FinalTest\CovariateCorrelationOutputMDS_initial.csv" seed=-635517616 o="I:\VisTrails\WorkingFiles\workspace\_FinalTest\brt_2" rc=responseBinary
 
-I:\VisTrails\VisTrails_SAHM_x64_debug\Central_R\R-2.14.1\bin\x64\Rterm.exe --vanilla -f "I:\VisTrails\VisTrails_SAHM_x64_debug\vistrails\vistrails\packages\sahm_MarianDev\pySAHM\Resources\R_Modules\FIT_MARS_pluggable.r" --args  c="I:\VisTrails\WorkingFiles\workspace\_FinalTest\CovariateCorrelationOutputMDS_initial.csv" o="I:\VisTrails\WorkingFiles\workspace\_FinalTest\mars_2" rc=responseBinary
+I:\VisTrails\VisTrails_SAHM_x64_debug\Central_R\R-2.14.1\bin\x64\Rterm.exe --vanilla -f "I:\VisTrails\VisTrails_SAHM_x64_debug\vistrails\vistrails\packages\sahm_MarianDev\pySAHM\Resources\R_Modules\FIT_RF_pluggable.r" --args  c="I:\VisTrails\WorkingFiles\workspace\_FinalTest\CovariateCorrelationOutputMDS_initial.csv" o="I:\VisTrails\WorkingFiles\workspace\_FinalTest\mars_2" rc=responseBinary

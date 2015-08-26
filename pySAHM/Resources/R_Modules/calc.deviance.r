@@ -41,9 +41,8 @@
 ## Any use of trade, firm, or product names is for descriptive purposes only 
 ## and does not imply endorsement by the U.S. Government.
 ###############################################################################
-
-"calc.deviance" <-
-function(obs.values, fitted.values, weights = rep(1,length(obs.values)), family=family, calc.mean = TRUE)
+ "calc.deviance" <-
+function(obs.values, fitted.values, weights = rep(1,length(obs.values)), family="binomial", calc.mean = TRUE)
 {
 # j. leathwick/j. elith
 #
@@ -90,3 +89,4 @@ if (calc.mean) deviance <- deviance/length(obs.values)
 return(deviance)
 
 }
+
