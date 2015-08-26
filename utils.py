@@ -521,7 +521,8 @@ def cleanup_stderr(stderr_string):
                 else:
                     actual_msgs.append(err_chunk)
 
-        return "\n".join(actual_msgs)
+    return "\n".join(actual_msgs)
+
 
 class ModelJobMonitor(object):
     '''The job monitor object that checks for model run completion and
