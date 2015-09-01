@@ -64,14 +64,26 @@ FitModels(ma.name=input.file,
 #================================================================#
 input.file = "J:\\Projects\\MojaveInvasives\\DerivedData\\AnalysisWith2000to2010base\\BRORUB20002010prism\\brt_1\\CovariateCorrelationOutputMDS_initial.csv"
 input.file = "I:\\VisTrails\\WorkingFiles\\workspace\\_yetAnotherTest\\brewersSparrow_presenceONLY\\mars_1\\CovariateCorrelationOutputMDS_initial.csv"
-input.file = "I:\\VisTrails\\WorkingFiles\\workspace\\_yetAnotherTest\\brewersSparrow_presenceONLY\\mars_1\\CovariateCorrelationOutputMDS_initial.csv"
 
 FitModels(ma.name=input.file,
         tif.dir=NULL,output.dir=output.dir,
         response.col=rc,make.p.tif=F,make.binary.tif=F,
             mars.degree=1,mars.penalty=2,debug.mode=F,seed=123,
             script.name="mars",opt.methods=2,MESS=F,ScriptPath=ScriptPath)
-          
+
+input.file = "C:\\temp\\SAHM_workspace\\WarnTesting\\SAHMTestingOutput\\brewersSparrow_justMaurerObs\\mars_asage_1\\CovariateCorrelationOutputMDS_asage_initial.csv"
+output.dir="C:\\temp\\SAHM_workspace\\MarsParameter"
+mars.penalty=c(3,5,7,10)
+for(i in length(mars.penalty)){
+output.diri<-paste(output.dir,i,sep="_")
+dir.create(output.diri)
+FitModels(ma.name=input.file,
+        tif.dir=NULL,output.dir=output.diri,
+        response.col=rc,make.p.tif=F,make.binary.tif=F,
+            mars.degree=1,mars.penalty=mars.penalty[i],debug.mode=F,seed=123,
+            script.name="mars",opt.methods=2,MESS=F,ScriptPath=ScriptPath)
+}            
+                      
 #================================================================#
 #                   Evaluate New Data
 #================================================================#
@@ -111,10 +123,20 @@ input.file = "C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\rf_1\\CovariateCor
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_tutorial_2.0_testing\\brewersSparrow_justMaurerObs\\rf_asage_1\\CovariateCorrelationOutputMDS_asage_initial.csv 
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_clutteredWarnings\\brewersSparrow\\rf_1\\CovariateCorrelationOutputMDS_initial.csv"
 input.file="J:\\Projects\\NAS\\SAHM_output\\Pomacea\\rf_optimizedGastroBacks_1\\CovariateCorrelationOutputMDS_optimizedGastroBacks_initial.csv"
+
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,nodesize=NULL,maxnodes=NULL,sampsize=NULL,mtry=NULL,samp.replace=FALSE,keep.forest=NULL,xtest=NULL,ytest=NULL,
       response.col=rc,make.p.tif=F,make.binary.tif=F, localImp=FALSE,nPerm=1,proximity=NULL,n.trees=1000,keep.forest=NULL,
+      keep.inbag=FALSE,
+          debug.mode=T,opt.methods=2,script.name="rf",ScriptPath=ScriptPath,multCore=FALSE)
+
+input.file ="C:\\temp\\SAHM_workspace\\WarnTesting\\SAHMTestingOutput\\brewersSparrow_justMaurerObs\\rf_asage_1\\CovariateCorrelationOutputMDS_asage_initial.csv"
+f
+FitModels(ma.name=input.file,
+      tif.dir=NULL,
+      output.dir=output.dir,nodesize=NULL,maxnodes=NULL,sampsize=NULL,mtry=NULL,samp.replace=FALSE,keep.forest=NULL,xtest=NULL,ytest=NULL,
+      response.col=rc,make.p.tif=F,make.binary.tif=F, localImp=FALSE,nPerm=1,proximity=NULL,n.trees=30,keep.forest=NULL,
       keep.inbag=FALSE,
           debug.mode=T,opt.methods=2,script.name="rf",ScriptPath=ScriptPath,multCore=FALSE)
 
