@@ -155,7 +155,7 @@ class ModelMapViewer(BaseGeoViewerCell):
 
         self.inputs["model_tag"] = os.path.split(self.inputs["model_dir"])[1]
 
-        self.location = utils.get_sheet_location(self)
+        utils.set_sheet_location(self)
 
         if utils.check_if_model_finished(self.inputs["model_dir"]):
             self.local_displayAndWait(self.inputs)
