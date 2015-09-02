@@ -434,7 +434,7 @@ class Model(SAHMDocumentedModule, Module):
 
         #  This give previously launched models time to finish writing their
         #  logs so we don't get a lock
-        time.sleep(2)
+        time.sleep(0.5)
 
         utils.write_hash_entry_pickle(signature, self.output_dname)
 

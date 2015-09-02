@@ -146,7 +146,7 @@ class ModelOutputViewer(SpreadsheetCell):
 
             model_label = model_dir.capitalize().replace('output', 'Output')
 
-            self.location = utils.get_sheet_location(self)
+            utils.set_sheet_location(self)
 
             if self.has_input('InitialModelOutputDisplay'):
                 initial_display = self.get_input('InitialModelOutputDisplay')

@@ -130,7 +130,7 @@ class BaseGeoViewerCell(SpreadsheetCell):
     def parse_inputs(self):
         inputs = {}
 
-        self.location = utils.get_sheet_location(self)
+        utils.set_sheet_location(self)
 
         inputs['vector_layers'] = self.force_get_input_list('vector_layers')
         #  ugly hack to get the viswall to work.  Serial/unserialize nests

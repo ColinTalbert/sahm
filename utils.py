@@ -1302,7 +1302,10 @@ def get_curve_sheet_location(_module):
 
     return auto_location
 
-def get_sheet_location(_module):
+
+
+
+def set_sheet_location(_module):
     '''given a sahm spreadsheet module, finds all the other sahm spreadsheet cells
     in the currently executing pipeline and returns a CellLocation
     with the name of the currently executing pipeline and dimensions set to
@@ -1310,7 +1313,8 @@ def get_sheet_location(_module):
     '''
     auto_location = None
     if _module.inputPorts.has_key('Location'):
-        auto_location = _module.inputPorts['Location'][0].obj.Location()
+        return
+#          auto_location = _module.inputPorts['Location'][0].obj.Location()
     else:
         try:
             cur_vt = _module.moduleInfo['controller'].vistrail
@@ -1369,7 +1373,8 @@ def get_sheet_location(_module):
             auto_location = CellLocation.Location()
         auto_location.col = _module.get_input('column') - 1
 
-    return auto_location
+    _module.overrideLocation(auto_location)
+
 
 def get_previous_run_info(full_fname):
     '''given a fname in in the format:
