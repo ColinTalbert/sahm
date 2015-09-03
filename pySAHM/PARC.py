@@ -173,7 +173,7 @@ class PARC(object):
                     gdal.Open(out_file)
 
                     old_source = utilities.get_fname_from_hash_pickle(raster_hash, self.out_dir)
-                    if old_source is None or old_source['source'].replace("\\", "/") != image[0].replace("\\", "/"):  #  we've previously run a file with this output name from a different source
+                    if old_source is None:  #  we've previously run a file with this output name from a different source
                         out_file = out_file.replace('.tif', "_" + raster_hash + '.tif')
                         msg = "The output " + in_fname + \
                             " already exists, but was derived from a different source."
