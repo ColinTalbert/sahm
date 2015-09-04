@@ -401,10 +401,8 @@ class Model(SAHMDocumentedModule, Module):
             raise ModuleError(self, msg)
 
         if self.abbrev == "Maxent":
-            global maxent_path
-            self.args_dict['maxent_path'] = maxent_path
-            global java_path
-            self.args_dict['java_path'] = java_path
+            self.args_dict['maxent_path'] = configuration.maxent_path
+            self.args_dict['java_path'] = utils.find_java_exe(configuration.java_path)
             self.args_dict['maxent_args'] = self.maxent_args
 
         self.args_dict['rc'] = utils.MDSresponseCol(mdsFile)
