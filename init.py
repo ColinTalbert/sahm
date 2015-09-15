@@ -1582,50 +1582,34 @@ class ModelEvaluationSplit(SAHMDocumentedModule, Module):
 
     def compute(self):
         writetolog("\nGenerating Model Evaluation split ", True)
-        inputMDS = utils.get_relative_path(utils.dir_path_value(self.force_get_input('inputMDS', [])), self)
+
+        port_map = {'inputMDS':('i', utils.dir_path_value, True),
+                'trainingProportion':('p', None, False),
+                'Seed':('seed', None, False)}
+
+        args = utils.map_ports(self, port_map)
 
         if self.has_input('run_name_info'):
             runinfo = self.force_get_input('run_name_info')
             subfolder = runinfo.get('subfolder', "")
             runname = runinfo.get('runname', "")
         else:
-            subfolder, runname = utils.get_previous_run_info(inputMDS)
+            subfolder, runname = utils.get_previous_run_info(args['i'])
 
         global models_path
 
-        #  args = "i=" + '"' + inputMDS + '"' + " o=" + '"' + outputMDS + '"'
-        #  args += " rc=" + utils.MDSresponseCol(inputMDS)
-        args = {'i': inputMDS,
+        args['rc'] = utils.MDSresponseCol(args['i'])
 
-                'rc': utils.MDSresponseCol(inputMDS)}
-        if (self.has_input("trainingProportion")):
-            try:
-                trainingProportion = float(self.get_input("trainingProportion"))
-                if trainingProportion <= 0 or trainingProportion > 1:
-                    raise ModuleError(self, "Train Proportion (trainProp) must be a number between 0 and 1 excluding 0")
-                #  args += " p=" + str(trainingProportion)
-                args['p'] = str(trainingProportion)
-            except:
-                raise ModuleError(self, "Train Proportion (trainProp) must be a number between 0 and 1 excluding 0")
-        if (self.has_input("RatioPresAbs")):
-            try:
-                RatioPresAbs = float(self.get_input("RatioPresAbs"))
-                if RatioPresAbs <= 0:
-                    raise ModuleError(self, "The ratio of presence to absence (RatioPresAbs) must be a number greater than 0")
-                #  args += " m=" + str(trainingProportion)
-                args['m'] = str(trainingProportion)
-            except:
-                raise ModuleError(self, "The ratio of presence to absence (RatioPresAbs) must be a number greater than 0")
+        if args.get('p', 0.5) <= 0 or args.get('p', 0.5) > 1:
+            raise ModuleError(self, "Train Proportion (trainProp) must be a number between 0 and 1 excluding 0")
 
         args['es'] = "TRUE"
-
-        seed = utils.get_seed(self.force_get_input("Seed", None))
-        writetolog("    seed used for Split = " + str(seed))
-        args['seed'] = str(seed)
+        args['seed'] = utils.get_seed(args.get('seed', None))
+        writetolog("    seed used for Split = " + str(args['seed']))
 
         outputMDS, signature, already_run = utils.make_next_file_complex(self,
                                 prefix='ModelEvaluationSplit', suffix='.csv',
-                                key_inputs=[inputMDS],
+                                key_inputs=[args['i']],
                                 subfolder=subfolder, runname=runname)
         args['o'] = outputMDS
 
@@ -1652,51 +1636,32 @@ class ModelSelectionSplit(SAHMDocumentedModule, Module):
 
     def compute(self):
         writetolog("\nGenerating Model Selection split ", True)
-        inputMDS = utils.get_relative_path(utils.dir_path_value(self.force_get_input('inputMDS', []), self))
+        port_map = {'inputMDS':('i', utils.dir_path_value, True),
+                'trainingProportion':('p', None, False),
+                'Seed':('seed', None, False)}
+
+        args = utils.map_ports(self, port_map)
 
         if self.has_input('run_name_info'):
             runinfo = self.force_get_input('run_name_info')
             subfolder = runinfo.get('subfolder', "")
             runname = runinfo.get('runname', "")
         else:
-            subfolder, runname = utils.get_previous_run_info(inputMDS)
+            subfolder, runname = utils.get_previous_run_info(args['i'])
 
         global models_path
+        args['rc'] = utils.MDSresponseCol(args['i'])
 
-        #  args = "i=" + '"' + inputMDS + '"' + " o=" + '"' + outputMDS + '"'
-        #  args += " rc=" + utils.MDSresponseCol(inputMDS)
-        args = {'i': inputMDS,
-                'rc': utils.MDSresponseCol(inputMDS)}
-        if (self.has_input("trainingProportion")):
-            try:
-                trainingProportion = float(self.get_input("trainingProportion"))
-                if trainingProportion <= 0 or trainingProportion > 1:
-                    raise ModuleError(self, "Train Proportion (trainProp) must be a number between 0 and 1 excluding 0")
-                #  args += " p=" + str(trainingProportion)
-                args['p'] = str(trainingProportion)
-            except:
-                raise ModuleError(self, "Train Proportion (trainProp) must be a number between 0 and 1 excluding 0")
-        if (self.has_input("RatioPresAbs")):
-            try:
-                RatioPresAbs = float(self.get_input("RatioPresAbs"))
-                if RatioPresAbs <= 0:
-                    raise ModuleError(self, "The ratio of presence to absence (RatioPresAbs) must be a number greater than 0")
-                #  args += " m=" + str(trainingProportion)
-                args['m'] = trainingProportion
-            except:
-                raise ModuleError(self, "The ratio of presence to absence (RatioPresAbs) must be a number greater than 0")
+        if args.get('p', 0.5) <= 0 or args.get('p', 0.5) > 1:
+            raise ModuleError(self, "Train Proportion (trainProp) must be a number between 0 and 1 excluding 0")
 
-        #  args += " es=FALSE"
         args['es'] = "FALSE"
-
-        seed = utils.get_seed(self.force_get_input("Seed", None))
-        writetolog("    seed used for Split = " + str(seed))
-        #  args += " seed=" + str(seed)
-        args['seed'] = str(seed)
+        args['seed'] = utils.get_seed(args.get('seed', None))
+        writetolog("    seed used for Split = " + str(args['seed']))
 
         outputMDS, signature, already_run = utils.make_next_file_complex(self,
                                 prefix='modelSelectionSplit', suffix='.csv',
-                                key_inputs=[inputMDS],
+                                key_inputs=[args['i']],
                                 subfolder=subfolder, runname=runname)
         args['o'] = outputMDS
 
