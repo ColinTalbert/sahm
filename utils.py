@@ -1325,7 +1325,7 @@ def set_sheet_location(_module):
     auto_location = None
     if _module.inputPorts.has_key('Location'):
         return
-#          auto_location = _module.inputPorts['Location'][0].obj.Location(
+
     elif not on_viswall:
         try:
             cur_vt = _module.moduleInfo['controller'].vistrail
