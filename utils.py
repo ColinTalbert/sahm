@@ -626,7 +626,10 @@ def run_model_script(script, args_dict, module=None, runner_script="runRModel.py
 
             json_fname = os.path.join(module.output_dname, 'udc.json')
             kwargs_mod = {'inputMDS':args_dict['c'],
-                      'output_json':json_fname}
+                      'output_json':json_fname,
+                      'input_json':args_dict.get('curves_json', None)}
+
+
             args_dict['udc'] = json_fname
             cmd.append("udc=" + json_fname)
             dialog = CreatePredictorCurvesDialog(kwargs_mod)

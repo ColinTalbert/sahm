@@ -708,6 +708,7 @@ class UserDefinedCurve(Model):
     __doc__ = GenModDoc.construct_module_doc('UserDefinedCurve')
 
     _input_ports = list(Model._input_ports)
+    _input_ports.extend([("curves_json", "(edu.utah.sci.vistrails.basic:File)", {'optional':True}),])
     _output_ports = list(Model._output_ports)
     _output_ports.extend([("curves_json", "(edu.utah.sci.vistrails.basic:File)", {'optional':True}),])
 
@@ -717,6 +718,9 @@ class UserDefinedCurve(Model):
         self.name = 'FIT_UDC.r'
         self.pywrapper = "runRModel.py"
         self.abbrev = 'udc'
+        
+        self.port_map.update({'curves_json':('curves_json', None, False),  #  This is a Maxent specific port
+                              })
 
     def compute(self):
 

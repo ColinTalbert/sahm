@@ -84,6 +84,7 @@ class CreatePredictorCurvesDialog(QtGui.QDialog):
 
         self.input_mds = kwargs['inputMDS']
         self.output_json = kwargs['output_json']
+        self.input_json = kwargs.get('input_json', None)
 
         self.setWindowFlags(QtCore.Qt.Window)
 
@@ -163,6 +164,8 @@ class CreatePredictorCurvesDialog(QtGui.QDialog):
 
         if os.path.exists(self.output_json):
             prev_out = json.load(open(self.output_json, 'rb'))
+        elif self.input_json and os.path.exists(self.input_json):
+            prev_out = json.load(open(self.input_json, 'rb'))
         else:
             prev_out = {}
 
