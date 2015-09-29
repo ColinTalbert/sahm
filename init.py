@@ -2264,7 +2264,7 @@ _upgrades['DataInput|Predictor'] = [UpgradeModuleRemap(None, '2.0.0', '2.0.0', N
 _upgrades['Models|MAXENT'] = [UpgradeModuleRemap(None, '1.0.2', '1.0.2', None,
                                   dst_port_remap={'inputMDS': 'mdsFile'})]
 
-for m in ['GLM', 'MARS', 'RandomForest', 'BoostedRegressionTree']:
+for m in ['GLM', 'MARS', 'RandomForest', 'BoostedRegressionTree', 'MAXENT']:
         _upgrades['Models|' + m] = [UpgradeModuleRemap(None, '1.0.2', '1.0.2', 'Models|' + m,
                                         dst_port_remap={'modelWorkspace': utils.getParentDir}),
                                     UpgradeModuleRemap(None, '1.2.0', '1.2.0', 'Models|' + m,
@@ -2282,7 +2282,9 @@ _upgrades['Tools|MDSBuilder'] = [UpgradeModuleRemap(None, '2.0.0', '2.0.0', None
                                                   'backgroundPointType':None})]
 _upgrades['Tools|PARC'] = [UpgradeModuleRemap(None, '1.0.2', '1.0.2', None,
                                   dst_port_remap={'bias': '',
-                                          'multipleCores': ''})]
+                                          'multipleCores': ''}),
+                           UpgradeModuleRemap(None, '1.2.0', '2.0.0', None,
+                                  dst_port_remap={'outputFolderName': None})]
 _upgrades['Tools|RasterFormatConverter'] = [UpgradeModuleRemap(None, '1.0.2', '1.0.2', None,
                                   dst_port_remap={'multipleCores': ''})]
 _upgrades['Tools|ApplyModel'] = [UpgradeModuleRemap(None, '1.0.1', '1.0.1', None,
