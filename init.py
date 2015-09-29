@@ -972,6 +972,8 @@ class MDSBuilder(SAHMDocumentedModule, Module):
         inputs_csvs = self.force_get_input_list('RastersWithPARCInfoCSV')
         if len(inputs_csvs) == 0:
             raise ModuleError(self, "Must supply at least one 'RastersWithPARCInfoCSV'/nThis is the output from the PARC module")
+        if not type(inputs_csvs[0]) == str:
+            inputs_csvs = [i.name for i in inputs_csvs]
 
         run_name_info = MDSParams.get('run_name_info')
         if run_name_info:
