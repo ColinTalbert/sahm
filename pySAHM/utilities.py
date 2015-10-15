@@ -310,8 +310,11 @@ def start_new_pool(processes=1):
 def wait_for_pool_to_finish():
     global _process_pool
     global _pool_processes
-    for process in _pool_processes:
-        process.get()
+#      for process in _pool_processes:
+#          process.get()
+
+    results = [process.get() for process in _pool_processes]
+    return results
 
 def add_process_to_pool(worker, arglist):
     '''
