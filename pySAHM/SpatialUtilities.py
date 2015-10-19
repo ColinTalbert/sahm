@@ -637,6 +637,23 @@ def getTemplateSRSCellSize(sourceRaster, templateRaster):
     templateSRSCellSize = abs(abs(tOriginX1) - abs(templateRaster.west))
     return templateSRSCellSize
 
+def all_nodata(raster_fname):
+    """Check if all the values in a raster are nodata in a fairly efficent way
+    """
+    raster = SAHMRaster(raster_fname)
+
+    first_pass_data = raster.getBlock(0, 0, raster.width, raster.height, 30, 30)
+
+    if np.all(first_pass_data.mask == True):
+        #  all of the first pass is nodata, let's check the whole thing
+        #  which is a bit slow
+        for block in raster.iterBlocks():
+            pass
+
+        first_pass_data = raster.getBlock(0, 0, raster.width, raster.height)
+
+    return False
+
 def intermediaryReprojection(sourceRaster, templateRaster, outRasterFName,
                              resamplingType, matchTemplateCellSize=False,
                              create_args=None):
