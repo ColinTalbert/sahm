@@ -146,10 +146,7 @@ class PARC(object):
         self.logger.writetolog("Finished PARC", True, True)
 
     def processFiles(self):
-        if self.processingMode == "FORT Condor":
-            self.process_pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
-        else:
-            self.process_pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
+        self.process_pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
         self.pool_processes = []
 
         header_row = ["PARCOutputFile", "Categorical", "Resampling",
@@ -204,33 +201,25 @@ class PARC(object):
         del cur_output
 
         #  wait for the last set of processes to finish up
-        if self.processingMode == "FORT Condor":
-            self.waitForCondorProcessesToFinish(process_queue)
-        else:
-            error_msgs = ''
-            for process in self.pool_processes:
-                msg = process.get()
-                print msg[0]
-                if msg[1] != '':
-                    error_msgs += ("\n" + msg[1])
-            if error_msgs != '':
-                raise utilities.TrappedError(error_msgs)
+        error_msgs = ''
+        for process in self.pool_processes:
+            msg = process.get()
+            print msg[0]
+            if msg[1] != '':
+                error_msgs += ("\n" + msg[1])
+        if error_msgs != '':
+            raise utilities.TrappedError(error_msgs)
 
         print "done"
 
     def gen_singlePARC_thread(self, image, outFile):
         command_arr = self.gen_singlePARC_cmd(image, outFile)
 
-        if self.processingMode == "FORT Condor":
-            workspace, fname = os.path.split(os.path.abspath(outFile))
-            prefix = os.path.splitext(fname)[0]
-            utilities.runCondorPythonJob(command_arr, workspace, prefix)
-        else:
-            self.pool_processes.append(self.process_pool.apply_async(
+        self.pool_processes.append(self.process_pool.apply_async(
                                 utilities.launch_cmd,
                                 [self.gen_singlePARC_cmd(image, outFile)]))
 
-            return os.path.abspath(outFile)
+        return os.path.abspath(outFile)
 
     def gen_singlePARC_cmd(self, image, outFile):
         image_short_name = os.path.split(image[0])[1]
@@ -255,55 +244,6 @@ class PARC(object):
 
     def log_result(self, result):
         print result
-
-    def waitForCondorProcessesToFinish(self, outputs):
-        errors = []
-        originalCount = len(outputs)
-        while outputs:
-            for process in outputs:
-                result = self.jobFinished(process)
-                if result == "finished":
-                    outputs.remove(process)
-
-                    #  cleanup some condor files
-                    success = False
-                    while not success:
-                        try:
-                            for f in ["log", "stdOut", "stdErr", "CondorSubmit"]:
-                                fname = process.replace(".tif", "_" + f + ".txt")
-                                if os.path.exists(fname):
-                                    os.remove(fname)
-                            success = True
-                        except:
-                            pass
-
-                    print str(originalCount - len(outputs)) + " PARC layers finished"
-                elif result == "error":
-                    if os.path.exists(process):
-                        os.remove(process)
-                    errors.append(process)
-                    outputs.remove(process)
-                    print str(originalCount - len(outputs)) + \
-                        " PARC layers finished"
-
-        if len(errors) > 0:
-            msg = "There were problems with one or more runs."
-            for process in errors:
-                msg += "\n" + process + " did not run correctly"
-            raise utilities.TrappedError(msg)
-
-    def jobFinished(self, output):
-        stdout = output.replace(".tif", "_stdOut.txt")
-        try:
-            lastline = open(stdout, "r").readlines()[-1]
-            if lastline.startswith("Finished successfully!"):
-                return "finished"
-            elif lastline.startswith("Job failed!"):
-                return "error"
-            else:
-                return "running"
-        except (IndexError, IOError):
-            pass
 
     def parcFile(self, source, dest):
         """

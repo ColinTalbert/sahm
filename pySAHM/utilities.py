@@ -158,60 +158,60 @@ def find_key(dic, val):
 #    finally:
 #        que.put( (description, popen.returncode) )
 
-def runCondorPythonJob(args, workspace, prefix, wholeMachine=False):
-    #  replace all mappedDriveLetters in the argsDict with UNC paths
-    global UNCDrives
-    for item in args:
-        args[args.index(item)] = replaceMappedDrives(item)
-
-    if prefix[0].isdigit():
-        prefix = "_" + prefix
-
-    #  create submit file
-        #  create condorSubmit file
-    submitFname = os.path.join(workspace, prefix + "_CondorSubmit.txt")
-    submitFile = open(submitFname, 'w')
-    submitFile.write("Universe                = vanilla\n")
-    submitFile.write("Executable              = c:\Windows\System32\cmd.exe\n")
-    submitFile.write("run_as_owner            = true\n")
-    submitFile.write("Getenv                  = true\n")
-    submitFile.write("Should_transfer_files   = no\n")
-    submitFile.write("transfer_executable     = false\n")
-
-    machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151a', 'igskbacbws425']
-#    machines = ['igskbacbwsvis3']
-    reqsStr = 'Requirements            = (Machine == "'
-    reqsStr += '.gs.doi.net" || Machine == "'.join(machines) + '.gs.doi.net")'
-    if wholeMachine:
-        reqsStr += "&& CAN_RUN_WHOLE_MACHINE\n"
-        submitFile.write("+RequiresWholeMachine = True\n")
-    else:
-        reqsStr += "\n"
-    submitFile.write(reqsStr)
-
-    stdErrFname = os.path.join(workspace, "ExpandedOutput", prefix + "_stdErr.txt")
-    stdOutFname = os.path.join(workspace, "ExpandedOutput", prefix + "_stdOut.txt")
-    logFname = os.path.join(workspace, "ExpandedOutput", prefix + "_log.txt")
-    submitFile.write("Output                  = " + replaceMappedDrives(stdOutFname) + "\n")
-    submitFile.write("error                   = " + replaceMappedDrives(stdErrFname) + "\n")
-    submitFile.write("log                     = " + replaceMappedDrives(logFname) + "\n")
-    argsStr = 'Arguments               = "/c pushd ' + "'"
-    argsStr += "' '".join(args) + "'" + '"\n'
-    argsStr = replaceMappedDrives(argsStr)
-    argsStr = argsStr.replace(r"\python.exe'", "' && python.exe")
-    submitFile.write(argsStr)
-    submitFile.write("Notification            = Never\n")
-    submitFile.write("Queue\n")
-    submitFile.close()
-
-    curDir = os.getcwd()
-    os.chdir(os.path.split(curDir)[0])
-
-    #  launch condor job
-    DEVNULL = open(os.devnull, 'wb')
-    p = subprocess.Popen(["condor_submit", "-n", 'IGSKBACBWSCDRS3', submitFname], stderr=DEVNULL, stdout=DEVNULL)
-
-    os.chdir(curDir)
+#  def runCondorPythonJob(args, workspace, prefix, wholeMachine=False):
+#      #  replace all mappedDriveLetters in the argsDict with UNC paths
+#      global UNCDrives
+#      for item in args:
+#          args[args.index(item)] = replaceMappedDrives(item)
+#
+#      if prefix[0].isdigit():
+#          prefix = "_" + prefix
+#
+#      #  create submit file
+#          #  create condorSubmit file
+#      submitFname = os.path.join(workspace, prefix + "_CondorSubmit.txt")
+#      submitFile = open(submitFname, 'w')
+#      submitFile.write("Universe                = vanilla\n")
+#      submitFile.write("Executable              = c:\Windows\System32\cmd.exe\n")
+#      submitFile.write("run_as_owner            = true\n")
+#      submitFile.write("Getenv                  = true\n")
+#      submitFile.write("Should_transfer_files   = no\n")
+#      submitFile.write("transfer_executable     = false\n")
+#
+#      machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151a', 'igskbacbws425']
+#  #    machines = ['igskbacbwsvis3']
+#      reqsStr = 'Requirements            = (Machine == "'
+#      reqsStr += '.gs.doi.net" || Machine == "'.join(machines) + '.gs.doi.net")'
+#      if wholeMachine:
+#          reqsStr += "&& CAN_RUN_WHOLE_MACHINE\n"
+#          submitFile.write("+RequiresWholeMachine = True\n")
+#      else:
+#          reqsStr += "\n"
+#      submitFile.write(reqsStr)
+#
+#      stdErrFname = os.path.join(workspace, "ExpandedOutput", prefix + "_stdErr.txt")
+#      stdOutFname = os.path.join(workspace, "ExpandedOutput", prefix + "_stdOut.txt")
+#      logFname = os.path.join(workspace, "ExpandedOutput", prefix + "_log.txt")
+#      submitFile.write("Output                  = " + replaceMappedDrives(stdOutFname) + "\n")
+#      submitFile.write("error                   = " + replaceMappedDrives(stdErrFname) + "\n")
+#      submitFile.write("log                     = " + replaceMappedDrives(logFname) + "\n")
+#      argsStr = 'Arguments               = "/c pushd ' + "'"
+#      argsStr += "' '".join(args) + "'" + '"\n'
+#      argsStr = replaceMappedDrives(argsStr)
+#      argsStr = argsStr.replace(r"\python.exe'", "' && python.exe")
+#      submitFile.write(argsStr)
+#      submitFile.write("Notification            = Never\n")
+#      submitFile.write("Queue\n")
+#      submitFile.close()
+#
+#      curDir = os.getcwd()
+#      os.chdir(os.path.split(curDir)[0])
+#
+#      #  launch condor job
+#      DEVNULL = open(os.devnull, 'wb')
+#      p = subprocess.Popen(["condor_submit", "-n", 'IGSKBACBWSCDRS3', submitFname], stderr=DEVNULL, stdout=DEVNULL)
+#
+#      os.chdir(curDir)
 
 def replaceMappedDrives(inStr):
     '''This function replaces all instances of each stored drive letter
@@ -279,9 +279,7 @@ def get_process_count(strProcessingMode):
     else we will be running n-1 jobs (this function is only used by PARC now)
     '''
 
-    if strProcessingMode == "FORT Condor":
-        process_count = multiprocessing.cpu_count() - 1
-    elif strProcessingMode == "multiple models simultaneously (1 core each)":
+    if strProcessingMode == "multiple models simultaneously (1 core each)":
         process_count = multiprocessing.cpu_count() - 1
     else:
         process_count = 1
