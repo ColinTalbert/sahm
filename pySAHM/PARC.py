@@ -213,7 +213,6 @@ class PARC(object):
         print "done"
 
     def gen_singlePARC_thread(self, image, outFile):
-        command_arr = self.gen_singlePARC_cmd(image, outFile)
 
         self.pool_processes.append(self.process_pool.apply_async(
                                 utilities.launch_cmd,
