@@ -362,6 +362,8 @@ class Model(SAHMDocumentedModule, Module):
 
         if self.has_input('run_name_info'):
             runinfo = self.force_get_input('run_name_info')
+            if not type(runinfo) == dict:
+                runinfo = runinfo.contents
             subfolder = runinfo.get('subfolder_name', "")
             runname = runinfo.get('runname', "")
         else:
@@ -775,6 +777,8 @@ class EnsembleBuilder(SAHMDocumentedModule, Module):
 
         run_name_info = params.get('run_name_info')
         if run_name_info:
+            if not type(run_name_info) == dict:
+                run_name_info = run_name_info.contents
             subfolder = run_name_info.get('subfolder_name', "")
             runname = run_name_info.get('runname', "")
         else:
@@ -846,6 +850,8 @@ class BackgroundSurfaceGenerator(SAHMDocumentedModule, Module):
 
         run_name_info = kde_params.get('run_name_info')
         if run_name_info:
+            if not type(runinfo) == dict:
+                runinfo = runinfo.contents
             subfolder = run_name_info.get('subfolder_name', "")
             runname = run_name_info.get('runname', "")
         else:
@@ -898,8 +904,8 @@ class OutputNameInfo(Constant):
     def translate_to_python(x):
         try:
             runinfo = OutputNameInfo()
-            runinfo.contents = {'runname':str(x),
-                                'subfolder_name':'',
+            runinfo.contents = {'runname':'',
+                                'subfolder_name':str(x),
                                 'delete_previous':False}
             return runinfo
         except:
@@ -977,6 +983,8 @@ class MDSBuilder(SAHMDocumentedModule, Module):
 
         run_name_info = MDSParams.get('run_name_info')
         if run_name_info:
+            if not type(run_name_info) == dict:
+                run_name_info = run_name_info.contents
             subfolder = run_name_info.get('subfolder_name', "")
             runname = run_name_info.get('runname', "")
         else:
@@ -985,7 +993,6 @@ class MDSBuilder(SAHMDocumentedModule, Module):
             if subfolder == '' and runname == '':
                 subfolder, runname = utils.get_previous_run_info(
                                         os.path.split(inputs_csvs[0])[0])
-
 
         key_inputs = []
         for input in ['fieldData']:
@@ -1073,6 +1080,8 @@ class FieldDataQuery(SAHMDocumentedModule, Module):
 
         run_name_info = FDQParams.get('run_name_info')
         if run_name_info:
+            if not type(run_name_info) == dict:
+                run_name_info = run_name_info.contents
             subfolder = run_name_info.get('subfolder_name', "")
             runname = run_name_info.get('runname', "")
         else:
@@ -1214,6 +1223,8 @@ class FieldDataAggregateAndWeight(SAHMDocumentedModule, Module):
 
         run_name_info = FDAWParams.get('run_name_info')
         if run_name_info:
+            if not type(run_name_info) == dict:
+                run_name_info = run_name_info.contents
             subfolder = run_name_info.get('subfolder_name', "")
             runname = run_name_info.get('runname', "")
         else:
@@ -1265,6 +1276,8 @@ class PARC(SAHMDocumentedModule, Module):
 
         run_name_info = self.force_get_input('run_name_info', None)
         if run_name_info:
+            if not type(run_name_info) == dict:
+                run_name_info = run_name_info.contents
             subfolder = run_name_info.get('subfolder_name', "")
             runname = run_name_info.get('runname', "")
             if runname:
@@ -1371,6 +1384,8 @@ class Reclassifier(SAHMDocumentedModule, Module):
 
         run_name_info = self.force_get_input('run_name_info', None)
         if run_name_info:
+            if not type(run_name_info) == dict:
+                run_name_info = run_name_info.contents
             subfolder = run_name_info.get('subfolder_name', "")
             runname = run_name_info.get('runname', "")
             if runname:
@@ -1593,7 +1608,9 @@ class ModelEvaluationSplit(SAHMDocumentedModule, Module):
 
         if self.has_input('run_name_info'):
             runinfo = self.force_get_input('run_name_info')
-            subfolder = runinfo.get('subfolder', "")
+            if not type(runinfo) == dict:
+                runinfo = runinfo.contents
+            subfolder = runinfo.get('subfolder_name', "")
             runname = runinfo.get('runname', "")
         else:
             subfolder, runname = utils.get_previous_run_info(args['i'])
@@ -1646,7 +1663,9 @@ class ModelSelectionSplit(SAHMDocumentedModule, Module):
 
         if self.has_input('run_name_info'):
             runinfo = self.force_get_input('run_name_info')
-            subfolder = runinfo.get('subfolder', "")
+            if not type(runinfo) == dict:
+                runinfo = runinfo.contents
+            subfolder = runinfo.get('subfolder_name', "")
             runname = runinfo.get('runname', "")
         else:
             subfolder, runname = utils.get_previous_run_info(args['i'])
@@ -1700,7 +1719,9 @@ class ModelSelectionCrossValidation(SAHMDocumentedModule, Module):
 
         if self.has_input('run_name_info'):
             runinfo = self.force_get_input('run_name_info')
-            subfolder = runinfo.get('subfolder', "")
+            if not type(runinfo) == dict:
+                runinfo = runinfo.contents
+            subfolder = runinfo.get('subfolder_name', "")
             runname = runinfo.get('runname', "")
         else:
             subfolder, runname = utils.get_previous_run_info(argsDict['i'])
@@ -1759,6 +1780,8 @@ class CovariateCorrelationAndSelection(SAHMDocumentedModule, Module):
 
         if self.has_input('run_name_info'):
             runinfo = self.force_get_input('run_name_info')
+            if not type(runinfo) == dict:
+                runinfo = runinfo.contents
             subfolder = runinfo.get('subfolder_name', "")
             runname = runinfo.get('runname', "")
         else:
