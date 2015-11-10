@@ -58,3 +58,4 @@ plots ,,Boolean ,True ,Write various plots for inclusion in .html output ,
 projectionlayers ,j ,Directory ,,"Location of an alternate set of environmental variables. Maxent models will be projected onto these variables.
 Can be a .csv file (in SWD format) or a directory containing one file per variable.
 Multiple projection files/directories can be separated by commas. ",
+memorysize,mx,Integer ,512,Amount of memory for Java to use,

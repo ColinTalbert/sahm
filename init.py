@@ -362,6 +362,8 @@ class Model(SAHMDocumentedModule, Module):
 
         if self.has_input('run_name_info'):
             runinfo = self.force_get_input('run_name_info')
+            if not type(runinfo) == dict:
+                runinfo = runinfo.contents
             subfolder = runinfo.get('subfolder_name', "")
             runname = runinfo.get('runname', "")
         else:
@@ -570,32 +572,28 @@ class ApplyModel(Model):
         else:
             self.args = 'pmt=FALSE '
 
-        if len(lines) == 3:
-            #  we're applying this model to a new area
-            #  make sure all the covariates in the original model are in the new csv
-            #  if not tack on the original values.
-            orig_mds = utils.get_mdsfname(workspace)
-            orig_mdsfile = open(orig_mds, "r")
-            orig_lines = orig_mdsfile.readlines()
+#          if len(lines) == 3:
+#              #  we're applying this model to a new area
+#              #  make sure all the covariates in the original model are in the new csv
+#              #  if not tack on the original values.
+        orig_mds = utils.get_mdsfname(workspace)
+        orig_mdsfile = open(orig_mds, "r")
+        orig_lines = orig_mdsfile.readlines()
 
-            orig_covariates = [item for item in orig_lines[0][3:] if item not in ['Split', 'EvalSplit', 'Weights']]
-            missing_covariates = []
-            new_covariates = [item for item in lines[0][3:] if item not in ['Split', 'EvalSplit', 'Weights']]
-            
-            for orig_covariate in orig_covariates:
-                if orig_lines[1][orig_lines[0].index(orig_covariate)] == 1 and \
-                    new_covariates.count(orig_covariate) == 0:
-                    missing_covariates.append(orig_covariate)
-            if len(missing_covariates) > 0:
-                msg = 'One or more of the covariates used in the original model are not specified in the apply model mds file\n'
-                msg += 'Specfically the following covariates were not found:'
-                msg += '\n\t'.join(missing_covariates)
+        orig_covariates = [item.strip() for item in orig_lines[0].split(",")[3:] if item.strip() not in ['Split', 'EvalSplit', 'Weights']]
+        missing_covariates = []
+        new_covariates = [item.strip() for item in lines[0].split(",")[3:] if item.strip() not in ['Split', 'EvalSplit', 'Weights']]
 
-                raise RuntimeError()
+        for orig_covariate in orig_covariates:
+            if orig_lines[1].split(",")[orig_lines[0].split(",").index(orig_covariate)] == "1" and \
+                new_covariates.count(orig_covariate) == 0:
+                missing_covariates.append(orig_covariate)
+        if len(missing_covariates) > 0:
+            msg = 'One or more of the covariates used in the original model are not specified in the apply model mds file\n'
+            msg += 'Specfically the following covariates were not found:'
+            msg += '\n\t'.join(missing_covariates)
 
-
-
-
+            raise RuntimeError(msg)
 
         Model.compute(self)
 
@@ -708,6 +706,7 @@ class UserDefinedCurve(Model):
     __doc__ = GenModDoc.construct_module_doc('UserDefinedCurve')
 
     _input_ports = list(Model._input_ports)
+    _input_ports.extend([("curves_json", "(edu.utah.sci.vistrails.basic:File)", {'optional':True}),])
     _output_ports = list(Model._output_ports)
     _output_ports.extend([("curves_json", "(edu.utah.sci.vistrails.basic:File)", {'optional':True}),])
 
@@ -717,6 +716,9 @@ class UserDefinedCurve(Model):
         self.name = 'FIT_UDC.r'
         self.pywrapper = "runRModel.py"
         self.abbrev = 'udc'
+        
+        self.port_map.update({'curves_json':('curves_json', None, False),  #  This is a Maxent specific port
+                              })
 
     def compute(self):
 
@@ -775,6 +777,8 @@ class EnsembleBuilder(SAHMDocumentedModule, Module):
 
         run_name_info = params.get('run_name_info')
         if run_name_info:
+            if not type(run_name_info) == dict:
+                run_name_info = run_name_info.contents
             subfolder = run_name_info.get('subfolder_name', "")
             runname = run_name_info.get('runname', "")
         else:
@@ -846,6 +850,8 @@ class BackgroundSurfaceGenerator(SAHMDocumentedModule, Module):
 
         run_name_info = kde_params.get('run_name_info')
         if run_name_info:
+            if not type(runinfo) == dict:
+                runinfo = runinfo.contents
             subfolder = run_name_info.get('subfolder_name', "")
             runname = run_name_info.get('runname', "")
         else:
@@ -898,8 +904,8 @@ class OutputNameInfo(Constant):
     def translate_to_python(x):
         try:
             runinfo = OutputNameInfo()
-            runinfo.contents = {'runname':str(x),
-                                'subfolder_name':'',
+            runinfo.contents = {'runname':'',
+                                'subfolder_name':str(x),
                                 'delete_previous':False}
             return runinfo
         except:
@@ -972,9 +978,13 @@ class MDSBuilder(SAHMDocumentedModule, Module):
         inputs_csvs = self.force_get_input_list('RastersWithPARCInfoCSV')
         if len(inputs_csvs) == 0:
             raise ModuleError(self, "Must supply at least one 'RastersWithPARCInfoCSV'/nThis is the output from the PARC module")
+        if not type(inputs_csvs[0]) == str:
+            inputs_csvs = [i.name for i in inputs_csvs]
 
         run_name_info = MDSParams.get('run_name_info')
         if run_name_info:
+            if not type(run_name_info) == dict:
+                run_name_info = run_name_info.contents
             subfolder = run_name_info.get('subfolder_name', "")
             runname = run_name_info.get('runname', "")
         else:
@@ -983,7 +993,6 @@ class MDSBuilder(SAHMDocumentedModule, Module):
             if subfolder == '' and runname == '':
                 subfolder, runname = utils.get_previous_run_info(
                                         os.path.split(inputs_csvs[0])[0])
-
 
         key_inputs = []
         for input in ['fieldData']:
@@ -1071,6 +1080,8 @@ class FieldDataQuery(SAHMDocumentedModule, Module):
 
         run_name_info = FDQParams.get('run_name_info')
         if run_name_info:
+            if not type(run_name_info) == dict:
+                run_name_info = run_name_info.contents
             subfolder = run_name_info.get('subfolder_name', "")
             runname = run_name_info.get('runname', "")
         else:
@@ -1212,6 +1223,8 @@ class FieldDataAggregateAndWeight(SAHMDocumentedModule, Module):
 
         run_name_info = FDAWParams.get('run_name_info')
         if run_name_info:
+            if not type(run_name_info) == dict:
+                run_name_info = run_name_info.contents
             subfolder = run_name_info.get('subfolder_name', "")
             runname = run_name_info.get('runname', "")
         else:
@@ -1263,6 +1276,8 @@ class PARC(SAHMDocumentedModule, Module):
 
         run_name_info = self.force_get_input('run_name_info', None)
         if run_name_info:
+            if not type(run_name_info) == dict:
+                run_name_info = run_name_info.contents
             subfolder = run_name_info.get('subfolder_name', "")
             runname = run_name_info.get('runname', "")
             if runname:
@@ -1369,6 +1384,8 @@ class Reclassifier(SAHMDocumentedModule, Module):
 
         run_name_info = self.force_get_input('run_name_info', None)
         if run_name_info:
+            if not type(run_name_info) == dict:
+                run_name_info = run_name_info.contents
             subfolder = run_name_info.get('subfolder_name', "")
             runname = run_name_info.get('runname', "")
             if runname:
@@ -1591,7 +1608,9 @@ class ModelEvaluationSplit(SAHMDocumentedModule, Module):
 
         if self.has_input('run_name_info'):
             runinfo = self.force_get_input('run_name_info')
-            subfolder = runinfo.get('subfolder', "")
+            if not type(runinfo) == dict:
+                runinfo = runinfo.contents
+            subfolder = runinfo.get('subfolder_name', "")
             runname = runinfo.get('runname', "")
         else:
             subfolder, runname = utils.get_previous_run_info(args['i'])
@@ -1644,7 +1663,9 @@ class ModelSelectionSplit(SAHMDocumentedModule, Module):
 
         if self.has_input('run_name_info'):
             runinfo = self.force_get_input('run_name_info')
-            subfolder = runinfo.get('subfolder', "")
+            if not type(runinfo) == dict:
+                runinfo = runinfo.contents
+            subfolder = runinfo.get('subfolder_name', "")
             runname = runinfo.get('runname', "")
         else:
             subfolder, runname = utils.get_previous_run_info(args['i'])
@@ -1698,7 +1719,9 @@ class ModelSelectionCrossValidation(SAHMDocumentedModule, Module):
 
         if self.has_input('run_name_info'):
             runinfo = self.force_get_input('run_name_info')
-            subfolder = runinfo.get('subfolder', "")
+            if not type(runinfo) == dict:
+                runinfo = runinfo.contents
+            subfolder = runinfo.get('subfolder_name', "")
             runname = runinfo.get('runname', "")
         else:
             subfolder, runname = utils.get_previous_run_info(argsDict['i'])
@@ -1757,6 +1780,8 @@ class CovariateCorrelationAndSelection(SAHMDocumentedModule, Module):
 
         if self.has_input('run_name_info'):
             runinfo = self.force_get_input('run_name_info')
+            if not type(runinfo) == dict:
+                runinfo = runinfo.contents
             subfolder = runinfo.get('subfolder_name', "")
             runname = runinfo.get('runname', "")
         else:
@@ -2264,7 +2289,7 @@ _upgrades['DataInput|Predictor'] = [UpgradeModuleRemap(None, '2.0.0', '2.0.0', N
 _upgrades['Models|MAXENT'] = [UpgradeModuleRemap(None, '1.0.2', '1.0.2', None,
                                   dst_port_remap={'inputMDS': 'mdsFile'})]
 
-for m in ['GLM', 'MARS', 'RandomForest', 'BoostedRegressionTree']:
+for m in ['GLM', 'MARS', 'RandomForest', 'BoostedRegressionTree', 'MAXENT']:
         _upgrades['Models|' + m] = [UpgradeModuleRemap(None, '1.0.2', '1.0.2', 'Models|' + m,
                                         dst_port_remap={'modelWorkspace': utils.getParentDir}),
                                     UpgradeModuleRemap(None, '1.2.0', '1.2.0', 'Models|' + m,
@@ -2282,7 +2307,9 @@ _upgrades['Tools|MDSBuilder'] = [UpgradeModuleRemap(None, '2.0.0', '2.0.0', None
                                                   'backgroundPointType':None})]
 _upgrades['Tools|PARC'] = [UpgradeModuleRemap(None, '1.0.2', '1.0.2', None,
                                   dst_port_remap={'bias': '',
-                                          'multipleCores': ''})]
+                                          'multipleCores': ''}),
+                           UpgradeModuleRemap(None, '1.2.0', '2.0.0', None,
+                                  dst_port_remap={'outputFolderName': None})]
 _upgrades['Tools|RasterFormatConverter'] = [UpgradeModuleRemap(None, '1.0.2', '1.0.2', None,
                                   dst_port_remap={'multipleCores': ''})]
 _upgrades['Tools|ApplyModel'] = [UpgradeModuleRemap(None, '1.0.1', '1.0.1', None,
