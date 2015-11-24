@@ -1,11 +1,9 @@
 read.maxent<-function(lambdas){
-
   lambdas <- read.csv(lambdas,header=FALSE)
   normalizers<-lambdas[(nrow(lambdas)-3):nrow(lambdas),]
     entropy<-normalizers[4,2]
     lambdas<-lambdas[1:(nrow(lambdas)-4),]
-    
-    fctType <- rep("raw",times=nrow(lambdas)-4)
+    fctType <- rep("raw",times=nrow(lambdas))
     fctType[grep("`",as.character(lambdas[,1]))] <- "reverse.hinge"
     fctType[grep("'",as.character(lambdas[,1]))] <- "forward.hinge"
     fctType[grep("\\^",as.character(lambdas[,1]))]<-"quadratic"

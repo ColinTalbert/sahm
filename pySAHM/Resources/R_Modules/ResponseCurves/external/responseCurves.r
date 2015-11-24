@@ -35,10 +35,11 @@ responseCurves<-function(fitLst,model,vals=NULL,varImp,addImp,pIdx){
               modelCycle<-1:length(fitLst)
               predCycle<-1:ncol(dat)
               if(byVar) predCycle <- pIdx
-               for(j in modelCycle){
               
+               for(j in modelCycle){
+                   
                     allVarImp<-rep(0,times=ncol(dat))
-                    allVarImp[match(rownames(varImp[[j]]),names(dat))]<-as.vector(varImp[[j]][,1]) 
+                    allVarImp[match(names(varImp[[j]]),names(dat))]<-as.vector(varImp[[j]][1]) 
                     allVarImp[allVarImp<0]<-0 #set the minimum to zero so it shows up white
                     bgCol<-bgRamp[cut(x=allVarImp,breaks=seq(from=0,to=max(varImp[[j]]),length=11),include.lowest=TRUE)] 
                  for (pIdx in predCycle) {
