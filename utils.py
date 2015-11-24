@@ -64,6 +64,7 @@ from vistrails.core.modules.basic_modules import File, Path, Directory, PathObje
 from vistrails.packages.spreadsheet.basic_widgets import CellLocation
 from vistrails.packages.spreadsheet.spreadsheet_base import StandardSheetReference
 from vistrails.core.modules.vistrails_module import ModuleError, ModuleSuspended
+from vistrails.core.packagemanager import get_package_manager
 from vistrails.core import system
 from vistrails.gui import application
 
@@ -625,7 +626,10 @@ def run_model_script(script, args_dict, module=None, runner_script="runRModel.py
 
             json_fname = os.path.join(module.output_dname, 'udc.json')
             kwargs_mod = {'inputMDS':args_dict['c'],
-                      'output_json':json_fname}
+                      'output_json':json_fname,
+                      'input_json':args_dict.get('curves_json', None)}
+
+
             args_dict['udc'] = json_fname
             cmd.append("udc=" + json_fname)
             dialog = CreatePredictorCurvesDialog(kwargs_mod)
@@ -1302,16 +1306,30 @@ def get_curve_sheet_location(_module):
 
     return auto_location
 
-def get_sheet_location(_module):
+
+
+
+def set_sheet_location(_module):
     '''given a sahm spreadsheet module, finds all the other sahm spreadsheet cells
     in the currently executing pipeline and returns a CellLocation
     with the name of the currently executing pipeline and dimensions set to
     hold the number of cells needed.
     '''
+    #  don't do this if we're on the VisWall
+    package_manager = get_package_manager()
+    try:
+        package = package_manager.get_package('gov.usgs.VisWallClient')
+        on_viswall = True
+    except:
+        on_viswall = False
+        pass
+
+
     auto_location = None
     if _module.inputPorts.has_key('Location'):
-        auto_location = _module.inputPorts['Location'][0].obj.Location()
-    else:
+        return
+
+    elif not on_viswall:
         try:
             cur_vt = _module.moduleInfo['controller'].vistrail
 
@@ -1369,7 +1387,8 @@ def get_sheet_location(_module):
             auto_location = CellLocation.Location()
         auto_location.col = _module.get_input('column') - 1
 
-    return auto_location
+    _module.overrideLocation(auto_location)
+
 
 def get_previous_run_info(full_fname):
     '''given a fname in in the format:

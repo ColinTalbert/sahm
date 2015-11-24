@@ -141,7 +141,13 @@ if __name__ == "__main__":
             source_name = '<<problem getting raster name>>'
 
         main(options)
-        print "Finished PARC processing of {}".format(source_name)
+
+        if SpatialUtilities.all_nodata(options.dest):
+            sys.stderr.write("PARC processing of {} failed:\n{}".format(source_name,
+                                            "all output pixels were nodata"))
+        else:
+            print "Finished PARC processing of {}".format(source_name)
+
     except Exception as e:
 #          import traceback
 #  #          exc_type, exc_value, exc_traceback = sys.exc_info()

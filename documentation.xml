@@ -2961,7 +2961,7 @@ For example:
       </Port>
       <Port>
         <PortName>fill_color</PortName>
-        <Definition>The color to use inside the point marker.  Not all markers use a fill color, for example Xs.</Definition>
+        <Definition>The color to use inside the point marker.  Not all markers use a fill color, for example Xs.  To have transparent (no) fill use an RGB value of 1, 2, 3.</Definition>
         <Mandatory>No</Mandatory>
         <Default>Blue</Default>
         <Options>Any color</Options>

@@ -92,15 +92,16 @@ class MAXENTRunner(object):
                                     [cmd, stdout_fname, stderr_fname])
             utilities.wait_for_pool_to_finish()
 
-            r_cmd = [sys.executable]
-            r_cmd.extend(sys.argv)
-            r_cmd[1] = r_cmd[1].replace('runMaxent.py', 'runRModel.py')
-            r_cmd.append('lam=' + self.outputdir)
-            self.writetolog('    running command:  \n' +
-                        utilities.convert_list_to_cmd_str(r_cmd) + "\n", True, False)
-            utilities.add_process_to_pool(utilities.launch_cmd,
-                                    [r_cmd, stdout_fname, stderr_fname])
-            utilities.wait_for_pool_to_finish()
+            if not self.sub_run:
+                r_cmd = [sys.executable]
+                r_cmd.extend(sys.argv)
+                r_cmd[1] = r_cmd[1].replace('runMaxent.py', 'runRModel.py')
+                r_cmd.append('lam=' + self.outputdir)
+                self.writetolog('    running command:  \n' +
+                            utilities.convert_list_to_cmd_str(r_cmd) + "\n", True, False)
+                utilities.add_process_to_pool(utilities.launch_cmd,
+                                        [r_cmd, stdout_fname, stderr_fname])
+                utilities.wait_for_pool_to_finish()
         else:
             msg = 'The specified Maxent.Jar file ({})\n\t\t'.format(self.maxent_path)
             msg += "\nNoes not appear to exist on the file system!"
@@ -127,7 +128,10 @@ class MAXENTRunner(object):
         utilities.start_new_pool(process_count)
 
     def gen_maxent_cmd(self):
-        cmd = [self.java_path, '-mx512m', '-jar', self.maxent_path]
+
+
+        mem_arg = self.maxent_args.pop('memorysize', 512)
+        cmd = [self.java_path, '-mx{}m'.format(mem_arg), '-jar', self.maxent_path]
         for k, v in self.maxent_args.iteritems():
             if v in [True, False]:
                 cmd.append(k + "=" + str(v).lower())
@@ -318,7 +322,11 @@ class MAXENTRunner(object):
 
                     #  here we need to run Maxent without the test split csv which breaks it
                     self.test_key = None
-            utilities.wait_for_pool_to_finish()
+            results = utilities.wait_for_pool_to_finish()
+            for result in results:
+                if "Error" in result[0]:
+                    print "!!!!!!!!!!!!!!!!!test!!!!!!!!!!!!!!!!!!!!!!"
+                    raise RuntimeError(self, result[0])
 
     def convertNA(self, vals):
         """Switches the NA value used in our R models

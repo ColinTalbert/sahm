@@ -80,7 +80,7 @@ from pySAHM.utilities import dbfreader as dbfreader
 
 import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 
 from matplotlib.figure import Figure
 from matplotlib.offsetbox import AnchoredOffsetbox, TextArea
@@ -130,7 +130,7 @@ class BaseGeoViewerCell(SpreadsheetCell):
     def parse_inputs(self):
         inputs = {}
 
-        self.location = utils.get_sheet_location(self)
+        utils.set_sheet_location(self)
 
         inputs['vector_layers'] = self.force_get_input_list('vector_layers')
         #  ugly hack to get the viswall to work.  Serial/unserialize nests
