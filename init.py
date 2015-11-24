@@ -572,22 +572,28 @@ class ApplyModel(Model):
         else:
             self.args = 'pmt=FALSE '
 
-#          if len(lines) == 3:
-#              #  we're applying this model to a new area
-#              #  make sure all the covariates in the original model are in the new csv
-#              #  if not tack on the original values.
+        #  make sure all the covariates in the original model are in the new csv
+        #  if not raise an exception alerting the user
         orig_mds = utils.get_mdsfname(workspace)
         orig_mdsfile = open(orig_mds, "r")
         orig_lines = orig_mdsfile.readlines()
 
-        orig_covariates = [item.strip() for item in orig_lines[0].split(",")[3:] if item.strip() not in ['Split', 'EvalSplit', 'Weights']]
+
+        skip_list = ['Split', 'EvalSplit', 'Weights']
+
+        orig_covariates = [item.strip() for item in orig_lines[0].split(",")[3:]
+                                            if item.strip() not in skip_list]
+        orig_used = [item.strip() for item in orig_lines[1].split(",")[3:]]
         missing_covariates = []
-        new_covariates = [item.strip() for item in lines[0].split(",")[3:] if item.strip() not in ['Split', 'EvalSplit', 'Weights']]
+        new_covariates = [item.strip() for item in lines[0].split(",")[3:]
+                                            if item.strip() not in skip_list]
 
         for orig_covariate in orig_covariates:
-            if orig_lines[1].split(",")[orig_lines[0].split(",").index(orig_covariate)] == "1" and \
-                new_covariates.count(orig_covariate) == 0:
+            i = orig_covariates.index(orig_covariate)
+            if orig_used[i] == "1" and \
+                    new_covariates.count(orig_covariate) == 0:
                 missing_covariates.append(orig_covariate)
+
         if len(missing_covariates) > 0:
             msg = 'One or more of the covariates used in the original model are not specified in the apply model mds file\n'
             msg += 'Specfically the following covariates were not found:'
