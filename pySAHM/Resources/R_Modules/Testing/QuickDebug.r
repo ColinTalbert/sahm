@@ -52,8 +52,8 @@ FitModels(ma.name=input.file,
 'multicore=TRUE', 'om=2', 'maxent_path=K:\\USERS\\ISS\\VisTrails\\VisTrails2.1.2_SAHM_x64_1.2.0\\Central_Maxent', 'species_name=species', 'cur_processing_mode=single models sequentially (n - 1 cores each)', 'c=J:\\Projects\\CNHPforJorge\\Maxent_WildParsnip_4\\CovariateCorrelationOutputMDS_WildParsnip_initial.csv', 'o=J:\\Projects\\CNHPforJorge\\Maxent_WildParsnip_4'
 
 
-  lambdas.file="J:\\Projects\\CNHPforJorge\\Maxent_WildParsnip_4"
- input.file="J:\\Projects\\CNHPforJorge\\Maxent_WildParsnip_4\\CovariateCorrelationOutputMDS_WildParsnip_initial.csv"
+ lambdas.file="J:\\Projects\\NASADevelop\\AK\\Elodea2\\Elodea_1\\Elodea_1\\Maxent_kdeContOpt_1"
+ input.file="J:\\Projects\\NASADevelop\\AK\\Elodea2\\Elodea_1\\Elodea_1\\Maxent_kdeContOpt_1\\CovariateCorrelationOutputMDS_kdeContOpt_initial.csv"
 
 FitModels(ma.name=input.file,
             output.dir=output.dir,
@@ -64,14 +64,26 @@ FitModels(ma.name=input.file,
 #================================================================#
 input.file = "J:\\Projects\\MojaveInvasives\\DerivedData\\AnalysisWith2000to2010base\\BRORUB20002010prism\\brt_1\\CovariateCorrelationOutputMDS_initial.csv"
 input.file = "I:\\VisTrails\\WorkingFiles\\workspace\\_yetAnotherTest\\brewersSparrow_presenceONLY\\mars_1\\CovariateCorrelationOutputMDS_initial.csv"
-input.file = "I:\\VisTrails\\WorkingFiles\\workspace\\_yetAnotherTest\\brewersSparrow_presenceONLY\\mars_1\\CovariateCorrelationOutputMDS_initial.csv"
 
 FitModels(ma.name=input.file,
         tif.dir=NULL,output.dir=output.dir,
         response.col=rc,make.p.tif=F,make.binary.tif=F,
             mars.degree=1,mars.penalty=2,debug.mode=F,seed=123,
             script.name="mars",opt.methods=2,MESS=F,ScriptPath=ScriptPath)
-          
+
+input.file = "C:\\temp\\SAHM_workspace\\WarnTesting\\SAHMTestingOutput\\brewersSparrow_justMaurerObs\\mars_asage_1\\CovariateCorrelationOutputMDS_asage_initial.csv"
+output.dir="C:\\temp\\SAHM_workspace\\MarsParameter"
+mars.penalty=seq(from=5,to=15)
+for(i in 1:length(mars.penalty)){
+output.diri<-paste(output.dir,mars.penalty[i],sep="_")
+dir.create(output.diri)
+FitModels(ma.name=input.file,
+        tif.dir=NULL,output.dir=output.diri,
+        response.col=rc,make.p.tif=F,make.binary.tif=F,
+            mars.degree=1,mars.penalty=mars.penalty[i],debug.mode=F,seed=123,
+            script.name="mars",opt.methods=2,MESS=F,ScriptPath=ScriptPath)
+}            
+                      
 #================================================================#
 #                   Evaluate New Data
 #================================================================#
@@ -111,10 +123,26 @@ input.file = "C:\\temp\\SAHM_workspace\\ForResponseCurveTool\\rf_1\\CovariateCor
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_tutorial_2.0_testing\\brewersSparrow_justMaurerObs\\rf_asage_1\\CovariateCorrelationOutputMDS_asage_initial.csv 
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_clutteredWarnings\\brewersSparrow\\rf_1\\CovariateCorrelationOutputMDS_initial.csv"
 input.file="J:\\Projects\\NAS\\SAHM_output\\Pomacea\\rf_optimizedGastroBacks_1\\CovariateCorrelationOutputMDS_optimizedGastroBacks_initial.csv"
+input.file="I:\\VisTrails\\WorkingFiles\\workspace\\Tutorial_2.0_output\\brewersSparrow_justMaurerObs\\rf_asage_1\\CovariateCorrelationOutputMDS_asage_initial.csv"
 FitModels(ma.name=input.file,
       tif.dir=NULL,
       output.dir=output.dir,nodesize=NULL,maxnodes=NULL,sampsize=NULL,mtry=NULL,samp.replace=FALSE,keep.forest=NULL,xtest=NULL,ytest=NULL,
       response.col=rc,make.p.tif=F,make.binary.tif=F, localImp=FALSE,nPerm=1,proximity=NULL,n.trees=1000,keep.forest=NULL,
+      keep.inbag=FALSE,
+          debug.mode=T,opt.methods=2,script.name="rf",ScriptPath=ScriptPath,multCore=FALSE)
+
+
+#RF loop to select parameters
+input.file = "C:\\temp\\SAHM_workspace\\WarnTesting\\SAHMTestingOutput\\brewersSparrow_justMaurerObs\\mars_asage_1\\CovariateCorrelationOutputMDS_asage_initial.csv"
+output.dir="C:\\temp\\SAHM_workspace\\MarsParameter"
+n.trees=c(30,50,70,100,500)
+for(i in 1:length(n.trees)){
+output.diri<-paste(output.dir,i,sep="_")
+dir.create(output.diri)
+FitModels(ma.name=input.file,
+      tif.dir=NULL,
+      output.dir=output.dir,nodesize=NULL,maxnodes=NULL,sampsize=NULL,mtry=NULL,samp.replace=FALSE,keep.forest=NULL,xtest=NULL,ytest=NULL,
+      response.col=rc,make.p.tif=F,make.binary.tif=F, localImp=FALSE,nPerm=1,proximity=NULL,n.trees=30,keep.forest=NULL,
       keep.inbag=FALSE,
           debug.mode=T,opt.methods=2,script.name="rf",ScriptPath=ScriptPath,multCore=FALSE)
 
@@ -127,17 +155,27 @@ rc="responseBinary"
 input.file="J:\Projects\NormalsComparison\SAHM4\AHB\MergedDataset_1.csv"
 input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_ntr\\brt_BrewersSparrowCV_1\\CovariateCorrelationOutputMDS_BrewersSparrowCV_initial.csv"
 #input.file="I:\\VisTrails\\WorkingFiles\\workspace\\_FinalTest\\CovariateCorrelationOutputMDS_initial.csv"
-input.file="J:\\Projects\\MojaveInvasives\\DerivedData\\AnalysisWith2000to2010base\\BRORUB20002010prism\\brt_1\\CovariateCorrelationOutputMDS_initial.csv"
+input.file="J:\\Projects\\buffelgrass\\SNP\\HabitatSuitability\\SAHM\\CeCi\\BRT_OPT\\brt_finalmaps_4\\CovariateCorrelationOutputMDS_finalmaps_initial.csv"
+input.file="J:\\Projects\\NASADevelop\\AK\\Elodea2\\Elodea_1\\Revisions\\brt_First_1\\CovariateCorrelationOutputMDS_First_initial.csv"
+FitModels(ma.name=input.file,
+            tif.dir=NULL,output.dir=output.dir,
+            response.col=rc,make.p.tif=F,make.binary.tif=F,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
+        family = "bernoulli",n.trees =NULL,tolerance.method = "auto",
+    tolerance = 0.001,seed=1234,opt.methods=2,learning.rate=NULL,
+            simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
+            bag.fraction = 0.5,prev.stratify = TRUE, opt.methods=2,MESS=F,ScriptPath=ScriptPath,multCore=FALSE,predSelect=FALSE)
+            
+            
 maxTrees=c(25,50,75,100,150,NULL)
 output.dir="C:\\temp\\BRT"
 for(i in 1:length(maxTrees)){
   d<-file.path(output.dir,paste("brt",i,sep="_"))
   dir.create(d)
   FitModels(ma.name=input.file,
-            tif.dir=NULL,output.dir=d,
-            response.col=rc,make.p.tif=F,make.binary.tif=F,n.folds=3,simp.method="cross-validation",tc=NULL,alpha=1,
-        family = "bernoulli",n.trees =maxTrees[i],tolerance.method = "auto",
-    tolerance = 0.001,seed=1234,opt.methods=2,
+            tif.dir=NULL,output.dir=output.dir,
+            response.col=rc,make.p.tif=F,make.binary.tif=F,n.folds=3,simp.method="cross-validation",tc=1,alpha=1,
+        family = "bernoulli",n.trees =NULL,tolerance.method = "auto",
+    tolerance = 0.001,seed=1234,opt.methods=2,learning.rate=0.0005,
             simp.method="cross-validation",debug.mode=T,responseCurveForm="pdf",script.name="brt",
             bag.fraction = 0.5,prev.stratify = TRUE, opt.methods=2,MESS=F,ScriptPath=ScriptPath,multCore=FALSE,predSelect=FALSE)
 }
