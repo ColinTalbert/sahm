@@ -514,6 +514,7 @@ class RandomForest(Model):
         self.abbrev = 'rf'
         self.port_map.update({'Seed':('seed', utils.get_seed, True),  #  This is a BRT specific port
                          'mTry': ('mtry', None, False),  #  This is a Random Forest specific port
+                         'nTrees': ('ntree', None, False), # MMF 02/22/2016 - nTrees was not getting passed
                          'nodesize': ('nodeS', None, False),  #  This is a Random Forest specific port
                          'replace': ('sampR', utils.R_boolean, False),  #  This is a Random Forest specific port
                          'maxnodes': ('maxN', None, False),  #  This is a Random Forest specific port
