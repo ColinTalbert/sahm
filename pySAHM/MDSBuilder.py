@@ -238,9 +238,10 @@ class MDSBuilder(object):
             self.parc_template = inputs_header[5]
             parc_workspace = inputs_header[6]
         else:
-            self.parc_template = "Unknown"
-            parc_workspace = "Unknown"
-
+##            self.parc_template = "Unknown" #MMF 02/22/2016 - I usually "pre-PARC" my data, and this
+##            parc_workspace = "Unknown"     #causes problems. SAHM doesn't know what to do w/ the unknowns.
+            self.parc_template = temp_raster
+            parc_workspace = temp_raster
 
         secondRow = [original_field_data, field_data_template, ""] + ["1" for elem in self.inputs]
         thirdRow = [self.parc_template, parc_workspace, ""] + self.inputs
