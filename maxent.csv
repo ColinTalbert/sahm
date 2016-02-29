@@ -59,3 +59,4 @@ projectionlayers ,j ,Directory ,,"Location of an alternate set of environmental 
 Can be a .csv file (in SWD format) or a directory containing one file per variable.
 Multiple projection files/directories can be separated by commas. ",
 memorysize,mx,Integer ,512,Amount of memory for Java to use,
+cache,,Boolean ,True ," Make a .mxe cached version of ascii files, for faster access",

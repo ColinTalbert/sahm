@@ -47,6 +47,7 @@ class MAXENTRunner(object):
             self.prepInputs()
         else:
             raise Exception, 'No MDS supplied.'
+
         if not self.maxent_args.has_key('projectionlayers'):
             self.maxent_args['projectionlayers'] = ''
         if self.trainingCSV != '':
@@ -70,10 +71,7 @@ class MAXENTRunner(object):
         if(not self.test_key):  #  if there is no testsplit (ie cross validation, remove the empty csv
             del self.maxent_args['testsamplesfile']
 
-        if self.categoricals:
-            catstr = ",".join([cat.replace('_categorical', '')
-                               for cat in self.categoricals])
-            self.maxent_args['togglelayertype'] = catstr
+
 
         if not self.maxent_path.endswith('.jar'):
             self.maxent_path = os.path.join(self.maxent_path, 'maxent.jar')
@@ -137,6 +135,10 @@ class MAXENTRunner(object):
                 cmd.append(k + "=" + str(v).lower())
             else:
                 cmd.append(k + "=" + str(v))
+
+        for categorical in self.categoricals:
+            cmd.append("togglelayertype=" + str(categorical.replace('_categorical', '')))
+
         return cmd
 
     def validateInputs(self):
@@ -175,6 +177,13 @@ class MAXENTRunner(object):
         self.writetolog = self.logger.writetolog
 
     def prepInputs(self):
+
+        MDSreader = csv.reader(open(self.args_dict['c'], 'r'))
+        header1 = MDSreader.next()
+        header2 = MDSreader.next()
+        header3 = MDSreader.next()
+        self.pullCategoricals(header1)
+
         if not self.sub_run:
             self.handleCrossValidations()
 
@@ -187,11 +196,8 @@ class MAXENTRunner(object):
         testWriter = csv.writer(open(self.testCSV, 'wb'))
         trainingWriter = csv.writer(open(self.trainingCSV, 'wb'))
         backgroundWriter = csv.writer(open(self.backgroundCSV, 'wb'))
-        MDSreader = csv.reader(open(self.args_dict['c'], 'r'))
-        header1 = MDSreader.next()
-        header2 = MDSreader.next()
-        header3 = MDSreader.next()
-        self.pullCategoricals(header1)
+
+
         splitcol = None
         evalsplit = None
         if 'EvalSplit' in header1:
@@ -352,6 +358,7 @@ class MAXENTRunner(object):
         return usedvals
 
     def pullCategoricals(self, headerline):
+        print headerline
         for item in headerline:
             if item.endswith('_categorical'):
                 if item not in self.categoricals:
