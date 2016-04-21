@@ -84,6 +84,7 @@ class SAHMRaster():
                 create_args = ['COMPRESS=LZW', 'PREDICTOR=2', 'TILED=Yes',
                    'BLOCKXSIZE=128', 'BLOCKYSIZE=128']
 
+        create_args += ["BIGTIFF=Yes"]
         if self.signedByte:
             create_args += ["PIXELTYPE=SIGNEDBYTE"]
 
