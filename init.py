@@ -219,6 +219,8 @@ def menu_items():
     lst.append(("Change processing mode", selectProcessingMode))
     lst.append(("Select and test the Final Model", select_test_final_model))
     lst.append(("Check Asynchronous model runs", checkAsyncModels))
+    lst.append(("Tony's Data Management", select_test_final_model))
+
     return(lst)
 
 
