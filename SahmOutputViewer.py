@@ -1,35 +1,35 @@
 ###############################################################################
 #  #
-#  # This file is part of the Software for Assisted Habitat Modeling package
-#  # for VisTrails.
+# This file is part of the Software for Assisted Habitat Modeling package
+# for VisTrails.
 #  #
 #  #
-#  # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-#  # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-#  # THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-#  # PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
-#  # CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-#  # EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-#  # PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
-#  # OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-#  # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-#  # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-#  # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+# OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
 #  #
-#  # Although this program has been used by the U.S. Geological Survey (USGS),
-#  # no warranty, expressed or implied, is made by the USGS or the
-#  # U.S. Government as to the accuracy and functioning of the program and
-#  # related program material nor shall the fact of distribution constitute
-#  # any such warranty, and no responsibility is assumed by the USGS
-#  # in connection therewith.
+# Although this program has been used by the U.S. Geological Survey (USGS),
+# no warranty, expressed or implied, is made by the USGS or the
+# U.S. Government as to the accuracy and functioning of the program and
+# related program material nor shall the fact of distribution constitute
+# any such warranty, and no responsibility is assumed by the USGS
+# in connection therewith.
 #  #
-#  # Any use of trade, firm, or product names is for descriptive purposes only
-#  # and does not imply endorsement by the U.S. Government.
+# Any use of trade, firm, or product names is for descriptive purposes only
+# and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
-################################################################################
+##########################################################################
 #  ImageViewer widgets/toolbar implementation
-################################################################################
+##########################################################################
 import time
 import subprocess
 import socket
@@ -45,8 +45,8 @@ from vistrails.packages.spreadsheet.spreadsheet_cell import QCellWidget, QCellTo
 from vistrails.packages.spreadsheet.spreadsheet_controller import spreadsheetController
 from vistrails.core.packagemanager import get_package_manager
 
-if systemType in ['Microsoft', 'Windows']:
-    from PyQt4 import QAxContainer
+# if systemType in ['Microsoft', 'Windows']:
+#     from PyQt4 import QAxContainer
 
 import utils
 import pySAHM.utilities as utilities
@@ -55,27 +55,34 @@ import os
 import itertools
 
 import GenerateModuleDoc as GenModDoc
-doc_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "documentation.xml"))
+doc_file = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "documentation.xml"))
 GenModDoc.load_documentation(doc_file)
 
-################################################################################
+##########################################################################
+
 
 class ModelOutputViewer(SpreadsheetCell):
+
     """
     """
     __doc__ = GenModDoc.construct_module_doc('ModelOutputViewer')
     _input_ports = [("row", "(edu.utah.sci.vistrails.basic:Integer)", {'optional': True}),
-                    ("column", "(edu.utah.sci.vistrails.basic:Integer)", {'optional': True}),
-                    ('ModelWorkspace', '(edu.utah.sci.vistrails.basic:Directory)'),
+                    ("column", "(edu.utah.sci.vistrails.basic:Integer)",
+                     {'optional': True}),
+                    ('ModelWorkspace',
+                     '(edu.utah.sci.vistrails.basic:Directory)'),
                     ('InitialModelOutputDisplay', '(edu.utah.sci.vistrails.basic:String)',
                      {'entry_types': "['enum']",
                       'values': "[['Text', 'Response Curves', 'AUC', 'Calibration', 'Confusion', 'Residuals']]", 'optional': True,
-                      'defaults':'["AUC"]'}),
+                      'defaults': '["AUC"]'}),
                     ('Location', '(org.vistrails.vistrails.spreadsheet:CellLocation)',
-                                    {'optional':True})]
+                     {'optional': True})]
+
     @classmethod
     def provide_input_port_documentation(cls, port_name):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
+
     @classmethod
     def provide_output_port_documentation(cls, port_name):
         return GenModDoc.construct_port_doc(cls, port_name, 'out')
@@ -97,10 +104,11 @@ class ModelOutputViewer(SpreadsheetCell):
         Dispatch the display event to the spreadsheet with images and labels
 
         """
-        model_workspace = utils.get_relative_path(self.get_input("ModelWorkspace"), self)
+        model_workspace = utils.get_relative_path(
+            self.get_input("ModelWorkspace"), self)
 
         if self.has_input("ModelWorkspace") and \
-            utils.check_if_model_finished(model_workspace):
+                utils.check_if_model_finished(model_workspace):
 
             auc_graph = text_output = response_curves = calibration_graph = None
             confusion_graph = residuals_graph = variable_graph = model_label = initial_display = None
@@ -110,39 +118,56 @@ class ModelOutputViewer(SpreadsheetCell):
             model_dir_full = os.path.normcase(model_workspace)
             model_dir = os.path.split(model_dir_full)[1]
             model_name = model_dir[:model_dir.index('_')]
-            auc_graph_path = self.findFile(model_dir_full, '_modelEvalPlot.png')  #  os.path.join(model_dir_full, model_name + '_modelEvalPlot.jpg')
+            # os.path.join(model_dir_full, model_name + '_modelEvalPlot.jpg')
+            auc_graph_path = self.findFile(
+                model_dir_full, '_modelEvalPlot.png')
             if os.path.exists(auc_graph_path):
                 auc_graph = window.file_pool.make_local_copy(auc_graph_path)
 
-            text_output_path = self.findFile(model_dir_full, '_output.txt')  #  os.path.join(model_dir_full, model_name + '_output.txt')
+            # os.path.join(model_dir_full, model_name + '_output.txt')
+            text_output_path = self.findFile(model_dir_full, '_output.txt')
             if os.path.exists(text_output_path):
-                text_output = window.file_pool.make_local_copy(text_output_path)
+                text_output = window.file_pool.make_local_copy(
+                    text_output_path)
 
             response_directory = os.path.join(model_dir_full, 'responseCurves')
             if os.path.exists(response_directory):
                 responseCurveFiles = os.listdir(response_directory)
                 response_curves = []
                 for response_curve in responseCurveFiles:
-                    if response_curve != "Thumbs.db":  #  Windows grief
-                        response_curves.append(os.path.join(response_directory, response_curve))
+                    if response_curve != "Thumbs.db":  # Windows grief
+                        response_curves.append(
+                            os.path.join(response_directory, response_curve))
             else:
                 response_curves = []
 
-            calibration_graph_path = self.findFile(model_dir_full, '_CalibrationPlot.png')  #  os.path.join(model_dir_full, model_name + '_CalibrationPlot.jpg')
+            # os.path.join(model_dir_full, model_name + '_CalibrationPlot.jpg')
+            calibration_graph_path = self.findFile(
+                model_dir_full, '_CalibrationPlot.png')
             if os.path.exists(calibration_graph_path):
-                calibration_graph = window.file_pool.make_local_copy(calibration_graph_path)
+                calibration_graph = window.file_pool.make_local_copy(
+                    calibration_graph_path)
 
-            confusion_graph_path = self.findFile(model_dir_full, '.confusion.matrix.png')  #  os.path.join(model_dir_full, model_name + '.confusion.matrix.jpg')
+            # os.path.join(model_dir_full, model_name + '.confusion.matrix.jpg')
+            confusion_graph_path = self.findFile(
+                model_dir_full, '.confusion.matrix.png')
             if os.path.exists(confusion_graph_path):
-                confusion_graph = window.file_pool.make_local_copy(confusion_graph_path)
+                confusion_graph = window.file_pool.make_local_copy(
+                    confusion_graph_path)
 
-            residuals_graph_path = self.findFile(model_dir_full, '.resid.plot.png')  #  os.path.join(model_dir_full, model_name + '.resid.plot.jpg')
+            # os.path.join(model_dir_full, model_name + '.resid.plot.jpg')
+            residuals_graph_path = self.findFile(
+                model_dir_full, '.resid.plot.png')
             if os.path.exists(residuals_graph_path):
-                residuals_graph = window.file_pool.make_local_copy(residuals_graph_path)
+                residuals_graph = window.file_pool.make_local_copy(
+                    residuals_graph_path)
 
-            variable_imp_path = self.findFile(model_dir_full, '_variable.importance.png')  #  os.path.join(model_dir_full, model_name + '_variable.importance.jpg')
+            # os.path.join(model_dir_full, model_name + '_variable.importance.jpg')
+            variable_imp_path = self.findFile(
+                model_dir_full, '_variable.importance.png')
             if os.path.exists(variable_imp_path):
-                variable_graph = window.file_pool.make_local_copy(variable_imp_path)
+                variable_graph = window.file_pool.make_local_copy(
+                    variable_imp_path)
 
             model_label = model_dir.capitalize().replace('output', 'Output')
 
@@ -154,22 +179,25 @@ class ModelOutputViewer(SpreadsheetCell):
                 initial_display = 'AUC'
 
             self.cellWidget = self.displayAndWait(SAHMOutputViewerCellWidget, (auc_graph,
-                                                                          text_output,
-                                                                          response_curves,
-                                                                          calibration_graph,
-                                                                          confusion_graph,
-                                                                          residuals_graph,
-                                                                          variable_graph,
-                                                                          model_label,
-                                                                          initial_display))
+                                                                               text_output,
+                                                                               response_curves,
+                                                                               calibration_graph,
+                                                                               confusion_graph,
+                                                                               residuals_graph,
+                                                                               variable_graph,
+                                                                               model_label,
+                                                                               initial_display))
         else:
             fileValue = None
 
+
 class SAHMOutputViewerCellWidget(QCellWidget):
+
     """
     SAHMOutputViewerCellWidget is the widget that will display the various
     non spatial outputs from a model run
     """
+
     def __init__(self, parent=None):
         QCellWidget.__init__(self, parent)
 
@@ -186,7 +214,8 @@ class SAHMOutputViewerCellWidget(QCellWidget):
 
         self.gs_crv_graph = QtGui.QGraphicsScene()
         self.ui.gv_crv.setScene(self.gs_crv_graph)
-        QtCore.QObject.connect(self.ui.crv_combobox, QtCore.SIGNAL("currentIndexChanged(QString)"), self.changeResponseCurve)
+        QtCore.QObject.connect(self.ui.crv_combobox, QtCore.SIGNAL(
+            "currentIndexChanged(QString)"), self.changeResponseCurve)
         self.gs_crv_graph.wheelEvent = self.wheel_event_crv
 
         self.gs_auc_graph = QtGui.QGraphicsScene()
@@ -215,8 +244,8 @@ class SAHMOutputViewerCellWidget(QCellWidget):
 
         self.text_urlSrc = None
 
-
-        self.connect(self.ui.tabWidget, QtCore.SIGNAL('currentChanged(int)'), self.tabChanged)
+        self.connect(self.ui.tabWidget, QtCore.SIGNAL(
+            'currentChanged(int)'), self.tabChanged)
 
         self.layout().addWidget(self.Frame)
 
@@ -224,34 +253,35 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         active_cells = self.get_active_cells()
         for cell in active_cells:
             try:
-                responseCurve = [rc for rc in cell.response_curves if os.path.splitext(os.path.split(rc)[1])[0] == event][0]
+                responseCurve = [rc for rc in cell.response_curves if os.path.splitext(
+                    os.path.split(rc)[1])[0] == event][0]
                 pixmap_crv = QtGui.QPixmap(responseCurve)
                 max_size = self.getMaxSize(cell.ui.gv_crv)
                 scaled_pixmap_crv = pixmap_crv.scaled(max_size, max_size,
-                                            QtCore.Qt.KeepAspectRatio,
-                                            QtCore.Qt.SmoothTransformation)
+                                                      QtCore.Qt.KeepAspectRatio,
+                                                      QtCore.Qt.SmoothTransformation)
 
                 cell.images['crv_graph'] = [pixmap_crv,
-                                       scaled_pixmap_crv,
-                                       cell.gs_crv_graph,
-                                       cell.ui.gv_crv,
-                                       max_size]
+                                            scaled_pixmap_crv,
+                                            cell.gs_crv_graph,
+                                            cell.ui.gv_crv,
+                                            max_size]
                 cell.ui.crv_combobox.blockSignals(True)
-                curIndex = [i for i in range(cell.ui.crv_combobox.count()) if cell.ui.crv_combobox.itemText(i) == event][0]
+                curIndex = [i for i in range(
+                    cell.ui.crv_combobox.count()) if cell.ui.crv_combobox.itemText(i) == event][0]
                 cell.ui.crv_combobox.setCurrentIndex(curIndex)
                 cell.ui.crv_combobox.blockSignals(False)
             except IndexError:
                 cell.images['crv_graph'] = [QtGui.QPixmap(),
-                                       QtGui.QPixmap(),
-                                       cell.gs_crv_graph,
-                                       cell.ui.gv_crv,
-                                       100]
+                                            QtGui.QPixmap(),
+                                            cell.gs_crv_graph,
+                                            cell.ui.gv_crv,
+                                            100]
 
                 cell.ui.crv_combobox.blockSignals(True)
                 cell.ui.crv_combobox.setCurrentIndex(-1)
                 cell.ui.crv_combobox.blockSignals(False)
             cell.view_current()
-
 
     def tabChanged(self):
         active_cells = self.get_active_cells()
@@ -273,14 +303,14 @@ class SAHMOutputViewerCellWidget(QCellWidget):
             pixmap = QtGui.QPixmap(auc_graph.name)
             max_size = self.getMaxSize(self.ui.gv_auc)
             scaled_pixmap = pixmap.scaled(max_size, max_size,
-                                            QtCore.Qt.KeepAspectRatio,
-                                            QtCore.Qt.SmoothTransformation)
+                                          QtCore.Qt.KeepAspectRatio,
+                                          QtCore.Qt.SmoothTransformation)
 
             self.images['auc_graph'] = [pixmap,
-                                       scaled_pixmap,
-                                       self.gs_auc_graph,
-                                       self.ui.gv_auc,
-                                       max_size]
+                                        scaled_pixmap,
+                                        self.gs_auc_graph,
+                                        self.ui.gv_auc,
+                                        max_size]
 
         self.ui.crv_combobox.clear()
         curindex = 0
@@ -298,62 +328,61 @@ class SAHMOutputViewerCellWidget(QCellWidget):
             except:
                 pass
 
-
-
         if calibration_graph:
             pixmap_cal = QtGui.QPixmap(calibration_graph.name)
             max_size = self.getMaxSize(self.ui.gv_calibration)
             scaled_pixmap_cal = pixmap_cal.scaled(max_size, max_size,
-                                            QtCore.Qt.KeepAspectRatio,
-                                            QtCore.Qt.SmoothTransformation)
+                                                  QtCore.Qt.KeepAspectRatio,
+                                                  QtCore.Qt.SmoothTransformation)
 
             self.images['calibration_graph'] = [pixmap_cal,
-                                       scaled_pixmap_cal,
-                                       self.gs_calibration_graph,
-                                       self.ui.gv_calibration,
-                                       max_size]
+                                                scaled_pixmap_cal,
+                                                self.gs_calibration_graph,
+                                                self.ui.gv_calibration,
+                                                max_size]
         if confusion_graph:
             pixmap_con = QtGui.QPixmap(confusion_graph.name)
             max_size = self.getMaxSize(self.ui.gv_confusion)
             scaled_pixmap_con = pixmap_con.scaled(max_size, max_size,
-                                            QtCore.Qt.KeepAspectRatio,
-                                            QtCore.Qt.SmoothTransformation)
+                                                  QtCore.Qt.KeepAspectRatio,
+                                                  QtCore.Qt.SmoothTransformation)
 
             self.images['confusion_graph'] = [pixmap_con,
-                                       scaled_pixmap_con,
-                                       self.gs_confusion_graph,
-                                       self.ui.gv_confusion,
-                                       max_size]
+                                              scaled_pixmap_con,
+                                              self.gs_confusion_graph,
+                                              self.ui.gv_confusion,
+                                              max_size]
 
         if residuals_graph:
             pixmap_res = QtGui.QPixmap(residuals_graph.name)
             max_size = self.getMaxSize(self.ui.gv_residuals)
             scaled_pixmap_res = pixmap_res.scaled(max_size, max_size,
-                                            QtCore.Qt.KeepAspectRatio,
-                                            QtCore.Qt.SmoothTransformation)
+                                                  QtCore.Qt.KeepAspectRatio,
+                                                  QtCore.Qt.SmoothTransformation)
 
             self.images['residuals_graph'] = [pixmap_res,
-                                       scaled_pixmap_res,
-                                       self.gs_residuals_graph,
-                                       self.ui.gv_residuals,
-                                       max_size]
+                                              scaled_pixmap_res,
+                                              self.gs_residuals_graph,
+                                              self.ui.gv_residuals,
+                                              max_size]
         if variable_graph:
             pixmap_res = QtGui.QPixmap(variable_graph.name)
             max_size = self.getMaxSize(self.ui.gv_variable)
             scaled_pixmap_res = pixmap_res.scaled(max_size, max_size,
-                                            QtCore.Qt.KeepAspectRatio,
-                                            QtCore.Qt.SmoothTransformation)
+                                                  QtCore.Qt.KeepAspectRatio,
+                                                  QtCore.Qt.SmoothTransformation)
 
             self.images['variable_graph'] = [pixmap_res,
-                                       scaled_pixmap_res,
-                                       self.gs_variable_graph,
-                                       self.ui.gv_variable,
-                                       max_size]
+                                             scaled_pixmap_res,
+                                             self.gs_variable_graph,
+                                             self.ui.gv_variable,
+                                             max_size]
 
         self.text_urlSrc = QtCore.QUrl.fromLocalFile(text_output.name)
         self.text_browser.load(self.text_urlSrc)
 
-        choices = ['Text', 'Response Curves', 'AUC', 'Calibration', 'Confusion', 'Residuals', 'Variable Importance']
+        choices = ['Text', 'Response Curves', 'AUC', 'Calibration',
+                   'Confusion', 'Residuals', 'Variable Importance']
         selected_index = choices.index(inital_display)
         self.ui.tabWidget.setCurrentIndex(selected_index)
 
@@ -371,7 +400,8 @@ class SAHMOutputViewerCellWidget(QCellWidget):
     def view_current(self):
         for k, v in self.images.iteritems():
             size_img = v[1].size()
-            wth, hgt = QtCore.QSize.width(size_img), QtCore.QSize.height(size_img)
+            wth, hgt = QtCore.QSize.width(
+                size_img), QtCore.QSize.height(size_img)
             v[2].clear()
             v[2].setSceneRect(0, 0, wth, hgt)
             v[2].addPixmap(v[1])
@@ -387,18 +417,22 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         self.wheel_event(event, 'crv_graph', QtCore.Qt.SmoothTransformation)
 
     def wheel_event_calibration(self, event):
-        self.wheel_event(event, 'calibration_graph', QtCore.Qt.SmoothTransformation)
+        self.wheel_event(
+            event, 'calibration_graph', QtCore.Qt.SmoothTransformation)
 
     def wheel_event_confusion(self, event):
-        self.wheel_event(event, 'confusion_graph', QtCore.Qt.SmoothTransformation)
+        self.wheel_event(
+            event, 'confusion_graph', QtCore.Qt.SmoothTransformation)
 
     def wheel_event_residuals(self, event):
-        self.wheel_event(event, 'residuals_graph', QtCore.Qt.SmoothTransformation)
+        self.wheel_event(
+            event, 'residuals_graph', QtCore.Qt.SmoothTransformation)
 
     def wheel_event_variable(self, event):
-        self.wheel_event(event, 'variable_graph', QtCore.Qt.SmoothTransformation)
+        self.wheel_event(
+            event, 'variable_graph', QtCore.Qt.SmoothTransformation)
 
-    def wheel_event (self, event, id, transform):
+    def wheel_event(self, event, id, transform):
         numDegrees = event.delta() / 8
         numSteps = numDegrees / 15.0
 #        self.zoom(numSteps, self.images[id], transform)
@@ -406,10 +440,9 @@ class SAHMOutputViewerCellWidget(QCellWidget):
 
         active_cells = self.get_active_cells()
         for cell in active_cells:
-#            if cell != self:
+            #            if cell != self:
             cell.zoom(numSteps, cell.images[id], transform)
             cell.view_current()
-
 
     def zoom(self, step, images, transform):
         zoom_step = 0.06
@@ -418,12 +451,8 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         h = images[1].size().height()
         w, h = w * (1 + zoom_step * step), h * (1 + zoom_step * step)
         images[1] = images[0].scaled(w, h,
-                                            QtCore.Qt.KeepAspectRatio,
-                                            transform)
-
-
-
-
+                                     QtCore.Qt.KeepAspectRatio,
+                                     transform)
 
     def saveToPNG(self, filename):
         """ saveToPNG(filename: str) -> bool
@@ -460,7 +489,6 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         painter.drawPixmap(0, 0, pixmap)
         painter.end()
 
-
     def findSheetTabWidget(self):
         """ findSheetTabWidget() -> QTabWidget
         Find and return the sheet tab widget
@@ -495,7 +523,8 @@ class SAHMOutputViewerCellWidget(QCellWidget):
     def get_allCellWidgets(self):
         sheet = self.findSheetTabWidget()
         if sheet:
-            all_cells = list(itertools.product(range(sheet.getDimension()[0]), range(sheet.getDimension()[1])))
+            all_cells = list(itertools.product(
+                range(sheet.getDimension()[0]), range(sheet.getDimension()[1])))
             return self.getSAHMOutputsInCellList(sheet, all_cells)
         return []
 
@@ -507,12 +536,15 @@ class SAHMOutputViewerCellWidget(QCellWidget):
         else:
             return [self]
 
+
 class ImageViewerFitToCellAction(QtGui.QAction):
+
     """
     ImageViewerFitToCellAction is the action to stretch the image to
     fit inside a cell
 
     """
+
     def __init__(self, parent=None):
         """ ImageViewerFitToCellAction(parent: QWidget)
                                        -> ImageViewerFitToCellAction
@@ -547,11 +579,14 @@ class ImageViewerFitToCellAction(QtGui.QAction):
         (sheet, row, col, cellWidget) = info
         self.setChecked(cellWidget.label.hasScaledContents())
 
+
 class ImageViewerSaveAction(QtGui.QAction):
+
     """
     ImageViewerSaveAction is the action to save the image to file
 
     """
+
     def __init__(self, parent=None):
         """ ImageViewerSaveAction(parent: QWidget) -> ImageViewerSaveAction
         Setup the image, status tip, etc. of the action
@@ -586,11 +621,14 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
+
 class Ui_Frame(object):
+
     def setupUi(self, Frame):
         Frame.setObjectName(_fromUtf8("Frame"))
         Frame.resize(546, 402)
-        Frame.setWindowTitle(QtGui.QApplication.translate("Frame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
+        Frame.setWindowTitle(QtGui.QApplication.translate(
+            "Frame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
         Frame.setFrameShape(QtGui.QFrame.StyledPanel)
         Frame.setFrameShadow(QtGui.QFrame.Raised)
         self.horizontalLayout = QtGui.QHBoxLayout(Frame)
@@ -609,7 +647,8 @@ class Ui_Frame(object):
         self.text_output_layout.setMargin(0)
         self.text_output_layout.setObjectName(_fromUtf8("text_output_layout"))
         self.tabWidget.addTab(self.text_output, _fromUtf8(""))
-        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.text_output), QtGui.QApplication.translate("Frame", "Textual model output ", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.text_output), QtGui.QApplication.translate(
+            "Frame", "Textual model output ", None, QtGui.QApplication.UnicodeUTF8))
 
 #        self.response_curves = QtGui.QWidget()
 #        self.response_curves.setObjectName(_fromUtf8("response_curves"))
@@ -617,8 +656,8 @@ class Ui_Frame(object):
 #        self.response_curves_layout.setSpacing(0)
 #        self.response_curves_layout.setMargin(0)
 #        self.response_curves_layout.setObjectName(_fromUtf8("response_curves_layout"))
-#  #        self.response_combobox = QtGui.QComboBox(self.response_curves)
-#  #        self.response_curves_layout.addWidget(self.response_combobox)
+# self.response_combobox = QtGui.QComboBox(self.response_curves)
+# self.response_curves_layout.addWidget(self.response_combobox)
 #        self.gv_response = QtGui.QGraphicsView(self.response_curves)
 #        self.gv_response.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
 #        self.gv_response.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
@@ -633,12 +672,14 @@ class Ui_Frame(object):
         self.horizontalLayout_4crv = QtGui.QVBoxLayout(self.crv)
         self.horizontalLayout_4crv.setSpacing(0)
         self.horizontalLayout_4crv.setMargin(0)
-        self.horizontalLayout_4crv.setObjectName(_fromUtf8("horizontalLayout_4crv"))
+        self.horizontalLayout_4crv.setObjectName(
+            _fromUtf8("horizontalLayout_4crv"))
         self.crv_combobox = QtGui.QComboBox(self.crv)
         self.horizontalLayout_4crv.addWidget(self.crv_combobox)
         self.gv_crv = QtGui.QGraphicsView(self.crv)
         self.gv_crv.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
-        self.gv_crv.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        self.gv_crv.setTransformationAnchor(
+            QtGui.QGraphicsView.AnchorUnderMouse)
         self.gv_crv.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
         self.gv_crv.setObjectName(_fromUtf8("gv_crv"))
         self.horizontalLayout_4crv.addWidget(self.gv_crv)
@@ -652,12 +693,14 @@ class Ui_Frame(object):
         self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
         self.gv_auc = QtGui.QGraphicsView(self.auc)
         self.gv_auc.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
-        self.gv_auc.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        self.gv_auc.setTransformationAnchor(
+            QtGui.QGraphicsView.AnchorUnderMouse)
         self.gv_auc.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
         self.gv_auc.setObjectName(_fromUtf8("gv_auc"))
         self.horizontalLayout_4.addWidget(self.gv_auc)
         self.tabWidget.addTab(self.auc, _fromUtf8(""))
-        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.auc), QtGui.QApplication.translate("Frame", "Area under the curve (AUC)", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.auc), QtGui.QApplication.translate(
+            "Frame", "Area under the curve (AUC)", None, QtGui.QApplication.UnicodeUTF8))
 
         self.calibration = QtGui.QWidget()
         self.calibration.setObjectName(_fromUtf8("calibration"))
@@ -667,12 +710,15 @@ class Ui_Frame(object):
         self.horizontalLayout_5.setObjectName(_fromUtf8("horizontalLayout_5"))
         self.gv_calibration = QtGui.QGraphicsView(self.calibration)
         self.gv_calibration.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
-        self.gv_calibration.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
-        self.gv_calibration.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        self.gv_calibration.setTransformationAnchor(
+            QtGui.QGraphicsView.AnchorUnderMouse)
+        self.gv_calibration.setResizeAnchor(
+            QtGui.QGraphicsView.AnchorUnderMouse)
         self.gv_calibration.setObjectName(_fromUtf8("gv_calibration"))
         self.horizontalLayout_5.addWidget(self.gv_calibration)
         self.tabWidget.addTab(self.calibration, _fromUtf8(""))
-        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.calibration), QtGui.QApplication.translate("Frame", "Calibration plot", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.calibration), QtGui.QApplication.translate(
+            "Frame", "Calibration plot", None, QtGui.QApplication.UnicodeUTF8))
 
         self.confusion = QtGui.QWidget()
         self.confusion.setObjectName(_fromUtf8("confusion"))
@@ -682,12 +728,14 @@ class Ui_Frame(object):
         self.horizontalLayout_6.setObjectName(_fromUtf8("horizontalLayout_6"))
         self.gv_confusion = QtGui.QGraphicsView(self.confusion)
         self.gv_confusion.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
-        self.gv_confusion.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        self.gv_confusion.setTransformationAnchor(
+            QtGui.QGraphicsView.AnchorUnderMouse)
         self.gv_confusion.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
         self.gv_confusion.setObjectName(_fromUtf8("gv_confusion"))
         self.horizontalLayout_6.addWidget(self.gv_confusion)
         self.tabWidget.addTab(self.confusion, _fromUtf8(""))
-        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.confusion), QtGui.QApplication.translate("Frame", "Confusion matrix", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.confusion), QtGui.QApplication.translate(
+            "Frame", "Confusion matrix", None, QtGui.QApplication.UnicodeUTF8))
 
         self.residuals = QtGui.QWidget()
         self.residuals.setObjectName(_fromUtf8("residuals"))
@@ -697,7 +745,8 @@ class Ui_Frame(object):
         self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
         self.gv_residuals = QtGui.QGraphicsView(self.residuals)
         self.gv_residuals.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
-        self.gv_residuals.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        self.gv_residuals.setTransformationAnchor(
+            QtGui.QGraphicsView.AnchorUnderMouse)
         self.gv_residuals.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
         self.gv_residuals.setObjectName(_fromUtf8("gv_residuals"))
         self.horizontalLayout_7.addWidget(self.gv_residuals)
@@ -711,7 +760,8 @@ class Ui_Frame(object):
         self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
         self.gv_variable = QtGui.QGraphicsView(self.variable)
         self.gv_variable.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
-        self.gv_variable.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        self.gv_variable.setTransformationAnchor(
+            QtGui.QGraphicsView.AnchorUnderMouse)
         self.gv_variable.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
         self.gv_variable.setObjectName(_fromUtf8("gv_variable"))
         self.horizontalLayout_7.addWidget(self.gv_variable)
@@ -722,28 +772,38 @@ class Ui_Frame(object):
         QtCore.QMetaObject.connectSlotsByName(Frame)
 
     def retranslateUi(self, Frame):
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.text_output), QtGui.QApplication.translate("Frame", "Text Results", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.text_output), QtGui.QApplication.translate(
+            "Frame", "Text Results", None, QtGui.QApplication.UnicodeUTF8))
 #        self.tabWidget.setTabText(self.tabWidget.indexOf(self.response_curves), QtGui.QApplication.translate("Frame", "Response", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.crv), QtGui.QApplication.translate("Frame", "Response Curves", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.auc), QtGui.QApplication.translate("Frame", "AUC", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.calibration), QtGui.QApplication.translate("Frame", "Calibration", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.confusion), QtGui.QApplication.translate("Frame", "Confusion", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.residuals), QtGui.QApplication.translate("Frame", "Residuals", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.variable), QtGui.QApplication.translate("Frame", "Variable Importance", None, QtGui.QApplication.UnicodeUTF8))
-
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.crv), QtGui.QApplication.translate(
+            "Frame", "Response Curves", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.auc), QtGui.QApplication.translate(
+            "Frame", "AUC", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.calibration), QtGui.QApplication.translate(
+            "Frame", "Calibration", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.confusion), QtGui.QApplication.translate(
+            "Frame", "Confusion", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.residuals), QtGui.QApplication.translate(
+            "Frame", "Residuals", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.variable), QtGui.QApplication.translate(
+            "Frame", "Variable Importance", None, QtGui.QApplication.UnicodeUTF8))
 
 
 class ResponseCurveExplorer(SpreadsheetCell):
+
     """
     """
     __doc__ = GenModDoc.construct_module_doc('ResponseCurveExplorer')
     _input_ports = [('ModelWorkspaces', '(edu.utah.sci.vistrails.basic:Directory)'),
-                    ('run_name_info', '(gov.usgs.sahm:OutputNameInfo:Other)', {'optional':True}),
+                    ('run_name_info', '(gov.usgs.sahm:OutputNameInfo:Other)',
+                     {'optional': True}),
                     ('Location', '(org.vistrails.vistrails.spreadsheet:CellLocation)',
-                                    {'optional':True})]
+                     {'optional': True})]
+
     @classmethod
     def provide_input_port_documentation(cls, port_name):
         return GenModDoc.construct_port_doc(cls, port_name, 'in')
+
     @classmethod
     def provide_output_port_documentation(cls, port_name):
         return GenModDoc.construct_port_doc(cls, port_name, 'out')
@@ -755,10 +815,11 @@ class ResponseCurveExplorer(SpreadsheetCell):
         """
         model_workspaces = self.get_input_list("ModelWorkspaces")
         if len(model_workspaces) < 1 or len(model_workspaces) > 4:
-            raise RuntimeError('Between 1 and 4 ModelWorkspaces must be supplied!')
-         
-        #TODO add in check to make sure all models finished successfully
-        #if still running raise module suspended   
+            raise RuntimeError(
+                'Between 1 and 4 ModelWorkspaces must be supplied!')
+
+        # TODO add in check to make sure all models finished successfully
+        # if still running raise module suspended
         workspaces = []
         for model_workspace in model_workspaces:
             rel_workspace = utils.get_relative_path(model_workspace, self)
@@ -782,7 +843,6 @@ class ResponseCurveExplorer(SpreadsheetCell):
         script = "ResponseCurveShinyApp.r"
         cmd = utils.gen_R_cmd(script, args)
 
-
         if self.has_input('run_name_info'):
             runinfo = self.force_get_input('run_name_info')
             subfolder = runinfo.contents.get('subfolder', "")
@@ -791,7 +851,8 @@ class ResponseCurveExplorer(SpreadsheetCell):
             subfolders = []
             runnames = []
             for outdname in workspaces:
-                _subfolder, _runname = utils.get_previous_run_info(os.path.split(outdname)[0])
+                _subfolder, _runname = utils.get_previous_run_info(
+                    os.path.split(outdname)[0])
                 subfolders.append(_subfolder)
                 runnames.append(_runname)
 
@@ -804,20 +865,21 @@ class ResponseCurveExplorer(SpreadsheetCell):
             else:
                 runname = ''
 
-
-        outdname = os.path.join(utils.getrootdir(), subfolder, "ResponseCurveExplorerOutput")
+        outdname = os.path.join(
+            utils.getrootdir(), subfolder, "ResponseCurveExplorerOutput")
         if not os.path.exists(outdname):
             os.makedirs(outdname)
 
-        outdname = utils.mknextdir(prefix="ResponseCurveExplorerOutput", skipSequence=False, directory=os.path.join(utils.getrootdir(), subfolder))
+        outdname = utils.mknextdir(prefix="ResponseCurveExplorerOutput",
+                                   skipSequence=False, directory=os.path.join(utils.getrootdir(), subfolder))
         outfname = utils.mknextfile("ResponseCurveExplorer_stdout", suffix=".txt", directory=outdname,
-                                   runname=runname)
+                                    runname=runname)
         errfname = utils.mknextfile("ResponseCurveExplorer_stderr", suffix=".txt", directory=outdname,
-                                   runname=runname)
+                                    runname=runname)
 
-
-        utils.writetolog("\nStarting processing of " + script , True)
-        utils.writetolog("    command used: \n" + utilities.convert_list_to_cmd_str(cmd), False, False)
+        utils.writetolog("\nStarting processing of " + script, True)
+        utils.writetolog(
+            "    command used: \n" + utilities.convert_list_to_cmd_str(cmd), False, False)
 
         stdErrFile = open(errfname, 'a')
         stdErrFile.seek(0, os.SEEK_END)
@@ -827,7 +889,7 @@ class ResponseCurveExplorer(SpreadsheetCell):
         p = subprocess.Popen(cmd, stderr=stdErrFile, stdout=stdOutFile)
 
         start_time = time.clock()
-        CUTOFF_SECONDS = 300  #  5min
+        CUTOFF_SECONDS = 300  # 5min
 
         while True:
             with open(outfname) as stdout_f:
@@ -841,7 +903,8 @@ class ResponseCurveExplorer(SpreadsheetCell):
             with open(errfname) as stderr_f:
                 stderr = stderr_f.read()
                 if "Error" in stderr:
-                    raise RuntimeError("Running Shiny App resulted in an Error:\n{}".format(stderr))
+                    raise RuntimeError(
+                        "Running Shiny App resulted in an Error:\n{}".format(stderr))
 
                 else:
                     listening = stderr.split("Listening on ")
@@ -854,10 +917,12 @@ class ResponseCurveExplorer(SpreadsheetCell):
             if time.clock() - start_time > CUTOFF_SECONDS:
                 msg = "Shiny App taking longer than expected to load!.\n"
                 msg += "The R kernel generating the Shiny app will continue to run in the background.\n"
-                msg += "Manually monitor the contents of {\n}\tfor the url which you can then open in a browser.".format(errfname)
+                msg += "Manually monitor the contents of {\n}\tfor the url which you can then open in a browser.".format(
+                    errfname)
                 raise RuntimeError(msg)
 
-        self.cellWidget = self.displayAndWait(responseCurveExplorerWidger, (p, url, None))
+        self.cellWidget = self.displayAndWait(
+            responseCurveExplorerWidger, (p, url, None))
 
 
 class responseCurveExplorerWidger(WebViewCellWidget):
@@ -873,6 +938,7 @@ class responseCurveExplorerWidger(WebViewCellWidget):
         """
         self.p.kill()
         WebViewCellWidget.deleteLater(self)
+
 
 def port_occupied(url, port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
