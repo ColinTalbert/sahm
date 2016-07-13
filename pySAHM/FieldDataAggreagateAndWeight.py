@@ -137,8 +137,8 @@ class FieldDataQuery(object):
                 raise RuntimeError, "The EPSG code provided, " + str(self.epsg) + ", is not known to the current installation of GDAL."
 
         if self.logger is None:
-            self.logger = utilities.logger(outDir, self.verbose)
-        self.writetolog = self.logger.writetolog
+            self.logger = utilities.Logger(outDir, self.verbose)
+        self.writetolog = self.logger.write_to_log
 
 
     def processCSV(self):

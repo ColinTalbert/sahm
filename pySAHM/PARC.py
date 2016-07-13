@@ -82,12 +82,12 @@ def main(args_in):
     our_PARC.inputs_CSV = options.inputs_CSV
     our_PARC.multicores = options.multicore
     our_PARC.ignoreNonOverlap = options.ignoreNonOverlap
-    our_PARC.logger = utilities.logger(os.path.join(our_PARC.out_dir,
+    our_PARC.logger = utilities.Logger(os.path.join(our_PARC.out_dir,
                                                     "logfile.txt"), True)
     our_PARC.parcFiles()
 
 class PARC(object):
-    '''
+    """
      PARC:  Project, Aggregate, Resample, Clip
       The workflow on this beast is as follows:
             For each dataset
@@ -99,7 +99,7 @@ class PARC(object):
                 setting.
             Step 2: Aggregate the tmpRaster to have the same origin,
                 cell size and extent as our template.
-    '''
+    """
 
     def __init__(self):
         #  instance level variables
@@ -120,22 +120,22 @@ class PARC(object):
         self.pool_processes = []
 
     def parcFiles(self):
-        '''
+        """
             1: Parse the inputs_CSV into our inputs list
             2: Make sure all of our instance variables are good and proper
             3: Loop through the list of sourceImages and PARC each one.
             4: The outputs will be stored in the output directory
             5: Additionally an output CSV will be produced that lists the
             inputs, parameters used, and outputs
-        '''
+        """
 
-        self.logger.writetolog("Starting PARC", True, True)
+        self.logger.write_to_log("Starting PARC", True, True)
         self.validateArgs()
-        self.logger.writetolog("    Arguments validated successfully",
-                               True, True)
+        self.logger.write_to_log("    Arguments validated successfully",
+                                 True, True)
         self.processFiles()
 
-        self.logger.writetolog("Finished PARC", True, True)
+        self.logger.write_to_log("Finished PARC", True, True)
 
     def processFiles(self):
         self.process_pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
@@ -168,12 +168,12 @@ class PARC(object):
                             " already exists, but was derived from a different source."
 
                         msg += " renaming output to {}".format(out_file)
-                        self.logger.writetolog(msg, True, True)
+                        self.logger.write_to_log(msg, True, True)
                         process_queue.append(self.gen_singlePARC_thread(image, out_file))
                     else:
                         msg = "The output " + in_fname + \
                             " already exists. \tSkipping this file."
-                        self.logger.writetolog(msg, True, True)
+                        self.logger.write_to_log(msg, True, True)
                 except:
                     #  we bombed trying to open the outFile with gdal. Lets rerun it.
                     process_queue.append(self.gen_singlePARC_thread(image, out_file))
@@ -230,7 +230,7 @@ class PARC(object):
         pyEx = sys.executable
         command_arr = [pyEx, executable] + args
         command = ' '.join(command_arr)
-        self.logger.writetolog(command, False, False)
+        self.logger.write_to_log(command, False, False)
         return command_arr
 
     def log_result(self, result):
@@ -243,7 +243,7 @@ class PARC(object):
         gdal.UseExceptions()
 
         short_name = os.path.split(os.path.splitext(source[0])[0])[1]
-        self.logger.writetolog("    Starting processing of " + source[0])
+        self.logger.write_to_log("    Starting processing of " + source[0])
         source_raster = SpatialUtilities.SAHMRaster(source[0])
 
         gdal_type = self.get_gdal_type_from_string(source[2])
@@ -259,7 +259,7 @@ class PARC(object):
         if cell_ratio > 0.5:
             #  The source cell size is close enough to our template cell size,
             #  or smaller so that all we need to do is reproject and resample.
-            self.logger.writetolog("  cell ratio > .5: reprojecting and resampling to template parameters only")
+            self.logger.write_to_log("  cell ratio > .5: reprojecting and resampling to template parameters only")
             SpatialUtilities.intermediaryReprojection(source_raster,
                             self.templateRaster, dest, gdal_type, True)
         else:
@@ -290,12 +290,12 @@ class PARC(object):
                 pass
 
     def get_gdal_type_from_string(self, gdal_gra_description):
-        '''Returns a gdal resampling type based on the string passed
+        """Returns a gdal resampling type based on the string passed
         gdal_GRA_description must be one of: nearestneighbor, bilinear,
         cubic, cubicspline, or lanczos.
         Otherwise will default and return nearestneighbor
         Note gdal_GRA_description is not case sensitive
-        '''
+        """
         gdal_type = None
         if gdal_gra_description.lower() == "nearestneighbor":
             gdal_type = gdalconst.GRA_NearestNeighbour
@@ -308,8 +308,8 @@ class PARC(object):
         if gdal_gra_description.lower() == "lanczos":
             gdal_type = gdalconst.GRA_Lanczos
         if gdal_type == None:
-            self.logger.writetolog("   Specified resampling method ("
-                + gdal_gra_description + ") not one of 'NearestNeighbor', " +
+            self.logger.write_to_log("   Specified resampling method ("
+                                     + gdal_gra_description + ") not one of 'NearestNeighbor', " +
                 "'Bilinear', 'Cubic', 'CubicSpline', or 'Lanczos'.  " +
                 "Defaulting to 'NearestNeighbor'")
             gdal_type = gdalconst.GRA_NearestNeighbour
@@ -495,8 +495,8 @@ class PARC(object):
             raise utilities.TrappedError("Specified Output directory " + self.out_dir + " is not a directory")
 
         if self.logger is None:
-            self.logger = utilities.logger(self.out_dir, self.verbose)
-        self.writetolog = self.logger.writetolog
+            self.logger = utilities.Logger(self.out_dir, self.verbose)
+        self.writetolog = self.logger.write_to_log
 
         #  Validate template image.
         if self.template is None:

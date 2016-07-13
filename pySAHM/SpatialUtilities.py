@@ -58,9 +58,9 @@ gdal.AllRegister()
 
 class SAHMRaster():
 
-    '''An extension to a GDAL raster that contains convenience methods for
+    """An extension to a GDAL raster that contains convenience methods for
     some of the operations we use use.
-    '''
+    """
 
     def __init__(self, rasterFile):
         self.source = rasterFile
@@ -269,11 +269,11 @@ class SAHMRaster():
         return self.getPixelValueFromIndex(col, row)
 
     def get_block_bbox(self, bbox, win_xsize=None, win_ysize=None, band=1):
-        '''returns a chunk of data specified with a bbox
+        """returns a chunk of data specified with a bbox
         bbox format is [minX, minY, maxX, maxY]
         the optional win size variables allow for downsampling of data returned
         nodata values are masked off
-        '''
+        """
         leftcol, bottomrow = self.convertCoordsToColRow(bbox[0], bbox[1])
         rightcol, toprow = self.convertCoordsToColRow(bbox[2], bbox[3])
 
@@ -282,8 +282,8 @@ class SAHMRaster():
                              win_xsize, win_ysize, band)
 
     def get_bbox_data_bounds(self, bbox):
-        '''returns a bbox of the pixels returned from a get_block_bbox call
-        '''
+        """returns a bbox of the pixels returned from a get_block_bbox call
+        """
         leftcol, bottomrow = self.convertCoordsToColRow(bbox[0], bbox[1])
         rightcol, toprow = self.convertCoordsToColRow(bbox[2], bbox[3])
 
@@ -298,10 +298,10 @@ class SAHMRaster():
     def getBlock(self, col, row, numCols, numRows,
                  win_xsize=None, win_ysize=None,
                  band=1):
-        '''Gets a specified chunk of data from our raster
+        """Gets a specified chunk of data from our raster
         the optional win size variables allow for downsampling of data returned
         nodata values are masked off
-        '''
+        """
         if type(band) == list:
             from PIL import Image
             r_block = self.getBlock(
@@ -332,8 +332,8 @@ class SAHMRaster():
         return ndMask
 
     def putBlock(self, data, col, row, band=1):
-        '''this only works on rasters we've opened for writing
-        '''
+        """this only works on rasters we've opened for writing
+        """
         try:
             data = np.where(data.mask, self.NoData, data)
         except:
@@ -359,8 +359,8 @@ class SAHMRaster():
                 yield self.getBlock(j, i, numCols, numRows, band=band)
 
     def num_blocks(self):
-        '''returns an integer with the current number of blocks
-        '''
+        """returns an integer with the current number of blocks
+        """
         rows = int(self.height)
         cols = int(self.width)
         return int(len(range(0, rows, self.blockSize))) * int(len(range(0, cols, self.blockSize)))
@@ -544,9 +544,9 @@ def transformPoint(x, y, from_srs, to_srs):
 
 
 def isRaster(filePath):
-    '''Verifies that a passed file and path is recognized by
+    """Verifies that a passed file and path is recognized by
     GDAL as a raster file.
-    '''
+    """
     try:
         dataset = gdal.Open(filePath, gdalconst.GA_ReadOnly)
         if dataset is None:
@@ -582,9 +582,9 @@ def extentMatch(raster1, raster2):
 
 
 def defaultNoData(GDALdatatype, signedByte=False):
-    '''returns a reasonable default NoData value for a given
+    """returns a reasonable default NoData value for a given
     GDAL data type.
-    '''
+    """
     if signedByte:
         return -128
 
@@ -604,8 +604,8 @@ def defaultNoData(GDALdatatype, signedByte=False):
 
 
 def GDALToNPDataType(GDALdatatype, signedByte=False):
-    '''returns the coresponding numpy data time for a gdal data type
-    '''
+    """returns the coresponding numpy data time for a gdal data type
+    """
     if signedByte:
         return np.int8
 
@@ -625,10 +625,10 @@ def GDALToNPDataType(GDALdatatype, signedByte=False):
 
 
 def get_raster_minmax(filename):
-    '''return the min and max value from a raster.
+    """return the min and max value from a raster.
     This is not nearly as easy as it should be.
     This routine tries a variety of strategies to get these
-    '''
+    """
     dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
     band = dataset.GetRasterBand(1)
     nodata = get_nd_val(filename)
@@ -740,11 +740,11 @@ def all_nodata(raster_fname):
 def intermediaryReprojection(sourceRaster, templateRaster, outRasterFName,
                              resamplingType, matchTemplateCellSize=False,
                              create_args=None):
-    '''Reprojects the sourceRaster into the templateRaster projection, datum
+    """Reprojects the sourceRaster into the templateRaster projection, datum
     and extent.  The output cell size is determined to be the closest dimension
     to the sourceRaster cell size that will evenly go into the template raster
     cell size
-    '''
+    """
     outputFile = SAHMRaster(outRasterFName)
     outputFile.getParams(templateRaster.ds)
     outputFile.gt = templateRaster.gt
@@ -786,27 +786,27 @@ def intermediaryReprojection(sourceRaster, templateRaster, outRasterFName,
 
 
 def average_nparrays(arrays):
-    '''return the average of a list of np arrays
+    """return the average of a list of np arrays
     These arrays must be 2d and have the same shape
-    '''
+    """
     dstack = np.ma.dstack(arrays)
     return np.ma.mean(dstack, axis=2)
 
 
 def sum_nparrays(arrays):
-    '''return the sum of a list of np arrays
+    """return the sum of a list of np arrays
     These arrays must be 2d and have the same shape
-    '''
+    """
     dstack = np.ma.dstack(arrays)
     return np.ma.sum(dstack, axis=2)
 
 
 def average_geotifs(raster_fnames, outfname,
                     create_args=[], verbose=False, op=average_nparrays):
-    '''takes a list of raster fnames and saves
+    """takes a list of raster fnames and saves
     the average of their pixel values to a new raster
     with the outfname
-    '''
+    """
     #  load our rasters
     #  we end up with a list of data iterators on each
     rasters = []

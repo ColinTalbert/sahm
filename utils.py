@@ -35,7 +35,9 @@
 #
 ###############################################################################
 
-import os, sys, shutil
+import os
+import sys
+import shutil
 import traceback
 import csv
 import time
@@ -43,9 +45,8 @@ import subprocess
 import re
 import random
 import filecmp
-import pickle
 import math
-
+import getpass
 
 import numpy as np
 
@@ -61,8 +62,6 @@ from vistrails.core.packagemanager import get_package_manager
 from vistrails.core import system
 from vistrails.gui import application
 
-import numpy
-
 import pySAHM.utilities as utilities
 from CreatePredictorCurves import CreatePredictorCurvesDialog
 
@@ -71,8 +70,6 @@ delete_hash_entry_pickle = utilities.delete_hash_entry_pickle
 get_fname_from_hash_pickle = utilities.get_fname_from_hash_pickle
 hash_file = utilities.hash_file
 get_raster_files = utilities.get_raster_files
-
-import getpass
 
 _roottempdir = ""
 _logger = None
@@ -84,7 +81,8 @@ gdal = None
 osr = None
 gdal_merge = None
 
-def importOSGEO():
+
+def import_osgeo():
     global gdalconst
     from osgeo import gdalconst as gdalconst
     global gdal
@@ -93,6 +91,7 @@ def importOSGEO():
     from osgeo import osr as osr
     global gdal_merge
     from GDAL_Resources.Utilities import gdal_merge as gdal_merge
+
 
 def mknextfile(prefix, suffix="", directory="", subfolder="", runname=""):
     global _roottempdir
@@ -107,7 +106,7 @@ def mknextfile(prefix, suffix="", directory="", subfolder="", runname=""):
     if runname:
         prefix = prefix + "_" + runname + "_"
     else:
-        prefix = prefix + "_"
+        prefix += "_"
 
     seq = 0
     for f in files:
@@ -120,9 +119,10 @@ def mknextfile(prefix, suffix="", directory="", subfolder="", runname=""):
                     seq = int(old_seq)
     seq += 1
     filename = os.path.join(directory, prefix + str(seq) + suffix)
-    file = open(filename, 'w')
-    file.close()
+    f = open(filename, 'w')
+    f.close()
     return filename
+
 
 def get_last_dir(prefix, directory="", subfolder="", name=""):
     global _roottempdir
@@ -134,7 +134,7 @@ def get_last_dir(prefix, directory="", subfolder="", name=""):
     found = False
     for f in files:
         if (f.lower().startswith(prefix.lower()) and
-            os.path.isdir(os.path.join(directory, f))):
+                os.path.isdir(os.path.join(directory, f))):
             try:
                 f_seq = int(f.lower().replace(prefix.lower(), ''))
                 if f_seq > seq:
@@ -148,6 +148,7 @@ def get_last_dir(prefix, directory="", subfolder="", name=""):
         return os.path.join(directory, prefix + str(seq))
     return None
 
+
 def mknextdir(prefix, directory="", skipSequence=False, subfolder="", runname=""):
     global _roottempdir
     if directory == "":
@@ -159,12 +160,12 @@ def mknextdir(prefix, directory="", skipSequence=False, subfolder="", runname=""
     if runname:
         prefix = prefix + "_" + runname + "_"
     else:
-        prefix = prefix + "_"
+        prefix += "_"
 
     if skipSequence:
-        dirname = os.path.join(directory, prefix)
-        if os.path.exists(dirname):
-            shutil.rmtree(dirname)
+        dname = os.path.join(directory, prefix)
+        if os.path.exists(dname):
+            shutil.rmtree(dname)
     else:
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -173,7 +174,7 @@ def mknextdir(prefix, directory="", skipSequence=False, subfolder="", runname=""
         seq = 0
         for f in files:
             if (f.lower().startswith(prefix.lower()) and
-                os.path.isdir(os.path.join(directory, f))):
+                    os.path.isdir(os.path.join(directory, f))):
                 try:
                     f_seq = int(f.lower().replace(prefix.lower(), ''))
                     if f_seq > seq:
@@ -182,24 +183,27 @@ def mknextdir(prefix, directory="", skipSequence=False, subfolder="", runname=""
                     #  someone has renamed a folder to a non-numeric string
                     pass
         seq += 1
-        dirname = os.path.join(directory, prefix + str(seq))
-    os.mkdir(dirname)
-    return dirname
+        dname = os.path.join(directory, prefix + str(seq))
+    os.mkdir(dname)
+    return dname
+
 
 def setrootdir(session_dir):
     global _roottempdir
     _roottempdir = session_dir
     utilities.setrootdir(session_dir)
 
+
 def getrootdir():
     global _roottempdir
     return _roottempdir
 
+
 def createrootdir(rootWorkspace):
-    '''Creates a session Directory which will
+    """Creates a session Directory which will
     contain all of the output produced in a single
     VisTrails/Sahm session.
-    '''
+    """
     global _roottempdir
     user_nospace = getpass.getuser().split(' ')[0]
     _roottempdir = os.path.join(rootWorkspace, user_nospace + '_' + time.strftime("%Y%m%dT%H%M%S"))
@@ -207,6 +211,7 @@ def createrootdir(rootWorkspace):
         os.makedirs(_roottempdir)
 
     return _roottempdir
+
 
 def map_ports(module, port_map):
     args = {}
@@ -238,11 +243,13 @@ def map_ports(module, port_map):
             args[flag] = value
     return args
 
+
 def is_filelike(thing):
     return isinstance(thing, File) or \
                         isinstance(thing, Directory) or \
                         isinstance(thing, Path) or\
                         isinstance(thing, PathObject)
+
 
 def path_port(module, portName):
     value = module.force_get_input_list(portName)
@@ -260,6 +267,7 @@ def path_port(module, portName):
         raise RuntimeError, 'The indicated file or directory, ' + \
             path + ', does not exist on the file system.  Cannot continue!'
 
+
 def PySAHM_instance_params(instance, mappedPorts):
     global _logger
     instance.__dict__['logger'] = _logger
@@ -267,11 +275,13 @@ def PySAHM_instance_params(instance, mappedPorts):
     for k, v in mappedPorts.iteritems():
             instance.__dict__[k] = v
 
+
 def vt_color_to_tuple(vtcolor):
     try:
         return vtcolor.tuple
     except:
         (random.random(), random.random(), random.random())
+
 
 def R_boolean(value):
     if value:
@@ -279,9 +289,11 @@ def R_boolean(value):
     else:
         return 'FALSE'
 
+
 def set_seed(value):
     global default_seed
     default_seed = int(value)
+
 
 def get_seed(value=None):
     global default_seed
@@ -290,28 +302,32 @@ def get_seed(value=None):
     else:
         return default_seed
 
+
 def dir_path_value(value, module=None):
     val = get_relative_path(value, module)
     sep = os.path.sep
     return val.replace("/", sep)
 
-def MDSresponseCol(MDSFile):
-    csvfile = open(MDSFile, "r")
+
+def mds_response_col(mds_fname):
+    csvfile = open(mds_fname, "r")
     reader = csv.reader(csvfile)
-    header = reader.next()  #  store the header
+    header = reader.next()  # store the header
     responseCol = header[2]
     return responseCol
 
-def checkModelCovariatenames(MDSFile):
+
+def check_model_covariate_names(mds_fname):
     """These R models break if any of the covariate names used
     start with anything other than an alpha character
     contain any special characters besides "." and "_"
     """
-    covariates = open(MDSFile, "r").readline().strip().split(",")[3:]
+    covariates = open(mds_fname, "r").readline().strip().split(",")[3:]
     for covariate in covariates:
         if not utilities.covariate_name_is_ok(covariate):
             return False
     return True
+
 
 def print_exc_plus():
     """ Print the usual traceback information, followed by a listing of
@@ -360,22 +376,26 @@ def informative_untrapped_error(instance, name):
     writetolog(print_exc_plus(), False, False)
     raise ModuleError(instance, errorMsg)
 
+
 def writetolog(*args, **kwargs):
-    '''Uses the SAHM log file writting function
+    """Uses the SAHM log file writting function
     but appends our known logfile to the kwargs.
-    '''
+    """
     global _logger
-    _logger.writetolog(*args, **kwargs)
+    _logger.write_to_log(*args, **kwargs)
 
-def createLogger(outputdir, verbose):
+
+def create_logger(outputdir, verbose):
     global _logger
-    _logger = utilities.logger(outputdir, verbose)
+    _logger = utilities.Logger(outputdir, verbose)
 
-def getLogger():
+
+def get_logger():
     global _logger
     return _logger
 
-def getShortName(fullPathName):
+
+def get_short_name(fullPathName):
     if fullPathName.endswith('hdr.adf'):
         shortname = os.path.split(fullPathName)[0]
         shortname = os.path.split(shortname)[1]
@@ -384,6 +404,7 @@ def getShortName(fullPathName):
         shortname = os.path.splitext(shortname)[0]
     return shortname
 
+
 def get_raster_name(fullPathName):
     if fullPathName.endswith('hdr.adf'):
         rastername = os.path.split(fullPathName)[0]
@@ -391,19 +412,20 @@ def get_raster_name(fullPathName):
         rastername = fullPathName
     return get_relative_path(rastername)
 
+
 def gen_R_cmd(script, args_dict):
-    '''Formats the cmd used to launch a SAHM R script
+    """Formats the cmd used to launch a SAHM R script
     Returns a list of the cmd elements
-    '''
+    """
     #  get the path to the R exe
     global r_path
     if system.systemType in ['Microsoft', 'Windows']:
-        R_exe = getR_application()  #  -q prevents R_exe from running
+        R_exe = get_r_application()  # -q prevents R_exe from running
     else:
         R_exe = r_path
 
     #  get the path the the SAHM specific R script that we'll be running
-    sahm_R_script = os.path.join(utilities.getModelsPath(), script)
+    sahm_R_script = os.path.join(utilities.get_models_path(), script)
 
     #  reformat are args into the form expected by our R scripts
     args = ["%s=%s" % pair for pair in args_dict.iteritems()]
@@ -415,9 +437,10 @@ def gen_R_cmd(script, args_dict):
 
     return command_arr
 
+
 def run_R_script(script, args_dict, module=None, async=False,
-               stdout_fname=None, stderr_fname=None, new_r_path=None):
-    '''Runs a SAHM R script
+                 stdout_fname=None, stderr_fname=None, new_r_path=None):
+    """Runs a SAHM R script
     if async is False it waits for the script to finish processing and checks
     the output for warning and error messages.
 
@@ -426,9 +449,9 @@ def run_R_script(script, args_dict, module=None, async=False,
 
     if stdout_fname or stderr_fname are provided these files will receive the
     output, which is helpful for debugging/logging
-    '''
+    """
     global r_path
-    if not new_r_path is None and \
+    if new_r_path is not None and \
        os.path.abspath(new_r_path) != r_path:
         set_r_path(new_r_path)
 
@@ -447,6 +470,7 @@ def run_R_script(script, args_dict, module=None, async=False,
         check_R_output(stdout, stderr, module, args_dict)
         writetolog("\nFinished processing of " + script , True)
         return stdout, stderr
+
 
 def check_R_output(stdout, stderr, module=None, args_dict=None):
     #  handle the errors and warnings
@@ -473,11 +497,13 @@ def check_R_output(stdout, stderr, module=None, args_dict=None):
         else:
             raise RuntimeError , msg
 
-def findnth(haystack, needle, n):
+
+def find_nth(haystack, needle, n):
     parts = haystack.split(needle, n + 1)
     if len(parts) <= n + 1:
         return -1
     return len(haystack) - len(parts[-1]) - len(needle)
+
 
 def cleanup_stderr(stderr_string):
 
@@ -487,14 +513,14 @@ def cleanup_stderr(stderr_string):
     actual_msgs = []
     for chunk in chunks:
         if not 'Warning' in chunk and not 'Error' in chunk:
-            continue  #  this is just a masked junk error message
+            continue  # this is just a masked junk error message
 
         if chunk.startswith('_by_') or \
             chunk.startswith('from '):
-            #  this is a masked junk message
-            #  glomed onto an actual warning or error
+            # this is a masked junk message
+            # glomed onto an actual warning or error
             start_i = chunk.index(':') + 1
-            end_i = start_i + findnth(chunk[start_i:], "\n\n", 1)
+            end_i = start_i + find_nth(chunk[start_i:], "\n\n", 1)
             chunk = chunk[end_i:].strip()
         err_chunks = [("Error" + c).replace("ErrorWarning", "Warning") for c in chunk.split('Error') if c]
         for err_chunk in err_chunks:
@@ -519,14 +545,14 @@ def cleanup_stderr(stderr_string):
 
 
 class ModelJobMonitor(object):
-    '''The job monitor object that checks for model run completion and
+    """The job monitor object that checks for model run completion and
     errors.  The signal that a model is finished is that the last line
     in the model output text file starts with 'Total time' The signal
     that a model failed is that either the last line starts with
     'Model Failed' or the stderr (which is getting written to a text
     file in the model output directory) contains the word 'Error'.
     This file can contain warning messages.
-    '''
+    """
     def __init__(self, module, stdout_fname, stderr_fname, output_txt=None):
         self.module = module
         self.stderr_fname = stderr_fname
@@ -578,6 +604,7 @@ class ModelJobMonitor(object):
 
         return False
 
+
 def get_job_monitor(module, model_args):
     stdout_fname = os.path.join(model_args['o'], "ExpandedOutput", "stdOut.txt")
     stderr_fname = os.path.join(model_args['o'], "ExpandedOutput", "stdErr.txt")
@@ -591,11 +618,12 @@ def get_job_monitor(module, model_args):
 
     return ModelJobMonitor(module, stdout_fname, stderr_fname, output_txt)
 
+
 def run_model_script(script, args_dict, module=None, runner_script="runRModel.py"):
-    '''Our SAHM R model scripts now require a python wrapper to handle complications
+    """Our SAHM R model scripts now require a python wrapper to handle complications
     introduced by multiprocessing.  Additionally these model scripts require
     specific processing depending on the current processing mode.
-    '''
+    """
     processing_mode = args_dict.get("cur_processing_mode",
                                 "single models sequentially (n - 1 cores each)")
     args_dict["multicore"] = R_boolean(not processing_mode ==
@@ -622,7 +650,6 @@ def run_model_script(script, args_dict, module=None, runner_script="runRModel.py
                       'output_json':json_fname,
                       'input_json':args_dict.get('curves_json', None)}
 
-
             args_dict['udc'] = json_fname
             cmd.append("udc=" + json_fname)
             dialog = CreatePredictorCurvesDialog(kwargs_mod)
@@ -643,9 +670,11 @@ def run_model_script(script, args_dict, module=None, runner_script="runRModel.py
         check_R_output(job_monitor.stdout, job_monitor.stderr,
                        module, args_dict)
 
+
 def get_r_path():
     global r_path
     return str(r_path)
+
 
 def  set_r_path(r_bin_path):
     global r_path
@@ -653,7 +682,8 @@ def  set_r_path(r_bin_path):
         r_bin_path = os.path.abspath(r_bin_path)
     r_path = str(r_bin_path)
 
-def getR_application(module=None):
+
+def get_r_application(module=None):
     global r_path
     #  are we in 64 or 32 bit?  If 64 use the 64 bit install of R otherwise 32 bit.
     #  if we don't have the matching version and the other exists use it.
@@ -676,17 +706,18 @@ def getR_application(module=None):
 
     return program
 
-def pull_R_install_from_reg():
+
+def pull_r_install_from_reg():
     #  searches in the registry for an installation of R and returns the path
     #  to the bin folder within it if that folder exists
-    regCmds = [r'reg query "HKEY_LOCAL_MACHINE\SOFTWARE\R-core\R" /v "InstallPath"',
-               r'reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\R-core\R" /v "InstallPath"']
+    reg_cmds = [r'reg query "HKEY_LOCAL_MACHINE\SOFTWARE\R-core\R" /v "InstallPath"',
+                r'reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\R-core\R" /v "InstallPath"']
     startupinfo = subprocess.STARTUPINFO()
     startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-    for regCmd in regCmds:
-        regValue = subprocess.Popen(regCmd, startupinfo=startupinfo, stdout=subprocess.PIPE).stdout.read()
+    for regCmd in reg_cmds:
+        reg_value = subprocess.Popen(regCmd, startupinfo=startupinfo, stdout=subprocess.PIPE).stdout.read()
 
-        for line in regValue.split("\n"):
+        for line in reg_value.split("\n"):
             if line.strip() and os.path.isdir(line.split("    ")[-1].strip()):
                 R_path = os.path.abspath(os.path.join(line.split("    ")[-1].strip(), "bin"))
                 if os.path.exists(R_path):
@@ -695,18 +726,20 @@ def pull_R_install_from_reg():
                     writetolog(msg, True, True)
 
                     return R_path
+    msg = "SAHM is unable to autodetect an installation of R on this machine\nYou must manually set the 'r_path'"
+    msg += "configuration value\n\nSee the SAHM installation section of the user manual for details."
+    return  msg
 
-    return "SAHM is unable to autodetect an installation of R on this machine\nYou must manually set the 'r_path' configuration value\n\nSee the SAHM installation section of the user manual for details."
 
 def find_java_exe(java_bin):
-    '''Used on windows to check if we can execute java based on the
+    """Used on windows to check if we can execute java based on the
     java_bin file they have selected.
     The default is 'java' which works if java is installed correctly and on the path
     if they have specified something else that we can get to, we're good as well.
     If not look for an environmental variable 'java_home'
     otherwise look in c:\program files\java or C:\Program Files (x86)\Java
-    '''
-    tryed_locs = [java_bin]
+    """
+    tried_locs = [java_bin]
     try:
         p = subprocess.Popen(java_bin, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = p.communicate()
@@ -720,14 +753,14 @@ def find_java_exe(java_bin):
     try:
         java_home = os.environ['JAVA_HOME']
         java_exe = os.path.join(java_home, 'bin', 'java.exe')
-        tryed_locs.append(java_exe)
+        tried_locs.append(java_exe)
         if os.path.exists(java_exe):
             return os.path.abspath(java_exe)
     except KeyError, IndexError:
         pass
 
     for java_dir in [r"C:\Program Files (x86)\java", r"C:\Program Files\java"]:
-        tryed_locs.append(java_dir)
+        tried_locs.append(java_dir)
         try:
             jre_folders = [os.path.join(java_dir, j) for j in os.listdir(java_dir)
                 if j.lower().startswith('jre') or j.lower().startswith('jdk')]
@@ -742,7 +775,7 @@ def find_java_exe(java_bin):
     msg = "The current java_path does not appear to be a valid instalation of java.\n"
     msg += "SAHM is also unable to autodetect an installation of java on this machine.\n"
     msg += "\nLocations searched for java:"
-    for loc in tryed_locs:
+    for loc in tried_locs:
         msg += "\n\t" + loc
     msg += "\nThis only affects the Maxent model."
     msg += "\nSee the SAHM installation section of the user manual for details."
@@ -751,8 +784,7 @@ def find_java_exe(java_bin):
     return java_bin
 
 
-
-def writeRErrorsToLog(args, outMsg, errMsg):
+def write_r_errors_to_log(args, outMsg, errMsg):
     #  first check that this is a model run, or has a o= in the args.
     #  If so write the output log file in the directory
     if os.path.isdir(args["o"]):
@@ -762,173 +794,125 @@ def writeRErrorsToLog(args, outMsg, errMsg):
     else:
         return False
 
-    outFileN = os.path.join(outputfolder, "errorLogFile.txt")
-    outFile = open(outFileN, "w")
-    outFile.write("standard out:\n\n")
-    outFile.write(outMsg + "\n\n\n")
-    outFile.write("standard error:\n\n")
-    outFile.write(errMsg)
-    outFile.close()
+    out_fname = os.path.join(outputfolder, "errorLogFile.txt")
+    out_file = open(out_fname, "w")
+    out_file.write("standard out:\n\n")
+    out_file.write(outMsg + "\n\n\n")
+    out_file.write("standard error:\n\n")
+    out_file.write(errMsg)
+    out_file.close()
 
-def merge_inputs_csvs(input_csvs, outputFile):
-    '''This function takes a list of inputCSV and merges them into a single
+
+def merge_inputs_csvs(input_csvs, out_fname):
+    """This function takes a list of inputCSV and merges them into a single
     file.  The template from the first will be used
-    '''
+    """
     #  get the first template specified
-    templatefname = "None specified"
+    template_fname = "None specified"
     for input_csv in input_csvs:
         infile1 = open(input_csv, "rb")
         infile1csv = csv.reader(infile1)
         firstline = infile1csv.next()
         if len(firstline) > 4:
-            templatefname = firstline[-2]
-            if get_relative_path(templatefname):
+            template_fname = firstline[-2]
+            if get_relative_path(template_fname):
                 infile1.close()
                 break
         else:
-            templatefname = None
+            template_fname = None
         infile1.close()
 
     #  open a csv we will write all the outputs into
-    oFile = open(outputFile, "wb")
-    outputCSV = csv.writer(oFile)
-    if templatefname:
-        outputCSV.writerow(["PARCOutputFile", "Categorical",
-                         "Resampling", "Aggregation", "OriginalFile", templatefname, templatefname])
+    out_file = open(out_fname, "wb")
+    output_csv = csv.writer(out_file)
+    if template_fname:
+        output_csv.writerow(["PARCOutputFile", "Categorical",
+                         "Resampling", "Aggregation", "OriginalFile", template_fname, template_fname])
     else:
-        outputCSV.writerow(["PARCOutputFile", "Categorical",
+        output_csv.writerow(["PARCOutputFile", "Categorical",
                          "Resampling", "Aggregation", "OriginalFile"])
 
     #  write all the inputs out to this file
     for inputCSV in input_csvs:
-        iFile = open(inputCSV, "rb")
-        inputreader = csv.reader(iFile)
-        inputreader.next()
-        for row in inputreader:
+        in_file = open(inputCSV, "rb")
+        input_reader = csv.reader(in_file)
+        input_reader.next()
+        for row in input_reader:
             try:
-                outputCSV.writerow([get_relative_path(row[0]), row[1], row[2], row[3], row[6]])
+                output_csv.writerow([get_relative_path(row[0]), row[1], row[2], row[3], row[6]])
             except:
-                outputCSV.writerow([get_relative_path(row[0]), row[1], row[2], row[3]])
-        iFile.close()
-    oFile.close()
+                output_csv.writerow([get_relative_path(row[0]), row[1], row[2], row[3]])
+        in_file.close()
+    out_file.close()
 
-def applyMDS_selection(oldMDS, newMDS):
+
+def apply_mds_selection(oldMDS, newMDS):
     """Takes a selection from a previous MDS and '
         applies it to a new MDS file.
     """
-    oldvals = {}
+    old_vals = {}
     if os.path.exists(oldMDS):
-        iFile = open(oldMDS, 'r')
-        previousout = csv.reader(iFile)
-        oldheader1 = previousout.next()
-        oldheader2 = previousout.next()
-        oldvals = dict(zip(oldheader1, oldheader2))
-        iFile.close()
-        del previousout
+        in_file = open(oldMDS, 'r')
+        previous_out = csv.reader(in_file)
+        old_header1 = previous_out.next()
+        old_header2 = previous_out.next()
+        old_vals = dict(zip(old_header1, old_header2))
+        in_file.close()
+        del previous_out
 
-    tmpnewMDS = newMDS + ".tmp.csv"
-    oFile = open(tmpnewMDS, "wb")
-    tmpOutCSV = csv.writer(oFile)
-    iFile = open(newMDS, "rb")
-    outCSV = csv.reader(iFile)
+    tmp_new_mds = newMDS + ".tmp.csv"
+    out_file = open(tmp_new_mds, "wb")
+    tmp_out_csv = csv.writer(out_file)
+    in_file = open(newMDS, "rb")
+    out_csv = csv.reader(in_file)
 
-    oldHeader1 = outCSV.next()
-    oldHeader2 = outCSV.next()
-    oldHeader3 = outCSV.next()
+    old_header1 = out_csv.next()
+    old_header2 = out_csv.next()
+    old_header3 = out_csv.next()
 
-    newHeader2 = oldHeader2[:3]
-    for val in (oldHeader1[3:]):
-        if oldvals.has_key(val) and \
-        oldvals[val] == '0':
-            newHeader2.append('0')
+    new_header2 = old_header2[:3]
+    for val in (old_header1[3:]):
+        if old_vals.has_key(val) and \
+        old_vals[val] == '0':
+            new_header2.append('0')
         else:
-            newHeader2.append('1')
+            new_header2.append('1')
 
-    tmpOutCSV.writerow(oldHeader1)
-    tmpOutCSV.writerow(newHeader2)
-    tmpOutCSV.writerow(oldHeader3)
-    for row in outCSV:
-        tmpOutCSV.writerow(row)
+    tmp_out_csv.writerow(old_header1)
+    tmp_out_csv.writerow(new_header2)
+    tmp_out_csv.writerow(old_header3)
+    for row in out_csv:
+        tmp_out_csv.writerow(row)
 
-    iFile.close()
-    oFile.close()
-    shutil.copyfile(tmpnewMDS, newMDS)
-    os.remove(tmpnewMDS)
+    in_file.close()
+    out_file.close()
+    shutil.copyfile(tmp_new_mds, newMDS)
+    os.remove(tmp_new_mds)
 
-def get_mdsfname(workspace):
-    '''given a model output workspace directory namereturns the full path to the
+
+def get_mds_fname(workspace):
+    """given a model output workspace directory namereturns the full path to the
     mds file (only csv in the workspace)
-    '''
+    """
     csv_fnames = [f for f in os.listdir(workspace) if f.endswith('.csv')]
     if not csv_fnames:
         return None
 
     for csv_fname in csv_fnames:
         full_fname = os.path.join(workspace, csv_fname)
-        if utilities.isMDSFile(full_fname):
+        if utilities.is_mds_file(full_fname):
             return full_fname
     return None
-#
-#
-#
-#
-#
-#  def getRasterParams(rasterFile):
-#      """
-#      Extracts a series of bits of information from a passed raster
-#      All values are stored in a dictionary which is returned.
-#      If errors are encountered along the way the error messages will
-#      be returned as a list in the Error element.
-#      """
-#      try:
-#          #  initialize our params dictionary to have None for all parma
-#          params = {}
-#          allRasterParams = ["Error", "xScale", "yScale", "width", "height",
-#                          "ulx", "uly", "lrx", "lry", "Wkt",
-#                          "tUlx", "tUly", "tLrx", "tLry",
-#                          "srs", "gt", "prj", "NoData", "PixelType"]
-#
-#          for param in allRasterParams:
-#              params[param] = None
-#          params["Error"] = []
-#
-#          #  Get the PARC parameters from the rasterFile.
-#          dataset = gdal.Open(rasterFile, gdalconst.GA_ReadOnly)
-#          if dataset is None:
-#              params["Error"].append("Unable to open file")
-#              #  print "Unable to open " + rasterFile
-#              #  raise Exception, "Unable to open specifed file " + rasterFile
-#
-#
-#          xform = dataset.GetGeoTransform()
-#          params["xScale"] = xform[1]
-#          params["yScale"] = xform[5]
-#
-#          params["width"] = dataset.RasterXSize
-#          params["height"] = dataset.RasterYSize
-#
-#          params["ulx"] = xform[0]
-#          params["uly"] = xform[3]
-#          params["lrx"] = params["ulx"] + params["width"] * params["xScale"]
-#          params["lry"] = params["uly"] + params["height"] * params["yScale"]
-#
-#
-#      except:
-#          #  print "We ran into problems extracting raster parameters from " + rasterFile
-#          params["Error"].append("Some untrapped error was encountered")
-#      finally:
-#          del dataset
-#          return params
 
 
 class InteractiveQGraphicsView(QtGui.QGraphicsView):
-    '''
+    """
     Extends a QGraphicsView to enable wheel zooming and scrolling
     The main QGraphicsView contains a graphics scene which is dynamically
 
     l_pix - original picture
     c_view - scaled picture
-    '''
+    """
     def __init__(self, parent=None):
         self.scene = QtGui.QGraphicsScene()
         self.scene.wheelEvent = self.wheel_event
@@ -936,12 +920,11 @@ class InteractiveQGraphicsView(QtGui.QGraphicsView):
 
         self.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
 
-
     def load_picture(self, strPicture):
-        '''This loads and zooms to a new picture
+        """This loads and zooms to a new picture
         a new l_pix is created
         and a c_view is derived from it.
-        '''
+        """
 
         self.picture_fname = strPicture
         self.l_pix = QtGui.QPixmap(strPicture)
@@ -959,14 +942,12 @@ class InteractiveQGraphicsView(QtGui.QGraphicsView):
 
         self.view_current()
 
-
     def view_current(self):
 
         self.scene.clear()
         self.scene.setSceneRect(0, 0, self.c_view.size().width(), self.c_view.size().height())
         self.scene.addPixmap(self.c_view)
         QtCore.QCoreApplication.processEvents()
-
 
     def wheel_event (self, event):
 
@@ -1026,57 +1007,60 @@ def print_timing(func):
         return res
     return wrapper
 
+
 def check_if_model_finished(model_dir):
 
     try:
-        outText = find_file(model_dir, "_output.txt")
+        out_text = find_file(model_dir, "_output.txt")
     except RuntimeError:
         return False
 
-    model_text = os.path.join(model_dir, outText)
+    model_text = os.path.join(model_dir, out_text)
     try:
-        lastLine = open(model_text, 'r').readlines()[-2]
+        last_line = open(model_text, 'r').readlines()[-2]
     except IndexError:
         return False
 
-    if lastLine.startswith("Total time"):
+    if last_line.startswith("Total time"):
         return True
-    elif lastLine.startswith("Model failed"):
+    elif last_line.startswith("Model failed"):
         return "Error"
     else:
         return False
 
+
 def find_file(model_dir, suffix):
     try:
         return [file_name for file_name in os.listdir(model_dir)
-                                 if file_name.lower().endswith(suffix.lower())][0]
+                if file_name.lower().endswith(suffix.lower())][0]
     except IndexError:
-        raise RuntimeError('The expected model output '
-                               + suffix + ' was not found in the model output directory')
+        raise RuntimeError('The expected model output ' +
+                           suffix + ' was not found in the model output directory')
 
 
-def mosaicAllTifsInFolder(inDir, outFileName):
-    onlyfiles = [os.path.join(inDir, f) for f in os.listdir(inDir)
-            if os.path.isfile(os.path.join(inDir, f)) and f.endswith(".tif") ]
-    args = ["placeholder", "-o", outFileName] + onlyfiles
+def mosaic_all_tifs_in_folder(in_dname, out_fname):
+    only_files = [os.path.join(in_dname, f) for f in os.listdir(in_dname)
+                  if os.path.isfile(os.path.join(in_dname, f)) and f.endswith(".tif")]
+    args = ["placeholder", "-o", out_fname] + only_files
     gdal.DontUseExceptions()
     gdal_merge.main(args)
 
 
-def waitForProcessesToFinish(processQueue, maxCount=1):
-    while len(processQueue) >= maxCount:
+def wait_for_processes_to_finish(process_queue, max_count=1):
+    while len(process_queue) >= max_count:
             time.sleep(1)
-            for process in processQueue:
+            for process in process_queue:
                 if process.poll() is not None:
-                    processQueue.remove(process)
+                    process_queue.remove(process)
 
-def getParentDir(f, x=None):
+
+def get_parent_dname(f):
     return os.path.dirname(f.name)
+
 
 def convert_old_enum(old_f, new_module):
     controller = api.get_current_controller()
     param = old_f.parameters[0]
-    param_value = param.strValue
     alias = param.alias
 
     param_value = param.strValue
@@ -1092,7 +1076,6 @@ def convert_old_enum(old_f, new_module):
 def convert_tom(old_f, new_module):
     controller = api.get_current_controller()
     param = old_f.parameters[0]
-    param_value = param.strValue
     alias = param.alias
 
     new_val_lookup = ["Threshold=0.5", "Sensitivity=Specificity",
@@ -1117,6 +1100,7 @@ def convert_tom(old_f, new_module):
 
     new_module.add_function(new_function)
     return []
+
 
 def get_relative_path(f, module=None):
     #  This is three step approach:
@@ -1195,13 +1179,15 @@ def get_relative_path(f, module=None):
         #  if something goes wrong we couldn't find the file throw an error
         couldnt_find_file(fname)
 
+
 def compare_files(f1, f2):
     return filecmp.cmp(f1, f2, shallow=False)
 
+
 def compare_mds(mds1, mds2):
-    '''checks if the two mds files entered are identical
+    """checks if the two mds files entered are identical
     ignores the path components so that relative paths will work
-    '''
+    """
     orig_mds = np.genfromtxt(mds1, dtype='S25', delimiter=",")
     new_mds = np.genfromtxt(mds2, dtype='S25', delimiter=",")
     orig_mds[1, :2] = 'skip'
@@ -1211,23 +1197,21 @@ def compare_mds(mds1, mds2):
     #  np.array_equiv(orig_mds, new_mds) doesn't work on string types in this np version
     return np.count_nonzero(np.logical_not(orig_mds == new_mds)) == 0
 
+
 def make_next_file_complex(module, prefix, suffix="", directory="",
-                          key_inputs=[], file_or_dir='file',
-                                                    subfolder="", runname=""):
-    '''How we're handling file can lead to some unanticipated results.
+                           key_inputs=[], file_or_dir='file', subfolder="", runname=""):
+    """How we're handling file can lead to some unanticipated results.
     To handle this we want to re-use file names if
     1) all ports are identical
     2) key input files we want to monitor for changes
-    '''
+    """
     h = sha_hash()
     h.update(module.signature)
     for key in sorted(module.inputPorts):
         if module.has_input(key):
-#              print bytes(module.get_input(key))
             h.update(bytes(module.get_input(key)))
 
     for input in key_inputs:
-#          print str(input) + hash_file(input)
         h.update(str(input) + hash_file(input))
 
     signature = h.hexdigest()
@@ -1271,13 +1255,11 @@ def make_next_file_complex(module, prefix, suffix="", directory="",
 
 
 def get_curve_sheet_location(_module):
-    '''returns a location with a new sheet with the node name of the current run
+    """returns a location with a new sheet with the node name of the current run
     and dimensions set to 1x1
-    '''
+    """
     try:
         cur_vt = _module.moduleInfo['controller'].vistrail
-
-        cur_pipeline = _module.moduleInfo['pipeline']
         cur_version = _module.moduleInfo['controller'].current_version
         cur_name = cur_vt.get_pipeline_name(cur_version)
         if "+" in cur_name:
@@ -1300,14 +1282,12 @@ def get_curve_sheet_location(_module):
     return auto_location
 
 
-
-
 def set_sheet_location(_module):
-    '''given a sahm spreadsheet module, finds all the other sahm spreadsheet cells
+    """given a sahm spreadsheet module, finds all the other sahm spreadsheet cells
     in the currently executing pipeline and returns a CellLocation
     with the name of the currently executing pipeline and dimensions set to
     hold the number of cells needed.
-    '''
+    """
     #  don't do this if we're on the VisWall
     package_manager = get_package_manager()
     try:
@@ -1316,7 +1296,6 @@ def set_sheet_location(_module):
     except:
         on_viswall = False
         pass
-
 
     auto_location = None
     if _module.inputPorts.has_key('Location'):
@@ -1384,10 +1363,10 @@ def set_sheet_location(_module):
 
 
 def get_previous_run_info(full_fname):
-    '''given a fname in in the format:
+    """given a fname in in the format:
                 ..\sessiondir\<subfolder>\prefix_runname_count.suffix"
     returns the subfolder and runname if applicable
-    '''
+    """
     folder, fname = os.path.split(full_fname)
     parentfolder, subfolder = os.path.split(folder)
 
@@ -1411,20 +1390,20 @@ def get_previous_run_info(full_fname):
     return subfolder, runname
 
 
-
 def get_model_output_fname(dname):
-    '''given a model output workspace (dname) returns the full path to the
+    """given a model output workspace (dname) returns the full path to the
     text output file from the model
-    '''
+    """
     output_fnames = [f for f in os.listdir(dname) if f.endswith('_output.txt')]
     if not output_fnames:
         return None
     return os.path.join(dname, output_fnames[0])
 
+
 def get_model_results(dname):
-    '''Given a model output workspace (dname) returns a dictionary with the
+    """Given a model output workspace (dname) returns a dictionary with the
     parsed contents of the model results
-    '''
+    """
     output_txt = get_model_output_fname(dname)
     f = open(output_txt, "r")
     lines = f.readlines()

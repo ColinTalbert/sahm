@@ -331,10 +331,10 @@ class SelectListDialog(QtGui.QDialog):
             pass
 
     def PopulateTreeview(self):
-        ''' Reads in the input MDS and populates the treeview widget
+        """ Reads in the input MDS and populates the treeview widget
         with the items in covariate columns.
         Sets the check state to be the same as the 0/1 include flag.
-        '''
+        """
         writetolog("    PopulateTreeview inputMDS = " + self.inputMDS, False, False)
 
         #        self.treeview.setColumnCount(2)

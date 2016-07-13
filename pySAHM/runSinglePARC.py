@@ -94,8 +94,8 @@ def main(options):
     ourPARC.templateRaster = SpatialUtilities.SAHMRaster(options.template)
     outDir = os.path.split(options.dest)[0]
     ourPARC.outDir = outDir
-    ourPARC.logger = utilities.logger(os.path.dirname(outDir), ourPARC.verbose, False)
-    ourPARC.writetolog = ourPARC.logger.writetolog
+    ourPARC.logger = utilities.Logger(os.path.dirname(outDir), ourPARC.verbose, False)
+    ourPARC.writetolog = ourPARC.logger.write_to_log
 
 #     if options.ignoreNonOverlap:
 #         ourPARC.shrink_template_extent(SpatialUtilities.SAHMRaster(options.source))

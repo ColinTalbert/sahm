@@ -52,7 +52,7 @@ from osgeo import gdal
 from optparse import OptionParser
 
 import utilities
-from utilities import isMDSFile
+from utilities import is_mds_file
 
 class FormatConverter(object):
     def __init__(self):
@@ -82,13 +82,13 @@ class FormatConverter(object):
         argProblem = ""
         
         if self.logger is None:
-            self.logger = utilities.logger(self.outputDir, self.verbose)
-        self.writetolog = self.logger.writetolog
+            self.logger = utilities.Logger(self.outputDir, self.verbose)
+        self.writetolog = self.logger.write_to_log
         
         if os.path.isdir(self.inputDir):
             pass
         elif os.path.exists(self.MDSFile):
-            if not isMDSFile(self.MDSFile):
+            if not is_mds_file(self.MDSFile):
                 argProblem += "The supplied MDS file, " + self.MDSFile + ", does not appear to be in the appropriate format."
         else:
             argProblem += "Neither an input Directory or MDS File was supplied."       
@@ -148,9 +148,9 @@ class FormatConverter(object):
             i += 1
            
     def convertEnvironmentalLayers_mc(self, files, outputFolder, type):
-        '''This function has the same functionality as convertEnvironmentalLayers
+        """This function has the same functionality as convertEnvironmentalLayers
         with the addition of utilizing multiple cores to do the processing.
-        '''
+        """
         results = Queue.Queue()
         process_count= 0
         
@@ -170,7 +170,7 @@ class FormatConverter(object):
             executable = os.path.join(execDir, 'singleRasterFormatConverter.py')
             
             command_arr = [sys.executable, executable] + args
-            self.logger.writetolog(' '.join(command_arr), False, False)
+            self.logger.write_to_log(' '.join(command_arr), False, False)
 #            proc = subprocess.Popen( command_arr )
 #            thread.start_new_thread(utilities.process_waiter,
 #                    (proc, f_name, results))

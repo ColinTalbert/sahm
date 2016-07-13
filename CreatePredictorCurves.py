@@ -150,10 +150,10 @@ class CreatePredictorCurvesDialog(QtGui.QDialog):
         self.done(1)
     
     def PopulateTreeview(self):
-        ''' Reads in the input MDS and populates the treeview widget
+        """ Reads in the input MDS and populates the treeview widget
         with the items in covariate columns.
         Sets the check state to be the same as the 0/1 include flag.
-        '''
+        """
 
         if os.path.exists(self.output_json):
             prev_out = json.load(open(self.output_json, 'rb'))

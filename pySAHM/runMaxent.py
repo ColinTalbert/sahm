@@ -47,9 +47,9 @@ import multiprocessing
 
 
 class MAXENTRunner(object):
-    '''This is a class to run the maxent jar.  The output from will need
+    """This is a class to run the maxent jar.  The output from will need
     to be sent through WrapMaxent.r to generate outputs.
-    '''
+    """
     def __init__(self):
         self.verbose = False
         self.maxent_path = ''
@@ -205,13 +205,13 @@ class MAXENTRunner(object):
                 if not os.path.isdir(d):
                     raise RuntimeError(self, "Input 'projectionlayers' must be a directory")
 
-        if not utilities.isMDSFile(self.mdsfile):
+        if not utilities.is_mds_file(self.mdsfile):
             raise RuntimeError(self, 'Input MDS, ' + self.mdsfile + ', does not appear to be formated as an MDS file.')
         if not os.path.exists(self.outputdir):
             raise RuntimeError(self, 'Output directory, ' + self.outputdir + ', could not be found on file system')
         if self.logger is None:
-            self.logger = utilities.logger(self.outputdir, self.verbose)
-        self.writetolog = self.logger.writetolog
+            self.logger = utilities.Logger(self.outputdir, self.verbose)
+        self.writetolog = self.logger.write_to_log
 
     def prepInputs(self):
 

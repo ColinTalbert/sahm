@@ -82,8 +82,8 @@ def main(argv):
     
     ourFC = FormatConverter()
     ourFC.verbose = options.verbose
-    ourFC.logger = utilities.logger(options.outputDir, ourFC.verbose)
-    ourFC.writetolog = ourFC.logger.writetolog
+    ourFC.logger = utilities.Logger(options.outputDir, ourFC.verbose)
+    ourFC.writetolog = ourFC.logger.write_to_log
     ourFC.outputDir = options.outputDir
     ourFC.format = options.format
     ourFC.convertEnvironmentalLayers([options.input, ], options.outputDir, options.format)

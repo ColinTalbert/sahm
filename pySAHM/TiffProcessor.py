@@ -61,9 +61,9 @@ def main(args):
     ourLittleWorker.run()
     
 class rasterProcessor(object):
-    '''The base class that all other Raster processing
+    """The base class that all other Raster processing
     objects will inherit from
-    '''
+    """
     def __init__(self):
         #instance level variables
         self.verbose = True
@@ -89,8 +89,8 @@ class rasterProcessor(object):
             raise utilities.TrappedError("Specified Output directory " + self.outDir + " is not a directory")
      
         if self.logger is None:
-            self.logger = utilities.logger(self.outDir, self.verbose)
-        self.writetolog = self.logger.writetolog
+            self.logger = utilities.Logger(self.outDir, self.verbose)
+        self.writetolog = self.logger.write_to_log
 
         # Validate template image.
         if not SpatialUtilities.isRaster(self.inputFname):
@@ -104,7 +104,7 @@ class rasterProcessor(object):
         self.inputRaster = SpatialUtilities.SAHMRaster(self.inputFname)
     
 class rasterReclassifier(rasterProcessor):
-    '''produces an output raster that has been reclassified according to 
+    """produces an output raster that has been reclassified according to
     a reclass text file provided.
     The format of this file conforms to the ESRI reclass by asci form
     Information available at: http://resources.arcgis.com/en/help/main/10.1/index.html#//00q90000003w000000
@@ -112,7 +112,7 @@ class rasterReclassifier(rasterProcessor):
     Values not specified in the reclass file will remain unchanged.
     No Data values are specified in both the input and output line with a NoData string
     
-    '''
+    """
     def __init__(self):
         rasterProcessor.__init__(self)
         #template is optional and is only used to specify extent
@@ -165,13 +165,13 @@ class rasterReclassifier(rasterProcessor):
         self.reclassDict = self.loadReclassDict(self.reclassFName)
            
     def loadReclassDict(self, reclassFName):
-        '''loads our reclass File into a dictionary for latter processing
+        """loads our reclass File into a dictionary for latter processing
         the reclass file is the same format as that used by ESRI:
         see http://help.arcgis.com/en/arcgisdesktop/10.0/help/index.html#/How_Reclass_By_ASCII_File_works/009z000000t3000000/
         the dictionary is in the format
         {(oldVal,):newVal,
         (minOldVal, maxOldVal):newVal}
-        '''
+        """
         outDict = {}
         reclassFile = open(reclassFName, "r")
         for line in reclassFile.readlines():

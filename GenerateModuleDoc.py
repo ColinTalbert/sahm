@@ -35,7 +35,7 @@
 #
 ###############################################################################
 
-'''
+"""
 Due to the complexity of the documentation we wish to provide to the
 SAHM package users it became necessary to store our module and port
 level documentation in an external xml file.
@@ -43,7 +43,7 @@ This file is arranged in a specific manner with detailed information about
 each of our modules, the input and output ports, options, defaults, requirements
 references, etc.
 
-'''
+"""
 
 from xml.etree import ElementTree as ET
 import textwrap

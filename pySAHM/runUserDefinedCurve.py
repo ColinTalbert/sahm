@@ -35,23 +35,14 @@
 #
 ###############################################################################
 
-import os
 import sys
-import csv
-
-import utilities
-
-import copy
-
-import multiprocessing
+import os
 
 from PyQt4 import QtCore, QtGui
 import csv
 import utils
 from utils import writetolog
-import shutil
-import os
-import subprocess
+
 
 try:
     from vistrails.core.modules.vistrails_module import Module
@@ -64,6 +55,7 @@ try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
     _fromUtf8 = lambda s: s
+
 
 class CreateUserDefinedCurveDialog(QtGui.QDialog):
 
@@ -98,11 +90,11 @@ class CreateUserDefinedCurveDialog(QtGui.QDialog):
         self.verticalLayout_3 = QtGui.QVBoxLayout()
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
         self.splitter = QtGui.QSplitter()
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.splitter.sizePolicy().hasHeightForWidth())
-        self.splitter.setSizePolicy(sizePolicy)
+        size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        size_policy.setHorizontalStretch(0)
+        size_policy.setVerticalStretch(0)
+        size_policy.setHeightForWidth(self.splitter.sizePolicy().hasHeightForWidth())
+        self.splitter.setSizePolicy(size_policy)
         self.splitter.setMinimumSize(QtCore.QSize(0, 0))
         self.splitter.setFrameShape(QtGui.QFrame.Box)
         self.splitter.setFrameShadow(QtGui.QFrame.Plain)
@@ -129,11 +121,11 @@ class CreateUserDefinedCurveDialog(QtGui.QDialog):
         self.treeview.setColumnWidth(1, 125)
         self.treeview.setToolTip(_fromUtf8("Double click to view detailed information for single covariate."))
 #        self.treeview.setHeaderLabels(['include', 'covariate'])
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.treeview.sizePolicy().hasHeightForWidth())
-        self.treeview.setSizePolicy(sizePolicy)
+        size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Expanding)
+        size_policy.setHorizontalStretch(0)
+        size_policy.setVerticalStretch(0)
+        size_policy.setHeightForWidth(self.treeview.sizePolicy().hasHeightForWidth())
+        self.treeview.setSizePolicy(size_policy)
         self.treeview.setMinimumSize(QtCore.QSize(75, 0))
         self.treeview.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.treeview.setSizeIncrement(QtCore.QSize(100, 0))
@@ -144,30 +136,30 @@ class CreateUserDefinedCurveDialog(QtGui.QDialog):
         self.horizontalLayout_3.setSizeConstraint(QtGui.QLayout.SetDefaultConstraint)
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
         self.btnRunR = QtGui.QPushButton(self.widget)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.btnRunR.sizePolicy().hasHeightForWidth())
-        self.btnRunR.setSizePolicy(sizePolicy)
+        size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        size_policy.setHorizontalStretch(0)
+        size_policy.setVerticalStretch(0)
+        size_policy.setHeightForWidth(self.btnRunR.sizePolicy().hasHeightForWidth())
+        self.btnRunR.setSizePolicy(size_policy)
         self.btnRunR.setObjectName(_fromUtf8("btnRunR"))
 #        self.horizontalLayout_3.addWidget(self.btnRunR)
 
         self.label = QtGui.QLabel(self.widget)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
-        self.label.setSizePolicy(sizePolicy)
+        size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
+        size_policy.setHorizontalStretch(0)
+        size_policy.setVerticalStretch(0)
+        size_policy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
+        self.label.setSizePolicy(size_policy)
         self.label.setObjectName(_fromUtf8("label"))
         self.horizontalLayout_3.addWidget(self.label)
         self.lineEdit = QtGui.QLineEdit(self.widget)
 
         self.lineEdit.setText(_fromUtf8(str(self.kwargs['minCor'])))
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.lineEdit.sizePolicy().hasHeightForWidth())
-        self.lineEdit.setSizePolicy(sizePolicy)
+        size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        size_policy.setHorizontalStretch(0)
+        size_policy.setVerticalStretch(0)
+        size_policy.setHeightForWidth(self.lineEdit.sizePolicy().hasHeightForWidth())
+        self.lineEdit.setSizePolicy(size_policy)
         self.lineEdit.setMaximumSize(QtCore.QSize(75, 16777215))
         self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
         self.horizontalLayout_3.addWidget(self.lineEdit)
@@ -175,23 +167,22 @@ class CreateUserDefinedCurveDialog(QtGui.QDialog):
         self.horizontalLayout_3.addItem(spacerItem)
         self.numPlots = QtGui.QLineEdit(self.widget)
         self.numPlots.setText(_fromUtf8(str(self.kwargs['numPlots'])))
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.lineEdit.sizePolicy().hasHeightForWidth())
+        size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        size_policy.setHorizontalStretch(0)
+        size_policy.setVerticalStretch(0)
+        size_policy.setHeightForWidth(self.lineEdit.sizePolicy().hasHeightForWidth())
 
         self.horizontalLayout_6 = QtGui.QHBoxLayout()
         self.horizontalLayout_6.setSpacing(5)
         self.horizontalLayout_6.setMargin(5)
-        self.numPlots.setSizePolicy(sizePolicy)
+        self.numPlots.setSizePolicy(size_policy)
         self.numPlots.setMaximumSize(QtCore.QSize(75, 16777215))
         self.numPlots.setObjectName(_fromUtf8("numPlots"))
         self.numPlotsLabel = QtGui.QLabel(self.widget)
-        self.numPlotsLabel.setSizePolicy(sizePolicy)
+        self.numPlotsLabel.setSizePolicy(size_policy)
         self.numPlotsLabel.setObjectName(_fromUtf8("numPlotsLabel"))
         self.horizontalLayout_6.addWidget(self.numPlotsLabel)
         self.horizontalLayout_6.addWidget(self.numPlots)
-
 
         self.chkPresence = QtGui.QCheckBox(self.widget)
         self.chkPresence.setChecked(True)
@@ -218,11 +209,11 @@ class CreateUserDefinedCurveDialog(QtGui.QDialog):
 
         self.view = utils.InteractiveQGraphicsView(self)
 
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(4)
-        sizePolicy.setVerticalStretch(0)
-        #  sizePolicy.setHeightForWidth(self.view.sizePolicy().hasHeightForWidth())
-        self.view.setSizePolicy(sizePolicy)
+        size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        size_policy.setHorizontalStretch(4)
+        size_policy.setVerticalStretch(0)
+        #  size_policy.setHeightForWidth(self.view.size_policy().hasHeightForWidth())
+        self.view.setSizePolicy(size_policy)
         self.view.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
         self.view.setObjectName(_fromUtf8("view"))
 
@@ -233,21 +224,21 @@ class CreateUserDefinedCurveDialog(QtGui.QDialog):
         self.button_layout.setContentsMargins(-1, 3, -1, 3)
         self.button_layout.setObjectName(_fromUtf8("button_layout"))
         self.btnOK = QtGui.QPushButton()
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.btnOK.sizePolicy().hasHeightForWidth())
-        self.btnOK.setSizePolicy(sizePolicy)
+        size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        size_policy.setHorizontalStretch(0)
+        size_policy.setVerticalStretch(0)
+        size_policy.setHeightForWidth(self.btnOK.sizePolicy().hasHeightForWidth())
+        self.btnOK.setSizePolicy(size_policy)
         self.btnOK.setBaseSize(QtCore.QSize(100, 0))
         self.btnOK.setToolTip(_fromUtf8(""))
         self.btnOK.setObjectName(_fromUtf8("btnOK"))
         self.button_layout.addWidget(self.btnOK)
         self.btnCancel = QtGui.QPushButton()
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.btnCancel.sizePolicy().hasHeightForWidth())
-        self.btnCancel.setSizePolicy(sizePolicy)
+        size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        size_policy.setHorizontalStretch(0)
+        size_policy.setVerticalStretch(0)
+        size_policy.setHeightForWidth(self.btnCancel.sizePolicy().hasHeightForWidth())
+        self.btnCancel.setSizePolicy(size_policy)
         self.btnCancel.setBaseSize(QtCore.QSize(100, 0))
         self.btnCancel.setObjectName(_fromUtf8("btnCancel"))
         self.button_layout.addWidget(self.btnCancel)
@@ -270,30 +261,27 @@ class CreateUserDefinedCurveDialog(QtGui.QDialog):
 
         self.btnCancel.setShortcut('Esc')
         self.connect(self.btnOK, QtCore.SIGNAL('clicked(bool)'),
-                     self.okTriggered)
+                     self.ok_triggered)
         self.connect(self.btnCancel, QtCore.SIGNAL('clicked(bool)'),
                      self.cancel)
         self.connect(self.btnRunR, QtCore.SIGNAL('clicked(bool)'),
                      self.update_pairs_plot)
         self.connect(self.lineEdit, QtCore.SIGNAL('textChanged(QString)'),
-                     self.thresholdEdit)
+                     self.threshold_edit)
         self.connect(self.numPlots, QtCore.SIGNAL('textChanged(QString)'),
-             self.numPlotsEdit)
+                     self.num_plots_edit)
 
         self.connect(self.treeview, QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem*, int)'), self.on_item_doublclick)
 
-
-
         #  code to populate the treeview with the contents of our MDS
-        self.PopulateTreeview()
+        self.populate_treeview()
 
         self.setLayout(layout)
         self.repaint()
 
         #  code to add in pictureviewer stuff
-        outputPic = self.make_new_pairs_plot(self.input_mds)
-        self.view.load_picture(outputPic)
-
+        output_pic = self.make_new_pairs_plot(self.input_mds)
+        self.view.load_picture(output_pic)
 
     def on_item_doublclick(self, item, column):
         QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
@@ -301,60 +289,58 @@ class CreateUserDefinedCurveDialog(QtGui.QDialog):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        outputPic = self.makeNewCovariatePlot(output_dir, str(item.text(0)))
+        outputPic = self.make_new_covariate_plot(output_dir, str(item.text(0)))
         QtGui.QApplication.restoreOverrideCursor()
         self.popup = QtGui.QDialog()
 #        self.popup.setBaseSize(1200, 1200)
         size = 800
         self.popup.resize(size, size)
 
-        viewWindow = utils.InteractiveQGraphicsView(self.popup)
-        viewWindow.resize(size, size)
+        view_window = utils.InteractiveQGraphicsView(self.popup)
+        view_window.resize(size, size)
         layout = QtGui.QVBoxLayout()
-        layout.addWidget(viewWindow)
+        layout.addWidget(view_window)
         self.popup.setLayout(layout)
-        viewWindow.load_picture(outputPic)
-        viewWindow.view_current()
+        view_window.load_picture(outputPic)
+        view_window.view_current()
 
         retVal = self.popup.exec_()
 
-
-    def okTriggered(self):
-        self.SaveMDSFromTreeview()
+    def ok_triggered(self):
+        self.save_mds_from_treeview()
         self.done(0)
 
     def cancel(self):
         self.done(1)
 
-    def thresholdEdit(self):
+    def threshold_edit(self):
         try:
             self.kwargs['minCor'] = float(str(self.lineEdit.text()))
         except ValueError:
             pass
 
-    def numPlotsEdit(self):
+    def num_plots_edit(self):
         try:
             self.kwargs['numPlots'] = int(str(self.numPlots.text()))
         except ValueError:
             pass
 
-
-    def PopulateTreeview(self):
-        ''' Reads in the input MDS and populates the treeview widget
+    def populate_treeview(self):
+        """ Reads in the input MDS and populates the treeview widget
         with the items in covariate columns.
         Sets the check state to be the same as the 0/1 include flag.
-        '''
+        """
         writetolog("    PopulateTreeview input_mds = " + self.input_mds, False, False)
 
 #        self.treeview.setColumnCount(2)
         #  If an output_json already exists then the user has run this module before.
         #  We need to pull and apply their previous selections from that output file
-        csvfile = open(self.input_mds, "r")
+        csv_file = open(self.input_mds, "r")
         #  print "MDS", self.input_mds
-        reader = csv.reader(csvfile)
-        header = reader.next()  #  store the header
-        header2 = reader.next()  #  the 2nd line of the mds with use/don't use
-        header3 = reader.next()  #  the 3rd line of the mds with the path
+        reader = csv.reader(csv_file)
+        header = reader.next()  # store the header
+        header2 = reader.next()  # the 2nd line of the mds with use/don't use
+        header3 = reader.next()  # the 3rd line of the mds with the path
 
         self.responseCol = header[2]
 
@@ -363,12 +349,12 @@ class CreateUserDefinedCurveDialog(QtGui.QDialog):
         for i in range(0, len(header)):
             headerList.append([header[i], header2[i], header3[i]])
 
-        noncovariate_columns = ['Split', 'EvalSplit']
+        non_covariate_columns = ['Split', 'EvalSplit']
         for item in headerList[3:]:
-            if not item[0] in noncovariate_columns:
+            if not item[0] in non_covariate_columns:
                 child_item = QtGui.QTreeWidgetItem([_fromUtf8(item[0]), "0"])
                 child_item.setFlags(QtCore.Qt.ItemIsUserCheckable |
-                                QtCore.Qt.ItemIsEnabled)
+                                    QtCore.Qt.ItemIsEnabled)
                 checked = True
                 if int(item[1]) == 0:
                     checked = False
@@ -381,51 +367,51 @@ class CreateUserDefinedCurveDialog(QtGui.QDialog):
                 self.treeview.addTopLevelItem(child_item)
                 #  self.tree_items[file] = child_item
                 n += 1
-        csvfile.close()
+        csv_file.close()
         #  update the tree view label to show how many covariates there are
         self.label_2.setText(_fromUtf8("Covariates   (n=" + str(n) + ")"))
 
-    def SaveMDSFromTreeview(self):
+    def save_mds_from_treeview(self):
         #  updates the second header line on the input MDS file
         #  to reflect the checked items in the tree view
         #  and saves the results to the output MDS.
 
         reader = csv.reader(open(self.input_mds, "r"))
-        header = reader.next()  #  store the header
-        header2 = reader.next()  #  the 2nd line of the mds with use/don't use
-        header3 = reader.next()  #  the 3rd line of the mds with the path
+        header = reader.next()  # store the header
+        header2 = reader.next()  # the 2nd line of the mds with use/don't use
+        header3 = reader.next()  # the 3rd line of the mds with the path
 
         outHeader2 = header2
         outHeader2[2] = self.selection_name
 
-        treeviewIter = QtGui.QTreeWidgetItemIterator(self.treeview)
-        while treeviewIter.value():
-            item = treeviewIter.value()
+        treeview_iter = QtGui.QTreeWidgetItemIterator(self.treeview)
+        while treeview_iter.value():
+            item = treeview_iter.value()
             col_index = header.index(item.text(0))
             if item.checkState(0) == QtCore.Qt.Checked:
                 outHeader2[col_index] = "1"
             else:
                 outHeader2[col_index] = "0"
-            treeviewIter += 1
+            treeview_iter += 1
 
-        oFile = open(self.output_json, 'wb')
-        writer = csv.writer(oFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        out_file = open(self.output_json, 'wb')
+        writer = csv.writer(out_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(header)
         writer.writerow(outHeader2)
         writer.writerow(header3)
         for row in reader:
             writer.writerow(row)
-        oFile.close
+        out_file.close
 
     def update_pairs_plot(self):
-        self.SaveMDSFromTreeview()
-        outputPic = self.make_new_pairs_plot(self.output_json)
+        self.save_mds_from_treeview()
+        output_pic = self.make_new_pairs_plot(self.output_json)
 
-        self.view.load_picture(outputPic)
+        self.view.load_picture(output_pic)
 
-    def make_new_pairs_plot(self, MDSfile):
+    def make_new_pairs_plot(self, mds_file):
 
-        args = {'i':  MDSfile,
+        args = {'i':  mds_file,
                 'o': self.displayJPEG,
                 'rc': self.responseCol}
 
@@ -448,7 +434,7 @@ class CreateUserDefinedCurveDialog(QtGui.QDialog):
         utils.run_R_script('PairsExplore.r', args, self.module, new_r_path=self.kwargs['r_path'])
 
         if os.path.exists(os.path.join(self.outputDir, "devinfo.csv")):
-            self.loadDeviances()
+            self.load_deviances()
 
         if os.path.exists(os.path.join(self.displayJPEG)):
             return os.path.join(self.displayJPEG)
@@ -456,14 +442,14 @@ class CreateUserDefinedCurveDialog(QtGui.QDialog):
             writetolog("Missing output from R processing: " + self.displayJPEG)
             raise Exception, "Missing output from R processing"
 
-    def saveExploreOptions(self, args):
+    def save_explore_options(self, args):
         checkboxes = [('pres', self.chkPresence),
                       ('absn', self.chkAbsence),
                       ('bgd', self.chkBackground)]
         for arg, checkbox in checkboxes:
             args[arg] = str(checkbox.checkState() == QtCore.Qt.Checked).upper()
 
-    def loadDeviances(self):
+    def load_deviances(self):
         #  store the deviances explained in dev
         deviances = {}
         devfname = os.path.join(self.outputDir, "devinfo.csv")
@@ -483,15 +469,14 @@ class CreateUserDefinedCurveDialog(QtGui.QDialog):
                 print "problem loading deviances"
         del devcsv
 
-
-    def makeNewCovariatePlot(self, output_dir, covariate):
+    def make_new_covariate_plot(self, output_dir, covariate):
         output_fname = os.path.join(output_dir, covariate + ".jpg")
 
-        args = {"i":self.input_mds,
-            "o":output_dir,
-            "rc":self.responseCol,
-            "p":covariate}
-        self.saveExploreOptions(args)
+        args = {"i": self.input_mds,
+                "o": output_dir,
+                "rc": self.responseCol,
+                "p": covariate}
+        self.save_explore_options(args)
 
         if os.path.exists(output_fname):
             os.remove(output_fname)
@@ -506,10 +491,6 @@ class CreateUserDefinedCurveDialog(QtGui.QDialog):
 
     def closeEvent(self, event):
         self.cancel()
-
-
-
-
 
 
 def main(argv):
@@ -531,6 +512,4 @@ def main(argv):
 #      ourMaxent.run()
 
 if __name__ == "__main__":
-
-#    try:
     main(sys.argv)

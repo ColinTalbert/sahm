@@ -455,8 +455,8 @@ class ViewLayerAction(QtGui.QAction):
         self.toolBar.updateToolBar()
 
     def toggleOthers(self):
-        '''Unselect the other raster or vector layers
-        '''
+        """Unselect the other raster or vector layers
+        """
         for action in self.toolBar.actions():
             if "group" in dir(action) and \
                 action.group == self.group and \
@@ -464,9 +464,9 @@ class ViewLayerAction(QtGui.QAction):
                 action.setChecked(False)
 
     def displayLayer(self):
-        '''Display all the layers that have their
+        """Display all the layers that have their
         actions selected in the toolbar
-        '''
+        """
         cellWidget = self.toolBar.getSnappedWidget()
         active_cells = cellWidget.get_active_cells()
 
@@ -549,8 +549,8 @@ class SAHMSpatialViewerToolBar(GeneralSpatialViewerToolBar):
 
     """
     def add_layers_actions(self):
-        '''add the actions (buttons) associated with turning layers on and off
-        '''
+        """add the actions (buttons) associated with turning layers on and off
+        """
         lyrs_label = QtGui.QLabel()
         lyrs_label.setText("Layers:")
         self.appendWidget(lyrs_label)
@@ -589,9 +589,9 @@ class SAHMSpatialViewerToolBar(GeneralSpatialViewerToolBar):
         self.appendAction(ViewStateBoundariesButton(self))
 
     def add_other_actions(self):
-        '''Add the actions(buttons) associated with map navigation
+        """Add the actions(buttons) associated with map navigation
         i.e. zoom, pan, extents
-        '''
+        """
         self.addSeparator()
         other_label = QtGui.QLabel()
         other_label.setText("  Other:")

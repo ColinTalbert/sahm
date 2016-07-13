@@ -50,10 +50,10 @@ import SpatialUtilities
 
 
 class MDSBuilder(object):
-    '''Takes a csv with animal location x,y and attributes each with the values
+    """Takes a csv with animal location x,y and attributes each with the values
     extracted from each of the grids (covariates) indicated in the supplied
     csv list of files
-    '''
+    """
     def __init__(self):
         #  instance level variables
         self.verbose = False
@@ -126,14 +126,14 @@ class MDSBuilder(object):
             raise RuntimeError, "The directory of the supplied MDS output file path, " + self.outputMDS + ", does not appear to exist on the filesystem"
 
         if self.logger is None:
-            self.logger = utilities.logger(outDir, self.verbose)
-        self.writetolog = self.logger.writetolog
+            self.logger = utilities.Logger(outDir, self.verbose)
+        self.writetolog = self.logger.write_to_log
 
     def run(self):
-        '''
+        """
         The main execution method which calls
         each of the processing step functions
-        '''
+        """
 
         self.validateArgs()
         self.writetolog('\nRunning MDSBuilder', True, True)
@@ -165,10 +165,10 @@ class MDSBuilder(object):
             self.writetolog('    The process took {:.1f} seconds'.format(endTime - startTime))
 
     def constructEmptyMDS(self):
-        '''Creates the triple header line format of our output file.
+        """Creates the triple header line format of our output file.
         Also parses the inputs file to append the '_categorical' flag
         to the covariate names of all categorical inputs.
-        '''
+        """
 
         if os.path.exists(self.fieldData):
             fieldDataCSV = csv.reader(open(self.fieldData, "r"))
@@ -269,9 +269,9 @@ class MDSBuilder(object):
         self.templateSurface = SpatialUtilities.SAHMRaster(self.template)
 
     def readInPoints(self):
-        '''Loop through each row in our field data and add the X, Y, response
+        """Loop through each row in our field data and add the X, Y, response
         to our in memory list of rows to write to our output MDS file
-        '''
+        """
         fieldDataCSV = csv.reader(open(self.fieldData, "r"))
         origHeader = fieldDataCSV.next()
         points = []
@@ -288,12 +288,12 @@ class MDSBuilder(object):
         return points
 
     def addBackgroundPoints(self):
-        '''Add self.pointCount number of points to the supplied field data
+        """Add self.pointCount number of points to the supplied field data
         If a probability surface was provided the distribution will
         follow this otherwise it will be uniform within the extent of the
         first of our inputs.
         Each pixel is sampled only once.
-        '''
+        """
         #  determine what value we'll be using (background/pseudoabsense)
         pointval = '-9998'
 
@@ -347,13 +347,13 @@ class MDSBuilder(object):
         del fOut
 
     def pullBackgroundSingly(self, fOut, pointVal):
-        '''We need a small proportion of the total pixels.
+        """We need a small proportion of the total pixels.
         We'll do our sampling without replacement by randomly sampling pixels
         and keeping track of the ones we've tried so we don't retry them.
 
         Each found pixel will be written to a new row in our temp output file
         as it's found.
-        '''
+        """
         if self.probSurface:
             probRaster = self.probSurface
             useProbSurf = True
@@ -601,11 +601,11 @@ class MDSBuilder(object):
             return int(1.0 / ave_prob * self.pointCount * 1.1)
 
     def probSurfaceSanityCheck(self):
-        '''ascertain how hard it will be to find the required
+        """ascertain how hard it will be to find the required
         number of points given the entered probability surface.
 
         return proportion we will have to sample.
-        '''
+        """
 
         #  step2 calculate the expected maximum number of points available
         if self.probSurface is None:

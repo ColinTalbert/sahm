@@ -875,8 +875,8 @@ gdal2tiles temp.vrt""" % self.input )
 						if self.options.verbose:
 							print("Modified -dstalpha warping result saved into 'tiles1.vrt'")
 							open("tiles1.vrt","w").write(s)
-					s = '''
-					'''
+					s = """
+					"""
 						
 			else:
 				self.error("Input file has unknown SRS.", "Use --s_srs ESPG:xyz (or similar) to provide source reference system." )

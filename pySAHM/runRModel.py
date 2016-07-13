@@ -57,7 +57,7 @@ def main(args_in):
 #              outDir = os.path.split(outDir)[0]
 
             print "outDir=", outDir
-            logger = utilities.logger(os.path.split(outDir)[0], True)
+            logger = utilities.Logger(os.path.split(outDir)[0], True)
 
 #   if this is an ApplyModel we need to wait for the preceeding model to finish
 #   up before launching R
@@ -85,7 +85,7 @@ def main(args_in):
         msg += "\n     The R error message is below: \n"
         msg += ret[1]
         if logger:
-            logger.writetolog(msg)
+            logger.write_to_log(msg)
         print msg
         return
 
@@ -93,7 +93,7 @@ def main(args_in):
         msg = "The R script returned the following warning(s).  The R warning message is below - \n"
         msg += ret[1]
         if logger:
-            logger.writetolog(msg)
+            logger.write_to_log(msg)
 
     setupGDAL()
     mosaicTiledOutputs(outDir)
@@ -178,11 +178,11 @@ def mosaicTiledOutputs(outputDirectory):
 
 
 def get_nd_val(filename):
-    '''Attemps to determine the nodata value used in this raster
+    """Attemps to determine the nodata value used in this raster
     First it reads the value from the header metadata
     If that value is approximately the same as raster min
     the return the exact pixel value
-    '''
+    """
     dataset = gdal.Open(filename, gdalconst.GA_ReadOnly)
     band = dataset.GetRasterBand(1)
 
