@@ -50,9 +50,11 @@ import multiprocessing
 from PyQt4 import QtCore, QtGui
 
 try:
-    import hashlib.sha1 as sha_hash
+    import hashlib
+    sha_hash = hashlib.sha1
 except ImportError:
-    import sha.new as sha_hash
+    import sha
+    sha_hash = sha.new
 
 _logfile = ''
 _verbose = False
