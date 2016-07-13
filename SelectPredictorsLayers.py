@@ -65,7 +65,6 @@ except AttributeError:
 
 
 class SelectListDialog(QtGui.QDialog):
-
     def __init__(self, kwargs, parent=None):
         # print inputMDS, outputMDS, rPath, modelsPath
         self.rPath = kwargs['r_path']
@@ -94,15 +93,13 @@ class SelectListDialog(QtGui.QDialog):
         self.horizontalLayout_4.setSpacing(5)
         self.horizontalLayout_4.setMargin(5)
         self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
-        self.verticalLObjectName(_fromUtf8("verticalLayout_3"))
+        self.verticalLayout_3 = QtGui.QVBoxLayout()
+        self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
         self.splitter = QtGui.QSplitter()
-        sizePolicy = QtGui.QSizePolicy(
-            QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVeayout_3 = QtGui.QVBoxLayout()
-        self.verticalLayout_3.setrticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.splitter.sizePolicy().hasHeightForWidth())
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.splitter.sizePolicy().hasHeightForWidth())
         self.splitter.setSizePolicy(sizePolicy)
         self.splitter.setMinimumSize(QtCore.QSize(0, 0))
         self.splitter.setFrameShape(QtGui.QFrame.Box)
@@ -115,8 +112,7 @@ class SelectListDialog(QtGui.QDialog):
         self.widget.setObjectName(_fromUtf8("widget"))
         self.verticalLayout = QtGui.QVBoxLayout(self.widget)
         self.verticalLayout.setSpacing(4)
-        self.verticalLayout.setSizeConstraint(
-            QtGui.QLayout.SetDefaultConstraint)
+        self.verticalLayout.setSizeConstraint(QtGui.QLayout.SetDefaultConstraint)
         self.verticalLayout.setContentsMargins(6, 6, 3, 3)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.label_2 = QtGui.QLabel(self.widget)
@@ -129,15 +125,12 @@ class SelectListDialog(QtGui.QDialog):
         self.treeview.setColumnWidth(0, 130)
         self.treeview.headerItem().setText(1, "% Deviance Explained")
         self.treeview.setColumnWidth(1, 125)
-        self.treeview.setToolTip(
-            _fromUtf8("Double click to view detailed information for single covariate."))
-#        self.treeview.setHeaderLabels(['include', 'covariate'])
-        sizePolicy = QtGui.QSizePolicy(
-            QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Expanding)
+        self.treeview.setToolTip(_fromUtf8("Double click to view detailed information for single covariate."))
+        #        self.treeview.setHeaderLabels(['include', 'covariate'])
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.treeview.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(self.treeview.sizePolicy().hasHeightForWidth())
         self.treeview.setSizePolicy(sizePolicy)
         self.treeview.setMinimumSize(QtCore.QSize(75, 0))
         self.treeview.setMaximumSize(QtCore.QSize(16777215, 16777215))
@@ -146,54 +139,44 @@ class SelectListDialog(QtGui.QDialog):
         self.treeview.setObjectName(_fromUtf8("treeview"))
         self.verticalLayout.addWidget(self.treeview)
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
-        self.horizontalLayout_3.setSizeConstraint(
-            QtGui.QLayout.SetDefaultConstraint)
+        self.horizontalLayout_3.setSizeConstraint(QtGui.QLayout.SetDefaultConstraint)
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
         self.btnRunR = QtGui.QPushButton(self.widget)
-        sizePolicy = QtGui.QSizePolicy(
-            QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.btnRunR.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(self.btnRunR.sizePolicy().hasHeightForWidth())
         self.btnRunR.setSizePolicy(sizePolicy)
         self.btnRunR.setObjectName(_fromUtf8("btnRunR"))
-#        self.horizontalLayout_3.addWidget(self.btnRunR)
+        #        self.horizontalLayout_3.addWidget(self.btnRunR)
 
         self.label = QtGui.QLabel(self.widget)
-        sizePolicy = QtGui.QSizePolicy(
-            QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.label.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
         self.label.setSizePolicy(sizePolicy)
         self.label.setObjectName(_fromUtf8("label"))
         self.horizontalLayout_3.addWidget(self.label)
         self.lineEdit = QtGui.QLineEdit(self.widget)
 
         self.lineEdit.setText(_fromUtf8(str(self.kwargs['minCor'])))
-        sizePolicy = QtGui.QSizePolicy(
-            QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.lineEdit.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(self.lineEdit.sizePolicy().hasHeightForWidth())
         self.lineEdit.setSizePolicy(sizePolicy)
         self.lineEdit.setMaximumSize(QtCore.QSize(75, 16777215))
         self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
         self.horizontalLayout_3.addWidget(self.lineEdit)
-        spacerItem = QtGui.QSpacerItem(
-            10, 0, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        spacerItem = QtGui.QSpacerItem(10, 0, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem)
         self.numPlots = QtGui.QLineEdit(self.widget)
         self.numPlots.setText(_fromUtf8(str(self.kwargs['numPlots'])))
-        sizePolicy = QtGui.QSizePolicy(
-            QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.lineEdit.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(self.lineEdit.sizePolicy().hasHeightForWidth())
 
         self.horizontalLayout_6 = QtGui.QHBoxLayout()
         self.horizontalLayout_6.setSpacing(5)
@@ -231,8 +214,7 @@ class SelectListDialog(QtGui.QDialog):
 
         self.view = utils.InteractiveQGraphicsView(self)
 
-        sizePolicy = QtGui.QSizePolicy(
-            QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(4)
         sizePolicy.setVerticalStretch(0)
         # sizePolicy.setHeightForWidth(self.view.sizePolicy().hasHeightForWidth())
@@ -247,24 +229,20 @@ class SelectListDialog(QtGui.QDialog):
         self.horizontalLayout.setContentsMargins(-1, 3, -1, 3)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.btnOK = QtGui.QPushButton()
-        sizePolicy = QtGui.QSizePolicy(
-            QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.btnOK.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(self.btnOK.sizePolicy().hasHeightForWidth())
         self.btnOK.setSizePolicy(sizePolicy)
         self.btnOK.setBaseSize(QtCore.QSize(100, 0))
         self.btnOK.setToolTip(_fromUtf8(""))
         self.btnOK.setObjectName(_fromUtf8("btnOK"))
         self.horizontalLayout.addWidget(self.btnOK)
         self.btnCancel = QtGui.QPushButton()
-        sizePolicy = QtGui.QSizePolicy(
-            QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.btnCancel.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(self.btnCancel.sizePolicy().hasHeightForWidth())
         self.btnCancel.setSizePolicy(sizePolicy)
         self.btnCancel.setBaseSize(QtCore.QSize(100, 0))
         self.btnCancel.setObjectName(_fromUtf8("btnCancel"))
@@ -282,7 +260,7 @@ class SelectListDialog(QtGui.QDialog):
         self.resize(1100, 800)
         self.view.resize(750, 750)
 
-        # End  autogenerated code from QtDesigner
+        ##End  autogenerated code from QtDesigner
 
         layout.addLayout(self.horizontalLayout_4)
 
@@ -298,8 +276,7 @@ class SelectListDialog(QtGui.QDialog):
         self.connect(self.numPlots, QtCore.SIGNAL('textChanged(QString)'),
                      self.numPlotsEdit)
 
-        self.connect(self.treeview, QtCore.SIGNAL(
-            'itemDoubleClicked(QTreeWidgetItem*, int)'), self.on_item_doublclick)
+        self.connect(self.treeview, QtCore.SIGNAL('itemDoubleClicked(QTreeWidgetItem*, int)'), self.on_item_doublclick)
 
         # code to populate the treeview with the contents of our MDS
         self.PopulateTreeview()
@@ -312,8 +289,7 @@ class SelectListDialog(QtGui.QDialog):
         self.view.load_picture(outputPic)
 
     def on_item_doublclick(self, item, column):
-        QtGui.QApplication.setOverrideCursor(
-            QtGui.QCursor(QtCore.Qt.WaitCursor))
+        QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
         output_dir = os.path.join(self.outputDir, "PredictorInspections")
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
@@ -321,7 +297,7 @@ class SelectListDialog(QtGui.QDialog):
         outputPic = self.makeNewCovariatePlot(output_dir, str(item.text(0)))
         QtGui.QApplication.restoreOverrideCursor()
         self.popup = QtGui.QDialog()
-#        self.popup.setBaseSize(1200, 1200)
+        #        self.popup.setBaseSize(1200, 1200)
         size = 800
         self.popup.resize(size, size)
 
@@ -356,16 +332,14 @@ class SelectListDialog(QtGui.QDialog):
 
     def PopulateTreeview(self):
         ''' Reads in the input MDS and populates the treeview widget
-        with the items in covariate columns.  
+        with the items in covariate columns.
         Sets the check state to be the same as the 0/1 include flag.
         '''
-        writetolog(
-            "    PopulateTreeview inputMDS = " + self.inputMDS, False, False)
+        writetolog("    PopulateTreeview inputMDS = " + self.inputMDS, False, False)
 
-#        self.treeview.setColumnCount(2)
+        #        self.treeview.setColumnCount(2)
         # If an outputMDS already exists then the user has run this module before.
-        # We need to pull and apply their previous selections from that output
-        # file
+        # We need to pull and apply their previous selections from that output file
         csvfile = open(self.inputMDS, "r")
         # print "MDS", self.inputMDS
         reader = csv.reader(csvfile)
@@ -396,7 +370,7 @@ class SelectListDialog(QtGui.QDialog):
                     child_item.setCheckState(0, QtCore.Qt.Checked)
 
                 self.treeview.addTopLevelItem(child_item)
-                #self.tree_items[file] = child_item
+                # self.tree_items[file] = child_item
                 n += 1
         csvfile.close()
         # update the tree view label to show how many covariates there are
@@ -426,8 +400,7 @@ class SelectListDialog(QtGui.QDialog):
             treeviewIter += 1
 
         oFile = open(self.outputMDS, 'wb')
-        writer = csv.writer(
-            oFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        writer = csv.writer(oFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(header)
         writer.writerow(outHeader2)
         writer.writerow(header3)
@@ -443,7 +416,7 @@ class SelectListDialog(QtGui.QDialog):
 
     def make_new_pairs_plot(self, MDSfile):
 
-        args = {'i':  MDSfile,
+        args = {'i': MDSfile,
                 'o': self.displayJPEG,
                 'rc': self.responseCol}
 
@@ -461,11 +434,9 @@ class SelectListDialog(QtGui.QDialog):
                 args[arg] = str(self.kwargs[kwarg_key])
 
         if os.path.exists(os.path.join(self.outputDir, "Predictor_Correlation.png")):
-            os.remove(
-                os.path.join(self.outputDir, "Predictor_Correlation.png"))
+            os.remove(os.path.join(self.outputDir, "Predictor_Correlation.png"))
 
-        utils.run_R_script(
-            'PairsExplore.r', args, self.module, new_r_path=self.kwargs['r_path'])
+        utils.run_R_script('PairsExplore.r', args, self.module, new_r_path=self.kwargs['r_path'])
 
         if os.path.exists(os.path.join(self.outputDir, "devinfo.csv")):
             self.loadDeviances()
@@ -494,8 +465,7 @@ class SelectListDialog(QtGui.QDialog):
                 deviance = "%.1f" % float(line[1])
                 deviance = deviance.rjust(7)
                 try:
-                    item = self.treeview.findItems(
-                        _fromUtf8(line[0]), QtCore.Qt.MatchFlags())
+                    item = self.treeview.findItems(_fromUtf8(line[0]), QtCore.Qt.MatchFlags())
                     item[0].setData(1, 0, deviance)
                 except:
                     print "Problem encountered with item: ", line[0]
