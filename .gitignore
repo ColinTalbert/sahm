@@ -3,6 +3,7 @@
 ~*
 *.DS_Store
 .project
+.idea
 .pydevproject
 .metadata
 *Thumbs.db
