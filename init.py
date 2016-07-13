@@ -141,6 +141,31 @@ def menu_items():
 
                         utilities.start_new_pool(utilities.get_process_count(widget.text()))
 
+    def save_current_workflow():
+        import vistrails
+        from vistrails.core.application import get_vistrails_application
+        pipeline = get_vistrails_application().get_current_controller().current_pipeline
+
+        from vistrails.core.vistrail.vistrail import Vistrail as _Vistrail
+
+        vistrail = _Vistrail()
+        ops = []
+        for module in pipeline.module_list:
+            ops.append(('add', module))
+        for connection in pipeline.connection_list:
+            ops.append(('add', connection))
+        # a = vistrails.core.vistrail.annotation.Annotation(id=0, key='__description__', value='adfasdf')
+        # action.db_add_annotation(a)
+
+        action = vistrails.core.db.action.create_action(ops)
+        vistrail.add_action(action, 0L)
+        vistrail.update_id_scope()
+
+        vistrail.set_action_annotation(1, key='__tag__', value='this is the label')
+        vistrail.set_action_annotation(1, key='__notes__', value='how about some notes')
+        vistrail.change_description("Imported pipeline", 0L)
+
+        vistrails.db.services.io.save_workflow_to_xml(vistrail, r"c:\temp_colin\test_12345.xml")
 
     lst = []
     lst.append(("Change session folder", change_session_folder))
