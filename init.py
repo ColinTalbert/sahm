@@ -41,21 +41,25 @@ import shutil
 import copy
 import time
 
+from PyQt4 import QtCore, QtGui
+
+# VisTrails Imports
 from vistrails.core.modules.vistrails_module import Module, ModuleError, ModuleSuspended
 from vistrails.core.modules.basic_modules import File, Path, Constant
 from vistrails.gui.modules.module_configure import StandardModuleConfigurationWidget
 from vistrails.core.packagemanager import get_package_manager
 import vistrails.core.upgradeworkflow as upgradeworkflow
-
 from vistrails.core import system
 
-from PyQt4 import QtCore, QtGui
+# import MD_Resources.data_management as data_management
+from MD_Resources.data_management import data_management
+from MD_Resources.data_management import get_sb_item
+from MD_Resources.data_management import get_sb_credentials
 
+# SAHM imports
 from widgets import get_predictor_widget, get_predictor_config
-
 from SelectPredictorsLayers import SelectListDialog
 from SelectAndTestFinalModel import SelectAndTestFinalModel
-
 import utils
 import GenerateModuleDoc as GenModDoc
 import pySAHM.utilities as utilities
@@ -67,10 +71,8 @@ import pySAHM.SpatialUtilities as SpatialUtilities
 from SahmOutputViewer import ModelOutputViewer
 # from SahmOutputViewer import ResponseCurveExplorer
 from SahmSpatialOutputViewer import ModelMapViewer
-
 from spatial_modules import BaseGeoViewerCell, GeoSpatialViewerCell, RasterLayer, \
                             VectorLayer, PolyLayer, PointLayer
-
 from utils import writetolog
 from pySAHM.utilities import TrappedError
 
@@ -177,12 +179,27 @@ def menu_items():
 
         vistrails.db.services.io.save_workflow_to_xml(vistrail, r"c:\temp_colin\test_12345.xml")
 
+    def data_management_init():
+        # global session_dir
+        dm = data_management()
+        print dm
+
+    def get_public_item():
+        # global session_dir
+        gp = get_sb_item()
+
+    def get_sb_user_pwd():
+        credentials = get_sb_credentials()
+
     lst = []
     lst.append(("Change session folder", change_session_folder))
     lst.append(("Change processing mode", select_processing_mode))
     lst.append(("Select and test the Final Model", select_test_final_model))
     lst.append(("save current workflow", save_current_workflow))
-    return(lst)
+    lst.append(("Launch MetaDataWizard from Data Management", data_management_init))
+    lst.append(("Get ScienceBase Item", get_public_item))
+    lst.append(("Return SB Username and Password", get_sb_user_pwd))
+    return lst
 
 
 class SAHMDocumentedModule(object):
