@@ -87,6 +87,10 @@ from widgets import get_predictor_widget, get_predictor_config
 from SelectPredictorsLayers import SelectListDialog
 from SelectAndTestFinalModel import SelectAndTestFinalModel
 
+# import MD_Resources.data_management as data_management
+from MD_Resources.data_management import data_management
+from MD_Resources.data_management import get_sb_item
+from MD_Resources.data_management import get_sb_credentials
 
 import utils
 import GenerateModuleDoc as GenModDoc
@@ -108,6 +112,8 @@ from sahm_picklists import ResponseType, AggregationMethod, \
 from utils import writetolog
 from pySAHM.utilities import TrappedError
 global utilities
+
+
 
 identifier = 'gov.usgs.sahm' 
 
@@ -211,17 +217,29 @@ def menu_items():
 
     def checkAsyncModels():
         utils.launch_RunMonitorApp()
-        
-        
-        
+
+    def data_management_init():
+        # global session_dir
+        dm = data_management()
+        print dm
+
+    def get_public_item():
+        # global session_dir
+        gp = get_sb_item()
+
+    def get_sb_user_pwd():
+        credentials = get_sb_credentials()
+
     lst = []
     lst.append(("Change session folder", change_session_folder))
     lst.append(("Change processing mode", selectProcessingMode))
     lst.append(("Select and test the Final Model", select_test_final_model))
     lst.append(("Check Asynchronous model runs", checkAsyncModels))
-    lst.append(("Tony's Data Management", select_test_final_model))
+    lst.append(("Launch MetaDataWizard from Data Management", data_management_init))
+    lst.append(("Get ScienceBase Item", get_public_item))
+    lst.append(("Return SB Username and Password", get_sb_user_pwd))
 
-    return(lst)
+    return lst
 
 
 #
