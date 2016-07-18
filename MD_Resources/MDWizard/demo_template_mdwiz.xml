@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+ <idinfo>
+  <citation>
+   <citeinfo>
+    <origin>U.S. Geological Survey, Fort Collins Science Center (FORT)</origin>
+    <pubdate>Unpublished Material</pubdate>
+    <title>Natural Resource Preservation Program: Gunnison Sage-Grouse Chick Survival and Landscape Population Modeling</title>
+    <geoform>Project</geoform>
+   </citeinfo>
+  </citation>
+  <descript>
+   <abstract>Gunnison Sage-Grouse (&lt;i&gt;Centrocerus minimus) populations are declining, primarily due to habitat alteration, conversion, and fragmentation. Past studies and long-term data on the closely related Greater Sage-Grouse—also undergoing population declines—indicate that there may be changes in chick survival and productivity that are limiting population sustainability and recovery. Data on nesting/brood-rearing locations and habitat use for Gunnison Sage-Grouse are limited, however, and chick survival remains unevaluated. More than half of the estimated 4,500 remaining Gunnison Sage-Grouse inhabit the Gunnison Basin of west-central Colorado. Two National Park Service units provide crucial habitat for the species: Curecanti National Recreation Area and Black Canyon of the Gunnison National Park. Since 2003, the Colorado Division of Wildlife, U.S. Bureau of Land Management, and USDA Natural Resources Conservation Service—in cooperation with private landowners—have implemented small projects to improve Gunnison Sage-Grouse habitat; however, effectiveness of these treatments for Gunnison Sage-Grouse has not been evaluated. This task entails using recently collected and new movement data from radio-marked Gunnison Sage-Grouse hens and chicks to improve our understanding of their survivorship and develop a habitat-selection model. The model will provide a stronger basis for identifying key resources needing conservation and areas suitable for habitat improvements.</abstract>
+   <purpose>See Abstract</purpose>
+   <supplinf>The USGS BASIS+ tracking number for this project is 8160DAT.2.30</supplinf>
+  </descript>
+  <timeperd>
+   <timeinfo>
+    <rngdates>
+     <begdate>20071003</begdate>
+     <enddate>20100930</enddate>
+    </rngdates>
+   </timeinfo>
+   <current>observed</current>
+  </timeperd>
+  <status>
+   <progress>In work</progress>
+   <update>As needed</update>
+  </status>
+  <spdom>
+   <descgeog>Colorado</descgeog>
+   <bounding>
+    <westbc>-109.0552</westbc>
+    <eastbc>-102.03676</eastbc>
+    <northbc>41.00341</northbc>
+    <southbc>36.98897</southbc>
+   </bounding>
+  </spdom>
+  <keywords>
+   <theme>
+    <themekt>None</themekt>
+    <themekey>radio telemetry</themekey>
+    <themekey>landscape-scale</themekey>
+    <themekey>sagebrush steppe</themekey>
+    <themekey>Bureau of Land Management</themekey>
+    <themekey>habitat selection</themekey>
+    <themekey>sagebrush ecosystems</themekey>
+    <themekey>survivorship</themekey>
+    <themekey>chick survival</themekey>
+    <themekey>population modeling</themekey>
+    <themekey>species of concern</themekey>
+    <themekey>population trends</themekey>
+   </theme>
+   <place>
+    <placekt>None</placekt>
+    <placekey>Colorado</placekey>
+   </place>
+  </keywords>
+  <taxonomy>
+   <keywtax>
+    <taxonkt>None</taxonkt>
+    <taxonkey>Gunnison Sage Grouse</taxonkey>
+   </keywtax>
+   <taxoncl>
+    <taxonrn>Kingdom</taxonrn>
+    <taxonrv>Animalia</taxonrv>
+    <taxoncl>
+     <taxonrn>Phylum</taxonrn>
+     <taxonrv>Chordata</taxonrv>
+     <taxoncl>
+      <taxonrn>Class</taxonrn>
+      <taxonrv>Aves</taxonrv>
+      <taxoncl>
+       <taxonrn>Order</taxonrn>
+       <taxonrv>Galliformes</taxonrv>
+       <taxoncl>
+        <taxonrn>Family</taxonrn>
+        <taxonrv>Phasianidae</taxonrv>
+        <taxoncl>
+         <taxonrn>Genus</taxonrn>
+         <taxonrv>Centrocercus</taxonrv>
+         <taxoncl>
+          <taxonrn>Species</taxonrn>
+          <taxonrv>Centrocercus minimus</taxonrv>
+          <common>Gunnison Sage Grouse</common>
+         </taxoncl>
+        </taxoncl>
+       </taxoncl>
+      </taxoncl>
+     </taxoncl>
+    </taxoncl>
+   </taxoncl>
+  </taxonomy>
+  <accconst>Contact principal investigator after completion of project.</accconst>
+  <useconst>Contact principal investigator after completion of project.</useconst>
+  <ptcontac>
+   <cntinfo>
+    <cntperp>
+     <cntper>Cameron Aldridge</cntper>
+     <cntorg>U.S. Geological Survey, Fort Collins Science Center (FORT)</cntorg>
+    </cntperp>
+    <cntaddr>
+     <addrtype>Mailing and Physical</addrtype>
+     <address>U.S. Geological Survey, Fort Collins Science Center (FORT)</address>
+     <city>Fort Collins</city>
+     <state>CO</state>
+     <postal>80526-8118</postal>
+     <country>USA</country>
+    </cntaddr>
+    <cntvoice>970-226-9433</cntvoice>
+    <cntemail>aldridgec@usgs.gov</cntemail>
+   </cntinfo>
+  </ptcontac>
+ </idinfo>
+ <dataqual>
+  <attracc>
+   <attraccr>No formal attribute accuracy tests were conducted.</attraccr>
+  </attracc>
+  <logic>Unknown</logic>
+  <complete>Unknown</complete>
+  <posacc>
+   <horizpa>
+    <horizpar>A formal accuracy assessment of the horizontal positional information in the data set has not been conducted.</horizpar>
+   </horizpa>
+   <vertacc>
+    <vertaccr>A formal accuracy assessment of the vertical positional information in the data set has either not been conducted, or is not applicable.</vertaccr>
+   </vertacc>
+  </posacc>
+  <lineage>
+   <procstep>
+    <procdesc>Unknown Process Steps</procdesc>
+    <procdate>2010</procdate>
+   </procstep>
+  </lineage>
+ </dataqual>
+ <distinfo>
+  <distrib>
+   <cntinfo>
+    <cntorgp>
+     <cntorg>U.S. Geological Survey, Fort Collins Science Center (FORT)</cntorg>
+    </cntorgp>
+    <cntaddr>
+     <addrtype>Mailing and Physical</addrtype>
+     <address>U.S. Geological Survey, Fort Collins Science Center (FORT)</address>
+     <city>Fort Collins</city>
+     <state>CO</state>
+     <postal>80526-8118</postal>
+     <country>USA</country>
+    </cntaddr>
+    <cntvoice>(970) 226-9100</cntvoice>
+   </cntinfo>
+  </distrib>
+  <resdesc>Data for Natural Resource Preservation Program: Gunnison Sage-Grouse Chick Survival and Landscape Population Modeling project.</resdesc>
+  <distliab>Although this data and information has been processed successfully on a computer system at the USGS Fort Collins Science Center, no warranty expressed or implied is made regarding the accuracy or utility of the data and information on any other system or for general or scientific purposes, nor shall the act of distribution constitute any such warranty.  This disclaimer applies both to individual use of the data and information, and aggregate use with other data and information.  It is also strongly recommended that careful attention be paid to the contents of the metadata file associated with these data and information.  The USGS shall not be held liable for improper or incorrect use of the data and information described and/or contained herein.</distliab>
+  <custom>Contact the Distributor</custom>
+ </distinfo>
+ <metainfo>
+  <metd>20100119</metd>
+  <metc>
+   <cntinfo>
+    <cntorgp>
+     <cntorg>U.S. Geological Survey, Fort Collins Science Center (FORT)</cntorg>
+     <cntper>FORT Metadata Specialist</cntper>
+    </cntorgp>
+    <cntaddr>
+     <addrtype>Mailing and Physical</addrtype>
+     <address>U.S. Geological Survey, Fort Collins Science Center (FORT)
+2150 Centre Avenue, Bldg C</address>
+     <city>Fort Collins</city>
+     <state>CO</state>
+     <postal>80526-8118</postal>
+     <country>USA</country>
+    </cntaddr>
+    <cntvoice>(970) 226-9100</cntvoice>
+    <cntfax>(970) 226-9230</cntfax>
+    <cntemail>fort_metadata_team@usgs.gov</cntemail>
+   </cntinfo>
+  </metc>
+  <metstdn>FGDC Biological Data Profile of the Content Standard for Digital Geospatial Metadata</metstdn>
+  <metstdv>FGDC-STD-001.1-1999</metstdv>
+ </metainfo>
+</metadata>

@@ -109,6 +109,19 @@ def get_fname(parent=None):
         return str(fname)
 
 
+def get_md_template():
+    """
+    return the default metadata template file
+    TODO: make this a per user variable so that users can customize their starting template,  store in config???
+
+    :return:
+    str filename
+    """
+    cur_dname = os.path.split(os.path.realpath(__file__))[0]
+    template_fname = os.path.join(cur_dname, "MDWizard", "demo_template.xml")
+    return template_fname
+
+
 class Buddy_Label(QtGui.QLabel):
     def __init__(self, buddy, parent=None):
         super(Buddy_Label, self).__init__(parent)
@@ -208,7 +221,8 @@ def data_management():
     # file_picker_gui = FilePicker()
     # file_picker_gui.show()
 
-    input_file_xml = get_fname()
+    # input_file_xml = get_fname()
+    input_file_xml = get_md_template()
     # ctypes.windll.user32.MessageBoxA(0, "Input File lives here: \n" +
     #                                  input_file_xml, "MD_Resources Module - data_management",  1)
 

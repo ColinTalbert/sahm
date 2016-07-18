@@ -153,7 +153,7 @@ def menu_items():
 
                         utilities.start_new_pool(utilities.get_process_count(widget.text()))
 
-    def save_current_workflow():
+    def archive_current_workflow():
         import vistrails
         from vistrails.core.application import get_vistrails_application
         pipeline = get_vistrails_application().get_current_controller().current_pipeline
@@ -195,10 +195,10 @@ def menu_items():
     lst.append(("Change session folder", change_session_folder))
     lst.append(("Change processing mode", select_processing_mode))
     lst.append(("Select and test the Final Model", select_test_final_model))
-    lst.append(("save current workflow", save_current_workflow))
-    lst.append(("Launch MetaDataWizard from Data Management", data_management_init))
-    lst.append(("Get ScienceBase Item", get_public_item))
-    lst.append(("Return SB Username and Password", get_sb_user_pwd))
+    lst.append(("Document workflow (Metadata creation)", data_management_init))
+    lst.append(("Archive current workflow (create zip bundle)", archive_current_workflow))
+    lst.append(("Move item to ScienceBase", get_public_item))
+    # lst.append(("Return SB Username and Password", get_sb_user_pwd))
     return lst
 
 

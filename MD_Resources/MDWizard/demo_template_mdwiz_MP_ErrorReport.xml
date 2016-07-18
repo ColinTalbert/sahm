@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="C:\GoogleDrive\work\Python\DevWorkspace\userpackages\sahm\MD_Resources\MDWizard\Resources\MPErrorReportStylesheet.xsl" type="text/xsl"?>
+<report program="mp" version="2.9.33" originator="Peter N. Schweitzer (U.S. Geological Survey)">
+  <info input_file="C:\GoogleDrive\work\Python\DevWorkspace\userpackages\sahm\MD_Resources\MDWizard\demo_template_mdwiz.xml" />
+  <info process_date="20160714" process_time="08:04:01" />
+  <warning type="missing" line="3" xpath="">Missing Spatial_Data_Organization_Information is mandatory if applicable in Metadata</warning>
+  <warning type="missing" line="3" xpath="">Missing Spatial_Reference_Information is mandatory if applicable in Metadata</warning>
+  <warning type="missing" line="3" xpath="">Missing Entity_and_Attribute_Information is mandatory if applicable in Metadata</warning>
+  <summary />
+</report>

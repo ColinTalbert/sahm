@@ -1,0 +1,156 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<metadata>
+  <idinfo>
+    <citation>
+      <citeinfo>
+        <title>
+        </title>
+        <pubdate>
+        </pubdate>
+      </citeinfo>
+    </citation>
+    <timeperd>
+      <current>
+      </current>
+      <timeinfo>
+        <sngdate>
+          <caldate>
+          </caldate>
+        </sngdate>
+        <rngdates>
+          <begdate>
+          </begdate>
+          <enddate>
+          </enddate>
+        </rngdates>
+      </timeinfo>
+    </timeperd>
+    <status>
+      <progress>
+      </progress>
+      <update>
+      </update>
+    </status>
+    <useconst>None. Users are advised to read the data set's metadata thoroughly to understand appropriate use and data limitations.</useconst>
+    <accconst>None. Please see 'Distribution Info' for details.</accconst>
+    <descript>
+      <abstract>
+      </abstract>
+      <purpose>
+      </purpose>
+      <supplinf>
+      </supplinf>
+    </descript>
+    <datacred>
+    </datacred>
+    <ptcontac>
+      <cntinfo>
+        <cntaddr />
+      </cntinfo>
+    </ptcontac>
+    <keywords />
+  </idinfo>
+  <dataqual>
+    <attracc>
+      <attraccr>No formal attribute accuracy tests were conducted.</attraccr>
+    </attracc>
+    <logic>No formal logical accuracy tests were conducted.</logic>
+    <complete>Data set is considered complete for the information presented, as described in the abstract. Users are advised to read the rest of the metadata record carefully for additional details.</complete>
+    <posacc>
+      <horizpa>
+        <horizpar>A formal accuracy assessment of the horizontal positional information in the data set has not been conducted.</horizpar>
+      </horizpa>
+      <vertacc>
+        <vertaccr>A formal accuracy assessment of the vertical positional information in the data set has either not been conducted, or is not applicable.
+</vertaccr>
+      </vertacc>
+    </posacc>
+    <lineage>
+      <procstep>
+        <procdate>Unknown</procdate>
+        <procdesc>Development of the data set by the agency / individuals identified in the 'Originator' element in the Identification Info section of the record.</procdesc>
+      </procstep>
+    </lineage>
+  </dataqual>
+  <spdoinfo>
+  </spdoinfo>
+  <spref>
+  </spref>
+  <eainfo>
+  </eainfo>
+  <distinfo>
+    <distrib>
+      <cntinfo>
+        <cntaddr>
+          <addrtype>mailing address</addrtype>
+          <city>Fort Collins</city>
+          <state>CO</state>
+          <country>
+          </country>
+          <postal>80526</postal>
+          <address>2150 Centre Avenue Bldg C</address>
+        </cntaddr>
+        <cntorgp>
+          <cntorg>U.S. Geological Survey, Southwest Region</cntorg>
+          <cntper>Colin Talbert</cntper>
+        </cntorgp>
+        <cntpos>Ecologist</cntpos>
+        <cntvoice>970-226-9425</cntvoice>
+        <cntfax>970-226-9230</cntfax>
+        <cntemail>talbertc@usgs.gov</cntemail>
+      </cntinfo>
+    </distrib>
+    <distliab>Distributor assumes no liability for misuse of data.</distliab>
+    <stdorder>
+      <fees>None. No fees are applicable for obtaining the data set.</fees>
+      <digform>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>
+                </networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+    </stdorder>
+    <custom>
+    </custom>
+  </distinfo>
+  <metainfo>
+    <metc>
+      <cntinfo>
+        <cntaddr>
+          <city>
+          </city>
+          <state>
+          </state>
+          <country>
+          </country>
+          <postal>
+          </postal>
+          <addrtype>
+          </addrtype>
+        </cntaddr>
+        <cntperp>
+          <cntper>
+          </cntper>
+          <cntorg>
+          </cntorg>
+        </cntperp>
+        <cntpos>
+        </cntpos>
+        <cntvoice>
+        </cntvoice>
+        <cntfax>
+        </cntfax>
+        <cntemail>
+        </cntemail>
+      </cntinfo>
+    </metc>
+    <metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+    <metstdv>FGDC-STD-001-1998</metstdv>
+  </metainfo>
+</metadata>
