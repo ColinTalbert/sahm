@@ -483,6 +483,7 @@ def get_contact():
         # for node in etree.iter():
         #     if node.text is not None:
         #         print 'node.tag: ' + node.tag + '  node.text: ' + node.text
+        #
 
     except OSError as err:
         print("OS error: {0}".format(err))
