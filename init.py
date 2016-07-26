@@ -195,9 +195,9 @@ def menu_items():
     lst.append(("Change session folder", change_session_folder))
     lst.append(("Change processing mode", select_processing_mode))
     lst.append(("Select and test the Final Model", select_test_final_model))
-    lst.append(("Document workflow (Metadata creation)", data_management_init))
-    lst.append(("Archive current workflow (create zip bundle)", archive_current_workflow))
-    lst.append(("Move item to ScienceBase", get_public_item))
+    lst.append(("DataManagement/Document workflow (Metadata creation)", data_management_init))
+    lst.append(("DataManagement/Archive current workflow (create zip bundle)", archive_current_workflow))
+    lst.append(("DataManagement/Move item to ScienceBase", get_public_item))
     # lst.append(("Return SB Username and Password", get_sb_user_pwd))
     return lst
 
