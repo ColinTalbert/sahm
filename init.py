@@ -36,7 +36,8 @@
 ###############################################################################
 
 import csv
-import os, sys
+import os
+import sys
 import shutil
 import copy
 import time
@@ -52,9 +53,12 @@ import vistrails.core.upgradeworkflow as upgradeworkflow
 from vistrails.core import system
 
 # import MD_Resources.data_management as data_management
-from MD_Resources.data_management import data_management
+from MD_Resources.data_management import metadata_creation
 from MD_Resources.data_management import get_sb_item
 from MD_Resources.data_management import get_sb_credentials
+from MD_Resources.data_management import create_zip
+from MD_Resources.data_management import get_contact
+from MD_Resources.data_management import update_metadata
 
 # SAHM imports
 from widgets import get_predictor_widget, get_predictor_config
@@ -181,7 +185,7 @@ def menu_items():
 
     def data_management_init():
         # global session_dir
-        dm = data_management()
+        dm = metadata_creation()
         print dm
 
     def get_public_item():
@@ -191,14 +195,40 @@ def menu_items():
     def get_sb_user_pwd():
         credentials = get_sb_credentials()
 
+    def create_zip_bundle():
+        create_zip()
+
+    def get_contact_info():
+        get_contact()
+
+    def update_metadata_template():
+        update_metadata()
+
+    # sub_lst = []
+    # sub_lst.append(("Archive current workflow (create zip bundle)", create_zip_bundle))
+    # sub_lst.append(("Move item to ScienceBase", get_public_item))
+    # sub_lst.append(("Get Contact Info", get_contact_info))
+    #
+    # sub_menu = QtGui.QMenu("Sub Menu")
+    # sub_menu.addAction("Get Contact Info", get_contact_info)
+    # sub_menu.addAction("Get Contact Info", get_contact_info)
+
+    # lst.append(("submenu", sub_lst))
+    # lst.append(sub_menu)
+    # lst.append(("Return SB Username and Password", get_sb_user_pwd))
+
+
     lst = []
     lst.append(("Change session folder", change_session_folder))
     lst.append(("Change processing mode", select_processing_mode))
     lst.append(("Select and test the Final Model", select_test_final_model))
     lst.append(("Document workflow (Metadata creation)", data_management_init))
-    lst.append(("Archive current workflow (create zip bundle)", archive_current_workflow))
+    # lst.append(("Archive current workflow (create zip bundle)", archive_current_workflow))
+    lst.append(("Archive current workflow (create zip bundle)", create_zip_bundle))
     lst.append(("Move item to ScienceBase", get_public_item))
-    # lst.append(("Return SB Username and Password", get_sb_user_pwd))
+    lst.append(("Get Contact Info", get_contact_info))
+    lst.append(("Update default metadata", update_metadata_template))
+
     return lst
 
 
