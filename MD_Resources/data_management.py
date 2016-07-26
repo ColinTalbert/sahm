@@ -42,84 +42,35 @@
 # and does not imply endorsement by the U.S. Government.
 ###############################################################################
 #
-import Tkinter as tk
+
 import os
+import sys
 import subprocess
 import tempfile
-import tkFileDialog
-
 import pysb
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 import config
-import sys
-
-
-# class FilePicker(QtGui.QWidget):
-#     """
-#     An example file picker application
-#     """
-#
-#     def __init__(self):
-#         # create GUI
-#         QtGui.QMainWindow.__init__(self)
-#         self.setWindowTitle('File picker')
-#         # Set the window dimensions
-#         self.resize(300, 75)
-#
-#         # vertical layout for widgets
-#         self.vbox = QtGui.QVBoxLayout()
-#         self.setLayout(self.vbox)
-#
-#         # Create a label which displays the path to our chosen file
-#         self.lbl = QtGui.QLabel('No file selected')
-#         self.vbox.addWidget(self.lbl)
-#
-#         # Create a push button labelled 'choose' and add it to our layout
-#         btn = QtGui.QPushButton('Choose a Meta Data XML file1', self)
-#         self.vbox.addWidget(btn)
-#
-#         # Connect the clicked signal to the get_fname handler
-#         self.connect(btn, QtCore.SIGNAL('clicked()'), self.get_fname)
-#
-#     def get_fname(self):
-#         """
-#         Handler called when 'choose file' is clicked
-#         """
-#         # When you call getOpenFileName, a file picker dialog is created
-#         # and if the user selects a file, it's path is returned, and if not
-#         # (ie, the user cancels the operation) None is returned
-#         fname = QtGui.QFileDialog.getOpenFileName(self, 'Choose a Meta Data XML file2')
-#         if fname:
-#             self.lbl.setText(fname)
-#             return str(fname)
-#         else:
-#             self.lbl.setText('No file selected')
+import zipfile
+import requests
+import lxml.etree as et
+from PyQt4.QtGui import *
+import xml_utils
+from os.path import expanduser
 
 
 def get_fname(parent=None):
     """
     Handler called when 'choose file' is clicked
     """
-    # When you call getOpenFileName, a file picker dialog is created
-    # and if the user selects a file, it's path is returned, and if not
-    # (ie, the user cancels the operation) None is returned
-    fname = QtGui.QFileDialog.getOpenFileName(parent, 'Choose a Meta Data XML file2')
+
+    fname = QtGui.QFileDialog.getOpenFileName(parent, 'Choose a FGDC Metadata xml file', '../../../../',
+                                              "FGDC Metadata files (*.xml);; All Files (*)")
     if fname:
         return str(fname)
 
 
-def get_md_template():
-    """
-    return the default metadata template file
-    TODO: make this a per user variable so that users can customize their starting template,  store in config???
 
-    :return:
-    str filename
-    """
-    cur_dname = os.path.split(os.path.realpath(__file__))[0]
-    template_fname = os.path.join(cur_dname, "MDWizard", "demo_template.xml")
-    return template_fname
 
 
 class Buddy_Label(QtGui.QLabel):
@@ -189,48 +140,157 @@ class Window(QtGui.QMainWindow):
         # self.ui.setupUi(self)
 
 
-def get_sb_item():
-    sb = pysb.SbSession()
-    #
-    # # Get a public item.  No need to log in.
-    item_json = sb.get_item('505bc673e4b08c986b32bf81')
-    print "Public Item: " + str(item_json)
-    return "I have returned from ScienceBase!"
+def update_metadata():
+
+    curr_path = str(os.path.realpath(__file__))
+    workspace_path = curr_path.replace("data_management.py", "MDWizard")
+    mde_exe_cmd = curr_path.replace("data_management.py", "MDWizard\MetadataEditor.exe")
+
+    # check to see if the .vistrails directory exists for the given user
+    vistrails_user_dir = expanduser("~") + '\\.vistrails\\MD_resources'  # TODO remove the XXXX this is for Colin's benefit
+    if not os.path.exists(vistrails_user_dir):
+        os.makedirs(vistrails_user_dir)
+
+    # TODO get Colin's Feedback on custom user MD template name
+    # user_md_template_file = expanduser("~") + '\\.vistrails\\MD_resources\\' + os.environ.get("USERNAME") + \
+    #                         '_MD_template_file.xml'
+
+    user_md_template_file = expanduser("~") + '\\.vistrails\\MD_resources\\user_MD_template_file.xml'
+    # look for custom FGDC template XML in the users .vistrails directory,
+    # confirm that the user wants to update/replace it......
+    if os.path.exists(user_md_template_file):
+
+        print 'found it!'
+        # TODO: see if Colin wants file details in the PyQT4 message box
+        info = os.stat(user_md_template_file)
+        st_ctime = info.st_ctime
+        st_mtime = info.st_mtime
+        st_zize = info.st_size
+        # ask the user if they want to use their existing FGDC template
+        result = QMessageBox.question(None, 'SAHM Data Management', "Do you wish to continue to update " + user_md_template_file + "?",
+                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+        if result == QMessageBox.Yes:
+            print 'Yes.'
+            input_file_xml = user_md_template_file
+        else:
+            print 'No.'
+            input_file_xml = QtGui.QFileDialog.getOpenFileName(
+                None,
+                'Choose a FGDC Metadata xml file to use as basis for your new ' + user_md_template_file,
+                workspace_path, "FGDC Metadata files (*.xml);; All Files (*)")
+
+    else:
+        # the users custom user_MD_template_file.xml has not been found in their user directory
+        generic_fgdc_template = curr_path.replace("data_management.py", "MDWizard\GenericFGDCTemplate.xml")
+
+        if os.path.exists(generic_fgdc_template):
+            result = QMessageBox.question(None, 'SAHM Data Management', "SAHM has detected " + generic_fgdc_template +
+                                          "\n Would you like to use it?",
+                                          QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+            if result == QMessageBox.Yes:
+                print 'Yes.'
+                input_file_xml = generic_fgdc_template
+            else:
+                print 'No.'
+                input_file_xml = QtGui.QFileDialog.getOpenFileName(None, 'Choose a template FGDC Metadata xml file',
+                                                          workspace_path, "FGDC Metadata files (*.xml);; All Files (*)")
+
+    print input_file_xml
+    if input_file_xml.strip() != '':
+        # generate output XML filename based upon user input
+        out_file_path = user_md_template_file
+        # ctypes.windll.user32.MessageBoxA(0, "Output File will go here: \n" +
+        #                                  out_file_path, "MD_Resources Module - data_management",  1)
+
+        launch_metadatawizard(mde_exe_cmd, input_file_xml, out_file_path)
+
+    return False
 
 
-def data_management():
+def get_md_template():
+    """
+    return the default metadata template file
+    TODO: make this a per user variable so that users can customize their starting template,  store in config???
+
+    :return:
+    str filename
+    """
+
+    curr_path = str(os.path.realpath(__file__))
+    workspace_path = curr_path.replace("data_management.py", "MDWizard")
+    # mde_exe_cmd = curr_path.replace("data_management.py", "MDWizard\MetadataEditor.exe")
+
+    # check to see if the .vistrails directory exists for the given user
+    vistrails_user_dir = expanduser("~") + '\\.vistrails\\MD_resources'  # TODO remove the XXXX this is for Colin's benefit
+    if not os.path.exists(vistrails_user_dir):
+        os.makedirs(vistrails_user_dir)
+
+    user_md_template_file = expanduser("~") + '\\.vistrails\\MD_resources\\user_MD_template_file.xml'
+    # look for custom FGDC template XML in the users .vistrails directory,
+    # confirm that the user wants to update/replace it......
+    if os.path.exists(user_md_template_file):
+
+        print 'found it!'
+        info = os.stat(user_md_template_file)
+        # TODO: see if Colin wants file details in the PyQT4 message box
+        st_ctime = info.st_ctime
+        st_mtime = info.st_mtime
+        st_zize = info.st_size
+        # ask the user if they want to use their existing FGDC template
+        result = QMessageBox.question(None, 'SAHM Data Management', "Do you wish to continue to use " +
+                                      user_md_template_file + " as your template file?",
+                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+        if result == QMessageBox.Yes:
+            print 'Yes.'
+            input_file_xml = user_md_template_file
+        else:
+            print 'No.'
+            input_file_xml = QtGui.QFileDialog.getOpenFileName(
+                None, 'Choose a FGDC Metadata xml file to use as a template',
+                workspace_path, "FGDC Metadata files (*.xml);; All Files (*)")
+
+    else:
+        # the users custom user_MD_template_file.xml has not been found in their user directory
+        generic_fgdc_template = curr_path.replace("data_management.py", "MDWizard\GenericFGDCTemplate.xml")
+
+        if os.path.exists(generic_fgdc_template):
+            result = QMessageBox.question(None, 'SAHM Data Management',
+                                          'You don\'t appear to have a custom template saved as \n' +
+                                          user_md_template_file + ".  SAHM has detected " + generic_fgdc_template +
+                                          "\n Would you like to use it?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+            if result == QMessageBox.Yes:
+                print 'Yes.'
+                input_file_xml = generic_fgdc_template
+            else:
+                print 'No.'
+                input_file_xml = QtGui.QFileDialog.getOpenFileName(None, 'Choose a template FGDC Metadata xml file',
+                                                                   workspace_path,
+                                                                   "FGDC Metadata files (*.xml);; All Files (*)")
+
+    if input_file_xml.strip() != '':
+        return input_file_xml
+    else:
+        return False
+
+
+def metadata_creation():
 
     # get MetadataEditor.exe from relative pathname...
     # print "this is my path: " + str(os.path.realpath(__file__))
     curr_path = str(os.path.realpath(__file__))
     mde_exe_cmd = curr_path.replace("data_management.py", "MDWizard\MetadataEditor.exe")
 
-    # ctypes.windll.user32.MessageBoxA(0, "MetadataEditor.exe lives here: \n" +
-    #                                  mde_exe_cmd, "MD_Resources Module - data_management",  1)
-
-    # get metadata xml record from file browser
-    # root = tk.Tk()
-    # root.withdraw()
-    # root.filename = tkFileDialog.askopenfilename(initialdir="/Development/SupportFiles", title="Select MetaData XML file",
-    #                                              filetypes=(("all files", "*.*"), ("MetaData files", "*.xml *.XML")))
-
-    # root.filename = Example()
-    #
-    # input_file_xml = str(root.filename)
-
-    # file_picker_gui = FilePicker()
-    # file_picker_gui.show()
-
-    # input_file_xml = get_fname()
     input_file_xml = get_md_template()
-    # ctypes.windll.user32.MessageBoxA(0, "Input File lives here: \n" +
-    #                                  input_file_xml, "MD_Resources Module - data_management",  1)
 
-    # generate output XML filename based upon user input
+    if input_file_xml.strip() == '':
+        return False
+
+    print input_file_xml
     out_file_path = input_file_xml.replace(".xml", "_mdwiz.xml")
-    # ctypes.windll.user32.MessageBoxA(0, "Output File will go here: \n" +
-    #                                  out_file_path, "MD_Resources Module - data_management",  1)
-
     launch_metadatawizard(mde_exe_cmd, input_file_xml, out_file_path)
 
     return "I have returned from data_management!"
@@ -261,6 +321,69 @@ def launch_metadatawizard(cmd, stdin_fname, stdout_fname, async=False):
     return err_msg, out_msg
 
 
+def get_contact():
+    try:
+        user_name = os.environ.get("USERNAME")
+
+        # These are to create errors.....
+        # user_name = ''
+        response = requests.get("http://geo-nsdi.er.usgs.gov/contact-xml.php?email=" + user_name)
+
+        # These are to create errors.....
+        # response = requests.get("xyz://geo-nsdi.er.usgs.gov/contact-xml.php?email=" + user_name)
+
+        if response is NotImplementedError:
+            print
+            print "Something went horribly wrong.\n\n"
+            return False
+
+        print response.text
+        print
+        etree = et.fromstring(response.content)  # this is type lxml.etree._Element
+        # etype = type(etree)
+        # print etype
+        # print
+        # print et.tostring(etree, pretty_print=True)
+        # print
+
+        # this will step thru all the nodes looking for only the cntper (name) node
+        for node in etree.iter('cntper'):
+            if node.text.strip() != '':
+                print 'This is my name: ', node.text
+            else:
+                # TODO: get Colin's feedback on best error trap method
+                print
+                print "Unable to verify the user is a current USGS employee or affiliate.\n\n"
+                return False
+
+        return etree
+        # for page in list(etree):
+        #     print 'Elements of the XML: ' + str(page)
+        # print
+
+        # #  TODO: get Colin's feedback on best way to create nested dictionary
+        # # This will step thru all the nodes and create a flat dictionary of the contact info
+        # # and print it's contents
+        # flat_contact_dictionary = {}
+        # for node in etree.iter():
+        #     flat_contact_dictionary[node.tag] = node.text
+        # print
+        # print'flat_contact_dictionary = ', flat_contact_dictionary
+        #
+        # print
+        # # # This will step thru all the nodes and print the node tags and node texts
+        # for node in etree.iter():
+        #     if node.text is not None:
+        #         print 'node.tag: ' + node.tag + '  node.text: ' + node.text
+
+    except OSError as err:
+        print("OS error: {0}".format(err))
+    except:  # TODO: get Colin's feedback on best error trap method
+        print("Unexpected error:", sys.exc_info()[0])
+        print
+        print "Something went horribly wrong.\n\n"
+
+
 def get_sb_credentials():
 
     if config.sb_username.strip() == '' or config.sb_password.strip() == '':
@@ -278,3 +401,136 @@ def get_sb_credentials():
 
     username_password = {'username': config.sb_username, 'password': config.sb_password}
     return username_password
+
+
+def get_sb_item():
+    sb = pysb.SbSession()
+    #
+    # # Get a public item.  No need to log in.
+    item_json = sb.get_item('505bc673e4b08c986b32bf81')
+    print "Public Item: " + str(item_json)
+    return "I have returned from ScienceBase!"
+
+
+def create_zip():
+
+    current_dir = os.path.dirname(os.path.realpath(__file__))
+    os_walk = os.walk
+    dir_to_zip = current_dir + '\\tmp'
+    zipf = zipfile.ZipFile('Python.zip', 'w', zipfile.ZIP_DEFLATED)
+    zipdir(dir_to_zip, zipf)
+    zipf.close()
+
+
+def zipdir(path, ziph):
+    # ziph is zipfile handle
+    for root, dirs, files in os.walk(path):
+        my_root = root
+        my_dirs = dirs
+        for file in files:
+            ziph.write(os.path.join(root, file))
+
+
+def get_contact():
+    try:
+        user_name = os.environ.get("USERNAME")
+
+        # These are to create errors.....
+        # user_name = ''
+        response = requests.get("http://geo-nsdi.er.usgs.gov/contact-xml.php?email=" + user_name)
+
+        # These are to create errors.....
+        # response = requests.get("xyz://geo-nsdi.er.usgs.gov/contact-xml.php?email=" + user_name)
+
+        if response is NotImplementedError:
+            print
+            print "Something went horribly wrong.\n\n"
+            return False
+
+        print response.text
+        print
+        etree = et.fromstring(response.content)  # this is type lxml.etree._Element
+        # etype = type(etree)
+        # print etype
+        # print
+        # print et.tostring(etree, pretty_print=True)
+        # print
+
+        # this will step thru all the nodes looking for only the cntper (name) node
+        for node in etree.iter('cntper'):
+            if node.text.strip() != '':
+                print 'This is my name: ', node.text
+            else:
+                print
+                print "Unable to verify the user is a current USGS employee or affiliate.\n\n"
+                return False
+
+        return etree
+        # for page in list(etree):
+        #     print 'Elements of the XML: ' + str(page)
+        # print
+
+        # # This will step thru all the nodes and create a flat dictionary of the contact info
+        # # and print it's contents
+        # flat_contact_dictionary = {}
+        # for node in etree.iter():
+        #     flat_contact_dictionary[node.tag] = node.text
+        # print
+        # print'flat_contact_dictionary = ', flat_contact_dictionary
+        #
+        # print
+        # # # This will step thru all the nodes and print the node tags and node texts
+        # for node in etree.iter():
+        #     if node.text is not None:
+        #         print 'node.tag: ' + node.tag + '  node.text: ' + node.text
+        #
+
+    except OSError as err:
+        print("OS error: {0}".format(err))
+    except:  # TODO: get Colin's feedback on best error trap method
+        print("Unexpected error:", sys.exc_info()[0])
+        print
+        print "Something went horribly wrong.\n\n"
+
+
+# This class may be used to create nested dictionaries in the future
+
+# nested_contact_dictionary = {}
+# for node in etree.iter():
+#     if node.text is not None:
+#         nested_contact_dictionary[node.tag] = node.text
+#     else:
+#
+# print
+# print 'nested_contact_dictionary = ', nested_contact_dictionary
+class Vividict(dict):
+    def __missing__(self, key):
+        value = self[key] = type(self)()
+        return value
+
+
+# useful dialog box TODO: parameterize it for ease of use....
+def show_dialog():
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Information)
+
+    msg.setText("This is a message box")
+    msg.setInformativeText("This is additional information")
+    msg.setWindowTitle("MessageBox demo")
+    msg.setDetailedText("The details are as follows:")
+    msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+    # msg.buttonClicked.connect(msgbtn)
+
+    retval = msg.exec_()
+    print "value of pressed message box button:", retval
+
+
+# holding spot for calls to editing functions in xml_utils.py
+
+def xml_object_editing():
+
+    xml_utils.remove_node_by_name(xml_input=etree, xpath='cntperp/cntorg')
+    xml_utils.change_xml_node_text(xml_input=etree, xpath='cntperp/cntorg', new_node_text='A Undisclosed Location for ExPat Entomological Developers..', add_if_missing=True)
+    xml_utils.replace_xml_node_contents(xml_input=etree, xpath='cntperp/cntorg',
+                                        new_node_contents='<samplenode><innernode><pocketcontent1>PC1</pocketcontent1><pocketcontent2>PC2</pocketcontent2></innernode></samplenode>',
+                                        add_if_missing=True)
