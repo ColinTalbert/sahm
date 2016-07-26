@@ -53,10 +53,12 @@ from PyQt4 import QtCore
 import config
 import zipfile
 import requests
+import shutil
 import lxml.etree as et
 from PyQt4.QtGui import *
 import xml_utils
 from os.path import expanduser
+import utils
 
 
 def get_fname(parent=None):
@@ -282,16 +284,22 @@ def metadata_creation():
     # get MetadataEditor.exe from relative pathname...
     # print "this is my path: " + str(os.path.realpath(__file__))
     curr_path = str(os.path.realpath(__file__))
-    mde_exe_cmd = curr_path.replace("data_management.py", "MDWizard\MetadataEditor.exe")
+    curr_dname = os.path.split(curr_path)[0]
+    mde_exe_cmd = os.path.join(curr_dname, "MDWizard", "MetadataEditor.exe")
 
     input_file_xml = get_md_template()
+    copied_file_xml = os.path.join(utils.getrootdir(), utils.get_current_history_node())
+    shutil.copyfile(input_file_xml, copied_file_xml)
+
 
     if input_file_xml.strip() == '':
         return False
 
     print input_file_xml
-    out_file_path = input_file_xml.replace(".xml", "_mdwiz.xml")
+    out_file_path = copied_file_xml.replace(".xml", "_mdwiz.xml")
     launch_metadatawizard(mde_exe_cmd, input_file_xml, out_file_path)
+
+
 
     return "I have returned from data_management!"
 
@@ -396,8 +404,7 @@ def get_sb_credentials():
 
     else:
         print "We already have username and password! \n" \
-              "Username : " + config.sb_username + "\n" \
-              "Password : " + config.sb_password
+              "Username : " + config.sb_username + "\n"
 
     username_password = {'username': config.sb_username, 'password': config.sb_password}
     return username_password
