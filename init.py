@@ -52,9 +52,12 @@ import vistrails.core.upgradeworkflow as upgradeworkflow
 from vistrails.core import system
 
 # import MD_Resources.data_management as data_management
-from MD_Resources.data_management import data_management
+from MD_Resources.data_management import metadata_creation
 from MD_Resources.data_management import get_sb_item
 from MD_Resources.data_management import get_sb_credentials
+from MD_Resources.data_management import create_zip
+from MD_Resources.data_management import get_contact
+from MD_Resources.data_management import update_metadata
 
 # SAHM imports
 from widgets import get_predictor_widget, get_predictor_config
@@ -181,7 +184,7 @@ def menu_items():
 
     def data_management_init():
         # global session_dir
-        dm = data_management()
+        dm = metadata_creation()
         print dm
 
     def get_public_item():
@@ -198,7 +201,7 @@ def menu_items():
     lst.append(("DataManagement/Document workflow (Metadata creation)", data_management_init))
     lst.append(("DataManagement/Archive current workflow (create zip bundle)", archive_current_workflow))
     lst.append(("DataManagement/Move item to ScienceBase", get_public_item))
-    # lst.append(("Return SB Username and Password", get_sb_user_pwd))
+    lst.append(("DataManagement/Return SB Username and Password", get_sb_user_pwd))
     return lst
 
 
