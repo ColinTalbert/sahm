@@ -62,52 +62,6 @@ import utils
 from .. import *  # gets configuration from __init__.py from parent directory
 import re         # allows for use of regular expressions
 
-# VisTrails Imports
-from vistrails.core.modules.vistrails_module import Module, ModuleError, ModuleSuspended
-from vistrails.core.modules.basic_modules import File, Path, Constant
-from vistrails.gui.modules.module_configure import StandardModuleConfigurationWidget
-from vistrails.core.packagemanager import get_package_manager
-import vistrails.core.upgradeworkflow as upgradeworkflow
-from vistrails.core import system
-#
-# # SAHM imports
-# from widgets import get_predictor_widget, get_predictor_config
-# from SelectPredictorsLayers import SelectListDialog
-# from SelectAndTestFinalModel import SelectAndTestFinalModel
-#
-# import GenerateModuleDoc as GenModDoc
-# import pySAHM.utilities as utilities
-# import pySAHM.FieldDataAggreagateAndWeight as FDAW
-# import pySAHM.MDSBuilder as MDSB
-# import pySAHM.PARC as parc
-# import pySAHM.RasterFormatConverter as RFC
-# import pySAHM.SpatialUtilities as SpatialUtilities
-# from SahmOutputViewer import ModelOutputViewer
-# # from SahmOutputViewer import ResponseCurveExplorer
-# from SahmSpatialOutputViewer import ModelMapViewer
-# from spatial_modules import BaseGeoViewerCell, GeoSpatialViewerCell, RasterLayer, \
-#     VectorLayer, PolyLayer, PointLayer
-# from utils import writetolog
-# from pySAHM.utilities import TrappedError
-#
-# # import pySAHM.__init__.py
-#
-# import copy
-# import time
-#
-# from vistrails.core import system
-# from vistrails.core.configuration import ConfigurationObject
-#
-# from .. import __init__
-#
-# UpgradeModuleRemap = upgradeworkflow.UpgradeModuleRemap
-# identifier = 'gov.usgs.sahm'
-
-# doc_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "documentation.xml"))
-# GenModDoc.load_documentation(doc_file)
-
-# session_dir = None
-
 
 def get_fname(parent=None):
     """
@@ -204,8 +158,10 @@ def update_metadata_template():
         # TODO: see if Colin wants file details in the PyQT4 message box
 
         # ask the user if they want to use their existing FGDC template
-        result = QMessageBox.question(None, 'SAHM Data Management', "Do you wish to continue to update " + users_template + "?",
-                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        result = QMessageBox.question(
+            None, 'SAHM Data Management',
+            "Do you wish to continue to update " + users_template + "?",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
         if result == QMessageBox.Yes:
             print 'Yes.'
@@ -222,9 +178,10 @@ def update_metadata_template():
         generic_fgdc_template = curr_path.replace("data_management.py", "MDWizard\demo_template.xml")
 
         if os.path.exists(generic_fgdc_template):
-            result = QMessageBox.question(None, 'SAHM Data Management', "SAHM has detected " + generic_fgdc_template +
-                                          "\n Would you like to use it as the basis for your new custom template?",
-                                          QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            result = QMessageBox.question(
+                None, 'SAHM Data Management', "SAHM has detected " + generic_fgdc_template +
+                "\n Would you like to use it as the basis for your new custom template?",
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
             if result == QMessageBox.Yes:
                 print 'Yes.'
@@ -252,33 +209,30 @@ def update_metadata_template():
 
 def prompt_user_for_default_xml():
 
-    output_filename_tuple = QInputDialog.getText(None, 'SAHM custom metadata template creation', 'Enter a custom filename if you wish:')
+    output_filename_tuple = QInputDialog.getText(
+        None,
+        'SAHM custom metadata template creation',
+        'Enter a custom filename if you wish:')
 
-    # assure user template filename is snake case with a .xml file extension
     output_filename = output_filename_tuple[0]
-    output_filename = output_filename.strip()
-    output_filename = output_filename.lower()
 
-    # use regular expressions to eliminate non alphanumeric characters
-    output_filename = re.sub(r'([^\s\w]|_)+', '', output_filename)
-
-    # replace spaces with underscores....
     if len(output_filename) > 0:
-        str_lst = output_filename.split()
-        if len(str_lst) > 1:
-            new_str = ''
-            for word in str_lst:
-                new_str += word + '_'
-            # remove trailing underscore....
-            if new_str.endswith("_"):
-                new_str = new_str[:-1]
-            output_filename = new_str
-        # assure a .xml file extension.....
-        str_lst = output_filename.split('.')
-        if len(str_lst) > 0:
-            output_filename = str_lst[0]
-        else:
-            return False
+
+        # assure user template filename is snake case with a .xml file extension
+        output_filename = output_filename.strip()
+        output_filename = output_filename.lower()
+        # the regular expression replace below will remove '_'
+        # This is preventative, spaces will be replaced with '_' at end of function....
+        output_filename = output_filename.replace('_', ' ')
+        # the regular expression replace below will remove '.'
+        # This is preventative, file extension will be added at end of function....
+        output_filename = output_filename.replace('.xml', '')
+
+        # use regular expressions to eliminate non alphanumeric characters
+        output_filename = re.sub(r'([^\s\w]|_)+', '', output_filename)
+        # replace spaces with underscores....
+        output_filename = output_filename.replace(' ', '_')
+
         output_filename += '.xml'
     else:
 
@@ -286,6 +240,23 @@ def prompt_user_for_default_xml():
         output_filename = 'user_md_template_file.xml'
 
     return output_filename
+
+
+def scrub_pep8(input_string):
+
+    input_string = input_string.strip()
+    input_string = input_string.lower()
+
+    # the regular expression replace below will remove '_'
+    # This is preventative, spaces will be replaced with '_' at end of function....
+    input_string = input_string.replace('_', ' ')
+
+    # use regular expressions to eliminate non alphanumeric characters
+    input_string = re.sub(r'([^\s\w]|_)+', '', input_string)
+    # replace spaces with underscores....
+    input_string = input_string.replace(' ', '_')
+
+    return input_string
 
 
 def get_md_template():
@@ -296,7 +267,7 @@ def get_md_template():
     :return:
     str filename
     """
-    global session_dir
+    # global session_dir
     curr_path = str(os.path.realpath(__file__))
     curr_dir_name = os.path.split(curr_path)[0]
     workspace_path = os.path.join(curr_dir_name, 'MDWizard')
@@ -328,21 +299,6 @@ def get_md_template():
                                                                    workspace_path,
                                                                    "FGDC Metadata files (*.xml);; All Files (*)")
 
-        #  TODO figure out current history node
-        # root_directory = utils.getrootdir()
-        # # history_node = utils.get_current_history_node()
-        # import vistrails
-        # from vistrails.core.application import get_vistrails_application
-        # history_node = get_vistrails_application().get_current_history_node()
-        # copied_file_xml = os.path.join(utils.getrootdir(), utils.get_current_history_node())
-        # if input_file_xml.strip() != '':
-            # prompt user for custom filename, if not use ....'user_md_template_file.xml'
-            # output_filename = prompt_user_for_default_xml()
-            #
-            # copied_file_xml = os.path.join(curr_dir_name, 'MDWizard', output_filename)
-            # shutil.copyfile(input_file_xml, copied_file_xml)
-            # configuration.set_deep_value('metadata_template', copied_file_xml)
-
     if input_file_xml.strip() != '':
         return input_file_xml
     else:
@@ -363,7 +319,22 @@ def run_metadata_wizard():
         return False
 
     print input_file_xml
-    out_file_path = input_file_xml.replace(".xml", "_mdwiz.xml")
+
+    # TODO: ask Colin if Root Directory should have anything to do with output XML filename.....
+    # root_directory = utils.getrootdir()
+    # print 'Root Directory: ', root_directory
+
+    history_node = utils.get_current_history_node_name()
+
+    print 'Original History Node: ', history_node
+    history_node = scrub_pep8(history_node)
+    print 'Scrubbed History Node: ', history_node
+
+    # ? This may not be an issue as users might not be creating metadata records WITHOUT a history node selected ?
+    if history_node == 'root':
+        history_node = 'mdwiz'
+
+    out_file_path = input_file_xml.replace(".xml", "_" + history_node + ".xml")
     launch_metadatawizard(mde_exe_cmd, input_file_xml, out_file_path)
 
     return "I have returned from data_management!"
@@ -598,11 +569,14 @@ def show_dialog():
 
 
 # holding spot for calls to editing functions in xml_utils.py
-
 def xml_object_editing():
 
     xml_utils.remove_node_by_name(xml_input=etree, xpath='cntperp/cntorg')
-    xml_utils.change_xml_node_text(xml_input=etree, xpath='cntperp/cntorg', new_node_text='A Undisclosed Location for ExPat Entomological Developers..', add_if_missing=True)
+
+    xml_utils.change_xml_node_text(xml_input=etree, xpath='cntperp/cntorg',
+                                   new_node_text='A Undisclosed Location for ExPat Entomological Developers..',
+                                   add_if_missing=True)
+
     xml_utils.replace_xml_node_contents(xml_input=etree, xpath='cntperp/cntorg',
                                         new_node_contents='<samplenode><innernode><pocketcontent1>PC1</pocketcontent1><pocketcontent2>PC2</pocketcontent2></innernode></samplenode>',
                                         add_if_missing=True)

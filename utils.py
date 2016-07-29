@@ -1446,7 +1446,7 @@ def get_current_history_node_name(with_increment=False):
     # cur_pipeline = _module.moduleInfo['pipeline']
     controller = get_vistrails_application().get_current_controller()
     cur_vt = controller.vistrail
-    cur_version =  controller.current_version
+    cur_version = controller.current_version
 
     cur_name = cur_vt.get_pipeline_name(cur_version)
     if "+" in cur_name and not with_increment:
