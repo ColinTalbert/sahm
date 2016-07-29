@@ -86,7 +86,7 @@ if system.systemType in ['Microsoft', 'Windows']:
                             cur_processing_mode="multiple models simultaneously (1 core each)",
                             default_seed='1234',
                             verbose='True',
-                            metadata_template=r"C:\temp\somefile.xml")
+                            metadata_template=r"")
 else:
     configuration = \
         ConfigurationObject(output_dir=r'C:\temp\SAHM_workspace',
@@ -96,4 +96,5 @@ else:
                             cur_session_folder=r"C:\temp\SAHM_workspace",
                             cur_processing_mode="multiple models simultaneously (1 core each)",
                             default_seed='1234',
-                            verbose='True')
+                            verbose='True',
+                            metadata_template=r"")

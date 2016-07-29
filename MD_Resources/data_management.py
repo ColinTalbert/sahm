@@ -59,6 +59,54 @@ from PyQt4.QtGui import *
 import xml_utils
 from os.path import expanduser
 import utils
+from .. import *  # gets configuration from __init__.py from parent directory
+import re         # allows for use of regular expressions
+
+# VisTrails Imports
+from vistrails.core.modules.vistrails_module import Module, ModuleError, ModuleSuspended
+from vistrails.core.modules.basic_modules import File, Path, Constant
+from vistrails.gui.modules.module_configure import StandardModuleConfigurationWidget
+from vistrails.core.packagemanager import get_package_manager
+import vistrails.core.upgradeworkflow as upgradeworkflow
+from vistrails.core import system
+#
+# # SAHM imports
+# from widgets import get_predictor_widget, get_predictor_config
+# from SelectPredictorsLayers import SelectListDialog
+# from SelectAndTestFinalModel import SelectAndTestFinalModel
+#
+# import GenerateModuleDoc as GenModDoc
+# import pySAHM.utilities as utilities
+# import pySAHM.FieldDataAggreagateAndWeight as FDAW
+# import pySAHM.MDSBuilder as MDSB
+# import pySAHM.PARC as parc
+# import pySAHM.RasterFormatConverter as RFC
+# import pySAHM.SpatialUtilities as SpatialUtilities
+# from SahmOutputViewer import ModelOutputViewer
+# # from SahmOutputViewer import ResponseCurveExplorer
+# from SahmSpatialOutputViewer import ModelMapViewer
+# from spatial_modules import BaseGeoViewerCell, GeoSpatialViewerCell, RasterLayer, \
+#     VectorLayer, PolyLayer, PointLayer
+# from utils import writetolog
+# from pySAHM.utilities import TrappedError
+#
+# # import pySAHM.__init__.py
+#
+# import copy
+# import time
+#
+# from vistrails.core import system
+# from vistrails.core.configuration import ConfigurationObject
+#
+# from .. import __init__
+#
+# UpgradeModuleRemap = upgradeworkflow.UpgradeModuleRemap
+# identifier = 'gov.usgs.sahm'
+
+# doc_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "documentation.xml"))
+# GenModDoc.load_documentation(doc_file)
+
+# session_dir = None
 
 
 def get_fname(parent=None):
@@ -70,9 +118,6 @@ def get_fname(parent=None):
                                               "FGDC Metadata files (*.xml);; All Files (*)")
     if fname:
         return str(fname)
-
-
-
 
 
 class Buddy_Label(QtGui.QLabel):
@@ -142,53 +187,43 @@ class Window(QtGui.QMainWindow):
         # self.ui.setupUi(self)
 
 
-def update_metadata():
+def update_metadata_template():
 
     curr_path = str(os.path.realpath(__file__))
-    workspace_path = curr_path.replace("data_management.py", "MDWizard")
-    mde_exe_cmd = curr_path.replace("data_management.py", "MDWizard\MetadataEditor.exe")
+    curr_dir_name = os.path.split(curr_path)[0]
+    workspace_path = os.path.join(curr_dir_name, 'MDWizard')
+    mde_exe_cmd = os.path.join(curr_dir_name, "MDWizard", "MetadataEditor.exe")
 
-    # check to see if the .vistrails directory exists for the given user
-    vistrails_user_dir = expanduser("~") + '\\.vistrails\\MD_resources'  # TODO remove the XXXX this is for Colin's benefit
-    if not os.path.exists(vistrails_user_dir):
-        os.makedirs(vistrails_user_dir)
+    users_template = configuration.metadata_template
 
-    # TODO get Colin's Feedback on custom user MD template name
-    # user_md_template_file = expanduser("~") + '\\.vistrails\\MD_resources\\' + os.environ.get("USERNAME") + \
-    #                         '_MD_template_file.xml'
-
-    user_md_template_file = expanduser("~") + '\\.vistrails\\MD_resources\\user_MD_template_file.xml'
     # look for custom FGDC template XML in the users .vistrails directory,
     # confirm that the user wants to update/replace it......
-    if os.path.exists(user_md_template_file):
+    if os.path.exists(users_template):
 
         print 'found it!'
         # TODO: see if Colin wants file details in the PyQT4 message box
-        info = os.stat(user_md_template_file)
-        st_ctime = info.st_ctime
-        st_mtime = info.st_mtime
-        st_zize = info.st_size
+
         # ask the user if they want to use their existing FGDC template
-        result = QMessageBox.question(None, 'SAHM Data Management', "Do you wish to continue to update " + user_md_template_file + "?",
+        result = QMessageBox.question(None, 'SAHM Data Management', "Do you wish to continue to update " + users_template + "?",
                                       QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
         if result == QMessageBox.Yes:
             print 'Yes.'
-            input_file_xml = user_md_template_file
+            input_file_xml = users_template
         else:
             print 'No.'
             input_file_xml = QtGui.QFileDialog.getOpenFileName(
                 None,
-                'Choose a FGDC Metadata xml file to use as basis for your new ' + user_md_template_file,
+                'Choose a FGDC Metadata xml file to use as basis for your new custom template ',
                 workspace_path, "FGDC Metadata files (*.xml);; All Files (*)")
 
     else:
         # the users custom user_MD_template_file.xml has not been found in their user directory
-        generic_fgdc_template = curr_path.replace("data_management.py", "MDWizard\GenericFGDCTemplate.xml")
+        generic_fgdc_template = curr_path.replace("data_management.py", "MDWizard\demo_template.xml")
 
         if os.path.exists(generic_fgdc_template):
             result = QMessageBox.question(None, 'SAHM Data Management', "SAHM has detected " + generic_fgdc_template +
-                                          "\n Would you like to use it?",
+                                          "\n Would you like to use it as the basis for your new custom template?",
                                           QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
             if result == QMessageBox.Yes:
@@ -196,19 +231,61 @@ def update_metadata():
                 input_file_xml = generic_fgdc_template
             else:
                 print 'No.'
-                input_file_xml = QtGui.QFileDialog.getOpenFileName(None, 'Choose a template FGDC Metadata xml file',
-                                                          workspace_path, "FGDC Metadata files (*.xml);; All Files (*)")
+                input_file_xml = QtGui.QFileDialog.getOpenFileName(
+                    None,
+                    'Choose a FGDC Metadata xml file to use as basis for your new custom template ',
+                    workspace_path, "FGDC Metadata files (*.xml);; All Files (*)")
 
     print input_file_xml
     if input_file_xml.strip() != '':
-        # generate output XML filename based upon user input
-        out_file_path = user_md_template_file
-        # ctypes.windll.user32.MessageBoxA(0, "Output File will go here: \n" +
-        #                                  out_file_path, "MD_Resources Module - data_management",  1)
 
+        # prompt the user for custom filename to save
+
+        output_filename = prompt_user_for_default_xml()
+        out_file_path = os.path.join(curr_dir_name, "MDWizard", output_filename)
+        configuration.set_deep_value('metadata_template', out_file_path)
+        print out_file_path
         launch_metadatawizard(mde_exe_cmd, input_file_xml, out_file_path)
 
     return False
+
+
+def prompt_user_for_default_xml():
+
+    output_filename_tuple = QInputDialog.getText(None, 'SAHM custom metadata template creation', 'Enter a custom filename if you wish:')
+
+    # assure user template filename is snake case with a .xml file extension
+    output_filename = output_filename_tuple[0]
+    output_filename = output_filename.strip()
+    output_filename = output_filename.lower()
+
+    # use regular expressions to eliminate non alphanumeric characters
+    output_filename = re.sub(r'([^\s\w]|_)+', '', output_filename)
+
+    # replace spaces with underscores....
+    if len(output_filename) > 0:
+        str_lst = output_filename.split()
+        if len(str_lst) > 1:
+            new_str = ''
+            for word in str_lst:
+                new_str += word + '_'
+            # remove trailing underscore....
+            if new_str.endswith("_"):
+                new_str = new_str[:-1]
+            output_filename = new_str
+        # assure a .xml file extension.....
+        str_lst = output_filename.split('.')
+        if len(str_lst) > 0:
+            output_filename = str_lst[0]
+        else:
+            return False
+        output_filename += '.xml'
+    else:
+
+        # if user fails to specify a valid template filename......
+        output_filename = 'user_md_template_file.xml'
+
+    return output_filename
 
 
 def get_md_template():
@@ -219,50 +296,28 @@ def get_md_template():
     :return:
     str filename
     """
-
+    global session_dir
     curr_path = str(os.path.realpath(__file__))
-    workspace_path = curr_path.replace("data_management.py", "MDWizard")
-    # mde_exe_cmd = curr_path.replace("data_management.py", "MDWizard\MetadataEditor.exe")
+    curr_dir_name = os.path.split(curr_path)[0]
+    workspace_path = os.path.join(curr_dir_name, 'MDWizard')
+    # user_md_template_file = os.path.join(curr_dir_name, 'MDWizard', 'user_MD_template_file.xml')
 
-    # check to see if the .vistrails directory exists for the given user
-    vistrails_user_dir = expanduser("~") + '\\.vistrails\\MD_resources'  # TODO remove the XXXX this is for Colin's benefit
-    if not os.path.exists(vistrails_user_dir):
-        os.makedirs(vistrails_user_dir)
+    users_template = configuration.metadata_template
 
-    user_md_template_file = expanduser("~") + '\\.vistrails\\MD_resources\\user_MD_template_file.xml'
-    # look for custom FGDC template XML in the users .vistrails directory,
-    # confirm that the user wants to update/replace it......
-    if os.path.exists(user_md_template_file):
+    if os.path.exists(users_template):
 
         print 'found it!'
-        info = os.stat(user_md_template_file)
-        # TODO: see if Colin wants file details in the PyQT4 message box
-        st_ctime = info.st_ctime
-        st_mtime = info.st_mtime
-        st_zize = info.st_size
-        # ask the user if they want to use their existing FGDC template
-        result = QMessageBox.question(None, 'SAHM Data Management', "Do you wish to continue to use " +
-                                      user_md_template_file + " as your template file?",
-                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-
-        if result == QMessageBox.Yes:
-            print 'Yes.'
-            input_file_xml = user_md_template_file
-        else:
-            print 'No.'
-            input_file_xml = QtGui.QFileDialog.getOpenFileName(
-                None, 'Choose a FGDC Metadata xml file to use as a template',
-                workspace_path, "FGDC Metadata files (*.xml);; All Files (*)")
+        input_file_xml = users_template
 
     else:
         # the users custom user_MD_template_file.xml has not been found in their user directory
-        generic_fgdc_template = curr_path.replace("data_management.py", "MDWizard\GenericFGDCTemplate.xml")
+        generic_fgdc_template = os.path.join(curr_dir_name, 'MDWizard', 'demo_template.xml')
 
         if os.path.exists(generic_fgdc_template):
             result = QMessageBox.question(None, 'SAHM Data Management',
-                                          'You don\'t appear to have a custom template saved as \n' +
-                                          user_md_template_file + ".  SAHM has detected " + generic_fgdc_template +
-                                          "\n Would you like to use it?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                                          'You don\'t appear to have a custom template saved. \n' +
+                                          'SAHM has detected ' + generic_fgdc_template +
+                                          '\n Would you like to use it?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
             if result == QMessageBox.Yes:
                 print 'Yes.'
@@ -273,33 +328,43 @@ def get_md_template():
                                                                    workspace_path,
                                                                    "FGDC Metadata files (*.xml);; All Files (*)")
 
+        #  TODO figure out current history node
+        # root_directory = utils.getrootdir()
+        # # history_node = utils.get_current_history_node()
+        # import vistrails
+        # from vistrails.core.application import get_vistrails_application
+        # history_node = get_vistrails_application().get_current_history_node()
+        # copied_file_xml = os.path.join(utils.getrootdir(), utils.get_current_history_node())
+        # if input_file_xml.strip() != '':
+            # prompt user for custom filename, if not use ....'user_md_template_file.xml'
+            # output_filename = prompt_user_for_default_xml()
+            #
+            # copied_file_xml = os.path.join(curr_dir_name, 'MDWizard', output_filename)
+            # shutil.copyfile(input_file_xml, copied_file_xml)
+            # configuration.set_deep_value('metadata_template', copied_file_xml)
+
     if input_file_xml.strip() != '':
         return input_file_xml
     else:
         return False
 
 
-def metadata_creation():
+def run_metadata_wizard():
 
     # get MetadataEditor.exe from relative pathname...
     # print "this is my path: " + str(os.path.realpath(__file__))
     curr_path = str(os.path.realpath(__file__))
-    curr_dname = os.path.split(curr_path)[0]
-    mde_exe_cmd = os.path.join(curr_dname, "MDWizard", "MetadataEditor.exe")
+    curr_dir_name = os.path.split(curr_path)[0]
+    mde_exe_cmd = os.path.join(curr_dir_name, "MDWizard", "MetadataEditor.exe")
 
     input_file_xml = get_md_template()
-    copied_file_xml = os.path.join(utils.getrootdir(), utils.get_current_history_node())
-    shutil.copyfile(input_file_xml, copied_file_xml)
-
 
     if input_file_xml.strip() == '':
         return False
 
     print input_file_xml
-    out_file_path = copied_file_xml.replace(".xml", "_mdwiz.xml")
+    out_file_path = input_file_xml.replace(".xml", "_mdwiz.xml")
     launch_metadatawizard(mde_exe_cmd, input_file_xml, out_file_path)
-
-
 
     return "I have returned from data_management!"
 

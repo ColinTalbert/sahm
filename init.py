@@ -52,12 +52,13 @@ import vistrails.core.upgradeworkflow as upgradeworkflow
 from vistrails.core import system
 
 # import MD_Resources.data_management as data_management
-from MD_Resources.data_management import metadata_creation
+
 from MD_Resources.data_management import get_sb_item
 from MD_Resources.data_management import get_sb_credentials
 from MD_Resources.data_management import create_zip
 from MD_Resources.data_management import get_contact
-from MD_Resources.data_management import update_metadata
+from MD_Resources.data_management import update_metadata_template
+from MD_Resources.data_management import run_metadata_wizard
 
 # SAHM imports
 from widgets import get_predictor_widget, get_predictor_config
@@ -182,23 +183,24 @@ def menu_items():
 
         vistrails.db.services.io.save_workflow_to_xml(vistrail, r"c:\temp_colin\test_12345.xml")
 
-    def data_management_init():
-        # global session_dir
-        dm = metadata_creation()
-        print dm
+    def fgdc_metadata_creation():
+        run_metadata_wizard()
+
+    def update_metadata():
+        update_metadata_template()
 
     def get_public_item():
-        # global session_dir
-        gp = get_sb_item()
+        get_sb_item()
 
     def get_sb_user_pwd():
-        credentials = get_sb_credentials()
+        get_sb_credentials()
 
     lst = []
     lst.append(("Change session folder", change_session_folder))
     lst.append(("Change processing mode", select_processing_mode))
     lst.append(("Select and test the Final Model", select_test_final_model))
-    lst.append(("DataManagement/Document workflow (Metadata creation)", data_management_init))
+    lst.append(("DataManagement/Update default metadata", update_metadata))
+    lst.append(("DataManagement/Document workflow (Metadata creation)", fgdc_metadata_creation))
     lst.append(("DataManagement/Archive current workflow (create zip bundle)", archive_current_workflow))
     lst.append(("DataManagement/Move item to ScienceBase", get_public_item))
     lst.append(("DataManagement/Return SB Username and Password", get_sb_user_pwd))
