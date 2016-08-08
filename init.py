@@ -52,13 +52,12 @@ import vistrails.core.upgradeworkflow as upgradeworkflow
 from vistrails.core import system
 
 # import MD_Resources.data_management as data_management
-
-from MD_Resources.data_management import get_sb_item
+from MD_Resources.data_management import upload_archive_to_sciencebase
 from MD_Resources.data_management import get_sb_credentials
-from MD_Resources.data_management import create_zip
 from MD_Resources.data_management import get_contact
 from MD_Resources.data_management import update_metadata_template
 from MD_Resources.data_management import run_metadata_wizard
+from MD_Resources.data_management import archive_workflow
 
 # SAHM imports
 from widgets import get_predictor_widget, get_predictor_config
@@ -158,30 +157,7 @@ def menu_items():
                         utilities.start_new_pool(utilities.get_process_count(widget.text()))
 
     def archive_current_workflow():
-        import vistrails
-        from vistrails.core.application import get_vistrails_application
-        pipeline = get_vistrails_application().get_current_controller().current_pipeline
-
-        from vistrails.core.vistrail.vistrail import Vistrail as _Vistrail
-
-        vistrail = _Vistrail()
-        ops = []
-        for module in pipeline.module_list:
-            ops.append(('add', module))
-        for connection in pipeline.connection_list:
-            ops.append(('add', connection))
-        # a = vistrails.core.vistrail.annotation.Annotation(id=0, key='__description__', value='adfasdf')
-        # action.db_add_annotation(a)
-
-        action = vistrails.core.db.action.create_action(ops)
-        vistrail.add_action(action, 0L)
-        vistrail.update_id_scope()
-
-        vistrail.set_action_annotation(1, key='__tag__', value='this is the label')
-        vistrail.set_action_annotation(1, key='__notes__', value='how about some notes')
-        vistrail.change_description("Imported pipeline", 0L)
-
-        vistrails.db.services.io.save_workflow_to_xml(vistrail, r"c:\temp_colin\test_12345.xml")
+        archive_workflow()
 
     def fgdc_metadata_creation():
         run_metadata_wizard()
@@ -189,8 +165,8 @@ def menu_items():
     def update_metadata():
         update_metadata_template()
 
-    def get_public_item():
-        get_sb_item()
+    def upload_archive_file():
+        upload_archive_to_sciencebase()
 
     def get_sb_user_pwd():
         get_sb_credentials()
@@ -199,11 +175,11 @@ def menu_items():
     lst.append(("Change session folder", change_session_folder))
     lst.append(("Change processing mode", select_processing_mode))
     lst.append(("Select and test the Final Model", select_test_final_model))
-    lst.append(("DataManagement/Update default metadata template", update_metadata))
-    lst.append(("DataManagement/Document workflow (Metadata creation)", fgdc_metadata_creation))
+    lst.append(("DataManagement/Document workflow (create metadata record)", fgdc_metadata_creation))
     lst.append(("DataManagement/Archive current workflow (create zip bundle)", archive_current_workflow))
-    lst.append(("DataManagement/Move item to ScienceBase", get_public_item))
-    lst.append(("DataManagement/Return SB Username and Password", get_sb_user_pwd))
+    lst.append(("DataManagement/Upload archive zip bundle to ScienceBase", upload_archive_file))
+    lst.append(("DataManagement/Update default metadata template", update_metadata))
+    # lst.append(("DataManagement/Return SB Username and Password", get_sb_user_pwd))
     return lst
 
 

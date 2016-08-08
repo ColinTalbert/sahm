@@ -638,7 +638,7 @@ def run_model_script(script, args_dict, module=None, runner_script="runRModel.py
 
     job_monitor = get_job_monitor(module, args_dict)
     if not job_monitor.finished():
-        writetolog("\nStarting processing of " + script , True)
+        writetolog("\nStarting processing of " + script, True)
         writetolog("    command used: \n" + utilities.convert_list_to_cmd_str(cmd), False, False)
 
         if module.abbrev == "udc":
@@ -988,7 +988,7 @@ class InteractiveQGraphicsView(QtGui.QGraphicsView):
             h = self.size().height()
 
         if self.c_view.size().width() < old_width * 0.9 and \
-            self.c_view.size().height() < old_height * 0.9 :
+            self.c_view.size().height() < old_height * 0.9:
             self.c_view = self.l_pix.scaled(w, h,
                                                 QtCore.Qt.KeepAspectRatio,
                                                 QtCore.Qt.SmoothTransformation)
