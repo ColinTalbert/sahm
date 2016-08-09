@@ -22,11 +22,9 @@ def get_current_history_node():
             the second item is the integer count of unnamed nodes (changes)
                 since the last named node
     """
-
     controller = get_vistrails_application().get_current_controller()
-    cur_vt = controller.vistrail
     cur_version = controller.current_version
-
+    cur_vt = controller.vistrail
     cur_name = cur_vt.get_pipeline_name(cur_version)
     if "+" in cur_name:
         count = int(cur_name.split(' + ')[-1])

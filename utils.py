@@ -1425,31 +1425,3 @@ def get_model_results(dname):
         except:
             pass
     return results
-
-
-def get_current_history_node_name(with_increment=False):
-    """
-    Queries the current history tree and returns the currently active node
-
-    Parameters:
-        with_increment:  bool, if True returns the option count of changes
-                         since last named node.
-    :return: str node name
-    """
-
-    from vistrails.core.application import get_vistrails_application
-
-    # from vistrails.core.vistrail.vistrail import Vistrail as _Vistrail
-    #
-    # vistrail = _Vistrail()
-
-    # cur_pipeline = _module.moduleInfo['pipeline']
-    controller = get_vistrails_application().get_current_controller()
-    cur_vt = controller.vistrail
-    cur_version = controller.current_version
-
-    cur_name = cur_vt.get_pipeline_name(cur_version)
-    if "+" in cur_name and not with_increment:
-        cur_name = " ".join(cur_name.split()[:-2])
-
-    return cur_name
