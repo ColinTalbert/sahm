@@ -170,3 +170,73 @@ def _get_output_names(pipeline):
     return output_names
 
 
+def create_big_inputs_list(big_input_fname):
+    """
+    creates a csv file which lists all of the 'big' inputs that are required by
+    a workflow
+
+    Parameters
+    ----------
+    big_input_fname  : str
+        the filename to create and fill with the list of big inputs
+
+    Returns
+    None
+    -------
+
+    """
+    cur_pipeline = _get_current_pipeline()
+    for m in cur_pipeline.modules.itervalues():
+        if m.name in ['templateLayer', 'Predictor']:
+            template_fnames = _pull_param(m, 'file')
+            _append_big_inputs(big_input_fname, template_fnames)
+        elif m.name == 'PredictorListFile':
+            raster_fnames = _pull_param(m, 'csvFileList')
+            for raster_fname in raster_fnames:
+                local_raster_fname = utils.get_relative_path(raster_fname)
+                df = pd.read_csv(local_raster_fname)
+                rasters = list(df.iloc[:, 0])
+                _append_big_inputs(big_input_fname, rasters)
+
+        elif m.name == 'PARC':
+            raster_fnames = _pull_param(m, 'RastersWithPARCInfoCSV')
+            for raster_fname in raster_fnames:
+                local_raster_fname = utils.get_relative_path(raster_fname)
+                df = pd.read_csv(local_raster_fname)
+                rasters = list(df.iloc[:, 0])
+                _append_big_inputs(big_input_fname, rasters)
+
+
+def _append_big_inputs(big_input_fname, file_list):
+    """
+
+    Parameters
+    ----------
+    big_input_fname : str
+        The file path to the csv that contains a list of the 'big' data that
+        went into this workflow.
+    file_list : list
+        list of filepaths to add to big_input_fname
+
+    Returns
+    -------
+
+    """
+    if not os.path.exists(big_input_fname):
+        csvfile = open(big_input_fname, 'wb')
+        out_csv = csv.writer(csvfile, delimiter=',',
+                                quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        out_csv.writerow(["workflow_name", "full_path", "hash"])
+    else:
+        csvfile = open(big_input_fname, 'ab')
+        out_csv = csv.writer(csvfile, delimiter=',',
+                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
+
+    for fname in file_list:
+        full_fname = utils.get_relative_path(fname)
+        raster_fnames = utils.get_raster_files(full_fname)
+        full_fname = utils.get_raster_name(full_fname)
+        hash_value = utils.hash_file(raster_fnames)
+        out_csv.writerow([fname, full_fname, hash_value])
+
+    csvfile.close()
