@@ -236,6 +236,7 @@ def map_ports(module, port_map):
             else:
                 value = module.force_get_input(port)
 
+
             if access is not None:
                 value = access(value)
             if is_filelike(value):

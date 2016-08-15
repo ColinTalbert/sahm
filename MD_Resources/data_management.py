@@ -301,10 +301,11 @@ def update_metadata_template():
     if input_file_xml.strip() != '':
         # prompt the user for custom filename to save
         output_filename = _prompt_user_for_default_xml()
-        out_file_path = os.path.join(curr_dir_name, "MDWizard", output_filename)
+        curr_session_dir_name = configuration.cur_session_folder
+        out_file_path = os.path.join(curr_session_dir_name, output_filename)
         configuration.set_deep_value('metadata_template', out_file_path)
         print out_file_path
-        _launch_metadatawizard(mde_exe_cmd, input_file_xml, out_file_path)
+        _launch_metadata_wizard(mde_exe_cmd, input_file_xml, out_file_path)
 
     return False
 
@@ -430,7 +431,7 @@ def _get_md_template():
 def run_metadata_wizard():
     """
 
-    Fires the MetaData Wizard executable with a FGDC metadata template (as determined by the _get_md_template function)
+    Runs the MetaData Wizard executable with a FGDC metadata template (as determined by the _get_md_template function)
     specifying its output file name based upon the selected workflow history node and FGDC date format
     (ex. Brewers_Sparrow_metadata_YYYYMMDD.xml)
 
@@ -454,6 +455,9 @@ def run_metadata_wizard():
     history_node = _scrub_pep8(history_node)
     print 'Scrubbed History Node: ', history_node
 
+    root = utils.getrootdir()
+    print root
+
     # ? This may not be an issue as users might not be creating metadata records WITHOUT a history node selected ?
     if history_node == 'ROOT':
         QtGui.QMessageBox.warning(None, "SAHM Workflow Documentation",
@@ -467,19 +471,19 @@ def run_metadata_wizard():
     curr_session_dir_name = configuration.cur_session_folder
     out_file_path = os.path.join(curr_session_dir_name, output_file_name)
 
-    _launch_metadatawizard(mde_exe_cmd, input_file_xml, out_file_path)
+    _launch_metadata_wizard(mde_exe_cmd, input_file_xml, out_file_path)
 
     return "I have returned from data_management!"
 
 
-def _launch_metadatawizard(cmd, stdin_fname, stdout_fname, async=False):
+def _launch_metadata_wizard(cmd, input_filename, output_filename, async=False):
     """
 
     Parameters
     ----------
-    cmd
-    stdin_fname
-    stdout_fname
+    cmd - {installation path}\\MDResources\\MDWizard\\MetadataEditor.exe
+    input_filename - users custom template saved in their session folder OR {installation path}\\MDResources\\MDWizard\\demo_template.xml
+    output_filename
     async
 
     Returns
@@ -497,8 +501,8 @@ def _launch_metadatawizard(cmd, stdin_fname, stdout_fname, async=False):
     std_err_file.seek(0, os.SEEK_END)
 
     mde_exe_cmd = cmd
-    mde_exe_cmd += " " + stdin_fname
-    mde_exe_cmd += " " + stdout_fname
+    mde_exe_cmd += " " + input_filename
+    mde_exe_cmd += " " + output_filename
 
     p = subprocess.Popen(mde_exe_cmd)
     if not async:
