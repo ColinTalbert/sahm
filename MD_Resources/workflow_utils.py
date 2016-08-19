@@ -11,6 +11,9 @@ import pandas as pd
 
 from vistrails.core.application import get_vistrails_application
 
+from .. import *  # gets configuration from __init__.py from parent directory
+import utils
+utils.setrootdir(configuration.cur_session_folder)
 
 def get_current_history_node():
     """
@@ -61,6 +64,7 @@ def get_current_copy_list():
     -------
 
     """
+
     cur_pipeline = _get_current_pipeline()
 
     copy_list = []
@@ -97,6 +101,18 @@ def get_current_copy_list():
         elif m.name in ['GLM', 'RandomForest', 'MARS',
                         'BoostedRegressionTree', 'MAXENT', 'UserDefinedCurve']:
             copy_list = _pull_param(m, 'mdsFile', copy_list)
+
+    output_names = _get_output_names(cur_pipeline)
+    subfolder, subname = output_names[0]
+    if len(output_names) != 1 and not subfolder:
+        pass
+        #TODO:implement a msgbox with the message "This functionality is designed to work with workflows that use a single outputname module which specifies a subfolder name"
+
+    session_dname = configuration.cur_session_folder
+    subfolder = os.path.join(session_dname, subfolder)
+
+    subdir_contents = [os.path.join(subfolder, f) for f in os.listdir(subfolder)]
+    copy_list.extend(subdir_contents)
 
     return copy_list
 
