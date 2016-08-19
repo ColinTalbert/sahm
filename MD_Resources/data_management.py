@@ -66,7 +66,11 @@ from vistrails.core.application import get_vistrails_application
 from vistrails.core.vistrail.vistrail import Vistrail as _Vistrail
 import datetime
 import pysb
+import workflow_utils
+
 sb = pysb.SbSession()
+
+
 
 
 def get_fname(parent=None):
@@ -152,6 +156,10 @@ class Window(QtGui.QMainWindow):
 
 def archive_workflow():
     """
+    Creates an '_archive_history' directory in the users session directory containing an 'xml_workflow_document'
+    and all of the pipelines necessary component files that will be zipped into a 'vt__archive_history_YYYYMMDD.zip'
+    file
+
 
      Returns
      -------
@@ -181,13 +189,12 @@ def archive_workflow():
     vistrail.set_action_annotation(1, key='__notes__', value='how about some notes')
     vistrail.change_description("Imported pipeline", 0L)
 
-    # assumption: xml workflow document is to go in archive directory....... (Moved to line 194)
-    # assumption "r" for read only doesnt seem to be read only if that is to be the intent....
-    # vistrails.db.services.io.save_workflow_to_xml(vistrail, r"c:\temp_colin\test_12345.xml")
+    # assumption get_current_history_node will only ever return on tuple name value pair?
+    history_node = workflow_utils.get_current_history_node()[0]
 
-    history_node = utils.get_current_history_node_name()
-
-    archive_directory = '_archive_' + _scrub_pep8(history_node) + '_' + _FGDCdate()
+    # assumption do not include FGDC date in archive directory name
+    # archive_directory = '_archive_' + _scrub_pep8(history_node) + '_' + _FGDCdate()
+    archive_directory = '_archive_' + _scrub_pep8(history_node)
 
     curr_session_dir_name = configuration.cur_session_folder
     archive_directory_path = os.path.join(curr_session_dir_name, archive_directory)
@@ -199,26 +206,37 @@ def archive_workflow():
         os.mkdir(archive_directory_path)
         print archive_directory_path, 'does not exist, Python will create it!'
 
-    xml_document = _scrub_pep8(history_node) + '.xml'
-    xml_document_path = os.path.join(archive_directory_path, xml_document)
+    xml_workflow_document = _scrub_pep8(history_node) + '.xml'
+    xml_workflow_document_path = os.path.join(archive_directory_path, xml_workflow_document)
+
 
     # assumption "r" for read only doesnt seem to be read only if that is to be the intent....
-    # vistrails.db.services.io.save_workflow_to_xml(vistrail, r"" + xml_document_path + "")
-    vistrails.db.services.io.save_workflow_to_xml(vistrail, xml_document_path)
+    # vistrails.db.services.io.save_workflow_to_xml(vistrail, r"" + xml_workflow_document_path + "")
+    vistrails.db.services.io.save_workflow_to_xml(vistrail, xml_workflow_document_path)
 
     # gather all the workflow files and insert them into the _archive_history_YYYYMMDD directory
     # based upon Colin's function
+    vt_input_list_document = _scrub_pep8(history_node) + '.csv'
+    vt_input_list_document_path = str(os.path.join(archive_directory_path, vt_input_list_document))
+    workflow_utils.create_big_inputs_list(vt_input_list_document_path)
+
+    # TODO: Find all the files in the csv and copy them to the archive directory...
+    _copy_vt_files_to_archive_directory(archive_directory_path)
 
     # zip the contents of the _archive_history_YYYYMMDD directory
     history_node = _scrub_pep8(history_node)
     _create_zip(archive_directory_path, history_node)
 
-    # Delete the _archive* directory
-    try:
-        shutil.rmtree(archive_directory_path)
-    except IOError:
-        print("Error upon either deleting or creating the directory or files.")
 
+    # TODO: delete the *.csv file once it is used to harvest all the input files....
+
+
+    # # Assumption; it might not be best to delete the archive directory.... discuss with Colin....
+    # # Delete the _archive* directory
+    # try:
+    #     shutil.rmtree(archive_directory_path)
+    # except IOError:
+    #     print("Error upon either deleting or creating the directory or files.")
     # # Ask the user if they want to push their archive to their ScienceBase account
     # result = QMessageBox.question(
     #     None, 'SAHM Archiving Current Workflow',
@@ -245,6 +263,45 @@ def archive_workflow():
     #
     # new_item = sb.upload_file_to_item(new_item, zipfile_path)
     # print "FILE UPDATE: " + str(new_item)
+
+
+def _copy_vt_files_to_archive_directory(archive_directory_path):
+
+    file_and_directory_list = workflow_utils.get_current_copy_list()
+
+    for element in file_and_directory_list:
+
+        input_path = os.path.normcase(element)
+        tail = os.path.split(input_path)[1]
+        output_path = os.path.join(archive_directory_path, tail)
+
+        # if tail contains a . copy the file, if not make a directory
+        if '.' in input_path:
+            shutil.copy(input_path, output_path)
+        else:
+            os.mkdir(output_path)
+
+
+
+    # f = open(vt_input_list_document_path, 'r')
+    # for line in f:
+    #     vt_input_lst = line.split(',')
+    #     workflow_name = vt_input_lst[0]
+    #     full_path = vt_input_lst[1]
+    #     hash = vt_input_lst[2]
+    #
+    #     if full_path != 'full_path':
+    #         full_path = os.path.normcase(full_path)
+    #         workflow_path = os.path.split(workflow_name)[0]
+    #         file_name = os.path.split(workflow_name)[1]
+    #
+    #         full_source_path = os.path.join(full_path, file_name)
+    #         output_path = os.path.join(archive_directory_path, file_name)
+    #
+    #         shutil.copy(full_source_path, output_path)
+    #         wtf = 'xxxx'
+
+    # output = archive_directory_path
 
 
 def update_metadata_template():
@@ -450,7 +507,7 @@ def run_metadata_wizard():
 
     print input_file_xml
 
-    history_node = utils.get_current_history_node_name()
+    history_node = workflow_utils.get_current_history_node()[0]
     print 'Original History Node: ', history_node
     history_node = _scrub_pep8(history_node)
     print 'Scrubbed History Node: ', history_node
@@ -466,7 +523,9 @@ def run_metadata_wizard():
                                   QtGui.QMessageBox.Cancel)
         return False
 
-    output_file_name = history_node + "_metadata_" + _FGDCdate() + ".xml"
+    # assumption - do not include _FGDCdate as the metadata record may be edited many times.....
+    # output_file_name = history_node + "_metadata_" + _FGDCdate() + ".xml"
+    output_file_name = history_node + "_metadata_" + ".xml"
 
     curr_session_dir_name = configuration.cur_session_folder
     out_file_path = os.path.join(curr_session_dir_name, output_file_name)

@@ -10,6 +10,8 @@ import csv
 import pandas as pd
 
 from vistrails.core.application import get_vistrails_application
+import utils
+# assumption Colin has a different method of referencing .utils?
 
 
 def get_current_history_node():
