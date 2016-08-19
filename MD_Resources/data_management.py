@@ -44,7 +44,6 @@
 #
 
 import os
-import sys
 import subprocess
 import tempfile
 from PyQt4 import QtGui
@@ -151,6 +150,69 @@ class Window(QtGui.QMainWindow):
         # self.ui.setupUi(self)
 
 
+def workflow_or_history_are_not_specified():
+    if workflow_utils.get_current_history_node()[0] == 'ROOT':
+        QtGui.QMessageBox.warning(
+            None, 'User Warning ', 'A Vistrails Workflow and/or History Node\n'
+                                   'must be selected to utilize this functionality')
+        return True
+
+
+def run_metadata_wizard():
+    """
+
+    Runs the MetaData Wizard executable with a FGDC metadata template (as determined by the _get_md_template function)
+    specifying its output file name based upon the selected workflow history node and FGDC date format
+    (ex. Brewers_Sparrow_metadata_YYYYMMDD.xml)
+
+    """
+
+    if workflow_or_history_are_not_specified():
+        return None
+
+    # TODO:look for preexisting history_name_metadata.xml and confirm they want to use that;
+    # if not allow them to select another?
+
+    # get MetadataEditor.exe from relative pathname...
+    # print "this is my path: " + str(os.path.realpath(__file__))
+    curr_path = str(os.path.realpath(__file__))
+    curr_dir_name = os.path.split(curr_path)[0]
+    mde_exe_cmd = os.path.join(curr_dir_name, "MDWizard", "MetadataEditor.exe")
+
+    input_file_xml = _get_md_template()
+
+    if input_file_xml.strip() == '':
+        return False
+
+    print input_file_xml
+
+    history_node = workflow_utils.get_current_history_node()[0]
+    history_node = _scrub_pep8(history_node)
+    # print 'Scrubbed History Node: ', history_node
+    #
+    # root = utils.getrootdir()
+    # print root
+    #
+    # # ? This may not be an issue as users might not be creating metadata records WITHOUT a history node selected ?
+    # if history_node == 'ROOT':
+    #     QtGui.QMessageBox.warning(None, "SAHM Workflow Documentation",
+    #                               "Please select a workflow history\n" +
+    #                               "before creating metadata!!",
+    #                               QtGui.QMessageBox.Cancel)
+    #     return False
+
+    # assumption - do not include _FGDCdate as the metadata record may be edited many times.....
+    # output_file_name = history_node + "_metadata_" + _FGDCdate() + ".xml"
+    output_file_name = history_node + "_metadata" + ".xml"
+
+    curr_session_dir_name = configuration.cur_session_folder
+    out_file_path = os.path.join(curr_session_dir_name, output_file_name)
+
+    _launch_metadata_wizard(mde_exe_cmd, input_file_xml, out_file_path)
+
+    return "I have returned from data_management!"
+
+
 def archive_workflow():
     """
     Creates an '_archive_history' directory in the users session directory containing an 'xml_workflow_document'
@@ -162,6 +224,9 @@ def archive_workflow():
      -------
 
     """
+
+    if workflow_or_history_are_not_specified():
+        return None
 
     pipeline = get_vistrails_application().get_current_controller().current_pipeline
 
@@ -261,51 +326,39 @@ def archive_workflow():
     # print "FILE UPDATE: " + str(new_item)
 
 
-def _copy_vt_files_to_archive_directory(archive_directory_path):
+def upload_archive_to_sciencebase():
+    """
 
-    file_and_directory_list = workflow_utils.get_current_copy_list()
-    if file_and_directory_list is None:
-        return None
+    Returns
+    -------
 
-    for element in file_and_directory_list:
+    """
 
-        input_path = os.path.normcase(element)
+    curr_session_dir_name = configuration.cur_session_folder
 
-        if os.path.isfile(input_path):
-            tail = os.path.split(input_path)[1]
-            output_path = os.path.join(archive_directory_path, tail)
-            shutil.copy(input_path, output_path)
-        else:
-            # gets rid of the '/*.*' from the input_path
-            input_directory_path = os.path.split(input_path)[0]
-            directory_name = os.path.basename(input_directory_path)
-            output_path = os.path.join(archive_directory_path, directory_name)
-            try:
-                shutil.copytree(input_directory_path, output_path)
-            except OSError as err:
-                print("OS error: {0}".format(err))
+    # allows user to specify a file and then appends it to a new scienceBase item
+    zipfile_path = QtGui.QFileDialog.getOpenFileName(
+        None,
+        'Choose a SAHM Archive File to Upload to ScienceBase', curr_session_dir_name,
+        'vt_archive *.zip;')
 
+    if not zipfile_path:
+        return False
 
+    # allow the user to logon to ScienceBase
+    get_sb_credentials()
+    sb.login(config.sb_username, config.sb_password)
 
-    # f = open(vt_input_list_document_path, 'r')
-    # for line in f:
-    #     vt_input_lst = line.split(',')
-    #     workflow_name = vt_input_lst[0]
-    #     full_path = vt_input_lst[1]
-    #     hash = vt_input_lst[2]
-    #
-    #     if full_path != 'full_path':
-    #         full_path = os.path.normcase(full_path)
-    #         workflow_path = os.path.split(workflow_name)[0]
-    #         file_name = os.path.split(workflow_name)[1]
-    #
-    #         full_source_path = os.path.join(full_path, file_name)
-    #         output_path = os.path.join(archive_directory_path, file_name)
-    #
-    #         shutil.copy(full_source_path, output_path)
-    #         wtf = 'xxxx'
+    # parse the zipfile_path
+    sb_item_name = os.path.split(zipfile_path)[1]
 
-    # output = archive_directory_path
+    # Create a new item.  The minimum required is a title for the new item, and the parent ID
+    new_item = {'title': sb_item_name,
+                'parentId': sb.get_my_items_id(),
+                'provenance': {'annotation': 'Compressed archive files for VisTrails SAHM workflow'}}
+    new_item = sb.create_item(new_item)
+
+    sb.upload_file_to_item(new_item, zipfile_path)
 
 
 def update_metadata_template():
@@ -330,12 +383,12 @@ def update_metadata_template():
         print 'found it!'
 
         # ask the user if they want to use their existing FGDC template
-        result = QMessageBox.question(
+        result = QtGui.QMessageBox.question(
             None, 'SAHM Data Management',
             "Do you wish to continue to update " + users_template + "?",
-            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
 
-        if result == QMessageBox.Yes:
+        if result == QtGui.QMessageBox.Yes:
             print 'Yes.'
             input_file_xml = users_template
         else:
@@ -369,6 +422,51 @@ def update_metadata_template():
         _launch_metadata_wizard(mde_exe_cmd, input_file_xml, out_file_path)
 
     return False
+
+
+def _copy_vt_files_to_archive_directory(archive_directory_path):
+
+    file_and_directory_list = workflow_utils.get_current_copy_list()
+    if file_and_directory_list is None:
+        return None
+
+    for element in file_and_directory_list:
+
+        input_path = os.path.normcase(element)
+
+        if os.path.isfile(input_path):
+            tail = os.path.split(input_path)[1]
+            output_path = os.path.join(archive_directory_path, tail)
+            shutil.copy(input_path, output_path)
+        else:
+            # gets rid of the '/*.*' from the input_path
+            input_directory_path = os.path.split(input_path)[0]
+            directory_name = os.path.basename(input_directory_path)
+            output_path = os.path.join(archive_directory_path, directory_name)
+            try:
+                shutil.copytree(input_directory_path, output_path)
+            except OSError as err:
+                print("OS error: {0}".format(err))
+
+    # f = open(vt_input_list_document_path, 'r')
+    # for line in f:
+    #     vt_input_lst = line.split(',')
+    #     workflow_name = vt_input_lst[0]
+    #     full_path = vt_input_lst[1]
+    #     hash = vt_input_lst[2]
+    #
+    #     if full_path != 'full_path':
+    #         full_path = os.path.normcase(full_path)
+    #         workflow_path = os.path.split(workflow_name)[0]
+    #         file_name = os.path.split(workflow_name)[1]
+    #
+    #         full_source_path = os.path.join(full_path, file_name)
+    #         output_path = os.path.join(archive_directory_path, file_name)
+    #
+    #         shutil.copy(full_source_path, output_path)
+    #         wtf = 'xxxx'
+
+    # output = archive_directory_path
 
 
 def _prompt_user_for_default_xml():
@@ -487,56 +585,6 @@ def _get_md_template():
         return md_template
     else:
         return False
-
-
-def run_metadata_wizard():
-    """
-
-    Runs the MetaData Wizard executable with a FGDC metadata template (as determined by the _get_md_template function)
-    specifying its output file name based upon the selected workflow history node and FGDC date format
-    (ex. Brewers_Sparrow_metadata_YYYYMMDD.xml)
-
-    """
-
-    # get MetadataEditor.exe from relative pathname...
-    # print "this is my path: " + str(os.path.realpath(__file__))
-    curr_path = str(os.path.realpath(__file__))
-    curr_dir_name = os.path.split(curr_path)[0]
-    mde_exe_cmd = os.path.join(curr_dir_name, "MDWizard", "MetadataEditor.exe")
-
-    input_file_xml = _get_md_template()
-
-    if input_file_xml.strip() == '':
-        return False
-
-    print input_file_xml
-
-    history_node = workflow_utils.get_current_history_node()[0]
-    print 'Original History Node: ', history_node
-    history_node = _scrub_pep8(history_node)
-    print 'Scrubbed History Node: ', history_node
-
-    root = utils.getrootdir()
-    print root
-
-    # ? This may not be an issue as users might not be creating metadata records WITHOUT a history node selected ?
-    if history_node == 'ROOT':
-        QtGui.QMessageBox.warning(None, "SAHM Workflow Documentation",
-                                  "Please select a workflow history\n" +
-                                  "before creating metadata!!",
-                                  QtGui.QMessageBox.Cancel)
-        return False
-
-    # assumption - do not include _FGDCdate as the metadata record may be edited many times.....
-    # output_file_name = history_node + "_metadata_" + _FGDCdate() + ".xml"
-    output_file_name = history_node + "_metadata" + ".xml"
-
-    curr_session_dir_name = configuration.cur_session_folder
-    out_file_path = os.path.join(curr_session_dir_name, output_file_name)
-
-    _launch_metadata_wizard(mde_exe_cmd, input_file_xml, out_file_path)
-
-    return "I have returned from data_management!"
 
 
 def _launch_metadata_wizard(cmd, input_filename, output_filename, async=False):
@@ -668,41 +716,6 @@ def get_sb_credentials():
 
     username_password = {'username': config.sb_username, 'password': config.sb_password}
     return username_password
-
-
-def upload_archive_to_sciencebase():
-    """
-
-    Returns
-    -------
-
-    """
-
-    curr_session_dir_name = configuration.cur_session_folder
-
-    # allows user to specify a file and then appends it to a new scienceBase item
-    zipfile_path = QtGui.QFileDialog.getOpenFileName(
-        None,
-        'Choose a SAHM Archive File to Upload to ScienceBase', curr_session_dir_name,
-        'vt_archive *.zip;')
-
-    if not zipfile_path:
-        return False
-
-    # allow the user to logon to ScienceBase
-    get_sb_credentials()
-    sb.login(config.sb_username, config.sb_password)
-
-    # parse the zipfile_path
-    sb_item_name = os.path.split(zipfile_path)[1]
-
-    # Create a new item.  The minimum required is a title for the new item, and the parent ID
-    new_item = {'title': sb_item_name,
-                'parentId': sb.get_my_items_id(),
-                'provenance': {'annotation': 'Compressed archive files for VisTrails SAHM workflow'}}
-    new_item = sb.create_item(new_item)
-
-    sb.upload_file_to_item(new_item, zipfile_path)
 
 
 def _create_zip(archive_directory, history_node):

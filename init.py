@@ -156,17 +156,17 @@ def menu_items():
 
                         utilities.start_new_pool(utilities.get_process_count(widget.text()))
 
-    def archive_current_workflow():
-        archive_workflow()
-
     def fgdc_metadata_creation():
         run_metadata_wizard()
 
-    def update_metadata():
-        update_metadata_template()
+    def archive_current_workflow():
+        archive_workflow()
 
     def upload_archive_file():
         upload_archive_to_sciencebase()
+
+    def update_metadata():
+        update_metadata_template()
 
     def get_sb_user_pwd():
         get_sb_credentials()
@@ -175,7 +175,7 @@ def menu_items():
     lst.append(("Change session folder", change_session_folder))
     lst.append(("Change processing mode", select_processing_mode))
     lst.append(("Select and test the Final Model", select_test_final_model))
-    lst.append(("DataManagement/Document workflow (create metadata record)", fgdc_metadata_creation))
+    lst.append(("DataManagement/Document workflow (create/edit a metadata record)", fgdc_metadata_creation))
     lst.append(("DataManagement/Archive current workflow (create zip bundle)", archive_current_workflow))
     lst.append(("DataManagement/Upload archive zip bundle to ScienceBase", upload_archive_file))
     lst.append(("DataManagement/Update default metadata template", update_metadata))
