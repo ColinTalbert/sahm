@@ -47,15 +47,12 @@ import os
 import sys
 import subprocess
 import tempfile
-import pysb
 from PyQt4 import QtGui
-from PyQt4 import QtCore
 import config
 import zipfile
 import requests
 import shutil
 import lxml.etree as et
-from PyQt4.QtGui import *
 import xml_utils
 from os.path import expanduser
 import utils
@@ -220,7 +217,6 @@ def archive_workflow():
     vt_input_list_document_path = str(os.path.join(archive_directory_path, vt_input_list_document))
     workflow_utils.create_big_inputs_list(vt_input_list_document_path)
 
-    # TODO: Find all the files in the csv and copy them to the archive directory...
     _copy_vt_files_to_archive_directory(archive_directory_path)
 
     # zip the contents of the _archive_history_YYYYMMDD directory
@@ -268,18 +264,26 @@ def archive_workflow():
 def _copy_vt_files_to_archive_directory(archive_directory_path):
 
     file_and_directory_list = workflow_utils.get_current_copy_list()
+    if file_and_directory_list is None:
+        return None
 
     for element in file_and_directory_list:
 
         input_path = os.path.normcase(element)
-        tail = os.path.split(input_path)[1]
-        output_path = os.path.join(archive_directory_path, tail)
 
-        # if tail contains a . copy the file, if not make a directory
-        if '.' in input_path:
+        if os.path.isfile(input_path):
+            tail = os.path.split(input_path)[1]
+            output_path = os.path.join(archive_directory_path, tail)
             shutil.copy(input_path, output_path)
         else:
-            os.mkdir(output_path)
+            # gets rid of the '/*.*' from the input_path
+            input_directory_path = os.path.split(input_path)[0]
+            directory_name = os.path.basename(input_directory_path)
+            output_path = os.path.join(archive_directory_path, directory_name)
+            try:
+                shutil.copytree(input_directory_path, output_path)
+            except OSError as err:
+                print("OS error: {0}".format(err))
 
 
 
@@ -525,7 +529,7 @@ def run_metadata_wizard():
 
     # assumption - do not include _FGDCdate as the metadata record may be edited many times.....
     # output_file_name = history_node + "_metadata_" + _FGDCdate() + ".xml"
-    output_file_name = history_node + "_metadata_" + ".xml"
+    output_file_name = history_node + "_metadata" + ".xml"
 
     curr_session_dir_name = configuration.cur_session_folder
     out_file_path = os.path.join(curr_session_dir_name, output_file_name)

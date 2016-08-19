@@ -10,6 +10,8 @@ import csv
 import pandas as pd
 
 from vistrails.core.application import get_vistrails_application
+from PyQt4 import QtGui
+
 import utils
 # assumption Colin has a different method of referencing .utils?
 
@@ -106,17 +108,31 @@ def get_current_copy_list():
 
     output_names = _get_output_names(cur_pipeline)
     subfolder, subname = output_names[0]
+
     if len(output_names) != 1 and not subfolder:
+        QtGui.QMessageBox.warning(
+            None, 'User Warning ', 'This functionality is designed to work with workflows/n'
+            ' that use a single outputname module which specifies a subfolder name"')
+            #ASSUMPTION :TODO implement a msgbox with the message "This functionality is designed to work with workflows that use a single outputname module which specifies a subfolder name"
         pass
-        #TODO:implement a msgbox with the message "This functionality is designed to work with workflows that use a single outputname module which specifies a subfolder name"
 
     session_dname = configuration.cur_session_folder
     subfolder = os.path.join(session_dname, subfolder)
 
-    subdir_contents = [os.path.join(subfolder, f) for f in os.listdir(subfolder)]
-    copy_list.extend(subdir_contents)
+    try:
+        subdir_contents = [os.path.join(subfolder, f) for f in os.listdir(subfolder)]
+        copy_list.extend(subdir_contents)
+        return copy_list
 
-    return copy_list
+    except OSError as err:
+        print("OS error: {0}".format(err))
+        QtGui.QMessageBox.warning(
+            None, 'User Warning ', 'FYI this VisTrails Workflow has not been executed.\n'
+                                   'The Archive directory will still contain valid information.\n'
+                                   'Colin what do we want to say here if anything?\n'
+                                   'I\'m not sure.')
+
+        return None
 
 
 def _pull_param(module, param_name, result_list=[]):
