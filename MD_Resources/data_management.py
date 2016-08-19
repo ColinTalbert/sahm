@@ -61,6 +61,12 @@ from os.path import expanduser
 import utils
 from .. import *  # gets configuration from __init__.py from parent directory
 import re         # allows for use of regular expressions
+import vistrails
+from vistrails.core.application import get_vistrails_application
+from vistrails.core.vistrail.vistrail import Vistrail as _Vistrail
+import datetime
+import pysb
+sb = pysb.SbSession()
 
 
 def get_fname(parent=None):
@@ -81,9 +87,12 @@ class Buddy_Label(QtGui.QLabel):
 
 
 class Login(QtGui.QDialog):
+    """
+
+    """
     def __init__(self, parent=None):
         super(Login, self).__init__(parent)
-        self.setWindowTitle('ScienceBase Login Information')
+        self.setWindowTitle('ScienceBase Login Credentials')
         self.setGeometry(0, 0, 400, 25)
         screen = QtGui.QApplication.desktop().screenNumber(QtGui.QApplication.desktop().cursor().pos())
         center_point = QtGui.QApplication.desktop().screenGeometry(screen).center()
@@ -91,12 +100,12 @@ class Login(QtGui.QDialog):
         self.textName = QtGui.QLineEdit(self)
 
         self.my_name_label = Buddy_Label(self.textName)  # Create our custom label, and assign myEdit as its buddy
-        self.my_name_label.setText('User Name')
+        self.my_name_label.setText('ScienceBase User Name')
 
         self.textPass = QtGui.QLineEdit(self)
         self.textPass.setEchoMode(QtGui.QLineEdit.Password)
         self.my_pwd_label = Buddy_Label(self.textPass)  # Create our custom label, and assign myEdit as its buddy
-        self.my_pwd_label.setText('Password')
+        self.my_pwd_label.setText('ScienceBase Password')
 
         self.buttonLogin = QtGui.QPushButton('Enter', self)
         self.buttonLogin.clicked.connect(self.handle_login)
@@ -131,7 +140,7 @@ class Login(QtGui.QDialog):
             self.accept()
         else:
             QtGui.QMessageBox.warning(
-                self, 'Error', 'Bad user or password')
+                self, 'Login Error ', 'Unrecognized User Name or Password for ScienceBase')
 
 
 class Window(QtGui.QMainWindow):
@@ -141,7 +150,110 @@ class Window(QtGui.QMainWindow):
         # self.ui.setupUi(self)
 
 
+def archive_workflow():
+    """
+
+     Returns
+     -------
+
+    """
+
+    pipeline = get_vistrails_application().get_current_controller().current_pipeline
+
+    vistrail = _Vistrail()
+    ops = []
+    for module in pipeline.module_list:
+        ops.append(('add', module))
+    for connection in pipeline.connection_list:
+        ops.append(('add', connection))
+    # a = vistrails.core.vistrail.annotation.Annotation(id=0, key='__description__', value='adfasdf')
+    # action.db_add_annotation(a)
+
+    # assumption if there are no modules or connections there is no point.....
+    if len(ops) == 0:
+        return False
+
+    action = vistrails.core.db.action.create_action(ops)
+    vistrail.add_action(action, 0L)
+    vistrail.update_id_scope()
+
+    vistrail.set_action_annotation(1, key='__tag__', value='this is the label')
+    vistrail.set_action_annotation(1, key='__notes__', value='how about some notes')
+    vistrail.change_description("Imported pipeline", 0L)
+
+    # assumption: xml workflow document is to go in archive directory....... (Moved to line 194)
+    # assumption "r" for read only doesnt seem to be read only if that is to be the intent....
+    # vistrails.db.services.io.save_workflow_to_xml(vistrail, r"c:\temp_colin\test_12345.xml")
+
+    history_node = utils.get_current_history_node_name()
+
+    archive_directory = '_archive_' + _scrub_pep8(history_node) + '_' + _FGDCdate()
+
+    curr_session_dir_name = configuration.cur_session_folder
+    archive_directory_path = os.path.join(curr_session_dir_name, archive_directory)
+
+    print archive_directory_path
+
+    # python views as absolute path
+    if not os.path.isdir(archive_directory_path):
+        os.mkdir(archive_directory_path)
+        print archive_directory_path, 'does not exist, Python will create it!'
+
+    xml_document = _scrub_pep8(history_node) + '.xml'
+    xml_document_path = os.path.join(archive_directory_path, xml_document)
+
+    # assumption "r" for read only doesnt seem to be read only if that is to be the intent....
+    # vistrails.db.services.io.save_workflow_to_xml(vistrail, r"" + xml_document_path + "")
+    vistrails.db.services.io.save_workflow_to_xml(vistrail, xml_document_path)
+
+    # gather all the workflow files and insert them into the _archive_history_YYYYMMDD directory
+    # based upon Colin's function
+
+    # zip the contents of the _archive_history_YYYYMMDD directory
+    history_node = _scrub_pep8(history_node)
+    _create_zip(archive_directory_path, history_node)
+
+    # Delete the _archive* directory
+    try:
+        shutil.rmtree(archive_directory_path)
+    except IOError:
+        print("Error upon either deleting or creating the directory or files.")
+
+    # # Ask the user if they want to push their archive to their ScienceBase account
+    # result = QMessageBox.question(
+    #     None, 'SAHM Archiving Current Workflow',
+    #     "Do you wish to push the " + archive_directory + " file to ScienceBase?",
+    #     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+    #
+    # if result == QMessageBox.No:
+    #     return False
+    #
+    # zipfile_name = history_node + _FGDCdate() + '.zip'
+    # zipfile_path = os.path.join(archive_directory_path, zipfile_name)
+    #
+    # # allows user to specify a file and then appends it to a new scienceBase item
+    # # This works as well, but again only in debug mode
+    # get_sb_credentials()
+    # sb.login(config.sb_username, config.sb_password)
+    # sb_item_name = 'vt' + archive_directory
+    # # Create a new item.  The minimum required is a title for the new item, and the parent ID
+    # new_item = {'title': sb_item_name,
+    #             'parentId': sb.get_my_items_id(),
+    #             'provenance': {'annotation': 'Compressed archive files for VisTrails SAHM workflow '}}
+    # new_item = sb.create_item(new_item)
+    # print "NEW ITEM: " + str(new_item)
+    #
+    # new_item = sb.upload_file_to_item(new_item, zipfile_path)
+    # print "FILE UPDATE: " + str(new_item)
+
+
 def update_metadata_template():
+    """
+
+    Returns
+    -------
+
+    """
 
     curr_path = str(os.path.realpath(__file__))
     curr_dir_name = os.path.split(curr_path)[0]
@@ -155,7 +267,6 @@ def update_metadata_template():
     if os.path.exists(users_template):
 
         print 'found it!'
-        # TODO: see if Colin wants file details in the PyQT4 message box
 
         # ask the user if they want to use their existing FGDC template
         result = QMessageBox.question(
@@ -178,36 +289,34 @@ def update_metadata_template():
         generic_fgdc_template = curr_path.replace("data_management.py", "MDWizard\demo_template.xml")
 
         if os.path.exists(generic_fgdc_template):
-            result = QMessageBox.question(
-                None, 'SAHM Data Management', "SAHM has detected " + generic_fgdc_template +
-                "\n Would you like to use it as the basis for your new custom template?",
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-
-            if result == QMessageBox.Yes:
-                print 'Yes.'
-                input_file_xml = generic_fgdc_template
-            else:
-                print 'No.'
-                input_file_xml = QtGui.QFileDialog.getOpenFileName(
-                    None,
-                    'Choose a FGDC Metadata xml file to use as basis for your new custom template ',
-                    workspace_path, "FGDC Metadata files (*.xml);; All Files (*)")
+            input_file_xml = generic_fgdc_template
+        else:
+            input_file_xml = QtGui.QFileDialog.getOpenFileName(
+                None,
+                'Choose a FGDC Metadata xml file to use as basis for your new custom template ',
+                workspace_path, "FGDC Metadata files (*.xml);; All Files (*)")
 
     print input_file_xml
+
     if input_file_xml.strip() != '':
-
         # prompt the user for custom filename to save
-
-        output_filename = prompt_user_for_default_xml()
-        out_file_path = os.path.join(curr_dir_name, "MDWizard", output_filename)
+        output_filename = _prompt_user_for_default_xml()
+        curr_session_dir_name = configuration.cur_session_folder
+        out_file_path = os.path.join(curr_session_dir_name, output_filename)
         configuration.set_deep_value('metadata_template', out_file_path)
         print out_file_path
-        launch_metadatawizard(mde_exe_cmd, input_file_xml, out_file_path)
+        _launch_metadata_wizard(mde_exe_cmd, input_file_xml, out_file_path)
 
     return False
 
 
-def prompt_user_for_default_xml():
+def _prompt_user_for_default_xml():
+    """
+
+    Returns
+    -------
+
+    """
 
     output_filename_tuple = QInputDialog.getText(
         None,
@@ -218,9 +327,8 @@ def prompt_user_for_default_xml():
 
     if len(output_filename) > 0:
 
-        # assure user template filename is snake case with a .xml file extension
         output_filename = output_filename.strip()
-        output_filename = output_filename.lower()
+        # output_filename = output_filename.lower()
         # the regular expression replace below will remove '_'
         # This is preventative, spaces will be replaced with '_' at end of function....
         output_filename = output_filename.replace('_', ' ')
@@ -237,15 +345,33 @@ def prompt_user_for_default_xml():
     else:
 
         # if user fails to specify a valid template filename......
-        output_filename = 'user_md_template_file.xml'
+        user_name = os.environ.get("USERNAME")
+        if user_name.strip() != '':
+            output_filename = user_name + '_md_template_file.xml'
+        else:
+            output_filename = 'user_md_template_file.xml'
 
     return output_filename
 
 
-def scrub_pep8(input_string):
+def _scrub_pep8(input_string):
+    """
+
+    Parameters
+    ----------
+    input_string
+
+    Returns
+    -------
+    input_string
+
+    cleans up input string making it suitable for incorporation into a filename, eliminating non-alphanumeric
+    characters and replacing spaces with underscores
+
+    """
 
     input_string = input_string.strip()
-    input_string = input_string.lower()
+    # input_string = input_string.lower()
 
     # the regular expression replace below will remove '_'
     # This is preventative, spaces will be replaced with '_' at end of function....
@@ -259,53 +385,57 @@ def scrub_pep8(input_string):
     return input_string
 
 
-def get_md_template():
-    """
-    return the default metadata template file
-    TODO: make this a per user variable so that users can customize their starting template,  store in config???
+def _get_md_template():
 
-    :return:
-    str filename
     """
-    # global session_dir
+    Returns the default metadata template file.  If the user has not saved their own custom metadata
+    template in VisTrails configuration.metadata_template the function uses the 'demo_template.xml'
+    that ships with VisTrails SAHM..
+
+    returns
+    --------
+    str md_template as filename
+
+    """
+
     curr_path = str(os.path.realpath(__file__))
     curr_dir_name = os.path.split(curr_path)[0]
     workspace_path = os.path.join(curr_dir_name, 'MDWizard')
-    # user_md_template_file = os.path.join(curr_dir_name, 'MDWizard', 'user_MD_template_file.xml')
 
     users_template = configuration.metadata_template
 
     if os.path.exists(users_template):
-
-        print 'found it!'
-        input_file_xml = users_template
+        md_template = users_template
 
     else:
         # the users custom user_MD_template_file.xml has not been found in their user directory
+        # use the 'demo_template.xml' that ships with VisTrails SAHM..
         generic_fgdc_template = os.path.join(curr_dir_name, 'MDWizard', 'demo_template.xml')
 
         if os.path.exists(generic_fgdc_template):
-            result = QMessageBox.question(None, 'SAHM Data Management',
-                                          'You don\'t appear to have a custom template saved. \n' +
-                                          'SAHM has detected ' + generic_fgdc_template +
-                                          '\n Would you like to use it?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            md_template = generic_fgdc_template
+        else:
+            # can't find 'demo_template.xml' let the user specify their metadata template
+            md_template = QtGui.QFileDialog.getOpenFileName(
+                None,
+                'Choose a template FGDC Metadata xml file',
+                workspace_path,
+                'FGDC Metadata files (*.xml);; All Files (*)')
 
-            if result == QMessageBox.Yes:
-                print 'Yes.'
-                input_file_xml = generic_fgdc_template
-            else:
-                print 'No.'
-                input_file_xml = QtGui.QFileDialog.getOpenFileName(None, 'Choose a template FGDC Metadata xml file',
-                                                                   workspace_path,
-                                                                   "FGDC Metadata files (*.xml);; All Files (*)")
-
-    if input_file_xml.strip() != '':
-        return input_file_xml
+    if md_template.strip() != '':
+        return md_template
     else:
         return False
 
 
 def run_metadata_wizard():
+    """
+
+    Runs the MetaData Wizard executable with a FGDC metadata template (as determined by the _get_md_template function)
+    specifying its output file name based upon the selected workflow history node and FGDC date format
+    (ex. Brewers_Sparrow_metadata_YYYYMMDD.xml)
+
+    """
 
     # get MetadataEditor.exe from relative pathname...
     # print "this is my path: " + str(os.path.realpath(__file__))
@@ -313,34 +443,53 @@ def run_metadata_wizard():
     curr_dir_name = os.path.split(curr_path)[0]
     mde_exe_cmd = os.path.join(curr_dir_name, "MDWizard", "MetadataEditor.exe")
 
-    input_file_xml = get_md_template()
+    input_file_xml = _get_md_template()
 
     if input_file_xml.strip() == '':
         return False
 
     print input_file_xml
 
-    # TODO: ask Colin if Root Directory should have anything to do with output XML filename.....
-    # root_directory = utils.getrootdir()
-    # print 'Root Directory: ', root_directory
-
     history_node = utils.get_current_history_node_name()
-
     print 'Original History Node: ', history_node
-    history_node = scrub_pep8(history_node)
+    history_node = _scrub_pep8(history_node)
     print 'Scrubbed History Node: ', history_node
 
-    # ? This may not be an issue as users might not be creating metadata records WITHOUT a history node selected ?
-    if history_node == 'root':
-        history_node = 'mdwiz'
+    root = utils.getrootdir()
+    print root
 
-    out_file_path = input_file_xml.replace(".xml", "_" + history_node + ".xml")
-    launch_metadatawizard(mde_exe_cmd, input_file_xml, out_file_path)
+    # ? This may not be an issue as users might not be creating metadata records WITHOUT a history node selected ?
+    if history_node == 'ROOT':
+        QtGui.QMessageBox.warning(None, "SAHM Workflow Documentation",
+                                  "Please select a workflow history\n" +
+                                  "before creating metadata!!",
+                                  QtGui.QMessageBox.Cancel)
+        return False
+
+    output_file_name = history_node + "_metadata_" + _FGDCdate() + ".xml"
+
+    curr_session_dir_name = configuration.cur_session_folder
+    out_file_path = os.path.join(curr_session_dir_name, output_file_name)
+
+    _launch_metadata_wizard(mde_exe_cmd, input_file_xml, out_file_path)
 
     return "I have returned from data_management!"
 
 
-def launch_metadatawizard(cmd, stdin_fname, stdout_fname, async=False):
+def _launch_metadata_wizard(cmd, input_filename, output_filename, async=False):
+    """
+
+    Parameters
+    ----------
+    cmd - {installation path}\\MDResources\\MDWizard\\MetadataEditor.exe
+    input_filename - users custom template saved in their session folder OR {installation path}\\MDResources\\MDWizard\\demo_template.xml
+    output_filename
+    async
+
+    Returns
+    -------
+
+    """
 
     #  open the text files we'll be writing our stdOut and stdErr to
     f = tempfile.NamedTemporaryFile(delete=False)
@@ -352,8 +501,8 @@ def launch_metadatawizard(cmd, stdin_fname, stdout_fname, async=False):
     std_err_file.seek(0, os.SEEK_END)
 
     mde_exe_cmd = cmd
-    mde_exe_cmd += " " + stdin_fname
-    mde_exe_cmd += " " + stdout_fname
+    mde_exe_cmd += " " + input_filename
+    mde_exe_cmd += " " + output_filename
 
     p = subprocess.Popen(mde_exe_cmd)
     if not async:
@@ -366,6 +515,12 @@ def launch_metadatawizard(cmd, stdin_fname, stdout_fname, async=False):
 
 
 def get_contact():
+    """
+
+    Returns
+    -------
+
+    """
     try:
         user_name = os.environ.get("USERNAME")
 
@@ -429,6 +584,12 @@ def get_contact():
 
 
 def get_sb_credentials():
+    """
+
+    Returns
+    -------
+
+    """
 
     if config.sb_username.strip() == '' or config.sb_password.strip() == '':
         login = Login()
@@ -446,26 +607,68 @@ def get_sb_credentials():
     return username_password
 
 
-def get_sb_item():
-    sb = pysb.SbSession()
-    #
-    # # Get a public item.  No need to log in.
-    item_json = sb.get_item('505bc673e4b08c986b32bf81')
-    print "Public Item: " + str(item_json)
-    return "I have returned from ScienceBase!"
+def upload_archive_to_sciencebase():
+    """
+
+    Returns
+    -------
+
+    """
+
+    curr_session_dir_name = configuration.cur_session_folder
+
+    # allows user to specify a file and then appends it to a new scienceBase item
+    zipfile_path = QtGui.QFileDialog.getOpenFileName(
+        None,
+        'Choose a SAHM Archive File to Upload to ScienceBase', curr_session_dir_name,
+        'vt_archive *.zip;')
+
+    if not zipfile_path:
+        return False
+
+    # allow the user to logon to ScienceBase
+    get_sb_credentials()
+    sb.login(config.sb_username, config.sb_password)
+
+    # parse the zipfile_path
+    sb_item_name = os.path.split(zipfile_path)[1]
+
+    # Create a new item.  The minimum required is a title for the new item, and the parent ID
+    new_item = {'title': sb_item_name,
+                'parentId': sb.get_my_items_id(),
+                'provenance': {'annotation': 'Compressed archive files for VisTrails SAHM workflow'}}
+    new_item = sb.create_item(new_item)
+
+    sb.upload_file_to_item(new_item, zipfile_path)
 
 
-def create_zip():
+def _create_zip(archive_directory, history_node):
+    """
 
-    current_dir = os.path.dirname(os.path.realpath(__file__))
-    os_walk = os.walk
-    dir_to_zip = current_dir + '\\tmp'
-    zipf = zipfile.ZipFile('Python.zip', 'w', zipfile.ZIP_DEFLATED)
-    zipdir(dir_to_zip, zipf)
+    Returns
+    -------
+
+    """
+    zipfile_name = 'vt_archive_' + history_node + _FGDCdate() + '.zip'
+    curr_session_dir_name = configuration.cur_session_folder
+    zipfile_path = os.path.join(curr_session_dir_name, zipfile_name)
+    zipf = zipfile.ZipFile(zipfile_path, 'w', zipfile.ZIP_DEFLATED)
+    _zipdir(archive_directory, zipf)
     zipf.close()
 
 
-def zipdir(path, ziph):
+def _zipdir(path, ziph):
+    """
+
+    Parameters
+    ----------
+    path
+    ziph
+
+    Returns
+    -------
+
+    """
     # ziph is zipfile handle
     for root, dirs, files in os.walk(path):
         my_root = root
@@ -474,102 +677,29 @@ def zipdir(path, ziph):
             ziph.write(os.path.join(root, file))
 
 
-def get_contact():
-    try:
-        user_name = os.environ.get("USERNAME")
-
-        # These are to create errors.....
-        # user_name = ''
-        response = requests.get("http://geo-nsdi.er.usgs.gov/contact-xml.php?email=" + user_name)
-
-        # These are to create errors.....
-        # response = requests.get("xyz://geo-nsdi.er.usgs.gov/contact-xml.php?email=" + user_name)
-
-        if response is NotImplementedError:
-            print
-            print "Something went horribly wrong.\n\n"
-            return False
-
-        print response.text
-        print
-        etree = et.fromstring(response.content)  # this is type lxml.etree._Element
-        # etype = type(etree)
-        # print etype
-        # print
-        # print et.tostring(etree, pretty_print=True)
-        # print
-
-        # this will step thru all the nodes looking for only the cntper (name) node
-        for node in etree.iter('cntper'):
-            if node.text.strip() != '':
-                print 'This is my name: ', node.text
-            else:
-                print
-                print "Unable to verify the user is a current USGS employee or affiliate.\n\n"
-                return False
-
-        return etree
-        # for page in list(etree):
-        #     print 'Elements of the XML: ' + str(page)
-        # print
-
-        # # This will step thru all the nodes and create a flat dictionary of the contact info
-        # # and print it's contents
-        # flat_contact_dictionary = {}
-        # for node in etree.iter():
-        #     flat_contact_dictionary[node.tag] = node.text
-        # print
-        # print'flat_contact_dictionary = ', flat_contact_dictionary
-        #
-        # print
-        # # # This will step thru all the nodes and print the node tags and node texts
-        # for node in etree.iter():
-        #     if node.text is not None:
-        #         print 'node.tag: ' + node.tag + '  node.text: ' + node.text
-        #
-
-    except OSError as err:
-        print("OS error: {0}".format(err))
-    except:  # TODO: get Colin's feedback on best error trap method
-        print("Unexpected error:", sys.exc_info()[0])
-        print
-        print "Something went horribly wrong.\n\n"
+def _FGDCdate():
+    """
+    Returns current date as a string in YYYYMMDD format
+    """
+    now = datetime.datetime.now()
+    date_string = str(now.strftime('%Y%m%d'))
+    return date_string
 
 
-# This class may be used to create nested dictionaries in the future
-
-# nested_contact_dictionary = {}
-# for node in etree.iter():
-#     if node.text is not None:
-#         nested_contact_dictionary[node.tag] = node.text
-#     else:
-#
-# print
-# print 'nested_contact_dictionary = ', nested_contact_dictionary
 class Vividict(dict):
+    """
+        This class may be used to create nested dictionaries in the future
+    """
     def __missing__(self, key):
         value = self[key] = type(self)()
         return value
 
 
-# useful dialog box TODO: parameterize it for ease of use....
-def show_dialog():
-    msg = QMessageBox()
-    msg.setIcon(QMessageBox.Information)
-
-    msg.setText("This is a message box")
-    msg.setInformativeText("This is additional information")
-    msg.setWindowTitle("MessageBox demo")
-    msg.setDetailedText("The details are as follows:")
-    msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-    # msg.buttonClicked.connect(msgbtn)
-
-    retval = msg.exec_()
-    print "value of pressed message box button:", retval
-
-
-# holding spot for calls to editing functions in xml_utils.py
 def xml_object_editing():
+    """
+        holding spot for calls to editing functions in xml_utils.py
+
+    """
 
     xml_utils.remove_node_by_name(xml_input=etree, xpath='cntperp/cntorg')
 

@@ -74,7 +74,6 @@ def replace_xml_node_contents(xml_input=None, xpath=None, new_node_contents=None
             "Unable to update the XML file. Check that the file exists, \n" \
             "the provided node-path within the XML, or permission settings."
 
-
     print et.tostring(etree, pretty_print=True)
     return etree
 
