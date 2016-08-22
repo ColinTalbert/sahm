@@ -15,9 +15,10 @@ from PyQt4 import QtGui
 import utils
 # assumption Colin has a different method of referencing .utils?
 
-from .. import *  # gets configuration from __init__.py from parent directory
+from .. import configuration  # gets configuration from __init__.py from parent directory
 import utils
 utils.setrootdir(configuration.cur_session_folder)
+
 
 def get_current_history_node():
     """

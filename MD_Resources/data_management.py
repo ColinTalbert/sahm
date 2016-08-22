@@ -55,7 +55,7 @@ import lxml.etree as et
 import xml_utils
 from os.path import expanduser
 import utils
-from .. import *  # gets configuration from __init__.py from parent directory
+from .. import configuration  # gets configuration from __init__.py from parent directory
 import re         # allows for use of regular expressions
 import vistrails
 from vistrails.core.application import get_vistrails_application
@@ -65,8 +65,6 @@ import pysb
 import workflow_utils
 
 sb = pysb.SbSession()
-
-
 
 
 def get_fname(parent=None):
@@ -170,24 +168,39 @@ def run_metadata_wizard():
     if workflow_or_history_are_not_specified():
         return None
 
+    curr_session_dir_name = configuration.cur_session_folder
+
     # TODO:look for preexisting history_name_metadata.xml and confirm they want to use that;
     # if not allow them to select another?
+    history_node = workflow_utils.get_current_history_node()[0]
+    history_node = _scrub_pep8(history_node)
 
-    # get MetadataEditor.exe from relative pathname...
-    # print "this is my path: " + str(os.path.realpath(__file__))
-    curr_path = str(os.path.realpath(__file__))
-    curr_dir_name = os.path.split(curr_path)[0]
-    mde_exe_cmd = os.path.join(curr_dir_name, "MDWizard", "MetadataEditor.exe")
+    # look for existing XML in an archive directory, if not there Create it!
+    archive_directory_name = '_archive_' + history_node
+    archive_directory_path = os.path.join(curr_session_dir_name, archive_directory_name)
+    if not os.path.isdir(archive_directory_path):
+        os.makedirs(archive_directory_path)
 
-    input_file_xml = _get_md_template()
+    # look for existing XML in an archive directory?
+    potential_input_file_name = history_node + "_metadata" + ".xml"
+    potential_input_file_path = os.path.join(archive_directory_path, potential_input_file_name)
+    if os.path.isfile(potential_input_file_path):
+        input_file_xml = potential_input_file_path
+        out_file_path = input_file_xml
+    else:
+        input_file_xml = _get_md_template()
+        output_file_name = history_node + "_metadata" + ".xml"
+        out_file_path = os.path.join(archive_directory_path, output_file_name)
+
+    # Question; Inform/remind the user what history node they have selected and
+    # what/where is being created/edited.  allow them to opt out!
 
     if input_file_xml.strip() == '':
         return False
 
     print input_file_xml
 
-    history_node = workflow_utils.get_current_history_node()[0]
-    history_node = _scrub_pep8(history_node)
+
     # print 'Scrubbed History Node: ', history_node
     #
     # root = utils.getrootdir()
@@ -203,10 +216,11 @@ def run_metadata_wizard():
 
     # assumption - do not include _FGDCdate as the metadata record may be edited many times.....
     # output_file_name = history_node + "_metadata_" + _FGDCdate() + ".xml"
-    output_file_name = history_node + "_metadata" + ".xml"
 
-    curr_session_dir_name = configuration.cur_session_folder
-    out_file_path = os.path.join(curr_session_dir_name, output_file_name)
+    # get MetadataEditor.exe from relative pathname...
+    curr_path = str(os.path.realpath(__file__))
+    curr_dir_name = os.path.split(curr_path)[0]
+    mde_exe_cmd = os.path.join(curr_dir_name, "MDWizard", "MetadataEditor.exe")
 
     _launch_metadata_wizard(mde_exe_cmd, input_file_xml, out_file_path)
 
