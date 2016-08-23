@@ -6,10 +6,17 @@ These were written for and are used for data management and archiving
 
 import os
 import csv
+import zipfile
+import datetime
+import getpass
+from bs4 import BeautifulSoup
 
 import pandas as pd
 
+import vistrails
 from vistrails.core.application import get_vistrails_application
+from vistrails.core.vistrail.vistrail import Vistrail as _Vistrail
+
 from PyQt4 import QtGui
 
 import utils
@@ -44,7 +51,8 @@ def get_current_history_node():
     else:
         count = 0
 
-    return cur_name, count
+    cur_notes = cur_vt.get_action_annotation(1, key='__notes__').value
+    return cur_name, count, cur_notes
 
 
 def _get_current_pipeline():
@@ -58,6 +66,63 @@ def _get_current_pipeline():
     """
     controller = get_vistrails_application().get_current_controller()
     return controller.current_pipeline
+
+
+def save_current_history_node_to_vt(out_fname):
+    """
+
+    Parameters
+    ----------
+    out_fname : str
+        The file name/path to save the current history node to
+        in a standalone vistrails(vt) file
+
+    Returns
+    -------
+
+    """
+    pipeline = get_vistrails_application().get_current_controller().current_pipeline
+
+    vistrail = _Vistrail()
+    ops = []
+    for module in pipeline.module_list:
+        ops.append(('add', module))
+    for connection in pipeline.connection_list:
+        ops.append(('add', connection))
+
+    # assumption if there are no modules or connections there is no point.....
+    if len(ops) == 0:
+        return False
+
+    action = vistrails.core.db.action.create_action(ops)
+    vistrail.add_action(action, 0L)
+    vistrail.update_id_scope()
+
+    node_name, count, node_notes = get_current_history_node()
+
+    vistrail.set_action_annotation(1, key='__tag__', value=node_name)
+    fname = get_vistrails_application().get_current_controller().file_name
+    notes_items = ["This workflow was extracted from the complete workflow file:\t {}".format(fname)]
+    today = datetime.datetime.now()
+    notes_items.append("\non: {:%d, %b %Y}".format(today))
+    username = getpass.getuser()
+    notes_items.append("\nby: {}".format(username))
+    notes_items.append("\n\noriginal notes:")
+    notes_items.extend(_get_sections(node_notes))
+
+    notes_str = _format_qtext(notes_items)
+
+    vistrail.set_action_annotation(1, key='__notes__', value=notes_str)
+    vistrail.change_description("Imported pipeline", 0L)
+
+    working_dname = os.path.split(out_fname)[0]
+    sub_fname = os.path.join(working_dname, 'vistrail')
+    vistrails.db.services.io.save_workflow_to_xml(vistrail, sub_fname)
+
+    with zipfile.ZipFile(out_fname, 'w') as myzip:
+        myzip.write(sub_fname, arcname='vistrail')
+
+    os.unlink(sub_fname)
 
 
 def get_current_copy_list():
@@ -275,3 +340,63 @@ def _append_big_inputs(big_input_fname, file_list):
         out_csv.writerow([fname, full_fname, hash_value])
 
     csvfile.close()
+
+
+DOC_WRAPPER_START = """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+ <head>
+  <meta content="1" name="qrichtext"/>
+  <style type="text/css">
+   p, li { white-space: pre-wrap; }
+  </style>
+ </head>
+ <body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+"""
+DOC_WRAPPER_END = """</body></html>"""
+
+BLOCK_WRAPPER = """<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt;">{}</span></p>"""
+
+EMPTY_WRAPPER = """<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;"><br/></p>"""
+
+
+def _format_qtext(items):
+    """
+
+    Parameters
+    ----------
+    items : list
+            a list of strings that will become individual sections
+    Returns
+    -------
+        a string in qt/html format that wrappes the items in a html wrapper
+    """
+    sections = [DOC_WRAPPER_START]
+    for item in items:
+        if item:
+            sections.append(BLOCK_WRAPPER.format(item))
+        else:
+            sections.append(EMPTY_WRAPPER)
+    sections.append(DOC_WRAPPER_END)
+
+    return "\n".join(sections)
+
+
+def _get_sections(qtext):
+    """
+
+    Parameters
+    ----------
+    qtext : str
+            an qt/html formated string
+            from a node notes text box for exaample
+    Returns
+    -------
+    a list of the component text strings
+
+    """
+    soup = BeautifulSoup(qtext, 'html.parser')
+    sections = []
+    for link in soup.find_all('p'):
+        sections.append(link.text)
+
+    return sections
