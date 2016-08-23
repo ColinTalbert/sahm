@@ -53,13 +53,8 @@ import requests
 import shutil
 import lxml.etree as et
 import xml_utils
-from os.path import expanduser
-import utils
 from .. import configuration  # gets configuration from __init__.py from parent directory
 import re         # allows for use of regular expressions
-import vistrails
-from vistrails.core.application import get_vistrails_application
-from vistrails.core.vistrail.vistrail import Vistrail as _Vistrail
 import datetime
 import pysb
 import workflow_utils
@@ -242,29 +237,6 @@ def archive_workflow():
     if workflow_or_history_are_not_specified():
         return None
 
-    pipeline = get_vistrails_application().get_current_controller().current_pipeline
-
-    vistrail = _Vistrail()
-    ops = []
-    for module in pipeline.module_list:
-        ops.append(('add', module))
-    for connection in pipeline.connection_list:
-        ops.append(('add', connection))
-    # a = vistrails.core.vistrail.annotation.Annotation(id=0, key='__description__', value='adfasdf')
-    # action.db_add_annotation(a)
-
-    # assumption if there are no modules or connections there is no point.....
-    if len(ops) == 0:
-        return False
-
-    action = vistrails.core.db.action.create_action(ops)
-    vistrail.add_action(action, 0L)
-    vistrail.update_id_scope()
-
-    vistrail.set_action_annotation(1, key='__tag__', value='this is the label')
-    vistrail.set_action_annotation(1, key='__notes__', value='how about some notes')
-    vistrail.change_description("Imported pipeline", 0L)
-
     # assumption get_current_history_node will only ever return on tuple name value pair?
     history_node = workflow_utils.get_current_history_node()[0]
 
@@ -282,13 +254,9 @@ def archive_workflow():
         os.mkdir(archive_directory_path)
         print archive_directory_path, 'does not exist, Python will create it!'
 
-    xml_workflow_document = _scrub_pep8(history_node) + '.xml'
-    xml_workflow_document_path = os.path.join(archive_directory_path, xml_workflow_document)
-
-
-    # assumption "r" for read only doesnt seem to be read only if that is to be the intent....
-    # vistrails.db.services.io.save_workflow_to_xml(vistrail, r"" + xml_workflow_document_path + "")
-    vistrails.db.services.io.save_workflow_to_xml(vistrail, xml_workflow_document_path)
+    output_workflow_fname = _scrub_pep8(history_node) + '.vt'
+    output_workflow_path = os.path.join(archive_directory_path, output_workflow_fname)
+    workflow_utils.save_current_history_node_to_vt(output_workflow_path)
 
     # gather all the workflow files and insert them into the _archive_history_YYYYMMDD directory
     # based upon Colin's function
@@ -635,8 +603,8 @@ def _launch_metadata_wizard(cmd, input_filename, output_filename, async=False):
 
     std_err_file.close()
     err_msg = "\n".join(open(stderr_fname, "r").readlines())
-    out_msg = "\n".join(open(stdout_fname, "r").readlines())
-    return err_msg, out_msg
+    # out_msg = "\n".join(open(stdout_fname, "r").readlines())
+    return err_msg
 
 
 def get_contact():
